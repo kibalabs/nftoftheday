@@ -1,0 +1,52 @@
+name: Deploy
+on:
+  push:
+    branches: [ main ]
+env:
+  DOCKER_IMAGE: ghcr.io/${{ github.repository }}
+  DOCKER_TAG: latest
+  NAME: nftoftheday-app
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Login to GitHub container registry
+        run: echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Build docker image
+        run: docker build --tag $DOCKER_IMAGE:$DOCKER_TAG .
+      - name: Push to container registry
+        run: docker push $DOCKER_IMAGE:$DOCKER_TAG
+  run-app:
+    needs: deploy-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.FREEBOX_URL }}
+          username: ${{ secrets.FREEBOX_USER }}
+          key: ${{ secrets.FREEBOX_SSH_KEY }}
+          envs: DOCKER_IMAGE,DOCKER_TAG,NAME
+          script_stop: true
+          script: |
+            url="notd.kibalabs.com"
+            dockerImage="${DOCKER_IMAGE}:${DOCKER_TAG}"
+            varsFile=~/.${NAME}.vars
+            docker pull ${dockerImage}
+            docker stop ${NAME} && docker rm ${NAME} || true
+            docker run \
+                --name ${NAME} \
+                --detach \
+                --publish-all \
+                --restart on-failure \
+                --env NAME=${NAME} \
+                --env VERSION=${DOCKER_TAG} \
+                --env VIRTUAL_HOST=${url} \
+                --env LETSENCRYPT_HOST=${url} \
+                --env-file ${varsFile} \
+                ${dockerImage}
