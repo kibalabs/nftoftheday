@@ -39,3 +39,5 @@ jobs:
         check-name: type-app
         fail-on-error: false
         path-prefix: ./app/
+    - name: Build final docker image
+      run: docker build .
