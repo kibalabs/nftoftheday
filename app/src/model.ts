@@ -2,14 +2,26 @@
 
 export interface Transaction {
   hash: string;
-  nonce: number;
-  blockHash: string | null;
-  blockNumber: number | null;
-  transactionIndex: number | null;
   from: string;
-  to: string | null;
-  value: string;
+  to: string;
+  value: number;
   gasPrice: string;
-  gas: number;
-  input: string;
+  gasUsed: number;
+}
+
+export interface AssetCollection {
+  name: string;
+  description: string;
+  imageUrl: string;
+  openSeaUrl: string;
+  externalUrl: string;
+}
+
+export interface Asset {
+  name: string;
+  description: string;
+  imageUrl: string;
+  openSeaUrl: string;
+  externalUrl: string;
+  collection: AssetCollection;
 }

@@ -18,6 +18,7 @@
     "@kibalabs/everyview-tracker-react": "0.2.4",
     "@kibalabs/ui-react": "0.8.4",
     "graphql": "^15.5.0",
+    "opensea-js": "^1.1.11",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "styled-components": "5.2.1",
