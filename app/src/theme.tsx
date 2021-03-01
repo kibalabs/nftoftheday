@@ -19,9 +19,9 @@ export const buildNotdTheme = (): ITheme => {
         'font-family': "'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif",
       },
       header2: {
-        'font-weight': 'normal'
+        'font-weight': 'normal',
       },
     },
   });
   return theme;
-}
+};

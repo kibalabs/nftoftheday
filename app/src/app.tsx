@@ -1,7 +1,9 @@
 import React from 'react';
-import { hot } from 'react-hot-loader/root';
+
 import { useFavicon } from '@kibalabs/core-react';
-import { BackgroundView, KibaApp, Direction, Stack, Alignment, PaddingSize, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Direction, KibaApp, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { hot } from 'react-hot-loader/root';
 
 import { buildNotdTheme } from './theme';
 
