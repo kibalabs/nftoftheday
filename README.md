@@ -1,1 +1,1 @@
-# Nftoftheday
+# NFT of the Day
