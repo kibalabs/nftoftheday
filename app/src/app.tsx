@@ -61,8 +61,8 @@ export const App = hot((): React.ReactElement => {
         console.log(`Transfer at ${transferDate} from ${transfer.from.id} to ${transfer.to.id} at ${transfer.transaction.id}`);
         const transaction = await web3Client.eth.getTransaction(transfer.transaction.id);
         console.log('transaction', transaction);
-        const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${transfer.to.id}/${transfer.token.identifier}/`)
-        console.log('assetResponse', assetResponse);
+        const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${transfer.token.registry.id}/${transfer.token.identifier}/`)
+        console.log('assetResponse', JSON.parse(assetResponse.content));
       });
     });
   }, []);
