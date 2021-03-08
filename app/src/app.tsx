@@ -13,14 +13,14 @@ import { buildNotdTheme } from './theme';
 
 const theme = buildNotdTheme();
 
-const web3Client = new Web3(window.ethereum);
+const web3Client = new Web3("https://eth-mainnet.alchemyapi.io/v2/rdYIr6T2nBgJvtKlYQxmVH3bvjW2DLxi");
 // const web3Provider = new Web3.providers.HttpProvider('https://mainnet.infura.io');
 // const openSeaClient = new OpenSeaPort(web3Provider);
 
 const requester = new Requester();
 
 const nftGraphClient = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/amxx/eip721-subgraph',
+  uri: 'https://api.thegraph.com/subgraphs/name/kibalabs/nft-tracker',
   cache: new InMemoryCache(),
 });
 
@@ -38,6 +38,9 @@ export const App = hot((): React.ReactElement => {
             transaction {
               id
               timestamp
+              value
+              gasPrice
+              gasUsed
             }
             timestamp
             token {
@@ -61,25 +64,25 @@ export const App = hot((): React.ReactElement => {
     })
       .then(async (result: ApolloQueryResult<unknown>) => {
         const transfers = result.data.transfers;
-        // console.log('transfers', transfers);
+        console.log('transfers', transfers);
         transfers.forEach(async (transfer: unknown): Promise<void> => {
-          // const transferDate = new Date(parseInt(transfer.timestamp, 10) * 1000);
-          // console.log(`Transfer at ${transferDate} from ${transfer.from.id} to ${transfer.to.id} at ${transfer.transaction.id}`);
-          const transaction = await web3Client.eth.getTransaction(transfer.transaction.id);
+          const transferDate = new Date(parseInt(transfer.timestamp, 10) * 1000);
+          console.log(`Transfer at ${transferDate} from ${transfer.from.id} to ${transfer.to.id} at ${transfer.transaction.id}`);
+          // const transaction = await web3Client.eth.getTransaction(transfer.transaction.id);
           // console.log('transaction', transaction);
           const transactionReceipt = await web3Client.eth.getTransactionReceipt(transfer.transaction.id);
-          // console.log('transactionReceipt', transactionReceipt);
+          console.log('transactionReceipt', transactionReceipt);
           setAssetTransaction({
-            hash: transaction.hash,
-            from: transaction.from,
-            to: transaction.to,
-            value: parseInt(transaction.value, 10),
-            gasPrice: transaction.gasPrice,
+            hash: transfer.transaction.id,
+            from: transfer.from.id,
+            to: transfer.to.id,
+            value: parseInt(transfer.transaction.value, 10),
+            gasPrice: transfer.transaction.gasPrice,
             gasUsed: transactionReceipt.gasUsed,
           });
           const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${transfer.token.registry.id}/${transfer.token.identifier}/`, undefined, { 'x-api-key': '' });
           const assetJson = JSON.parse(assetResponse.content);
-          // console.log('assetJson', assetJson);
+          console.log('assetJson', assetJson);
           const assetCollection: AssetCollection = {
             name: assetJson.collection.name,
             imageUrl: assetJson.collection.large_image_url ?? assetJson.collection.image_url,
