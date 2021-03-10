@@ -65,11 +65,11 @@ jobs:
                 --env LETSENCRYPT_HOST=${url} \
                 --env-file ${varsFile} \
                 ${DOCKER_IMAGE}
-  run-api:
+  run-worker:
     needs: deploy-api
     runs-on: ubuntu-latest
     env:
-      NAME: nftoftheday-api
+      NAME: nftoftheday-worker
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
     steps:
       - name: executing remote ssh commands
