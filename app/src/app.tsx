@@ -6,8 +6,8 @@ import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
-import { Asset, AssetCollection, TokenTransfer } from './model';
 import { asyncSleep } from './asyncUtil';
+import { Asset, AssetCollection, TokenTransfer } from './model';
 import { buildNotdTheme } from './theme';
 
 const theme = buildNotdTheme();
@@ -15,17 +15,17 @@ const theme = buildNotdTheme();
 const requester = new Requester();
 
 const EXAMPLE_TOKEN_TRANSFER: TokenTransfer = {
-  transactionHash: "0xcd2be787b6efa1006dd19a312ee9dea50340d77ac7546fbb62dd17242e83c458",
-  registryAddress: "0x31af195db332bc9203d758c74df5a5c5e597cdb7",
-  fromAddress: "0x0000000000000000000000000000000000000000",
-  toAddress: "0xf55161739672929a20b94d611d2d98352e837e44",
+  transactionHash: '0xcd2be787b6efa1006dd19a312ee9dea50340d77ac7546fbb62dd17242e83c458',
+  registryAddress: '0x31af195db332bc9203d758c74df5a5c5e597cdb7',
+  fromAddress: '0x0000000000000000000000000000000000000000',
+  toAddress: '0xf55161739672929a20b94d611d2d98352e837e44',
   tokenId: 19894,
   value: 0,
   gasLimit: 2000000,
   gasPrice: 2200000000,
   gasUsed: 793693,
   blockDate: new Date(2019, 3, 17, 8, 58, 17),
-}
+};
 
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
