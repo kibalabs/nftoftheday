@@ -63,7 +63,6 @@ class BlockProcessor:
             # NOTE(krishan711): for CryptoPunks there is a separate PunkTransfer event with the punkId
             ethTransactionReceipt = self.w3.eth.getTransactionReceipt(transactionHash)
             decodedEventData = self.cryptoPunksTransferEvent.processReceipt(ethTransactionReceipt)[0]
-            print('decodedEventData', decodedEventData)
             event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['punkIndex'])]
         if len(event['topics']) < 4:
             logging.debug(f'Ignoring event with less than 4 topics')
