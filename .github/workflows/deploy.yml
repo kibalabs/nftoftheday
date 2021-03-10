@@ -90,6 +90,5 @@ jobs:
                 --publish-all \
                 --restart on-failure \
                 --env NAME=${NAME} \
-                --env VERSION=${DOCKER_TAG} \
                 --env-file ${varsFile} \
                 ${DOCKER_IMAGE} './start-worker.sh'
