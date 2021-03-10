@@ -1,12 +1,16 @@
 
 
-export interface Transaction {
-  hash: string;
-  from: string;
-  to: string;
+export interface TokenTransfer {
+  transactionHash: string;
+  registryAddress: string;
+  fromAddress: string;
+  toAddress: string;
+  tokenId: number;
   value: number;
-  gasPrice: string;
+  gasLimit: number;
+  gasPrice: number;
   gasUsed: number;
+  blockDate: Date;
 }
 
 export interface AssetCollection {
