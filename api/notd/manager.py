@@ -2,14 +2,14 @@ import asyncio
 import logging
 from typing import List
 
-from notd.chain_processor import ChainProcessor
+from notd.block_processor import BlockProcessor
 from notd.store.saver import Saver
 from notd.core.exceptions import DuplicateValueException
 
 class NotdManager:
 
-    def __init__(self, chainProcessor: ChainProcessor, saver: Saver):
-        self.chainProcessor = chainProcessor
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver):
+        self.blockProcessor = blockProcessor
         self.saver = saver
 
     async def process_block_range(self, startBlockNumber: int, endBlockNumber: int) -> None:
@@ -20,7 +20,7 @@ class NotdManager:
         await asyncio.gather(*[self.process_block(blockNumber=blockNumber) for blockNumber in blockNumbers])
 
     async def process_block(self, blockNumber: int) -> None:
-        retrievedTokenTransfers = await self.chainProcessor.get_transfers_in_block(blockNumber=blockNumber)
+        retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         for retrievedTokenTransfer in retrievedTokenTransfers:
             logging.debug(f'Transferred {retrievedTokenTransfer.tokenId} from {retrievedTokenTransfer.fromAddress} to {retrievedTokenTransfer.toAddress}')

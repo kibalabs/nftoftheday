@@ -6,7 +6,7 @@ import boto3
 from databases import Database
 from web3 import Web3
 
-from notd.chain_processor import ChainProcessor
+from notd.block_processor import BlockProcessor
 from notd.core.s3_manager import S3Manager
 from notd.store.saver import Saver
 from notd.store.retriever import Retriever
@@ -27,8 +27,8 @@ async def main():
     requester = Requester()
 
     w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/rdYIr6T2nBgJvtKlYQxmVH3bvjW2DLxi'))
-    chainProcessor = ChainProcessor(web3Connection=w3)
-    notdManager = NotdManager(chainProcessor=chainProcessor, saver=saver)
+    blockProcessor = BlockProcessor(web3Connection=w3)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')

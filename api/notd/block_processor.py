@@ -13,7 +13,7 @@ from hexbytes import HexBytes
 
 from notd.model import RetrievedTokenTransfer
 
-class ChainProcessor:
+class BlockProcessor:
 
     def __init__(self, web3Connection: Web3):
         self.w3 = web3Connection
