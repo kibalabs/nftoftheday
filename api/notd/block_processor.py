@@ -56,7 +56,7 @@ class BlockProcessor:
         registryAddress = event['address']
         logging.debug(f'------------- {transactionHash} ------------')
         if registryAddress == self.cryptoKittiesContract.address:
-            # NOTE(krishan711): for CryptoKitties the tokenId wasn't indexed
+            # NOTE(krishan711): for CryptoKitties the tokenId isn't indexed in the Transfer event
             decodedEventData = self.cryptoKittiesTransferEvent.processLog(event)
             event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['tokenId'])]
         if registryAddress == self.cryptoPunksContract.address:
