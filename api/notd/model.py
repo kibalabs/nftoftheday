@@ -5,11 +5,12 @@ from pydantic import dataclasses
 
 @dataclasses.dataclass
 class TokenTransfer:
+    tokenTransferId: int
     transactionHash: str
     registryAddress: str
     fromAddress: str
     toAddress: str
-    tokenId: int
+    tokenId: str
     value: int
     gasLimit: int
     gasPrice: int
@@ -20,6 +21,7 @@ class TokenTransfer:
 
     def to_dict(self) -> Dict:
         return {
+            'tokenTransferId': self.tokenTransferId,
             'transactionHash': self.transactionHash,
             'registryAddress': self.registryAddress,
             'fromAddress': self.fromAddress,
@@ -33,3 +35,18 @@ class TokenTransfer:
             'blockHash': self.blockHash,
             'blockDate': self.blockDate.isoformat(),
         }
+
+@dataclasses.dataclass
+class RetrievedTokenTransfer:
+    transactionHash: str
+    registryAddress: str
+    fromAddress: str
+    toAddress: str
+    tokenId: str
+    value: int
+    gasLimit: int
+    gasPrice: int
+    gasUsed: int
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime

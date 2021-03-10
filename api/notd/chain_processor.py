@@ -11,9 +11,9 @@ from web3.types import LogReceipt
 from eth_utils import event_abi_to_log_topic
 from hexbytes import HexBytes
 
-from nftoftheday.model import TokenTransfer
+from notd.model import RetrievedTokenTransfer
 
-class NftOfTheDay:
+class ChainProcessor:
 
     def __init__(self, web3Connection: Web3):
         self.w3 = web3Connection
@@ -29,7 +29,7 @@ class NftOfTheDay:
         # self.contractFilter = self.ierc721Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc721TansferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
 
-    async def get_transfers_in_block(self, blockNumber: int) -> List[TokenTransfer]:
+    async def get_transfers_in_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
         block = self.w3.eth.getBlock(blockNumber)
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
@@ -45,7 +45,7 @@ class NftOfTheDay:
                 tokenTransfers.append(tokenTransfer)
         return tokenTransfers
 
-    async def process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[TokenTransfer]:
+    async def process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = event['address']
         logging.debug(f'------------- {transactionHash} ------------')
@@ -68,5 +68,5 @@ class NftOfTheDay:
         value = ethTransaction['value']
         ethTransactionReceipt = self.w3.eth.getTransactionReceipt(transactionHash)
         gasUsed = ethTransactionReceipt['gasUsed']
-        transaction = TokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
+        transaction = RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
         return transaction

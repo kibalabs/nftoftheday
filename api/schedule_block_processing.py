@@ -9,29 +9,23 @@ import boto3
 from web3 import Web3
 from databases import Database
 
-from notd.chain_processor import ChainProcessor
-from notd.manager import NotdManager
-from notd.core.s3_manager import S3Manager
-from notd.store.saver import Saver
+from notd.core.sqs_message_queue import SqsMessageQueue
+from notd.messages import ProcessBlocksMessageContent
+from notd.messages import ProcessBlockRangeMessageContent
 
-# NOTE(krishan711): test CryptoPunks with block 11999450
 
 @click.command()
 @click.option('-b', '--block-number', 'blockNumber', required=False, type=int)
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=False, type=int, default=0)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=False, type=int)
 async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBlockNumber: Optional[int]):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
-    saver = Saver(database=database)
-    w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/rdYIr6T2nBgJvtKlYQxmVH3bvjW2DLxi'))
-    chainProcessor = ChainProcessor(web3Connection=w3)
-    manager = NotdManager(chainProcessor=chainProcessor, saver=saver)
+    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
+    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 
-    await database.connect()
     if blockNumber:
-        await manager.process_block(blockNumber=blockNumber)
+        await workQueue.send_message(message=ProcessBlocksMessageContent(blockNumbers=[blockNumber]).to_message())
     elif startBlockNumber and endBlockNumber:
-        await manager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
+        await workQueue.send_message(message=ProcessBlockRangeMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
     else:
         raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
 
