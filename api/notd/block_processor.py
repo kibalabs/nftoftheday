@@ -21,6 +21,12 @@ class BlockProcessor:
             contractJson = json.load(contractJsonFile)
         self.cryptoKittiesContract = self.w3.eth.contract(address='0x06012c8cf97BEaD5deAe237070F9587f8E7A266d', abi=contractJson['abi'])
         self.cryptoKittiesTransferEvent = self.cryptoKittiesContract.events.Transfer()
+
+        with open('./contracts/CryptoPunksMarket.json') as contractJsonFile:
+            contractJson = json.load(contractJsonFile)
+        self.cryptoPunksContract = self.w3.eth.contract(address='0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB', abi=contractJson['abi'])
+        self.cryptoPunksTransferEvent = self.cryptoPunksContract.events.PunkTransfer()
+
         with open('./contracts/IERC721.json') as contractJsonFile:
             contractJson = json.load(contractJsonFile)
         self.ierc721Contract = self.w3.eth.contract(abi=contractJson['abi'])
@@ -50,12 +56,15 @@ class BlockProcessor:
         registryAddress = event['address']
         logging.debug(f'------------- {transactionHash} ------------')
         if registryAddress == self.cryptoKittiesContract.address:
+            # NOTE(krishan711): for CryptoKitties the tokenId wasn't indexed
             decodedEventData = self.cryptoKittiesTransferEvent.processLog(event)
             event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['tokenId'])]
-        # NOTE(krishan711): for CryptoPunks we need more work!
-        # if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
-        #     print('event', event)
-        #     raise Exception()
+        if registryAddress == self.cryptoPunksContract.address:
+            # NOTE(krishan711): for CryptoPunks there is a separate PunkTransfer event with the punkId
+            ethTransactionReceipt = self.w3.eth.getTransactionReceipt(transactionHash)
+            decodedEventData = self.cryptoPunksTransferEvent.processReceipt(ethTransactionReceipt)[0]
+            print('decodedEventData', decodedEventData)
+            event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['punkIndex'])]
         if len(event['topics']) < 4:
             logging.debug(f'Ignoring event with less than 4 topics')
             return None
