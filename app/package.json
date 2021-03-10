@@ -12,17 +12,13 @@
     "type-check": "type-check"
   },
   "dependencies": {
-    "@apollo/client": "^3.3.11",
     "@kibalabs/core": "0.5.3",
     "@kibalabs/core-react": "0.6.0",
     "@kibalabs/everyview-tracker-react": "0.2.4",
     "@kibalabs/ui-react": "0.8.4",
-    "graphql": "^15.5.0",
-    "opensea-js": "^1.1.11",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "styled-components": "5.2.1",
-    "web3": "1.3.4"
+    "styled-components": "5.2.1"
   },
   "devDependencies": {
     "@kibalabs/build": "0.6.4",

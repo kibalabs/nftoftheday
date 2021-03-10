@@ -9,7 +9,7 @@ class TokenTransfer:
     registryAddress: str
     fromAddress: str
     toAddress: str
-    tokenId: str
+    tokenId: int
     value: int
     gasLimit: int
     gasPrice: int

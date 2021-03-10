@@ -1,108 +1,67 @@
 import React from 'react';
 
-import { ApolloClient, ApolloQueryResult, gql, InMemoryCache } from '@apollo/client';
 import { Requester, RestMethod } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
-import Web3 from 'web3';
 
-import { Asset, AssetCollection, Transaction } from './model';
+import { Asset, AssetCollection, TokenTransfer } from './model';
+import { asyncSleep } from './asyncUtil';
 import { buildNotdTheme } from './theme';
 
 const theme = buildNotdTheme();
 
-const web3Client = new Web3("https://eth-mainnet.alchemyapi.io/v2/rdYIr6T2nBgJvtKlYQxmVH3bvjW2DLxi");
-// const web3Provider = new Web3.providers.HttpProvider('https://mainnet.infura.io');
-// const openSeaClient = new OpenSeaPort(web3Provider);
-
 const requester = new Requester();
 
-const nftGraphClient = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/kibalabs/nft-tracker',
-  cache: new InMemoryCache(),
-});
+const EXAMPLE_TOKEN_TRANSFER: TokenTransfer = {
+  transactionHash: "0xcd2be787b6efa1006dd19a312ee9dea50340d77ac7546fbb62dd17242e83c458",
+  registryAddress: "0x31af195db332bc9203d758c74df5a5c5e597cdb7",
+  fromAddress: "0x0000000000000000000000000000000000000000",
+  toAddress: "0xf55161739672929a20b94d611d2d98352e837e44",
+  tokenId: 19894,
+  value: 0,
+  gasLimit: 2000000,
+  gasPrice: 2200000000,
+  gasUsed: 793693,
+  blockDate: new Date(2019, 3, 17, 8, 58, 17),
+}
 
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
+  const [tokenTransfer, setTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [asset, setAsset] = React.useState<Asset | null>(null);
-  const [assetTransaction, setAssetTransaction] = React.useState<Transaction | null>(null);
 
   React.useEffect((): void => {
-    nftGraphClient.query({
-      query: gql`
-        query getLatestNft {
-          transfers(first: 1, orderBy: timestamp, orderDirection: desc) {
-            id
-            transaction {
-              id
-              timestamp
-              value
-              gasPrice
-              gasUsed
-            }
-            timestamp
-            token {
-              id
-              registry {
-                id
-                name
-                symbol
-              }
-              identifier
-            }
-            from {
-              id
-            }
-            to {
-              id
-            }
-          }
-        }
-      `,
-    })
-      .then(async (result: ApolloQueryResult<unknown>) => {
-        const transfers = result.data.transfers;
-        console.log('transfers', transfers);
-        transfers.forEach(async (transfer: unknown): Promise<void> => {
-          const transferDate = new Date(parseInt(transfer.timestamp, 10) * 1000);
-          console.log(`Transfer at ${transferDate} from ${transfer.from.id} to ${transfer.to.id} at ${transfer.transaction.id}`);
-          // const transaction = await web3Client.eth.getTransaction(transfer.transaction.id);
-          // console.log('transaction', transaction);
-          const transactionReceipt = await web3Client.eth.getTransactionReceipt(transfer.transaction.id);
-          console.log('transactionReceipt', transactionReceipt);
-          setAssetTransaction({
-            hash: transfer.transaction.id,
-            from: transfer.from.id,
-            to: transfer.to.id,
-            value: parseInt(transfer.transaction.value, 10),
-            gasPrice: transfer.transaction.gasPrice,
-            gasUsed: transactionReceipt.gasUsed,
-          });
-          const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${transfer.token.registry.id}/${transfer.token.identifier}/`, undefined, { 'x-api-key': '' });
-          const assetJson = JSON.parse(assetResponse.content);
-          console.log('assetJson', assetJson);
-          const assetCollection: AssetCollection = {
-            name: assetJson.collection.name,
-            imageUrl: assetJson.collection.large_image_url ?? assetJson.collection.image_url,
-            openSeaUrl: assetJson.collection.permalink,
-            externalUrl: assetJson.collection.external_link,
-            description: assetJson.collection.description,
-          };
-          const latestAsset: Asset = {
-            name: assetJson.name,
-            imageUrl: assetJson.image_url ?? assetJson.original_image_url,
-            openSeaUrl: assetJson.permalink,
-            externalUrl: assetJson.external_link,
-            description: assetJson.description,
-            collection: assetCollection,
-          };
-          // console.log('asset', asset);
-          setAsset(latestAsset);
-        });
-      });
+    asyncSleep(2).then(async (): Promise<void> => {
+      setTokenTransfer(EXAMPLE_TOKEN_TRANSFER);
+    });
   }, []);
+
+  React.useEffect(async (): void => {
+    if (!tokenTransfer) {
+      setAsset(null);
+      return;
+    }
+    const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${tokenTransfer.registryAddress}/${tokenTransfer.tokenId}/`, undefined, { 'x-api-key': '' });
+    const assetJson = JSON.parse(assetResponse.content);
+    const assetCollection: AssetCollection = {
+      name: assetJson.collection.name,
+      imageUrl: assetJson.collection.large_image_url ?? assetJson.collection.image_url,
+      openSeaUrl: assetJson.collection.permalink,
+      externalUrl: assetJson.collection.external_link,
+      description: assetJson.collection.description,
+    };
+    const latestAsset: Asset = {
+      name: assetJson.name,
+      imageUrl: assetJson.image_url ?? assetJson.original_image_url,
+      openSeaUrl: assetJson.permalink,
+      externalUrl: assetJson.external_link,
+      description: assetJson.description,
+      collection: assetCollection,
+    };
+    setAsset(latestAsset);
+  }, [tokenTransfer]);
 
   return (
     <KibaApp theme={theme}>
@@ -122,7 +81,7 @@ export const App = hot((): React.ReactElement => {
                 <Text variant='header2'>{`${asset.name || '(unnamed)'}`}</Text>
               </Stack>
               <Text>{`Part of ${asset.collection.name}`}</Text>
-              <Text>{`Bought for Ξ${assetTransaction.value / 1000000000000000000.0}`}</Text>
+              <Text>{`Bought for Ξ${tokenTransfer.value / 1000000000000000000.0}`}</Text>
             </React.Fragment>
           )}
         </Stack>
