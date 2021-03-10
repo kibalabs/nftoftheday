@@ -14,6 +14,8 @@ class TokenTransfer:
     gasLimit: int
     gasPrice: int
     gasUsed: int
+    blockNumber: int
+    blockHash: str
     blockDate: datetime.datetime
 
     def to_dict(self) -> Dict:
@@ -27,5 +29,7 @@ class TokenTransfer:
             'gasLimit': self.gasLimit,
             'gasPrice': self.gasPrice,
             'gasUsed': self.gasUsed,
+            'blockNumber': self.blockNumber,
+            'blockHash': self.blockHash,
             'blockDate': self.blockDate.isoformat(),
         }

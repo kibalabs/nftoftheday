@@ -3,6 +3,7 @@ import shutil
 from typing import Optional
 
 import aiofiles
+import aiofiles.os
 
 async def remove_file(filePath: str):
     await aiofiles.os.remove(filePath)
