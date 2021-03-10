@@ -2,8 +2,6 @@ name: Deploy
 on:
   push:
     branches: [ main ]
-env:
-  DOCKER_TAG: latest
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
@@ -11,23 +9,23 @@ jobs:
       run:
         working-directory: ./app
     env:
-      DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
       - name: Login to GitHub container registry
         run: echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
       - name: Build docker image
-        run: docker build --tag $DOCKER_IMAGE:$DOCKER_TAG .
+        run: docker build --tag $DOCKER_IMAGE .
       - name: Push to container registry
-        run: docker push $DOCKER_IMAGE:$DOCKER_TAG
+        run: docker push $DOCKER_IMAGE
   deploy-api:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./api
     env:
-      DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -42,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NAME: nftoftheday-app
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
     steps:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
@@ -49,13 +48,12 @@ jobs:
           host: ${{ secrets.FREEBOX_URL }}
           username: ${{ secrets.FREEBOX_USER }}
           key: ${{ secrets.FREEBOX_SSH_KEY }}
-          envs: DOCKER_IMAGE,DOCKER_TAG,NAME
+          envs: DOCKER_IMAGE,NAME
           script_stop: true
           script: |
             url="notd.kibalabs.com"
-            dockerImage="${DOCKER_IMAGE}:${DOCKER_TAG}"
             varsFile=~/.${NAME}.vars
-            docker pull ${dockerImage}
+            docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
                 --name ${NAME} \
@@ -63,14 +61,16 @@ jobs:
                 --publish-all \
                 --restart on-failure \
                 --env NAME=${NAME} \
-                --env VERSION=${DOCKER_TAG} \
                 --env VIRTUAL_HOST=${url} \
                 --env LETSENCRYPT_HOST=${url} \
                 --env-file ${varsFile} \
-                ${dockerImage}
+                ${DOCKER_IMAGE}
   run-api:
     needs: deploy-api
     runs-on: ubuntu-latest
+    env:
+      NAME: nftoftheday-api
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
     steps:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
@@ -78,12 +78,11 @@ jobs:
           host: ${{ secrets.FREEBOX_URL }}
           username: ${{ secrets.FREEBOX_USER }}
           key: ${{ secrets.FREEBOX_SSH_KEY }}
-          envs: DOCKER_IMAGE,DOCKER_TAG,NAME
+          envs: DOCKER_IMAGE,NAME
           script_stop: true
           script: |
-            dockerImage="${DOCKER_IMAGE}:${DOCKER_TAG}"
             varsFile=~/.${NAME}.vars
-            docker pull ${dockerImage}
+            docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
                 --name ${NAME} \
@@ -93,4 +92,4 @@ jobs:
                 --env NAME=${NAME} \
                 --env VERSION=${DOCKER_TAG} \
                 --env-file ${varsFile} \
-                ${dockerImage}
+                ${DOCKER_IMAGE} './start-worker.sh'
