@@ -28,6 +28,7 @@ class NotdManager:
         latestTokenTransfers = await self.retriever.list_token_transfers(orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)], limit=1)
         latestProcessedBlockNumber = latestTokenTransfers[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
+        logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
         batchSize = 10
         for startBlockNumber in range(latestProcessedBlockNumber, latestBlockNumber + 1, batchSize):
             endBlockNumber = min(startBlockNumber + batchSize, latestBlockNumber + 1)
