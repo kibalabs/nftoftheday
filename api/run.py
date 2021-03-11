@@ -27,7 +27,7 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     blockProcessor = BlockProcessor(web3Connection=w3)
     manager = NotdManager(blockProcessor=blockProcessor, saver=saver)
 
-    await database.connect()
+    # await database.connect()
     if blockNumber:
         await manager.process_block(blockNumber=blockNumber)
     elif startBlockNumber and endBlockNumber:
