@@ -26,6 +26,7 @@ class BlockProcessor:
             contractJson = json.load(contractJsonFile)
         self.cryptoPunksContract = self.w3.eth.contract(address='0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB', abi=contractJson['abi'])
         self.cryptoPunksTransferEvent = self.cryptoPunksContract.events.PunkTransfer()
+        self.cryptoPunksBoughtEvent = self.cryptoPunksContract.events.PunkBought()
 
         with open('./contracts/IERC721.json') as contractJsonFile:
             contractJson = json.load(contractJsonFile)
@@ -46,12 +47,12 @@ class BlockProcessor:
         })
         tokenTransfers = []
         for event in contractFilter.get_all_entries():
-            tokenTransfer = await self.process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
+            tokenTransfer = await self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
             if tokenTransfer:
                 tokenTransfers.append(tokenTransfer)
         return tokenTransfers
 
-    async def process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
+    async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = event['address']
         logging.debug(f'------------- {transactionHash} ------------')
@@ -60,10 +61,15 @@ class BlockProcessor:
             decodedEventData = self.cryptoKittiesTransferEvent.processLog(event)
             event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['tokenId'])]
         if registryAddress == self.cryptoPunksContract.address:
-            # NOTE(krishan711): for CryptoPunks there is a separate PunkTransfer event with the punkId
+            # NOTE(krishan711): for CryptoPunks there is a separate PunkBought (and PunkTransfer if its free) event with the punkId
             ethTransactionReceipt = self.w3.eth.getTransactionReceipt(transactionHash)
-            decodedEventData = self.cryptoPunksTransferEvent.processReceipt(ethTransactionReceipt)[0]
-            event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['punkIndex'])]
+            decodedEventData = self.cryptoPunksBoughtEvent.processReceipt(ethTransactionReceipt)
+            if len(decodedEventData) == 1:
+                event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['fromAddress']), HexBytes(decodedEventData[0]['args']['toAddress']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
+            else:
+                decodedEventData = self.cryptoPunksTransferEvent.processReceipt(ethTransactionReceipt)
+                if len(decodedEventData) == 1:
+                    event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['from']), HexBytes(decodedEventData[0]['args']['to']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
         if len(event['topics']) < 4:
             logging.debug(f'Ignoring event with less than 4 topics')
             return None
