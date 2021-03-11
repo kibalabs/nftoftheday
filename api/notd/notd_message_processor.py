@@ -3,6 +3,7 @@ from notd.core.model import SqsMessage
 from notd.core.exceptions import KibaException
 from notd.messages import ProcessBlocksMessageContent
 from notd.messages import ProcessBlockRangeMessageContent
+from notd.messages import ReceiveNewBlocksMessageContent
 from notd.manager import NotdManager
 
 class NotdMessageProcessor(MessageProcessor):
@@ -18,5 +19,9 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == ProcessBlockRangeMessageContent._COMMAND:
             messageContent = ProcessBlockRangeMessageContent.parse_obj(message.content)
             await self.notdManager.process_block_range(startBlockNumber=messageContent.startBlockNumber, endBlockNumber=messageContent.endBlockNumber)
+            return
+        if message.command == ReceiveNewBlocksMessageContent._COMMAND:
+            messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
+            await self.notdManager.receive_new_blocks()
             return
         raise KibaException(message='Message was unhandled')

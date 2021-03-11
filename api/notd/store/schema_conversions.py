@@ -1,20 +1,23 @@
 import datetime
+from typing import Mapping
 
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 
-def token_transfer_from_row(row: TokenTransfersTable) -> TokenTransfer:
+def token_transfer_from_row(row: Mapping) -> TokenTransfer:
+    # NOTE(krishan711) these should be of the form row.id but https://github.com/encode/databases/issues/101
     return TokenTransfer(
-        transactionHash=row.transaction_hash,
-        registryAddress=row.registry_address,
-        fromAddress=row.from_address,
-        toAddress=row.to_address,
-        tokenId=row.token_id,
-        value=row.value,
-        gasLimit=row.gas_limit,
-        gasPrice=row.gas_price,
-        gasUsed=row.gas_used,
-        blockNumber=row.block_number,
-        blockHash=row.block_hash,
-        blockDate=row.block_date.replace(tzinfo=datetime.timezone.utc),
+        tokenTransferId=row[TokenTransfersTable.c.id],
+        transactionHash=row[TokenTransfersTable.c.transactionHash],
+        registryAddress=row[TokenTransfersTable.c.registryAddress],
+        fromAddress=row[TokenTransfersTable.c.fromAddress],
+        toAddress=row[TokenTransfersTable.c.toAddress],
+        tokenId=row[TokenTransfersTable.c.tokenId],
+        value=row[TokenTransfersTable.c.value],
+        gasLimit=row[TokenTransfersTable.c.gasLimit],
+        gasPrice=row[TokenTransfersTable.c.gasPrice],
+        gasUsed=row[TokenTransfersTable.c.gasUsed],
+        blockNumber=row[TokenTransfersTable.c.blockNumber],
+        blockHash=row[TokenTransfersTable.c.blockHash],
+        blockDate=row[TokenTransfersTable.c.blockDate].replace(tzinfo=datetime.timezone.utc),
     )

@@ -11,3 +11,6 @@ class ProcessBlockRangeMessageContent(MessageContent):
     _COMMAND = 'PROCESS_BLOCK_RANGE'
     startBlockNumber: int
     endBlockNumber: int
+
+class ReceiveNewBlocksMessageContent(MessageContent):
+    _COMMAND = 'RECEIVE_NEW_BLOCKS'
