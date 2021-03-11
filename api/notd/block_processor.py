@@ -36,6 +36,9 @@ class BlockProcessor:
         # self.contractFilter = self.ierc721Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc721TansferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
 
+    async def get_latest_block_number(self) -> int:
+        return self.w3.eth.block_number
+
     async def get_transfers_in_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
         block = self.w3.eth.getBlock(blockNumber)
         blockHash = block['hash'].hex()

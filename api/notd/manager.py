@@ -4,13 +4,35 @@ from typing import List
 
 from notd.block_processor import BlockProcessor
 from notd.store.saver import Saver
+from notd.store.retriever import Direction
+from notd.store.retriever import Order
+from notd.store.retriever import Retriever
+from notd.store.schema import TokenTransfersTable
+from notd.messages import ProcessBlockRangeMessageContent
+from notd.messages import ReceiveNewBlocksMessageContent
 from notd.core.exceptions import DuplicateValueException
+from notd.core.sqs_message_queue import SqsMessageQueue
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue):
         self.blockProcessor = blockProcessor
         self.saver = saver
+        self.retriever = retriever
+        self.workQueue = workQueue
+
+    async def receive_new_blocks_deferred(self) -> None:
+        await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
+
+    async def receive_new_blocks(self) -> None:
+        latestTokenTransfers = await self.retriever.list_token_transfers(orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)], limit=1)
+        latestProcessedBlockNumber = latestTokenTransfers[0].blockNumber
+        latestBlockNumber = await self.blockProcessor.get_latest_block_number()
+        logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
+        batchSize = 10
+        for startBlockNumber in range(latestProcessedBlockNumber, latestBlockNumber + 1, batchSize):
+            endBlockNumber = min(startBlockNumber + batchSize, latestBlockNumber + 1)
+            await self.workQueue.send_message(message=ProcessBlockRangeMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
 
     async def process_block_range(self, startBlockNumber: int, endBlockNumber: int) -> None:
         blockNumbers = list(range(startBlockNumber, endBlockNumber))

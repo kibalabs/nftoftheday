@@ -23,22 +23,21 @@ class Saver:
             raise DuplicateValueException(message=str(exception))
         except Exception as exception:
             logging.error(exception)
-            # if ('Duplicate entry' in str(exception)):
             raise InternalServerErrorException(message='Error running save operation')
 
     async def create_token_transfer(self, transactionHash: str, registryAddress: str, fromAddress: str, toAddress: str, tokenId: int, value: int, gasLimit: int, gasPrice: int, gasUsed: int, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> TokenTransfer:
         tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={
-            TokenTransfersTable.c.transaction_hash.name: transactionHash,
-            TokenTransfersTable.c.registry_address.name: registryAddress,
-            TokenTransfersTable.c.from_address.name: fromAddress,
-            TokenTransfersTable.c.to_address.name: toAddress,
-            TokenTransfersTable.c.token_id.name: tokenId,
-            TokenTransfersTable.c.value.name: value,
-            TokenTransfersTable.c.gas_limit.name: gasLimit,
-            TokenTransfersTable.c.gas_price.name: gasPrice,
-            TokenTransfersTable.c.gas_used.name: gasUsed,
-            TokenTransfersTable.c.block_number.name: blockNumber,
-            TokenTransfersTable.c.block_hash.name: blockHash,
-            TokenTransfersTable.c.block_date.name: blockDate,
+            TokenTransfersTable.c.transactionHash.key: transactionHash,
+            TokenTransfersTable.c.registryAddress.key: registryAddress,
+            TokenTransfersTable.c.fromAddress.key: fromAddress,
+            TokenTransfersTable.c.toAddress.key: toAddress,
+            TokenTransfersTable.c.tokenId.key: tokenId,
+            TokenTransfersTable.c.value.key: value,
+            TokenTransfersTable.c.gasLimit.key: gasLimit,
+            TokenTransfersTable.c.gasPrice.key: gasPrice,
+            TokenTransfersTable.c.gasUsed.key: gasUsed,
+            TokenTransfersTable.c.blockNumber.key: blockNumber,
+            TokenTransfersTable.c.blockHash.key: blockHash,
+            TokenTransfersTable.c.blockDate.key: blockDate,
         })
         return TokenTransfer(tokenTransferId=tokenTransferId, transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
