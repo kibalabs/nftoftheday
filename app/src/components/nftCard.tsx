@@ -26,7 +26,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Box width='100px' height='100px'>
             <Image isLazyLoadable={true} source={props.imageUrl || props.collectionImage} alternativeText={`${props.title} image`} />
           </Box>
-          <Text variant='header6'>{`${props.title || '(unnamed)'}`}</Text>
+          <Text variant='header5'>{`${props.title || '(unnamed)'}`}</Text>
           <Text variant='subtitle'>{props.subtitle}</Text>
           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
             {props.collectionImage && (

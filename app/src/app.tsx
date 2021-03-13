@@ -2,11 +2,7 @@ import React from 'react';
 
 import { dateToString, Requester, RestMethod } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
-<<<<<<< HEAD
 import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
-=======
-import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
->>>>>>> main
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
@@ -81,7 +77,7 @@ export const App = hot((): React.ReactElement => {
     <KibaApp theme={theme}>
       <BackgroundView linearGradient='#200122,#6F0000'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
-        <Spacing variant={PaddingSize.Wide3} />
+          <Spacing variant={PaddingSize.Wide3} />
           <Text variant='header1'>NFT of the day</Text>
           <Spacing variant={PaddingSize.Default} />
           <Text variant='header3'>{getDateString()}</Text>
@@ -132,7 +128,7 @@ export const App = hot((): React.ReactElement => {
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>
-        <MarkdownText source='Made by [Kiba Labs](https://www.kibalabs.com)' />
+          <MarkdownText source='Made by [Kiba Labs](https://www.kibalabs.com)' />
         </Stack>
       </BackgroundView>
     </KibaApp>
