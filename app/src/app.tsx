@@ -1,31 +1,21 @@
 import React from 'react';
 
-import { Requester, RestMethod } from '@kibalabs/core';
+import { KibaResponse, Requester, RestMethod } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
 import { asyncSleep } from './asyncUtil';
-import { Asset, AssetCollection, TokenTransfer } from './model';
+import { Asset, AssetCollection } from './model';
 import { buildNotdTheme } from './theme';
+import { NotdClient } from './client/client';
+import { TokenTransfer, UiData } from './client/resources';
 
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-
-const EXAMPLE_TOKEN_TRANSFER: TokenTransfer = {
-  transactionHash: '0xcd2be787b6efa1006dd19a312ee9dea50340d77ac7546fbb62dd17242e83c458',
-  registryAddress: '0x31af195db332bc9203d758c74df5a5c5e597cdb7',
-  fromAddress: '0x0000000000000000000000000000000000000000',
-  toAddress: '0xf55161739672929a20b94d611d2d98352e837e44',
-  tokenId: 19894,
-  value: 0,
-  gasLimit: 2000000,
-  gasPrice: 2200000000,
-  gasUsed: 793693,
-  blockDate: new Date(2019, 3, 17, 8, 58, 17),
-};
+const notdClient = new NotdClient(requester);
 
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
@@ -33,8 +23,9 @@ export const App = hot((): React.ReactElement => {
   const [asset, setAsset] = React.useState<Asset | null>(null);
 
   React.useEffect((): void => {
-    asyncSleep(2).then(async (): Promise<void> => {
-      setTokenTransfer(EXAMPLE_TOKEN_TRANSFER);
+    notdClient.retrieveUiData(new Date(), new Date()).then((uiData: UiData): void => {
+      console.log('uiData', uiData);
+      setTokenTransfer(uiData.highestPricedTokenTransfer);
     });
   }, []);
 

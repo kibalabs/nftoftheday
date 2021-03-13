@@ -70,9 +70,8 @@ class ApiUiData(BaseModel):
         )
 
 class RetrieveUiDataRequest(BaseModel):
-    # startDate: Optional[datetime.datetime]
-    # endDate: Optional[datetime.datetime]
-    pass
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
 
 class RetrieveUiDataResponse(BaseModel):
     uiData: ApiUiData
