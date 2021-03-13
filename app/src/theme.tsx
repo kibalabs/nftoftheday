@@ -14,6 +14,24 @@ export const buildNotdTheme = (): ITheme => {
         url: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700,800,900&display=swap',
       },
     },
+    links: {
+      default: {
+        normal: {
+          default: {
+            text: {
+              color: '$colors.text',
+            },
+          },
+        },
+        visited: {
+          default: {
+            text: {
+              color: '$colors.textDarker15',
+            },
+          },
+        },
+      },
+    },
     texts: {
       default: {
         'font-family': "'Post No Bills Jaffna', sans-serif",
