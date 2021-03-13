@@ -11,7 +11,6 @@ from databases import Database
 
 from notd.block_processor import BlockProcessor
 from notd.block_processor import Web3EthClient
-# from notd.block_processor import EtherscanEthClient
 from notd.manager import NotdManager
 from notd.core.requester import Requester
 from notd.store.saver import Saver
