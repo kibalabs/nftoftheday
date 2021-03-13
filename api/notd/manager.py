@@ -48,7 +48,7 @@ class NotdManager:
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
         batchSize = 10
-        for startBlockNumber in range(latestProcessedBlockNumber, latestBlockNumber + 1, batchSize):
+        for startBlockNumber in reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1, batchSize)):
             endBlockNumber = min(startBlockNumber + batchSize, latestBlockNumber + 1)
             await self.workQueue.send_message(message=ProcessBlockRangeMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
 
