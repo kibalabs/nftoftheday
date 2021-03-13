@@ -34,12 +34,12 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
 
     await database.connect()
     await manager.receive_new_blocks()
-    # if blockNumber:
-    #     await manager.process_block(blockNumber=blockNumber)
-    # elif startBlockNumber and endBlockNumber:
-    #     await manager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
-    # else:
-    #     raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
+    if blockNumber:
+        await manager.process_block(blockNumber=blockNumber)
+    elif startBlockNumber and endBlockNumber:
+        await manager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
+    else:
+        raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
