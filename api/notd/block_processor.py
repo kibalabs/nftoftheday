@@ -59,6 +59,30 @@ class Web3EthClient(EthClientInterface):
         })
         return contractFilter.get_all_entries()
 
+class RestEthClient(EthClientInterface):
+
+    #NOTE(krishan711): find docs at https://eth.wiki/json-rpc/API
+    def __init__(self, url: str, requester: Requester):
+        self.url = url
+        self.requester = requester
+
+    async def get_latest_block_number(self) -> int:
+        response = await self.requester.post_json(url=self.url, data={'jsonrpc':'2.0', 'method':'eth_blockNumber', 'params': [], 'id': 83})
+        jsonResponse = response.json()
+        return int(jsonResponse['result'], 16)
+
+    async def get_block(self, blockNumber: int) -> BlockData:
+        response = await self.requester.post(url=self.url, data={'jsonrpc':'2.0', 'method':'eth_getBlockByNumber', 'params': ['0x1b4', True], 'id': 1})
+
+    async def get_transaction(self, transactionHash: str) -> TxData:
+        raise NotImplementedError()
+
+    async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+        raise NotImplementedError()
+
+    async def get_log_entries(self, startBlockNumber: int, endBlockNumber: int, topics: List[str]) -> List[LogReceipt]:
+        raise NotImplementedError()
+
 class BlockProcessor:
 
     def __init__(self, ethClient: EthClientInterface):
