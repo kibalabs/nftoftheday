@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Requester, RestMethod } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, Link, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, Link, LoadingSpinner, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
@@ -110,11 +110,9 @@ export const App = hot((): React.ReactElement => {
             )}
           </EqualGrid>
         </Stack>
+        <Spacing variant={PaddingSize.Wide4}/>
+        <Text alignment={TextAlignment.Center}>Made by <Link target='//#endregion' text='KibaLabs' /></Text>
       </BackgroundView>
-      <Text>
-Made by
-        <Link target='//#endregion' text='KibaLabs' />
-      </Text>
     </KibaApp>
   );
 });
