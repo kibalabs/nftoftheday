@@ -1,71 +1,40 @@
-import dataclasses
-from enum import Enum
+import datetime
 from typing import Optional
 from typing import Sequence
-from typing import List
 from typing import Optional
 
-from databases import Database
-import sqlalchemy
-from sqlalchemy import Table
-from sqlalchemy.sql.expression import FromClause
+from  sqlalchemy.sql.expression import func as sqlalchemyfunc
 
+from notd.core.store.retriever import Retriever
+from notd.core.store.retriever import FieldFilter
+from notd.core.store.retriever import Order
+from notd.model import Token
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
-class Direction(Enum):
-    ASCENDING = 'ascending'
-    DESCENDING = 'descending'
+class NotdRetriever(Retriever):
 
-@dataclasses.dataclass
-class Order:
-        fieldName: str
-        direction: Direction = Direction.DESCENDING
-
-@dataclassess.dataclass
-class NumericField:
-    isNull: Optional[bool]: None
-    isNotNull: Optional[bool]: None
-    eq: Optional[int]: None
-    ne: Optional[int]: None
-    le: Optional[int]: None
-    lt: Optional[int]: None
-    ge: Optional[int]: None
-    gt: Optional[int]: None
-    containedIn: Optional[List[int]]: None
-    notContainedIn: Optional[List[int]]: None
-
-@dataclassess.dataclass
-class DateField:
-    isNull: Optional[bool]: None
-    isNotNull: Optional[bool]: None
-    eq: Optional[int]: None
-    ne: Optional[int]: None
-    le: Optional[int]: None
-    lt: Optional[int]: None
-    ge: Optional[int]: None
-    gt: Optional[int]: None
-    containedIn: Optional[List[int]]: None
-    notContainedIn: Optional[List[int]]: None
-
-class Retriever:
-
-    def __init__(self, database: Database):
-        self.database = database
-
-    def _apply_order(self, query: FromClause, tableClass: Table, order: Order) -> FromClause:
-        field = table.c[order.fieldName]
-        query = query.order_by(field.asc() if order.direction == Direction.ASCENDING else field.desc())
-        return query
-
-    async def list_token_transfers(self, orders: Optional[List[Order]], limit: Optional[int]) -> Sequence[TokenTransfer]:
+    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
         query = TokenTransfersTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
-            query = query.limit(1)
+            query = query.limit(limit)
         rows = await self.database.fetch_all(query=query)
         tokenTransfers = [token_transfer_from_row(row) for row in rows]
         return tokenTransfers
+
+    async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Token:
+        query = TokenTransfersTable.select()
+        query = query.with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId)])
+        query = query.group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+        query = query.where(TokenTransfersTable.c.blockDate >= startDate)
+        query = query.where(TokenTransfersTable.c.blockDate < endDate)
+        query = query.order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId).desc())
+        query = query.limit(1)
+        rows = await self.database.fetch_all(query=query)
+        return Token(registryAddress=rows[0][TokenTransfersTable.c.registryAddress], tokenId=rows[0][TokenTransfersTable.c.tokenId])
