@@ -7,7 +7,6 @@ from databases import Database
 from web3 import Web3
 
 from notd.block_processor import BlockProcessor
-from notd.core.s3_manager import S3Manager
 from notd.store.saver import Saver
 from notd.store.retriever import Retriever
 from notd.core.sqs_message_queue import SqsMessageQueue

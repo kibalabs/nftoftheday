@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 from typing import List
 
@@ -7,7 +8,10 @@ from notd.store.saver import Saver
 from notd.store.retriever import Direction
 from notd.store.retriever import Order
 from notd.store.retriever import Retriever
+from notd.store.retriever import DateField
 from notd.store.schema import TokenTransfersTable
+from notd.model import UiData
+from notd.model import Token
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.core.exceptions import DuplicateValueException
@@ -20,6 +24,17 @@ class NotdManager:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
+
+    async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
+        highestPricedTokenTransfers = await self.retriever.list_token_transfers(blockDate=DateField(gte=startDate, lt=endDate), orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)], limit=1)
+        mostTradedTokenTransfers = await self.retriever.list_token_transfers(orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)], limit=1)
+        randomTokenTransfers = await self.retriever.list_token_transfers(orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)], limit=1)
+        return UiData(
+            highestPricedTokenTransfer=highestPricedTokenTransfers[0],
+            mostTradedTokenTransfers=mostTradedTokenTransfers,
+            randomTokenTransfer=randomTokenTransfers[0],
+            sponsoredToken=Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345')
+        )
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
