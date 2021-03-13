@@ -16,19 +16,19 @@ export class TokenTransfer {
   readonly blockDate: Date;
 
   public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date) {
-    this.tokenTransferId = tokenTransferId
-    this.transactionHash = transactionHash
-    this.registryAddress = registryAddress
-    this.fromAddress = fromAddress
-    this.toAddress = toAddress
-    this.tokenId = tokenId
-    this.value = value
-    this.gasLimit = gasLimit
-    this.gasPrice = gasPrice
-    this.gasUsed = gasUsed
-    this.blockNumber = blockNumber
-    this.blockHash = blockHash
-    this.blockDate = blockDate
+    this.tokenTransferId = tokenTransferId;
+    this.transactionHash = transactionHash;
+    this.registryAddress = registryAddress;
+    this.fromAddress = fromAddress;
+    this.toAddress = toAddress;
+    this.tokenId = tokenId;
+    this.value = value;
+    this.gasLimit = gasLimit;
+    this.gasPrice = gasPrice;
+    this.gasUsed = gasUsed;
+    this.blockNumber = blockNumber;
+    this.blockHash = blockHash;
+    this.blockDate = blockDate;
   }
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
@@ -73,7 +73,7 @@ export class UiData {
   readonly randomTokenTransfer: TokenTransfer;
   readonly sponsoredToken: Token;
 
-  public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: striTokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token) {
+  public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: TokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token) {
     this.highestPricedTokenTransfer = highestPricedTokenTransfer;
     this.mostTradedTokenTransfers = mostTradedTokenTransfers;
     this.randomTokenTransfer = randomTokenTransfer;

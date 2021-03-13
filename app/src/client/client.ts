@@ -15,5 +15,4 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUiDataResponse);
     return response.uiData;
   }
-
 }

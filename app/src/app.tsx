@@ -1,16 +1,15 @@
 import React from 'react';
 
-import { KibaResponse, Requester, RestMethod } from '@kibalabs/core';
+import { Requester, RestMethod } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
-import { asyncSleep } from './asyncUtil';
-import { Asset, AssetCollection } from './model';
-import { buildNotdTheme } from './theme';
 import { NotdClient } from './client/client';
 import { TokenTransfer, UiData } from './client/resources';
+import { Asset, AssetCollection } from './model';
+import { buildNotdTheme } from './theme';
 
 const theme = buildNotdTheme();
 
@@ -24,16 +23,12 @@ export const App = hot((): React.ReactElement => {
 
   React.useEffect((): void => {
     notdClient.retrieveUiData(new Date(), new Date()).then((uiData: UiData): void => {
-      console.log('uiData', uiData);
+      // console.log('uiData', uiData);
       setTokenTransfer(uiData.highestPricedTokenTransfer);
     });
   }, []);
 
-  React.useEffect(async (): void => {
-    if (!tokenTransfer) {
-      setAsset(null);
-      return;
-    }
+  const updateAsset = React.useCallback(async (): Promise<void> => {
     const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${tokenTransfer.registryAddress}/${tokenTransfer.tokenId}/`, undefined, { 'x-api-key': '' });
     const assetJson = JSON.parse(assetResponse.content);
     const assetCollection: AssetCollection = {
@@ -53,6 +48,14 @@ export const App = hot((): React.ReactElement => {
     };
     setAsset(latestAsset);
   }, [tokenTransfer]);
+
+  React.useEffect((): void => {
+    if (!tokenTransfer) {
+      setAsset(null);
+      return;
+    }
+    updateAsset();
+  }, [tokenTransfer, updateAsset]);
 
   return (
     <KibaApp theme={theme}>

@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-constructor, @typescript-eslint/no-unused-vars */
 import { dateToString, RequestData, ResponseData } from '@kibalabs/core';
 
 import * as Resources from './resources';
