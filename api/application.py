@@ -10,6 +10,7 @@ from web3 import Web3
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.health import create_api as create_health_api
 from notd.block_processor import BlockProcessor
+from notd.block_processor import Web3EthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
@@ -26,8 +27,10 @@ sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access
 workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 requester = Requester()
 
-w3 = Web3(Web3.HTTPProvider('https://eth-mainnet.alchemyapi.io/v2/rdYIr6T2nBgJvtKlYQxmVH3bvjW2DLxi'))
-blockProcessor = BlockProcessor(web3Connection=w3)
+w3 = Web3(Web3.HTTPProvider(endpoint_uri=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}'))
+requester = Requester()
+web3EthClient = Web3EthClient(web3Connection=w3)
+blockProcessor = BlockProcessor(web3Connection=w3, ethClient=web3EthClient)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue)
 
 app = FastAPI()
