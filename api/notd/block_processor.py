@@ -2,6 +2,7 @@ import json
 import datetime
 from typing import List
 from typing import Optional
+from typing import Dict
 import logging
 
 import web3
@@ -11,11 +12,13 @@ from web3.types import LogReceipt
 from web3.types import BlockData
 from web3.types import TxData
 from web3.types import TxReceipt
+from web3._utils import method_formatters
 from eth_utils import event_abi_to_log_topic
 from hexbytes import HexBytes
 
 from notd.model import RetrievedTokenTransfer
 from notd.core.requester import Requester
+from notd.core.exceptions import BadRequestException
 
 class EthClientInterface:
 
@@ -58,6 +61,44 @@ class Web3EthClient(EthClientInterface):
             'topics': topics,
         })
         return contractFilter.get_all_entries()
+
+class RestEthClient(EthClientInterface):
+
+    #NOTE(krishan711): find docs at https://eth.wiki/json-rpc/API
+    def __init__(self, url: str, requester: Requester):
+        self.url = url
+        self.requester = requester
+
+    @staticmethod
+    def _hex_to_int(value: str) -> int:
+        return int(value, 16)
+
+    async def _make_request(self, method: str, params: List = []) -> Dict:
+        response = await self.requester.post_json(url=self.url, data={'jsonrpc':'2.0', 'method': method, 'params': params, 'id': 0})
+        jsonResponse = response.json()
+        if jsonResponse.get('error'):
+            raise BadRequestException(message=jsonResponse['error']['message'])
+        return jsonResponse
+
+    async def get_latest_block_number(self) -> int:
+        response = await self._make_request(method='eth_blockNumber')
+        return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_blockNumber'](response['result'])
+
+    async def get_block(self, blockNumber: int) -> BlockData:
+        response = await self._make_request(method='eth_getBlockByNumber', params=[hex(blockNumber), False])
+        return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_getBlockByNumber'](response['result'])
+
+    async def get_transaction(self, transactionHash: str) -> TxData:
+        response = await self._make_request(method='eth_getTransactionByHash', params=[transactionHash])
+        return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_getTransactionByHash'](response['result'])
+
+    async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+        response = await self._make_request(method='eth_getTransactionReceipt', params=[transactionHash])
+        return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_getTransactionReceipt'](response['result'])
+
+    async def get_log_entries(self, startBlockNumber: int, endBlockNumber: int, topics: List[str]) -> List[LogReceipt]:
+        response = await self._make_request(method='eth_getLogs', params=[{'fromBlock': hex(startBlockNumber), 'toBlock': hex(endBlockNumber), 'topics': topics}])
+        return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_getLogs'](response['result'])
 
 class BlockProcessor:
 
