@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { Requester, RestMethod } from '@kibalabs/core';
-import { useFavicon } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Link, useFavicon } from '@kibalabs/core-react';
+import { Alignment, BackgroundView, Box, Direction, EqualGrid, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
@@ -11,6 +11,7 @@ import { TokenTransfer, UiData } from './client/resources';
 import { Asset, AssetCollection } from './model';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
+import { NftCard } from './components/nftCard';
 
 const theme = buildNotdTheme();
 
@@ -64,24 +65,53 @@ export const App = hot((): React.ReactElement => {
       <BackgroundView linearGradient='#200122,#6F0000'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingStart={PaddingSize.Wide3} paddingEnd={PaddingSize.Wide3}>
           <Text variant='header1'>NFT of the day</Text>
+          <Spacing variant={PaddingSize.Wide} />
+          <Text variant='header3'>Today</Text>
           <Spacing variant={PaddingSize.Wide3} />
+          <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 3}} contentAlignment={Alignment.Center} shouldAddGutters={true}>
           {!asset ? (
             <LoadingSpinner variant='light-large' />
           ) : (
+            /*
+             * when 4 card are added then it doesn't look that good
+             * I was not sure what to pass in subtitle and button target 
+             */
             <React.Fragment>
-              <Box width='100px' height='100px'>
-                <Image source={asset.imageUrl || asset.collection.imageUrl} alternativeText={`${asset.name} image`} />
-              </Box>
-              <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-                <IconButton icon={<KibaIcon iconId='ion-globe' />} target={asset.externalUrl || asset.openSeaUrl} />
-                <Text variant='header2'>{`${asset.name || '(unnamed)'}`}</Text>
-              </Stack>
-              <Text>{`Part of ${asset.collection.name}`}</Text>
-              <Text>{`Bought for Ξ${highestPricedTokenTransfer.value / 1000000000000000000.0}`}</Text>
+            <NftCard 
+            label='Random'
+            title={asset.name}
+            subtitle='Sold at 14:00 for 0.04Ξ'
+            collectionImage={asset.collection.imageUrl}
+            collectionTitle={asset.collection.name}
+            imageUrl={asset.imageUrl}
+            secondaryButtonText='View Transaction'
+            secondaryButtonTarget={asset.externalUrl}
+            primaryButtonText='View Token'
+            primaryButtonTarget={asset.collection.name}
+            />
+            <NftCard 
+            label='Highest Priced Trade'
+            title={asset.name}
+            subtitle='Sold at 14:00 for 0.04Ξ'
+            collectionTitle={asset.collection.name}
+            imageUrl={asset.imageUrl}
+            />
+            <NftCard 
+            label='Sponsored'
+            title={asset.name}
+            subtitle='Sold at 14:00 for 0.04Ξ'
+            collectionImage={asset.collection.imageUrl}
+            collectionTitle={asset.collection.name}
+            imageUrl={asset.imageUrl}
+            secondaryButtonText='View Transaction'
+            secondaryButtonTarget={asset.externalUrl}
+            />
             </React.Fragment>
-          )}
+            )}
+          </EqualGrid>
         </Stack>
       </BackgroundView>
+      <Text>Made by KibaLabs</Text>
     </KibaApp>
   );
 });
