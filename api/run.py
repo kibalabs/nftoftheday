@@ -33,7 +33,7 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     manager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue)
 
     await database.connect()
-    await manager.receive_new_blocks()
+    # await manager.receive_new_blocks()
     if blockNumber:
         await manager.process_block(blockNumber=blockNumber)
     elif startBlockNumber and endBlockNumber:
