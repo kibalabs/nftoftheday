@@ -19,23 +19,23 @@ export const buildNotdTheme = (): ITheme => {
         normal: {
           default: {
             text: {
-              color: '$colors.text'
-            }
-          }
+              color: '$colors.text',
+            },
+          },
         },
         visited: {
           default: {
             text: {
-              color: '$colors.textDarker15'
-            }
-          }
-        }
-      }
+              color: '$colors.textDarker15',
+            },
+          },
+        },
+      },
     },
     texts: {
       default: {
         'font-family': "'Post No Bills Jaffna', sans-serif",
-      }
+      },
     },
   });
   return theme;

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, Requester, RestMethod } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, Markdown, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
@@ -24,13 +24,13 @@ export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [asset, setAsset] = React.useState<Asset | null>(null);
-  const [startDate, setStartDate] = React.useState<Date | null>(defaultDate);
+  const [startDate] = React.useState<Date | null>(defaultDate);
 
   React.useEffect((): void => {
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
     });
-  }, []);
+  }, [startDate]);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${highestPricedTokenTransfer.registryAddress}/${highestPricedTokenTransfer.tokenId}/`, undefined, { 'x-api-key': '' });
@@ -63,14 +63,14 @@ export const App = hot((): React.ReactElement => {
 
   const getDateString = (): string => {
     const currentDate = new Date();
-    if (startDate.getDate() == currentDate.getDate()) {
+    if (startDate.getDate() === currentDate.getDate()) {
       return 'Today';
     }
-    if (startDate.getDate() == new Date(currentDate.setDate(currentDate.getDate() - 1)).getDate()) {
+    if (startDate.getDate() === new Date(currentDate.setDate(currentDate.getDate() - 1)).getDate()) {
       return 'Yesterday';
     }
-    return dateToString(startDate, 'dd MMMM yyyy')
-  }
+    return dateToString(startDate, 'dd MMMM yyyy');
+  };
 
   return (
     <KibaApp theme={theme}>
