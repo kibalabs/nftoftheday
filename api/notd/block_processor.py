@@ -31,6 +31,9 @@ class EthClientInterface:
     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
         raise NotImplementedError()
 
+    async def get_log_entries(self, startBlockNumber: int, endBlockNumber: int, topics: List[str]) -> List[LogReceipt]:
+        raise NotImplementedError()
+
 class Web3EthClient(EthClientInterface):
 
     def __init__(self, web3Connection: Web3):
@@ -48,31 +51,18 @@ class Web3EthClient(EthClientInterface):
     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
         return self.w3.eth.getTransactionReceipt(transactionHash)
 
-# class EtherscanEthClient(EthClientInterface):
-
-#     def __init__(self, apiKey: str, requester: Requester):
-#         self.apiKey = apiKey
-#         self.requester = requester
-#         self.apiUrl = 'https://api.etherscan.io/api'
-
-#     async def get_latest_block_number(self) -> int:
-#         return self.w3.eth.block_number
-
-#     async def get_block(self, blockNumber: int) -> BlockData:
-#         response = await self.requester.get(url=self.apiUrl, data={'module': 'block', }, headers={'Authorization': f'Bearer {self.apiKey}'})
-#         jsonResponse = json.loads(response.content)
-#         print('jsonResponse', json.dumps(jsonResponse))
-
-#     async def get_transaction(self, transactionHash: str) -> TxData:
-#         return self.w3.eth.get_transaction(transactionHash)
-
-#     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
-#         return self.w3.eth.getTransactionReceipt(transactionHash)
+    async def get_log_entries(self, startBlockNumber: int, endBlockNumber: int, topics: List[str]) -> List[LogReceipt]:
+        contractFilter = self.w3.eth.filter({
+            'fromBlock': startBlockNumber,
+            'toBlock': endBlockNumber,
+            'topics': topics,
+        })
+        return contractFilter.get_all_entries()
 
 class BlockProcessor:
 
-    def __init__(self, web3Connection: Web3, ethClient: EthClientInterface):
-        self.w3 = web3Connection
+    def __init__(self, ethClient: EthClientInterface):
+        self.w3 = Web3()
         self.ethClient = ethClient
 
         with open('./contracts/CryptoKitties.json') as contractJsonFile:
@@ -101,13 +91,9 @@ class BlockProcessor:
         block = await self.ethClient.get_block(blockNumber)
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
-        contractFilter = self.w3.eth.filter({
-            'fromBlock': blockNumber,
-            'toBlock': blockNumber,
-            'topics': [self.erc721TansferEventSignatureHash],
-        })
+        events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
         tokenTransfers = []
-        for event in contractFilter.get_all_entries():
+        for event in events:
             tokenTransfer = await self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
             if tokenTransfer:
                 tokenTransfers.append(tokenTransfer)
