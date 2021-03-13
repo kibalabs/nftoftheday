@@ -29,7 +29,7 @@ async def main():
     w3 = Web3(Web3.HTTPProvider(endpoint_uri=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}'))
     requester = Requester()
     web3EthClient = Web3EthClient(web3Connection=w3)
-    blockProcessor = BlockProcessor(web3Connection=w3, ethClient=web3EthClient)
+    blockProcessor = BlockProcessor(ethClient=web3EthClient)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
