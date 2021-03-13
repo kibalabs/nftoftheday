@@ -15,7 +15,7 @@ import './fonts.css';
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-const notdClient = new NotdClient(requester, 'http://localhost:5000');
+const notdClient = new NotdClient(requester);
 
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
