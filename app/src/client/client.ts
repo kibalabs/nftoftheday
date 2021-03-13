@@ -8,7 +8,7 @@ export class NotdClient extends ServiceClient {
     super(requester, baseUrl || 'https://notd-api.kibalabs.com');
   }
 
-  public retrieveUiData = async (startDate: Date, endDate: Date): Promise<Resources.UiData> => {
+  public retrieveUiData = async (startDate?: Date, endDate?: Date): Promise<Resources.UiData> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-ui-data';
     const request = new Endpoints.RetrieveUiDataRequest(startDate, endDate);

@@ -14,7 +14,7 @@ import { buildNotdTheme } from './theme';
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-const notdClient = new NotdClient(requester);
+const notdClient = new NotdClient(requester, 'http://localhost:5000');
 
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
@@ -22,8 +22,9 @@ export const App = hot((): React.ReactElement => {
   const [asset, setAsset] = React.useState<Asset | null>(null);
 
   React.useEffect((): void => {
-    notdClient.retrieveUiData(new Date(), new Date()).then((uiData: UiData): void => {
-      // console.log('uiData', uiData);
+    const startDate = new Date(2021, 2, 10);
+    startDate.setHours(0, 0, 0, 0);
+    notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setTokenTransfer(uiData.highestPricedTokenTransfer);
     });
   }, []);
