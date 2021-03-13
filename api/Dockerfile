@@ -18,4 +18,4 @@ RUN pip install -r requirements.txt
 COPY . $WORKDIR
 
 EXPOSE 5000
-CMD ["./start.sh"]
+CMD ["./start-api.sh"]

@@ -16,4 +16,9 @@ def create_api(notdManager: NotdManager) -> KibaRouter():
         uiData = await notdManager.retrieve_ui_data(startDate=startDate, endDate=endDate)
         return RetrieveUiDataResponse(uiData=ApiUiData.from_model(model=uiData))
 
+    @router.post('/receive-new-blocks-deferred', response_model=ReceiveNewBlocksDeferredResponse)
+    async def receive_new_blocks_deferred(rawRequest: Request, response: Response):  # request: ReceiveNewBlocksDeferredRequest
+        uiData = await notdManager.receive_new_blocks_deferred()
+        return ReceiveNewBlocksDeferredResponse()
+
     return router
