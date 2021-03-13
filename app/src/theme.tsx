@@ -3,8 +3,8 @@ import { buildTheme, ITheme } from '@kibalabs/ui-react';
 export const buildNotdTheme = (): ITheme => {
   const theme = buildTheme({
     colors: {
-      brandPrimary: '#E56B6F',
-      brandSecondary: '#6D597A',
+      brandPrimary: '#6F0000',
+      brandSecondary: '#200122',
       background: '#000000',
       text: '#ffffff',
       placeholderText: 'rgba(255, 255, 255, 0.5)',
@@ -16,10 +16,7 @@ export const buildNotdTheme = (): ITheme => {
     },
     texts: {
       default: {
-        'font-family': "'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif",
-      },
-      header2: {
-        'font-weight': 'normal',
+        'font-family': "'Post No Bills Jaffna', sans-serif",
       },
     },
   });
