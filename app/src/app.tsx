@@ -1,8 +1,12 @@
 import React from 'react';
 
-import { Requester, RestMethod } from '@kibalabs/core';
+import { dateToString, Requester, RestMethod } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
+<<<<<<< HEAD
 import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+=======
+import { Alignment, BackgroundView, Box, Direction, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+>>>>>>> main
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
@@ -18,18 +22,20 @@ const theme = buildNotdTheme();
 const requester = new Requester();
 const notdClient = new NotdClient(requester);
 
+const defaultDate = new Date(2021, 2, 13);
+defaultDate.setHours(0, 0, 0, 0);
+
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [asset, setAsset] = React.useState<Asset | null>(null);
+  const [startDate] = React.useState<Date | null>(defaultDate);
 
   React.useEffect((): void => {
-    const startDate = new Date(2021, 2, 10);
-    startDate.setHours(0, 0, 0, 0);
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
     });
-  }, []);
+  }, [startDate]);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${highestPricedTokenTransfer.registryAddress}/${highestPricedTokenTransfer.tokenId}/`, undefined, { 'x-api-key': '' });
@@ -60,14 +66,28 @@ export const App = hot((): React.ReactElement => {
     updateAsset();
   }, [highestPricedTokenTransfer, updateAsset]);
 
+  const getDateString = (): string => {
+    const currentDate = new Date();
+    if (startDate.getDate() === currentDate.getDate()) {
+      return 'Today';
+    }
+    if (startDate.getDate() === new Date(currentDate.setDate(currentDate.getDate() - 1)).getDate()) {
+      return 'Yesterday';
+    }
+    return dateToString(startDate, 'dd MMMM yyyy');
+  };
+
   return (
     <KibaApp theme={theme}>
       <BackgroundView linearGradient='#200122,#6F0000'>
-        <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingStart={PaddingSize.Wide3} paddingEnd={PaddingSize.Wide3}>
+        <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
+        <Spacing variant={PaddingSize.Wide3} />
           <Text variant='header1'>NFT of the day</Text>
-          <Spacing variant={PaddingSize.Wide} />
-          <Text variant='header3'>Today</Text>
-          <Spacing variant={PaddingSize.Wide3} />
+          <Spacing variant={PaddingSize.Default} />
+          <Text variant='header3'>{getDateString()}</Text>
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
+            <Spacing variant={PaddingSize.Wide3} />
+          </Stack.Item>
           <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
             {!asset ? (
               <LoadingSpinner variant='light-large' />
@@ -109,11 +129,11 @@ export const App = hot((): React.ReactElement => {
               </React.Fragment>
             )}
           </EqualGrid>
-        </Stack>
-        <Stack.Item growthFactor={1} shrinkFactor={1}>
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>
         <MarkdownText source='Made by [Kiba Labs](https://www.kibalabs.com)' />
+        </Stack>
       </BackgroundView>
     </KibaApp>
   );

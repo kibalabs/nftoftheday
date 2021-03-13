@@ -56,6 +56,24 @@ export const buildNotdTheme = (): ITheme => {
         },
       },
     },
+    links: {
+      default: {
+        normal: {
+          default: {
+            text: {
+              color: '$colors.text',
+            },
+          },
+        },
+        visited: {
+          default: {
+            text: {
+              color: '$colors.textDarker15',
+            },
+          },
+        },
+      },
+    },
     texts: {
       default: {
         'font-family': "'Post No Bills Jaffna', sans-serif",
