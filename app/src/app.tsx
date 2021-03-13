@@ -10,6 +10,7 @@ import { NotdClient } from './client/client';
 import { TokenTransfer, UiData } from './client/resources';
 import { Asset, AssetCollection } from './model';
 import { buildNotdTheme } from './theme';
+import './fonts.css';
 
 const theme = buildNotdTheme();
 
@@ -18,19 +19,19 @@ const notdClient = new NotdClient(requester, 'http://localhost:5000');
 
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
-  const [tokenTransfer, setTokenTransfer] = React.useState<TokenTransfer | null>(null);
+  const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [asset, setAsset] = React.useState<Asset | null>(null);
 
   React.useEffect((): void => {
     const startDate = new Date(2021, 2, 10);
     startDate.setHours(0, 0, 0, 0);
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
-      setTokenTransfer(uiData.highestPricedTokenTransfer);
+      setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
     });
   }, []);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${tokenTransfer.registryAddress}/${tokenTransfer.tokenId}/`, undefined, { 'x-api-key': '' });
+    const assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${highestPricedTokenTransfer.registryAddress}/${highestPricedTokenTransfer.tokenId}/`, undefined, { 'x-api-key': '' });
     const assetJson = JSON.parse(assetResponse.content);
     const assetCollection: AssetCollection = {
       name: assetJson.collection.name,
@@ -48,19 +49,19 @@ export const App = hot((): React.ReactElement => {
       collection: assetCollection,
     };
     setAsset(latestAsset);
-  }, [tokenTransfer]);
+  }, [highestPricedTokenTransfer]);
 
   React.useEffect((): void => {
-    if (!tokenTransfer) {
+    if (!highestPricedTokenTransfer) {
       setAsset(null);
       return;
     }
     updateAsset();
-  }, [tokenTransfer, updateAsset]);
+  }, [highestPricedTokenTransfer, updateAsset]);
 
   return (
     <KibaApp theme={theme}>
-      <BackgroundView linearGradient='#E56B6F, #6D597A'>
+      <BackgroundView linearGradient='#200122,#6F0000'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingStart={PaddingSize.Wide3} paddingEnd={PaddingSize.Wide3}>
           <Text variant='header1'>NFT of the day</Text>
           <Spacing variant={PaddingSize.Wide3} />
@@ -76,7 +77,7 @@ export const App = hot((): React.ReactElement => {
                 <Text variant='header2'>{`${asset.name || '(unnamed)'}`}</Text>
               </Stack>
               <Text>{`Part of ${asset.collection.name}`}</Text>
-              <Text>{`Bought for Ξ${tokenTransfer.value / 1000000000000000000.0}`}</Text>
+              <Text>{`Bought for Ξ${highestPricedTokenTransfer.value / 1000000000000000000.0}`}</Text>
             </React.Fragment>
           )}
         </Stack>
