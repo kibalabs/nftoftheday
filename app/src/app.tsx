@@ -1,17 +1,17 @@
 import React from 'react';
 
 import { Requester, RestMethod } from '@kibalabs/core';
-import { Link, useFavicon } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, Direction, EqualGrid, IconButton, Image, KibaApp, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { useFavicon } from '@kibalabs/core-react';
+import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, Link, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
 import { NotdClient } from './client/client';
 import { TokenTransfer, UiData } from './client/resources';
+import { NftCard } from './components/nftCard';
 import { Asset, AssetCollection } from './model';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
-import { NftCard } from './components/nftCard';
 
 const theme = buildNotdTheme();
 
@@ -68,50 +68,53 @@ export const App = hot((): React.ReactElement => {
           <Spacing variant={PaddingSize.Wide} />
           <Text variant='header3'>Today</Text>
           <Spacing variant={PaddingSize.Wide3} />
-          <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 3}} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-          {!asset ? (
-            <LoadingSpinner variant='light-large' />
-          ) : (
+          <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+            {!asset ? (
+              <LoadingSpinner variant='light-large' />
+            ) : (
             /*
              * when 4 card are added then it doesn't look that good
-             * I was not sure what to pass in subtitle and button target 
+             * I was not sure what to pass in subtitle and button target
              */
-            <React.Fragment>
-            <NftCard 
-            label='Random'
-            title={asset.name}
-            subtitle='Sold at 14:00 for 0.04Ξ'
-            collectionImage={asset.collection.imageUrl}
-            collectionTitle={asset.collection.name}
-            imageUrl={asset.imageUrl}
-            secondaryButtonText='View Transaction'
-            secondaryButtonTarget={asset.externalUrl}
-            primaryButtonText='View Token'
-            primaryButtonTarget={asset.collection.name}
-            />
-            <NftCard 
-            label='Highest Priced Trade'
-            title={asset.name}
-            subtitle='Sold at 14:00 for 0.04Ξ'
-            collectionTitle={asset.collection.name}
-            imageUrl={asset.imageUrl}
-            />
-            <NftCard 
-            label='Sponsored'
-            title={asset.name}
-            subtitle='Sold at 14:00 for 0.04Ξ'
-            collectionImage={asset.collection.imageUrl}
-            collectionTitle={asset.collection.name}
-            imageUrl={asset.imageUrl}
-            secondaryButtonText='View Transaction'
-            secondaryButtonTarget={asset.externalUrl}
-            />
-            </React.Fragment>
+              <React.Fragment>
+                <NftCard
+                  label='Random'
+                  title={asset.name}
+                  subtitle='Sold at 14:00 for 0.04Ξ'
+                  collectionImage={asset.collection.imageUrl}
+                  collectionTitle={asset.collection.name}
+                  imageUrl={asset.imageUrl}
+                  secondaryButtonText='View Transaction'
+                  secondaryButtonTarget={asset.externalUrl}
+                  primaryButtonText='View Token'
+                  primaryButtonTarget={asset.collection.name}
+                />
+                <NftCard
+                  label='Highest Priced Trade'
+                  title={asset.name}
+                  subtitle='Sold at 14:00 for 0.04Ξ'
+                  collectionTitle={asset.collection.name}
+                  imageUrl={asset.imageUrl}
+                />
+                <NftCard
+                  label='Sponsored'
+                  title={asset.name}
+                  subtitle='Sold at 14:00 for 0.04Ξ'
+                  collectionImage={asset.collection.imageUrl}
+                  collectionTitle={asset.collection.name}
+                  imageUrl={asset.imageUrl}
+                  secondaryButtonText='View Transaction'
+                  secondaryButtonTarget={asset.externalUrl}
+                />
+              </React.Fragment>
             )}
           </EqualGrid>
         </Stack>
       </BackgroundView>
-      <Text>Made by KibaLabs</Text>
+      <Text>
+Made by
+        <Link target='//#endregion' text='KibaLabs' />
+      </Text>
     </KibaApp>
   );
 });

@@ -45,45 +45,45 @@ export const buildNotdTheme = (): ITheme => {
               'border-color': 'rgba(255,255,255,0.5)',
             },
             text: {
-              color: '$colors.textOnBrand'
-            }
+              color: '$colors.textOnBrand',
+            },
           },
           hover: {
             background: {
               'background-color': 'rgba(255,255,255,0.25)',
-            }
-          }
+            },
+          },
         },
-      }
+      },
     },
     texts: {
-    default: {
-      'font-family': "'Post No Bills Jaffna', sans-serif",
+      default: {
+        'font-family': "'Post No Bills Jaffna', sans-serif",
+      },
+      header3: {
+        'font-size': '1.5rem',
+      },
+      subtitle: {
+        'font-size': '0.75rem',
+        'font-weight': '600',
+      },
+      small: {
+        'font-size': '0.85rem',
+      },
     },
-    header3: {
-      "font-size": '1.5rem'
-    },
-    subtitle: {
-      "font-size": '0.75rem',
-      "font-weight": '600'
-    },
-    small: {
-      "font-size": '0.85rem'
-    }
-  },
     boxes: {
-    card: {
-      padding: 'none',
-      "background-color": 'rgba(255, 255, 255, 0.15)',
-      "border-width": '1px',
-      "border-color": 'rgba(46, 180, 255, 0.5)',
-      "border-style": 'solid'
+      card: {
+        padding: 'none',
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'border-width': '1px',
+        'border-color': 'rgba(46, 180, 255, 0.5)',
+        'border-style': 'solid',
+      },
+      labelBox: {
+        'border-radius': '0.5rem 0 0 0',
+        padding: '0.5rem 0 0 0.75rem',
+      },
     },
-    labelBox: {
-      "border-radius": '0.5rem 0 0 0',
-      padding: '0.5rem 0 0 0.75rem'
-    }
-  }
   });
-return theme;
+  return theme;
 };
