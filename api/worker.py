@@ -7,7 +7,7 @@ from databases import Database
 from web3 import Web3
 
 from notd.block_processor import BlockProcessor
-from notd.block_processor import Web3EthClient
+from notd.block_processor import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
@@ -28,8 +28,8 @@ async def main():
 
     w3 = Web3(Web3.HTTPProvider(endpoint_uri=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}'))
     requester = Requester()
-    web3EthClient = Web3EthClient(web3Connection=w3)
-    blockProcessor = BlockProcessor(ethClient=web3EthClient)
+    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
+    blockProcessor = BlockProcessor(ethClient=ethClient)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
