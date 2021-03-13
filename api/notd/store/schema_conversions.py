@@ -7,7 +7,7 @@ from notd.store.schema import TokenTransfersTable
 def token_transfer_from_row(row: Mapping) -> TokenTransfer:
     # NOTE(krishan711) these should be of the form row.id but https://github.com/encode/databases/issues/101
     return TokenTransfer(
-        tokenTransferId=row[TokenTransfersTable.c.id],
+        tokenTransferId=row[TokenTransfersTable.c.tokenTransferId],
         transactionHash=row[TokenTransfersTable.c.transactionHash],
         registryAddress=row[TokenTransfersTable.c.registryAddress],
         fromAddress=row[TokenTransfersTable.c.fromAddress],

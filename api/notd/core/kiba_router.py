@@ -11,7 +11,7 @@ from fastapi.responses import Response
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 
-from everypage.core.exceptions import *
+from notd.core.exceptions import *
 
 class KibaRouter(APIRouter):
 

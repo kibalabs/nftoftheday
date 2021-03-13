@@ -1,13 +1,19 @@
 import asyncio
+import datetime
 import logging
-from typing import List
+from typing import Sequence
 
 from notd.block_processor import BlockProcessor
 from notd.store.saver import Saver
-from notd.store.retriever import Direction
-from notd.store.retriever import Order
-from notd.store.retriever import Retriever
+from notd.store.retriever import NotdRetriever
+from notd.core.store.retriever import Direction
+from notd.core.store.retriever import Order
+from notd.core.store.retriever import RandomOrder
+from notd.core.store.retriever import DateFieldFilter
+from notd.core.store.retriever import StringFieldFilter
 from notd.store.schema import TokenTransfersTable
+from notd.model import UiData
+from notd.model import Token
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.core.exceptions import DuplicateValueException
@@ -15,11 +21,23 @@ from notd.core.sqs_message_queue import SqsMessageQueue
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
+
+    async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
+        highestPricedTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)], orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)], limit=1)
+        mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
+        mostTradedTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress), StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId)], orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)])
+        randomTokenTransfers = await self.retriever.list_token_transfers(orders=[RandomOrder()], limit=1)
+        return UiData(
+            highestPricedTokenTransfer=highestPricedTokenTransfers[0],
+            mostTradedTokenTransfers=mostTradedTokenTransfers,
+            randomTokenTransfer=randomTokenTransfers[0],
+            sponsoredToken=Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345')
+        )
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
@@ -38,7 +56,7 @@ class NotdManager:
         blockNumbers = list(range(startBlockNumber, endBlockNumber))
         await self.process_blocks(blockNumbers=blockNumbers)
 
-    async def process_blocks(self, blockNumbers: List[int]) -> None:
+    async def process_blocks(self, blockNumbers: Sequence[int]) -> None:
         await asyncio.gather(*[self.process_block(blockNumber=blockNumber) for blockNumber in blockNumbers])
 
     async def process_block(self, blockNumber: int) -> None:

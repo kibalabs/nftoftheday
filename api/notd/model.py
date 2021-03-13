@@ -1,5 +1,6 @@
 import datetime
 from typing import Dict
+from typing import List
 
 from pydantic import dataclasses
 
@@ -50,3 +51,15 @@ class RetrievedTokenTransfer:
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
+
+@dataclasses.dataclass
+class Token:
+    registryAddress: str
+    tokenId: str
+
+@dataclasses.dataclass
+class UiData:
+    highestPricedTokenTransfer: TokenTransfer
+    mostTradedTokenTransfers: List[TokenTransfer]
+    randomTokenTransfer: TokenTransfer
+    sponsoredToken: Token
