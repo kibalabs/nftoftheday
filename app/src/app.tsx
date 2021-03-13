@@ -23,7 +23,7 @@ export const App = hot((): React.ReactElement => {
 
   React.useEffect((): void => {
     const startDate = new Date(2021, 2, 10);
-    startDate.setHours(0, 0, 0, 0)
+    startDate.setHours(0, 0, 0, 0);
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setTokenTransfer(uiData.highestPricedTokenTransfer);
     });
