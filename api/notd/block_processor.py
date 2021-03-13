@@ -8,15 +8,73 @@ import web3
 from web3 import Web3
 from web3.contract import Contract
 from web3.types import LogReceipt
+from web3.types import BlockData
+from web3.types import TxData
+from web3.types import TxReceipt
 from eth_utils import event_abi_to_log_topic
 from hexbytes import HexBytes
 
 from notd.model import RetrievedTokenTransfer
+from notd.core.requester import Requester
 
-class BlockProcessor:
+class EthClientInterface:
+
+    async def get_latest_block_number(self) -> int:
+        raise NotImplementedError()
+
+    async def get_block(self, blockNumber: int) -> BlockData:
+        raise NotImplementedError()
+
+    async def get_transaction(self, transactionHash: str) -> TxData:
+        raise NotImplementedError()
+
+    async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+        raise NotImplementedError()
+
+class Web3EthClient(EthClientInterface):
 
     def __init__(self, web3Connection: Web3):
         self.w3 = web3Connection
+
+    async def get_latest_block_number(self) -> int:
+        return self.w3.eth.block_number
+
+    async def get_block(self, blockNumber: int) -> BlockData:
+        return self.w3.eth.get_block(blockNumber)
+
+    async def get_transaction(self, transactionHash: str) -> TxData:
+        return self.w3.eth.get_transaction(transactionHash)
+
+    async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+        return self.w3.eth.getTransactionReceipt(transactionHash)
+
+# class EtherscanEthClient(EthClientInterface):
+
+#     def __init__(self, apiKey: str, requester: Requester):
+#         self.apiKey = apiKey
+#         self.requester = requester
+#         self.apiUrl = 'https://api.etherscan.io/api'
+
+#     async def get_latest_block_number(self) -> int:
+#         return self.w3.eth.block_number
+
+#     async def get_block(self, blockNumber: int) -> BlockData:
+#         response = await self.requester.get(url=self.apiUrl, data={'module': 'block', }, headers={'Authorization': f'Bearer {self.apiKey}'})
+#         jsonResponse = json.loads(response.content)
+#         print('jsonResponse', json.dumps(jsonResponse))
+
+#     async def get_transaction(self, transactionHash: str) -> TxData:
+#         return self.w3.eth.get_transaction(transactionHash)
+
+#     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+#         return self.w3.eth.getTransactionReceipt(transactionHash)
+
+class BlockProcessor:
+
+    def __init__(self, web3Connection: Web3, ethClient: EthClientInterface):
+        self.w3 = web3Connection
+        self.ethClient = ethClient
+
         with open('./contracts/CryptoKitties.json') as contractJsonFile:
             contractJson = json.load(contractJsonFile)
         self.cryptoKittiesContract = self.w3.eth.contract(address='0x06012c8cf97BEaD5deAe237070F9587f8E7A266d', abi=contractJson['abi'])
@@ -37,10 +95,10 @@ class BlockProcessor:
         self.erc721TansferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
 
     async def get_latest_block_number(self) -> int:
-        return self.w3.eth.block_number
+        return await self.ethClient.get_latest_block_number()
 
     async def get_transfers_in_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
-        block = self.w3.eth.getBlock(blockNumber)
+        block = await self.ethClient.get_block(blockNumber)
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         contractFilter = self.w3.eth.filter({
@@ -65,7 +123,7 @@ class BlockProcessor:
             event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['tokenId'])]
         if registryAddress == self.cryptoPunksContract.address:
             # NOTE(krishan711): for CryptoPunks there is a separate PunkBought (and PunkTransfer if its free) event with the punkId
-            ethTransactionReceipt = self.w3.eth.getTransactionReceipt(transactionHash)
+            ethTransactionReceipt = await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
             decodedEventData = self.cryptoPunksBoughtEvent.processReceipt(ethTransactionReceipt)
             if len(decodedEventData) == 1:
                 event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['fromAddress']), HexBytes(decodedEventData[0]['args']['toAddress']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
@@ -79,11 +137,11 @@ class BlockProcessor:
         fromAddress = event['topics'][1].hex()
         toAddress = event['topics'][2].hex()
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
-        ethTransaction = self.w3.eth.get_transaction(transactionHash)
+        ethTransaction = await self.ethClient.get_transaction(transactionHash=transactionHash)
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        ethTransactionReceipt = self.w3.eth.getTransactionReceipt(transactionHash)
+        ethTransactionReceipt = await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
         gasUsed = ethTransactionReceipt['gasUsed']
         transaction = RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
         return transaction
