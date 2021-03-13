@@ -1,0 +1,18 @@
+import { Requester, RestMethod, ServiceClient } from '@kibalabs/core';
+
+import * as Endpoints from './endpoints';
+import * as Resources from './resources';
+
+export class NotdClient extends ServiceClient {
+  public constructor(requester: Requester, baseUrl?: string) {
+    super(requester, baseUrl || 'https://notd-api.kibalabs.com');
+  }
+
+  public retrieveUiData = async (startDate: Date, endDate: Date): Promise<Resources.UiData> => {
+    const method = RestMethod.POST;
+    const path = 'v1/retrieve-ui-data';
+    const request = new Endpoints.RetrieveUiDataRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUiDataResponse);
+    return response.uiData;
+  }
+}
