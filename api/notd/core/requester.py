@@ -3,6 +3,7 @@ import json
 from typing import Optional
 from typing import Dict
 import urllib.parse as urlparse
+import logging
 
 import httpx
 
@@ -23,29 +24,34 @@ class Requester:
     def __init__(self, headers: Optional[Dict[str, str]] = None):
         self.headers = headers or {}
 
-    async def get(self, url: str, data: Optional[Dict] = None, timeout: Optional[int] = 10, headers: Optional[httpx.Headers] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
-        if data:
-            urlParts = urlparse.urlparse(url)
-            currentQuery = urlparse.parse_qs(urlParts.query)
-            queryString = urlparse.urlencode(dict_util.merge_dicts(currentQuery, data), doseq=True)
-            url = urlparse.urlunsplit(components=(urlParts.scheme, urlParts.netloc, urlParts.path, queryString, urlParts.fragment))
-        return await self.make_request(method='GET', url=url, data=None, timeout=timeout, headers=headers, outputFilePath=outputFilePath)
+    async def get(self, url: str, dataDict: Optional[Dict] = None, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[httpx.Headers] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
+        return await self.make_request(method='GET', url=url, dataDict=dataDict, data=data, timeout=timeout, headers=headers, outputFilePath=outputFilePath)
 
-    async def post(self, url: str, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[httpx.Headers] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
-        return await self.make_request(method='POST', url=url, data=data, timeout=timeout, headers=headers, outputFilePath=outputFilePath)
+    async def post(self, url: str, dataDict: Optional[Dict] = None, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[httpx.Headers] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
+        return await self.make_request(method='POST', url=url, dataDict=dataDict, data=data, timeout=timeout, headers=headers, outputFilePath=outputFilePath)
 
-    async def post_json(self, url: str, data: Dict, timeout: Optional[int] = 10, headers: Optional[httpx.Headers] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
+    async def post_json(self, url: str, dataDict: Optional[Dict] = None, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[httpx.Headers] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
         headers = headers or httpx.Headers()
         headers.update({'Content-Type': 'application/json'})
-        return await self.make_request(method='POST', url=url, data=json.dumps(data).encode(), timeout=timeout, headers=headers, outputFilePath=outputFilePath)
+        return await self.make_request(method='POST', url=url, dataDict=dataDict, data=data, timeout=timeout, headers=headers, outputFilePath=outputFilePath)
 
-    async def make_request(self, method: str, url: str, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[Dict[str, str]] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
+    async def make_request(self, method: str, url: str, dataDict: Optional[Dict] = None, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[Dict[str, str]] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
+        if dataDict is not None:
+            if data is not None:
+                logging.error('Error: dataDict and data should never both be provided to make_request. data will be overwritten by dataDict.')
+            if method == 'GET':
+                urlParts = urlparse.urlparse(url)
+                currentQuery = urlparse.parse_qs(urlParts.query)
+                queryString = urlparse.urlencode(dict_util.merge_dicts(currentQuery, data), doseq=True)
+                url = urlparse.urlunsplit(components=(urlParts.scheme, urlParts.netloc, urlParts.path, queryString, urlParts.fragment))
+            if method == 'POST':
+                data = json.dumps(dataDict).encode()
         request = httpx.Request(method=method, url=url, data=data, headers={**self.headers, **(headers or {})})
         async with httpx.AsyncClient(timeout=timeout) as client:
             httpxResponse = await client.send(request=request, timeout=timeout)
         if 400 <= httpxResponse.status_code < 600:
             raise ResponseException(message=httpxResponse.text, statusCode=httpxResponse.status_code)
-        # TODO(krish): this would be more efficient if streamed
+        # TODO(krishan711): this would be more efficient if streamed
         if outputFilePath is not None:
             if os.path.dirname(outputFilePath):
                 os.makedirs(os.path.dirname(outputFilePath), exist_ok=True)

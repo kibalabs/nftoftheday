@@ -1,3 +1,4 @@
+import asyncio
 import json
 import datetime
 from typing import List
@@ -74,7 +75,7 @@ class RestEthClient(EthClientInterface):
         return int(value, 16)
 
     async def _make_request(self, method: str, params: List = []) -> Dict:
-        response = await self.requester.post_json(url=self.url, data={'jsonrpc':'2.0', 'method': method, 'params': params, 'id': 0})
+        response = await self.requester.post_json(url=self.url, dataDict={'jsonrpc':'2.0', 'method': method, 'params': params, 'id': 0})
         jsonResponse = response.json()
         if jsonResponse.get('error'):
             raise BadRequestException(message=jsonResponse['error']['message'])
@@ -133,12 +134,8 @@ class BlockProcessor:
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
-        tokenTransfers = []
-        for event in events:
-            tokenTransfer = await self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
-            if tokenTransfer:
-                tokenTransfers.append(tokenTransfer)
-        return tokenTransfers
+        tokenTransfers = await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in events])
+        return [tokenTransfer for tokenTransfer in tokenTransfers if tokenTransfer]
 
     async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()

@@ -42,7 +42,10 @@ export const buildNotdTheme = (): ITheme => {
         normal: {
           default: {
             background: {
-              'border-color': 'rgba(255,255,255,0.5)',
+              'border-color': 'rgba(255, 255, 255, 0.5)',
+              // 'background-color': 'rgba(255, 255, 255, 0.05)',
+              // 'border-color': 'rgba(255, 255, 255, 0.1)',
+              // 'border-width': '1px',
             },
             text: {
               color: '$colors.textOnBrand',
@@ -50,7 +53,17 @@ export const buildNotdTheme = (): ITheme => {
           },
           hover: {
             background: {
-              'background-color': 'rgba(255,255,255,0.25)',
+              'background-color': 'rgba(255,255,255,0.35)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.45)',
+            },
+          },
+          focus: {
+            background: {
+              'border-color': 'rgba(255, 255, 255, 0.75)',
             },
           },
         },
@@ -80,6 +93,7 @@ export const buildNotdTheme = (): ITheme => {
       },
       header3: {
         'font-size': '1.5rem',
+        'font-weight': '600',
       },
       subtitle: {
         'font-size': '0.75rem',
@@ -90,6 +104,11 @@ export const buildNotdTheme = (): ITheme => {
       },
     },
     boxes: {
+      // card: {
+      //   'background-color': 'rgba(255, 255, 255, 0.15)',
+      //   'border-color': 'rgba(255, 255, 255, 0.5)',
+      //   margin: '0',
+      // },
       card: {
         padding: 'none',
         'background-color': 'rgba(255, 255, 255, 0.15)',
@@ -102,6 +121,37 @@ export const buildNotdTheme = (): ITheme => {
         padding: '0.5rem 0 0 0.75rem',
       },
     },
+    // buttons: {
+    //   primary: {
+    //     normal: {
+    //       default: {
+    //         background: {
+    //           'background-color': 'rgba(255, 255, 255, 0.25)',
+    //           'border-color': 'rgba(255, 255, 255, 0.5)',
+    //           'border-width': '1px',
+    //         },
+    //         text: {
+    //           color: 'white',
+    //         },
+    //       },
+    //       hover: {
+    //         background: {
+    //           'background-color': 'rgba(255, 255, 255, 0.35)',
+    //         },
+    //       },
+    //       press: {
+    //         background: {
+    //           'background-color': 'rgba(255, 255, 255, 0.45)',
+    //         },
+    //       },
+    //       focus: {
+    //         background: {
+    //           'border-color': 'rgba(255, 255, 255, 0.75)',
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
   });
   return theme;
 };

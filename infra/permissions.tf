@@ -54,3 +54,18 @@ resource "aws_iam_policy" "write_to_notd_queue" {
     }]
   })
 }
+
+resource "aws_iam_policy" "access_ethereum_node" {
+  name = "access-ethereum-node"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+        Effect = "Allow"
+        Action = [
+            "managedblockchain:GET",
+            "managedblockchain:POST"
+        ]
+        Resource = "arn:aws:managedblockchain:eu-west-1:097520841056:/"
+    }]
+  })
+}

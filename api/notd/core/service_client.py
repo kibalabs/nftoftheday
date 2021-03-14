@@ -15,8 +15,5 @@ class ServiceClient:
 
     async def make_request(self, method: str, path: str, responseClass: Optional[Type[BaseModel]] = None, request: Optional[BaseModel] = None) -> BaseModel:
         url = os.path.join(self.baseUrl, path)
-        if method == 'GET':
-            # TODO(krish): convert to query params
-            data = None
-        response = await self.requester.make_request(method=method, url=url, data=json.dumps(request.dict()).encode() if request else None)
+        response = await self.requester.make_request(method=method, url=url, dataDict=request.dict() if request else None)
         return responseClass.parse_obj(json.loads(response.content)) if responseClass else None
