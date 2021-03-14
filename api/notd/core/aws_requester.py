@@ -41,7 +41,8 @@ class AwsRequester(Requester):
     async def make_request(self, method: str, url: str, dataDict: Optional[Dict] = None, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[Dict[str, str]] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
         canonicalQueryString = ''
         if data is None and dataDict is not None:
-            # TODO(krishan711): deal with get requests (see base requester)
+            if method == 'GET':
+                raise Exception('GET requests with parameters are not supported on AwsRequester yet.')
             if method == 'POST':
                 data = json.dumps(dataDict).encode()
         parsedUrl = urlparse.urlparse(url=url)
