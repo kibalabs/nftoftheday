@@ -16,9 +16,9 @@ import './fonts.css';
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-const notdClient = new NotdClient(requester);
+const notdClient = new NotdClient(requester, 'http://localhost:5000');
 
-const defaultDate = new Date(2021, 2, 13);
+const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
 export const App = hot((): React.ReactElement => {
@@ -56,18 +56,19 @@ export const App = hot((): React.ReactElement => {
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>
-          {!highestPricedTokenTransfer ? (
+          {/* {!highestPricedTokenTransfer ? (
             <LoadingSpinner variant='light-large' />
-          ) : (
+          ) : ( */}
             <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
               <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
               <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
             </EqualGrid>
-          )}
+          {/* )} */}
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>
           <MarkdownText source='Made by [Kiba Labs](https://www.kibalabs.com)' />
+          <Spacing variant={PaddingSize.Narrow} />
         </Stack>
       </BackgroundView>
     </KibaApp>
