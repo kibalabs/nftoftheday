@@ -5,8 +5,8 @@ import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { retrieveAsset } from '../assetUtil';
 import { Token } from '../client/resources';
-import { NftCard } from './nftCard';
 import { Asset } from '../model';
+import { NftCard } from './nftCard';
 
 export type SponsoredTokenCardProps = {
   token: Token | null;

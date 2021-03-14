@@ -34,7 +34,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Stack.Item gutterAfter={PaddingSize.Wide2}>
             <Box width='150px' height='150px'>
               <Stack direction={Direction.Vertical} contentAlignment={Alignment.Center} isFullHeight={true}>
-                <Media source={props.imageUrl} alternativeText={`${props.title} image`} fitType='contain'/>
+                <Media source={props.imageUrl} alternativeText={`${props.title} image`} fitType='contain' />
               </Stack>
             </Box>
           </Stack.Item>

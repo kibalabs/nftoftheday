@@ -3,18 +3,18 @@ import React from 'react';
 import { dateToString, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Helmet } from 'react-helmet';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
-import { Helmet } from 'react-helmet';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
 import { HighestPricedTokenTransferCard } from './components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from './components/mostTradedTokenTransferCard';
+import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
+import { SponsoredTokenCard } from './components/sponsoredTokenCard';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
-import { SponsoredTokenCard } from './components/sponsoredTokenCard';
-import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
 
 const theme = buildNotdTheme();
 
@@ -63,7 +63,10 @@ export const App = hot((): React.ReactElement => {
   return (
     <KibaApp theme={theme}>
       <Helmet>
-        <title>NFT Of The Day {getTitleDateString()}</title>
+        <title>
+NFT Of The Day
+          {getTitleDateString()}
+        </title>
       </Helmet>
       <BackgroundView linearGradient='#200122,#6F0000'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
