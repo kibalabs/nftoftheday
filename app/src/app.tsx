@@ -63,7 +63,7 @@ export const App = hot((): React.ReactElement => {
   return (
     <KibaApp theme={theme}>
       <Helmet>
-        <title>NFT Of The Day ${getTitleDateString()}</title>
+        <title>NFT Of The Day {getTitleDateString()}</title>
       </Helmet>
       <BackgroundView linearGradient='#200122,#6F0000'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
