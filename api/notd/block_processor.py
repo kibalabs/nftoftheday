@@ -75,7 +75,7 @@ class RestEthClient(EthClientInterface):
         return int(value, 16)
 
     async def _make_request(self, method: str, params: List = []) -> Dict:
-        response = await self.requester.post_json(url=self.url, data={'jsonrpc':'2.0', 'method': method, 'params': params, 'id': 0})
+        response = await self.requester.post_json(url=self.url, dataDict={'jsonrpc':'2.0', 'method': method, 'params': params, 'id': 0})
         jsonResponse = response.json()
         if jsonResponse.get('error'):
             raise BadRequestException(message=jsonResponse['error']['message'])
