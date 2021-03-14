@@ -22,11 +22,16 @@ export const buildNotdTheme = (): ITheme => {
               color: '$colors.text',
             },
           },
+          hover: {
+            text: {
+              color: '$colors.textDark10',
+            },
+          },
         },
         visited: {
           default: {
             text: {
-              color: '$colors.textDarker15',
+              color: '$colors.textDark15',
             },
           },
         },
