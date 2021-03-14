@@ -46,8 +46,9 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
 
     await database.connect()
 
+    isReverse = batchSize < 0
     currentBlockNumber = startBlockNumber
-    while True:
+    while (isReverse and currentBlockNumber > endBlockNumber) or (not isReverse and currentBlockNumber < endBlockNumber):
         nextBlockNumber = currentBlockNumber + batchSize
         start = min(currentBlockNumber, nextBlockNumber)
         end = max(currentBlockNumber, nextBlockNumber)
