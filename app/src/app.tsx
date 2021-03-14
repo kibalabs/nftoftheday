@@ -76,9 +76,9 @@ export const App = hot((): React.ReactElement => {
           </Stack.Item>
           <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
             <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-            <SponsoredTokenCard token={sponsoredToken} />
-            <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
             <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
+            <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
+            <SponsoredTokenCard token={sponsoredToken} />
           </EqualGrid>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
