@@ -56,14 +56,10 @@ export const App = hot((): React.ReactElement => {
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>
-          {/* {!highestPricedTokenTransfer ? (
-            <LoadingSpinner variant='light-large' />
-          ) : ( */}
-          <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+          <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
             <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
             <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
           </EqualGrid>
-          {/* )} */}
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>

@@ -21,6 +21,7 @@ interface NftCardProps {
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
+  console.log('props.collectionUrl', props.collectionUrl)
   return (
     <Box variant='card'>
       <Stack direction={Direction.Vertical}>

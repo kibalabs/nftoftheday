@@ -9,7 +9,7 @@ export const retrieveAsset = async (requester: Requester, registryAddress: strin
     name: assetJson.collection.name,
     imageUrl: assetJson.collection.large_image_url ?? assetJson.collection.image_url,
     openSeaUrl: assetJson.collection.permalink,
-    externalUrl: assetJson.collection.external_link,
+    externalUrl: assetJson.collection.external_url,
     description: assetJson.collection.description,
   };
   const asset: Asset = {

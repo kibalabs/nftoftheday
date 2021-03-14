@@ -14,67 +14,6 @@ export const buildNotdTheme = (): ITheme => {
         url: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700,800,900&display=swap',
       },
     },
-    buttons: {
-      primary: {
-        normal: {
-          default: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.25)',
-              'border-color': 'rgba(255, 255, 255, 0.3)',
-              'border-width': '1px',
-            },
-            text: {
-              color: '$colors.textOnBrand',
-            },
-          },
-          hover: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.35)',
-            },
-          },
-          press: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.55)',
-            },
-          },
-          focus: {
-            background: {
-              'border-color': 'rgba(255, 255, 255, 0.75)',
-            },
-          },
-        },
-      },
-      secondary: {
-        normal: {
-          default: {
-            background: {
-              'border-color': 'rgba(255, 255, 255, 0.3)',
-              // 'background-color': 'rgba(255, 255, 255, 0.05)',
-              // 'border-color': 'rgba(255, 255, 255, 0.1)',
-              'border-width': '1px',
-            },
-            text: {
-              color: '$colors.textOnBrand',
-            },
-          },
-          hover: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.35)',
-            },
-          },
-          press: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.55)',
-            },
-          },
-          focus: {
-            background: {
-              'border-color': 'rgba(255, 255, 255, 0.75)',
-            },
-          },
-        },
-      },
-    },
     links: {
       default: {
         normal: {
@@ -131,6 +70,65 @@ export const buildNotdTheme = (): ITheme => {
       },
       cardLabelBoxSponsored: {
         'background-color': 'rgba(238, 213, 102, 0.25)',
+      },
+    },
+    buttons: {
+      primary: {
+        normal: {
+          default: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.25)',
+              'border-color': 'rgba(255, 255, 255, 0.3)',
+              'border-width': '1px',
+            },
+            text: {
+              color: '$colors.textOnBrand',
+            },
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.35)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.55)',
+            },
+          },
+          focus: {
+            background: {
+              'border-color': 'rgba(255, 255, 255, 0.75)',
+            },
+          },
+        },
+      },
+      secondary: {
+        normal: {
+          default: {
+            background: {
+              'border-color': 'rgba(255, 255, 255, 0.3)',
+              'border-width': '1px',
+            },
+            text: {
+              color: '$colors.textOnBrand',
+            },
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.35)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.55)',
+            },
+          },
+          focus: {
+            background: {
+              'border-color': 'rgba(255, 255, 255, 0.75)',
+            },
+          },
+        },
       },
     },
   });
