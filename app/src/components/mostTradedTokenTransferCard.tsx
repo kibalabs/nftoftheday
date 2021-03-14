@@ -46,8 +46,6 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'
           secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
-          extraLabelVariants={['cardLabelSponsored']}
-          extraLabelBoxVariants={['cardLabelBoxSponsored']}
         />
       )}
     </React.Fragment>

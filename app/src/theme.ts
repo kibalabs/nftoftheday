@@ -58,6 +58,9 @@ export const buildNotdTheme = (): ITheme => {
       cardLabelSponsored: {
         color: 'rgba(238, 213, 102, 1)',
       },
+      cardLabelRandom: {
+        color: 'rgba(46, 180, 255, 1)',
+      },
     },
     boxes: {
       card: {
@@ -75,6 +78,9 @@ export const buildNotdTheme = (): ITheme => {
       },
       cardLabelBoxSponsored: {
         'background-color': 'rgba(238, 213, 102, 0.25)',
+      },
+      cardLabelBoxRandom: {
+        'background-color': 'rgba(46, 180, 255, 0.25)',
       },
     },
     buttons: {
