@@ -35,7 +35,7 @@ class EthClientInterface:
     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
         raise NotImplementedError()
 
-    async def get_log_entries(self, startBlockNumber: int, endBlockNumber: int, topics: List[str]) -> List[LogReceipt]:
+    async def get_log_entries(self, topics: List[str], startBlockNumber: Optional[int] = None, endBlockNumber: Optional[int] = None, address: Optional[str] = None) -> List[LogReceipt]:
         raise NotImplementedError()
 
 class Web3EthClient(EthClientInterface):
@@ -55,11 +55,12 @@ class Web3EthClient(EthClientInterface):
     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
         return self.w3.eth.getTransactionReceipt(transactionHash)
 
-    async def get_log_entries(self, startBlockNumber: int, endBlockNumber: int, topics: List[str]) -> List[LogReceipt]:
+    async def get_log_entries(self, topics: List[str], startBlockNumber: Optional[int] = None, endBlockNumber: Optional[int] = None, address: Optional[str] = None) -> List[LogReceipt]:
         contractFilter = self.w3.eth.filter({
             'fromBlock': startBlockNumber,
             'toBlock': endBlockNumber,
             'topics': topics,
+            'address': address,
         })
         return contractFilter.get_all_entries()
 
@@ -75,7 +76,7 @@ class RestEthClient(EthClientInterface):
         return int(value, 16)
 
     async def _make_request(self, method: str, params: List = []) -> Dict:
-        response = await self.requester.post_json(url=self.url, dataDict={'jsonrpc':'2.0', 'method': method, 'params': params, 'id': 0})
+        response = await self.requester.post_json(url=self.url, dataDict={'jsonrpc':'2.0', 'method': method, 'params': params, 'id': 0}, timeout=100)
         jsonResponse = response.json()
         if jsonResponse.get('error'):
             raise BadRequestException(message=jsonResponse['error']['message'])
@@ -97,8 +98,18 @@ class RestEthClient(EthClientInterface):
         response = await self._make_request(method='eth_getTransactionReceipt', params=[transactionHash])
         return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_getTransactionReceipt'](response['result'])
 
-    async def get_log_entries(self, startBlockNumber: int, endBlockNumber: int, topics: List[str]) -> List[LogReceipt]:
-        response = await self._make_request(method='eth_getLogs', params=[{'fromBlock': hex(startBlockNumber), 'toBlock': hex(endBlockNumber), 'topics': topics}])
+    async def get_log_entries(self, topics: List[str], startBlockNumber: Optional[int] = None, endBlockNumber: Optional[int] = None, address: Optional[str] = None) -> List[LogReceipt]:
+        params = {
+            'topics': topics,
+            'fromBlock': 'earliest'
+        }
+        if startBlockNumber:
+            params['fromBlock'] = hex(startBlockNumber)
+        if endBlockNumber:
+            params['toBlock'] = hex(endBlockNumber)
+        if address:
+            params['address'] = address
+        response = await self._make_request(method='eth_getLogs', params=[params])
         return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_getLogs'](response['result'])
 
 class BlockProcessor:
