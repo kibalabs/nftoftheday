@@ -46,6 +46,8 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'
           secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
+          extraLabelVariants={['cardLabelRandom']}
+          extraLabelBoxVariants={['cardLabelBoxRandom']}
         />
       )}
     </React.Fragment>

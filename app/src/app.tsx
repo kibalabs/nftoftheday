@@ -5,6 +5,7 @@ import { useFavicon } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
+import { Helmet } from 'react-helmet';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
@@ -51,8 +52,19 @@ export const App = hot((): React.ReactElement => {
     return dateToString(startDate, 'dd MMMM yyyy');
   };
 
+  const getTitleDateString = (): string => {
+    const currentDate = new Date();
+    if (startDate.getDate() === currentDate.getDate()) {
+      return '';
+    }
+    return `| ${dateToString(startDate, 'dd MMMM yyyy')}`;
+  };
+
   return (
     <KibaApp theme={theme}>
+      <Helmet>
+        <title>NFT Of The Day ${getTitleDateString()}</title>
+      </Helmet>
       <BackgroundView linearGradient='#200122,#6F0000'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
           <Spacing variant={PaddingSize.Wide3} />
@@ -63,10 +75,10 @@ export const App = hot((): React.ReactElement => {
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>
           <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-            <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
             <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-            <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
             <SponsoredTokenCard token={sponsoredToken} />
+            <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
+            <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
           </EqualGrid>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
