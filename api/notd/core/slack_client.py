@@ -15,7 +15,7 @@ class SlackClient:
         self.defaultIconEmoji = defaultIconEmoji
 
     async def post(self, text: str):
-        response = await self.requester.post_json(url=self.webhookUrl, data={
+        response = await self.requester.post_json(url=self.webhookUrl, dataDict={
             'text': text,
             'username': self.defaultSender,
             'channel': self.defaultChannel,
