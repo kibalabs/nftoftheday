@@ -13,5 +13,7 @@ export interface Asset {
   imageUrl: string;
   openSeaUrl: string;
   externalUrl: string;
+  lastSaleDate?: Date;
+  lastSalePrice?: number;
   collection: AssetCollection;
 }

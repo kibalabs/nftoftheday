@@ -8,11 +8,11 @@ import { TokenTransfer } from '../client/resources';
 import { Asset } from '../model';
 import { NftCard } from './nftCard';
 
-export type HighestPricedTokenTransferCardProps = {
+export type RandomTokenTransferCardProps = {
   tokenTransfer: TokenTransfer | null;
 }
 
-export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransferCardProps): React.ReactElement => {
+export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): React.ReactElement => {
   const [asset, setAsset] = React.useState<Asset | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
@@ -35,7 +35,7 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
-          label='Highest Priced'
+          label='Random'
           title={asset.name}
           subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
           imageUrl={asset.imageUrl || asset.collection.imageUrl}

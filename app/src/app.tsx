@@ -7,16 +7,18 @@ import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, MarkdownText,
 import { hot } from 'react-hot-loader/root';
 
 import { NotdClient } from './client/client';
-import { TokenTransfer, UiData } from './client/resources';
+import { Token, TokenTransfer, UiData } from './client/resources';
 import { HighestPricedTokenTransferCard } from './components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from './components/mostTradedTokenTransferCard';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
+import { SponsoredTokenCard } from './components/sponsoredTokenCard';
+import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
 
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-const notdClient = new NotdClient(requester, 'http://localhost:5000');
+const notdClient = new NotdClient(requester);
 
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
@@ -24,13 +26,17 @@ defaultDate.setHours(0, 0, 0, 0);
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
+  const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
+  const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
   const [startDate] = React.useState<Date | null>(defaultDate);
 
   React.useEffect((): void => {
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
+      setRandomTokenTransfer(uiData.randomTokenTransfer);
       setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
+      setSponsoredToken(uiData.sponsoredToken);
     });
   }, [startDate]);
 
@@ -57,8 +63,10 @@ export const App = hot((): React.ReactElement => {
             <Spacing variant={PaddingSize.Wide3} />
           </Stack.Item>
           <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+            <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
             <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
             <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
+            <SponsoredTokenCard token={sponsoredToken} />
           </EqualGrid>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />
