@@ -36,7 +36,7 @@ async def main():
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     messageQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient)
 
-    # await database.connect()
+    await database.connect()
     await messageQueueProcessor.run()
 
 if __name__ == '__main__':
