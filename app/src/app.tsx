@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Direction, EqualGrid, KibaApp, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
@@ -59,10 +59,10 @@ export const App = hot((): React.ReactElement => {
           {/* {!highestPricedTokenTransfer ? (
             <LoadingSpinner variant='light-large' />
           ) : ( */}
-            <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-              <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-              <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
-            </EqualGrid>
+          <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, medium: 5, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+            <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
+            <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
+          </EqualGrid>
           {/* )} */}
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Spacing variant={PaddingSize.Wide3} />

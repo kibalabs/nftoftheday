@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, PaddingSize, Spacing, Stack, Text, Media, TextAlignment, MarkdownText } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 interface NftCardProps {
   label: string;
@@ -19,8 +19,8 @@ interface NftCardProps {
 }
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
-  const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}`: '';
-  const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}`: '';
+  const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
+  const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
   return (
     <Box variant='card'>
       <Stack direction={Direction.Vertical}>

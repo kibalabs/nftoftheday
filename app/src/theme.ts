@@ -109,10 +109,10 @@ export const buildNotdTheme = (): ITheme => {
         'font-size': '0.85rem',
       },
       cardLabel: {
-        'color': 'rgba(255, 255, 255, 0.75)',
+        color: 'rgba(255, 255, 255, 0.75)',
       },
       cardLabelSponsored: {
-        'color': 'rgba(238, 213, 102, 1)',
+        color: 'rgba(238, 213, 102, 1)',
       },
     },
     boxes: {
