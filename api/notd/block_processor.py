@@ -1,3 +1,4 @@
+import asyncio
 import json
 import datetime
 from typing import List
@@ -133,12 +134,8 @@ class BlockProcessor:
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
-        tokenTransfers = []
-        for event in events:
-            tokenTransfer = await self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
-            if tokenTransfer:
-                tokenTransfers.append(tokenTransfer)
-        return tokenTransfers
+        tokenTransfers = await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in events])
+        return [tokenTransfer for tokenTransfer in tokenTransfers if tokenTransfer]
 
     async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
