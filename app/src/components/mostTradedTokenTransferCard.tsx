@@ -1,14 +1,15 @@
 import React from 'react';
 
 import { Requester } from '@kibalabs/core';
-import { Alignment, Box, Button, Direction, LoadingSpinner, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { retrieveAsset } from '../assetUtil';
 import { TokenTransfer } from '../client/resources';
 import { Asset } from '../model';
+import { NftCard } from './nftCard';
 
 export type MostTradedTokenTransferCardProps = {
-  tokenTransfers: TokenTransfer[];
+  tokenTransfers: TokenTransfer[] | null;
 }
 
 export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardProps): React.ReactElement => {
@@ -29,29 +30,26 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
   }, [props.tokenTransfers, updateAsset]);
 
   return (
-    <Box variant='card' isFullWidth={true} isFullHeight={false}>
-      <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
-        { !asset ? (
-          <LoadingSpinner variant='light' />
-        ) : (
-          <React.Fragment>
-            <Stack.Item gutterAfter={PaddingSize.Wide2}>
-              <Box width='150px' height='150px'>
-                <Media source={asset.imageUrl || asset.collection.imageUrl} alternativeText={`${asset.name} image`} />
-              </Box>
-            </Stack.Item>
-            <Text variant='header3' alignment={TextAlignment.Center}>{`${asset.name || '(unnamed)'}`}</Text>
-            <Text alignment={TextAlignment.Center}>{`Sold ${props.tokenTransfers.length} times today`}</Text>
-            <Spacing variant={PaddingSize.Wide2} />
-            <Text>{`Part of ${asset.collection.name}`}</Text>
-            <Spacing variant={PaddingSize.Wide2} />
-            <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-              <Button variant='secondary' target={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`} text='View Tx' />
-              <Button variant='primary' target={asset.openSeaUrl} text='View Token' />
-            </Stack>
-          </React.Fragment>
-        )}
-      </Stack>
-    </Box>
+    <React.Fragment>
+      { !asset ? (
+        <LoadingSpinner variant='light' />
+      ) : (
+        <NftCard
+          label='Most Traded'
+          title={asset.name}
+          subtitle={`Sold ${props.tokenTransfers.length} times today`}
+          imageUrl={asset.imageUrl || asset.collection.imageUrl}
+          collectionImage={asset.collection.imageUrl}
+          collectionTitle={asset.collection.name}
+          collectionUrl={asset.collection.externalUrl ?? asset.collection.openSeaUrl}
+          primaryButtonText='View Token'
+          primaryButtonTarget={asset.openSeaUrl}
+          secondaryButtonText='View Tx'
+          secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
+          extraLabelVariants={['cardLabelSponsored']}
+          extraLabelBoxVariants={['cardLabelBoxSponsored']}
+        />
+      )}
+    </React.Fragment>
   );
 };
