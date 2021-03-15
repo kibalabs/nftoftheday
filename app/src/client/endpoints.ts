@@ -49,8 +49,8 @@ export class RetrieveRegistryTokenRequest extends RequestData {
 
   public toObject = (): Record<string, unknown> => {
     return {
-  //     registryAddress: this.registryAddress,
-  //     tokenId: this.tokenId,
+      //     registryAddress: this.registryAddress,
+      //     tokenId: this.tokenId,
     };
   }
 }
