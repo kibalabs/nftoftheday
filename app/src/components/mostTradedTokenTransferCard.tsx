@@ -34,13 +34,9 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
+          nft={asset}
           label='Most Traded'
-          title={asset.name}
           subtitle={`Traded ${props.tokenTransfers.length} times today`}
-          imageUrl={asset.imageUrl || asset.collectionImageUrl || '/asset/icon.svg'}
-          collectionImage={asset.collectionImageUrl}
-          collectionTitle={asset.collectionName}
-          collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'

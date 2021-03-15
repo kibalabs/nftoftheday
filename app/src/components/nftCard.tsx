@@ -1,15 +1,12 @@
 import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { RegistryToken } from '../client/resources';
 
 interface NftCardProps {
+  nft: RegistryToken;
   label: string;
-  imageUrl: string;
-  title: string;
   subtitle: string;
-  collectionImage?: string;
-  collectionTitle?: string;
-  collectionUrl?: string;
   secondaryButtonTarget?: string;
   secondaryButtonText?: string
   primaryButtonTarget?: string;
@@ -19,6 +16,11 @@ interface NftCardProps {
 }
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
+  const title = props.nft.name;
+  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? '/props.nft/icon.svg';
+  const collectionImage = props.nft.collectionImageUrl;
+  const collectionTitle = props.nft.collectionName;
+  const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
 
@@ -34,25 +36,25 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Stack.Item gutterAfter={PaddingSize.Wide2}>
             <Box width='150px' height='150px'>
               <Stack direction={Direction.Vertical} contentAlignment={Alignment.Center} isFullHeight={true}>
-                <Media source={props.imageUrl} alternativeText={`${props.title} image`} fitType='contain' />
+                <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
               </Stack>
             </Box>
           </Stack.Item>
-          <Text variant='header3' alignment={TextAlignment.Center}>{props.title}</Text>
+          <Text variant='header3' alignment={TextAlignment.Center}>{title}</Text>
           <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
           <Spacing variant={PaddingSize.Wide} />
-          {props.collectionTitle && (
+          {collectionTitle && (
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-              {props.collectionImage && (
+              {collectionImage && (
                 <Box width='25px' height='25px'>
-                  <Image source={props.collectionImage} alternativeText={props.collectionTitle} fitType='contain' />
+                  <Image source={collectionImage} alternativeText={collectionTitle} fitType='contain' />
                 </Box>
               )}
               <Stack.Item growthFactor={1} shrinkFactor={1}>
-                {props.collectionUrl ? (
-                  <MarkdownText textVariant='small' source={`Part of [${props.collectionTitle}](${props.collectionUrl})`} />
+                {collectionUrl ? (
+                  <MarkdownText textVariant='small' source={`Part of [${collectionTitle}](${collectionUrl})`} />
                 ) : (
-                  <Text variant='small'>{`Part of ${props.collectionTitle}`}</Text>
+                  <Text variant='small'>{`Part of ${collectionTitle}`}</Text>
                 )}
               </Stack.Item>
             </Stack>
