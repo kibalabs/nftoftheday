@@ -89,3 +89,44 @@ export class UiData {
     );
   }
 }
+
+export class RegistryToken {
+  readonly name: string;
+  readonly imageUrl: string;
+  readonly openSeaUrl: string;
+  readonly externalUrl: string | null;
+  readonly lastSaleDate: Date | null;
+  readonly lastSalePrice: number | null;
+  readonly collectionName: string;
+  readonly collectionImageUrl: string;
+  readonly collectionOpenSeaUrl: string | null;
+  readonly collectionExternalUrl: string | null;
+
+  public constructor(name: string, imageUrl: string, openSeaUrl: string, externalUrl: string | null, lastSaleDate: Date | null, lastSalePrice: number | null, collectionName: string, collectionImageUrl: string, collectionOpenSeaUrl: string | null, collectionExternalUrl: string | null) {
+    this.name = name;
+    this.imageUrl = imageUrl;
+    this.openSeaUrl = openSeaUrl;
+    this.externalUrl = externalUrl;
+    this.lastSaleDate = lastSaleDate;
+    this.lastSalePrice = lastSalePrice;
+    this.collectionName = collectionName;
+    this.collectionImageUrl = collectionImageUrl;
+    this.collectionOpenSeaUrl = collectionOpenSeaUrl;
+    this.collectionExternalUrl = collectionExternalUrl;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RegistryToken => {
+    return new RegistryToken(
+      String(obj.name),
+      String(obj.imageUrl),
+      String(obj.openSeaUrl),
+      String(obj.externalUrl),
+      obj.lastSaleDate ? dateFromString(obj.lastSaleDate as string) : null,
+      Number(obj.lastSalePrice),
+      String(obj.collectionName),
+      String(obj.collectionImageUrl),
+      String(obj.collectionOpenSeaUrl),
+      String(obj.collectionExternalUrl),
+    );
+  }
+}

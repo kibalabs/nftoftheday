@@ -15,4 +15,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUiDataResponse);
     return response.uiData;
   }
+
+  public retrieveRegistryToken = async (registryAddress: string, tokenId: string): Promise<Resources.RegistryToken> => {
+    const method = RestMethod.GET;
+    const path = `v1/registries/${registryAddress}/tokens/${tokenId}`;
+    const request = new Endpoints.RetrieveRegistryTokenRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveRegistryTokenResponse);
+    return response.registryToken;
+  }
 }

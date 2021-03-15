@@ -34,3 +34,38 @@ export class RetrieveUiDataResponse extends ResponseData {
     );
   }
 }
+
+
+export class RetrieveRegistryTokenRequest extends RequestData {
+  // NOTE(krishan711): uncomment when ServiceClient implements params filled into the path
+  // readonly registryAddress: string;
+  // readonly tokenId: string;
+
+  // public constructor(registryAddress?: string, tokenId?: string) {
+  //   super();
+  //   this.registryAddress = registryAddress;
+  //   this.tokenId = tokenId;
+  // }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      //     registryAddress: this.registryAddress,
+      //     tokenId: this.tokenId,
+    };
+  }
+}
+
+export class RetrieveRegistryTokenResponse extends ResponseData {
+  readonly registryToken: Resources.RegistryToken;
+
+  public constructor(registryToken: Resources.RegistryToken) {
+    super();
+    this.registryToken = registryToken;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveRegistryTokenResponse => {
+    return new RetrieveRegistryTokenResponse(
+      Resources.RegistryToken.fromObject(obj.registryToken as Record<string, unknown>),
+    );
+  }
+}

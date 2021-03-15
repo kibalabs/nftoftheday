@@ -9,6 +9,7 @@ from pydantic import Json
 from notd.model import Token
 from notd.model import TokenTransfer
 from notd.model import UiData
+from notd.model import RegistryToken
 
 class ApiTokenTransfer(BaseModel):
     tokenTransferId: int
@@ -69,6 +70,33 @@ class ApiUiData(BaseModel):
             sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
         )
 
+class ApiRegistryToken(BaseModel):
+    name: str
+    imageUrl: str
+    openSeaUrl: str
+    externalUrl: Optional[str]
+    lastSaleDate: Optional[datetime.datetime]
+    lastSalePrice: Optional[int]
+    collectionName: str
+    collectionImageUrl: str
+    collectionOpenSeaUrl: Optional[str]
+    collectionExternalUrl: Optional[str]
+
+    @classmethod
+    def from_model(cls, model: RegistryToken):
+        return cls(
+            name=model.name,
+            imageUrl=model.imageUrl,
+            openSeaUrl=model.openSeaUrl,
+            externalUrl=model.externalUrl,
+            lastSaleDate=model.lastSaleDate,
+            lastSalePrice=model.lastSalePrice,
+            collectionName=model.collectionName,
+            collectionImageUrl=model.collectionImageUrl,
+            collectionOpenSeaUrl=model.collectionOpenSeaUrl,
+            collectionExternalUrl=model.collectionExternalUrl,
+        )
+
 class RetrieveUiDataRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
@@ -81,3 +109,11 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
+
+class RetreiveRegistryTokenRequest(BaseModel):
+    # registryAddress: str
+    # tokenId: str
+    pass
+
+class RetreiveRegistryTokenResponse(BaseModel):
+    registryToken: ApiRegistryToken

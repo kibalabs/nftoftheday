@@ -11,11 +11,13 @@ from databases import Database
 
 from notd.block_processor import BlockProcessor
 from notd.block_processor import RestEthClient
-from notd.manager import NotdManager
-from notd.core.aws_requester import AwsRequester
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
+from notd.core.aws_requester import AwsRequester
+from notd.core.requester import Requester
+from notd.manager import NotdManager
+from notd.opensea_client import OpenseaClient
 
 @click.command()
 @click.option('-b', '--block-number', 'blockNumber', required=False, type=int)
@@ -32,7 +34,9 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-z2a4tjsdtfbzbk2zsq5r4pahky.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
-    manager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue)
+    requester = Requester()
+    openseaClient = OpenseaClient(requester=requester)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
 
     await database.connect()
     # await manager.receive_new_blocks()

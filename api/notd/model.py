@@ -1,6 +1,7 @@
 import datetime
 from typing import Dict
 from typing import List
+from typing import Optional
 
 from pydantic import dataclasses
 
@@ -63,3 +64,16 @@ class UiData:
     mostTradedTokenTransfers: List[TokenTransfer]
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
+
+@dataclasses.dataclass
+class RegistryToken:
+    name: str
+    imageUrl: str
+    openSeaUrl: str
+    externalUrl: Optional[str]
+    lastSaleDate: Optional[datetime.datetime]
+    lastSalePrice: Optional[int]
+    collectionName: str
+    collectionImageUrl: str
+    collectionOpenSeaUrl: Optional[str]
+    collectionExternalUrl: Optional[str]

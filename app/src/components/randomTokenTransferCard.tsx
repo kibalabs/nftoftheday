@@ -4,8 +4,7 @@ import { dateToString, Requester } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { retrieveAsset } from '../assetUtil';
-import { TokenTransfer } from '../client/resources';
-import { Asset } from '../model';
+import { RegistryToken, TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
 
 export type RandomTokenTransferCardProps = {
@@ -13,11 +12,11 @@ export type RandomTokenTransferCardProps = {
 }
 
 export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): React.ReactElement => {
-  const [asset, setAsset] = React.useState<Asset | null>(null);
+  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    retrieveAsset(new Requester(), props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((retrievedAsset: Asset): void => {
-      setAsset(retrievedAsset);
+    retrieveAsset(new Requester(), props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
+      setAsset(registryToken);
     });
   }, [props.tokenTransfer]);
 
@@ -38,10 +37,10 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
           label='Random'
           title={asset.name}
           subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-          imageUrl={asset.imageUrl || asset.collection.imageUrl}
-          collectionImage={asset.collection.imageUrl}
-          collectionTitle={asset.collection.name}
-          collectionUrl={asset.collection.externalUrl ?? asset.collection.openSeaUrl}
+          imageUrl={asset.imageUrl || asset.collectionImageUrl}
+          collectionImage={asset.collectionImageUrl}
+          collectionTitle={asset.collectionName}
+          collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'

@@ -21,4 +21,9 @@ def create_api(notdManager: NotdManager) -> KibaRouter():
         await notdManager.receive_new_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
+    @router.get('/registries/{registryAddress}/tokens/{tokenId}', response_model=RetreiveRegistryTokenResponse)
+    async def retreive_registry_token(registryAddress: str, tokenId: str, rawRequest: Request, response: Response):  # request: RetreiveRegistryTokenRequest
+        registryToken = await notdManager.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+        return RetreiveRegistryTokenResponse(registryToken=ApiRegistryToken.from_model(model=registryToken))
+
     return router
