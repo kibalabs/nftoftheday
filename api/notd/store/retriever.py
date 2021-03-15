@@ -8,10 +8,16 @@ from  sqlalchemy.sql.expression import func as sqlalchemyfunc
 from notd.core.store.retriever import Retriever
 from notd.core.store.retriever import FieldFilter
 from notd.core.store.retriever import Order
+from notd.core.store.retriever import StringFieldFilter
 from notd.model import Token
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
+
+_REGISTRY_BLACKLIST = [
+    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47',
+    '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e',
+]
 
 class NotdRetriever(Retriever):
 
@@ -19,6 +25,7 @@ class NotdRetriever(Retriever):
         query = TokenTransfersTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
+        query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
@@ -34,6 +41,7 @@ class NotdRetriever(Retriever):
         query = query.group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
         query = query.where(TokenTransfersTable.c.blockDate >= startDate)
         query = query.where(TokenTransfersTable.c.blockDate < endDate)
+        query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
         query = query.order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId).desc())
         query = query.limit(1)
         rows = await self.database.fetch_all(query=query)

@@ -30,14 +30,14 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
 
   return (
     <React.Fragment>
-      { !asset ? (
+      { !props.tokenTransfers || !asset ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
           label='Most Traded'
           title={asset.name}
           subtitle={`Traded ${props.tokenTransfers.length} times today`}
-          imageUrl={asset.imageUrl || asset.collectionImageUrl}
+          imageUrl={asset.imageUrl || asset.collectionImageUrl || '/asset/icon.svg'}
           collectionImage={asset.collectionImageUrl}
           collectionTitle={asset.collectionName}
           collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}

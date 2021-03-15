@@ -52,6 +52,9 @@ export const buildNotdTheme = (): ITheme => {
       small: {
         'font-size': '0.85rem',
       },
+      light: {
+        color: 'rgba(255, 255, 255, 0.75)',
+      },
       cardLabel: {
         color: 'rgba(255, 255, 255, 0.75)',
       },
@@ -81,6 +84,17 @@ export const buildNotdTheme = (): ITheme => {
       },
       cardLabelBoxRandom: {
         'background-color': 'rgba(46, 180, 255, 0.25)',
+      },
+    },
+    iconButtons: {
+      default: {
+        disabled: {
+          default: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0)',
+            },
+          },
+        },
       },
     },
     buttons: {
@@ -119,6 +133,33 @@ export const buildNotdTheme = (): ITheme => {
             background: {
               'border-color': 'rgba(255, 255, 255, 0.3)',
               'border-width': '1px',
+            },
+            text: {
+              color: '$colors.textOnBrand',
+            },
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.35)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.55)',
+            },
+          },
+          focus: {
+            background: {
+              'border-color': 'rgba(255, 255, 255, 0.75)',
+            },
+          },
+        },
+      },
+      tertiary: {
+        normal: {
+          default: {
+            background: {
+              'border-width': '0',
             },
             text: {
               color: '$colors.textOnBrand',

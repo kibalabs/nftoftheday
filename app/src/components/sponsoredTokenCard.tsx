@@ -31,14 +31,14 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
 
   return (
     <React.Fragment>
-      { !asset ? (
+      { !props.token || !asset ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
           label='Sponsored'
           title={asset.name}
           subtitle={asset.lastSalePrice ? `Last sold on ${dateToString(asset.lastSaleDate, 'dd-MMM-YYY')} for Ξ${asset.lastSalePrice / 1000000000000000000.0}` : 'Not claimed yet'}
-          imageUrl={asset.imageUrl || asset.collectionImageUrl}
+          imageUrl={asset.imageUrl || asset.collectionImageUrl || '/asset/icon.svg'}
           collectionImage={asset.collectionImageUrl}
           collectionTitle={asset.collectionName}
           collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
