@@ -45,6 +45,10 @@ async def main():
     await database.connect()
     await messageQueueProcessor.run()
 
+    # NOTE(krishan711): This is to tidy up, I'm not sure if this will ever be called
+    await database.disconnect()
+    await requester.close_connections()
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     asyncio.run(main())
