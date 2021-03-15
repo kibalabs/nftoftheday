@@ -44,7 +44,7 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'X-Server-Version',
     'X-Kiba-Token',
 ], allow_origins=[
-    'https://notd.kibalabs.com',
+    'https://nft.tokenhunt.io',
     'http://localhost:3000',
 ])
 

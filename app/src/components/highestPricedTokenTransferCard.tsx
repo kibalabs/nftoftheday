@@ -35,13 +35,9 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
+          nft={asset}
           label='Highest Priced'
-          title={asset.name}
           subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-          imageUrl={asset.imageUrl || asset.collectionImageUrl || '/asset/icon.svg'}
-          collectionImage={asset.collectionImageUrl}
-          collectionTitle={asset.collectionName}
-          collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'

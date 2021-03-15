@@ -35,13 +35,9 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
+          nft={asset}
           label='Sponsored'
-          title={asset.name}
           subtitle={asset.lastSalePrice ? `Last sold on ${dateToString(asset.lastSaleDate, 'dd-MMM-YYY')} for Ξ${asset.lastSalePrice / 1000000000000000000.0}` : 'Not claimed yet'}
-          imageUrl={asset.imageUrl || asset.collectionImageUrl || '/asset/icon.svg'}
-          collectionImage={asset.collectionImageUrl}
-          collectionTitle={asset.collectionName}
-          collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           // secondaryButtonText='View Tx'
