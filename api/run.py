@@ -38,7 +38,7 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
     tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient)
 
     await database.connect()
     # await manager.receive_new_blocks()
@@ -48,6 +48,8 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
         await manager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
     else:
         raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
+    await database.disconnect()
+    await requester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

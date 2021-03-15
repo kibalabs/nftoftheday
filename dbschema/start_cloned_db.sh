@@ -11,7 +11,7 @@ ssh freebox "pg_dump -x -O -Z9 -U ${REMOTE_DB_USERNAME} -h ${REMOTE_DB_HOST} -p 
 gunzip -f ./tmp/dblocal.sql.gz
 
 cid=$(docker run --name ${DB_NAME} -d -p ${DB_PORT}:5432 -e POSTGRES_PASSWORD=${DB_PASSWORD} -v $(pwd)/tmp/:/tmp/ postgres:12.5)
-sleep 1
+sleep 3
 docker exec ${cid} bash -c "exec psql -h ${DB_HOST} -U ${DB_USERNAME} -c 'CREATE DATABASE ${DB_NAME}'"
 docker exec ${cid} bash -c "exec psql -h ${DB_HOST} -U ${DB_USERNAME} -d ${DB_NAME} -f /tmp/dblocal.sql"
 docker logs -f $cid

@@ -44,10 +44,9 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
     tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient)
 
     await database.connect()
-
     isReverse = batchSize < 0
     currentBlockNumber = startBlockNumber
     while (isReverse and currentBlockNumber > endBlockNumber) or (not isReverse and currentBlockNumber < endBlockNumber):
@@ -61,7 +60,9 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
             logging.error(f'Failed due to: {str(exception)[:200]}')
             continue
         currentBlockNumber = nextBlockNumber
-        time.sleep(2)
+        time.sleep(1)
+    await database.disconnect()
+    await requester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

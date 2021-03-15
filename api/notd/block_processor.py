@@ -163,13 +163,20 @@ class BlockProcessor:
     async def get_latest_block_number(self) -> int:
         return await self.ethClient.get_latest_block_number()
 
+    @staticmethod
+    def _genereate_chunks(lst: List, chunkSize: int):
+        for index in range(0, len(lst), chunkSize):
+            yield lst[index: index + chunkSize]
+
     async def get_transfers_in_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
         block = await self.ethClient.get_block(blockNumber)
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
-        tokenTransfers = await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in events])
-        return [tokenTransfer for tokenTransfer in tokenTransfers if tokenTransfer]
+        allTokenTransfers = []
+        for eventsChunk in self._genereate_chunks(events, 50):
+            allTokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in eventsChunk])
+        return [tokenTransfer for tokenTransfer in allTokenTransfers if tokenTransfer]
 
     async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
