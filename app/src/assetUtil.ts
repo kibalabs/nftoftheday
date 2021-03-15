@@ -1,21 +1,24 @@
 import { dateFromString, Requester, RestMethod } from '@kibalabs/core';
 
-import { RegistryToken } from './client/resources';
 import { asyncSleep } from './asyncUtil';
+import { RegistryToken } from './client/resources';
 
 export const retrieveAsset = async (requester: Requester, registryAddress: string, tokenId: string): Promise<RegistryToken> => {
   let assetResponse = null;
   let retryCount = 0;
   while (!assetResponse) {
     try {
+      // eslint-disable-next-line no-await-in-loop
       assetResponse = await requester.makeRequest(RestMethod.GET, `https://api.opensea.io/api/v1/asset/${registryAddress}/${tokenId}/`, undefined, { 'x-api-key': '' });
     } catch (exception) {
       if (retryCount >= 3) {
         throw exception;
       }
+      // eslint-disable-next-line no-console
       console.log(`Retrying due to: ${exception}`);
-      await asyncSleep(1.5)
-      retryCount += 1
+      // eslint-disable-next-line no-await-in-loop
+      await asyncSleep(1.5);
+      retryCount += 1;
     }
   }
   const assetJson = JSON.parse(assetResponse.content);

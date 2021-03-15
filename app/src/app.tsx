@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { dateFromString, dateToString, JSON_DATE_FORMAT, LocalStorageClient, Requester } from '@kibalabs/core';
-import { useFavicon, useUrlQueryState } from '@kibalabs/core-react';
+import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
+import { useFavicon } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Button, Container, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -43,12 +43,13 @@ export const App = hot((): React.ReactElement => {
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);
     const value = searchParams.get(key);
-    console.log(value);
     try {
       return dateFromString(value, 'yyyy-MM-dd');
-    } catch {}
+    } catch {
+      // No-op
+    }
     return null;
-  }
+  };
   const [startDate, setStartDate] = React.useState<Date | null>(getUrlDate('date') || defaultDate);
 
   const setUrlString = (key: string, value: string): void => {
@@ -59,15 +60,15 @@ export const App = hot((): React.ReactElement => {
       searchParams.set(key, value);
     }
     window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
-  }
+  };
 
-  const getUrlDateString = (): string | null => {
+  const getUrlDateString = React.useCallback((): string | null => {
     const currentDate = new Date();
     if (startDate.getDate() === currentDate.getDate()) {
       return null;
     }
     return dateToString(startDate, 'yyyy-MM-dd');
-  };
+  }, [startDate]);
 
   React.useEffect((): void => {
     setHighestPricedTokenTransfer(null);
@@ -82,7 +83,7 @@ export const App = hot((): React.ReactElement => {
       setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
       setSponsoredToken(uiData.sponsoredToken);
     });
-  }, [startDate]);
+  }, [getUrlDateString, startDate]);
 
   const getDateString = (): string => {
     const currentDate = new Date();
@@ -108,14 +109,14 @@ export const App = hot((): React.ReactElement => {
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-  }
+  };
 
   const onForwardClicked = (): void => {
     const newDate = new Date(startDate);
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-  }
+  };
 
   return (
     <KibaApp theme={theme}>
@@ -151,10 +152,10 @@ export const App = hot((): React.ReactElement => {
             <Spacing variant={PaddingSize.Narrow} />
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
               <Stack.Item growthFactor={1} shrinkFactor={1}>
-                <Button variant='tertiary' text={'Twitter'} target={'https://twitter.com/tokenhunt'} iconLeft={<KibaIcon iconId='feather-twitter'/>} />
+                <Button variant='tertiary' text={'Twitter'} target={'https://twitter.com/tokenhunt'} iconLeft={<KibaIcon iconId='feather-twitter' />} />
               </Stack.Item>
               <Stack.Item growthFactor={1} shrinkFactor={1}>
-                <Button variant='tertiary' text={'Instagram'} target={'https://instagram.com/tokenhunt'} iconLeft={<KibaIcon iconId='feather-instagram'/>} />
+                <Button variant='tertiary' text={'Instagram'} target={'https://instagram.com/tokenhunt'} iconLeft={<KibaIcon iconId='feather-instagram' />} />
               </Stack.Item>
             </Stack>
             <Spacing />

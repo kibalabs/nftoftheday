@@ -5,8 +5,8 @@ import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { retrieveAsset } from '../assetUtil';
 import { RegistryToken, TokenTransfer } from '../client/resources';
-import { NftCard } from './nftCard';
 import { useGlobals } from '../globalsContext';
+import { NftCard } from './nftCard';
 
 export type RandomTokenTransferCardProps = {
   tokenTransfer: TokenTransfer | null;
@@ -20,7 +20,7 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
     retrieveAsset(requester, props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
     });
-  }, [props.tokenTransfer]);
+  }, [requester, props.tokenTransfer]);
 
   React.useEffect((): void => {
     if (!props.tokenTransfer) {
