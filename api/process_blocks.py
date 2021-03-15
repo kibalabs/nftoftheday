@@ -18,10 +18,8 @@ from notd.core.sqs_message_queue import SqsMessageQueue
 from notd.core.aws_requester import AwsRequester
 from notd.core.requester import Requester
 from notd.core.slack_client import SlackClient
-from notd.core.message_queue_processor import MessageQueueProcessor
-from notd.notd_message_processor import NotdMessageProcessor
 from notd.manager import NotdManager
-from notd.messages import ProcessBlocksMessageContent
+from notd.opensea_client import OpenseaClient
 
 def chunks(lst, n):
     for i in range(0, len(lst), n):
@@ -42,7 +40,9 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-z2a4tjsdtfbzbk2zsq5r4pahky.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue)
+    requester = Requester()
+    openseaClient = OpenseaClient(requester=requester)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
 
     await database.connect()
 
