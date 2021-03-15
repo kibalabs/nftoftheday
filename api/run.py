@@ -18,6 +18,7 @@ from notd.core.aws_requester import AwsRequester
 from notd.core.requester import Requester
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
+from notd.token_client import TokenClient
 
 @click.command()
 @click.option('-b', '--block-number', 'blockNumber', required=False, type=int)
@@ -36,6 +37,7 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
+    tokenClient = TokenClient(requester=requester, ethClient=ethClient)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
 
     await database.connect()

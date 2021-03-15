@@ -20,6 +20,7 @@ from notd.core.requester import Requester
 from notd.core.slack_client import SlackClient
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
+from notd.token_client import TokenClient
 
 def chunks(lst, n):
     for i in range(0, len(lst), n):
@@ -42,6 +43,7 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
+    tokenClient = TokenClient(requester=requester, ethClient=ethClient)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
 
     await database.connect()
