@@ -4,6 +4,7 @@ import { dateFromString, dateToString, LocalStorageClient, Requester } from '@ki
 import { useFavicon } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Button, Container, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
+import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
@@ -22,6 +23,8 @@ const theme = buildNotdTheme();
 const requester = new Requester();
 const notdClient = new NotdClient(requester);
 const localStorageClient = new LocalStorageClient(window.localStorage);
+const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
+tracker.trackApplicationOpen();
 
 const globals = {
   requester,
