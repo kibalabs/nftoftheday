@@ -33,9 +33,19 @@ class NotdManager:
         self._openseaCache = dict()
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
-        highestPricedTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)], orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)], limit=1)
+        highestPricedTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+            limit=1
+        )
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
-        mostTradedTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress), StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId)], orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)])
+        mostTradedTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
+        )
         randomTokenTransfers = await self.retriever.list_token_transfers(orders=[RandomOrder()], limit=1)
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],

@@ -1,3 +1,6 @@
+import asyncio
+import logging
+
 from notd.core.requester import Requester
 from notd.core.util import date_util
 from notd.model import RegistryToken
@@ -8,10 +11,20 @@ class OpenseaClient:
         self.requester = requester
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
-        response = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset/{registryAddress}/{tokenId}')
+        response = None
+        retryCount = 0
+        while not response:
+            try:
+                response = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset/{registryAddress}/{tokenId}')
+            except Exception as exception:
+                if retryCount >= 3:
+                    raise
+                logging.info(f'Retrying due to: {str(exception)}')
+                await asyncio.sleep(1.5)
+                retryCount += 1
         responseJson = response.json()
         registryToken = RegistryToken(
-            name=responseJson['name'],
+            name=responseJson['name'] or f"{responseJson['collection']['name']} #{tokenId}",
             imageUrl=responseJson['animation_original_url'] or responseJson['animation_url'] or responseJson['image_url'] or responseJson['original_image_url'],
             openSeaUrl=f"{responseJson['permalink']}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032",
             externalUrl=responseJson['external_link'],

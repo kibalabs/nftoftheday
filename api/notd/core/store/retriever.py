@@ -68,7 +68,7 @@ class Retriever:
         if fieldFilter.containedIn is not None:
             query = query.where(field.in_(fieldFilter.containedIn))
         if fieldFilter.notContainedIn is not None:
-            query = query.where(field.not_in(fieldFilter.notContainedIn))
+            query = query.where(field.notin_(fieldFilter.notContainedIn))
         return query
 
     def _apply_date_field_filter(self, query: FromClause, table: Table, fieldFilter: DateFieldFilter) -> FromClause:
@@ -88,7 +88,7 @@ class Retriever:
         if fieldFilter.containedIn is not None:
             query = query.where(field.in_(fieldFilter.containedIn))
         if fieldFilter.notContainedIn is not None:
-            query = query.where(field.not_in(fieldFilter.notContainedIn))
+            query = query.where(field.notin_(fieldFilter.notContainedIn))
         return query
 
     def _apply_field_filter(self, query: FromClause, table: Table, fieldFilter: FieldFilter) -> FromClause:

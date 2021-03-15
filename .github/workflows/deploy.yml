@@ -51,7 +51,7 @@ jobs:
           envs: DOCKER_IMAGE,NAME
           script_stop: true
           script: |
-            url="notd.kibalabs.com"
+            url="nft.tokenhunt.io"
             varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
@@ -132,4 +132,4 @@ jobs:
 #   --detach \
 #   --env NAME=${NAME} \
 #   --env-file ${varsFile} \
-#   ${DOCKER_IMAGE} python process_blocks.py -s 11900400 -e 0 -b -25
+#   ${DOCKER_IMAGE} python process_blocks.py -s 11900375 -e 0 -b -10
