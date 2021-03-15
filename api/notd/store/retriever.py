@@ -14,12 +14,12 @@ from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
-_REGISTRY_BLACKLIST = [
+_REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47',
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47234808169212587382971023711941828336222959677902651',
     '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e',
     '0x4201dB13824a50a11f931169b2F0Bca9cAc23614',
-]
+])
 
 class NotdRetriever(Retriever):
 
@@ -27,12 +27,14 @@ class NotdRetriever(Retriever):
         query = TokenTransfersTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
-        query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
+        for registryAddress in _REGISTRY_BLACKLIST:
+            query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, ne=registryAddress))
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
+        print('query', query)
         rows = await self.database.fetch_all(query=query)
         tokenTransfers = [token_transfer_from_row(row) for row in rows]
         return tokenTransfers
