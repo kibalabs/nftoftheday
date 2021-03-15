@@ -2,9 +2,9 @@ import React from 'react';
 
 import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
+import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Button, Container, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
-import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
 
