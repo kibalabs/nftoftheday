@@ -12,6 +12,7 @@ from notd.core.store.retriever import RandomOrder
 from notd.core.store.retriever import DateFieldFilter
 from notd.core.store.retriever import StringFieldFilter
 from notd.core.requester import Requester
+from notd.core.exceptions import NotFoundException
 from notd.store.schema import TokenTransfersTable
 from notd.model import UiData
 from notd.model import Token
@@ -21,16 +22,18 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.core.exceptions import DuplicateValueException
 from notd.core.sqs_message_queue import SqsMessageQueue
 from notd.opensea_client import OpenseaClient
+from notd.token_client import TokenClient
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
         self.openseaClient = openseaClient
-        self._openseaCache = dict()
+        self.tokenClient = tokenClient
+        self._tokenCache = dict()
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
@@ -89,9 +92,11 @@ class NotdManager:
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
-        if cacheKey in self._openseaCache:
-            print('self._openseaCache[cacheKey]', self._openseaCache[cacheKey])
-            return self._openseaCache[cacheKey]
-        registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
-        self._openseaCache[cacheKey] = registryToken
+        if cacheKey in self._tokenCache:
+            return self._tokenCache[cacheKey]
+        try:
+            registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+        except NotFoundException:
+            registryToken = await self.tokenClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+        self._tokenCache[cacheKey] = registryToken
         return registryToken

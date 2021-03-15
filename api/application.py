@@ -18,6 +18,7 @@ from notd.core.aws_requester import AwsRequester
 from notd.core.requester import Requester
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
+from notd.token_client import TokenClient
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,7 +34,8 @@ ethClient = RestEthClient(url='https://nd-z2a4tjsdtfbzbk2zsq5r4pahky.ethereum.ma
 blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
 openseaClient = OpenseaClient(requester=requester)
-notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
+tokenClient = TokenClient(requester=requester, ethClient=ethClient)
+notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient)
 
 app = FastAPI()
 app.include_router(router=create_health_api())

@@ -4,6 +4,7 @@ import datetime
 from typing import List
 from typing import Optional
 from typing import Dict
+from typing import Any
 import logging
 
 import web3
@@ -13,7 +14,12 @@ from web3.types import LogReceipt
 from web3.types import BlockData
 from web3.types import TxData
 from web3.types import TxReceipt
+from web3.types import HexBytes
+from web3.types import ABIFunction
+from web3.types import ABI
 from web3._utils import method_formatters
+from web3._utils.contracts import encode_transaction_data
+from web3._utils.abi import get_abi_output_types
 from eth_utils import event_abi_to_log_topic
 from hexbytes import HexBytes
 
@@ -36,6 +42,9 @@ class EthClientInterface:
         raise NotImplementedError()
 
     async def get_log_entries(self, topics: List[str], startBlockNumber: Optional[int] = None, endBlockNumber: Optional[int] = None, address: Optional[str] = None) -> List[LogReceipt]:
+        raise NotImplementedError()
+
+    async def call_function(self, toAddress: str, contractAbi: ABI, functionName: str, functionAbi: ABIFunction, fromAddress: Optional[str] = None, arguments: Optional[Dict[str, Any]] = None, blockNumber: Optional[int] = None) -> List[Any]:
         raise NotImplementedError()
 
 class Web3EthClient(EthClientInterface):
@@ -70,6 +79,7 @@ class RestEthClient(EthClientInterface):
     def __init__(self, url: str, requester: Requester):
         self.url = url
         self.requester = requester
+        self.w3 = Web3()
 
     @staticmethod
     def _hex_to_int(value: str) -> int:
@@ -111,6 +121,19 @@ class RestEthClient(EthClientInterface):
             params['address'] = address
         response = await self._make_request(method='eth_getLogs', params=[params])
         return method_formatters.PYTHONIC_RESULT_FORMATTERS['eth_getLogs'](response['result'])
+
+    async def call_function(self, toAddress: str, contractAbi: ABI, functionAbi: ABIFunction, fromAddress: Optional[str] = None, arguments: Optional[Dict[str, Any]] = None, blockNumber: Optional[int] = None) -> List[Any]:
+        data = encode_transaction_data(web3=self.w3, fn_identifier=functionAbi['name'], contract_abi=contractAbi, fn_abi=functionAbi, kwargs=(arguments or {}))
+        params = {
+            'from': fromAddress or '0x0000000000000000000000000000000000000000',
+            'to': toAddress,
+            'data': data,
+        }
+        response = await self._make_request(method='eth_call', params=[params, blockNumber or 'latest'])
+        outputTypes = get_abi_output_types(abi=functionAbi)
+        outputData = self.w3.codec.decode_abi(types=outputTypes, data=HexBytes(response['result']))
+        return list(outputData)
+
 
 class BlockProcessor:
 

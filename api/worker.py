@@ -19,6 +19,7 @@ from notd.core.requester import Requester
 from notd.notd_message_processor import NotdMessageProcessor
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
+from notd.token_client import TokenClient
 
 async def main():
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
@@ -34,6 +35,7 @@ async def main():
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
+    tokenClient = TokenClient(requester=requester, ethClient=ethClient)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
