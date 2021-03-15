@@ -11,21 +11,26 @@ from notd.core.store.retriever import Order
 from notd.core.store.retriever import RandomOrder
 from notd.core.store.retriever import DateFieldFilter
 from notd.core.store.retriever import StringFieldFilter
+from notd.core.requester import Requester
 from notd.store.schema import TokenTransfersTable
 from notd.model import UiData
 from notd.model import Token
+from notd.model import RegistryToken
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.core.exceptions import DuplicateValueException
 from notd.core.sqs_message_queue import SqsMessageQueue
+from notd.opensea_client import OpenseaClient
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
+        self.openseaClient = openseaClient
+        self._openseaCache = dict()
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)], orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)], limit=1)
@@ -71,3 +76,12 @@ class NotdManager:
                 await self.saver.create_token_transfer(transactionHash=retrievedTokenTransfer.transactionHash, registryAddress=retrievedTokenTransfer.registryAddress, fromAddress=retrievedTokenTransfer.fromAddress, toAddress=retrievedTokenTransfer.toAddress, tokenId=retrievedTokenTransfer.tokenId, value=retrievedTokenTransfer.value, gasLimit=retrievedTokenTransfer.gasLimit, gasPrice=retrievedTokenTransfer.gasPrice, gasUsed=retrievedTokenTransfer.gasUsed, blockNumber=retrievedTokenTransfer.blockNumber, blockHash=retrievedTokenTransfer.blockHash, blockDate=retrievedTokenTransfer.blockDate)
             except DuplicateValueException:
                 logging.debug(f'Ignoring previously saved transaction')
+
+    async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
+        cacheKey = f'{registryAddress}:{tokenId}'
+        if cacheKey in self._openseaCache:
+            print('self._openseaCache[cacheKey]', self._openseaCache[cacheKey])
+            return self._openseaCache[cacheKey]
+        registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+        self._openseaCache[cacheKey] = registryToken
+        return registryToken

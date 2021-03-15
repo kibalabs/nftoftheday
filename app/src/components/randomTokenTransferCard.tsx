@@ -17,6 +17,7 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     retrieveAsset(new Requester(), props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((retrievedAsset: Asset): void => {
+      console.log('retrievedAsset', retrievedAsset)
       setAsset(retrievedAsset);
     });
   }, [props.tokenTransfer]);
@@ -38,10 +39,10 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
           label='Random'
           title={asset.name}
           subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-          imageUrl={asset.imageUrl || asset.collection.imageUrl}
-          collectionImage={asset.collection.imageUrl}
-          collectionTitle={asset.collection.name}
-          collectionUrl={asset.collection.externalUrl ?? asset.collection.openSeaUrl}
+          imageUrl={asset.imageUrl || asset.collectionImageUrl}
+          collectionImage={asset.collectionImageUrl}
+          collectionTitle={asset.collectionName}
+          collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'

@@ -1,23 +1,22 @@
 import React from 'react';
 
-import { Requester } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
-import { retrieveAsset } from '../assetUtil';
-import { TokenTransfer } from '../client/resources';
-import { Asset } from '../model';
+import { RegistryToken, TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
+import { useGlobals } from '../globalsContext';
 
 export type MostTradedTokenTransferCardProps = {
   tokenTransfers: TokenTransfer[] | null;
 }
 
 export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardProps): React.ReactElement => {
-  const [asset, setAsset] = React.useState<Asset | null>(null);
+  const { notdClient } = useGlobals();
+  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    retrieveAsset(new Requester(), props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId).then((retrievedAsset: Asset): void => {
-      setAsset(retrievedAsset);
+    notdClient.retrieveRegistryToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId).then((registryToken: RegistryToken): void => {
+      setAsset(registryToken);
     });
   }, [props.tokenTransfers]);
 
@@ -37,11 +36,11 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
         <NftCard
           label='Most Traded'
           title={asset.name}
-          subtitle={`Sold ${props.tokenTransfers.length} times today`}
-          imageUrl={asset.imageUrl || asset.collection.imageUrl}
-          collectionImage={asset.collection.imageUrl}
-          collectionTitle={asset.collection.name}
-          collectionUrl={asset.collection.externalUrl ?? asset.collection.openSeaUrl}
+          subtitle={`Traded ${props.tokenTransfers.length} times today`}
+          imageUrl={asset.imageUrl || asset.collectionImageUrl}
+          collectionImage={asset.collectionImageUrl}
+          collectionTitle={asset.collectionName}
+          collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'

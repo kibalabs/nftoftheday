@@ -30,7 +30,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
             <Text variant={`cardLabel${extraLabelVariantsString}`}>{props.label}</Text>
           </Box>
         </Stack.Item>
-        <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
+        <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
           <Stack.Item gutterAfter={PaddingSize.Wide2}>
             <Box width='150px' height='150px'>
               <Stack direction={Direction.Vertical} contentAlignment={Alignment.Center} isFullHeight={true}>
@@ -45,14 +45,16 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
               {props.collectionImage && (
                 <Box width='25px' height='25px'>
-                  <Image source={props.collectionImage} alternativeText={props.collectionTitle} />
+                  <Image source={props.collectionImage} alternativeText={props.collectionTitle} fitType='contain' />
                 </Box>
               )}
-              {props.collectionUrl ? (
-                <MarkdownText textVariant='small' source={`Part of [${props.collectionTitle}](${props.collectionUrl})`} />
-              ) : (
-                <Text variant='small'>{`Part of ${props.collectionTitle}`}</Text>
-              )}
+              <Stack.Item growthFactor={1} shrinkFactor={1}>
+                {props.collectionUrl ? (
+                  <MarkdownText textVariant='small' source={`Part of [${props.collectionTitle}](${props.collectionUrl})`} />
+                ) : (
+                  <Text variant='small' >{`Part of ${props.collectionTitle}`}</Text>
+                )}
+              </Stack.Item>
             </Stack>
           )}
           <Spacing variant={PaddingSize.Wide2} />

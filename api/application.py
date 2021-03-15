@@ -15,7 +15,9 @@ from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
 from notd.core.aws_requester import AwsRequester
+from notd.core.requester import Requester
 from notd.manager import NotdManager
+from notd.opensea_client import OpenseaClient
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +31,9 @@ workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1
 awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
 ethClient = RestEthClient(url='https://nd-z2a4tjsdtfbzbk2zsq5r4pahky.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
 blockProcessor = BlockProcessor(ethClient=ethClient)
-notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue)
+requester = Requester()
+openseaClient = OpenseaClient(requester=requester)
+notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
 
 app = FastAPI()
 app.include_router(router=create_health_api())

@@ -1,23 +1,23 @@
 import React from 'react';
 
-import { dateToString, Requester } from '@kibalabs/core';
+import { dateToString } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
-import { retrieveAsset } from '../assetUtil';
-import { Token } from '../client/resources';
-import { Asset } from '../model';
+import { RegistryToken, Token } from '../client/resources';
 import { NftCard } from './nftCard';
+import { useGlobals } from '../globalsContext';
 
 export type SponsoredTokenCardProps = {
   token: Token | null;
 }
 
 export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactElement => {
-  const [asset, setAsset] = React.useState<Asset | null>(null);
+  const { notdClient } = useGlobals();
+  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    retrieveAsset(new Requester(), props.token.registryAddress, props.token.tokenId).then((retrievedAsset: Asset): void => {
-      setAsset(retrievedAsset);
+    notdClient.retrieveRegistryToken(props.token.registryAddress, props.token.tokenId).then((registryToken: RegistryToken): void => {
+      setAsset(registryToken);
     });
   }, [props.token]);
 
@@ -38,10 +38,10 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
           label='Sponsored'
           title={asset.name}
           subtitle={asset.lastSalePrice ? `Last sold on ${dateToString(asset.lastSaleDate, 'dd-MMM-YYY')} for Ξ${asset.lastSalePrice / 1000000000000000000.0}` : 'Not claimed yet'}
-          imageUrl={asset.imageUrl || asset.collection.imageUrl}
-          collectionImage={asset.collection.imageUrl}
-          collectionTitle={asset.collection.name}
-          collectionUrl={asset.collection.externalUrl ?? asset.collection.openSeaUrl}
+          imageUrl={asset.imageUrl || asset.collectionImageUrl}
+          collectionImage={asset.collectionImageUrl}
+          collectionTitle={asset.collectionName}
+          collectionUrl={asset.collectionExternalUrl ?? asset.collectionOpenSeaUrl}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           // secondaryButtonText='View Tx'
