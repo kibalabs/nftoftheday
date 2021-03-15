@@ -122,3 +122,14 @@ jobs:
                 --env LETSENCRYPT_HOST=${url} \
                 --env-file ${varsFile} \
                 ${DOCKER_IMAGE} './start-api.sh'
+
+# NAME=nftoftheday-processor;
+# DOCKER_IMAGE=ghcr.io/kibalabs/nftoftheday-api:latest;
+# varsFile=~/.${NAME}.vars; docker pull ${DOCKER_IMAGE};
+# docker stop ${NAME} && docker rm ${NAME} || true;
+# docker run \
+#   --name ${NAME} \
+#   --detach \
+#   --env NAME=${NAME} \
+#   --env-file ${varsFile} \
+#   ${DOCKER_IMAGE} python process_blocks.py -s 11900400 -e 0 -b -25
