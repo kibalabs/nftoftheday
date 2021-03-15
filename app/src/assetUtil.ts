@@ -23,7 +23,7 @@ export const retrieveAsset = async (requester: Requester, registryAddress: strin
   }
   const assetJson = JSON.parse(assetResponse.content);
   const asset: RegistryToken = {
-    name: assetJson.name,
+    name: assetJson.name ?? `${assetJson.collection.name} #${tokenId}`,
     imageUrl: assetJson.animation_url ?? assetJson.image_url ?? assetJson.original_image_url,
     openSeaUrl: `${assetJson.permalink}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`,
     externalUrl: assetJson.external_link,
