@@ -44,7 +44,7 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
     tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient)
 
     await database.connect()
 
