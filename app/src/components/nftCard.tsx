@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+
 import { RegistryToken } from '../client/resources';
 
 interface NftCardProps {
