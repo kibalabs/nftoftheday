@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { dateToString, Requester, LocalStorageClient } from '@kibalabs/core';
+import { dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
-import { Alignment, Box, BackgroundView, Container, Direction, EqualGrid, KibaApp, MarkdownText, PaddingSize, Spacing, Stack, Text, Image } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Container, Direction, EqualGrid, KibaApp, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
@@ -20,7 +20,7 @@ import './fonts.css';
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-const notdClient = new NotdClient(requester, 'http://localhost:5000');
+const notdClient = new NotdClient(requester);
 const localStorageClient = new LocalStorageClient(window.localStorage);
 
 const globals = {

@@ -52,7 +52,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                 {props.collectionUrl ? (
                   <MarkdownText textVariant='small' source={`Part of [${props.collectionTitle}](${props.collectionUrl})`} />
                 ) : (
-                  <Text variant='small' >{`Part of ${props.collectionTitle}`}</Text>
+                  <Text variant='small'>{`Part of ${props.collectionTitle}`}</Text>
                 )}
               </Stack.Item>
             </Stack>

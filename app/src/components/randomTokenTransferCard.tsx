@@ -4,8 +4,7 @@ import { dateToString, Requester } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { retrieveAsset } from '../assetUtil';
-import { TokenTransfer } from '../client/resources';
-import { Asset } from '../model';
+import { RegistryToken, TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
 
 export type RandomTokenTransferCardProps = {
@@ -13,12 +12,11 @@ export type RandomTokenTransferCardProps = {
 }
 
 export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): React.ReactElement => {
-  const [asset, setAsset] = React.useState<Asset | null>(null);
+  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    retrieveAsset(new Requester(), props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((retrievedAsset: Asset): void => {
-      console.log('retrievedAsset', retrievedAsset)
-      setAsset(retrievedAsset);
+    retrieveAsset(new Requester(), props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
+      setAsset(registryToken);
     });
   }, [props.tokenTransfer]);
 

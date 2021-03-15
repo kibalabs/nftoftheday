@@ -4,8 +4,8 @@ import { dateToString } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { RegistryToken, Token } from '../client/resources';
-import { NftCard } from './nftCard';
 import { useGlobals } from '../globalsContext';
+import { NftCard } from './nftCard';
 
 export type SponsoredTokenCardProps = {
   token: Token | null;
@@ -19,7 +19,7 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
     notdClient.retrieveRegistryToken(props.token.registryAddress, props.token.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
     });
-  }, [props.token]);
+  }, [notdClient, props.token]);
 
   React.useEffect((): void => {
     if (!props.token) {

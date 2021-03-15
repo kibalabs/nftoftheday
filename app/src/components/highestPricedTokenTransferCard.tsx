@@ -4,8 +4,8 @@ import { dateToString } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { RegistryToken, TokenTransfer } from '../client/resources';
-import { NftCard } from './nftCard';
 import { useGlobals } from '../globalsContext';
+import { NftCard } from './nftCard';
 
 export type HighestPricedTokenTransferCardProps = {
   tokenTransfer: TokenTransfer | null;
@@ -19,7 +19,7 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
     notdClient.retrieveRegistryToken(props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
     });
-  }, [props.tokenTransfer]);
+  }, [notdClient, props.tokenTransfer]);
 
   React.useEffect((): void => {
     if (!props.tokenTransfer) {

@@ -3,8 +3,8 @@ import React from 'react';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { RegistryToken, TokenTransfer } from '../client/resources';
-import { NftCard } from './nftCard';
 import { useGlobals } from '../globalsContext';
+import { NftCard } from './nftCard';
 
 export type MostTradedTokenTransferCardProps = {
   tokenTransfers: TokenTransfer[] | null;
@@ -18,7 +18,7 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
     notdClient.retrieveRegistryToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
     });
-  }, [props.tokenTransfers]);
+  }, [notdClient, props.tokenTransfers]);
 
   React.useEffect((): void => {
     if (!props.tokenTransfers) {

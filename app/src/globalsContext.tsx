@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { LocalStorageClient, Requester } from '@kibalabs/core';
+import { IMultiAnyChildProps } from '@kibalabs/core-react';
 
 import { NotdClient } from './client/client';
-import { IMultiAnyChildProps } from '@kibalabs/core-react';
 
 
 export interface IGlobals {

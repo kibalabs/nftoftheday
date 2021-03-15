@@ -23,5 +23,4 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveRegistryTokenResponse);
     return response.registryToken;
   }
-
 }

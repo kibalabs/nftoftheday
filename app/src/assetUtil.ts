@@ -1,4 +1,5 @@
 import { dateFromString, Requester, RestMethod } from '@kibalabs/core';
+
 import { RegistryToken } from './client/resources';
 
 export const retrieveAsset = async (requester: Requester, registryAddress: string, tokenId: string): Promise<RegistryToken> => {
