@@ -27,14 +27,12 @@ class NotdRetriever(Retriever):
         query = TokenTransfersTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
-        for registryAddress in _REGISTRY_BLACKLIST:
-            query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, ne=registryAddress))
+        query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
-        print('query', query)
         rows = await self.database.fetch_all(query=query)
         tokenTransfers = [token_transfer_from_row(row) for row in rows]
         return tokenTransfers
