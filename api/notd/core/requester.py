@@ -23,6 +23,7 @@ class Requester:
 
     def __init__(self, headers: Optional[Dict[str, str]] = None):
         self.headers = headers or {}
+        self.client = httpx.AsyncClient()
 
     async def get(self, url: str, dataDict: Optional[Dict] = None, data: Optional[bytes] = None, timeout: Optional[int] = 10, headers: Optional[httpx.Headers] = None, outputFilePath: Optional[str] = None) -> httpx.Response:
         return await self.make_request(method='GET', url=url, dataDict=dataDict, data=data, timeout=timeout, headers=headers, outputFilePath=outputFilePath)
@@ -47,8 +48,7 @@ class Requester:
             if method == 'POST':
                 data = json.dumps(dataDict).encode()
         request = httpx.Request(method=method, url=url, data=data, headers={**self.headers, **(headers or {})})
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            httpxResponse = await client.send(request=request, timeout=timeout)
+        httpxResponse = await self.client.send(request=request, timeout=timeout)
         if 400 <= httpxResponse.status_code < 600:
             raise ResponseException(message=httpxResponse.text, statusCode=httpxResponse.status_code)
         # TODO(krishan711): this would be more efficient if streamed
@@ -57,3 +57,6 @@ class Requester:
                 os.makedirs(os.path.dirname(outputFilePath), exist_ok=True)
             await file_util.write_file_bytes(filePath=outputFilePath, content=httpxResponse.content)
         return httpxResponse
+
+    async def close_connections(self) -> None:
+        await self.client.close()

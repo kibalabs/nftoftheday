@@ -132,4 +132,4 @@ jobs:
 #   --detach \
 #   --env NAME=${NAME} \
 #   --env-file ${varsFile} \
-#   ${DOCKER_IMAGE} python process_blocks.py -s 11900365 -e 0 -b -5
+#   ${DOCKER_IMAGE} python process_blocks.py -s 11900110 -e 0 -b -5
