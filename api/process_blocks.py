@@ -61,7 +61,7 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
             logging.error(f'Failed due to: {str(exception)[:200]}')
             continue
         currentBlockNumber = nextBlockNumber
-        time.sleep(2)
+        time.sleep(1)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
