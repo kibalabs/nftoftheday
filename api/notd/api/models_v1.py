@@ -72,13 +72,13 @@ class ApiUiData(BaseModel):
 
 class ApiRegistryToken(BaseModel):
     name: str
-    imageUrl: str
-    openSeaUrl: str
+    imageUrl: Optional[str]
+    openSeaUrl: Optional[str]
     externalUrl: Optional[str]
     lastSaleDate: Optional[datetime.datetime]
     lastSalePrice: Optional[int]
     collectionName: str
-    collectionImageUrl: str
+    collectionImageUrl: Optional[str]
     collectionOpenSeaUrl: Optional[str]
     collectionExternalUrl: Optional[str]
 
