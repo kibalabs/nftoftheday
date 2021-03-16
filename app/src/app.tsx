@@ -133,7 +133,7 @@ export const App = hot((): React.ReactElement => {
             <Text variant='header1'>NFT of the day</Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-              <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2021, 1, 19) } />
+              <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2021, 0, 1) } />
               <Text variant='header3'>{getDateString()}</Text>
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
