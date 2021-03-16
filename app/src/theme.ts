@@ -100,28 +100,28 @@ export const buildNotdTheme = (): ITheme => {
     dialogs: {
       default: {
         background: {
-          "background-color": '$colors.backgroundLight10'
-        }
-      }
+          'background-color': '$colors.backgroundLight10',
+        },
+      },
     },
     inputWrappers: {
       dialogInput: {
         normal: {
           default: {
             background: {
-              "background-color": '$colors.text'
+              'background-color': '$colors.text',
             },
             text: {
               color: '$colors.background',
-              "font-weight": '600'
+              'font-weight': '600',
             },
             placeholderText: {
               color: '$colors.textDark10',
-              "font-weight": '600'
-            }
-          }
-        }
-      }
+              'font-weight': '600',
+            },
+          },
+        },
+      },
     },
     buttons: {
       primary: {
