@@ -17,6 +17,7 @@ import { SponsoredTokenCard } from './components/sponsoredTokenCard';
 import { GlobalsProvider } from './globalsContext';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
+import { DialogTest } from './components/dialogTest';
 
 const theme = buildNotdTheme();
 
@@ -151,6 +152,7 @@ export const App = hot((): React.ReactElement => {
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide3} />
             </Stack.Item>
+            <DialogTest />
             <Text>Get your daily dose on:</Text>
             <Spacing variant={PaddingSize.Narrow} />
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
