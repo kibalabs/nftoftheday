@@ -21,7 +21,7 @@ import './fonts.css';
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-const notdClient = new NotdClient(requester);
+const notdClient = new NotdClient(requester, 'http://localhost:5000');
 const localStorageClient = new LocalStorageClient(window.localStorage);
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
 tracker.trackApplicationOpen();
@@ -133,7 +133,7 @@ export const App = hot((): React.ReactElement => {
             <Text variant='header1'>NFT of the day</Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-              <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2021, 1, 19) } />
+              <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2021, 0, 1) } />
               <Text variant='header3'>{getDateString()}</Text>
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>

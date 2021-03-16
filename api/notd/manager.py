@@ -54,7 +54,7 @@ class NotdManager:
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
             randomTokenTransfer=randomTokenTransfers[0],
-            sponsoredToken=Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345')
+            sponsoredToken=Token(registryAddress='0xeb30e885ad86882e6d7d357977fd6398526b08f6', tokenId='12600020004')
         )
 
     async def receive_new_blocks_deferred(self) -> None:
