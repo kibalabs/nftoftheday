@@ -163,7 +163,7 @@ export const App = hot((): React.ReactElement => {
             </Stack>
             <Spacing />
             <Spacing />
-            <MarkdownText textVariant='light' source='Data provided by [OpenSea](https://opensea.io/). Made by [krishan711](https://twitter.com/krishan711)' />
+            <MarkdownText textVariant='light' source='Data provided by [OpenSea](https://opensea.io/). Made by [Kiba Labs](https://www.kibalabs.com)' />
             <Spacing variant={PaddingSize.Narrow} />
           </Stack>
         </BackgroundView>
