@@ -73,7 +73,7 @@ export class RetrieveRegistryTokenResponse extends ResponseData {
 export class SubscribeRequest extends RequestData {
   readonly email: string;
 
-  public constructor(email?: string) {
+  public constructor(email: string) {
     super();
     this.email = email;
   }

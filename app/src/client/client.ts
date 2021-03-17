@@ -30,6 +30,6 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.SubscribeRequest(email);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await this.makeRequest(method, path, request, Endpoints.SubscribeResponse);
-    return null;
+    return;
   }
 }
