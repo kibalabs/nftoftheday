@@ -10,6 +10,7 @@ import { hot } from 'react-hot-loader/root';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
+import { EmailSubsriptionPopup } from './components/emailSubcriptionPopup';
 import { HighestPricedTokenTransferCard } from './components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from './components/mostTradedTokenTransferCard';
 import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
@@ -17,7 +18,6 @@ import { SponsoredTokenCard } from './components/sponsoredTokenCard';
 import { GlobalsProvider } from './globalsContext';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
-import { EmailSubsriptionPopup } from './components/emailSubcriptionPopup';
 
 const theme = buildNotdTheme();
 
@@ -125,7 +125,7 @@ export const App = hot((): React.ReactElement => {
 
   const onEmailClicked = (): void => {
     setIsEmailPopopShowing(true);
-  }
+  };
 
   return (
     <KibaApp theme={theme}>

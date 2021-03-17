@@ -26,8 +26,9 @@ export class NotdClient extends ServiceClient {
 
   public subscribe = async (email: string): Promise<void> => {
     const method = RestMethod.POST;
-    const path = `v1/subscribe`;
+    const path = 'v1/subscribe';
     const request = new Endpoints.SubscribeRequest(email);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await this.makeRequest(method, path, request, Endpoints.SubscribeResponse);
     return null;
   }

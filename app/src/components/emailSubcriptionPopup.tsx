@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Alignment, Button, Dialog, Direction, Form, IconButton, KibaIcon, PaddingSize, SingleLineInput, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+
 import { useGlobals } from '../globalsContext';
 
 interface EmailSubsriptionPopupProps {
@@ -14,7 +15,6 @@ export const EmailSubsriptionPopup = (props: EmailSubsriptionPopupProps): React.
   const [inputText, setInputText] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isSuccessfullySubscribed, setIsSuccessfullySubscribed] = React.useState<boolean>(false);
-  const confirmButtonText = props.confirmButtonText || 'Confirm';
 
   const onSubscribeClicked = (): void => {
     setIsLoading(true);
@@ -25,7 +25,7 @@ export const EmailSubsriptionPopup = (props: EmailSubsriptionPopupProps): React.
       // TODO(krishan711): show the error
       setIsLoading(false);
     });
-  }
+  };
 
   return (
     <Dialog
@@ -51,7 +51,7 @@ export const EmailSubsriptionPopup = (props: EmailSubsriptionPopupProps): React.
             </Form>
           </React.Fragment>
         ) : (
-          <Text alignment={TextAlignment.Center}>Awesome, you'll be hearing from us soon!</Text>
+          <Text alignment={TextAlignment.Center}>Awesome, you&apos;ll be hearing from us soon!</Text>
         )}
       </Stack>
     </Dialog>
