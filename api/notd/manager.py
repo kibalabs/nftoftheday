@@ -21,8 +21,20 @@ from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.core.exceptions import DuplicateValueException
 from notd.core.sqs_message_queue import SqsMessageQueue
+from notd.core.util import date_util
 from notd.opensea_client import OpenseaClient
 from notd.token_client import TokenClient
+
+SPONSORED_TOKENS = [{
+    'date': datetime.datetime(2021, 1, 1),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345'),
+}, {
+    'date': datetime.datetime(2021, 3, 17),
+    'token': Token(registryAddress='0xeb30e885ad86882e6d7d357977fd6398526b08f6', tokenId='12600020004'),
+}, {
+    'date': datetime.datetime(2021, 3, 18),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='46336616857044335826783636020397951689168313340333593985461699001474655191041'),
+}]
 
 class NotdManager:
 
@@ -35,6 +47,15 @@ class NotdManager:
         self.tokenClient = tokenClient
         self.requester = requester
         self._tokenCache = dict()
+
+    @staticmethod
+    def get_sponsored_token() -> Token:
+        sponsoredToken = SPONSORED_TOKENS[0]['token']
+        currentDate = date_util.datetime_from_now()
+        allPastTokens = [sponsorItem['token'] for sponsorItem in SPONSORED_TOKENS if sponsorItem['date'] < currentDate]
+        if allPastTokens:
+            sponsoredToken = allPastTokens[-1]
+        return sponsoredToken
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
@@ -59,7 +80,7 @@ class NotdManager:
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
             randomTokenTransfer=randomTokenTransfers[0],
-            sponsoredToken=Token(registryAddress='0xeb30e885ad86882e6d7d357977fd6398526b08f6', tokenId='12600020004')
+            sponsoredToken=self.get_sponsored_token(),
         )
 
     async def receive_new_blocks_deferred(self) -> None:
