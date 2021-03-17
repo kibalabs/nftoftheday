@@ -19,7 +19,7 @@ interface NftCardProps {
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
   const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? '/props.nft/icon.svg';
-  const collectionImage = props.nft.collectionImageUrl;
+  const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
   const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
@@ -46,9 +46,9 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Spacing variant={PaddingSize.Wide} />
           {collectionTitle && (
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-              {collectionImage && (
+              {collectionImageUrl && (
                 <Box width='25px' height='25px'>
-                  <Image source={collectionImage} alternativeText={collectionTitle} fitType='contain' />
+                  <Image source={collectionImageUrl} alternativeText={collectionTitle} fitType='contain' />
                 </Box>
               )}
               <Stack.Item growthFactor={1} shrinkFactor={1}>

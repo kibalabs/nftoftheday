@@ -49,7 +49,11 @@ class NotdManager:
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
         )
-        randomTokenTransfers = await self.retriever.list_token_transfers(orders=[RandomOrder()], limit=1)
+        randomTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            orders=[RandomOrder()],
+            limit=1
+        )
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,

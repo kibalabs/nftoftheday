@@ -118,15 +118,15 @@ export class RegistryToken {
   public static fromObject = (obj: Record<string, unknown>): RegistryToken => {
     return new RegistryToken(
       String(obj.name),
-      String(obj.imageUrl),
-      String(obj.openSeaUrl),
-      String(obj.externalUrl),
+      obj.imageUrl ? String(obj.imageUrl) : null,
+      obj.openSeaUrl ? String(obj.openSeaUrl) : null,
+      obj.externalUrl ? String(obj.externalUrl) : null,
       obj.lastSaleDate ? dateFromString(obj.lastSaleDate as string) : null,
-      Number(obj.lastSalePrice),
+      obj.lastSalePrice ? Number(obj.lastSalePrice) : null,
       String(obj.collectionName),
-      String(obj.collectionImageUrl),
-      String(obj.collectionOpenSeaUrl),
-      String(obj.collectionExternalUrl),
+      obj.collectionImageUrl ? String(obj.collectionImageUrl) : null,
+      obj.collectionOpenSeaUrl ? String(obj.collectionOpenSeaUrl) : null,
+      obj.collectionExternalUrl ? String(obj.collectionExternalUrl) : null,
     );
   }
 }
