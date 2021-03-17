@@ -21,7 +21,7 @@ import './fonts.css';
 const theme = buildNotdTheme();
 
 const requester = new Requester();
-const notdClient = new NotdClient(requester);
+const notdClient = new NotdClient(requester, 'http://localhost:5000');
 const localStorageClient = new LocalStorageClient(window.localStorage);
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
 tracker.trackApplicationOpen();
