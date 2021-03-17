@@ -26,4 +26,10 @@ def create_api(notdManager: NotdManager) -> KibaRouter():
         registryToken = await notdManager.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
         return RetreiveRegistryTokenResponse(registryToken=ApiRegistryToken.from_model(model=registryToken))
 
+    @router.post('/subscribe')
+    async def create_newsletter_subscription(request: SubscribeRequest):
+        email = request.email.lower()
+        await notdManager.subscribe_email(email=email)
+        return SubscribeResponse()
+
     return router
