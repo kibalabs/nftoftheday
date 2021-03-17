@@ -10,6 +10,7 @@ import { hot } from 'react-hot-loader/root';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
+import { EmailSubsriptionPopup } from './components/emailSubcriptionPopup';
 import { HighestPricedTokenTransferCard } from './components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from './components/mostTradedTokenTransferCard';
 import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
@@ -38,6 +39,7 @@ defaultDate.setHours(0, 0, 0, 0);
 
 export const App = hot((): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
+  const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
@@ -121,6 +123,10 @@ export const App = hot((): React.ReactElement => {
     setStartDate(newDate);
   };
 
+  const onEmailClicked = (): void => {
+    setIsEmailPopopShowing(true);
+  };
+
   return (
     <KibaApp theme={theme}>
       <GlobalsProvider globals={globals}>
@@ -160,6 +166,9 @@ export const App = hot((): React.ReactElement => {
               <Stack.Item growthFactor={1} shrinkFactor={1}>
                 <Button variant='tertiary' text={'Instagram'} target={'https://instagram.com/tokenhunt'} iconLeft={<KibaIcon iconId='feather-instagram' />} />
               </Stack.Item>
+              <Stack.Item growthFactor={1} shrinkFactor={1}>
+                <Button variant='tertiary' text={'Email'} onClicked={onEmailClicked} iconLeft={<KibaIcon iconId='feather-mail' />} />
+              </Stack.Item>
             </Stack>
             <Spacing />
             <Spacing />
@@ -167,6 +176,10 @@ export const App = hot((): React.ReactElement => {
             <Spacing variant={PaddingSize.Narrow} />
           </Stack>
         </BackgroundView>
+        <EmailSubsriptionPopup
+          isOpen={isEmailPopupShowing}
+          onCloseClicked={() => setIsEmailPopopShowing(false)}
+        />
       </GlobalsProvider>
     </KibaApp>
   );

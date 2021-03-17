@@ -117,3 +117,9 @@ class RetreiveRegistryTokenRequest(BaseModel):
 
 class RetreiveRegistryTokenResponse(BaseModel):
     registryToken: ApiRegistryToken
+
+class SubscribeRequest(BaseModel):
+    email: str
+
+class SubscribeResponse(BaseModel):
+    pass

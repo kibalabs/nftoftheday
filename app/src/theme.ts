@@ -40,6 +40,7 @@ export const buildNotdTheme = (): ITheme => {
     texts: {
       default: {
         'font-family': "'Post No Bills Jaffna', sans-serif",
+        'font-weight': '400',
       },
       header3: {
         'font-size': '1.5rem',
@@ -178,6 +179,25 @@ export const buildNotdTheme = (): ITheme => {
           focus: {
             background: {
               'border-color': 'rgba(255, 255, 255, 0.75)',
+            },
+          },
+        },
+      },
+    },
+    dialogs: {
+      default: {
+        backdropColor: 'rgba(0, 0, 0, 0.7)',
+        background: {
+          'background-color': '$colors.brandPrimaryDark10',
+        },
+      },
+    },
+    inputWrappers: {
+      dialogInput: {
+        normal: {
+          default: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.25)',
             },
           },
         },

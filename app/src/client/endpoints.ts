@@ -69,3 +69,26 @@ export class RetrieveRegistryTokenResponse extends ResponseData {
     );
   }
 }
+
+export class SubscribeRequest extends RequestData {
+  readonly email: string;
+
+  public constructor(email: string) {
+    super();
+    this.email = email;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      email: this.email,
+    };
+  }
+}
+
+export class SubscribeResponse extends ResponseData {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public static fromObject = (obj: Record<string, unknown>): SubscribeResponse => {
+    return new SubscribeResponse(
+    );
+  }
+}
