@@ -37,8 +37,11 @@ SPONSORED_TOKENS = [{
 }, {
     'date': datetime.datetime(2021, 3, 19),
     'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='55250154536998404625027252047976608984451896300108729590900307027953738317825'),
+}, {
+    'date': datetime.datetime(2021, 3, 21),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='25717709526662043702667024073050036494419818265012940397736896226900968472577'),
 }]
-	
+
 class NotdManager:
 
     def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester):
