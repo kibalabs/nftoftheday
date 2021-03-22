@@ -40,6 +40,27 @@ SPONSORED_TOKENS = [{
 }, {
     'date': datetime.datetime(2021, 3, 21),
     'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='25717709526662043702667024073050036494419818265012940397736896226900968472577'),
+}, {
+    'date': datetime.datetime(2021, 3, 23),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='43801378208677021703013652720955131791329532695635720832601938054892750897153'),
+}, {
+    'date': datetime.datetime(2021, 3, 24),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='105603725609947989499044129472074064723412167009068320432332286644752010444801'),
+}, {
+    'date': datetime.datetime(2021, 3, 25),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='29008894289059716691173729123664412627883963428002876020831939699607722786817'),
+}, {
+    'date': datetime.datetime(2021, 3, 26),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='92319092330910075162431766655763082221681235942393137704011888675062376562689'),
+}, {
+    'date': datetime.datetime(2021, 3, 27),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='24343393884017988685652554990480100049636101405691386574948147480323891920897'),
+}, {
+    'date': datetime.datetime(2021, 3, 28),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='27756626610640948989691358307332070697401420694720604130599955962904744820737'),
+}, {
+    'date': datetime.datetime(2021, 3, 29),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='24093022776342378134827809530625168732940087388395506520881445066877419126785'),
 }]
 
 class NotdManager:
@@ -72,6 +93,7 @@ class NotdManager:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
         mostTradedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
+                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId),
             ],

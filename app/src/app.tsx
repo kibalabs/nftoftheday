@@ -15,6 +15,7 @@ import { HighestPricedTokenTransferCard } from './components/highestPricedTokenT
 import { MostTradedTokenTransferCard } from './components/mostTradedTokenTransferCard';
 import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
 import { SponsoredTokenCard } from './components/sponsoredTokenCard';
+import { isToday, isYesterday } from './dateUtil';
 import { GlobalsProvider } from './globalsContext';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
@@ -68,12 +69,28 @@ export const App = hot((): React.ReactElement => {
   };
 
   const getUrlDateString = React.useCallback((): string | null => {
-    const currentDate = new Date();
-    if (startDate.getDate() === currentDate.getDate()) {
+    if (isToday(startDate)) {
       return null;
     }
     return dateToString(startDate, 'yyyy-MM-dd');
   }, [startDate]);
+
+  const getDateString = (): string => {
+    if (isToday(startDate)) {
+      return 'Today';
+    }
+    if (isYesterday(startDate)) {
+      return 'Yesterday';
+    }
+    return dateToString(startDate, 'dd MMMM yyyy');
+  };
+
+  const getTitleDateString = (): string => {
+    if (isToday(startDate)) {
+      return '';
+    }
+    return `| ${dateToString(startDate, 'dd MMMM yyyy')}`;
+  };
 
   React.useEffect((): void => {
     setHighestPricedTokenTransfer(null);
@@ -89,25 +106,6 @@ export const App = hot((): React.ReactElement => {
       setSponsoredToken(uiData.sponsoredToken);
     });
   }, [getUrlDateString, startDate]);
-
-  const getDateString = (): string => {
-    const currentDate = new Date();
-    if (startDate.getDate() === currentDate.getDate()) {
-      return 'Today';
-    }
-    if (startDate.getDate() === new Date(currentDate.setDate(currentDate.getDate() - 1)).getDate()) {
-      return 'Yesterday';
-    }
-    return dateToString(startDate, 'dd MMMM yyyy');
-  };
-
-  const getTitleDateString = (): string => {
-    const currentDate = new Date();
-    if (startDate.getDate() === currentDate.getDate()) {
-      return '';
-    }
-    return `| ${dateToString(startDate, 'dd MMMM yyyy')}`;
-  };
 
   const onBackClicked = (): void => {
     const newDate = new Date(startDate);
@@ -139,7 +137,7 @@ export const App = hot((): React.ReactElement => {
             <Text variant='header1'>NFT of the day</Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-              <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2021, 0, 1) } />
+              <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2019, 10, 1) } />
               <Text variant='header3'>{getDateString()}</Text>
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
