@@ -59,4 +59,4 @@ class Requester:
         return httpxResponse
 
     async def close_connections(self) -> None:
-        await self.client.close()
+        await self.client.aclose()
