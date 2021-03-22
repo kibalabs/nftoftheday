@@ -15,9 +15,9 @@ import { HighestPricedTokenTransferCard } from './components/highestPricedTokenT
 import { MostTradedTokenTransferCard } from './components/mostTradedTokenTransferCard';
 import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
 import { SponsoredTokenCard } from './components/sponsoredTokenCard';
+import { isToday, isYesterday } from './dateUtil';
 import { GlobalsProvider } from './globalsContext';
 import { buildNotdTheme } from './theme';
-import { isToday, isYesterday } from './dateUtil';
 import './fonts.css';
 
 const theme = buildNotdTheme();
