@@ -18,3 +18,4 @@ CREATE INDEX tbl_token_transfers_registry_address ON tbl_token_transfers (regist
 CREATE INDEX tbl_token_transfers_token_id ON tbl_token_transfers (token_id);
 CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
 CREATE INDEX tbl_token_transfers_block_date ON tbl_token_transfers (block_date);
+CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_number);
