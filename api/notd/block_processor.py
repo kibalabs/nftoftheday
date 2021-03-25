@@ -6,6 +6,7 @@ from typing import Optional
 from typing import Dict
 from typing import Any
 import logging
+import async_lru
 
 import web3
 from web3 import Web3
@@ -26,6 +27,7 @@ from hexbytes import HexBytes
 from notd.model import RetrievedTokenTransfer
 from notd.core.requester import Requester
 from notd.core.exceptions import BadRequestException
+from notd.core.util import list_util
 
 class EthClientInterface:
 
@@ -160,21 +162,25 @@ class BlockProcessor:
         # self.contractFilter = self.ierc721Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc721TansferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
 
+    @async_lru.alru_cache(maxsize=10000)
+    async def _get_transaction(self, transactionHash: str) -> TxData:
+        return await self.ethClient.get_transaction(transactionHash=transactionHash)
+
+    @async_lru.alru_cache(maxsize=10000)
+    async def _get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+        return await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
+
     async def get_latest_block_number(self) -> int:
         return await self.ethClient.get_latest_block_number()
-
-    @staticmethod
-    def _genereate_chunks(lst: List, chunkSize: int):
-        for index in range(0, len(lst), chunkSize):
-            yield lst[index: index + chunkSize]
 
     async def get_transfers_in_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
         block = await self.ethClient.get_block(blockNumber)
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
+        logging.info(f'Found {len(events)} events in block #{blockNumber}')
         allTokenTransfers = []
-        for eventsChunk in self._genereate_chunks(events, 50):
+        for eventsChunk in list_util.generate_chunks(events, 10):
             allTokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in eventsChunk])
         return [tokenTransfer for tokenTransfer in allTokenTransfers if tokenTransfer]
 
@@ -202,11 +208,11 @@ class BlockProcessor:
         fromAddress = event['topics'][1].hex()
         toAddress = event['topics'][2].hex()
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
-        ethTransaction = await self.ethClient.get_transaction(transactionHash=transactionHash)
+        ethTransaction = await self._get_transaction(transactionHash=transactionHash)
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        ethTransactionReceipt = await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
+        ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
         gasUsed = ethTransactionReceipt['gasUsed']
         transaction = RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
         return transaction
