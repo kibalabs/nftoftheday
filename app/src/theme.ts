@@ -1,5 +1,6 @@
 import { buildTheme, ITheme } from '@kibalabs/ui-react';
 
+const defaultTheme = buildTheme();
 export const buildNotdTheme = (): ITheme => {
   const theme = buildTheme({
     colors: {
@@ -67,6 +68,10 @@ export const buildNotdTheme = (): ITheme => {
       },
     },
     boxes: {
+      phBanner: {
+        padding: `${defaultTheme.dimensions.paddingWide} ${defaultTheme.dimensions.paddingWide}`,
+        'background-color': 'rgba(0, 0, 0, 0.5)',
+      },
       card: {
         padding: '0',
         'background-color': 'rgba(255, 255, 255, 0.15)',

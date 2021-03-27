@@ -49,6 +49,7 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     await database.connect()
     isReverse = batchSize < 0
     currentBlockNumber = startBlockNumber
+    exceptionCount = 0
     while (isReverse and currentBlockNumber > endBlockNumber) or (not isReverse and currentBlockNumber < endBlockNumber):
         nextBlockNumber = currentBlockNumber + batchSize
         start = min(currentBlockNumber, nextBlockNumber)
@@ -58,9 +59,14 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
             await notdManager.process_block_range(startBlockNumber=start, endBlockNumber=end)
         except Exception as exception:
             logging.error(f'Failed due to: {str(exception)[:200]}')
+            exceptionCount += 1
+            if exceptionCount > 3:
+                logging.error(f'Failed 3 times in a row, bailing out. Next to process is {start}-{end}')
+                break
             continue
         currentBlockNumber = nextBlockNumber
-        time.sleep(1)
+        exceptionCount = 0
+        # time.sleep(1)
     await database.disconnect()
     await requester.close_connections()
 
