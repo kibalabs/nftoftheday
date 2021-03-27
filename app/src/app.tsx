@@ -3,7 +3,7 @@ import React from 'react';
 import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Box, Button, Container, ContainingView, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, Link, LinkBase, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Button, Container, ContainingView, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
@@ -133,22 +133,20 @@ export const App = hot((): React.ReactElement => {
         </Helmet>
         <BackgroundView linearGradient='#200122,#6F0000'>
           <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-            <Box variant='phBanner'>
-              <ContainingView>
+            {/* <Box variant='phBanner'>
+              <Container isFullHeight={false}>
                 <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
-                  <KibaIcon _color='#DA552F' iconId={'remix-product-hunt'} />
-                  <Spacing />
-                  <Text>We're live on Product Hunt today 🎉 We'd love your support, please</Text>
+                  <Text>We&apos;re live on Product Hunt today 🎉 We&apos;d love your support, please</Text>
                   <Spacing variant={PaddingSize.Narrow} />
                   <Link
-                    text=" leave a review here "
+                    text=' leave a review here '
                     target='https://www.producthunt.com/posts/nft-of-the-day?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-nft-of-the-day'
                   />
                   <Spacing variant={PaddingSize.Narrow} />
                   <Text>🙌.</Text>
                 </Stack>
-              </ContainingView>
-            </Box>
+              </Container>
+            </Box> */}
             <Spacing variant={PaddingSize.Wide2} />
             <Text variant='header1'>NFT of the day</Text>
             <Spacing variant={PaddingSize.Default} />
@@ -160,14 +158,14 @@ export const App = hot((): React.ReactElement => {
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
             </Stack.Item>
-            <ContainingView>
+            <Container isFullHeight={false}>
               <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                 <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
                 <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
                 <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
                 <SponsoredTokenCard token={sponsoredToken} />
               </EqualGrid>
-            </ContainingView>
+            </Container>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
             </Stack.Item>

@@ -70,7 +70,7 @@ export const buildNotdTheme = (): ITheme => {
     boxes: {
       phBanner: {
         padding: `${defaultTheme.dimensions.paddingWide} ${defaultTheme.dimensions.paddingWide}`,
-        "background-color": 'rgba(0, 0, 0, 0.5)'
+        'background-color': 'rgba(0, 0, 0, 0.5)',
       },
       card: {
         padding: '0',
