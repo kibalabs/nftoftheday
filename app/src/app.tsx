@@ -127,7 +127,7 @@ export const App = hot((): React.ReactElement => {
 
   const showProductHuntBanner = (): boolean => {
     const currentDate = new Date();
-    return currentDate > new Date(2021, 4, 1) && currentDate < new Date(2021, 4, 2);
+    return currentDate > new Date(2021, 3, 1) && currentDate < new Date(2021, 3, 2);
   };
 
   return (
