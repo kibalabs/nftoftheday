@@ -66,6 +66,21 @@ SPONSORED_TOKENS = [{
 }, {
     'date': datetime.datetime(2021, 4, 6),
     'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='76342150682492012527130272222408539120490122112533884247310952850290821300225'),
+}, {
+    'date': datetime.datetime(2021, 4, 8),
+    'token': Token(registryAddress='0x60f80121c31a0d46b5279700f9df786054aa5ee5', tokenId='726570'),
+}, {
+    'date': datetime.datetime(2021, 4, 9),
+    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='8370'),
+}, {
+    'date': datetime.datetime(2021, 4, 10),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='99676044512270035834243585942457171130947118632456127502028325840120639913985'),
+}, {
+    'date': datetime.datetime(2021, 4, 11),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='107365703537559603625286105018717806731803205287939746917767951208164328734721'),
+}, {
+    'date': datetime.datetime(2021, 4, 12),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='84419958519894822484349159784641745807875992324952889767860142621535112265729'),
 }]
 
 class NotdManager:

@@ -10,7 +10,7 @@ from web3 import Web3
 from databases import Database
 
 from notd.block_processor import BlockProcessor
-from notd.block_processor import RestEthClient
+from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue

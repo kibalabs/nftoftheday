@@ -6,7 +6,7 @@ from notd.core.requester import Requester
 from notd.core.exceptions import NotFoundException
 from notd.core.util import date_util
 from notd.model import RegistryToken
-from notd.block_processor import EthClientInterface
+from notd.eth_client import EthClientInterface
 
 class TokenClient:
 

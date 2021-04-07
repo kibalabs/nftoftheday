@@ -10,7 +10,7 @@ from web3 import Web3
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.health import create_api as create_health_api
 from notd.block_processor import BlockProcessor
-from notd.block_processor import RestEthClient
+from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
