@@ -11,7 +11,7 @@ from web3 import Web3
 from databases import Database
 
 from notd.block_processor import BlockProcessor
-from notd.block_processor import RestEthClient
+from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
@@ -63,10 +63,10 @@ async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
             if exceptionCount > 3:
                 logging.error(f'Failed 3 times in a row, bailing out. Next to process is {start}-{end}')
                 break
+            time.sleep(60)
             continue
         currentBlockNumber = nextBlockNumber
         exceptionCount = 0
-        # time.sleep(1)
     await database.disconnect()
     await requester.close_connections()
 
