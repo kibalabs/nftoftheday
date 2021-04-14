@@ -11,7 +11,7 @@ from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
-from notd.core.aws_requester import AwsRequester
+from notd.core.basic_authentication import BasicAuthentication
 from notd.core.requester import Requester
 from notd.core.slack_client import SlackClient
 from notd.core.message_queue_processor import MessageQueueProcessor
@@ -30,8 +30,9 @@ async def main():
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     requester = Requester()
 
-    awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-    ethClient = RestEthClient(url='https://nd-z2a4tjsdtfbzbk2zsq5r4pahky.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    infuraAuth = BasicAuthentication(username='', password=os.environ['INFURA_PROJECT_SECRET'])
+    infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
+    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)

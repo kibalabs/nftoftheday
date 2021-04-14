@@ -14,7 +14,7 @@ from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
 from notd.core.sqs_message_queue import SqsMessageQueue
-from notd.core.aws_requester import AwsRequester
+from notd.core.basic_authentication import BasicAuthentication
 from notd.core.requester import Requester
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
@@ -29,8 +29,9 @@ retriever = NotdRetriever(database=database)
 sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
 workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 
-awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-ethClient = RestEthClient(url='https://nd-z2a4tjsdtfbzbk2zsq5r4pahky.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+infuraAuth = BasicAuthentication(username='', password=os.environ['INFURA_PROJECT_SECRET'])
+infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
+ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
 blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
 openseaClient = OpenseaClient(requester=requester)
