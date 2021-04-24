@@ -3,6 +3,7 @@ import React from 'react';
 import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { RegistryToken } from '../client/resources';
+import { NewThing } from './newThing';
 
 interface NftCardProps {
   nft: RegistryToken;
@@ -31,6 +32,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
         <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
           <Box variant={`cardLabelBox${extraLabelBoxVariantsString}`} isFullWidth={false}>
             <Text variant={`cardLabel${extraLabelVariantsString}`}>{props.label}</Text>
+            <NewThing />
           </Box>
         </Stack.Item>
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
