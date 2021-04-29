@@ -84,6 +84,24 @@ SPONSORED_TOKENS = [{
 }, {
     'date': datetime.datetime(2021, 4, 13),
     'token': Token(registryAddress='0x3a275655586a049fe860be867d10cdae2ffc0f33', tokenId='404'),
+}, {
+    'date': datetime.datetime(2021, 4, 29),
+    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='23851'),
+}, {
+    'date': datetime.datetime(2021, 4, 30),
+    'token': Token(registryAddress='0xd07dc4262bcdbf85190c01c996b4c06a461d2430', tokenId='519902'),
+}, {
+    'date': datetime.datetime(2021, 5, 1),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='54288986509980961627044848344103425498948313073962940939987547055279390588929'),
+}, {
+    'date': datetime.datetime(2021, 5, 2),
+    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='27798'),
+}, {
+    'date': datetime.datetime(2021, 5, 3),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='102246215621931234854983516961584524249741870832420637379168818446594192965633'),
+}, {
+    'date': datetime.datetime(2021, 5, 4),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='50351284325109780433681244533011450725220588723395223416911376259895259037697'),
 }]
 
 class NotdManager:
