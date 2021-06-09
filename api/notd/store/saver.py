@@ -8,7 +8,7 @@ from sqlalchemy.sql import ClauseElement
 from sqlalchemy.exc import IntegrityError
 
 from notd.model import *
-from notd.core.exceptions import *
+from core.exceptions import *
 from notd.store.schema import *
 
 class Saver:

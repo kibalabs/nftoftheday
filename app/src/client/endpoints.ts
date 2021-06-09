@@ -86,8 +86,7 @@ export class SubscribeRequest extends RequestData {
 }
 
 export class SubscribeResponse extends ResponseData {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public static fromObject = (obj: Record<string, unknown>): SubscribeResponse => {
+  public static fromObject = (): SubscribeResponse => {
     return new SubscribeResponse(
     );
   }

@@ -2,7 +2,7 @@ from __future__ import annotations
 import base64
 from binascii import Error as BinasciiError
 
-from notd.core.exceptions import UnauthorizedException
+from core.exceptions import UnauthorizedException
 
 class BasicAuthentication:
 

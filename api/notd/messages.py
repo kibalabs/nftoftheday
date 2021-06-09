@@ -1,6 +1,6 @@
 from typing import List
 
-from notd.core.model import MessageContent
+from core.queues.model import MessageContent
 
 
 class ProcessBlocksMessageContent(MessageContent):

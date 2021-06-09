@@ -3,19 +3,18 @@ import os
 import logging
 
 import boto3
+from core.queues.sqs_message_queue import SqsMessageQueue
+from core.requester import Requester
+from core.slack_client import SlackClient
+from core.queues.message_queue_processor import MessageQueueProcessor
+from core.requester import Requester
 from databases import Database
-from web3 import Web3
 
+from notd.basic_authentication import BasicAuthentication
 from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
-from notd.core.sqs_message_queue import SqsMessageQueue
-from notd.core.basic_authentication import BasicAuthentication
-from notd.core.requester import Requester
-from notd.core.slack_client import SlackClient
-from notd.core.message_queue_processor import MessageQueueProcessor
-from notd.core.requester import Requester
 from notd.notd_message_processor import NotdMessageProcessor
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
