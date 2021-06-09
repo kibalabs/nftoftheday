@@ -5,10 +5,10 @@ from typing import Optional
 
 from  sqlalchemy.sql.expression import func as sqlalchemyfunc
 
-from notd.core.store.retriever import Retriever
-from notd.core.store.retriever import FieldFilter
-from notd.core.store.retriever import Order
-from notd.core.store.retriever import StringFieldFilter
+from core.store.retriever import Retriever
+from core.store.retriever import FieldFilter
+from core.store.retriever import Order
+from core.store.retriever import StringFieldFilter
 from notd.model import Token
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable

@@ -3,31 +3,18 @@ import json
 import datetime
 from typing import List
 from typing import Optional
-from typing import Dict
-from typing import Any
 import logging
 import async_lru
 
-import web3
 from web3 import Web3
-from web3.contract import Contract
 from web3.types import LogReceipt
-from web3.types import BlockData
 from web3.types import TxData
 from web3.types import TxReceipt
 from web3.types import HexBytes
-from web3.types import ABIFunction
-from web3.types import ABI
-from web3._utils import method_formatters
-from web3._utils.contracts import encode_transaction_data
-from web3._utils.abi import get_abi_output_types
-from eth_utils import event_abi_to_log_topic
 from hexbytes import HexBytes
 
 from notd.model import RetrievedTokenTransfer
-from notd.core.requester import Requester
-from notd.core.exceptions import BadRequestException
-from notd.core.util import list_util
+from core.util import list_util
 from notd.eth_client import EthClientInterface
 
 

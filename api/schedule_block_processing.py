@@ -9,7 +9,7 @@ import boto3
 from web3 import Web3
 from databases import Database
 
-from notd.core.sqs_message_queue import SqsMessageQueue
+from core.sqs_message_queue import SqsMessageQueue
 from notd.messages import ProcessBlocksMessageContent
 from notd.messages import ProcessBlockRangeMessageContent
 

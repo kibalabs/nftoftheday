@@ -1,10 +1,10 @@
 import asyncio
 import logging
 
-from notd.core.requester import Requester
-from notd.core.requester import ResponseException
-from notd.core.exceptions import NotFoundException
-from notd.core.util import date_util
+from core.requester import Requester
+from core.requester import ResponseException
+from core.exceptions import NotFoundException
+from core.util import date_util
 from notd.model import RegistryToken
 
 class OpenseaClient:

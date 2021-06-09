@@ -6,14 +6,12 @@
   src: local('Post No Bills Jaffna'), url('/assets/PostNoBillsJaffna-Regular.woff') format('woff');
 }
 
-
 @font-face {
   font-family: 'Post No Bills Jaffna';
   font-style: normal;
   font-weight: 300;
   src: local('Post No Bills Jaffna'), url('/assets/PostNoBillsJaffna-Light.woff') format('woff');
 }
-
 
 @font-face {
   font-family: 'Post No Bills Jaffna';
@@ -22,7 +20,6 @@
   src: local('Post No Bills Jaffna'), url('/assets/PostNoBillsJaffna-Medium.woff') format('woff');
 }
 
-
 @font-face {
   font-family: 'Post No Bills Jaffna';
   font-style: normal;
@@ -30,14 +27,12 @@
   src: local('Post No Bills Jaffna'), url('/assets/PostNoBillsJaffna-SemiBold.woff') format('woff');
 }
 
-
 @font-face {
   font-family: 'Post No Bills Jaffna';
   font-style: normal;
   font-weight: 700;
   src: local('Post No Bills Jaffna'), url('/assets/PostNoBillsJaffna-Bold.woff') format('woff');
 }
-
 
 @font-face {
   font-family: 'Post No Bills Jaffna';
