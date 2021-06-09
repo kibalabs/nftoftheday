@@ -1,6 +1,7 @@
-from core.message_queue_processor import MessageProcessor
-from core.model import SqsMessage
 from core.exceptions import KibaException
+from core.queues.model import SqsMessage
+from core.queues.message_queue_processor import MessageProcessor
+
 from notd.messages import ProcessBlocksMessageContent
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
