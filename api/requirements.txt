@@ -1,4 +1,4 @@
 async_lru==1.0.2
 asyncclick==7.1.2.3
-kiba-core[wapi, eb3, queues, requester, database-psql]==0.1.2
+kiba-core[api, web3, queues, requester, database-psql]==0.1.2
 kiba-build==0.1.2
