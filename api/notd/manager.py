@@ -103,6 +103,15 @@ SPONSORED_TOKENS = [{
 }, {
     'date': datetime.datetime(2021, 5, 4),
     'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='50351284325109780433681244533011450725220588723395223416911376259895259037697'),
+}, {
+    'date': datetime.datetime(2021, 7, 8),
+    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='23851'),
+}, {
+    'date': datetime.datetime(2021, 7, 9),
+    'token': Token(registryAddress='0x1a92f7381b9f03921564a437210bb9396471050c', tokenId='8608'),
+}, {
+    'date': datetime.datetime(2021, 7, 10),
+    'token': Token(registryAddress='0x3b3bc9b1dd9f3c8716fff083947b8769e2ff9781', tokenId='2491'),
 }]
 
 class NotdManager:
