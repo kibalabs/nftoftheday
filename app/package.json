@@ -14,9 +14,9 @@
   "dependencies": {
     "@kibalabs/core": "0.5.4",
     "@kibalabs/core-react": "0.6.1",
-    "@kibalabs/everyview-tracker": "0.2.4",
-    "@kibalabs/everyview-tracker-react": "0.2.4",
-    "@kibalabs/ui-react": "0.9.0",
+    "@kibalabs/everyview-tracker": "0.2.5",
+    "@kibalabs/everyview-tracker-react": "0.2.5",
+    "@kibalabs/ui-react": "0.9.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-helmet": "6.1.0",
