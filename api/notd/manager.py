@@ -112,6 +112,9 @@ SPONSORED_TOKENS = [{
 }, {
     'date': datetime.datetime(2021, 7, 10),
     'token': Token(registryAddress='0x3b3bc9b1dd9f3c8716fff083947b8769e2ff9781', tokenId='2491'),
+}, {
+    'date': datetime.datetime(2021, 7, 11),
+    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='66002780748994982626144006163509289231567768778061913896012243296857769377793'),
 }]
 
 class NotdManager:
