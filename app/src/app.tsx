@@ -22,8 +22,11 @@ import './fonts.css';
 
 const theme = buildNotdTheme();
 
+const API_URL = 'https://notd-api.kibalabs.com';
+// const API_URL = 'http://localhost:5000';
+
 const requester = new Requester();
-const notdClient = new NotdClient(requester);
+const notdClient = new NotdClient(requester, API_URL);
 const localStorageClient = new LocalStorageClient(window.localStorage);
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
 tracker.trackApplicationOpen();
