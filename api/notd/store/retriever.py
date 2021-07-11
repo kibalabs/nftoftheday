@@ -15,10 +15,9 @@ from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
 _REGISTRY_BLACKLIST = set([
-    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47',
-    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47234808169212587382971023711941828336222959677902651',
-    '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e',
-    '0x4201dB13824a50a11f931169b2F0Bca9cAc23614',
+    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
+    '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e', # zed.run
+    '0xC36442b4a4522E871399CD717aBDD847Ab11FE88', # uniswap-v3-positions
 ])
 
 class NotdRetriever(Retriever):
