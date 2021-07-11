@@ -22,8 +22,8 @@ import './fonts.css';
 
 const theme = buildNotdTheme();
 
-// const API_URL = 'https://notd-api.kibalabs.com';
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://notd-api.kibalabs.com';
+// const API_URL = 'http://localhost:5000';
 
 const requester = new Requester();
 const notdClient = new NotdClient(requester, API_URL);
