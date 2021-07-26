@@ -28,94 +28,45 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.opensea_client import OpenseaClient
 from notd.token_client import TokenClient
 
-SPONSORED_TOKENS = [{
-    'date': datetime.datetime(2021, 1, 1),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345'),
-}, {
-    'date': datetime.datetime(2021, 3, 17),
-    'token': Token(registryAddress='0xeb30e885ad86882e6d7d357977fd6398526b08f6', tokenId='12600020004'),
-}, {
-    'date': datetime.datetime(2021, 3, 18),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='46336616857044335826783636020397951689168313340333593985461699001474655191041'),
-}, {
-    'date': datetime.datetime(2021, 3, 19),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='55250154536998404625027252047976608984451896300108729590900307027953738317825'),
-}, {
-    'date': datetime.datetime(2021, 3, 21),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='25717709526662043702667024073050036494419818265012940397736896226900968472577'),
-}, {
-    'date': datetime.datetime(2021, 3, 23),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='43801378208677021703013652720955131791329532695635720832601938054892750897153'),
-}, {
-    'date': datetime.datetime(2021, 3, 24),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='105603725609947989499044129472074064723412167009068320432332286644752010444801'),
-}, {
-    'date': datetime.datetime(2021, 3, 25),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='29008894289059716691173729123664412627883963428002876020831939699607722786817'),
-}, {
-    'date': datetime.datetime(2021, 3, 26),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='92319092330910075162431766655763082221681235942393137704011888675062376562689'),
-}, {
-    'date': datetime.datetime(2021, 3, 27),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='24343393884017988685652554990480100049636101405691386574948147480323891920897'),
-}, {
-    'date': datetime.datetime(2021, 3, 28),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='27756626610640948989691358307332070697401420694720604130599955962904744820737'),
-}, {
-    'date': datetime.datetime(2021, 3, 29),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='24093022776342378134827809530625168732940087388395506520881445066877419126785'),
-}, {
-    'date': datetime.datetime(2021, 4, 6),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='76342150682492012527130272222408539120490122112533884247310952850290821300225'),
-}, {
-    'date': datetime.datetime(2021, 4, 8),
-    'token': Token(registryAddress='0x60f80121c31a0d46b5279700f9df786054aa5ee5', tokenId='726570'),
-}, {
-    'date': datetime.datetime(2021, 4, 9),
-    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='8370'),
-}, {
-    'date': datetime.datetime(2021, 4, 10),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='99676044512270035834243585942457171130947118632456127502028325840120639913985'),
-}, {
-    'date': datetime.datetime(2021, 4, 11),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='107365703537559603625286105018717806731803205287939746917767951208164328734721'),
-}, {
-    'date': datetime.datetime(2021, 4, 12),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='84419958519894822484349159784641745807875992324952889767860142621535112265729'),
-}, {
-    'date': datetime.datetime(2021, 4, 13),
-    'token': Token(registryAddress='0x3a275655586a049fe860be867d10cdae2ffc0f33', tokenId='404'),
-}, {
-    'date': datetime.datetime(2021, 4, 29),
-    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='23851'),
-}, {
-    'date': datetime.datetime(2021, 4, 30),
-    'token': Token(registryAddress='0xd07dc4262bcdbf85190c01c996b4c06a461d2430', tokenId='519902'),
-}, {
-    'date': datetime.datetime(2021, 5, 1),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='54288986509980961627044848344103425498948313073962940939987547055279390588929'),
-}, {
-    'date': datetime.datetime(2021, 5, 2),
-    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='27798'),
-}, {
-    'date': datetime.datetime(2021, 5, 3),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='102246215621931234854983516961584524249741870832420637379168818446594192965633'),
-}, {
-    'date': datetime.datetime(2021, 5, 4),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='50351284325109780433681244533011450725220588723395223416911376259895259037697'),
-}, {
-    'date': datetime.datetime(2021, 7, 8),
-    'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='23851'),
-}, {
-    'date': datetime.datetime(2021, 7, 9),
-    'token': Token(registryAddress='0x1a92f7381b9f03921564a437210bb9396471050c', tokenId='8608'),
-}, {
-    'date': datetime.datetime(2021, 7, 10),
-    'token': Token(registryAddress='0x3b3bc9b1dd9f3c8716fff083947b8769e2ff9781', tokenId='2491'),
-}, {
-    'date': datetime.datetime(2021, 7, 11),
-    'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='66002780748994982626144006163509289231567768778061913896012243296857769377793'),
-}]
+SPONSORED_TOKENS = [
+    {'date': datetime.datetime(2021, 1, 1), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345')},
+    {'date': datetime.datetime(2021, 3, 17), 'token': Token(registryAddress='0xeb30e885ad86882e6d7d357977fd6398526b08f6', tokenId='12600020004')},
+    {'date': datetime.datetime(2021, 3, 18), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='46336616857044335826783636020397951689168313340333593985461699001474655191041')},
+    {'date': datetime.datetime(2021, 3, 19), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='55250154536998404625027252047976608984451896300108729590900307027953738317825')},
+    {'date': datetime.datetime(2021, 3, 21), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='25717709526662043702667024073050036494419818265012940397736896226900968472577')},
+    {'date': datetime.datetime(2021, 3, 23), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='43801378208677021703013652720955131791329532695635720832601938054892750897153')},
+    {'date': datetime.datetime(2021, 3, 24), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='105603725609947989499044129472074064723412167009068320432332286644752010444801')},
+    {'date': datetime.datetime(2021, 3, 25), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='29008894289059716691173729123664412627883963428002876020831939699607722786817')},
+    {'date': datetime.datetime(2021, 3, 26), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='92319092330910075162431766655763082221681235942393137704011888675062376562689')},
+    {'date': datetime.datetime(2021, 3, 27), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='24343393884017988685652554990480100049636101405691386574948147480323891920897')},
+    {'date': datetime.datetime(2021, 3, 28), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='27756626610640948989691358307332070697401420694720604130599955962904744820737')},
+    {'date': datetime.datetime(2021, 3, 29), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='24093022776342378134827809530625168732940087388395506520881445066877419126785')},
+    {'date': datetime.datetime(2021, 4, 6), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='76342150682492012527130272222408539120490122112533884247310952850290821300225')},
+    {'date': datetime.datetime(2021, 4, 8), 'token': Token(registryAddress='0x60f80121c31a0d46b5279700f9df786054aa5ee5', tokenId='726570')},
+    {'date': datetime.datetime(2021, 4, 9), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='8370')},
+    {'date': datetime.datetime(2021, 4, 10), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='99676044512270035834243585942457171130947118632456127502028325840120639913985')},
+    {'date': datetime.datetime(2021, 4, 11), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='107365703537559603625286105018717806731803205287939746917767951208164328734721')},
+    {'date': datetime.datetime(2021, 4, 12), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='84419958519894822484349159784641745807875992324952889767860142621535112265729')},
+    {'date': datetime.datetime(2021, 4, 13), 'token': Token(registryAddress='0x3a275655586a049fe860be867d10cdae2ffc0f33', tokenId='404')},
+    {'date': datetime.datetime(2021, 4, 29), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='23851')},
+    {'date': datetime.datetime(2021, 4, 30), 'token': Token(registryAddress='0xd07dc4262bcdbf85190c01c996b4c06a461d2430', tokenId='519902')},
+    {'date': datetime.datetime(2021, 5, 1), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='54288986509980961627044848344103425498948313073962940939987547055279390588929')},
+    {'date': datetime.datetime(2021, 5, 2), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='27798')},
+    {'date': datetime.datetime(2021, 5, 3), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='102246215621931234854983516961584524249741870832420637379168818446594192965633')},
+    {'date': datetime.datetime(2021, 5, 4), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='50351284325109780433681244533011450725220588723395223416911376259895259037697')},
+    {'date': datetime.datetime(2021, 7, 8), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='23851')},
+    {'date': datetime.datetime(2021, 7, 9), 'token': Token(registryAddress='0x1a92f7381b9f03921564a437210bb9396471050c', tokenId='8608')},
+    {'date': datetime.datetime(2021, 7, 10), 'token': Token(registryAddress='0x3b3bc9b1dd9f3c8716fff083947b8769e2ff9781', tokenId='2491')},
+    {'date': datetime.datetime(2021, 7, 11), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='66002780748994982626144006163509289231567768778061913896012243296857769377793')},
+    {'date': datetime.datetime(2021, 7, 12), 'token': Token(registryAddress='0x3b3bc9b1dd9f3c8716fff083947b8769e2ff9781', tokenId='2491')},
+    {'date': datetime.datetime(2021, 7, 27), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='66745729326815246883087876015061527361061274724079872296411828014787160178689')},
+    {'date': datetime.datetime(2021, 7, 30), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='88081196100390197613502372721796212703872445580242466524616017838975500681217')},
+    {'date': datetime.datetime(2021, 8, 2), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='105396633564879415009426829041684172579609570053458601633165868279695398666241')},
+    {'date': datetime.datetime(2021, 8, 5), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='62381')},
+    {'date': datetime.datetime(2021, 8, 8), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='61560')},
+    {'date': datetime.datetime(2021, 8, 11), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='48009777219687553353266573207856084490164331626444899155064281889677699448833')},
+    {'date': datetime.datetime(2021, 8, 14), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='49660350604499248360381827203761942161648024579795517639836571580713003909121')},
+    {'date': datetime.datetime(2021, 8, 17), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='95479215457186577315460887603281689611501581374433554641161475835178891870209')},]
 
 class NotdManager:
 
