@@ -1,29 +1,11 @@
-import logging
-from typing import Optional
-from typing import Dict
-
-import asyncpg
 from databases import Database
-from sqlalchemy.sql import ClauseElement
-from sqlalchemy.exc import IntegrityError
 
 from notd.model import *
 from core.exceptions import *
+from core.store.saver import Saver as CoreSaver
 from notd.store.schema import *
 
-class Saver:
-
-    def __init__(self, database: Database):
-        self.database = database
-
-    async def _execute(self, query: ClauseElement, values: Optional[Dict]):
-        try:
-            return await self.database.execute(query=query, values=values)
-        except asyncpg.exceptions.UniqueViolationError as exception:
-            raise DuplicateValueException(message=str(exception))
-        except Exception as exception:
-            logging.error(exception)
-            raise InternalServerErrorException(message='Error running save operation')
+class Saver(CoreSaver):
 
     async def create_token_transfer(self, transactionHash: str, registryAddress: str, fromAddress: str, toAddress: str, tokenId: int, value: int, gasLimit: int, gasPrice: int, gasUsed: int, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> TokenTransfer:
         tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={

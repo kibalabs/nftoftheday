@@ -1,13 +1,9 @@
 import datetime
-from typing import Dict
 from typing import Optional
 from typing import List
 
 from pydantic import BaseModel
-from pydantic import Json
 
-from notd.model import Token
-from notd.model import TokenTransfer
 from notd.model import UiData
 from notd.model import RegistryToken
 
