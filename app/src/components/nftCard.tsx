@@ -19,7 +19,7 @@ interface NftCardProps {
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
   const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? null;
-  const shouldUseIframe = imageUrl?.startsWith('https://api.artblocks.io/generator');
+  const shouldUseIframe = imageUrl?.startsWith('https://api.artblocks.io/generator') || imageUrl?.startsWith('https://generator.artblocks.io');
   const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
   const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
