@@ -1,0 +1,2 @@
+asyncclick==7.1.2.3
+kiba-build==0.1.2

@@ -4,17 +4,17 @@ import logging
 import boto3
 from core.api.health import create_api as create_health_api
 from core.queues.sqs_message_queue import SqsMessageQueue
+from core.http.basic_authentication import BasicAuthentication
+from core.requester import Requester
 from databases import Database
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from notd.api.api_v1 import create_api as create_v1_api
-from notd.basic_authentication import BasicAuthentication
 from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
-from core.requester import Requester
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
 from notd.token_client import TokenClient
