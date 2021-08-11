@@ -12,10 +12,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get purge -y --auto-remove gcc libc-dev
 
-COPY requirements.txt $WORKDIR
-RUN pip install -r requirements.txt
 COPY requirements-dev.txt $WORKDIR
 RUN pip install -r requirements-dev.txt
+COPY requirements.txt $WORKDIR
+RUN pip install -r requirements.txt
 
 COPY . $WORKDIR
 
