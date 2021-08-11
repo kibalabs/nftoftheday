@@ -14,6 +14,7 @@ RUN apt-get update \
 
 COPY requirements.txt $WORKDIR
 RUN pip install -r requirements.txt
+COPY requirements-dev.txt $WORKDIR
 RUN pip install -r requirements-dev.txt
 
 COPY . $WORKDIR
