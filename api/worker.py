@@ -8,9 +8,9 @@ from core.requester import Requester
 from core.slack_client import SlackClient
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.requester import Requester
+from core.http.basic_authentication import BasicAuthentication
 from databases import Database
 
-from notd.basic_authentication import BasicAuthentication
 from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
