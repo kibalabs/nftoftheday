@@ -2,7 +2,6 @@ from core.api.kiba_router import KibaRouter
 from core.util import date_util
 from fastapi import Request
 from fastapi import Response
-
 from notd.api.models_v1 import *
 from notd.manager import NotdManager
 

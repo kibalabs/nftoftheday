@@ -6,12 +6,11 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever
 from core.store.retriever import StringFieldFilter
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
-
 from notd.model import Token
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
+from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap

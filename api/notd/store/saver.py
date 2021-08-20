@@ -1,6 +1,5 @@
 from core.exceptions import *
 from core.store.saver import Saver as CoreSaver
-
 from notd.model import *
 from notd.store.schema import *
 

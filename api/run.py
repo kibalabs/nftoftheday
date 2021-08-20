@@ -10,8 +10,6 @@ from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from databases import Database
-from web3 import Web3
-
 from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
 from notd.manager import NotdManager
@@ -19,6 +17,7 @@ from notd.opensea_client import OpenseaClient
 from notd.store.retriever import NotdRetriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
+from web3 import Web3
 
 
 @click.command()

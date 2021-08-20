@@ -14,7 +14,6 @@ from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import list_util
-
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent

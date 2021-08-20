@@ -9,7 +9,6 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
 from databases import Database
-
 from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
 from notd.manager import NotdManager

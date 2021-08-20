@@ -7,14 +7,13 @@ from typing import Optional
 
 import async_lru
 from core.util import list_util
+from notd.eth_client import EthClientInterface
+from notd.model import RetrievedTokenTransfer
 from web3 import Web3
 from web3.types import HexBytes
 from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
-
-from notd.eth_client import EthClientInterface
-from notd.model import RetrievedTokenTransfer
 
 #from hexbytes import HexBytes
 

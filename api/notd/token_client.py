@@ -3,7 +3,6 @@ import json
 
 from core.exceptions import NotFoundException
 from core.requester import Requester
-
 from notd.eth_client import EthClientInterface
 #from core.util import date_util
 from notd.model import RegistryToken
