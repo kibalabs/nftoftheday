@@ -1,6 +1,5 @@
 from core.exceptions import *
 from core.store.saver import Saver as CoreSaver
-from databases import Database
 
 from notd.model import *
 from notd.store.schema import *
@@ -9,7 +8,7 @@ from notd.store.schema import *
 class Saver(CoreSaver):
 
     async def create_token_transfer(self, transactionHash: str, registryAddress: str, fromAddress: str, toAddress: str, tokenId: int, value: int, gasLimit: int, gasPrice: int, gasUsed: int, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> TokenTransfer:
-        tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={
+        tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={  # pylint: disable=no-value-for-parameter
             TokenTransfersTable.c.transactionHash.key: transactionHash,
             TokenTransfersTable.c.registryAddress.key: registryAddress,
             TokenTransfersTable.c.fromAddress.key: fromAddress,
