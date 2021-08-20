@@ -1,5 +1,7 @@
 from core.store.saver import Saver as CoreSaver
-from notd.model import TokenTransfer,datetime
+
+from notd.model import TokenTransfer
+from notd.model import datetime
 from notd.store.schema import TokenTransfersTable
 
 
