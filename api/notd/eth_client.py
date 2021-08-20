@@ -48,6 +48,7 @@ class EthClientInterface:
     async def call_function(self, toAddress: str, contractAbi: ABI, functionName: str, functionAbi: ABIFunction, fromAddress: Optional[str] = None, arguments: Optional[Dict[str, Any]] = None, blockNumber: Optional[int] = None) -> List[Any]:
         raise NotImplementedError()
 
+
 class Web3EthClient(EthClientInterface):
 
     def __init__(self, web3Connection: Web3):
