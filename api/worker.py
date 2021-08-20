@@ -4,7 +4,6 @@ import logging
 
 import boto3
 from core.queues.sqs_message_queue import SqsMessageQueue
-from core.requester import Requester
 from core.slack_client import SlackClient
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.requester import Requester

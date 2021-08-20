@@ -11,11 +11,12 @@ from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
 from web3.types import HexBytes
-from hexbytes import HexBytes
+#from hexbytes import HexBytes
 
 from notd.model import RetrievedTokenTransfer
-from core.util import list_util
 from notd.eth_client import EthClientInterface
+
+from core.util import list_util
 
 
 class BlockProcessor:
@@ -84,7 +85,7 @@ class BlockProcessor:
                 if len(decodedEventData) == 1:
                     event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['from']), HexBytes(decodedEventData[0]['args']['to']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
         if len(event['topics']) < 4:
-            logging.debug(f'Ignoring event with less than 4 topics')
+            logging.debug('Ignoring event with less than 4 topics')
             return None
         fromAddress = event['topics'][1].hex()
         toAddress = event['topics'][2].hex()

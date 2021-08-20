@@ -14,8 +14,8 @@ from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
-from core.sqs_message_queue import SqsMessageQueue
-from core.basic_authentication import BasicAuthentication
+from core.queues.sqs_message_queue import SqsMessageQueue
+from core.http.basic_authentication import BasicAuthentication
 from core.requester import Requester
 from core.slack_client import SlackClient
 from notd.manager import NotdManager

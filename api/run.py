@@ -13,8 +13,8 @@ from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
 from notd.store.saver import Saver
 from notd.store.retriever import NotdRetriever
-from core.sqs_message_queue import SqsMessageQueue
-from core.basic_authentication import BasicAuthentication
+from core.queues.sqs_message_queue import SqsMessageQueue
+from core.http.basic_authentication import BasicAuthentication
 from core.requester import Requester
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
@@ -44,9 +44,9 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     await database.connect()
     # await manager.receive_new_blocks()
     if blockNumber:
-        await manager.process_block(blockNumber=blockNumber)
+        await notdManager.process_block(blockNumber=blockNumber)
     elif startBlockNumber and endBlockNumber:
-        await manager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
+        await notdManager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
     else:
         raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
     await database.disconnect()
