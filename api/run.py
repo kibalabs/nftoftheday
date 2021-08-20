@@ -1,5 +1,5 @@
-import asyncio
-import json
+#import asyncio
+#import json
 import logging
 import os
 from typing import Optional
@@ -17,7 +17,7 @@ from notd.opensea_client import OpenseaClient
 from notd.store.retriever import NotdRetriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
-from web3 import Web3
+#from web3 import Web3
 
 
 @click.command()
