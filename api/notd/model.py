@@ -5,6 +5,7 @@ from typing import Optional
 
 from pydantic import dataclasses
 
+
 @dataclasses.dataclass
 class TokenTransfer:
     tokenTransferId: int

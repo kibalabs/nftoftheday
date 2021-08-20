@@ -1,12 +1,15 @@
 #import asyncio
 import json
-#import logging
 
-from core.requester import Requester
 from core.exceptions import NotFoundException
+from core.requester import Requester
+
+from notd.eth_client import EthClientInterface
 #from core.util import date_util
 from notd.model import RegistryToken
-from notd.eth_client import EthClientInterface
+
+#import logging
+
 
 class TokenClient:
 

@@ -1,11 +1,12 @@
 from core.exceptions import KibaException
-from core.queues.model import SqsMessage
 from core.queues.message_queue_processor import MessageProcessor
+from core.queues.model import SqsMessage
 
-from notd.messages import ProcessBlocksMessageContent
-from notd.messages import ProcessBlockRangeMessageContent
-from notd.messages import ReceiveNewBlocksMessageContent
 from notd.manager import NotdManager
+from notd.messages import ProcessBlockRangeMessageContent
+from notd.messages import ProcessBlocksMessageContent
+from notd.messages import ReceiveNewBlocksMessageContent
+
 
 class NotdMessageProcessor(MessageProcessor):
 

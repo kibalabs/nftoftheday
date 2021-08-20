@@ -1,23 +1,24 @@
 import asyncio
-import os
 import logging
+import os
 
 import boto3
-from core.queues.sqs_message_queue import SqsMessageQueue
-from core.slack_client import SlackClient
-from core.queues.message_queue_processor import MessageQueueProcessor
-from core.requester import Requester
 from core.http.basic_authentication import BasicAuthentication
+from core.queues.message_queue_processor import MessageQueueProcessor
+from core.queues.sqs_message_queue import SqsMessageQueue
+from core.requester import Requester
+from core.slack_client import SlackClient
 from databases import Database
 
 from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
-from notd.store.saver import Saver
-from notd.store.retriever import NotdRetriever
-from notd.notd_message_processor import NotdMessageProcessor
 from notd.manager import NotdManager
+from notd.notd_message_processor import NotdMessageProcessor
 from notd.opensea_client import OpenseaClient
+from notd.store.retriever import NotdRetriever
+from notd.store.saver import Saver
 from notd.token_client import TokenClient
+
 
 async def main():
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
