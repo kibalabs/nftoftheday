@@ -1,18 +1,16 @@
-import asyncio
-import json
+#import asyncio
+#import json
 import logging
 import os
 import time
-from typing import Optional
 
 import asyncclick as click
 import boto3
 from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
-from core.slack_client import SlackClient
+#from core.slack_client import SlackClient
 from databases import Database
-from web3 import Web3
 
 from notd.block_processor import BlockProcessor
 from notd.eth_client import RestEthClient
@@ -21,6 +19,10 @@ from notd.opensea_client import OpenseaClient
 from notd.store.retriever import NotdRetriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
+
+#from typing import Optional
+
+#from web3 import Web3
 
 
 def chunks(lst, n):

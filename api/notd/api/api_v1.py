@@ -12,6 +12,7 @@ from notd.api.models_v1 import RetrieveUiDataRequest
 from notd.api.models_v1 import RetrieveUiDataResponse
 from notd.api.models_v1 import SubscribeRequest
 from notd.api.models_v1 import SubscribeResponse
+from notd.api.models_v1 import datetime
 from notd.manager import NotdManager
 
 
