@@ -1,10 +1,10 @@
-import os
 import logging
+import os
 
-import boto3
 import asyncclick as click
+import boto3
+from core.queues.sqs_message_queue import SqsMessageQueue
 
-from core.sqs_message_queue import SqsMessageQueue
 
 @click.command()
 async def run():

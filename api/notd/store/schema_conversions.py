@@ -4,6 +4,7 @@ from typing import Mapping
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 
+
 def token_transfer_from_row(row: Mapping) -> TokenTransfer:
     # NOTE(krishan711) these should be of the form row.id but https://github.com/encode/databases/issues/101
     return TokenTransfer(

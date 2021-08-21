@@ -1,17 +1,13 @@
-import asyncio
-import os
-import json
 import logging
+import os
 from typing import Optional
 
 import asyncclick as click
 import boto3
-from web3 import Web3
-from databases import Database
+from core.queues.sqs_message_queue import SqsMessageQueue
 
-from core.sqs_message_queue import SqsMessageQueue
-from notd.messages import ProcessBlocksMessageContent
 from notd.messages import ProcessBlockRangeMessageContent
+from notd.messages import ProcessBlocksMessageContent
 
 
 @click.command()

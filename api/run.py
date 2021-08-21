@@ -1,24 +1,22 @@
-import asyncio
-import os
-import json
 import logging
+import os
 from typing import Optional
 
 import asyncclick as click
 import boto3
-from web3 import Web3
+from core.http.basic_authentication import BasicAuthentication
+from core.queues.sqs_message_queue import SqsMessageQueue
+from core.requester import Requester
+from core.web3.eth_client import RestEthClient
 from databases import Database
 
 from notd.block_processor import BlockProcessor
-from notd.eth_client import RestEthClient
-from notd.store.saver import Saver
-from notd.store.retriever import NotdRetriever
-from core.sqs_message_queue import SqsMessageQueue
-from core.basic_authentication import BasicAuthentication
-from core.requester import Requester
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
+from notd.store.retriever import NotdRetriever
+from notd.store.saver import Saver
 from notd.token_client import TokenClient
+
 
 @click.command()
 @click.option('-b', '--block-number', 'blockNumber', required=False, type=int)
@@ -42,13 +40,13 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester)
 
     await database.connect()
-    # await manager.receive_new_blocks()
-    if blockNumber:
-        await manager.process_block(blockNumber=blockNumber)
-    elif startBlockNumber and endBlockNumber:
-        await manager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
-    else:
-        raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
+    await notdManager.receive_new_blocks()
+    # if blockNumber:
+    #     await notdManager.process_block(blockNumber=blockNumber)
+    # elif startBlockNumber and endBlockNumber:
+    #     await notdManager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
+    # else:
+    #     raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
     await database.disconnect()
     await requester.close_connections()
 
