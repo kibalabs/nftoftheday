@@ -1,5 +1,3 @@
-#import asyncio
-#import json
 import logging
 import os
 from typing import Optional
@@ -10,10 +8,6 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ProcessBlocksMessageContent
-
-#from web3 import Web3
-#from databases import Database
-
 
 
 @click.command()
