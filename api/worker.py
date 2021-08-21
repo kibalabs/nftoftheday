@@ -8,10 +8,10 @@ from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
+from core.web3.eth_client import RestEthClient
 from databases import Database
 
 from notd.block_processor import BlockProcessor
-from notd.eth_client import RestEthClient
 from notd.manager import NotdManager
 from notd.notd_message_processor import NotdMessageProcessor
 from notd.opensea_client import OpenseaClient
