@@ -40,13 +40,13 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester)
 
     await database.connect()
-    await notdManager.receive_new_blocks()
-    # if blockNumber:
-    #     await notdManager.process_block(blockNumber=blockNumber)
-    # elif startBlockNumber and endBlockNumber:
-    #     await notdManager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
-    # else:
-    #     raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
+    #await notdManager.receive_new_blocks()
+    if blockNumber:
+         await notdManager.process_block(blockNumber=blockNumber)
+    elif startBlockNumber and endBlockNumber:
+         await notdManager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
+    else:
+         raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
     await database.disconnect()
     await requester.close_connections()
 
