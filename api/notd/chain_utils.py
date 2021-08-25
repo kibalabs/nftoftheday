@@ -1,4 +1,3 @@
-from eth_typing.encoding import HexStr
 import eth_utils
 
 
