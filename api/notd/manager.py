@@ -70,12 +70,8 @@ SPONSORED_TOKENS = [
     {'date': datetime.datetime(2021, 8, 23), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='75804228130349846080122888708441842295980916946164453065125507061084692938753')},
     {'date': datetime.datetime(2021, 8, 26), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='65446')},
     {'date': datetime.datetime(2021, 8, 29), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='64896')},
-<<<<<<< HEAD
-    {'date': datetime.datetime(2021, 9, 1), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='85364157633350634373635596396121761067444146987595609300037457530101165981697')},]
-=======
     {'date': datetime.datetime(2021, 9, 1), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='85364157633350634373635596396121761067444146987595609300037457530101165981697')},
 ]
->>>>>>> main
 
 class NotdManager:
 
