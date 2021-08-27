@@ -14,6 +14,8 @@ from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
 
+
+from notd.chain_utils import normalize_address
 from notd.model import RetrievedTokenTransfer
 
 
@@ -85,8 +87,9 @@ class BlockProcessor:
         if len(event['topics']) < 4:
             logging.debug('Ignoring event with less than 4 topics')
             return None
-        fromAddress = event['topics'][1].hex()
-        toAddress = event['topics'][2].hex()
+
+        fromAddress = normalize_address(event['topics'][1].hex())
+        toAddress = normalize_address(event['topics'][2].hex())
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
         gasLimit = ethTransaction['gas']

@@ -19,4 +19,4 @@ CREATE INDEX tbl_token_transfers_token_id ON tbl_token_transfers (token_id);
 CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
 CREATE INDEX tbl_token_transfers_block_date ON tbl_token_transfers (block_date);
 CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_number);
-CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_hash);
+CREATE INDEX tbl_token_transfers_block_hash ON tbl_token_transfers (block_hash);
