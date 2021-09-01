@@ -1,31 +1,56 @@
-
 import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+import logging
 import asyncio
 import asyncclick as click
 
-from sqlalchemy import create_engine
+from databases.core import Database
+from core.store.retriever import Direction, IntegerFieldFilter, Order
+
+from notd.store.retriever import Retriever
 from notd.chain_utils import normalize_address
-from notd.store.schema import TokenTransfersTable as table
+from notd.store.schema import TokenTransfersTable
+
 
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=10000)
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
-    dbString = (f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')#pylint: disable=invalid-name
-    db = create_engine(dbString) # pylint: disable=invalid-name
+    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    retriever = Retriever(database=database)
+    await database.connect()
 
-    conn = db.connect()
-
-    resultSet = conn.execute(table.select().where(table.c.block_number.between(startBlockNumber,endBlockNumber)).order_by(table.c.id) ) #pylint: disable=invalid-name
-    for toAddress, fromAddress, _ in resultSet:
-        if len(toAddress) > 42:
-            fixedAddress = normalize_address(toAddress)
-            update = table.update().where(table.c.to_address == toAddress).values(to_address = fixedAddress)
-            conn.execute(update)
-        if len(fromAddress) > 42:
-            fixedAddress = normalize_address(fromAddress)
-            update = table.update().where(table.c.from_address == fromAddress).values(from_address = fixedAddress)
-            conn.execute(update)
+    currentBlockNumber = startBlockNumber
+    while currentBlockNumber < endBlockNumber:
+        nextBlockNumber = currentBlockNumber + batchSize
+        start = min(currentBlockNumber, nextBlockNumber)
+        end = max(currentBlockNumber, nextBlockNumber)
+        currentBlockNumber = nextBlockNumber
+        logging.info(f'Working on {start} to {end}')
+        fieldFilters = [
+            IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, gte=start),
+            IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, lt=end),
+        ]
+        orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
+        tokenTransfersToChange = []
+        async with database.transaction():
+            async for tokenTransfer in retriever.generate_token_transfers(fieldFilters=fieldFilters, orders=orders):
+                if len(tokenTransfer.toAddress) != 42 or len(tokenTransfer.fromAddress) != 42:
+                    tokenTransfersToChange.append(tokenTransfer)
+            tokenTransferIdsToChange = [str(tokenTransfer.tokenTransferId) for tokenTransfer in tokenTransfersToChange]
+            logging.info(f'Got {len(tokenTransfersToChange)} changes: {",".join(tokenTransferIdsToChange)}')
+            for tokenTransfer in tokenTransfersToChange:
+                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId)
+                values = {
+                    TokenTransfersTable.c.toAddress.key: normalize_address(tokenTransfer.toAddress),
+                    TokenTransfersTable.c.fromAddress.key: normalize_address(tokenTransfer.fromAddress),
+                }
+                await database.execute(query=query, values=values)
+    await database.disconnect()
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     asyncio.run(fix_address())

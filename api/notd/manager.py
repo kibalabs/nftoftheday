@@ -23,7 +23,7 @@ from notd.model import RetrievedTokenTransfer
 from notd.model import Token
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
-from notd.store.retriever import NotdRetriever
+from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
@@ -75,7 +75,7 @@ SPONSORED_TOKENS = [
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
