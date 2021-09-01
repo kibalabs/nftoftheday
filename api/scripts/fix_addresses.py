@@ -10,7 +10,6 @@ from notd.store.schema import TokenTransfersTable as table
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=25)
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     dbString = (f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')#pylint: disable=invalid-name
     db = create_engine(dbString) # pylint: disable=invalid-name
