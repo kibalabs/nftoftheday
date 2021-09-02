@@ -3,7 +3,7 @@ import logging
 import os
 
 import boto3
-from core.http.basic_authentication import BasicAuthentication
+from core.aws_requester import AwsRequester
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -29,9 +29,8 @@ async def main():
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     requester = Requester()
 
-    infuraAuth = BasicAuthentication(username='', password=os.environ['INFURA_PROJECT_SECRET'])
-    infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
-    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
+    awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
