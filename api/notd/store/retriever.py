@@ -1,10 +1,10 @@
 import datetime
-from typing import Optional
+from typing import AsyncGenerator, Optional
 from typing import Sequence
 
 from core.store.retriever import FieldFilter
 from core.store.retriever import Order
-from core.store.retriever import Retriever
+from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
@@ -20,9 +20,12 @@ _REGISTRY_BLACKLIST = set([
     '0xb9ed94c6d594b2517c4296e24a8c517ff133fb6d', # hegic-eth-atm-calls-pool
 ])
 
-class NotdRetriever(Retriever):
+class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
+        return list(self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit))
+
+    async def generate_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
         query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if fieldFilters:
@@ -32,9 +35,9 @@ class NotdRetriever(Retriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
-        rows = await self.database.fetch_all(query=query)
-        tokenTransfers = [token_transfer_from_row(row) for row in rows]
-        return tokenTransfers
+        async for row in self.database.iterate(query=query):
+            tokenTransfer = token_transfer_from_row(row)
+            yield tokenTransfer
 
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Token:
         query = TokenTransfersTable.select()

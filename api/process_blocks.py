@@ -14,7 +14,7 @@ from databases import Database
 from notd.block_processor import BlockProcessor
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
-from notd.store.retriever import NotdRetriever
+from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
 
@@ -30,7 +30,7 @@ def chunks(lst, n):
 async def run(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database=database)
-    retriever = NotdRetriever(database=database)
+    retriever = Retriever(database=database)
 
     sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
