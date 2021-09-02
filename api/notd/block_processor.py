@@ -88,8 +88,8 @@ class BlockProcessor:
             logging.debug('Ignoring event with less than 4 topics')
             return None
 
-        fromAddress = normalize_address(event['topics'][1].hex())
-        toAddress = normalize_address(event['topics'][2].hex())
+        fromAddress = (event['topics'][1].hex())
+        toAddress = (event['topics'][2].hex())
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
         gasLimit = ethTransaction['gas']
