@@ -1,16 +1,19 @@
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import logging
 import asyncio
+import logging
+
 import asyncclick as click
-
+from core.store.retriever import Direction
+from core.store.retriever import IntegerFieldFilter
+from core.store.retriever import Order
 from databases.core import Database
-from core.store.retriever import Direction, IntegerFieldFilter, Order
 
-from notd.store.retriever import Retriever
 from notd.chain_utils import normalize_address
+from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 
 

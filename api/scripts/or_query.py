@@ -32,15 +32,20 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         logging.info(f'Working on {start} to {end}')
         myAddress = '0x18090cDA49B21dEAffC21b4F886aed3eB787d032'
         
-        onefieldFilters=[ OnOfFieldFilters(filters = [
-            StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=myAddress),
-            StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=myAddress),
-        ]),
+       
+        fieldFilters = [
+            IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, gte=start),
+            IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, lt=end),
+
+            OneOfFilter(filters = [
+                StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=myAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=myAddress),
+            ]),
         ]
         orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
 
         async with database.transaction():
-            async for tokenTransfer in retriever.generate_token_transfers(onOfFieldFilters=onefieldFilters,orders=orders):
+            async for tokenTransfer in retriever.generate_token_transfers(fieldFilters=fieldFilters,orders=orders):
                 logging.info(f'tokenTransfer {tokenTransfer}')        
     await database.disconnect()
 
