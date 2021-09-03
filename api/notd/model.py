@@ -69,4 +69,3 @@ class RegistryToken:
     collectionImageUrl: Optional[str]
     collectionOpenSeaUrl: Optional[str]
     collectionExternalUrl: Optional[str]
-    
