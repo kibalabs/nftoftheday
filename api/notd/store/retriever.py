@@ -1,5 +1,6 @@
 import datetime
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
+from typing import Optional
 from typing import Sequence
 
 from core.store.retriever import FieldFilter
