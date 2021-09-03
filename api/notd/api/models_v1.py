@@ -69,7 +69,7 @@ class ApiUiData(BaseModel):
 
 class ApiRegistryToken(BaseModel):
     registryAddress: str
-    tokenId: int
+    tokenId: str
     name: str
     imageUrl: Optional[str]
     openSeaUrl: Optional[str]

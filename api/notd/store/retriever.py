@@ -2,11 +2,11 @@ import datetime
 from typing import AsyncGenerator, Optional
 from typing import Sequence
 
-from core.store.retriever import FieldFilter
+from core.store.retriever import FieldFilter, OnOfFilters
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql.expression import func as sqlalchemyfunc, table
 
 from notd.model import Token
 from notd.model import TokenTransfer
@@ -22,19 +22,20 @@ _REGISTRY_BLACKLIST = set([
 
 class Retriever(CoreRetriever):
 
-    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
-        return list(self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit))
+    async def list_token_transfers(self, filters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
+        return list(self.generate_token_transfers(filters=filters, orders=orders, limit=limit))
 
-    async def generate_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
+    async def generate_token_transfers(self, filters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
         query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
-        if fieldFilters:
-            query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
+        if filters:
+            query = self._apply_filters(query=query, table=TokenTransfersTable, filters=filters)            
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
+        print(query)
         async for row in self.database.iterate(query=query):
             tokenTransfer = token_transfer_from_row(row)
             yield tokenTransfer
