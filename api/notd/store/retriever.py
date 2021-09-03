@@ -23,7 +23,7 @@ _REGISTRY_BLACKLIST = set([
 class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
-        return list(self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit))
+        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit)]
 
     async def generate_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
