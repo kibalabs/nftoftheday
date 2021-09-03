@@ -129,7 +129,7 @@ class NotdManager:
         latestProcessedBlockNumber = latestTokenTransfers[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
-        batchSize = 5
+        batchSize = 2
         for startBlockNumber in reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1, batchSize)):
             endBlockNumber = min(startBlockNumber + batchSize, latestBlockNumber + 1)
             await self.workQueue.send_message(message=ProcessBlockRangeMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
@@ -155,8 +155,11 @@ class NotdManager:
             logging.debug(f'Paid {retrievedTokenTransfer.value / 100000000000000000.0}Ξ ({retrievedTokenTransfer.gasUsed * retrievedTokenTransfer.gasPrice / 100000000000000000.0}Ξ) to {retrievedTokenTransfer.registryAddress}')
             logging.debug(f'OpenSea url: https://opensea.io/assets/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
             logging.debug(f'OpenSea api url: https://api.opensea.io/api/v1/asset/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
-        for retrievedTokenTransfersChunk in list_util.generate_chunks(retrievedTokenTransfers, 30):
-            await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfersChunk])
+        async with self.saver.transaction():
+            # NOTE(krishan711): figure out why this gathering doesn't work
+            # await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
+            for retrievedTokenTransfer in retrievedTokenTransfers:
+                self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
