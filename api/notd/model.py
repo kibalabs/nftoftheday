@@ -7,8 +7,7 @@ from pydantic import dataclasses
 
 
 @dataclasses.dataclass
-class TokenTransfer:
-    tokenTransferId: int
+class RetrievedTokenTransfer:
     transactionHash: str
     registryAddress: str
     fromAddress: str
@@ -21,6 +20,10 @@ class TokenTransfer:
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
+
+@dataclasses.dataclass
+class TokenTransfer(RetrievedTokenTransfer):
+    tokenTransferId: int
 
     def to_dict(self) -> Dict:
         return {
@@ -39,20 +42,6 @@ class TokenTransfer:
             'blockDate': self.blockDate.isoformat(),
         }
 
-@dataclasses.dataclass
-class RetrievedTokenTransfer:
-    transactionHash: str
-    registryAddress: str
-    fromAddress: str
-    toAddress: str
-    tokenId: str
-    value: int
-    gasLimit: int
-    gasPrice: int
-    gasUsed: int
-    blockNumber: int
-    blockHash: str
-    blockDate: datetime.datetime
 
 @dataclasses.dataclass
 class Token:
