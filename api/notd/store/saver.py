@@ -1,12 +1,30 @@
+import contextlib
 import datetime
+import logging
+from typing import Dict, Optional
+import asyncpg
+from core.exceptions import DuplicateValueException, InternalServerErrorException
 
 from core.store.saver import Saver as CoreSaver
+from databases.core import Transaction
+from sqlalchemy.sql.elements import ClauseElement
 
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 
 
 class Saver(CoreSaver):
+
+    @contextlib.asynccontextmanager
+    async def transaction(self):
+        transaction = self.database.transaction()
+        try:
+            await transaction.start()
+            yield None
+            await transaction.commit()
+        except:
+            await transaction.rollback()
+            raise
 
     async def create_token_transfer(self, transactionHash: str, registryAddress: str, fromAddress: str, toAddress: str, tokenId: int, value: int, gasLimit: int, gasPrice: int, gasUsed: int, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> TokenTransfer:
         tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={  # pylint: disable=no-value-for-parameter
