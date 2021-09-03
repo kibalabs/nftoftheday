@@ -35,11 +35,8 @@ class Retriever(CoreRetriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
-        print('query', query)
         async for row in self.database.iterate(query=query):
-            print('row', row)
             tokenTransfer = token_transfer_from_row(row)
-            print('tokenTransfer', tokenTransfer)
             yield tokenTransfer
 
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Token:
