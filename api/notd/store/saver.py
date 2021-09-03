@@ -1,15 +1,7 @@
 import contextlib
 import datetime
-import logging
-from typing import Dict
-from typing import Optional
 
-import asyncpg
-from core.exceptions import DuplicateValueException
-from core.exceptions import InternalServerErrorException
 from core.store.saver import Saver as CoreSaver
-from databases.core import Transaction
-from sqlalchemy.sql.elements import ClauseElement
 
 from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
