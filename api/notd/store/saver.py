@@ -1,9 +1,9 @@
 import contextlib
-import datetime
 
 from core.store.saver import Saver as CoreSaver
 
-from notd.model import RetrievedTokenTransfer, TokenTransfer
+from notd.model import RetrievedTokenTransfer
+from notd.model import TokenTransfer
 from notd.store.schema import TokenTransfersTable
 
 

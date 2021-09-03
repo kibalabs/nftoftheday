@@ -125,7 +125,7 @@ class NotdManager:
 
     async def receive_new_blocks(self) -> None:
         latestTokenTransfers = await self.retriever.list_token_transfers(orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)], limit=1)
-        latestProcessedBlockNumber = 13140000 #latestTokenTransfers[0].blockNumber
+        latestProcessedBlockNumber = latestTokenTransfers[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
         batchSize = 3
