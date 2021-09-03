@@ -2,11 +2,11 @@ import datetime
 from typing import AsyncGenerator, Optional
 from typing import Sequence
 
-from core.store.retriever import FieldFilter, OnOfFilters
+from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
-from sqlalchemy.sql.expression import func as sqlalchemyfunc, table
+from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 from notd.model import Token
 from notd.model import TokenTransfer
@@ -29,7 +29,7 @@ class Retriever(CoreRetriever):
         query = TokenTransfersTable.select()
         query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if filters:
-            query = self._apply_filters(query=query, table=TokenTransfersTable, filters=filters)            
+            query = self._apply_filters(query=query, table=TokenTransfersTable, filters=filters)
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
