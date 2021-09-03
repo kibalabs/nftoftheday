@@ -3,8 +3,6 @@ from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy.dialects import registry
-
 from notd.model import RegistryToken
 from notd.model import UiData
 
@@ -70,7 +68,7 @@ class ApiUiData(BaseModel):
 
 class ApiRegistryToken(BaseModel):
     registryAddress: str
-    tokenId: int
+    tokenId: str
     name: str
     imageUrl: Optional[str]
     openSeaUrl: Optional[str]
@@ -85,8 +83,8 @@ class ApiRegistryToken(BaseModel):
     @classmethod
     def from_model(cls, model: RegistryToken):
         return cls(
-            registryAddress = model.registryAddress,
-            tokenId = model.tokenId,
+            registryAddress=model.registryAddress,
+            tokenId=model.tokenId,
             name=model.name,
             imageUrl=model.imageUrl,
             openSeaUrl=model.openSeaUrl,
