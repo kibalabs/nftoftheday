@@ -69,7 +69,7 @@ class UiData:
 @dataclasses.dataclass
 class RegistryToken:
     registryAddress: str
-    tokenId: int
+    tokenId: str
     name: str
     imageUrl: Optional[str]
     openSeaUrl: Optional[str]
@@ -79,4 +79,5 @@ class RegistryToken:
     collectionName: str
     collectionImageUrl: Optional[str]
     collectionOpenSeaUrl: Optional[str]
-    collectionExternalUrl: Optional[str]    
+    collectionExternalUrl: Optional[str]
+    
