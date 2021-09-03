@@ -23,7 +23,7 @@ _REGISTRY_BLACKLIST = set([
 class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
-        return list(self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit))
+        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit)]
 
     async def generate_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
@@ -35,8 +35,11 @@ class Retriever(CoreRetriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
+        print('query', query)
         async for row in self.database.iterate(query=query):
+            print('row', row)
             tokenTransfer = token_transfer_from_row(row)
+            print('tokenTransfer', tokenTransfer)
             yield tokenTransfer
 
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Token:
