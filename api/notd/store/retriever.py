@@ -8,6 +8,7 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql.sqltypes import Integer
 
 from notd.model import Token
 from notd.model import TokenTransfer
@@ -39,6 +40,13 @@ class Retriever(CoreRetriever):
         async for row in self.database.iterate(query=query):
             tokenTransfer = token_transfer_from_row(row)
             yield tokenTransfer
+    async def get_token_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Integer:
+        query = TokenTransfersTable.select()
+        query = query.where(TokenTransfersTable.c.blockDate >= startDate)
+        query = query.where(TokenTransfersTable.c.blockDate < endDate)
+        query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+        rows = await self.database.fetch_all(query=query)
+        return len(rows)
 
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Token:
         query = TokenTransfersTable.select()
