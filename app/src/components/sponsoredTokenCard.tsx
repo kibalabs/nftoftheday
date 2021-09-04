@@ -37,7 +37,7 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
         <NftCard
           nft={asset}
           label='Sponsored'
-          subtitle={asset.lastSalePrice ? `Last sold on ${dateToString(asset.lastSaleDate, 'dd-MMM-YYY')} for Ξ${asset.lastSalePrice / 1000000000000000000.0}` : 'Not claimed yet'}
+          subtitle={asset.lastSalePrice ? `Last sold for Ξ${asset.lastSalePrice / 1000000000000000000.0}` : 'Available for sale'}
           primaryButtonText='View Token'
           primaryButtonTarget={asset.openSeaUrl}
           // secondaryButtonText='View Tx'

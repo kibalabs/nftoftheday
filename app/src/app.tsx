@@ -7,7 +7,6 @@ import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, Equa
 import { Helmet } from 'react-helmet';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { hot } from 'react-hot-loader/root';
-
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
 import { EmailSubsriptionPopup } from './components/emailSubcriptionPopup';
@@ -19,6 +18,7 @@ import { isToday, isYesterday } from './dateUtil';
 import { GlobalsProvider } from './globalsContext';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
+
 
 const theme = buildNotdTheme();
 
@@ -48,6 +48,12 @@ export const App = hot((): React.ReactElement => {
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
+  const [totalTransactions, setTotalTransactions] = React.useState<number | null>(30000000);
+  
+  function numberWithCommas(x) {
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+  }
+  let convertedTotalTransactions = numberWithCommas(totalTransactions);
 
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -101,12 +107,15 @@ export const App = hot((): React.ReactElement => {
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
     setUrlString('date', getUrlDateString());
+  
+
 
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
       setRandomTokenTransfer(uiData.randomTokenTransfer);
       setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
       setSponsoredToken(uiData.sponsoredToken);
+      //setTotalTransactions(uiData.totalTransactions);
     });
   }, [getUrlDateString, startDate]);
 
@@ -168,6 +177,9 @@ export const App = hot((): React.ReactElement => {
               <Text variant='header3'>{getDateString()}</Text>
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
+            <Spacing variant={PaddingSize.Wide2} />
+            <Text variant='header3'>{convertedTotalTransactions} transactions in total</Text>
+            <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
             </Stack.Item>
