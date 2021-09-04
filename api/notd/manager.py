@@ -13,7 +13,6 @@ from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-from core.util import list_util
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockRangeMessageContent
@@ -23,7 +22,7 @@ from notd.model import RetrievedTokenTransfer
 from notd.model import Token
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
-from notd.store.retriever import NotdRetriever
+from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
@@ -75,7 +74,7 @@ SPONSORED_TOKENS = [
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: NotdRetriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -129,7 +128,7 @@ class NotdManager:
         latestProcessedBlockNumber = latestTokenTransfers[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
-        batchSize = 5
+        batchSize = 3
         for startBlockNumber in reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1, batchSize)):
             endBlockNumber = min(startBlockNumber + batchSize, latestBlockNumber + 1)
             await self.workQueue.send_message(message=ProcessBlockRangeMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
@@ -143,7 +142,7 @@ class NotdManager:
 
     async def _create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer) -> None:
         try:
-            await self.saver.create_token_transfer(transactionHash=retrievedTokenTransfer.transactionHash, registryAddress=retrievedTokenTransfer.registryAddress, fromAddress=retrievedTokenTransfer.fromAddress, toAddress=retrievedTokenTransfer.toAddress, tokenId=retrievedTokenTransfer.tokenId, value=retrievedTokenTransfer.value, gasLimit=retrievedTokenTransfer.gasLimit, gasPrice=retrievedTokenTransfer.gasPrice, gasUsed=retrievedTokenTransfer.gasUsed, blockNumber=retrievedTokenTransfer.blockNumber, blockHash=retrievedTokenTransfer.blockHash, blockDate=retrievedTokenTransfer.blockDate)
+            await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
         except DuplicateValueException:
             logging.debug('Ignoring previously saved transfer')
 
@@ -155,8 +154,7 @@ class NotdManager:
             logging.debug(f'Paid {retrievedTokenTransfer.value / 100000000000000000.0}Ξ ({retrievedTokenTransfer.gasUsed * retrievedTokenTransfer.gasPrice / 100000000000000000.0}Ξ) to {retrievedTokenTransfer.registryAddress}')
             logging.debug(f'OpenSea url: https://opensea.io/assets/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
             logging.debug(f'OpenSea api url: https://api.opensea.io/api/v1/asset/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
-        for retrievedTokenTransfersChunk in list_util.generate_chunks(retrievedTokenTransfers, 30):
-            await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfersChunk])
+        await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'

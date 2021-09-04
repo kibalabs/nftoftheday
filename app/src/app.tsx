@@ -1,12 +1,9 @@
 import React from 'react';
-
 import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { hot } from 'react-hot-loader/root';
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
 import { EmailSubsriptionPopup } from './components/emailSubcriptionPopup';
@@ -41,7 +38,7 @@ const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
 
-export const App = hot((): React.ReactElement => {
+export const App = (): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
@@ -220,4 +217,4 @@ export const App = hot((): React.ReactElement => {
       </GlobalsProvider>
     </KibaApp>
   );
-});
+};

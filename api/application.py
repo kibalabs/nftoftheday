@@ -3,7 +3,7 @@ import os
 
 import boto3
 from core.api.health import create_api as create_health_api
-from core.http.basic_authentication import BasicAuthentication
+from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.web3.eth_client import RestEthClient
@@ -15,7 +15,7 @@ from notd.api.api_v1 import create_api as create_v1_api
 from notd.block_processor import BlockProcessor
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
-from notd.store.retriever import NotdRetriever
+from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
 
@@ -23,14 +23,13 @@ logging.basicConfig(level=logging.INFO)
 
 database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
 saver = Saver(database=database)
-retriever = NotdRetriever(database=database)
+retriever = Retriever(database=database)
 
 sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
 workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 
-infuraAuth = BasicAuthentication(username='', password=os.environ['INFURA_PROJECT_SECRET'])
-infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
-ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
+awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
 blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
 openseaClient = OpenseaClient(requester=requester)

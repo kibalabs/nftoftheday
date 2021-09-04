@@ -14,7 +14,6 @@ from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
 
-
 from notd.chain_utils import normalize_address
 from notd.model import RetrievedTokenTransfer
 
@@ -44,17 +43,18 @@ class BlockProcessor:
         # self.contractFilter = self.ierc721Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc721TansferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
 
-    @async_lru.alru_cache(maxsize=10000)
+    @async_lru.alru_cache(maxsize=100000)
     async def _get_transaction(self, transactionHash: str) -> TxData:
         return await self.ethClient.get_transaction(transactionHash=transactionHash)
 
-    @async_lru.alru_cache(maxsize=10000)
+    @async_lru.alru_cache(maxsize=100000)
     async def _get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
         return await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
 
     async def get_latest_block_number(self) -> int:
         return await self.ethClient.get_latest_block_number()
 
+    @async_lru.alru_cache(maxsize=100000)
     async def get_transfers_in_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
         block = await self.ethClient.get_block(blockNumber)
         blockHash = block['hash'].hex()
