@@ -3,6 +3,7 @@ from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
+
 from notd.model import RegistryToken
 from notd.model import UiData
 
