@@ -40,7 +40,8 @@ class Retriever(CoreRetriever):
         async for row in self.database.iterate(query=query):
             tokenTransfer = token_transfer_from_row(row)
             yield tokenTransfer
-    async def get_token_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Integer:
+
+    async def get_token_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
         query = TokenTransfersTable.select()
         query = query.where(TokenTransfersTable.c.blockDate >= startDate)
         query = query.where(TokenTransfersTable.c.blockDate < endDate)
