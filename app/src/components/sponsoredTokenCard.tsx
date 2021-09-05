@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { dateToString } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { RegistryToken, Token } from '../client/resources';

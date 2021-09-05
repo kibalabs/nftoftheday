@@ -1,9 +1,11 @@
 import React from 'react';
+
 import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
+
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
 import { EmailSubsriptionPopup } from './components/emailSubcriptionPopup';
@@ -46,11 +48,11 @@ export const App = (): React.ReactElement => {
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
   const [totalTransactions, setTotalTransactions] = React.useState<number | null>(30000000);
-  
+
   function numberWithCommas(x) {
-    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
   }
-  let convertedTotalTransactions = numberWithCommas(totalTransactions);
+  const convertedTotalTransactions = numberWithCommas(totalTransactions);
 
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -104,15 +106,13 @@ export const App = (): React.ReactElement => {
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
     setUrlString('date', getUrlDateString());
-  
-
 
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
       setRandomTokenTransfer(uiData.randomTokenTransfer);
       setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
       setSponsoredToken(uiData.sponsoredToken);
-      //setTotalTransactions(uiData.totalTransactions);
+      setTotalTransactions(uiData.totalTransactions);
     });
   }, [getUrlDateString, startDate]);
 
@@ -175,7 +175,11 @@ export const App = (): React.ReactElement => {
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
             <Spacing variant={PaddingSize.Wide2} />
-            <Text variant='header3'>{convertedTotalTransactions} transactions in total</Text>
+            <Text variant='header3'>
+              {convertedTotalTransactions}
+              {' '}
+transactions in total
+            </Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />

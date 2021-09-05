@@ -72,7 +72,7 @@ export class UiData {
   readonly mostTradedTokenTransfers: TokenTransfer[];
   readonly randomTokenTransfer: TokenTransfer;
   readonly sponsoredToken: Token;
-  readonly totalTransactions: number; 
+  readonly totalTransactions: number;
 
 
   public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: TokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token) {

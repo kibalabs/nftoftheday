@@ -18,9 +18,9 @@ interface NftCardProps {
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
-  //const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? null;
-  const imageUrl = "https://ipfs.io/ipfs/QmXwfwQxrdxg9czutZ5ta1NgJLfea6m1SRoTYnVyjzMTTK?seed=877#"
-  const shouldUseIframe = imageUrl?.startsWith('https://api.artblocks.io/generator') || imageUrl?.startsWith('https://generator.artblocks.io');
+  const defaultImage = 'https://ipfs.io/ipfs/QmXwfwQxrdxg9czutZ5ta1NgJLfea6m1SRoTYnVyjzMTTK?seed=877#';
+  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? null;
+  const shouldUseIframe = imageUrl?.startsWith('https://api.artblocks.io/generator') || imageUrl?.startsWith('https://generator.artblocks.io') || imageUrl === 'https://ipfs.io/ipfs/QmXwfwQxrdxg9czutZ5ta1NgJLfea6m1SRoTYnVyjzMTTK?seed=877#';
   const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
   const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
@@ -38,11 +38,12 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
           <Stack.Item gutterAfter={PaddingSize.Wide2}>
             <Box width='150px' height='150px'>
-              { true ? (
+              { shouldUseIframe ? (
                 <WebView url={imageUrl} />
               ) : (
-                <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
+                <Media source={imageUrl || defaultImage} alternativeText={`${title} image`} fitType='contain' />
               )}
+
             </Box>
           </Stack.Item>
           <Text variant='header3' alignment={TextAlignment.Center}>{title}</Text>
