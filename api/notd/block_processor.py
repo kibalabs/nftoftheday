@@ -87,7 +87,6 @@ class BlockProcessor:
         if len(event['topics']) < 4:
             logging.debug('Ignoring event with less than 4 topics')
             return None
-
         fromAddress = normalize_address(event['topics'][1].hex())
         toAddress = normalize_address(event['topics'][2].hex())
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
