@@ -57,6 +57,8 @@ class UiData:
 
 @dataclasses.dataclass
 class RegistryToken:
+    registryAddress: str
+    tokenId: str
     name: str
     imageUrl: Optional[str]
     openSeaUrl: Optional[str]
