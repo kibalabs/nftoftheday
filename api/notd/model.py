@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 
 from pydantic import dataclasses
+from sqlalchemy.sql.sqltypes import Integer
 
 
 @dataclasses.dataclass
@@ -54,6 +55,7 @@ class UiData:
     mostTradedTokenTransfers: List[TokenTransfer]
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
+    transferCount: Integer
 
 @dataclasses.dataclass
 class RegistryToken:
