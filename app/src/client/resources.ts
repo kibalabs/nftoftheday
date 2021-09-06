@@ -75,11 +75,12 @@ export class UiData {
   readonly totalTransactions: number;
 
 
-  public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: TokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token) {
+  public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: TokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token, totalTransactions: number) {
     this.highestPricedTokenTransfer = highestPricedTokenTransfer;
     this.mostTradedTokenTransfers = mostTradedTokenTransfers;
     this.randomTokenTransfer = randomTokenTransfer;
     this.sponsoredToken = sponsoredToken;
+    this.totalTransactions = totalTransactions;
   }
 
   public static fromObject = (obj: Record<string, unknown>): UiData => {
@@ -88,6 +89,7 @@ export class UiData {
       (obj.mostTradedTokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenTransfer.fromObject(innerObj)),
       TokenTransfer.fromObject(obj.randomTokenTransfer as Record<string, unknown>),
       Token.fromObject(obj.sponsoredToken as Record<string, unknown>),
+      Number(obj.totalTransactions as Record<string, unknown>),
     );
   }
 }
