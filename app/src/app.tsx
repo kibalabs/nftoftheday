@@ -15,6 +15,7 @@ import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
 import { SponsoredTokenCard } from './components/sponsoredTokenCard';
 import { isToday, isYesterday } from './dateUtil';
 import { GlobalsProvider } from './globalsContext';
+import { numberWithCommas } from './numberUtil';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
 
@@ -49,9 +50,7 @@ export const App = (): React.ReactElement => {
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
   const [totalTransactions, setTotalTransactions] = React.useState<number | null>(30000000);
 
-  function numberWithCommas(x) {
-    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
-  }
+
   const convertedTotalTransactions = numberWithCommas(totalTransactions);
 
   const getUrlDate = (key: string): Date | null => {
@@ -175,11 +174,7 @@ export const App = (): React.ReactElement => {
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
             <Spacing variant={PaddingSize.Wide2} />
-            <Text variant='header3'>
-              {convertedTotalTransactions}
-              {' '}
-transactions in total
-            </Text>
+            <Text variant='header3'>{`${convertedTotalTransactions} transactions in total`}</Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
