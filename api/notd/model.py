@@ -4,8 +4,6 @@ from typing import List
 from typing import Optional
 
 from pydantic import dataclasses
-from sqlalchemy.sql.sqltypes import Integer
-
 
 @dataclasses.dataclass
 class RetrievedTokenTransfer:

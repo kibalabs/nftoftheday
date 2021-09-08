@@ -40,6 +40,7 @@ class ApiTokenTransfer(BaseModel):
             blockDate=model.blockDate,
         )
 
+
 class ApiToken(BaseModel):
     registryAddress: str
     tokenId: str
@@ -56,6 +57,7 @@ class ApiUiData(BaseModel):
     mostTradedTokenTransfers: List[ApiTokenTransfer]
     randomTokenTransfer: ApiTokenTransfer
     sponsoredToken: ApiToken
+    transferCount: int
 
     @classmethod
     def from_model(cls, model: UiData):
@@ -63,7 +65,7 @@ class ApiUiData(BaseModel):
             highestPricedTokenTransfer=ApiTokenTransfer.from_model(model=model.highestPricedTokenTransfer),
             mostTradedTokenTransfers=[ApiTokenTransfer.from_model(model=transfer) for transfer in model.mostTradedTokenTransfers],
             randomTokenTransfer=ApiTokenTransfer.from_model(model=model.randomTokenTransfer),
-            sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
+            sponsoredToken=ApiToken.from_model(model=model.sponsoredToken)
         )
 
 class ApiRegistryToken(BaseModel):
@@ -102,7 +104,7 @@ class RetrieveUiDataRequest(BaseModel):
     endDate: Optional[datetime.datetime]
 
 class RetrieveUiDataResponse(BaseModel):
-    uiData: ApiUiData
+    uiData: ApiUiData  
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass

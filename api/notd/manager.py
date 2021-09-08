@@ -93,6 +93,11 @@ class NotdManager:
             sponsoredToken = allPastTokens[-1]
         return sponsoredToken
 
+    @staticmethod
+    async def retrieve_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
+        transferCount = await self.retriever.get_token_transfer_count(startDate=startDate, endDate=endDate)
+        return transferCount
+
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
@@ -113,14 +118,16 @@ class NotdManager:
             orders=[RandomOrder()],
             limit=1
         )
-        transferCount = await self.retriever.get_token_transfer_count(startDate=startDate, endDate=endDate)
+        transferCount = await self.retriever.get_token_transfer_count(startDate=startDate,endDate=endDate)
+
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
             randomTokenTransfer=randomTokenTransfers[0],
             sponsoredToken=self.get_sponsored_token(),
-            transferCount = transferCount
+            transferCount = transferCount,
         )
+
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())

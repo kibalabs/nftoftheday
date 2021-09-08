@@ -8,8 +8,9 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.web3.eth_client import RestEthClient
 from databases import Database
-from fastapi import FastAPI
+from fastapi import FastAPI,Request,status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.block_processor import BlockProcessor
@@ -19,9 +20,14 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
 logging.basicConfig(level=logging.INFO)
 
-database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+#database = Database(f'postgresql://{os.environ["REMOTE_DB_USERNAME"]}:{os.environ["REMOTE_DB_PASSWORD"]}@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
+database = Database(f'postgresql://obafemi:obafemi@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
+
 saver = Saver(database=database)
 retriever = Retriever(database=database)
 
