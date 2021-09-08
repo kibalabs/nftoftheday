@@ -52,6 +52,7 @@ class ApiToken(BaseModel):
             tokenId=model.tokenId,
         )
 
+
 class ApiUiData(BaseModel):
     highestPricedTokenTransfer: ApiTokenTransfer
     mostTradedTokenTransfers: List[ApiTokenTransfer]
@@ -65,7 +66,8 @@ class ApiUiData(BaseModel):
             highestPricedTokenTransfer=ApiTokenTransfer.from_model(model=model.highestPricedTokenTransfer),
             mostTradedTokenTransfers=[ApiTokenTransfer.from_model(model=transfer) for transfer in model.mostTradedTokenTransfers],
             randomTokenTransfer=ApiTokenTransfer.from_model(model=model.randomTokenTransfer),
-            sponsoredToken=ApiToken.from_model(model=model.sponsoredToken)
+            sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
+            transferCount=model.transferCount
         )
 
 class ApiRegistryToken(BaseModel):
