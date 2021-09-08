@@ -50,9 +50,6 @@ export const App = (): React.ReactElement => {
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
   const [totalTransactions, setTotalTransactions] = React.useState<number | null>(30000000);
 
-
-  const convertedTotalTransactions = numberWithCommas(totalTransactions);
-
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);
     const value = searchParams.get(key);
@@ -174,7 +171,7 @@ export const App = (): React.ReactElement => {
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
             <Spacing variant={PaddingSize.Wide2} />
-            <Text variant='header3'>{`${convertedTotalTransactions} transactions in total`}</Text>
+            <Text variant='header3'>{`${numberWithCommas(totalTransactions)} transactions in total`}</Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
