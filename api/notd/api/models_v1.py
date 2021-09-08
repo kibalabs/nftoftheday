@@ -106,7 +106,7 @@ class RetrieveUiDataRequest(BaseModel):
     endDate: Optional[datetime.datetime]
 
 class RetrieveUiDataResponse(BaseModel):
-    uiData: ApiUiData  
+    uiData: ApiUiData
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass

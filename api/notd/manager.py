@@ -106,11 +106,6 @@ class NotdManager:
             sponsoredToken = allPastTokens[-1]
         return sponsoredToken
 
-    @staticmethod
-    async def retrieve_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
-        transferCount = await self.retriever.get_token_transfer_count(startDate=startDate, endDate=endDate)
-        return transferCount
-
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],

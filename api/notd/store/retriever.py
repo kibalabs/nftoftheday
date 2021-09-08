@@ -8,7 +8,6 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
-from sqlalchemy.sql.sqltypes import Integer
 
 from notd.model import Token
 from notd.model import TokenTransfer
