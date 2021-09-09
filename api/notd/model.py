@@ -54,6 +54,7 @@ class UiData:
     mostTradedTokenTransfers: List[TokenTransfer]
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
+    transationCount: int
 
 @dataclasses.dataclass
 class RegistryToken:

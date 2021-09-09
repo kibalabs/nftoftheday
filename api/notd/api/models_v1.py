@@ -57,6 +57,7 @@ class ApiUiData(BaseModel):
     mostTradedTokenTransfers: List[ApiTokenTransfer]
     randomTokenTransfer: ApiTokenTransfer
     sponsoredToken: ApiToken
+    transactionCount: int
 
     @classmethod
     def from_model(cls, model: UiData):
@@ -65,6 +66,7 @@ class ApiUiData(BaseModel):
             mostTradedTokenTransfers=[ApiTokenTransfer.from_model(model=transfer) for transfer in model.mostTradedTokenTransfers],
             randomTokenTransfer=ApiTokenTransfer.from_model(model=model.randomTokenTransfer),
             sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
+            transactionCount=model.transactionCount
         )
 
 class ApiRegistryToken(BaseModel):
