@@ -3,7 +3,6 @@ from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
-
 from notd.model import RegistryToken
 from notd.model import UiData
 
@@ -41,6 +40,7 @@ class ApiTokenTransfer(BaseModel):
             blockDate=model.blockDate,
         )
 
+
 class ApiToken(BaseModel):
     registryAddress: str
     tokenId: str
@@ -51,6 +51,7 @@ class ApiToken(BaseModel):
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
         )
+
 
 class ApiUiData(BaseModel):
     highestPricedTokenTransfer: ApiTokenTransfer

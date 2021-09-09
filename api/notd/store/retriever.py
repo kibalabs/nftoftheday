@@ -49,6 +49,14 @@ class Retriever(CoreRetriever):
         count = await self.database.execute(query)
         return count
 
+    async def get_token_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
+        query = TokenTransfersTable.select()
+        query = query.where(TokenTransfersTable.c.blockDate >= startDate)
+        query = query.where(TokenTransfersTable.c.blockDate < endDate)
+        query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+        rows = await self.database.fetch_all(query=query)
+        return len(rows)
+
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Token:
         query = TokenTransfersTable.select()
         query = query.with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId)])

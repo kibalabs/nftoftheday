@@ -137,6 +137,7 @@ class NotdManager:
             transactionCount=transactionCount   
         )
 
+
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
 
