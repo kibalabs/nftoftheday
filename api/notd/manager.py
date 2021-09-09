@@ -134,7 +134,7 @@ class NotdManager:
             mostTradedTokenTransfers=mostTradedTokenTransfers,
             randomTokenTransfer=randomTokenTransfers[0],
             sponsoredToken=self.get_sponsored_token(),
-            transactionCount=transactionCount   
+            transactionCount=transactionCount
         )
 
 
