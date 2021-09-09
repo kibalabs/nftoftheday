@@ -9,6 +9,5 @@ export const shouldUseIframe = (nft: RegistryToken): boolean => {
   if (registryAddress === '0x80416304142fa37929f8a4eee83ee7d2dac12d7c') {
     return (true);
   }
-
   return (false);
 };

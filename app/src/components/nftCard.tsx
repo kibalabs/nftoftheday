@@ -3,7 +3,7 @@ import React from 'react';
 import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment, WebView } from '@kibalabs/ui-react';
 
 import { RegistryToken } from '../client/resources';
-import { shouldUseIframe } from './imageUtil';
+import { shouldUseIframe } from './nftUtil';
 
 export interface NftCardProps {
   nft: RegistryToken;
