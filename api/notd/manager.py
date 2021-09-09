@@ -134,8 +134,7 @@ class NotdManager:
             mostTradedTokenTransfers=mostTradedTokenTransfers,
             randomTokenTransfer=randomTokenTransfers[0],
             sponsoredToken=self.get_sponsored_token(),
-            transactionCount=transactionCount
-            
+            transactionCount=transactionCount   
         )
 
     async def receive_new_blocks_deferred(self) -> None:
