@@ -126,14 +126,16 @@ class NotdManager:
             orders=[RandomOrder()],
             limit=1
         )
+
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
-        
+
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
             randomTokenTransfer=randomTokenTransfers[0],
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
+            
         )
 
     async def receive_new_blocks_deferred(self) -> None:
