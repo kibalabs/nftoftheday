@@ -5,7 +5,6 @@ from typing import Optional
 
 from pydantic import dataclasses
 
-
 @dataclasses.dataclass
 class RetrievedTokenTransfer:
     transactionHash: str
@@ -54,6 +53,7 @@ class UiData:
     mostTradedTokenTransfers: List[TokenTransfer]
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
+    transactionCount: int
 
 @dataclasses.dataclass
 class RegistryToken:
