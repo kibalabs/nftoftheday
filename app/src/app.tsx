@@ -18,6 +18,7 @@ import { GlobalsProvider } from './globalsContext';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
 
+
 const theme = buildNotdTheme();
 
 const API_URL = 'https://notd-api.kibalabs.com';
@@ -46,6 +47,7 @@ export const App = (): React.ReactElement => {
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
+
 
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);

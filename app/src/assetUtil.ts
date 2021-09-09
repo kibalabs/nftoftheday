@@ -33,6 +33,9 @@ export const retrieveAsset = async (requester: Requester, registryAddress: strin
     collectionImageUrl: assetJson.collection.large_image_url ?? assetJson.collection.image_url,
     collectionOpenSeaUrl: assetJson.collection.permalink ? `${assetJson.collection.permalink}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032` : null,
     collectionExternalUrl: assetJson.collection.external_url,
+    registryAddress: assetJson.asset_contract.address,
+    tokenId: assetJson.tokenId,
+
   };
   return asset;
 };
