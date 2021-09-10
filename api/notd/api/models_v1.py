@@ -3,7 +3,6 @@ from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
-
 from notd.model import RegistryToken
 from notd.model import UiData
 
@@ -41,6 +40,7 @@ class ApiTokenTransfer(BaseModel):
             blockDate=model.blockDate,
         )
 
+
 class ApiToken(BaseModel):
     registryAddress: str
     tokenId: str
@@ -52,11 +52,13 @@ class ApiToken(BaseModel):
             tokenId=model.tokenId,
         )
 
+
 class ApiUiData(BaseModel):
     highestPricedTokenTransfer: ApiTokenTransfer
     mostTradedTokenTransfers: List[ApiTokenTransfer]
     randomTokenTransfer: ApiTokenTransfer
     sponsoredToken: ApiToken
+    transactionCount: int
 
     @classmethod
     def from_model(cls, model: UiData):
@@ -65,6 +67,7 @@ class ApiUiData(BaseModel):
             mostTradedTokenTransfers=[ApiTokenTransfer.from_model(model=transfer) for transfer in model.mostTradedTokenTransfers],
             randomTokenTransfer=ApiTokenTransfer.from_model(model=model.randomTokenTransfer),
             sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
+            transactionCount=model.transactionCount
         )
 
 class ApiRegistryToken(BaseModel):

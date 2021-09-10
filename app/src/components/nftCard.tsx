@@ -3,8 +3,9 @@ import React from 'react';
 import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment, WebView } from '@kibalabs/ui-react';
 
 import { RegistryToken } from '../client/resources';
+import { shouldUseIframe } from './nftUtil';
 
-interface NftCardProps {
+export interface NftCardProps {
   nft: RegistryToken;
   label: string;
   subtitle: string;
@@ -20,7 +21,6 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
 
   const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? null;
-  const shouldUseIframe = imageUrl?.startsWith('https://api.artblocks.io/generator') || imageUrl?.startsWith('https://generator.artblocks.io');
   const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
   const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
@@ -38,7 +38,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
           <Stack.Item gutterAfter={PaddingSize.Wide2}>
             <Box width='150px' height='150px'>
-              { shouldUseIframe ? (
+              { shouldUseIframe(props.nft) ? (
                 <WebView url={imageUrl} />
               ) : (
                 <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
