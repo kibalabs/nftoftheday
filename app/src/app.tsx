@@ -19,7 +19,6 @@ import { numberWithCommas } from './numberUtil';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
 
-
 const theme = buildNotdTheme();
 
 const API_URL = 'https://notd-api.kibalabs.com';
@@ -40,7 +39,6 @@ const globals = {
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
-
 export const App = (): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
@@ -48,7 +46,7 @@ export const App = (): React.ReactElement => {
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
-  const [totalTransactions, setTotalTransactions] = React.useState<number | null>(30000000);
+  const [transactionCount, setTransactionCount] = React.useState<number | null>(0);
 
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -108,7 +106,7 @@ export const App = (): React.ReactElement => {
       setRandomTokenTransfer(uiData.randomTokenTransfer);
       setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
       setSponsoredToken(uiData.sponsoredToken);
-      setTotalTransactions(uiData.totalTransactions);
+      setTransactionCount(uiData.transactionCount);
     });
   }, [getUrlDateString, startDate]);
 
@@ -171,7 +169,7 @@ export const App = (): React.ReactElement => {
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
             <Spacing variant={PaddingSize.Wide2} />
-            <Text variant='header3'>{`${numberWithCommas(totalTransactions)} transactions in total`}</Text>
+            <Text variant='header3'>{`${numberWithCommas(transactionCount)} transactions in total`}</Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
