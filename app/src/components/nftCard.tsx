@@ -19,7 +19,6 @@ export interface NftCardProps {
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
-
   const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? null;
   const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
@@ -43,7 +42,6 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
               ) : (
                 <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
               )}
-
             </Box>
           </Stack.Item>
           <Text variant='header3' alignment={TextAlignment.Center}>{title}</Text>
