@@ -5,7 +5,6 @@ import { IMultiAnyChildProps } from '@kibalabs/core-react';
 
 import { NotdClient } from './client/client';
 
-
 export interface IGlobals {
   requester: Requester;
   notdClient: NotdClient;
