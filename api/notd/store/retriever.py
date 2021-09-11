@@ -1,5 +1,4 @@
 import datetime
-from operator import le
 from typing import AsyncGenerator
 from typing import Optional
 from typing import Sequence
@@ -24,7 +23,7 @@ _REGISTRY_BLACKLIST = set([
 class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
-        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit)]
+        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(filters=fieldFilters, orders=orders, limit=limit)]
 
     async def generate_token_transfers(self, filters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
@@ -40,9 +39,9 @@ class Retriever(CoreRetriever):
             tokenTransfer = token_transfer_from_row(row)
             yield tokenTransfer
 
-    async def normalize_bad_token_transfers(self,filters: Optional[Sequence[FieldFilter]] = None, len: Optional[int] = 42) -> AsyncGenerator[TokenTransfer, None]:
+    async def normalize_bad_token_transfers(self,filters: Optional[Sequence[FieldFilter]] = None, length: Optional[int] = 42) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
-        query = query.where(or_(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) > len,sqlalchemyfunc.length(TokenTransfersTable.c.fromAddress) > len))
+        query = query.where(or_(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) > length,sqlalchemyfunc.length(TokenTransfersTable.c.fromAddress) > length))
         if filters:
             query = self._apply_filters(query=query, table=TokenTransfersTable, filters=filters)
 

@@ -7,9 +7,7 @@ import asyncio
 import logging
 
 import asyncclick as click
-from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
-from core.store.retriever import Order
 from databases.core import Database
 
 from notd.chain_utils import normalize_address
@@ -40,7 +38,7 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         ]
         tokenTransfersToChange = []
         async with database.transaction():
-            async for tokenTransfer in retriever.normalize_bad_token_transfers(filters=fieldFilters, len=42):
+            async for tokenTransfer in retriever.normalize_bad_token_transfers(filters=fieldFilters, length=42):
                 tokenTransfersToChange.append(tokenTransfer)
             logging.info(f'Got {len(tokenTransfersToChange)} changes:')
             for tokenTransfer in tokenTransfersToChange:
