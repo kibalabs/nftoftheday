@@ -72,12 +72,14 @@ export class UiData {
   readonly mostTradedTokenTransfers: TokenTransfer[];
   readonly randomTokenTransfer: TokenTransfer;
   readonly sponsoredToken: Token;
+  readonly transactionCount: number;
 
-  public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: TokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token) {
+  public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: TokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token, transactionCount: number) {
     this.highestPricedTokenTransfer = highestPricedTokenTransfer;
     this.mostTradedTokenTransfers = mostTradedTokenTransfers;
     this.randomTokenTransfer = randomTokenTransfer;
     this.sponsoredToken = sponsoredToken;
+    this.transactionCount = transactionCount;
   }
 
   public static fromObject = (obj: Record<string, unknown>): UiData => {
@@ -86,6 +88,7 @@ export class UiData {
       (obj.mostTradedTokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenTransfer.fromObject(innerObj)),
       TokenTransfer.fromObject(obj.randomTokenTransfer as Record<string, unknown>),
       Token.fromObject(obj.sponsoredToken as Record<string, unknown>),
+      Number(obj.transactionCount as Record<string, unknown>),
     );
   }
 }
@@ -101,8 +104,10 @@ export class RegistryToken {
   readonly collectionImageUrl: string | null;
   readonly collectionOpenSeaUrl: string | null;
   readonly collectionExternalUrl: string | null;
+  readonly registryAddress: string;
+  readonly tokenId: string;
 
-  public constructor(name: string, imageUrl: string | null, openSeaUrl: string | null, externalUrl: string | null, lastSaleDate: Date | null, lastSalePrice: number | null, collectionName: string, collectionImageUrl: string | null, collectionOpenSeaUrl: string | null, collectionExternalUrl: string | null) {
+  public constructor(name: string, imageUrl: string | null, openSeaUrl: string | null, externalUrl: string | null, lastSaleDate: Date | null, lastSalePrice: number | null, collectionName: string, collectionImageUrl: string | null, collectionOpenSeaUrl: string | null, collectionExternalUrl: string | null, registryAddress: string, tokenId: string) {
     this.name = name;
     this.imageUrl = imageUrl;
     this.openSeaUrl = openSeaUrl;
@@ -113,6 +118,8 @@ export class RegistryToken {
     this.collectionImageUrl = collectionImageUrl;
     this.collectionOpenSeaUrl = collectionOpenSeaUrl;
     this.collectionExternalUrl = collectionExternalUrl;
+    this.registryAddress = registryAddress;
+    this.tokenId = tokenId;
   }
 
   public static fromObject = (obj: Record<string, unknown>): RegistryToken => {
@@ -127,6 +134,8 @@ export class RegistryToken {
       obj.collectionImageUrl ? String(obj.collectionImageUrl) : null,
       obj.collectionOpenSeaUrl ? String(obj.collectionOpenSeaUrl) : null,
       obj.collectionExternalUrl ? String(obj.collectionExternalUrl) : null,
+      String(obj.registryAddress),
+      String(obj.tokenId),
     );
   }
 }
