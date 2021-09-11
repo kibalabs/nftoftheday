@@ -1,4 +1,5 @@
 import datetime
+from operator import le
 from typing import AsyncGenerator
 from typing import Optional
 from typing import Sequence
@@ -7,7 +8,7 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql.expression import func as sqlalchemyfunc, or_
 
 from notd.model import Token
 from notd.model import TokenTransfer
@@ -20,7 +21,6 @@ _REGISTRY_BLACKLIST = set([
     '0xC36442b4a4522E871399CD717aBDD847Ab11FE88', # uniswap-v3-positions
     '0xb9ed94c6d594b2517c4296e24a8c517ff133fb6d', # hegic-eth-atm-calls-pool
 ])
-
 class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
@@ -36,6 +36,16 @@ class Retriever(CoreRetriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
+        async for row in self.database.iterate(query=query):
+            tokenTransfer = token_transfer_from_row(row)
+            yield tokenTransfer
+
+    async def normalize_bad_token_transfers(self,filters: Optional[Sequence[FieldFilter]] = None, len: Optional[int] = 42) -> AsyncGenerator[TokenTransfer, None]:
+        query = TokenTransfersTable.select()
+        query = query.where(or_(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) > len,sqlalchemyfunc.length(TokenTransfersTable.c.fromAddress) > len))
+        if filters:
+            query = self._apply_filters(query=query, table=TokenTransfersTable, filters=filters)
+
         async for row in self.database.iterate(query=query):
             tokenTransfer = token_transfer_from_row(row)
             yield tokenTransfer

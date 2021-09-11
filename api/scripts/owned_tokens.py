@@ -1,3 +1,4 @@
+from enum import unique
 import os
 import sys
 
@@ -18,11 +19,11 @@ from notd.store.schema import TokenTransfersTable
 
 
 @click.command()
-@click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int,default=1)
-@click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int,default=13000)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=10000)
-async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
-    database = Database(f'postgresql://obafemi:obafemi@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
+@click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int,default=13140000)
+@click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int,default=13180000)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
+async def ownedTokens(startBlockNumber: int, endBlockNumber: int, batchSize: int, boughtTokens = [],soldTokens=[]):
+    #database = Database(f'postgresql://obafemi:obafemi@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
     retriever = Retriever(database=database)
     await database.connect()
 
@@ -33,7 +34,7 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         end = max(currentBlockNumber, nextBlockNumber)
         currentBlockNumber = nextBlockNumber
         logging.info(f'Working on {start} to {end}')
-        myAddress = '0x18090cDA49B21dEAffC21b4F886aed3eB787d032'
+        myAddress ='0x18090cDA49B21dEAffC21b4F886aed3eB787d032'
 
         fieldFilters = [
             IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, gte=start),
@@ -41,25 +42,26 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
 
             OneOfFilter(filters = [
                 StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=myAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key,eq=myAddress)
             ]),
         ]
-        orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
-        tokenTransfersToChange = []
+        #orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
         async with database.transaction():
-            async for tokenTransfer in retriever.generate_token_transfers(filters=fieldFilters, orders=orders):
-                if len(tokenTransfer.toAddress) != 42 or len(tokenTransfer.fromAddress) != 42:
-                    tokenTransfersToChange.append(tokenTransfer)
-            tokenTransferIdsToChange = [str(tokenTransfer.tokenTransferId) for tokenTransfer in tokenTransfersToChange]
-            logging.info(f'Got {len(tokenTransfersToChange)} changes: {",".join(tokenTransferIdsToChange)}')
-            for tokenTransfer in tokenTransfersToChange:
-                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId)
-                values = {
-                    TokenTransfersTable.c.toAddress.key: normalize_address(tokenTransfer.toAddress),
-                    TokenTransfersTable.c.fromAddress.key: normalize_address(tokenTransfer.fromAddress),
-                }
-                await database.execute(query=query, values=values)
-    await database.disconnect()
+            async for tokenTransfer in retriever.generate_token_transfers(filters=fieldFilters):
+                if tokenTransfer.toAddress == myAddress:
+                    boughtTokens.append(tokenTransfer.tokenId)
+                if tokenTransfer.fromAddress == myAddress:
+                    soldTokens.append(tokenTransfer.tokenId)
 
+        uniqueBoughtTokens = set(boughtTokens)
+        uniqueSoldTokens = set(soldTokens)
+
+        ownedTokens = uniqueBoughtTokens - uniqueSoldTokens
+
+        logging.info(f'Got {len(ownedTokens)} owned')
+        
+    await database.disconnect()
+    logging.info(f'Got {len(ownedTokens)} total owned')
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(fix_address())
+    asyncio.run(ownedTokens())
