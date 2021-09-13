@@ -5,8 +5,6 @@ import { useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { Helmet } from 'react-helmet';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { hot } from 'react-hot-loader/root';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
@@ -17,6 +15,7 @@ import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
 import { SponsoredTokenCard } from './components/sponsoredTokenCard';
 import { isToday, isYesterday } from './dateUtil';
 import { GlobalsProvider } from './globalsContext';
+import { numberWithCommas } from './numberUtil';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
 
@@ -40,14 +39,14 @@ const globals = {
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
-
-export const App = hot((): React.ReactElement => {
+export const App = (): React.ReactElement => {
   useFavicon('/assets/favicon.svg');
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
+  const [transactionCount, setTransactionCount] = React.useState<number | null>(0);
 
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -107,6 +106,7 @@ export const App = hot((): React.ReactElement => {
       setRandomTokenTransfer(uiData.randomTokenTransfer);
       setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
       setSponsoredToken(uiData.sponsoredToken);
+      setTransactionCount(uiData.transactionCount);
     });
   }, [getUrlDateString, startDate]);
 
@@ -168,6 +168,9 @@ export const App = hot((): React.ReactElement => {
               <Text variant='header3'>{getDateString()}</Text>
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
+            <Spacing variant={PaddingSize.Wide2} />
+            <Text variant='header3'>{`${numberWithCommas(transactionCount)} transactions in total`}</Text>
+            <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
             </Stack.Item>
@@ -208,4 +211,4 @@ export const App = hot((): React.ReactElement => {
       </GlobalsProvider>
     </KibaApp>
   );
-});
+};

@@ -13,7 +13,6 @@ from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-from core.util import list_util
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockRangeMessageContent
@@ -71,6 +70,19 @@ SPONSORED_TOKENS = [
     {'date': datetime.datetime(2021, 8, 26), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='65446')},
     {'date': datetime.datetime(2021, 8, 29), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='64896')},
     {'date': datetime.datetime(2021, 9, 1), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='85364157633350634373635596396121761067444146987595609300037457530101165981697')},
+    {'date': datetime.datetime(2021, 9, 6), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 9, 8), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='37407742686923782518340478813362802374843880482908435344657670791292138815489')},
+    {'date': datetime.datetime(2021, 9, 10), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 9, 11), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='114859698114227588547733056434383421334237994024763599239667839133027242344449')},
+    {'date': datetime.datetime(2021, 9, 13), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 9, 14), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='28374988670751430330966987534702761350555098309612849048896399340611334832129')},
+    {'date': datetime.datetime(2021, 9, 16), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 9, 17), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='105396633564879415009426829041684172579609570053458601633165868523786980032513')},
+    {'date': datetime.datetime(2021, 9, 19), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 9, 20), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='77859822866043011832279255100584647416866494667308503025315105009609954295809')},
+    {'date': datetime.datetime(2021, 9, 22), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 9, 23), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='49660350604499248360381827203761942161648024579795517639836571627992003903489')},
+    {'date': datetime.datetime(2021, 9, 25), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
 ]
 
 class NotdManager:
@@ -114,12 +126,17 @@ class NotdManager:
             orders=[RandomOrder()],
             limit=1
         )
+
+        transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
+
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
             randomTokenTransfer=randomTokenTransfers[0],
             sponsoredToken=self.get_sponsored_token(),
+            transactionCount=transactionCount
         )
+
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
@@ -129,7 +146,7 @@ class NotdManager:
         latestProcessedBlockNumber = latestTokenTransfers[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
-        batchSize = 5
+        batchSize = 3
         for startBlockNumber in reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1, batchSize)):
             endBlockNumber = min(startBlockNumber + batchSize, latestBlockNumber + 1)
             await self.workQueue.send_message(message=ProcessBlockRangeMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
@@ -143,7 +160,7 @@ class NotdManager:
 
     async def _create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer) -> None:
         try:
-            await self.saver.create_token_transfer(transactionHash=retrievedTokenTransfer.transactionHash, registryAddress=retrievedTokenTransfer.registryAddress, fromAddress=retrievedTokenTransfer.fromAddress, toAddress=retrievedTokenTransfer.toAddress, tokenId=retrievedTokenTransfer.tokenId, value=retrievedTokenTransfer.value, gasLimit=retrievedTokenTransfer.gasLimit, gasPrice=retrievedTokenTransfer.gasPrice, gasUsed=retrievedTokenTransfer.gasUsed, blockNumber=retrievedTokenTransfer.blockNumber, blockHash=retrievedTokenTransfer.blockHash, blockDate=retrievedTokenTransfer.blockDate)
+            await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
         except DuplicateValueException:
             logging.debug('Ignoring previously saved transfer')
 
@@ -155,8 +172,7 @@ class NotdManager:
             logging.debug(f'Paid {retrievedTokenTransfer.value / 100000000000000000.0}Ξ ({retrievedTokenTransfer.gasUsed * retrievedTokenTransfer.gasPrice / 100000000000000000.0}Ξ) to {retrievedTokenTransfer.registryAddress}')
             logging.debug(f'OpenSea url: https://opensea.io/assets/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
             logging.debug(f'OpenSea api url: https://api.opensea.io/api/v1/asset/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
-        for retrievedTokenTransfersChunk in list_util.generate_chunks(retrievedTokenTransfers, 30):
-            await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfersChunk])
+        await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'

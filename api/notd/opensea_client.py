@@ -30,6 +30,8 @@ class OpenseaClient:
                 retryCount += 1
         responseJson = response.json()
         registryToken = RegistryToken(
+            registryAddress=registryAddress,
+            tokenId=tokenId,
             name=responseJson.get('name') or f"{responseJson.get('collection', {}).get('name')} #{tokenId}",
             imageUrl=responseJson.get('animation_original_url') or responseJson.get('animation_url') or responseJson.get('image_url') or responseJson.get('original_image_url') or responseJson.get('image_original_url'),
             openSeaUrl=f"{responseJson['permalink']}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032",

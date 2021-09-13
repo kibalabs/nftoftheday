@@ -1,5 +1,6 @@
 import datetime
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
+from typing import Optional
 from typing import Sequence
 
 from core.store.retriever import FieldFilter
@@ -23,22 +24,30 @@ _REGISTRY_BLACKLIST = set([
 class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
-        return list(self.generate_token_transfers(fieldFilters=fieldFilters,orders=orders,limit=limit))
+        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit)]
 
-    async def generate_token_transfers(self,fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit:Optional[int] = None) ->AsyncGenerator[TokenTransfer,None]:
+    async def generate_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
+        query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
-        query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
-
         async for row in self.database.iterate(query=query):
-            tokenTransfers = token_transfer_from_row(row)
-            yield tokenTransfers
+            tokenTransfer = token_transfer_from_row(row)
+            yield tokenTransfer
+
+    async def get_transaction_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
+        query = TokenTransfersTable.select()
+        query = query.where(TokenTransfersTable.c.blockDate >= startDate)
+        query = query.where(TokenTransfersTable.c.blockDate < endDate)
+        query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+        query = query.with_only_columns([sqlalchemyfunc.count()]).order_by(None)
+        count = await self.database.execute(query)
+        return count
 
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Token:
         query = TokenTransfersTable.select()

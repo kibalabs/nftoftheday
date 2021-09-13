@@ -28,6 +28,8 @@ class TokenClient:
         tokenMetadataNameResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataNameFunctionAbi)
         collectionName = tokenMetadataNameResponse[0]
         registryToken = RegistryToken(
+            registryAddress=registryAddress,
+            tokenId=tokenId,
             name=tokenMetadataResponseJson['name'] or f"{collectionName} #{tokenId}",
             imageUrl=tokenMetadataResponseJson['image'],
             openSeaUrl=f"https://opensea.io/assets/{registryAddress}/{tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032",
