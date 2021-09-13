@@ -115,6 +115,7 @@ export const App = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
+    setTransactionCount(0);
   };
 
   const onForwardClicked = (): void => {
@@ -122,6 +123,7 @@ export const App = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
+    setTransactionCount(0);
   };
 
   const onEmailClicked = (): void => {
@@ -169,7 +171,7 @@ export const App = (): React.ReactElement => {
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
             <Spacing variant={PaddingSize.Wide2} />
-            <Text variant='header3'>{`${numberWithCommas(transactionCount)} transactions in total`}</Text>
+            <Text variant='header3'>{`${transactionCount > 0 ? numberWithCommas(transactionCount) : '-'} transactions in total`}</Text>
             <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
