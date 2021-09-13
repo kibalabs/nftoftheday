@@ -19,7 +19,7 @@ from notd.store.schema import TokenTransfersTable
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int, default=12839320)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=20)
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
-    database = Database(f'postgresql://{os.environ["REMOTE_DB_USERNAME"]}:{os.environ["REMOTE_DB_PASSWORD"]}@{os.environ["REMOTE_DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     retriever = Retriever(database=database)
     await database.connect()
 
@@ -30,8 +30,7 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         end = max(currentBlockNumber, nextBlockNumber)
         currentBlockNumber = nextBlockNumber
         logging.info(f'Working on {start} to {end}')
-        myAddress = '0x0000000000000000000000004caa0b15b72f354919079005dd0ff89230695ee1'
-        myRegistryAddress = '0x5a654E6ae9D33FbF9b1295DFC3799007302527Ca'
+        myAddress = '0x18090cDA49B21dEAffC21b4F886aed3eB787d032'
         
        
         fieldFilters = [
@@ -41,14 +40,13 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
             OneOfFilter(filters = [
                 StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=myAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=myAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=myRegistryAddress)
             ]),
         ]
-        #orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
+        orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
 
         async with database.transaction():
-            async for tokenTransfer in retriever.generate_token_transfers(filters=fieldFilters):
-                logging.info(f'tokenTransfer {tokenTransfer.toAddress} {tokenTransfer.fromAddress} {tokenTransfer.registryAddress}')        
+            async for tokenTransfer in retriever.generate_token_transfers(filters=fieldFilters,orders=orders):
+                logging.info(f'tokenTransfer {tokenTransfer}')        
     await database.disconnect()
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ import logging
 
 import asyncclick as click
 from core.store.retriever import Direction
-from core.store.retriever import IntegerFieldFilter
+from core.store.retriever import IntegerFieldFilter ,OneOfFilter, StringFieldFilter
 from core.store.retriever import Order
 from databases.core import Database
 
@@ -18,17 +18,11 @@ from notd.store.schema import TokenTransfersTable
 
 
 @click.command()
-<<<<<<< HEAD
-@click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
-@click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
+@click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int,default=1)
+@click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int,default=13000)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=10000)
-=======
-@click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int,default=12839300)
-@click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int,default=12839320)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=5)
->>>>>>> parent of 892f04d... .
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    database = Database(f'postgresql://obafemi:obafemi@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
     retriever = Retriever(database=database)
     await database.connect()
 
@@ -39,18 +33,20 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         end = max(currentBlockNumber, nextBlockNumber)
         currentBlockNumber = nextBlockNumber
         logging.info(f'Working on {start} to {end}')
+        myAddress = '0x18090cDA49B21dEAffC21b4F886aed3eB787d032'
+
         fieldFilters = [
             IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, gte=start),
             IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, lt=end),
+
+            OneOfFilter(filters = [
+                StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=myAddress),
+            ]),
         ]
         orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
         tokenTransfersToChange = []
         async with database.transaction():
-<<<<<<< HEAD
-            async for tokenTransfer in retriever.generate_token_transfers(fieldFilters=fieldFilters, orders=orders):
-=======
             async for tokenTransfer in retriever.generate_token_transfers(filters=fieldFilters, orders=orders):
->>>>>>> parent of 892f04d... .
                 if len(tokenTransfer.toAddress) != 42 or len(tokenTransfer.fromAddress) != 42:
                     tokenTransfersToChange.append(tokenTransfer)
             tokenTransferIdsToChange = [str(tokenTransfer.tokenTransferId) for tokenTransfer in tokenTransfersToChange]
