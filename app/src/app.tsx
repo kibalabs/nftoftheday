@@ -171,7 +171,11 @@ export const App = (): React.ReactElement => {
               <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
             </Stack>
             <Spacing variant={PaddingSize.Wide2} />
-            <Text variant='header3'>{`${numberWithCommas(transactionCount)} transactions in total`}</Text>
+            { transactionCount !== null ? (
+              <Text variant='header3'>{`${numberWithCommas(transactionCount)} transactions in total`}</Text>
+            ) : (
+              <Text variant='header3'>Loading transactions...</Text>
+            )}
             <Spacing variant={PaddingSize.Default} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
