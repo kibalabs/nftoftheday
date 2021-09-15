@@ -22,7 +22,7 @@ from sqlalchemy.sql.expression import func as sqlalchemyfunc
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     retriever = Retriever(database=database)
@@ -38,26 +38,23 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
 
         tokenTransferToChange = []
         async with database.transaction():
-            async for tokenTransfer in token(retriever=retriever,start=start,end=end):
-                tokenTransferToChange.append(tokenTransfer.tokenTransferId)
-            for tokenId in tokenTransferToChange:
-                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenId)
+            query = TokenTransfersTable.select()
+            query = query.where(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42)
+            query = query.where(TokenTransfersTable.c.blockNumber >= start)
+            query = query.where(TokenTransfersTable.c.blockNumber < end)
+
+            async for row in retriever.database.iterate(query=query):
+                tokenTransfer = token_transfer_from_row(row)
+                tokenTransferToChange.append(tokenTransfer)
+
+            for token in tokenTransferToChange:
+                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == token.tokenTransferId)
                 values = {
-                    TokenTransfersTable.c.toAddress.key: normalize_address(tokenTransfer.toAddress),
-                    TokenTransfersTable.c.fromAddress.key: normalize_address(tokenTransfer.fromAddress),
+                    TokenTransfersTable.c.toAddress.key: normalize_address(token.toAddress),
+                    TokenTransfersTable.c.fromAddress.key: normalize_address(token.fromAddress),
                 }
                 await database.execute(query=query, values=values)
     await database.disconnect()
-
-async def token(retriever,start,end):
-    query = TokenTransfersTable.select()
-    query = query.where(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42)
-    query = query.where(TokenTransfersTable.c.blockNumber >= start)
-    query = query.where(TokenTransfersTable.c.blockNumber < end)
-
-    async for row in retriever.database.iterate(query=query):
-        tokenTransfer = token_transfer_from_row(row)
-        yield tokenTransfer
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
