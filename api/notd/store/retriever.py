@@ -45,7 +45,7 @@ class Retriever(CoreRetriever):
         query = query.with_only_columns([sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId)])
         query = query.where(TokenTransfersTable.c.blockDate >= startDate)
         query = query.where(TokenTransfersTable.c.blockDate < endDate)
-        c = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+        query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
         count = await self.database.execute(query)
         return count
 
