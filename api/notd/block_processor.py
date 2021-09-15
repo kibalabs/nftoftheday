@@ -62,7 +62,7 @@ class BlockProcessor:
         events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
         logging.info(f'Found {len(events)} events in block #{blockNumber}')
         allTokenTransfers = []
-        for eventsChunk in list_util.generate_chunks(events, 10):
+        for eventsChunk in list_util.generate_chunks(events, 3):
             allTokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in eventsChunk])
         return [tokenTransfer for tokenTransfer in allTokenTransfers if tokenTransfer]
 

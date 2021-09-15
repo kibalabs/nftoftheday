@@ -89,6 +89,8 @@ jobs:
                 --detach \
                 --publish-all \
                 --restart on-failure \
+                --memory=768m \
+                --cpus=$(echo "scale=2 ; $(grep -c ^processor /proc/cpuinfo) / 1.5" | bc) \
                 --env NAME=${NAME} \
                 --env-file ${varsFile} \
                 ${DOCKER_IMAGE} './start-worker.sh'
