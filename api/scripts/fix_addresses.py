@@ -22,7 +22,7 @@ from sqlalchemy.sql.expression import func as sqlalchemyfunc
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=10000)
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     retriever = Retriever(database=database)
