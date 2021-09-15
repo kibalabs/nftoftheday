@@ -23,7 +23,7 @@ _REGISTRY_BLACKLIST = set([
 class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
-        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(filters=fieldFilters, orders=orders, limit=limit)]
+        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit)]
 
     async def generate_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
@@ -39,15 +39,6 @@ class Retriever(CoreRetriever):
             tokenTransfer = token_transfer_from_row(row)
             yield tokenTransfer
 
-    async def normalize_bad_token_transfers(self,fieldFilters: Optional[Sequence[FieldFilter]] = None, length: Optional[int] = 42) -> AsyncGenerator[TokenTransfer, None]:
-        query = TokenTransfersTable.select()
-        query = query.where(or_(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) > length,sqlalchemyfunc.length(TokenTransfersTable.c.fromAddress) > length))
-        if fieldFilters:
-            query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
-
-        async for row in self.database.iterate(query=query):
-            tokenTransfer = token_transfer_from_row(row)
-            yield tokenTransfer
 
     async def get_transaction_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
         query = TokenTransfersTable.select()
