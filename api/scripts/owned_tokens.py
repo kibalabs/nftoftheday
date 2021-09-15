@@ -21,7 +21,6 @@ async def ownedTokens(ownerAddress: Optional[str]):
     retriever = Retriever(database=database)
     await database.connect()
 
-    ownerAddress ='0x34DCeB3487614B4f357f548B4a0E58f0E7ba3d93'
     boughtTokens = []
     soldTokens=[]
     async with database.transaction():
