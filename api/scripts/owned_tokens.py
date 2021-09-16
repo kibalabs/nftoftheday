@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
 import logging
+import collections
 
 import asyncclick as click
 from databases.core import Database
@@ -21,35 +22,34 @@ async def ownedTokens(ownerAddress: Optional[str]):
     retriever = Retriever(database=database)
     await database.connect()
 
-    boughtTokens = []
-    soldTokens=[]
+    ownerAddress = '0x63A2368F4B509438ca90186cb1C15156713D5834'
+   
+    #boughtTokens = {}
+    boughtTokens = collections.defaultdict(list)
+    soldTokens= {}
     async with database.transaction():
-        async for tokenTransfer in retrieve_token_transfer(ownerAddress=ownerAddress, retriever=retriever):
-            if tokenTransfer.toAddress == ownerAddress:
-                boughtTokens.append(tokenTransfer.tokenId)
-            if tokenTransfer.fromAddress == ownerAddress:
-                soldTokens.append(tokenTransfer.tokenId)
+        query = TokenTransfersTable.select()
+        query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
+        async for row in retriever.database.iterate(query=query):
+            tokenTransfer = token_transfer_from_row(row)
+            boughtTokens[tokenTransfer.registryAddress].append(tokenTransfer.tokenId)
+        
+        query = TokenTransfersTable.select()
+        query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
+        async for row in retriever.database.iterate(query=query):
+            tokenTransfer = token_transfer_from_row(row)
+            soldTokens[tokenTransfer.registryAddress] = tokenTransfer.tokenId
+       
+        print(boughtTokens.values())
+        print(soldTokens)
 
-        uniqueBoughtTokens = set(boughtTokens)
-        uniqueSoldTokens = set(soldTokens)
+        uniqueBoughtTokens = len(boughtTokens.values())
+        uniqueSoldTokens = len(soldTokens.values())
         tokensOwned = uniqueBoughtTokens - uniqueSoldTokens
-        for tokenTransfer in tokensOwned:
-            query = TokenTransfersTable.select(TokenTransfersTable.c.tokenId == tokenTransfer)
-            query = query.where(TokenTransfersTable.c.tokenId == tokenTransfer)
-            rows = await database.fetch_all(query=query)
-            for row in rows:
-                print(row[2],row[5])
+        print(tokensOwned)
 
     await database.disconnect()
-    logging.info(f'Got {len(tokensOwned)} total owned')
-
-async def retrieve_token_transfer(ownerAddress,retriever):
-    query = TokenTransfersTable.select()
-    query = query.where(or_(TokenTransfersTable.c.toAddress == ownerAddress,TokenTransfersTable.c.fromAddress == ownerAddress))
-
-    async for row in retriever.database.iterate(query=query):
-        tokenTransfer = token_transfer_from_row(row)
-        yield tokenTransfer
+    logging.info(f'Got {len(tokensOwned)} total owned')    
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
