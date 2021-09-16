@@ -39,7 +39,11 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         tokenTransfersToChange = []
         async with database.transaction():
             query = TokenTransfersTable.select()
-            query = query.where(or_(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42))
+            query = query.where(or_(
+                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,
+                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42
+                
+                ))  
             query = query.where(TokenTransfersTable.c.blockNumber >= start)
             query = query.where(TokenTransfersTable.c.blockNumber < end)
 
@@ -47,11 +51,11 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
                 tokenTransfer = token_transfer_from_row(row)
                 tokenTransfersToChange.append(tokenTransfer)
 
-            for token in tokenTransfersToChange:
-                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == token.tokenTransferId)
+            for tokenTransfer in tokenTransfersToChange:
+                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId)
                 values = {
-                    TokenTransfersTable.c.toAddress.key: normalize_address(token.toAddress),
-                    TokenTransfersTable.c.fromAddress.key: normalize_address(token.fromAddress),
+                    TokenTransfersTable.c.toAddress.key: normalize_address(tokenTransfer.toAddress),
+                    TokenTransfersTable.c.fromAddress.key: normalize_address(tokenTransfer.fromAddress),
                 }
                 await database.execute(query=query, values=values)
     await database.disconnect()
