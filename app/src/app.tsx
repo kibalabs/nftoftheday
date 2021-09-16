@@ -47,6 +47,7 @@ export const App = (): React.ReactElement => {
   const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
   const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
+  const [error, setError] = React.useState<boolean>(false);
 
   const getUrlDate = (key: string): Date | null => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -107,6 +108,8 @@ export const App = (): React.ReactElement => {
       setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
       setSponsoredToken(uiData.sponsoredToken);
       setTransactionCount(uiData.transactionCount);
+    }).catch(() => {
+      setError(true);
     });
   }, [getUrlDateString, startDate]);
 
@@ -181,12 +184,18 @@ export const App = (): React.ReactElement => {
               <Spacing variant={PaddingSize.Wide2} />
             </Stack.Item>
             <ContainingView>
-              <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
-                <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-                <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
-                <SponsoredTokenCard token={sponsoredToken} />
-              </EqualGrid>
+              {error ? (
+                <Box isFullWidth={false}>
+                  <Text variant='header3'>Sorry, something went wrong. Please Refresh the page</Text>
+                </Box>
+              ) : (
+                <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                  <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
+                  <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
+                  <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
+                  <SponsoredTokenCard token={sponsoredToken} />
+                </EqualGrid>
+              )}
             </ContainingView>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide2} />
