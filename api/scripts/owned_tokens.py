@@ -40,7 +40,7 @@ async def ownedTokens(ownerAddress: Optional[str]):
             tokenTransfer = token_transfer_from_row(row)
             soldTokens[tokenTransfer.registryAddress] = tokenTransfer.tokenId
        
-        print(boughtTokens.values())
+        print(boughtTokens)
         print(soldTokens)
 
         uniqueBoughtTokens = len(boughtTokens.values())
