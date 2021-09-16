@@ -186,7 +186,7 @@ export const App = (): React.ReactElement => {
             <ContainingView>
               {error ? (
                 <Box isFullWidth={false}>
-                  <Text variant='header3'>Sorry, no data found. Please Refresh the page</Text>
+                  <Text variant='header3'>Sorry, something went wrong. Please Refresh the page</Text>
                 </Box>
               ) : (
                 <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
