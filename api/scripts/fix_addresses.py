@@ -14,7 +14,7 @@ from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql.expression import func as sqlalchemyfunc, or_
 
 
 
@@ -36,18 +36,18 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         currentBlockNumber = nextBlockNumber
         logging.info(f'Working on {start} to {end}')
 
-        tokenTransferToChange = []
+        tokenTransfersToChange = []
         async with database.transaction():
             query = TokenTransfersTable.select()
-            query = query.where(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42)
+            query = query.where(or_(sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42))
             query = query.where(TokenTransfersTable.c.blockNumber >= start)
             query = query.where(TokenTransfersTable.c.blockNumber < end)
 
             async for row in retriever.database.iterate(query=query):
                 tokenTransfer = token_transfer_from_row(row)
-                tokenTransferToChange.append(tokenTransfer)
+                tokenTransfersToChange.append(tokenTransfer)
 
-            for token in tokenTransferToChange:
+            for token in tokenTransfersToChange:
                 query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == token.tokenTransferId)
                 values = {
                     TokenTransfersTable.c.toAddress.key: normalize_address(token.toAddress),
