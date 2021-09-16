@@ -7,14 +7,16 @@ import asyncio
 import logging
 
 import asyncclick as click
-from core.store.retriever import Direction
-from core.store.retriever import IntegerFieldFilter
-from core.store.retriever import Order
 from databases.core import Database
 
 from notd.chain_utils import normalize_address
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema_conversions import token_transfer_from_row
+
+from sqlalchemy.sql.expression import func as sqlalchemyfunc, or_
+
+
 
 
 @click.command()
@@ -24,8 +26,8 @@ from notd.store.schema import TokenTransfersTable
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     retriever = Retriever(database=database)
-    await database.connect()
 
+    await database.connect()
     currentBlockNumber = startBlockNumber
     while currentBlockNumber < endBlockNumber:
         nextBlockNumber = currentBlockNumber + batchSize
@@ -33,18 +35,22 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
         end = max(currentBlockNumber, nextBlockNumber)
         currentBlockNumber = nextBlockNumber
         logging.info(f'Working on {start} to {end}')
-        fieldFilters = [
-            IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, gte=start),
-            IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, lt=end),
-        ]
-        orders = [Order(fieldName=TokenTransfersTable.c.tokenTransferId.key, direction=Direction.ASCENDING)]
+
         tokenTransfersToChange = []
         async with database.transaction():
-            async for tokenTransfer in retriever.generate_token_transfers(fieldFilters=fieldFilters, orders=orders):
-                if len(tokenTransfer.toAddress) != 42 or len(tokenTransfer.fromAddress) != 42:
-                    tokenTransfersToChange.append(tokenTransfer)
-            tokenTransferIdsToChange = [str(tokenTransfer.tokenTransferId) for tokenTransfer in tokenTransfersToChange]
-            logging.info(f'Got {len(tokenTransfersToChange)} changes: {",".join(tokenTransferIdsToChange)}')
+            query = TokenTransfersTable.select()
+            query = query.where(or_(
+                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,
+                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42
+                
+            ))  
+            query = query.where(TokenTransfersTable.c.blockNumber >= start)
+            query = query.where(TokenTransfersTable.c.blockNumber < end)
+
+            async for row in retriever.database.iterate(query=query):
+                tokenTransfer = token_transfer_from_row(row)
+                tokenTransfersToChange.append(tokenTransfer)
+
             for tokenTransfer in tokenTransfersToChange:
                 query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId)
                 values = {
