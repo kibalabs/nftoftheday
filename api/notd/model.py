@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import dataclasses
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class RetrievedTokenTransfer:
     transactionHash: str
     registryAddress: str
@@ -20,7 +20,7 @@ class RetrievedTokenTransfer:
     blockHash: str
     blockDate: datetime.datetime
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
 
