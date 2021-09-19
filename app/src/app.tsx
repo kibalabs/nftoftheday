@@ -101,7 +101,7 @@ export const App = (): React.ReactElement => {
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
     setUrlString('date', getUrlDateString());
-    setError(false)
+    setError(false);
 
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
