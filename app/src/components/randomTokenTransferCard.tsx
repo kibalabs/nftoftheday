@@ -22,8 +22,8 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
     retrieveAsset(requester, props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
       setIsLoading(false);
-    }).catch((e) => {
-      setError(e);
+    }).catch((apiError : unknown) => {
+      setError(apiError as Error);
       setIsLoading(false);
     });
   }, [requester, props.tokenTransfer]);

@@ -21,8 +21,8 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
     notdClient.retrieveRegistryToken(props.token.registryAddress, props.token.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
       setIsLoading(false);
-    }).catch((e) => {
-      setError(e);
+    }).catch((apiError : unknown) => {
+      setError(apiError as Error);
       setIsLoading(false);
     });
   }, [notdClient, props.token]);

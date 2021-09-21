@@ -20,8 +20,8 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
     notdClient.retrieveRegistryToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
       setIsLoading(false);
-    }).catch((e) => {
-      setError(e);
+    }).catch((apiError : unknown) => {
+      setError(apiError as Error);
       setIsLoading(false);
     });
   }, [notdClient, props.tokenTransfers]);
