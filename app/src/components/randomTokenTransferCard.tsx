@@ -15,10 +15,16 @@ export type RandomTokenTransferCardProps = {
 export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): React.ReactElement => {
   const { requester } = useGlobals();
   const [asset, setAsset] = React.useState<RegistryToken | null>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     retrieveAsset(requester, props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
+      setIsLoading(false);
+    }).catch((apiError : unknown) => {
+      setError(apiError as Error);
+      setIsLoading(false);
     });
   }, [requester, props.tokenTransfer]);
 
@@ -32,7 +38,7 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
 
   return (
     <React.Fragment>
-      { !props.tokenTransfer || !asset ? (
+      { !props.tokenTransfer || isLoading || !asset ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
@@ -45,6 +51,7 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
           secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
           extraLabelVariants={['cardLabelRandom']}
           extraLabelBoxVariants={['cardLabelBoxRandom']}
+          error={error}
         />
       )}
     </React.Fragment>

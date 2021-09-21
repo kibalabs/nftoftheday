@@ -13,10 +13,17 @@ export type SponsoredTokenCardProps = {
 export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [asset, setAsset] = React.useState<RegistryToken | null>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
+    setIsLoading(true);
     notdClient.retrieveRegistryToken(props.token.registryAddress, props.token.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
+      setIsLoading(false);
+    }).catch((apiError : unknown) => {
+      setError(apiError as Error);
+      setIsLoading(false);
     });
   }, [notdClient, props.token]);
 
@@ -30,7 +37,7 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
 
   return (
     <React.Fragment>
-      { !props.token || !asset ? (
+      { !props.token || isLoading || !asset ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
@@ -43,6 +50,7 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
           // secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
           extraLabelVariants={['cardLabelSponsored']}
           extraLabelBoxVariants={['cardLabelBoxSponsored']}
+          error={error}
         />
       )}
     </React.Fragment>
