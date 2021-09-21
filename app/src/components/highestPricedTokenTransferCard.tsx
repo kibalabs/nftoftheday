@@ -14,10 +14,16 @@ export type HighestPricedTokenTransferCardProps = {
 export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransferCardProps): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [asset, setAsset] = React.useState<RegistryToken | null>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     notdClient.retrieveRegistryToken(props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
+      setIsLoading(false);
+    }).catch((e) => {
+      setError(e);
+      setIsLoading(false);
     });
   }, [notdClient, props.tokenTransfer]);
 
@@ -31,7 +37,7 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
 
   return (
     <React.Fragment>
-      { !props.tokenTransfer || !asset ? (
+      { !props.tokenTransfer || isLoading || !asset ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
@@ -42,6 +48,7 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
           primaryButtonTarget={asset.openSeaUrl}
           secondaryButtonText='View Tx'
           secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
+          error ={error}
         />
       )}
     </React.Fragment>

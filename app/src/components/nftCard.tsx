@@ -15,7 +15,7 @@ export interface NftCardProps {
   primaryButtonText?: string;
   extraLabelVariants?: string[];
   extraLabelBoxVariants?: string[];
-  error?: boolean;
+  error?: Error;
 }
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {

@@ -14,15 +14,15 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
   const { notdClient } = useGlobals();
   const [asset, setAsset] = React.useState<RegistryToken | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     setIsLoading(true);
     notdClient.retrieveRegistryToken(props.token.registryAddress, props.token.tokenId).then((registryToken: RegistryToken): void => {
       setAsset(registryToken);
       setIsLoading(false);
-    }).catch(() => {
-      setError(true);
+    }).catch((e) => {
+      setError(e);
       setIsLoading(false);
     });
   }, [notdClient, props.token]);
