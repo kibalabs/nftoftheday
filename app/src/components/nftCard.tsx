@@ -55,7 +55,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                 { shouldUseIframe(props.nft) ? (
                   <WebView url={imageUrl} />
                 ) : (
-                  <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
+                  <Media source={imageUrl || 'assets/icon.jpg'} alternativeText={`${title} image`} fitType='contain' />
                 )}
               </Box>
             </Stack.Item>
