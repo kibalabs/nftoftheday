@@ -20,3 +20,14 @@ CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
 CREATE INDEX tbl_token_transfers_block_date ON tbl_token_transfers (block_date);
 CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_number);
 CREATE INDEX tbl_token_transfers_block_hash ON tbl_token_transfers (block_hash);
+
+CREATE TABLE tbl_token_metadata (
+    id BIGSERIAL PRIMARY KEY,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    metadata_url TEXT NOT NULL
+    image_url TEXT NOT NULL
+);
+CREATE UNIQUE INDEX tbl_token_registry_address_token_id ON tbl_token_metadata (registry_address, token_id);
+CREATE INDEX tbl_token_metadata_registry_address ON tbl_token_metadata (registry_address);
+CREATE INDEX tbl_token_metadata_token_id ON tbl_token_metadata (token_id);
