@@ -20,7 +20,7 @@ export interface NftCardProps {
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
-  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? null;
+  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? 'assets/icon.jpg' ?? null;
   const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
   const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
@@ -55,7 +55,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                 { shouldUseIframe(props.nft) ? (
                   <WebView url={imageUrl} />
                 ) : (
-                  <Media source={imageUrl || 'assets/icon.jpg'} alternativeText={`${title} image`} fitType='contain' />
+                  <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
                 )}
               </Box>
             </Stack.Item>
