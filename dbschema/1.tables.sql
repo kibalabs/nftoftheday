@@ -39,4 +39,3 @@ CREATE UNIQUE INDEX tbl_token_registry_address_token_id ON tbl_token_metadata (r
 CREATE INDEX tbl_token_metadata_registry_address ON tbl_token_metadata (registry_address);
 CREATE INDEX tbl_token_metadata_token_id ON tbl_token_metadata (token_id);
 CREATE INDEX tbl_token_metadata_name ON tbl_token_metadata (name);
-
