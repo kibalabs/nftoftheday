@@ -1,4 +1,3 @@
-from api.notd.model import TokenMetadata
 import sqlalchemy
 
 metadata = sqlalchemy.MetaData()
