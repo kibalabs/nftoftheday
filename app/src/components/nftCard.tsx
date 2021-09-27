@@ -20,7 +20,7 @@ export interface NftCardProps {
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
-  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? 'assets/icon.jpg' ?? null;
+  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? 'assets/icon.jpg';
   const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
   const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
