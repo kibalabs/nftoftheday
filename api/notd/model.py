@@ -20,6 +20,18 @@ class RetrievedTokenTransfer:
     blockHash: str
     blockDate: datetime.datetime
 
+@dataclasses.dataclass
+class TokenMetadata:
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: int
+    metdataUrl: str
+    imageUrl: int
+    name: str
+    description: str
+    attributes: str
+
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int

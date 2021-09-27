@@ -9,10 +9,10 @@ from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
-from notd.model import Token
+from notd.model import Token, TokenMetadata
 from notd.model import TokenTransfer
-from notd.store.schema import TokenTransfersTable
-from notd.store.schema_conversions import token_transfer_from_row
+from notd.store.schema import TokenTransfersTable,TokenMetadataTable
+from notd.store.schema_conversions import token_transfer_from_row,token_metadata_from_row
 
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
@@ -60,3 +60,15 @@ class Retriever(CoreRetriever):
         query = query.limit(1)
         rows = await self.database.fetch_all(query=query)
         return Token(registryAddress=rows[0][TokenTransfersTable.c.registryAddress], tokenId=rows[0][TokenTransfersTable.c.tokenId])
+
+    async def list_token_metadata(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenMetadata]:
+        query = TokenMetadataTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenMetadataTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenMetadataTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        rows = await self.database.fetch_all(query=query)
+        tokenMetdata = [token_metadata_from_row(row) for row in rows]
+        return tokenMetdata
