@@ -24,7 +24,7 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         blockHash=row[TokenTransfersTable.c.blockHash],
         blockDate=row[TokenTransfersTable.c.blockDate].replace(tzinfo=datetime.timezone.utc),
     )
-    
+
 def token_metadata_from_row(row: Mapping) -> TokenMetadata:
     return TokenMetadata(
         tokenMetadataId=row[TokenMetadataTable.c.tokenMetadataId],
