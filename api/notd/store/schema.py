@@ -19,7 +19,7 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
 )
 
 TokenMetadataTable = sqlalchemy.Table(
-    'tbl_token_metadata',
+    'tbl_token_metadatas',
     metadata,
     sqlalchemy.Column(key='tokenMetadataId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),

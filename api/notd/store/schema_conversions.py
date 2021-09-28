@@ -1,9 +1,10 @@
 import datetime
 from typing import Mapping
 
-from notd.model import TokenTransfer
 from notd.model import TokenMetadata
-from notd.store.schema import TokenTransfersTable,TokenMetadataTable
+from notd.model import TokenTransfer
+from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenTransfersTable
 
 
 def token_transfer_from_row(row: Mapping) -> TokenTransfer:

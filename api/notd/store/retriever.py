@@ -9,10 +9,13 @@ from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
-from notd.model import Token, TokenMetadata
+from notd.model import Token
+from notd.model import TokenMetadata
 from notd.model import TokenTransfer
-from notd.store.schema import TokenTransfersTable,TokenMetadataTable
-from notd.store.schema_conversions import token_transfer_from_row,token_metadata_from_row
+from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenTransfersTable
+from notd.store.schema_conversions import token_metadata_from_row
+from notd.store.schema_conversions import token_transfer_from_row
 
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap

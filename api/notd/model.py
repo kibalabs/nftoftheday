@@ -5,6 +5,7 @@ from typing import Optional
 
 from pydantic import dataclasses
 
+
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class RetrievedTokenTransfer:
     transactionHash: str
