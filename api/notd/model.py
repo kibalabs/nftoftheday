@@ -4,6 +4,8 @@ from typing import List
 from typing import Optional
 
 from pydantic import dataclasses
+from sqlalchemy.sql.sqltypes import JSON
+
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class RetrievedTokenTransfer:
@@ -19,6 +21,18 @@ class RetrievedTokenTransfer:
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
+
+@dataclasses.dataclass
+class TokenMetadata:
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: int
+    metdataUrl: str
+    imageUrl: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    attributes: Optional[JSON]
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):

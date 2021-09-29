@@ -1,7 +1,9 @@
 import datetime
 from typing import Mapping
 
+from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 
 
@@ -21,4 +23,18 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         blockNumber=row[TokenTransfersTable.c.blockNumber],
         blockHash=row[TokenTransfersTable.c.blockHash],
         blockDate=row[TokenTransfersTable.c.blockDate].replace(tzinfo=datetime.timezone.utc),
+    )
+
+def token_metadata_from_row(row: Mapping) -> TokenMetadata:
+    return TokenMetadata(
+        tokenMetadataId=row[TokenMetadataTable.c.tokenMetadataId],
+        createdDate=row[TokenMetadataTable.c.createdDate],
+        updatedDate=row[TokenMetadataTable.c.updatedDate],
+        registryAddress=row[TokenMetadataTable.c.registry_address],
+        tokenId=row[TokenMetadataTable.c.tokenId],
+        metadatatUrl=row[TokenMetadataTable.c.metadatUrl],
+        imageUrl=row[TokenMetadataTable.c.imageUrl],
+        name=row[TokenMetadataTable.c.name],
+        description=row[TokenMetadataTable.c.description],
+        attributes=row[TokenMetadataTable.c.attributes],
     )
