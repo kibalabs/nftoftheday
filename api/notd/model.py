@@ -5,8 +5,6 @@ from typing import Optional
 from typing import Union
 
 from pydantic import dataclasses
-from sqlalchemy.sql.sqltypes import JSON
-
 
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
