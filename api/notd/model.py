@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 
 from pydantic import dataclasses
+from sqlalchemy.sql.sqltypes import JSON
 
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
@@ -28,10 +29,10 @@ class TokenMetadata:
     registryAddress: str
     tokenId: int
     metdataUrl: str
-    imageUrl: int
-    name: str
-    description: str
-    attributes: str
+    imageUrl: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    attributes: Optional[JSON]
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):

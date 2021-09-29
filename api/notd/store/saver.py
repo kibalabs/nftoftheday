@@ -3,6 +3,8 @@ import contextlib
 
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
+from sqlalchemy.sql.elements import Null
+from sqlalchemy.sql.sqltypes import JSON
 
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
@@ -11,6 +13,7 @@ from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
+_EMPTY_OBJECT = Null
 
 class Saver(CoreSaver):
 
@@ -57,7 +60,7 @@ class Saver(CoreSaver):
             blockDate=retrievedTokenTransfer.blockDate,
         )
 
-    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: int, name: str, description: str, attributes: str) -> TokenMetadata:
+    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Optional[JSON]) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
@@ -83,7 +86,7 @@ class Saver(CoreSaver):
             description=description,
             attributes=attributes)
 
-    async def update_token_metadata_item(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_STRING) -> None:
+    async def update_token_metadata_item(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
         query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId)
         values = {}
         if metadataUrl is not None:
@@ -94,7 +97,7 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.description.key] = description
         if name != _EMPTY_STRING:
             values[TokenMetadataTable.c.name.key] = name
-        if attributes != _EMPTY_STRING:
+        if attributes != _EMPTY_OBJECT:
             values[TokenMetadataTable.c.attributes.key] = attributes
         if len(values) > 0:
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
