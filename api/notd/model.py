@@ -1,10 +1,9 @@
 import datetime
-from typing import Dict
+from typing import Dict, Union
 from typing import List
 from typing import Optional
 
 from pydantic import dataclasses
-from sqlalchemy.sql.sqltypes import JSON
 
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
@@ -32,7 +31,7 @@ class TokenMetadata:
     imageUrl: Optional[int]
     name: Optional[str]
     description: Optional[str]
-    attributes: Optional[JSON]
+    attributes: Optional[Dict[str, Union[str, int, float]]]
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
