@@ -35,4 +35,4 @@ def retrieve_token_metadata(registryAddress: str,tokenId:int):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    retrieve_token_metadata()
+    retrieve_token_metadata() #pylint: disable = no-value-for-parameter
