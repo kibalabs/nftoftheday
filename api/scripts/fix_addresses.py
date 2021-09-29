@@ -8,15 +8,13 @@ import logging
 
 import asyncclick as click
 from databases.core import Database
+from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql.expression import or_
 
 from notd.chain_utils import normalize_address
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
-
-from sqlalchemy.sql.expression import func as sqlalchemyfunc, or_
-
-
 
 
 @click.command()
