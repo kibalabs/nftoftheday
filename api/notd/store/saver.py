@@ -13,7 +13,7 @@ from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
-_EMPTY_OBJECT = Null
+_EMPTY_OBJECT = Null()
 
 class Saver(CoreSaver):
 
