@@ -3,8 +3,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import logging
 import asyncio
+import logging
+
 import asyncclick as click
 from databases.core import Database
 from sqlalchemy.sql.expression import func as sqlalchemyfunc

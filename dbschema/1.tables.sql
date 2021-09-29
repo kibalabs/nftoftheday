@@ -23,8 +23,8 @@ CREATE INDEX tbl_token_transfers_block_hash ON tbl_token_transfers (block_hash);
 
 CREATE TABLE tbl_token_metadatas (
     id BIGSERIAL PRIMARY KEY,
-    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
-    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
     metadata_url TEXT NOT NULL,
