@@ -1,5 +1,6 @@
 from typing import Optional
 import contextlib
+from typing import Optional
 
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
@@ -84,7 +85,12 @@ class Saver(CoreSaver):
             imageUrl=imageUrl,
             name=name,
             description=description,
+<<<<<<< HEAD
             attributes=attributes)
+=======
+            attributes=attributes,
+        )
+>>>>>>> main
 
     async def update_token_metadata_item(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
         query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId)

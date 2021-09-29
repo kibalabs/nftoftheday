@@ -9,9 +9,11 @@ import logging
 
 import asyncclick as click
 from databases.core import Database
+
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
+
 
 @click.command()
 @click.option('-o', '--owner-address', 'ownerAddress', required=False, type=str)
