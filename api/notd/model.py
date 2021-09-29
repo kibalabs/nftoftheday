@@ -34,11 +34,7 @@ class TokenMetadata:
     imageUrl: Optional[int]
     name: Optional[str]
     description: Optional[str]
-<<<<<<< HEAD
-    attributes: Optional[JSON]
-=======
     attributes: Optional[Dict[str, Union[str, int, float]]]
->>>>>>> main
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
