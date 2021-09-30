@@ -1,38 +1,28 @@
 import json
-import logging
-import os
+
 import urllib.request
-
-from web3 import Web3
-
-from notd.model import TokenMetadata
+from core.web3.eth_client import EthClientInterface
 
 _EMPTY_STRING = '_EMPTY_STRING'
-w3 = Web3(Web3.HTTPProvider(f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}'))
 
-def retrieve_token_metadata(registryAddress: str,tokenId:int):
-    with open('./contracts/IERC721Metadata.json') as contractJsonFile:
-        erc721MetdataContractJson = json.load(contractJsonFile)
-        erc721MetdataContractAbi = erc721MetdataContractJson['abi']
-    contract = w3.eth.contract(registryAddress,abi=erc721MetdataContractAbi)
-    url = contract.functions.tokenURI(tokenId).call()
-    with urllib.request.urlopen(url) as response:
-        data = json.loads(response.read())
-        metadataUrl = url
-        imageUrl = data.get('image',_EMPTY_STRING)
-        name = data.get('name',_EMPTY_STRING)
-        description =  data.get('description',_EMPTY_STRING)
-        attributes = data.get('attributes',_EMPTY_STRING)
+class MetadataManager():
 
-    return TokenMetadata(
-        registryAddress=registryAddress,
-        tokenId=tokenId,
-        metadataUrl=metadataUrl,
-        imageUrl=imageUrl,
-        name=name,
-        description=description,
-        attributes=attributes)
+    def __init__(self, ethClient: EthClientInterface):
+        self.ethClient = ethClient
+        with open('./contracts/IERC721Metadata.json') as contractJsonFile:
+            erc721MetdataContractJson = json.load(contractJsonFile)
+        self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
+        self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
+        self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    retrieve_token_metadata() #pylint: disable = no-value-for-parameter
+    async def retrieve_token_metadata(self,registryAddress: str,tokenId: int):
+        tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+        with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
+            data = json.loads(response.read())
+            metadataUrl = tokenMetadataUriResponse[0]
+            imageUrl = data.get('image',_EMPTY_STRING)
+            name = data.get('name',_EMPTY_STRING)
+            description =  data.get('description',_EMPTY_STRING)
+            attributes = data.get('attributes',_EMPTY_STRING)
+
+        return metadataUrl, imageUrl, name, description, attributes
