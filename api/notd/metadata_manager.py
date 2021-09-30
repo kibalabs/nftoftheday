@@ -2,8 +2,6 @@ import json
 
 import urllib.request
 from core.web3.eth_client import EthClientInterface
-from notd.model import TokenMetadata
-
 
 class MetadataManager():
 
