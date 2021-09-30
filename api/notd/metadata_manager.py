@@ -2,8 +2,8 @@ import json
 
 import urllib.request
 from core.web3.eth_client import EthClientInterface
+from notd.model import TokenMetadata
 
-_EMPTY_STRING = '_EMPTY_STRING'
 
 class MetadataManager():
 
@@ -20,9 +20,9 @@ class MetadataManager():
         with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
             data = json.loads(response.read())
             metadataUrl = tokenMetadataUriResponse[0]
-            imageUrl = data.get('image',_EMPTY_STRING)
-            name = data.get('name',_EMPTY_STRING)
-            description =  data.get('description',_EMPTY_STRING)
-            attributes = data.get('attributes',_EMPTY_STRING)
+            imageUrl = data.get('image')
+            name = data.get('name')
+            description =  data.get('description')
+            attributes = data.get('attributes')
 
         return metadataUrl, imageUrl, name, description, attributes
