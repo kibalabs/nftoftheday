@@ -46,5 +46,5 @@ class TokenMetadataProcessor():
             description=description,
             attributes=attributes
             )
-        except: # pylint: disable=broad-except
+        except: # pylint: disable=bare-except
             pass
