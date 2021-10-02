@@ -4,7 +4,6 @@ import urllib.request
 from core.requester import Requester
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
-
 from notd.model import RetrievedTokenMetadata
 
 
@@ -46,5 +45,5 @@ class TokenMetadataProcessor():
             description=description,
             attributes=attributes
             )
-        except:
+        except: # pylint: disable=broad-except
             pass
