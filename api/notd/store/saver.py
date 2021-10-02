@@ -1,12 +1,13 @@
 import contextlib
-from typing import Optional
+from operator import and_
+from typing import List, Optional
 
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from sqlalchemy.sql.elements import Null
 from sqlalchemy.sql.sqltypes import JSON
 
-from notd.model import RetrievedTokenTransfer
+from notd.model import RetrievedTokenMetadata, RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.store.schema import TokenMetadataTable
@@ -60,35 +61,33 @@ class Saver(CoreSaver):
             blockDate=retrievedTokenTransfer.blockDate,
         )
 
-    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Optional[JSON]) -> TokenMetadata:
-        createdDate = date_util.datetime_from_now()
-        updatedDate = createdDate
+    async def create_token_metadata(self, retrievedTokenMetadata: RetrievedTokenMetadata) -> TokenMetadata:
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
-            TokenMetadataTable.c.createdDate.key: createdDate,
-            TokenMetadataTable.c.updatedDate.key: updatedDate,
-            TokenMetadataTable.c.registryAddress.key: registryAddress,
-            TokenMetadataTable.c.tokenId.key: tokenId,
-            TokenMetadataTable.c.metadataUrl.key: metadataUrl,
-            TokenMetadataTable.c.imageUrl.key: imageUrl,
-            TokenMetadataTable.c.name.key: name,
-            TokenMetadataTable.c.description.key: description,
-            TokenMetadataTable.c.attributes.key: attributes,
+            TokenMetadataTable.c.createdDate.key: retrievedTokenMetadata.createdDate,
+            TokenMetadataTable.c.updatedDate.key: retrievedTokenMetadata.updatedDate,
+            TokenMetadataTable.c.registryAddress.key: retrievedTokenMetadata.registryAddress,
+            TokenMetadataTable.c.tokenId.key: retrievedTokenMetadata.tokenId,
+            TokenMetadataTable.c.metadataUrl.key: retrievedTokenMetadata.metadataUrl,
+            TokenMetadataTable.c.imageUrl.key: retrievedTokenMetadata.imageUrl,
+            TokenMetadataTable.c.name.key: retrievedTokenMetadata.name,
+            TokenMetadataTable.c.description.key: retrievedTokenMetadata.description,
+            TokenMetadataTable.c.attributes.key: retrievedTokenMetadata.attributes,
         })
         return TokenMetadata(
             tokenMetadataId=tokenMetadataId,
-            createdDate=createdDate,
-            updatedDate=updatedDate,
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            metadataUrl=metadataUrl,
-            imageUrl=imageUrl,
-            name=name,
-            description=description,
-            attributes=attributes,
+            createdDate=retrievedTokenMetadata.createdDate,
+            updatedDate=retrievedTokenMetadata.updatedDate,
+            registryAddress=retrievedTokenMetadata.registryAddress,
+            tokenId=retrievedTokenMetadata.tokenId,
+            metadataUrl=retrievedTokenMetadata.metadataUrl,
+            imageUrl=retrievedTokenMetadata.imageUrl,
+            name=retrievedTokenMetadata.name,
+            description=retrievedTokenMetadata.description,
+            attributes=retrievedTokenMetadata.attributes,
         )
 
-    async def update_token_metadata_item(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
-        query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId)
+    async def update_token_metadata_item(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
+        query = TokenMetadataTable.update(and_(TokenMetadataTable.c.registryAddress == registryAddress,TokenMetadataTable.c.tokenId ==tokenId))
         values = {}
         if metadataUrl is not None:
             values[TokenMetadataTable.c.metadataUrl.key] = metadataUrl

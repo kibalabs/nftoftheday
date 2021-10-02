@@ -31,7 +31,7 @@ CREATE TABLE tbl_token_metadatas (
     image_url TEXT,
     name TEXT,
     description TEXT,
-    attributes JSON
+    attributes TEXT
 );
 CREATE UNIQUE INDEX tbl_tokens_metadatas_registry_address_token_id ON tbl_token_metadatas (registry_address, token_id);
 CREATE INDEX tbl_token_metadatas_registry_address ON tbl_token_metadatas (registry_address);

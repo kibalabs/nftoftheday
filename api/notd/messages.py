@@ -14,3 +14,8 @@ class ProcessBlockRangeMessageContent(MessageContent):
 
 class ReceiveNewBlocksMessageContent(MessageContent):
     _COMMAND = 'RECEIVE_NEW_BLOCKS'
+
+class UpdateTokenMetadataMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_METADATA'
+    registryAddress: str
+    tokenId: str

@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict
+from typing import Dict, Sequence
 from typing import List
 from typing import Optional
 from typing import Union
@@ -23,16 +23,34 @@ class RetrievedTokenTransfer:
     blockDate: datetime.datetime
 
 @dataclasses.dataclass
-class TokenMetadata:
+class RetrievedTokenMetadata:
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
     registryAddress: str
-    tokenId: int
-    metdataUrl: str
-    imageUrl: Optional[int]
+    tokenId: str
+    metadataUrl: str
+    imageUrl: Optional[str]
     name: Optional[str]
     description: Optional[str]
     attributes: Optional[Dict[str, Union[str, int, float]]]
+
+@dataclasses.dataclass
+class TokenMetadata(RetrievedTokenMetadata):
+    tokenMetadataId: int
+
+    def to_dict(self) -> Dict:
+        return {
+            'tokenMetadataId': self.tokenMetadataId,
+            'createdDate': self.createdDate.isoformat,
+            'updatedDate': self.updatedDated.isoformat,
+            'registryAddress': self.registryAddress,
+            'tokenId': self.tokenId,
+            'metadataUrl': self.metadataUrl,
+            'imageUrl': self.imageUrl,
+            'name': self.name,
+            'description': self.description,
+            'attributes': self.attributes,
+        }
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
