@@ -190,10 +190,8 @@ class NotdManager:
                     await self.saver.create_token_metadata(retrievedTokenMetadata = retrievedTokenMetadata)
                 else:
                     await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
-
         except BadRequestException:
             pass
-        
         
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'

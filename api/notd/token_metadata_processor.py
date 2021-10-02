@@ -35,7 +35,7 @@ class TokenMetadataProcessor():
                     name = data.get('name')
                     description =  data.get('description')
                     attributes = data.get('attributes')
-                    
+
             return RetrievedTokenMetadata(
             createdDate=createdDate,
             updatedDate=updatedDate,
@@ -49,6 +49,3 @@ class TokenMetadataProcessor():
         )
         except:
             pass
-        
-
-        
