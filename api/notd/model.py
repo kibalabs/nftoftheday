@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict, Sequence
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
@@ -42,7 +42,7 @@ class TokenMetadata(RetrievedTokenMetadata):
         return {
             'tokenMetadataId': self.tokenMetadataId,
             'createdDate': self.createdDate.isoformat,
-            'updatedDate': self.updatedDated.isoformat,
+            'updatedDate': self.updatedDate.isoformat,
             'registryAddress': self.registryAddress,
             'tokenId': self.tokenId,
             'metadataUrl': self.metadataUrl,

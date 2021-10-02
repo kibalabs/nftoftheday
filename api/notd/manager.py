@@ -1,11 +1,11 @@
 import asyncio
 import datetime
 import logging
-from os import name
-from re import S
-from typing import Optional, Sequence
 
-from core.exceptions import BadRequestException, DuplicateValueException
+from typing import Sequence
+
+from core.exceptions import BadRequestException
+from core.exceptions import DuplicateValueException
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -15,20 +15,22 @@ from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-from notd.token_metadata_processor import TokenMetadataProcessor
-
 from notd.block_processor import BlockProcessor
-from notd.messages import ProcessBlockRangeMessageContent, UpdateTokenMetadataMessageContent
+from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
-from notd.model import RegistryToken, RetrievedTokenMetadata, TokenMetadata
+from notd.messages import UpdateTokenMetadataMessageContent
+from notd.model import RegistryToken
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
+from notd.model import TokenMetadata
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadataTable, TokenTransfersTable
+from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 SPONSORED_TOKENS = [
     {'date': datetime.datetime(2021, 1, 1), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345')},
@@ -176,7 +178,7 @@ class NotdManager:
         for retrievedTokenTransfer in retrievedTokenTransfers:
             print(retrievedTokenTransfer.registryAddress)
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(regstryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId))
-    
+
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         try:
             retrievedTokenMetadata= await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
@@ -192,7 +194,7 @@ class NotdManager:
                     await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         except BadRequestException:
             pass
-        
+
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
         if cacheKey in self._tokenCache:

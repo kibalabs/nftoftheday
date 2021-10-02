@@ -1,11 +1,11 @@
 from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
-
 from notd.manager import NotdManager
-from notd.messages import ProcessBlockRangeMessageContent, UpdateTokenMetadataMessageContent
+from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ProcessBlocksMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import UpdateTokenMetadataMessageContent
 
 
 class NotdMessageProcessor(MessageProcessor):
@@ -30,5 +30,5 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
             await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
             return
-            
+
         raise KibaException(message='Message was unhandled')

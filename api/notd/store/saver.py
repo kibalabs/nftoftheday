@@ -1,11 +1,9 @@
 import contextlib
 from operator import and_
-from typing import List, Optional
+from typing import Optional
 
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
-from sqlalchemy.sql.elements import Null
-from sqlalchemy.sql.sqltypes import JSON
 
 from notd.model import RetrievedTokenMetadata, RetrievedTokenTransfer
 from notd.model import TokenMetadata

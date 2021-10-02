@@ -8,9 +8,8 @@ import logging
 
 import asyncclick as click
 from databases.core import Database
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
-
 from notd.store.schema import TokenTransfersTable
+from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 
 @click.command()
