@@ -23,16 +23,20 @@ class TokenMetadataProcessor():
     async def retrieve_token_metadata(self,registryAddress: str,tokenId: str):
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
-        tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})        
-        with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
-            data = json.loads(response.read())
-            metadataUrl = tokenMetadataUriResponse[0]
-            imageUrl = data.get('image')
-            name = data.get('name')
-            description =  data.get('description')
-            attributes = data.get('attributes')
-
-        return RetrievedTokenMetadata(
+        tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+    
+        if tokenMetadataUriResponse[0][:4] == 'ipfs':
+            tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace('ipfs://','https://ipfs.io/ipfs/')
+        try:
+            with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
+                    data = json.loads(response.read())
+                    metadataUrl = tokenMetadataUriResponse[0]
+                    imageUrl = data.get('image')
+                    name = data.get('name')
+                    description =  data.get('description')
+                    attributes = data.get('attributes')
+                    
+            return RetrievedTokenMetadata(
             createdDate=createdDate,
             updatedDate=updatedDate,
             registryAddress=registryAddress,
@@ -43,3 +47,8 @@ class TokenMetadataProcessor():
             description=description,
             attributes=attributes     
         )
+        except:
+            pass
+        
+
+        

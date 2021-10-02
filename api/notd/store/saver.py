@@ -14,7 +14,7 @@ from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
-_EMPTY_OBJECT = Null()
+_EMPTY_OBJECT = '_EMPTY_OBJECT'
 
 class Saver(CoreSaver):
 
@@ -97,7 +97,7 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.description.key] = description
         if name != _EMPTY_STRING:
             values[TokenMetadataTable.c.name.key] = name
-        if attributes != _EMPTY_OBJECT:
+        if attributes is not _EMPTY_OBJECT:
             values[TokenMetadataTable.c.attributes.key] = attributes
         if len(values) > 0:
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()

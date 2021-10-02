@@ -5,7 +5,7 @@ from os import name
 from re import S
 from typing import Optional, Sequence
 
-from core.exceptions import DuplicateValueException
+from core.exceptions import BadRequestException, DuplicateValueException
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -174,6 +174,7 @@ class NotdManager:
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
         for retrievedTokenTransfer in retrievedTokenTransfers:
+            print(retrievedTokenTransfer.registryAddress)
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(regstryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId))
     
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> TokenMetadata:
@@ -184,13 +185,15 @@ class NotdManager:
                     StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
                     StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
                 ])
-            if len(savedTokenMetadata)==0:
-                await self.saver.create_token_metadata(retrievedTokenMetadata = retrievedTokenMetadata)
-            else:
-                await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
-        except Exception:
+            if retrievedTokenMetadata is not None:
+                if len(savedTokenMetadata)==0:
+                    await self.saver.create_token_metadata(retrievedTokenMetadata = retrievedTokenMetadata)
+                else:
+                    await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+
+        except BadRequestException:
             pass
-            
+        
         
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
