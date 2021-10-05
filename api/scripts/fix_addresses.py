@@ -8,7 +8,7 @@ import logging
 
 import asyncclick as click
 from databases.core import Database
-from notd.chain_utils import normalize_address
+from core.util.chain_util import normalize_address
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row

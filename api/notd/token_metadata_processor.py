@@ -1,6 +1,6 @@
 import json
 import urllib.request
-
+from urllib.error import URLError
 from core.requester import Requester
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
@@ -28,12 +28,12 @@ class TokenMetadataProcessor():
             tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace('ipfs://','https://ipfs.io/ipfs/')
         try:
             with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
-                data = json.loads(response.read())
-                metadataUrl = tokenMetadataUriResponse[0]
-                imageUrl = data.get('image')
-                name = data.get('name')
-                description =  data.get('description')
-                attributes = data.get('attributes')
+                data=json.loads(response.read())
+                metadataUrl=tokenMetadataUriResponse[0]
+                imageUrl=data.get('image')
+                name=data.get('name')
+                description=data.get('description')
+                attributes=data.get('attributes')
 
             return RetrievedTokenMetadata(
             createdDate=createdDate,
@@ -46,5 +46,5 @@ class TokenMetadataProcessor():
             description=description,
             attributes=attributes
             )
-        except: # pylint: disable=bare-except
+        except URLError: # pylint: disable=bare-except
             pass

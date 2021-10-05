@@ -7,6 +7,7 @@ from typing import Optional
 
 import async_lru
 from core.util import list_util
+from core.util.chain_util import normalize_address
 from core.web3.eth_client import EthClientInterface
 from web3 import Web3
 from web3.types import HexBytes
@@ -14,7 +15,6 @@ from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
 
-from notd.chain_utils import normalize_address
 from notd.model import RetrievedTokenTransfer
 
 
