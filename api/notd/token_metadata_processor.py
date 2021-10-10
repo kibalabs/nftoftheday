@@ -33,8 +33,10 @@ class TokenMetadataProcessor():
                 imageUrl=data.get('image')
                 name=data.get('name')
                 description=data.get('description')
-                attributes=data.get('attributes')
-
+                if data.get('attributes') is None:
+                    attributes = []
+                else:
+                    attributes=data.get('attributes')[0]
             return RetrievedTokenMetadata(
             createdDate=createdDate,
             updatedDate=updatedDate,
@@ -47,4 +49,6 @@ class TokenMetadataProcessor():
             attributes=attributes
             )
         except URLError: # pylint: disable=bare-except
+            pass
+        except ValueError:
             pass
