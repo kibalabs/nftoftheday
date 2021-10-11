@@ -210,13 +210,9 @@ class NotdManager:
         await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
 
     async def retreive_metadata_token(self, registryAddress: str, tokenId: str) -> TokenMetadata:
-        cacheKey = f'{registryAddress}:{tokenId}'
-        if cacheKey in self._tokenCache:
-            return self._tokenCache[cacheKey]
         tokenMetadata = await self.retriever.list_token_metadata(fieldFilters=[
                 StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
             ])
-        self._tokenCache[cacheKey] = tokenMetadata
         return tokenMetadata
         
