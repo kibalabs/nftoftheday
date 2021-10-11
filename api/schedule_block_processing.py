@@ -5,6 +5,7 @@ from typing import Optional
 import asyncclick as click
 import boto3
 from core.queues.sqs_message_queue import SqsMessageQueue
+
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ProcessBlocksMessageContent
 
