@@ -39,7 +39,6 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
             query = query.where(or_(
                 sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,
                 sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42
-
             ))
             query = query.where(TokenTransfersTable.c.blockNumber >= start)
             query = query.where(TokenTransfersTable.c.blockNumber < end)
