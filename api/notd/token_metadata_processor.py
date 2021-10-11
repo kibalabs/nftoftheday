@@ -26,29 +26,25 @@ class TokenMetadataProcessor():
 
         if tokenMetadataUriResponse[0][:4] == 'ipfs':
             tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace('ipfs://','https://ipfs.io/ipfs/')
-        try:
-            with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
-                data=json.loads(response.read())
-                metadataUrl=tokenMetadataUriResponse[0]
-                imageUrl=data.get('image')
-                name=data.get('name')
-                description=data.get('description')
-                if data.get('attributes') is None:
-                    attributes = []
-                else:
-                    attributes=data.get('attributes')[0]
-            return RetrievedTokenMetadata(
-            createdDate=createdDate,
-            updatedDate=updatedDate,
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            metadataUrl=metadataUrl,
-            imageUrl=imageUrl,
-            name=name,
-            description=description,
-            attributes=attributes
-            )
-        except URLError: # pylint: disable=bare-except
-            pass
-        except ValueError:
-            pass
+    
+        with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
+            data=json.loads(response.read())
+            metadataUrl=tokenMetadataUriResponse[0]
+            imageUrl=data.get('image')
+            name=data.get('name')
+            description=data.get('description')
+            if data.get('attributes') is None:
+                attributes = []
+            else:
+                attributes=data.get('attributes')[0]
+        return RetrievedTokenMetadata(
+        createdDate=createdDate,
+        updatedDate=updatedDate,
+        registryAddress=registryAddress,
+        tokenId=tokenId,
+        metadataUrl=metadataUrl,
+        imageUrl=imageUrl,
+        name=name,
+        description=description,
+        attributes=attributes
+        )
