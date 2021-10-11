@@ -1,6 +1,5 @@
 import json
 import urllib.request
-from urllib.error import URLError
 from core.requester import Requester
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
@@ -26,7 +25,7 @@ class TokenMetadataProcessor():
 
         if tokenMetadataUriResponse[0][:4] == 'ipfs':
             tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace('ipfs://','https://ipfs.io/ipfs/')
-    
+
         with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
             data=json.loads(response.read())
             metadataUrl=tokenMetadataUriResponse[0]
