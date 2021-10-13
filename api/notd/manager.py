@@ -200,25 +200,19 @@ class NotdManager:
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId))
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> TokenMetadata:
-        try:
-            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-            if not retrievedTokenMetadata:
-                raise NotFoundException(f'Failed to find tokenMetadata for {registryAddress}/{tokenId}')
-            savedTokenMetadata = await self.retriever.list_token_metadata(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-                ])
-            if len(savedTokenMetadata) == 0:
-                await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
-            else:
-                await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
-        except BadRequestException:
-            logging.info(f'Bad request exception for registryAddress: {registryAddress}, tokenId: {tokenId} ')
-
-
-
-
+        retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        if not retrievedTokenMetadata:
+            raise NotFoundException(f'Failed to find tokenMetadata for {registryAddress}/{tokenId}')
+        savedTokenMetadata = await self.retriever.list_token_metadata(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+            ])
+        if len(savedTokenMetadata) == 0:
+            await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+        else:
+            await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+    
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
         if cacheKey in self._tokenCache:

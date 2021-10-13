@@ -20,26 +20,22 @@ class TokenMetadataProcessor():
     async def retrieve_token_metadata(self,registryAddress: str,tokenId: str):
         tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
         tokenMetadataUri = tokenMetadataUriResponse[0]
-
         if tokenMetadataUri.startswith('ipfs://'):
-            tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace('ipfs://','https://ipfs.io/ipfs/')
-
+            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
         with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
             data = json.loads(response.read())
-            metadataUrl = tokenMetadataUriResponse[0]
+            metadataUrl = tokenMetadataUri
             imageUrl = data.get('image')
             name = data.get('name')
-            description =data.get('description')
-            if data.get('attributes') is None:
-                attributes = []
-            else:
-                attributes=data.get('attributes')[0]
-        return RetrievedTokenMetadata (
-            registryAddress,
-            tokenId,
-            metadataUrl,
-            imageUrl,
-            name,
-            description,
-            attributes
-            )
+            description = data.get('description')
+            attributes = data.get('attributes')[0]
+        retrievedTokenMetadata = RetrievedTokenMetadata (
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            metadataUrl=metadataUrl,
+            imageUrl=imageUrl,
+            name=name,
+            description=description,
+            attributes=attributes
+        )
+        return retrievedTokenMetadata
