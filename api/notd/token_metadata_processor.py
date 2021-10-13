@@ -28,7 +28,7 @@ class TokenMetadataProcessor():
             imageUrl = data.get('image')
             name = data.get('name')
             description = data.get('description')
-            attributes = data.get('attributes')[0]
+            attributes = data.get('attributes')
         retrievedTokenMetadata = RetrievedTokenMetadata (
             registryAddress=registryAddress,
             tokenId=tokenId,

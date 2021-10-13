@@ -3,7 +3,6 @@ import datetime
 import logging
 from typing import Sequence
 
-from core.exceptions import BadRequestException
 from core.exceptions import DuplicateValueException
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -212,7 +211,7 @@ class NotdManager:
             await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         else:
             await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
-    
+
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
         if cacheKey in self._tokenCache:
