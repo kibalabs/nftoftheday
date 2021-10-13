@@ -225,3 +225,12 @@ class NotdManager:
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
+
+    async def retreive_token_metadata(self, registryAddress: str, tokenId: str) -> RegistryToken:
+        tokenMetadata = await self.retriever.list_token_metadata(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+            ],limit=1)
+        return tokenMetadata[0]
+    

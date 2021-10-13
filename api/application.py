@@ -10,6 +10,7 @@ from core.web3.eth_client import RestEthClient
 from databases import Database
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.block_processor import BlockProcessor
@@ -34,7 +35,8 @@ blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
 openseaClient = OpenseaClient(requester=requester)
 tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester)
+tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient)
+notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=os.environ.get('NAME', 'notd'), version=os.environ.get('VERSION')))

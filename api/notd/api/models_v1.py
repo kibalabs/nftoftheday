@@ -1,10 +1,10 @@
 import datetime
-from typing import List
+from typing import Dict, List, Union
 from typing import Optional
 
 from pydantic import BaseModel
 
-from notd.model import RegistryToken
+from notd.model import RegistryToken, RetrievedTokenMetadata
 from notd.model import UiData
 
 
@@ -102,6 +102,27 @@ class ApiRegistryToken(BaseModel):
             collectionExternalUrl=model.collectionExternalUrl,
         )
 
+class ApiMetadataToken(BaseModel):
+    registryAddress: str
+    tokenId: str
+    metadataUrl: str
+    imageUrl: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
+    attributes: Optional[Dict[str, Union[str, int, float]]]
+
+    @classmethod
+    def from_model(cls, model: RetrievedTokenMetadata):
+        return cls(
+            registryAddress=model.registryAddress,
+            tokenId=model.tokenId,
+            metadataUrl=model.metadataUrl,
+            imageUrl=model.imageUrl,
+            name=model.name,
+            description=model.description,
+            attributes=model.attributes,
+        )
+
 class RetrieveUiDataRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
@@ -122,6 +143,9 @@ class RetreiveRegistryTokenRequest(BaseModel):
 
 class RetreiveRegistryTokenResponse(BaseModel):
     registryToken: ApiRegistryToken
+
+class RetreiveRegistryTokenMetadata(BaseModel):
+    retrievedTokenMetadata: ApiMetadataToken
 
 class SubscribeRequest(BaseModel):
     email: str
