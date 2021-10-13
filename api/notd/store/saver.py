@@ -5,7 +5,6 @@ from typing import Optional
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 
-from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
@@ -60,29 +59,31 @@ class Saver(CoreSaver):
             blockDate=retrievedTokenTransfer.blockDate,
         )
 
-    async def create_token_metadata(self, retrievedTokenMetadata: RetrievedTokenMetadata) -> TokenMetadata:
+    async def create_token_metadata(self,registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> TokenMetadata:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
-            TokenMetadataTable.c.createdDate.key: retrievedTokenMetadata.createdDate,
-            TokenMetadataTable.c.updatedDate.key: retrievedTokenMetadata.updatedDate,
-            TokenMetadataTable.c.registryAddress.key: retrievedTokenMetadata.registryAddress,
-            TokenMetadataTable.c.tokenId.key: retrievedTokenMetadata.tokenId,
-            TokenMetadataTable.c.metadataUrl.key: retrievedTokenMetadata.metadataUrl,
-            TokenMetadataTable.c.imageUrl.key: retrievedTokenMetadata.imageUrl,
-            TokenMetadataTable.c.name.key: retrievedTokenMetadata.name,
-            TokenMetadataTable.c.description.key: retrievedTokenMetadata.description,
-            TokenMetadataTable.c.attributes.key: retrievedTokenMetadata.attributes,
+            TokenMetadataTable.c.createdDate.key: createdDate,
+            TokenMetadataTable.c.updatedDate.key: updatedDate,
+            TokenMetadataTable.c.registryAddress.key: registryAddress,
+            TokenMetadataTable.c.tokenId.key: tokenId,
+            TokenMetadataTable.c.metadataUrl.key: metadataUrl,
+            TokenMetadataTable.c.imageUrl.key: imageUrl,
+            TokenMetadataTable.c.name.key: name,
+            TokenMetadataTable.c.description.key: description,
+            TokenMetadataTable.c.attributes.key: attributes,
         })
         return TokenMetadata(
             tokenMetadataId=tokenMetadataId,
-            createdDate=retrievedTokenMetadata.createdDate,
-            updatedDate=retrievedTokenMetadata.updatedDate,
-            registryAddress=retrievedTokenMetadata.registryAddress,
-            tokenId=retrievedTokenMetadata.tokenId,
-            metadataUrl=retrievedTokenMetadata.metadataUrl,
-            imageUrl=retrievedTokenMetadata.imageUrl,
-            name=retrievedTokenMetadata.name,
-            description=retrievedTokenMetadata.description,
-            attributes=retrievedTokenMetadata.attributes,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            metadataUrl=metadataUrl,
+            imageUrl=imageUrl,
+            name=name,
+            description=description,
+            attributes=attributes,
         )
 
     async def update_token_metadata_item(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
@@ -96,7 +97,7 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.description.key] = description
         if name != _EMPTY_STRING:
             values[TokenMetadataTable.c.name.key] = name
-        if attributes is not _EMPTY_OBJECT:
+        if attributes != _EMPTY_OBJECT:
             values[TokenMetadataTable.c.attributes.key] = attributes
         if len(values) > 0:
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()

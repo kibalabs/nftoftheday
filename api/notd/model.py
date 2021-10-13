@@ -24,8 +24,6 @@ class RetrievedTokenTransfer:
 
 @dataclasses.dataclass
 class RetrievedTokenMetadata:
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
     registryAddress: str
     tokenId: str
     metadataUrl: str
@@ -37,12 +35,14 @@ class RetrievedTokenMetadata:
 @dataclasses.dataclass
 class TokenMetadata(RetrievedTokenMetadata):
     tokenMetadataId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
 
     def to_dict(self) -> Dict:
         return {
             'tokenMetadataId': self.tokenMetadataId,
-            'createdDate': self.createdDate.isoformat,
-            'updatedDate': self.updatedDate.isoformat,
+            'createdDate': self.createdDate,
+            'updatedDate': self.updatedDate,
             'registryAddress': self.registryAddress,
             'tokenId': self.tokenId,
             'metadataUrl': self.metadataUrl,

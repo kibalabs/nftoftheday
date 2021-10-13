@@ -1,7 +1,6 @@
 import json
 import urllib.request
 from core.requester import Requester
-from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 
 from notd.model import RetrievedTokenMetadata
@@ -19,31 +18,28 @@ class TokenMetadataProcessor():
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
     async def retrieve_token_metadata(self,registryAddress: str,tokenId: str):
-        createdDate = date_util.datetime_from_now()
-        updatedDate = createdDate
         tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+        tokenMetadataUri = tokenMetadataUriResponse[0]
 
-        if tokenMetadataUriResponse[0][:4] == 'ipfs':
+        if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace('ipfs://','https://ipfs.io/ipfs/')
 
         with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
-            data=json.loads(response.read())
-            metadataUrl=tokenMetadataUriResponse[0]
-            imageUrl=data.get('image')
-            name=data.get('name')
-            description=data.get('description')
+            data = json.loads(response.read())
+            metadataUrl = tokenMetadataUriResponse[0]
+            imageUrl = data.get('image')
+            name = data.get('name')
+            description =data.get('description')
             if data.get('attributes') is None:
                 attributes = []
             else:
                 attributes=data.get('attributes')[0]
-        return RetrievedTokenMetadata(
-        createdDate=createdDate,
-        updatedDate=updatedDate,
-        registryAddress=registryAddress,
-        tokenId=tokenId,
-        metadataUrl=metadataUrl,
-        imageUrl=imageUrl,
-        name=name,
-        description=description,
-        attributes=attributes
-        )
+        return RetrievedTokenMetadata (
+            registryAddress,
+            tokenId,
+            metadataUrl,
+            imageUrl,
+            name,
+            description,
+            attributes
+            )
