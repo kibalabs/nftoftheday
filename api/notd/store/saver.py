@@ -1,9 +1,9 @@
 import contextlib
-from operator import and_
 from typing import Optional
 
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
+from sqlalchemy.sql.expression import and_
 
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
