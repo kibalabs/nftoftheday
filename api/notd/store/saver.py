@@ -59,7 +59,7 @@ class Saver(CoreSaver):
             blockDate=retrievedTokenTransfer.blockDate,
         )
 
-    async def create_token_metadata(self,registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> TokenMetadata:
+    async def create_token_metadata(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
@@ -86,8 +86,13 @@ class Saver(CoreSaver):
             attributes=attributes,
         )
 
+<<<<<<< HEAD
     async def update_token_metadata_item(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
         query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId)
+=======
+    async def update_token_metadata(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
+        query = TokenMetadataTable.update(and_(TokenMetadataTable.c.registryAddress == registryAddress,TokenMetadataTable.c.tokenId ==tokenId))
+>>>>>>> 415fd783a75d85756966cb9d5e68601436b22238
         values = {}
         if metadataUrl is not None:
             values[TokenMetadataTable.c.metadataUrl.key] = metadataUrl
