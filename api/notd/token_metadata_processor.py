@@ -22,13 +22,13 @@ class TokenMetadataProcessor():
         tokenMetadataUri = tokenMetadataUriResponse[0]
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
-        with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
-            data = json.loads(response.read())
-            metadataUrl = tokenMetadataUri
-            imageUrl = data.get('image')
-            name = data.get('name')
-            description = data.get('description')
-            attributes = data.get('attributes')
+        tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
+        tokenMetadataResponseJson = tokenMetadataResponse.json()
+        metadataUrl = tokenMetadataUri
+        imageUrl = tokenMetadataResponseJson['image']
+        name = tokenMetadataResponseJson['name']
+        description = tokenMetadataResponseJson['description']
+        attributes = tokenMetadataResponseJson['attributes']
         retrievedTokenMetadata = RetrievedTokenMetadata (
             registryAddress=registryAddress,
             tokenId=tokenId,
