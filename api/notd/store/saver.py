@@ -59,7 +59,7 @@ class Saver(CoreSaver):
             blockDate=retrievedTokenTransfer.blockDate,
         )
 
-    async def create_token_metadata(self,registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> TokenMetadata:
+    async def create_token_metadata(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
