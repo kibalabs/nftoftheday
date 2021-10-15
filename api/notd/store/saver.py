@@ -86,7 +86,7 @@ class Saver(CoreSaver):
             attributes=attributes,
         )
 
-    async def update_token_metadata_item(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
+    async def update_token_metadata(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
         query = TokenMetadataTable.update(and_(TokenMetadataTable.c.registryAddress == registryAddress,TokenMetadataTable.c.tokenId ==tokenId))
         values = {}
         if metadataUrl is not None:
