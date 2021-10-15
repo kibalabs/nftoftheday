@@ -1,5 +1,4 @@
 import json
-import urllib.request
 from core.requester import Requester
 from core.web3.eth_client import EthClientInterface
 
