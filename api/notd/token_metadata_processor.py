@@ -23,7 +23,6 @@ class TokenMetadataProcessor():
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
         tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
         tokenMetadataResponseJson = tokenMetadataResponse.json()
-        print(tokenMetadataResponseJson)
         metadataUrl = tokenMetadataUri
         imageUrl = tokenMetadataResponseJson['image']
         name = tokenMetadataResponseJson['name']
@@ -36,6 +35,6 @@ class TokenMetadataProcessor():
             imageUrl=imageUrl,
             name=name,
             description=description,
-            attributes=attributes
+            attributes=attributes,
         )
         return retrievedTokenMetadata
