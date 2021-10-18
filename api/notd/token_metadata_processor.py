@@ -27,7 +27,7 @@ class TokenMetadataProcessor():
         metadataUrl = tokenMetadataUri
         imageUrl = tokenMetadataResponseJson['image']
         name = tokenMetadataResponseJson['name']
-        description = tokenMetadataResponseJson['description'] 
+        description = tokenMetadataResponseJson['description']
         attributes = tokenMetadataResponseJson['attributes']
         retrievedTokenMetadata = RetrievedTokenMetadata (
             registryAddress=registryAddress,
