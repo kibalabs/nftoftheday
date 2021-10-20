@@ -43,6 +43,8 @@ class TokenMetadataProcessor():
             tokenMetadataUri = tokenMetadataUri.replace('https://gateway.pinata.cloud/ipfs/', 'ipfs://')
         if tokenMetadataUri.startswith('https://ipfs.foundation.app/ipfs/'):
             tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.foundation.app/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://ipfs.io/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.io/ipfs/', 'ipfs://')
         if tokenMetadataUri.startswith('https://niftylabs.mypinata.cloud/ipfs/'):
             tokenMetadataUri = tokenMetadataUri.replace('https://niftylabs.mypinata.cloud/ipfs/', 'ipfs://')
         if tokenMetadataUri.startswith('https://time.mypinata.cloud/ipfs/'):
