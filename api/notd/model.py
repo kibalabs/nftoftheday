@@ -30,7 +30,7 @@ class RetrievedTokenMetadata:
     imageUrl: Optional[str]
     name: Optional[str]
     description: Optional[str]
-    attributes: Optional[Dict[str, Union[str, int, float]]]
+    attributes: Optional[Union[Dict, List]]
 
 @dataclasses.dataclass
 class TokenMetadata(RetrievedTokenMetadata):
