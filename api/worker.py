@@ -41,7 +41,7 @@ async def main():
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-    messageQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient)
+    messageQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=None)
 
     await database.connect()
     await messageQueueProcessor.run()
