@@ -21,7 +21,6 @@ from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
-from notd.model import TokenMetadata
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
@@ -29,6 +28,8 @@ from notd.store.saver import Saver
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
+from notd.token_metadata_processor import TokenDoesNotExistException
+from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 SPONSORED_TOKENS = [
@@ -198,10 +199,15 @@ class NotdManager:
         for retrievedTokenTransfer in retrievedTokenTransfers:
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId).to_message())
 
-    async def update_token_metadata(self, registryAddress: str, tokenId: str) -> TokenMetadata:
-        retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        if not retrievedTokenMetadata:
-            raise NotFoundException(f'Failed to find tokenMetadata for {registryAddress}/{tokenId}')
+    async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
+        try:
+            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        except TokenDoesNotExistException:
+            logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
+            return
+        except TokenHasNoMetadataException:
+            logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
+            return
         savedTokenMetadata = await self.retriever.list_token_metadata(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
