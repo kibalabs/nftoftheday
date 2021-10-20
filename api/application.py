@@ -19,6 +19,7 @@ from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 logging.basicConfig(level=logging.INFO)
 

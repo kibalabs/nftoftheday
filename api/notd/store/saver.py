@@ -1,6 +1,12 @@
 import contextlib
+<<<<<<< HEAD
 from operator import and_
+=======
+from typing import Dict
+from typing import List
+>>>>>>> main
 from typing import Optional
+from typing import Union
 
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
@@ -59,7 +65,11 @@ class Saver(CoreSaver):
             blockDate=retrievedTokenTransfer.blockDate,
         )
 
+<<<<<<< HEAD
     async def create_token_metadata(self,registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> TokenMetadata:
+=======
+    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
+>>>>>>> main
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
@@ -86,8 +96,13 @@ class Saver(CoreSaver):
             attributes=attributes,
         )
 
+<<<<<<< HEAD
     async def update_token_metadata_item(self, registryAddress: str, tokenId: str, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Optional[str] = _EMPTY_OBJECT) -> None:
         query = TokenMetadataTable.update(and_(TokenMetadataTable.c.registryAddress == registryAddress,TokenMetadataTable.c.tokenId ==tokenId))
+=======
+    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT) -> None:
+        query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId)
+>>>>>>> main
         values = {}
         if metadataUrl is not None:
             values[TokenMetadataTable.c.metadataUrl.key] = metadataUrl

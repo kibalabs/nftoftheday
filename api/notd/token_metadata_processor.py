@@ -1,9 +1,20 @@
 import json
-import urllib.request
+import logging
+
+from core.exceptions import BadRequestException
+from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.web3.eth_client import EthClientInterface
 
 from notd.model import RetrievedTokenMetadata
+
+
+class TokenDoesNotExistException(NotFoundException):
+    pass
+
+
+class TokenHasNoMetadataException(NotFoundException):
+    pass
 
 
 class TokenMetadataProcessor():
@@ -17,25 +28,64 @@ class TokenMetadataProcessor():
         self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
-    async def retrieve_token_metadata(self,registryAddress: str,tokenId: str):
-        tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+    async def retrieve_token_metadata(self, registryAddress: str,tokenId: str) -> RetrievedTokenMetadata:
+        if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
+            # TODO(krishan711): Implement special case for ENS
+            raise TokenDoesNotExistException()
+        if registryAddress == '0x06012c8cf97BEaD5deAe237070F9587f8E7A266d':
+            # TODO(krishan711): Implement special case for cryptokitties
+            raise TokenDoesNotExistException()
+        if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
+            # TODO(krishan711): Implement special case for cryptopunks
+            raise TokenDoesNotExistException()
+        try:
+            tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+        except BadRequestException as exception:
+            if 'URI query for nonexistent token' in exception.message:
+                raise TokenDoesNotExistException()
+            raise exception
         tokenMetadataUri = tokenMetadataUriResponse[0]
+        if len(tokenMetadataUri.strip()) == 0:
+            tokenMetadataUri = None
+        if not tokenMetadataUri:
+            raise TokenHasNoMetadataException()
+        if tokenMetadataUri.startswith('https://gateway.pinata.cloud/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://gateway.pinata.cloud/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://ipfs.foundation.app/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.foundation.app/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://ipfs.io/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.io/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://ipfs.infura.io/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.infura.io/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://niftylabs.mypinata.cloud/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://niftylabs.mypinata.cloud/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://time.mypinata.cloud/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://time.mypinata.cloud/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://robotos.mypinata.cloud/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://robotos.mypinata.cloud/ipfs/', 'ipfs://')
+        # NOTE(krishan711): save the url here before using ipfs gateways etc
+        metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
-        with urllib.request.urlopen(tokenMetadataUriResponse[0]) as response:
-            data = json.loads(response.read())
-            metadataUrl = tokenMetadataUri
-            imageUrl = data.get('image')
-            name = data.get('name')
-            description = data.get('description')
-            attributes = data.get('attributes')
-        retrievedTokenMetadata = RetrievedTokenMetadata (
+        if not tokenMetadataUri:
+            tokenMetadataResponseJson = {}
+        elif tokenMetadataUri.startswith('data:'):
+            # TODO(krishan711): parse the data here
+            tokenMetadataResponseJson = {}
+        else:
+            try:
+                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
+                tokenMetadataResponseJson = tokenMetadataResponse.json()
+            except Exception as exception:  # pylint: disable=broad-except
+                logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
+                tokenMetadataResponseJson = {}
+        retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
-            imageUrl=imageUrl,
-            name=name,
-            description=description,
-            attributes=attributes
+            imageUrl=tokenMetadataResponseJson.get('image'),
+            name=tokenMetadataResponseJson.get('name'),
+            description=tokenMetadataResponseJson.get('description'),
+            attributes=tokenMetadataResponseJson.get('attributes', []),
         )
         return retrievedTokenMetadata

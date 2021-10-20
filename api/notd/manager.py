@@ -29,6 +29,11 @@ from notd.store.saver import Saver
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
+<<<<<<< HEAD
+=======
+from notd.token_metadata_processor import TokenDoesNotExistException
+from notd.token_metadata_processor import TokenHasNoMetadataException
+>>>>>>> main
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 SPONSORED_TOKENS = [
@@ -196,21 +201,44 @@ class NotdManager:
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
         for retrievedTokenTransfer in retrievedTokenTransfers:
+<<<<<<< HEAD
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId))
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         if not retrievedTokenMetadata:
             raise NotFoundException(f'Failed to find tokenMetadata for {registryAddress}/{tokenId}')
+=======
+            await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId).to_message())
+
+    async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
+        try:
+            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        except TokenDoesNotExistException:
+            logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
+            return
+        except TokenHasNoMetadataException:
+            logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
+            return
+>>>>>>> main
         savedTokenMetadata = await self.retriever.list_token_metadata(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+<<<<<<< HEAD
             ])
         if len(savedTokenMetadata) == 0:
             await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         else:
             await self.saver.update_token_metadata_item(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+=======
+            ], limit=1,
+        )
+        if len(savedTokenMetadata) == 0:
+            await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+        else:
+            await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata[0].tokenMetadataId,  metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+>>>>>>> main
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
