@@ -194,14 +194,15 @@ class NotdManager:
             logging.debug('Ignoring previously saved transfer')
 
     async def process_block(self, blockNumber: int) -> None:
-        blockTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
-            ], limit=1,
-        )
-        if len(blockTransfers) > 0:
-            logging.info('Skipping block because it already has transfers.')
-            return
+        # TODO(krishan711): uncomment this when we can save in transactions (which is currently blocked by the duplication exception)
+        # blockTransfers = await self.retriever.list_token_transfers(
+        #     fieldFilters=[
+        #         IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
+        #     ], limit=1,
+        # )
+        # if len(blockTransfers) > 0:
+        #     logging.info('Skipping block because it already has transfers.')
+        #     return
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
