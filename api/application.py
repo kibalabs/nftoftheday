@@ -18,6 +18,7 @@ from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 logging.basicConfig(level=logging.INFO)
 
@@ -34,7 +35,8 @@ blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
 openseaClient = OpenseaClient(requester=requester)
 tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester)
+tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient)
+notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=os.environ.get('NAME', 'notd'), version=os.environ.get('VERSION')))
