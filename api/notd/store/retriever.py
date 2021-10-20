@@ -1,5 +1,4 @@
 import datetime
-from typing import AsyncGenerator
 from typing import Optional
 from typing import Sequence
 
