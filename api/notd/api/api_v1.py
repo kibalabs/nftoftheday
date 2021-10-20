@@ -3,7 +3,6 @@ from typing import Optional
 
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
-from notd.model import RetrievedTokenMetadata
 
 from notd.api.models_v1 import ApiMetadataToken, ApiRegistryToken, RetreiveRegistryTokenMetadata
 from notd.api.models_v1 import ApiUiData

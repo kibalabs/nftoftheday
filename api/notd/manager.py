@@ -21,7 +21,6 @@ from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
-from notd.model import TokenMetadata
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever

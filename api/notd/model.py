@@ -52,26 +52,6 @@ class TokenMetadata(RetrievedTokenMetadata):
             'attributes': self.attributes,
         }
 
-@dataclasses.dataclass
-class TokenMetadata(RetrievedTokenMetadata):
-    tokenMetadataId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
-
-    def to_dict(self) -> Dict:
-        return {
-            'tokenMetadataId': self.tokenMetadataId,
-            'createdDate': self.createdDate,
-            'updatedDate': self.updatedDate,
-            'registryAddress': self.registryAddress,
-            'tokenId': self.tokenId,
-            'metadataUrl': self.metadataUrl,
-            'imageUrl': self.imageUrl,
-            'name': self.name,
-            'description': self.description,
-            'attributes': self.attributes,
-        }
-
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
