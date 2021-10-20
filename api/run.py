@@ -5,7 +5,6 @@ from typing import Optional
 import asyncclick as click
 import boto3
 from core.aws_requester import AwsRequester
-from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.web3.eth_client import RestEthClient
@@ -44,11 +43,11 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
 
     await database.connect()
     if blockNumber:
-         await notdManager.process_block(blockNumber=blockNumber)
+        await notdManager.process_block(blockNumber=blockNumber)
     elif startBlockNumber and endBlockNumber:
-         await notdManager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
+        await notdManager.process_block_range(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber)
     else:
-         raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
+        raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
     await database.disconnect()
     await requester.close_connections()
 

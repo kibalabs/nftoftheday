@@ -2,8 +2,8 @@ import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Union
 
+from core.util.typing_util import JSON
 from pydantic import dataclasses
 
 
@@ -23,16 +23,34 @@ class RetrievedTokenTransfer:
     blockDate: datetime.datetime
 
 @dataclasses.dataclass
-class TokenMetadata:
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
+class RetrievedTokenMetadata:
     registryAddress: str
-    tokenId: int
-    metdataUrl: str
-    imageUrl: Optional[int]
+    tokenId: str
+    metadataUrl: str
+    imageUrl: Optional[str]
     name: Optional[str]
     description: Optional[str]
-    attributes: Optional[Dict[str, Union[str, int, float]]]
+    attributes: JSON
+
+@dataclasses.dataclass
+class TokenMetadata(RetrievedTokenMetadata):
+    tokenMetadataId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+    def to_dict(self) -> Dict:
+        return {
+            'tokenMetadataId': self.tokenMetadataId,
+            'createdDate': self.createdDate,
+            'updatedDate': self.updatedDate,
+            'registryAddress': self.registryAddress,
+            'tokenId': self.tokenId,
+            'metadataUrl': self.metadataUrl,
+            'imageUrl': self.imageUrl,
+            'name': self.name,
+            'description': self.description,
+            'attributes': self.attributes,
+        }
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):

@@ -17,6 +17,7 @@ from core.util import date_util
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
@@ -24,8 +25,12 @@ from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
+from notd.token_metadata_processor import TokenDoesNotExistException
+from notd.token_metadata_processor import TokenHasNoMetadataException
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 SPONSORED_TOKENS = [
     {'date': datetime.datetime(2021, 1, 1), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345')},
@@ -112,7 +117,7 @@ SPONSORED_TOKENS = [
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -121,6 +126,7 @@ class NotdManager:
         self.tokenClient = tokenClient
         self.requester = requester
         self._tokenCache = dict()
+        self.tokenMetadataProcessor = tokenMetadataProcessor
 
     @staticmethod
     def get_sponsored_token() -> Token:
@@ -151,9 +157,7 @@ class NotdManager:
             orders=[RandomOrder()],
             limit=1
         )
-
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
-
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
@@ -161,7 +165,6 @@ class NotdManager:
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
         )
-
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
@@ -192,12 +195,29 @@ class NotdManager:
     async def process_block(self, blockNumber: int) -> None:
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        for retrievedTokenTransfer in retrievedTokenTransfers:
-            logging.debug(f'Transferred {retrievedTokenTransfer.tokenId} from {retrievedTokenTransfer.fromAddress} to {retrievedTokenTransfer.toAddress}')
-            logging.debug(f'Paid {retrievedTokenTransfer.value / 100000000000000000.0}Ξ ({retrievedTokenTransfer.gasUsed * retrievedTokenTransfer.gasPrice / 100000000000000000.0}Ξ) to {retrievedTokenTransfer.registryAddress}')
-            logging.debug(f'OpenSea url: https://opensea.io/assets/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
-            logging.debug(f'OpenSea api url: https://api.opensea.io/api/v1/asset/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
+        for retrievedTokenTransfer in retrievedTokenTransfers:
+            await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId).to_message())
+
+    async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
+        try:
+            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        except TokenDoesNotExistException:
+            logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
+            return
+        except TokenHasNoMetadataException:
+            logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
+            return
+        savedTokenMetadata = await self.retriever.list_token_metadata(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+            ], limit=1,
+        )
+        if len(savedTokenMetadata) == 0:
+            await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+        else:
+            await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata[0].tokenMetadataId,  metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'

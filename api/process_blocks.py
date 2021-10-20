@@ -5,7 +5,6 @@ import time
 import asyncclick as click
 import boto3
 from core.aws_requester import AwsRequester
-from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.web3.eth_client import RestEthClient

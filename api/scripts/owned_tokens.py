@@ -30,7 +30,6 @@ async def owned_tokens(ownerAddress: Optional[str]):
         async for row in retriever.database.iterate(query=query):
             tokenTransfer = token_transfer_from_row(row)
             boughtTokens.append(tokenTransfer)
-        
         query = TokenTransfersTable.select()
         query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
         async for row in retriever.database.iterate(query=query):
@@ -45,7 +44,7 @@ async def owned_tokens(ownerAddress: Optional[str]):
             logging.info(f'Tokens Owned: registry_address: {tokenTransfer.registryAddress}, token_id: {tokenTransfer.tokenId}')
 
     await database.disconnect()
-    logging.info(f'Got {len(tokensOwned)} total owned')    
+    logging.info(f'Got {len(tokensOwned)} total owned')
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

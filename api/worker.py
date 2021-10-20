@@ -18,6 +18,7 @@ from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_client import TokenClient
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 
 async def main():
@@ -35,7 +36,8 @@ async def main():
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
     tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester)
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
