@@ -2,8 +2,8 @@ import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Union
 
+from core.util.typing_util import JSON
 from pydantic import dataclasses
 
 
@@ -30,7 +30,7 @@ class RetrievedTokenMetadata:
     imageUrl: Optional[str]
     name: Optional[str]
     description: Optional[str]
-    attributes: Optional[Union[Dict, List]]
+    attributes: JSON
 
 @dataclasses.dataclass
 class TokenMetadata(RetrievedTokenMetadata):

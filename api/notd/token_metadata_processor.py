@@ -1,9 +1,10 @@
 import json
 import logging
 
+from core.exceptions import BadRequestException
+from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.web3.eth_client import EthClientInterface
-from core.exceptions import BadRequestException, NotFoundException
 
 from notd.model import RetrievedTokenMetadata
 
@@ -27,7 +28,16 @@ class TokenMetadataProcessor():
         self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
-    async def retrieve_token_metadata(self,registryAddress: str,tokenId: str) -> RetrievedTokenMetadata:
+    async def retrieve_token_metadata(self, registryAddress: str,tokenId: str) -> RetrievedTokenMetadata:
+        if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
+            # TODO(krishan711): Implement special case for ENS
+            raise TokenDoesNotExistException()
+        if registryAddress == '0x06012c8cf97BEaD5deAe237070F9587f8E7A266d':
+            # TODO(krishan711): Implement special case for cryptokitties
+            raise TokenDoesNotExistException()
+        if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
+            # TODO(krishan711): Implement special case for cryptopunks
+            raise TokenDoesNotExistException()
         try:
             tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
         except BadRequestException as exception:
@@ -45,6 +55,8 @@ class TokenMetadataProcessor():
             tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.foundation.app/ipfs/', 'ipfs://')
         if tokenMetadataUri.startswith('https://ipfs.io/ipfs/'):
             tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.io/ipfs/', 'ipfs://')
+        if tokenMetadataUri.startswith('https://ipfs.infura.io/ipfs/'):
+            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.infura.io/ipfs/', 'ipfs://')
         if tokenMetadataUri.startswith('https://niftylabs.mypinata.cloud/ipfs/'):
             tokenMetadataUri = tokenMetadataUri.replace('https://niftylabs.mypinata.cloud/ipfs/', 'ipfs://')
         if tokenMetadataUri.startswith('https://time.mypinata.cloud/ipfs/'):

@@ -212,11 +212,12 @@ class NotdManager:
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-            ])
+            ], limit=1,
+        )
         if len(savedTokenMetadata) == 0:
             await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         else:
-            await self.saver.update_token_metadata_item(tokenMetadataId=savedTokenMetadata[0].tokenMetadataId,  metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+            await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata[0].tokenMetadataId,  metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
