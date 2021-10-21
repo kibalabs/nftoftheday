@@ -44,6 +44,10 @@ class TokenMetadataProcessor():
         except BadRequestException as exception:
             if 'URI query for nonexistent token' in exception.message:
                 raise TokenDoesNotExistException()
+            if 'execution reverted' in exception.message:
+                raise TokenDoesNotExistException()
+            if 'out of gas' in exception.message:
+                raise TokenDoesNotExistException()
             raise exception
         uri = tokenMetadataUriResponse[0].rstrip('\x00')
         tokenMetadataUri = uri
