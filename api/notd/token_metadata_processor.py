@@ -5,6 +5,7 @@ from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.web3.eth_client import EthClientInterface
+import sqlalchemy
 
 from notd.model import RetrievedTokenMetadata
 
@@ -44,7 +45,8 @@ class TokenMetadataProcessor():
             if 'URI query for nonexistent token' in exception.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUriResponse[0]
+        uri = tokenMetadataUriResponse[0].rstrip('\x00')
+        tokenMetadataUri = uri
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -82,10 +84,11 @@ class TokenMetadataProcessor():
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
-            metadataUrl=metadataUrl,
+            metadataUrl=tokenMetadataUri,
             imageUrl=tokenMetadataResponseJson.get('image'),
             name=tokenMetadataResponseJson.get('name'),
             description=tokenMetadataResponseJson.get('description'),
             attributes=tokenMetadataResponseJson.get('attributes', []),
         )
+        logging.info(f'{retrievedTokenMetadata}')
         return retrievedTokenMetadata
