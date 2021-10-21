@@ -45,6 +45,8 @@ class TokenMetadataProcessor():
                 raise TokenDoesNotExistException()
             if 'execution reverted' in exception.message:
                 raise TokenDoesNotExistException()
+            if 'out of gas' in exception.message:
+                raise TokenDoesNotExistException()
             raise exception
         tokenMetadataUri = tokenMetadataUriResponse[0]
         if len(tokenMetadataUri.strip()) == 0:
