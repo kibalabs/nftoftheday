@@ -48,7 +48,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in exception.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUriResponse[0]
+        tokenMetadataUri = tokenMetadataUriResponse[0].rstrip('\x00')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
