@@ -94,5 +94,4 @@ class TokenMetadataProcessor():
             description=tokenMetadataResponseJson.get('description'),
             attributes=tokenMetadataResponseJson.get('attributes', []),
         )
-        logging.info(f'{retrievedTokenMetadata}')
         return retrievedTokenMetadata
