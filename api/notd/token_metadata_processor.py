@@ -1,6 +1,6 @@
 import json
 import logging
-
+import re
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -48,7 +48,12 @@ class TokenMetadataProcessor():
             if 'out of gas' in exception.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUriResponse[0].rstrip('\x00')
+        logging.info(f'{tokenMetadataUriResponse}')
+        tokenMetadataUri = tokenMetadataUriResponse[0]
+        uri = re.sub('\x00','',tokenMetadataUri)
+        logging.info(f'{tokenMetadataUriResponse},{uri}')
+        tokenMetadataUri = uri
+        print(tokenMetadataUri)
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -69,6 +74,7 @@ class TokenMetadataProcessor():
             tokenMetadataUri = tokenMetadataUri.replace('https://robotos.mypinata.cloud/ipfs/', 'ipfs://')
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
+        logging.info(f'{metadataUrl}')
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
         if not tokenMetadataUri:
@@ -86,10 +92,11 @@ class TokenMetadataProcessor():
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
-            metadataUrl=metadataUrl,
+            metadataUrl=tokenMetadataUri,
             imageUrl=tokenMetadataResponseJson.get('image'),
             name=tokenMetadataResponseJson.get('name'),
             description=tokenMetadataResponseJson.get('description'),
             attributes=tokenMetadataResponseJson.get('attributes', []),
         )
+        logging.info(f'{retrievedTokenMetadata}')
         return retrievedTokenMetadata
