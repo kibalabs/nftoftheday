@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-from typing import List
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -90,7 +89,7 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
         description =tokenMetadataResponseJson.get('description')
-        if type(description)==List and len(description) == 1:
+        if isinstance(description, list) and len(description) == 1:
             description = description[0]
         else:
             description = tokenMetadataResponseJson.get('description')
