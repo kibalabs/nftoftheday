@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from typing import List
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -88,13 +89,19 @@ class TokenMetadataProcessor():
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
+        description =tokenMetadataResponseJson.get('description')
+        if type(description)==List and len(description) == 1:
+            description = description[0]
+        else:
+            description = tokenMetadataResponseJson.get('description')
+        logging.info(f'tokenId: {tokenId},registryAddress: {registryAddress},tokenMetadataUri: {tokenMetadataUri},image: {tokenMetadataResponseJson.get("image")},name: {tokenMetadataResponseJson.get("name")},description: {tokenMetadataResponseJson.get("description")}, attributes: {tokenMetadataResponseJson.get("attributes", [])}')
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=tokenMetadataUri,
             imageUrl=tokenMetadataResponseJson.get('image'),
             name=tokenMetadataResponseJson.get('name'),
-            description=tokenMetadataResponseJson.get('description'),
+            description=description,
             attributes=tokenMetadataResponseJson.get('attributes', []),
         )
         logging.info(f'{retrievedTokenMetadata}')
