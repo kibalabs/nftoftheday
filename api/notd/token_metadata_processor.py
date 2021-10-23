@@ -49,7 +49,7 @@ class TokenMetadataProcessor():
                 raise TokenDoesNotExistException()
             raise exception
         uri = tokenMetadataUriResponse[0]
-        uri = re.sub('\x00','',uri)
+        uri = uri.replace('\x00','')
         logging.info(f'{tokenMetadataUriResponse},{uri}')
         tokenMetadataUri = uri
         print(tokenMetadataUri)
@@ -93,11 +93,10 @@ class TokenMetadataProcessor():
             description = description[0]
         else:
             description = tokenMetadataResponseJson.get('description')
-        logging.info(f'tokenId: {tokenId},registryAddress: {registryAddress},tokenMetadataUri: {tokenMetadataUri},image: {tokenMetadataResponseJson.get("image")},name: {tokenMetadataResponseJson.get("name")},description: {tokenMetadataResponseJson.get("description")}, attributes: {tokenMetadataResponseJson.get("attributes", [])}')
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
-            metadataUrl=tokenMetadataUri,
+            metadataUrl=metadataUrl,
             imageUrl=tokenMetadataResponseJson.get('image'),
             name=tokenMetadataResponseJson.get('name'),
             description=description,
