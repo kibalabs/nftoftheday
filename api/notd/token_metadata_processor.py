@@ -88,7 +88,7 @@ class TokenMetadataProcessor():
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
-        description =tokenMetadataResponseJson.get('description')
+        description = tokenMetadataResponseJson.get('description')
         if isinstance(description, list) and len(description) == 1:
             description = description[0]
         else:
