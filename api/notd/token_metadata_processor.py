@@ -86,9 +86,8 @@ class TokenMetadataProcessor():
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
-            else:
-                description = description[0]
-        
+            description = description[0]
+
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
