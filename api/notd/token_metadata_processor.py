@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -48,7 +47,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in exception.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00','')
+        tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -87,9 +86,8 @@ class TokenMetadataProcessor():
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
-        else:
-            description = description[0]
-
+            else:
+                description = description[0]
         
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
