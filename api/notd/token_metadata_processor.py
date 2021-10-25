@@ -48,11 +48,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in exception.message:
                 raise TokenDoesNotExistException()
             raise exception
-        uri = tokenMetadataUriResponse[0]
-        uri = uri.replace('\x00','')
-        logging.info(f'{tokenMetadataUriResponse},{uri}')
-        tokenMetadataUri = uri
-        print(tokenMetadataUri)
+        tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00','')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -73,7 +69,6 @@ class TokenMetadataProcessor():
             tokenMetadataUri = tokenMetadataUri.replace('https://robotos.mypinata.cloud/ipfs/', 'ipfs://')
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
-        logging.info(f'{metadataUrl}')
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
         if not tokenMetadataUri:
@@ -89,18 +84,20 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
         description = tokenMetadataResponseJson.get('description')
-        if isinstance(description, list) and len(description) == 1:
-            description = description[0]
+        if isinstance(description, list):
+            if len(description) != 1:
+                raise BadRequestException(f'description is an array with len != 1: {description}')
         else:
-            description = tokenMetadataResponseJson.get('description')
+            description = description[0]
+
+        
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             imageUrl=tokenMetadataResponseJson.get('image'),
             name=tokenMetadataResponseJson.get('name'),
-            description=description,
+            description=tokenMetadataResponseJson.get('description'),
             attributes=tokenMetadataResponseJson.get('attributes', []),
         )
-        logging.info(f'{retrievedTokenMetadata}')
         return retrievedTokenMetadata
