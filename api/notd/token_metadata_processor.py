@@ -1,11 +1,10 @@
 import json
 import logging
+
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.web3.eth_client import EthClientInterface
-import sqlalchemy
-
 from notd.model import RetrievedTokenMetadata
 
 
@@ -48,12 +47,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in exception.message:
                 raise TokenDoesNotExistException()
             raise exception
-<<<<<<< HEAD
-        uri = tokenMetadataUriResponse[0].rstrip('\x00')
-        tokenMetadataUri = uri
-=======
         tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
->>>>>>> main
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:

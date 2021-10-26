@@ -1,11 +1,14 @@
 import datetime
-from typing import Dict, List, Union
+from typing import Dict
+from typing import List
 from typing import Optional
+from typing import Union
 
-from pydantic import BaseModel
-
-from notd.model import RegistryToken, RetrievedTokenMetadata
+from notd.model import RegistryToken
+from notd.model import RetrievedTokenMetadata
+from notd.model import TokenMetadata
 from notd.model import UiData
+from pydantic import BaseModel
 
 
 class ApiTokenTransfer(BaseModel):
@@ -144,11 +147,16 @@ class RetreiveRegistryTokenRequest(BaseModel):
 class RetreiveRegistryTokenResponse(BaseModel):
     registryToken: ApiRegistryToken
 
-class RetreiveRegistryTokenMetadata(BaseModel):
-    retrievedTokenMetadata: ApiMetadataToken
-
 class SubscribeRequest(BaseModel):
     email: str
 
 class SubscribeResponse(BaseModel):
     pass
+
+class RetrieveTokenMetadataRequest(BaseModel):
+    registryAddress: str
+    tokenId: str
+
+class RetrieveTokenMetadataResponse(BaseModel):
+    retrievedTokenMetadata: ApiMetadataToken
+

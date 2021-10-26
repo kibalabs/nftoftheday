@@ -6,7 +6,6 @@ from typing import Union
 
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
-
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
