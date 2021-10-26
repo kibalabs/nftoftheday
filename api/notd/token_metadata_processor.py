@@ -1,6 +1,5 @@
 import json
 import logging
-
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -49,8 +48,12 @@ class TokenMetadataProcessor():
             if 'out of gas' in exception.message:
                 raise TokenDoesNotExistException()
             raise exception
+<<<<<<< HEAD
         uri = tokenMetadataUriResponse[0].rstrip('\x00')
         tokenMetadataUri = uri
+=======
+        tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
+>>>>>>> main
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -85,6 +88,12 @@ class TokenMetadataProcessor():
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
+        description = tokenMetadataResponseJson.get('description')
+        if isinstance(description, list):
+            if len(description) != 1:
+                raise BadRequestException(f'description is an array with len != 1: {description}')
+            description = description[0]
+
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
