@@ -1,4 +1,5 @@
 import contextlib
+from re import S
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -7,7 +8,7 @@ from typing import Union
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 
-from notd.model import RetrievedTokenTransfer
+from notd.model import Collection, RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.store.schema import TokenMetadataTable
@@ -104,3 +105,41 @@ class Saver(CoreSaver):
         if len(values) > 0:
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
         await self.database.execute(query=query, values=values)
+
+    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> Collection:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        collectionId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
+            TokenMetadataTable.c.createdDate.key: createdDate,
+            TokenMetadataTable.c.updatedDate.key: updatedDate,
+            TokenMetadataTable.c.address.key: address,
+            TokenMetadataTable.c.name.key: name,
+            TokenMetadataTable.c.symbol.key: symbol,
+            TokenMetadataTable.c.description.key: description,
+            TokenMetadataTable.c.imageUrl.key: imageUrl,
+            TokenMetadataTable.c.twitterUsername.key: twitterUsername,
+            TokenMetadataTable.c.instagramUsername.key: instagramUsername,
+            TokenMetadataTable.c.wikiUrl.key: wikiUrl,
+            TokenMetadataTable.c.openseaSlug.key: openseaSlug,
+            TokenMetadataTable.c.url.key: url,
+            TokenMetadataTable.c.discordUrl.key: discordUrl,
+            TokenMetadataTable.c.bannerImageUrl.key: bannerImageUrl,
+
+        })
+        return Collection(
+            collectionId=collectionId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            address=address,
+            name=name,
+            symbol=symbol,
+            description=description,
+            imageUrl=imageUrl,
+            twitterUsername=twitterUsername,
+            instagramUsername=instagramUsername,
+            wikiUrl=wikiUrl,
+            openseaSlug=openseaSlug,
+            url=url,
+            discordUrl=discordUrl,
+            bannerImageUrl=bannerImageUrl,
+        )
