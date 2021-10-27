@@ -101,3 +101,27 @@ class RegistryToken:
     collectionImageUrl: Optional[str]
     collectionOpenSeaUrl: Optional[str]
     collectionExternalUrl: Optional[str]
+
+@dataclasses.dataclass
+class RetrivedCollection:
+    address: str
+    name: Optional[str]
+    symbol: Optional[str]
+    description: Optional[str]
+
+@dataclasses.dataclass
+class Collection(RetrivedCollection):
+    collectionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+    def to_dict(self) -> Dict:
+        return {
+            'collectionId': self.collectionId,
+            'createdDate': self.createdDate,
+            'updatedDate': self.updatedDate,
+            'address': self.address,
+            'name': self.name,
+            'symbol': self.symbol,
+            'description': self.description,
+        }

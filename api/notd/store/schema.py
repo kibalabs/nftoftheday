@@ -32,3 +32,15 @@ TokenMetadataTable = sqlalchemy.Table(
     sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='attributes', name='attributes', type_=sqlalchemy.JSON, nullable=True),
 )
+
+TokenCollectionsTable = sqlalchemy.Table(
+    'tbl_collections',
+    metadata,
+    sqlalchemy.Column(key='collectionId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='address', name='address', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Integer, nullable=True),
+    sqlalchemy.Column(key='symbol', name='symbol', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),
+)
