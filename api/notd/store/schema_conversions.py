@@ -41,7 +41,7 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
         attributes=row[TokenMetadataTable.c.attributes],
     )
 
-def token_metadata_from_row(row: Mapping) -> Collection:
+def collection_from_row(row: Mapping) -> Collection:
     return Collection(
         collectionId=row[TokenCollectionsTable.c.tokenMetadataId],
         createdDate=row[TokenCollectionsTable.c.createdDate],
