@@ -37,3 +37,15 @@ CREATE UNIQUE INDEX tbl_tokens_metadatas_registry_address_token_id ON tbl_token_
 CREATE INDEX tbl_token_metadatas_registry_address ON tbl_token_metadatas (registry_address);
 CREATE INDEX tbl_token_metadatas_token_id ON tbl_token_metadatas (token_id);
 CREATE INDEX tbl_token_metadatas_name ON tbl_token_metadatas (name);
+
+CREATE TABLE tbl_collections (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    address TEXT NOT NULL,
+    name TEXT,
+    symbol TEXT,
+    description TEXT,
+);
+CREATE INDEX tbl_collections_registry_address ON tbl_collections (registry_address);
+CREATE INDEX tbl_collections_name ON tbl_collections (name);
