@@ -3,12 +3,13 @@ from typing import Optional
 
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
+
 from notd.api.models_v1 import ApiMetadataToken
 from notd.api.models_v1 import ApiRegistryToken
 from notd.api.models_v1 import ApiUiData
 from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
-from notd.api.models_v1 import RetrieveTokenMetadataResponse
 from notd.api.models_v1 import RetreiveRegistryTokenResponse
+from notd.api.models_v1 import RetrieveTokenMetadataResponse
 from notd.api.models_v1 import RetrieveUiDataRequest
 from notd.api.models_v1 import RetrieveUiDataResponse
 from notd.api.models_v1 import SubscribeRequest

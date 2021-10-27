@@ -4,10 +4,11 @@ from typing import List
 from typing import Optional
 from typing import Union
 
+from pydantic import BaseModel
+
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenMetadata
 from notd.model import UiData
-from pydantic import BaseModel
 
 
 class ApiTokenTransfer(BaseModel):
