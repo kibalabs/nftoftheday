@@ -79,11 +79,11 @@ class TokenMetadataProcessor():
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
                 tokenMetadataResponseJson = tokenMetadataResponse.json()
+                if isinstance(tokenMetadataResponseJson, str):
+                    tokenMetadataResponseJson = json.loads(tokenMetadataResponseJson)
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
-        if isinstance(tokenMetadataResponseJson, str):
-            tokenMetadataResponseJson = json.loads(tokenMetadataResponseJson)
         description = tokenMetadataResponseJson.get('description')
         if isinstance(description, list):
             if len(description) != 1:
