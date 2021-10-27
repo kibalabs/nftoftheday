@@ -55,5 +55,5 @@ CREATE TABLE tbl_collections (
     discord_url TEXT,
     banner_image_url TEXT
 );
-CREATE INDEX tbl_collections_address ON tbl_collections (registry_address);
+CREATE INDEX tbl_collections_address ON tbl_collections (address);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);
