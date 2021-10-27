@@ -46,6 +46,14 @@ CREATE TABLE tbl_collections (
     name TEXT,
     symbol TEXT,
     description TEXT,
+    image_url TEXT,
+    twitter_username TEXT,
+    instagram_username TEXT,
+    wiki_url TEXT,
+    opensea_slug TEXT,
+    url TEXT,
+    discord_url TEXT,
+    banner_image_url TEXT
 );
 CREATE INDEX tbl_collections_registry_address ON tbl_collections (registry_address);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);

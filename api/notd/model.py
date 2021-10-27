@@ -108,6 +108,14 @@ class RetrivedCollection:
     name: Optional[str]
     symbol: Optional[str]
     description: Optional[str]
+    imageUrl: Optional[str]
+    twitterUsername: Optional[str]
+    instagramUsername: Optional[str]
+    wikiUrl: Optional[str]
+    openseaSlug: Optional[str]
+    url: Optional[str]
+    discordUrl: Optional[str]
+    bannerImageUrl: Optional[str]
 
 @dataclasses.dataclass
 class Collection(RetrivedCollection):
@@ -124,4 +132,12 @@ class Collection(RetrivedCollection):
             'name': self.name,
             'symbol': self.symbol,
             'description': self.description,
+            'imageUrl': self.imageUrl,
+            'twitterUsername': self.twitterUsername,
+            'instagramUsername': self.instagramUsername,
+            'wikiUrl': self.wikiUrl,
+            'openseaSlug': self.openseaSlug,
+            'url': self.url,
+            'discordUrl': self.discordUrl,
+            'bannerImageUrl': self.bannerImageUrl,
         }

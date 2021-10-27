@@ -48,6 +48,14 @@ def collection_from_row(row: Mapping) -> Collection:
         updatedDate=row[TokenCollectionsTable.c.updatedDate],
         address=row[TokenCollectionsTable.c.address],
         name=row[TokenCollectionsTable.c.name],
-        symbol=row[TokenCollectionsTable.c.synbol],
+        symbol=row[TokenCollectionsTable.c.symbol],
         description=row[TokenCollectionsTable.c.description],
+        imageUrl=row[TokenCollectionsTable.c.imageUrl],
+        twitterUsername=row[TokenCollectionsTable.c.twitterUsername],
+        instagramUsername=row[TokenCollectionsTable.c.instagramUsername],
+        wikiUrl=row[TokenCollectionsTable.c.wikiUrl],
+        openseaSlug=row[TokenCollectionsTable.c.openseaSlug],
+        url=row[TokenCollectionsTable.c.url],
+        discordUrl=row[TokenCollectionsTable.c.discordUrl],
+        bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl]
     )

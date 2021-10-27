@@ -39,8 +39,16 @@ TokenCollectionsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='collectionId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
-    sqlalchemy.Column(key='address', name='address', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='address', name='address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Integer, nullable=True),
     sqlalchemy.Column(key='symbol', name='symbol', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='imageUrl', name='image_url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='twitterUsername', name='twitter_username', type_=sqlalchemy.Integer, nullable=True),
+    sqlalchemy.Column(key='instagramUsername', name='instagram_username', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='wikiUrl', name='wiki_url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='openseaSlug', name='opensea_slug', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='url', name='url', type_=sqlalchemy.Integer, nullable=True),
+    sqlalchemy.Column(key='discordUrl', name='discord_url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='bannerImageUrl', name='banner_image_url', type_=sqlalchemy.Text, nullable=True)
 )
