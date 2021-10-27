@@ -1,5 +1,6 @@
 import json
 import logging
+
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -87,14 +88,13 @@ class TokenMetadataProcessor():
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
             description = description[0]
-
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             imageUrl=tokenMetadataResponseJson.get('image'),
             name=tokenMetadataResponseJson.get('name'),
-            description=tokenMetadataResponseJson.get('description'),
+            description=description,
             attributes=tokenMetadataResponseJson.get('attributes', []),
         )
         return retrievedTokenMetadata
