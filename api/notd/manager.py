@@ -253,4 +253,3 @@ class NotdManager:
                 StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
             ],limit=1)
         return tokenMetadata[0]
-    
