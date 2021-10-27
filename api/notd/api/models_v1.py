@@ -6,7 +6,6 @@ from typing import Union
 
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenMetadata
-from notd.model import TokenMetadata
 from notd.model import UiData
 from pydantic import BaseModel
 
@@ -159,4 +158,3 @@ class RetrieveTokenMetadataRequest(BaseModel):
 
 class RetrieveTokenMetadataResponse(BaseModel):
     retrievedTokenMetadata: ApiMetadataToken
-

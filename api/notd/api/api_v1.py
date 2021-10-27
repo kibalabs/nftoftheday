@@ -7,7 +7,7 @@ from notd.api.models_v1 import ApiMetadataToken
 from notd.api.models_v1 import ApiRegistryToken
 from notd.api.models_v1 import ApiUiData
 from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
-from notd.api.models_v1 import RetreiveRegistryTokenMetadata
+from notd.api.models_v1 import RetrieveTokenMetadataResponse
 from notd.api.models_v1 import RetreiveRegistryTokenResponse
 from notd.api.models_v1 import RetrieveUiDataRequest
 from notd.api.models_v1 import RetrieveUiDataResponse
@@ -37,10 +37,10 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
         registryToken = await notdManager.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
         return RetreiveRegistryTokenResponse(registryToken=ApiRegistryToken.from_model(model=registryToken))
 
-    @router.get('/contract/{registryAddress}/tokens/{tokenId}', response_model=RetreiveRegistryTokenMetadata)
+    @router.get('/contract/{registryAddress}/tokens/{tokenId}', response_model=RetrieveTokenMetadataResponse)
     async def retreive_token_metadata(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest
         retrievedTokenMetadata = await notdManager.retreive_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        return RetreiveRegistryTokenMetadata(retrievedTokenMetadata=ApiMetadataToken.from_model(model=retrievedTokenMetadata))
+        return RetrieveTokenMetadataResponse(retrievedTokenMetadata=ApiMetadataToken.from_model(model=retrievedTokenMetadata))
 
     @router.post('/subscribe')
     async def create_newsletter_subscription(request: SubscribeRequest):
