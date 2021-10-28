@@ -8,10 +8,12 @@ from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
-from notd.model import Collection, Token
+from notd.model import Collection
+from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
-from notd.store.schema import TokenCollectionsTable, TokenMetadataTable
+from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_transfer_from_row
