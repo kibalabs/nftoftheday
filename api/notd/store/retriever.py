@@ -74,7 +74,7 @@ class Retriever(CoreRetriever):
         tokenMetdata = [token_metadata_from_row(row) for row in rows]
         return tokenMetdata
 
-async def list_collection(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[Collection]:
+    async def list_collection(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[Collection]:
         query = TokenCollectionsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenCollectionsTable, fieldFilters=fieldFilters)
