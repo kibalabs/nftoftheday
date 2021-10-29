@@ -103,7 +103,7 @@ class RegistryToken:
     collectionExternalUrl: Optional[str]
 
 @dataclasses.dataclass
-class RetrivedCollection:
+class RetrievedCollection:
     address: str
     name: Optional[str]
     symbol: Optional[str]
@@ -118,26 +118,7 @@ class RetrivedCollection:
     bannerImageUrl: Optional[str]
 
 @dataclasses.dataclass
-class Collection(RetrivedCollection):
+class Collection(RetrievedCollection):
     collectionId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
-
-    def to_dict(self) -> Dict:
-        return {
-            'collectionId': self.collectionId,
-            'createdDate': self.createdDate,
-            'updatedDate': self.updatedDate,
-            'address': self.address,
-            'name': self.name,
-            'symbol': self.symbol,
-            'description': self.description,
-            'imageUrl': self.imageUrl,
-            'twitterUsername': self.twitterUsername,
-            'instagramUsername': self.instagramUsername,
-            'wikiUrl': self.wikiUrl,
-            'openseaSlug': self.openseaSlug,
-            'url': self.url,
-            'discordUrl': self.discordUrl,
-            'bannerImageUrl': self.bannerImageUrl,
-        }
