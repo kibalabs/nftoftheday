@@ -15,6 +15,8 @@ from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
 from notd.block_processor import BlockProcessor
+from notd.collection_processor import CollectionDoesNotExist
+from notd.collection_processor import CollectionProcessor
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
@@ -26,6 +28,7 @@ from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
@@ -118,7 +121,7 @@ SPONSORED_TOKENS = [
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -128,6 +131,7 @@ class NotdManager:
         self.requester = requester
         self._tokenCache = dict()
         self.tokenMetadataProcessor = tokenMetadataProcessor
+        self.collectionProcessor = collectionProcessor
 
     @staticmethod
     def get_sponsored_token() -> Token:
@@ -258,10 +262,31 @@ class NotdManager:
             raise NotFoundException()
         return tokenMetadatas[0]
 
+    async def update_collection(self, address: str, tokenId: str) -> None:
+        collections = await self.retriever.list_token_metadata(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.address.key, eq=address),
+            ], limit=1,
+        )
+        collection = collections[0] if len(collections) > 0 else None
+        if collection and collection.updatedDate >= date_util.datetime_from_now(days=-3):
+            logging.info('Skipping token because it has been updated recently.')
+            return
+        try:
+            retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)
+        except CollectionDoesNotExist:
+            logging.info(f'Failed to retrieve non-existant token: {address}: {tokenId}')
+            return
+        if collection:
+            print(collection)
+            await self.saver.update_collection(collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twiterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
+        else:
+            await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twiterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
+
     async def retreive_collection(self, address: str) -> Collection:
         collections = await self.retriever.list_collection(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenMetadataTable.c.address.key, eq=address),
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
             ], limit=1,
         )
         if len(collections) == 0:
