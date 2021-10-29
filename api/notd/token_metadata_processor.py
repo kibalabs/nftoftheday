@@ -39,7 +39,7 @@ class TokenMetadataProcessor():
             # TODO(krishan711): Implement special case for cryptopunks
             raise TokenDoesNotExistException()
         if registryAddress == '0x66018A2AC8F28f4d68d1F018680957F2F22528Da':
-            #TODO(): Implement special case for etherland
+            # TODO(krishan711): Implement special case for etherland
             raise TokenDoesNotExistException()
         try:
             tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
