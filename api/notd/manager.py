@@ -265,7 +265,7 @@ class NotdManager:
     async def update_collection(self, address: str, tokenId: str) -> None:
         collections = await self.retriever.list_token_metadata(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenMetadataTable.c.address.key, eq=address),
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
             ], limit=1,
         )
         collection = collections[0] if len(collections) > 0 else None
