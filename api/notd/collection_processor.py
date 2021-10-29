@@ -48,5 +48,4 @@ class CollectionProcessor:
             discordUrl=collection.get('discord_url'),
             bannerImageUrl=collection.get('banner_image_url'),
         )
-        logging.info(f'{retrievedCollection}')
         return retrievedCollection
