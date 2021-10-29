@@ -1,11 +1,12 @@
 import asyncio
 import logging
-from typing import Collection
-from core.exceptions import NotFoundException
-from core.requester import Requester, ResponseException
 
+from core.exceptions import NotFoundException
+from core.requester import Requester
+from core.requester import ResponseException
 
 from notd.model import RetrievedCollection
+
 
 class CollectionDoesNotExist(NotFoundException):
     pass
@@ -15,7 +16,7 @@ class CollectionProcessor:
         self.requester = requester
 
     async def retrieve_collection(self,address) -> RetrievedCollection:
-        response = 0 
+        response = 0
         retryCount = 0
         while not response:
             try:
@@ -32,7 +33,7 @@ class CollectionProcessor:
         collection = responseJson.get('collection')
         if collection is None:
             raise CollectionDoesNotExist()
-        
+
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collection.get('name'),
