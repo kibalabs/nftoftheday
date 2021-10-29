@@ -101,3 +101,24 @@ class RegistryToken:
     collectionImageUrl: Optional[str]
     collectionOpenSeaUrl: Optional[str]
     collectionExternalUrl: Optional[str]
+
+@dataclasses.dataclass
+class RetrievedCollection:
+    address: str
+    name: Optional[str]
+    symbol: Optional[str]
+    description: Optional[str]
+    imageUrl: Optional[str]
+    twitterUsername: Optional[str]
+    instagramUsername: Optional[str]
+    wikiUrl: Optional[str]
+    openseaSlug: Optional[str]
+    url: Optional[str]
+    discordUrl: Optional[str]
+    bannerImageUrl: Optional[str]
+
+@dataclasses.dataclass
+class Collection(RetrievedCollection):
+    collectionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime

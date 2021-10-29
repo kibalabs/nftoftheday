@@ -18,6 +18,7 @@ from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
+from notd.model import Collection
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
@@ -256,3 +257,13 @@ class NotdManager:
         if len(tokenMetadatas) == 0:
             raise NotFoundException()
         return tokenMetadatas[0]
+
+    async def retreive_collection(self, address: str) -> Collection:
+        collections = await self.retriever.list_collection(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.address.key, eq=address),
+            ], limit=1,
+        )
+        if len(collections) == 0:
+            raise NotFoundException()
+        return collections[0]

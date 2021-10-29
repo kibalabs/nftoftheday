@@ -8,9 +8,11 @@ from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
+from notd.model import Collection
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_metadata_from_row
@@ -71,3 +73,15 @@ class Retriever(CoreRetriever):
         rows = await self.database.fetch_all(query=query)
         tokenMetdata = [token_metadata_from_row(row) for row in rows]
         return tokenMetdata
+
+    async def list_collection(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[Collection]:
+        query = TokenCollectionsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenCollectionsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenCollectionsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        rows = await self.database.fetch_all(query=query)
+        tokenCollection = [token_metadata_from_row(row) for row in rows]
+        return tokenCollection
