@@ -38,7 +38,7 @@ openseaClient = OpenseaClient(requester=requester)
 tokenClient = TokenClient(requester=requester, ethClient=ethClient)
 tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient)
 collectionProcessor = CollectionProcessor(requester=requester)
-notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor)
+notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor, collectionProcessor=collectionProcessor)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=os.environ.get('NAME', 'notd'), version=os.environ.get('VERSION')))
