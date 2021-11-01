@@ -33,7 +33,6 @@ class CollectionProcessor:
         collection = responseJson.get('collection')
         if collection is None:
             raise CollectionDoesNotExist()
-
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collection.get('name'),

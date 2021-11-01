@@ -263,14 +263,14 @@ class NotdManager:
         return tokenMetadatas[0]
 
     async def update_collection(self, address: str, tokenId: str) -> None:
-        collections = await self.retriever.list_token_metadata(
+        collections = await self.retriever.list_collection(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
             ], limit=1,
         )
         collection = collections[0] if len(collections) > 0 else None
-        if collection and collection.updatedDate >= date_util.datetime_from_now(days=-3):
-            logging.info('Skipping token because it has been updated recently.')
+        if collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
+            logging.info('Skipping Collection because it has been updated recently.')
             return
         try:
             retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)
@@ -278,7 +278,6 @@ class NotdManager:
             logging.info(f'Failed to retrieve non-existant token: {address}: {tokenId}')
             return
         if collection:
-            print(collection)
             await self.saver.update_collection(collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twiterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
         else:
             await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twiterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)

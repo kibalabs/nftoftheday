@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.block_processor import BlockProcessor
+from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
@@ -36,6 +37,7 @@ requester = Requester()
 openseaClient = OpenseaClient(requester=requester)
 tokenClient = TokenClient(requester=requester, ethClient=ethClient)
 tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient)
+collectionProcessor = CollectionProcessor(requester=requester)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor)
 
 app = FastAPI()

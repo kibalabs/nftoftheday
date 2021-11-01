@@ -12,6 +12,7 @@ from core.web3.eth_client import RestEthClient
 from databases import Database
 
 from notd.block_processor import BlockProcessor
+from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.notd_message_processor import NotdMessageProcessor
 from notd.opensea_client import OpenseaClient
@@ -37,7 +38,8 @@ async def main():
     openseaClient = OpenseaClient(requester=requester)
     tokenClient = TokenClient(requester=requester, ethClient=ethClient)
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor)
+    collectionProcessor = CollectionProcessor(requester=requester)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor,collectionProcessor=collectionProcessor)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')

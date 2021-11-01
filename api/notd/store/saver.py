@@ -144,6 +144,7 @@ class Saver(CoreSaver):
             discordUrl=discordUrl,
             bannerImageUrl=bannerImageUrl,
         )
+
     async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> None:
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId)
         values = {}
