@@ -15,7 +15,8 @@ from notd.model import TokenTransfer
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
-from notd.store.schema_conversions import collection_from_row, token_metadata_from_row
+from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 
 _REGISTRY_BLACKLIST = set([

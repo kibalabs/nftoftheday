@@ -4,12 +4,12 @@ import os
 
 import boto3
 from core.aws_requester import AwsRequester
+from core.http.basic_authentication import BasicAuthentication
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
 from core.web3.eth_client import RestEthClient
-from core.http.basic_authentication import BasicAuthentication
 from databases import Database
 
 from notd.block_processor import BlockProcessor

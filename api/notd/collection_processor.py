@@ -2,7 +2,8 @@ import asyncio
 import json
 import logging
 
-from core.exceptions import BadRequestException, NotFoundException
+from core.exceptions import BadRequestException
+from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.requester import ResponseException
 from core.web3.eth_client import EthClientInterface
@@ -23,20 +24,19 @@ class CollectionProcessor:
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
         self.erc721MetadataSymbolFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'symbol'][0]
 
-
     async def retrieve_collection(self, address: str) -> RetrievedCollection:
-        response = 0
-        retryCount = 0
         try:
             tokenMetadataNameResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataNameFunctionAbi)
+            collectionName = tokenMetadataNameResponse[0]
         except BadRequestException as exception:
-            tokenMetadataNameResponse = [None]
-            pass
+            collectionName = None
         try:
             tokenMetadataSymbolResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataSymbolFunctionAbi)
-        except Exception:
-            tokenMetadataSymbolResponse = None
-            pass
+            collectionSymbol = tokenMetadataSymbolResponse[0]
+        except BadRequestException:
+            collectionSymbol = None
+        response = None
+        retryCount = 0
         while not response:
             try:
                 response = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}')
@@ -54,8 +54,8 @@ class CollectionProcessor:
             raise CollectionDoesNotExist()
         retrievedCollection = RetrievedCollection(
             address=address,
-            name=f'{tokenMetadataNameResponse[0]}' or collection.get('name'),
-            symbol=f'{tokenMetadataSymbolResponse}' or collection.get('symbol'),
+            name= collectionName or collection.get('name'),
+            symbol=collectionSymbol or collection.get('symbol'),
             description=collection.get('description'),
             imageUrl=collection.get('image_url'),
             twitterUsername=collection.get('twitter_username'),
