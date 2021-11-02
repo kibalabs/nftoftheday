@@ -110,21 +110,21 @@ class Saver(CoreSaver):
     async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> Collection:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
-        collectionId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
-            TokenMetadataTable.c.createdDate.key: createdDate,
-            TokenMetadataTable.c.updatedDate.key: updatedDate,
-            TokenMetadataTable.c.address.key: address,
-            TokenMetadataTable.c.name.key: name,
-            TokenMetadataTable.c.symbol.key: symbol,
-            TokenMetadataTable.c.description.key: description,
-            TokenMetadataTable.c.imageUrl.key: imageUrl,
-            TokenMetadataTable.c.twitterUsername.key: twitterUsername,
-            TokenMetadataTable.c.instagramUsername.key: instagramUsername,
-            TokenMetadataTable.c.wikiUrl.key: wikiUrl,
-            TokenMetadataTable.c.openseaSlug.key: openseaSlug,
-            TokenMetadataTable.c.url.key: url,
-            TokenMetadataTable.c.discordUrl.key: discordUrl,
-            TokenMetadataTable.c.bannerImageUrl.key: bannerImageUrl,
+        collectionId = await self._execute(query=TokenCollectionsTable.insert(), values={  # pylint: disable=no-value-for-parameter
+            TokenCollectionsTable.c.createdDate.key: createdDate,
+            TokenCollectionsTable.c.updatedDate.key: updatedDate,
+            TokenCollectionsTable.c.address.key: address,
+            TokenCollectionsTable.c.name.key: name,
+            TokenCollectionsTable.c.symbol.key: symbol,
+            TokenCollectionsTable.c.description.key: description,
+            TokenCollectionsTable.c.imageUrl.key: imageUrl,
+            TokenCollectionsTable.c.twitterUsername.key: twitterUsername,
+            TokenCollectionsTable.c.instagramUsername.key: instagramUsername,
+            TokenCollectionsTable.c.wikiUrl.key: wikiUrl,
+            TokenCollectionsTable.c.openseaSlug.key: openseaSlug,
+            TokenCollectionsTable.c.url.key: url,
+            TokenCollectionsTable.c.discordUrl.key: discordUrl,
+            TokenCollectionsTable.c.bannerImageUrl.key: bannerImageUrl,
 
         })
         return Collection(
