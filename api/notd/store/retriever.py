@@ -15,7 +15,7 @@ from notd.model import TokenTransfer
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
-from notd.store.schema_conversions import token_metadata_from_row
+from notd.store.schema_conversions import collection_from_row, token_metadata_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 
 _REGISTRY_BLACKLIST = set([
@@ -83,5 +83,5 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         rows = await self.database.fetch_all(query=query)
-        tokenCollection = [token_metadata_from_row(row) for row in rows]
+        tokenCollection = [collection_from_row(row) for row in rows]
         return tokenCollection
