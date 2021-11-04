@@ -228,10 +228,13 @@ class NotdManager:
         #     return
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
+        retrievedAddresses = set()
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
         for retrievedTokenTransfer in retrievedTokenTransfers:
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId).to_message())
-            await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=retrievedTokenTransfer.registryAddress).to_message())
+            retrievedAddresses.add(retrievedTokenTransfer.registryAddress)
+        for address in retrievedAddresses:
+            await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
         savedTokenMetadatas = await self.retriever.list_token_metadata(

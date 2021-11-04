@@ -54,7 +54,7 @@ class CollectionProcessor:
             raise CollectionDoesNotExist()
         retrievedCollection = RetrievedCollection(
             address=address,
-            name= collectionName or collection.get('name'),
+            name=collectionName or collection.get('name'),
             symbol=collectionSymbol or collection.get('symbol'),
             description=collection.get('description'),
             imageUrl=collection.get('image_url'),
