@@ -24,7 +24,7 @@ nosetests.xml
 eslint.xml
 jest.xml
 local_testing*
-local_worker*
+
 
 # Generated
 generated/

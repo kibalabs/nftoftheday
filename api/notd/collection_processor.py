@@ -15,6 +15,7 @@ class CollectionDoesNotExist(NotFoundException):
     pass
 
 class CollectionProcessor:
+
     def __init__(self, requester: Requester, ethClient: EthClientInterface):
         self.requester = requester
         self.ethClient = ethClient
