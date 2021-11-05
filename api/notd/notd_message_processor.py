@@ -6,6 +6,7 @@ from notd.manager import NotdManager
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ProcessBlocksMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 
 
@@ -30,6 +31,10 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateTokenMetadataMessageContent.get_command():
             messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
             await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+            return
+        if message.command == UpdateCollectionMessageContent.get_command():
+            messageContent = UpdateCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection(address=messageContent.address)
             return
 
         raise KibaException(message='Message was unhandled')
