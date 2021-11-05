@@ -44,6 +44,9 @@ class TokenMetadataProcessor():
         if registryAddress == '0xE22e1e620dffb03065CD77dB0162249c0c91bf01':
             # TODO(krishan711): Implement special case for bearxlabs
             raise TokenDoesNotExistException()
+        if registryAddress == '0x57E9a39aE8eC404C08f88740A9e6E306f50c937f':
+            # TODO(krishan711): Implement special case for polkacity
+            raise TokenDoesNotExistException()
         try:
             tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
         except BadRequestException as exception:
