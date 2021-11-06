@@ -37,7 +37,7 @@ requester = Requester()
 openseaClient = OpenseaClient(requester=requester)
 tokenClient = TokenClient(requester=requester, ethClient=ethClient)
 tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient)
-collectionProcessor = CollectionProcessor(requester=requester)
+collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor, collectionProcessor=collectionProcessor)
 
 app = FastAPI()
