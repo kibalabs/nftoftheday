@@ -15,8 +15,11 @@ from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
 from notd.block_processor import BlockProcessor
+from notd.collection_processor import CollectionDoesNotExist
+from notd.collection_processor import CollectionProcessor
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
 from notd.model import RegistryToken
@@ -26,6 +29,7 @@ from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
@@ -115,7 +119,6 @@ SPONSORED_TOKENS = [
     {'date': datetime.datetime(2021, 11, 1), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
     {'date': datetime.datetime(2021, 11, 2), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='29098890751422706961588455898220897438508367792447852946856941431639997677569')},
     {'date': datetime.datetime(2021, 11, 4), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
-    {'date': datetime.datetime(2021, 11, 5), 'token': Token(registryAddress='0x2953399124F0cBB46d2CbACD8A89cF0599974963', tokenId='95256250550879371203228711939746183905676249607077852628602806190568124710913')},
     {'date': datetime.datetime(2021, 11, 7), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
     {'date': datetime.datetime(2021, 11, 8), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='37245476930711271386485694793363763377086733366271522319079897520971769184257')},
     {'date': datetime.datetime(2021, 11, 10), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
@@ -136,7 +139,7 @@ SPONSORED_TOKENS = [
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -146,6 +149,7 @@ class NotdManager:
         self.requester = requester
         self._tokenCache = dict()
         self.tokenMetadataProcessor = tokenMetadataProcessor
+        self.collectionProcessor = collectionProcessor
 
     @staticmethod
     def get_sponsored_token() -> Token:
@@ -224,8 +228,12 @@ class NotdManager:
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
+        retrievedAddresses = set()
         for retrievedTokenTransfer in retrievedTokenTransfers:
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId).to_message())
+            retrievedAddresses.add(retrievedTokenTransfer.registryAddress)
+        for address in retrievedAddresses:
+            await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
         savedTokenMetadatas = await self.retriever.list_token_metadata(
@@ -276,10 +284,30 @@ class NotdManager:
             raise NotFoundException()
         return tokenMetadatas[0]
 
+    async def update_collection(self, address: str) -> None:
+        collections = await self.retriever.list_collection(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+            ], limit=1,
+        )
+        collection = collections[0] if len(collections) > 0 else None
+        if collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
+            logging.info('Skipping Collection because it has been updated recently.')
+            return
+        try:
+            retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)
+        except CollectionDoesNotExist:
+            logging.info(f'Failed to retrieve non-existant collection: {address}')
+            return
+        if collection:
+            await self.saver.update_collection(collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
+        else:
+            await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
+
     async def retreive_collection(self, address: str) -> Collection:
         collections = await self.retriever.list_collection(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenMetadataTable.c.address.key, eq=address),
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
             ], limit=1,
         )
         if len(collections) == 0:
