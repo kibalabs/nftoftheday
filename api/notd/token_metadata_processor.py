@@ -1,13 +1,20 @@
+import datetime
+import os
 import json
 import logging
+import boto3
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
+from core.s3_manager import S3Manager
 from core.web3.eth_client import EthClientInterface
+from core.util import date_util
+
 
 from notd.model import RetrievedTokenMetadata
 
+_BUCKET = 's3://kibatest'
 
 class TokenDoesNotExistException(NotFoundException):
     pass
@@ -19,9 +26,10 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager):
         self.requester = requester
         self.ethClient = ethClient
+        self.s3manager = s3manager
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetdataContractJson = json.load(contractJsonFile)
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
@@ -94,6 +102,8 @@ class TokenMetadataProcessor():
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
+        tokenMetadataResponseJsonBytes=str.encode(json.dumps(tokenMetadataResponseJson))
+        await self.s3manager.write_file(content=tokenMetadataResponseJsonBytes,targetPath=f'{_BUCKET}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json', accessControl='public-read')
         description = tokenMetadataResponseJson.get('description')
         if isinstance(description, list):
             if len(description) != 1:
