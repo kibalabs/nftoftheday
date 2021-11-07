@@ -1,16 +1,12 @@
-import datetime
-import os
 import json
 import logging
-import boto3
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.s3_manager import S3Manager
-from core.web3.eth_client import EthClientInterface
 from core.util import date_util
-
+from core.web3.eth_client import EthClientInterface
 
 from notd.model import RetrievedTokenMetadata
 
