@@ -85,22 +85,21 @@ class TokenMetadataProcessor():
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
         if not tokenMetadataUri:
-            tokenMetadataResponseJson = {}
+            tokenMetadataResponseDict = {}
         elif tokenMetadataUri.startswith('data:'):
             # TODO(krishan711): parse the data here
-            tokenMetadataResponseJson = {}
+            tokenMetadataResponseDict = {}
         else:
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
-                tokenMetadataResponseJson = tokenMetadataResponse.json()
-                if isinstance(tokenMetadataResponseJson, str):
-                    tokenMetadataResponseJson = json.loads(tokenMetadataResponseJson)
+                tokenMetadataResponseDict = tokenMetadataResponse.json()
+                if isinstance(tokenMetadataResponseDict, str):
+                    tokenMetadataResponseDict = json.loads(tokenMetadataResponseDict)
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
-                tokenMetadataResponseJson = {}
-        tokenMetadataResponseJsonBytes = str.encode(json.dumps(tokenMetadataResponseJson))
-        await self.s3manager.write_file(content=tokenMetadataResponseJsonBytes, targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
-        description = tokenMetadataResponseJson.get('description')
+                tokenMetadataResponseDict = {}
+        await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataResponseDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        description = tokenMetadataResponseDict.get('description')
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')

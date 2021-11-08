@@ -1,17 +1,17 @@
 resource "aws_sqs_queue" "notd_work_queue_dl" {
-  name = "notd-work-queue-dl"
+  name = "${local.project}-work-queue-dl"
   delay_seconds = 0
   max_message_size = 256 * 1024
   visibility_timeout_seconds = 60 * 5
   message_retention_seconds = 14 * 24 * 60 * 60
   receive_wait_time_seconds = 0
   tags = {
-    app = "notd"
+    app = local.project
   }
 }
 
 resource "aws_sqs_queue" "notd_work_queue" {
-  name = "notd-work-queue"
+  name = "${local.project}-work-queue"
   delay_seconds = 0
   max_message_size = 256 * 1024
   visibility_timeout_seconds = 60 * 5
@@ -22,6 +22,6 @@ resource "aws_sqs_queue" "notd_work_queue" {
     maxReceiveCount = 3
   })
   tags = {
-    app = "notd"
+    app = local.project
   }
 }
