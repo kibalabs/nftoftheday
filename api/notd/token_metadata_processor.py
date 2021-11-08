@@ -4,6 +4,8 @@ import logging
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
+from core.s3_manager import S3Manager
+from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 
 from notd.model import RetrievedTokenMetadata
@@ -19,9 +21,11 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
         self.requester = requester
         self.ethClient = ethClient
+        self.s3manager = s3manager
+        self.bucketName = bucketName
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetdataContractJson = json.load(contractJsonFile)
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
@@ -81,20 +85,21 @@ class TokenMetadataProcessor():
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
         if not tokenMetadataUri:
-            tokenMetadataResponseJson = {}
+            tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
             # TODO(krishan711): parse the data here
-            tokenMetadataResponseJson = {}
+            tokenMetadataDict = {}
         else:
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
-                tokenMetadataResponseJson = tokenMetadataResponse.json()
-                if isinstance(tokenMetadataResponseJson, str):
-                    tokenMetadataResponseJson = json.loads(tokenMetadataResponseJson)
+                tokenMetadataDict = tokenMetadataResponse.json()
+                if isinstance(tokenMetadataDict, str):
+                    tokenMetadataDict = json.loads(tokenMetadataDict)
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
-                tokenMetadataResponseJson = {}
-        description = tokenMetadataResponseJson.get('description')
+                tokenMetadataDict = {}
+        await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        description = tokenMetadataDict.get('description')
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
@@ -103,9 +108,9 @@ class TokenMetadataProcessor():
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
-            imageUrl=tokenMetadataResponseJson.get('image'),
-            name=tokenMetadataResponseJson.get('name'),
+            imageUrl=tokenMetadataDict.get('image'),
+            name=tokenMetadataDict.get('name'),
             description=description,
-            attributes=tokenMetadataResponseJson.get('attributes', []),
+            attributes=tokenMetadataDict.get('attributes', []),
         )
         return retrievedTokenMetadata
