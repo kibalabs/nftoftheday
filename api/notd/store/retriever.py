@@ -1,5 +1,4 @@
 import datetime
-from typing import AsyncGenerator
 from typing import Optional
 from typing import Sequence
 
@@ -9,9 +8,15 @@ from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
+from notd.model import Collection
 from notd.model import Token
+from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 
 _REGISTRY_BLACKLIST = set([
@@ -24,9 +29,6 @@ _REGISTRY_BLACKLIST = set([
 class Retriever(CoreRetriever):
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenTransfer]:
-        return [tokenTransfer async for tokenTransfer in self.generate_token_transfers(fieldFilters=fieldFilters, orders=orders, limit=limit)]
-
-    async def generate_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> AsyncGenerator[TokenTransfer, None]:
         query = TokenTransfersTable.select()
         query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if fieldFilters:
@@ -36,9 +38,9 @@ class Retriever(CoreRetriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
-        async for row in self.database.iterate(query=query):
-            tokenTransfer = token_transfer_from_row(row)
-            yield tokenTransfer
+        rows = await self.database.fetch_all(query=query)
+        tokenTransfers = [token_transfer_from_row(row) for row in rows]
+        return tokenTransfers
 
     async def get_transaction_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
         query = TokenTransfersTable.select()
@@ -60,3 +62,27 @@ class Retriever(CoreRetriever):
         query = query.limit(1)
         rows = await self.database.fetch_all(query=query)
         return Token(registryAddress=rows[0][TokenTransfersTable.c.registryAddress], tokenId=rows[0][TokenTransfersTable.c.tokenId])
+
+    async def list_token_metadata(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenMetadata]:
+        query = TokenMetadataTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenMetadataTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenMetadataTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        rows = await self.database.fetch_all(query=query)
+        tokenMetdata = [token_metadata_from_row(row) for row in rows]
+        return tokenMetdata
+
+    async def list_collection(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[Collection]:
+        query = TokenCollectionsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenCollectionsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenCollectionsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        rows = await self.database.fetch_all(query=query)
+        tokenCollection = [collection_from_row(row) for row in rows]
+        return tokenCollection

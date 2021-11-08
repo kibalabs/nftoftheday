@@ -3,7 +3,9 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+from core.util.typing_util import JSON
 from pydantic import dataclasses
+
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class RetrievedTokenTransfer:
@@ -19,6 +21,36 @@ class RetrievedTokenTransfer:
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
+
+@dataclasses.dataclass
+class RetrievedTokenMetadata:
+    registryAddress: str
+    tokenId: str
+    metadataUrl: str
+    imageUrl: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
+    attributes: JSON
+
+@dataclasses.dataclass
+class TokenMetadata(RetrievedTokenMetadata):
+    tokenMetadataId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+    def to_dict(self) -> Dict:
+        return {
+            'tokenMetadataId': self.tokenMetadataId,
+            'createdDate': self.createdDate,
+            'updatedDate': self.updatedDate,
+            'registryAddress': self.registryAddress,
+            'tokenId': self.tokenId,
+            'metadataUrl': self.metadataUrl,
+            'imageUrl': self.imageUrl,
+            'name': self.name,
+            'description': self.description,
+            'attributes': self.attributes,
+        }
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
@@ -69,3 +101,24 @@ class RegistryToken:
     collectionImageUrl: Optional[str]
     collectionOpenSeaUrl: Optional[str]
     collectionExternalUrl: Optional[str]
+
+@dataclasses.dataclass
+class RetrievedCollection:
+    address: str
+    name: Optional[str]
+    symbol: Optional[str]
+    description: Optional[str]
+    imageUrl: Optional[str]
+    twitterUsername: Optional[str]
+    instagramUsername: Optional[str]
+    wikiUrl: Optional[str]
+    openseaSlug: Optional[str]
+    url: Optional[str]
+    discordUrl: Optional[str]
+    bannerImageUrl: Optional[str]
+
+@dataclasses.dataclass
+class Collection(RetrievedCollection):
+    collectionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime

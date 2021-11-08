@@ -15,8 +15,13 @@ from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
 from notd.block_processor import BlockProcessor
+from notd.collection_processor import CollectionDoesNotExist
+from notd.collection_processor import CollectionProcessor
 from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import UpdateCollectionMessageContent
+from notd.messages import UpdateTokenMetadataMessageContent
+from notd.model import Collection
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
@@ -24,8 +29,13 @@ from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_client import TokenClient
+from notd.token_metadata_processor import TokenDoesNotExistException
+from notd.token_metadata_processor import TokenHasNoMetadataException
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 SPONSORED_TOKENS = [
     {'date': datetime.datetime(2021, 1, 1), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='64159879865138287087882027887075729047962830622590748212892263500451722297345')},
@@ -84,11 +94,52 @@ SPONSORED_TOKENS = [
     {'date': datetime.datetime(2021, 9, 23), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='49660350604499248360381827203761942161648024579795517639836571627992003903489')},
     {'date': datetime.datetime(2021, 9, 25), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
     {'date': datetime.datetime(2021, 9, 26), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='74647661069346027116264188822178107459174401458338635548610339998001004545')},
-    {'date': datetime.datetime(2021, 9, 28), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},]
+    {'date': datetime.datetime(2021, 9, 28), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 9, 29), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='114892502508796003086026794793400110362742126516063867859178063126163351404545')},
+    {'date': datetime.datetime(2021, 10, 1), 'token': Token(registryAddress='0x33825285eb66c11237cc68cc182c1e9bf01ba00b', tokenId='2780')},
+    {'date': datetime.datetime(2021, 10, 3), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='68637359230335288541607095017157500205230770777405649699842761669208772182026')},
+    {'date': datetime.datetime(2021, 10, 5), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 6), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='114892502508796003086026794793400110362742126516063867859178063004117560721409')},
+    {'date': datetime.datetime(2021, 10, 8), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 9), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='93234')},
+    {'date': datetime.datetime(2021, 10, 11), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 12), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='93229')},
+    {'date': datetime.datetime(2021, 10, 14), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 15), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='92271')},
+    {'date': datetime.datetime(2021, 10, 17), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 18), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='79272398249171848863486699580741524108961730623973519371282249716077447610369')},
+    {'date': datetime.datetime(2021, 10, 20), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 21), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='50988871394455988489157350861935100636585770195022668034637481825039695216641')},
+    {'date': datetime.datetime(2021, 10, 23), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 24), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='50483018599523793031646892055201443028457586511343357127301131364790085615617')},
+    {'date': datetime.datetime(2021, 10, 26), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 27), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='49660350604499248360381827203761942161648024579795517639836571656579306225665')},
+    {'date': datetime.datetime(2021, 10, 29), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 10, 30), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='12063007856746522084238452603208217521889080975581821822891377084891301675009')},
+    {'date': datetime.datetime(2021, 11, 1), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 2), 'token': Token(registryAddress='0x495f947276749ce646f68ac8c248420045cb7b5e', tokenId='29098890751422706961588455898220897438508367792447852946856941431639997677569')},
+    {'date': datetime.datetime(2021, 11, 4), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 7), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 8), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='37245476930711271386485694793363763377086733366271522319079897520971769184257')},
+    {'date': datetime.datetime(2021, 11, 10), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 11), 'token': Token(registryAddress='0xd07dc4262BCDbf85190C01c996b4C06a461d2430', tokenId='685820')},
+    {'date': datetime.datetime(2021, 11, 13), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 14), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='114892502508796003086026794793400110362742126516063867859178063184437467676673')},
+    {'date': datetime.datetime(2021, 11, 16), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 17), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='50483018599523793031646892055201443028457586511343357127301131486835876298753')},
+    {'date': datetime.datetime(2021, 11, 19), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 20), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='48009777219687553353266573207856084490164331626444899155064281984235699437569')},
+    {'date': datetime.datetime(2021, 11, 22), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 23), 'token': Token(registryAddress='0x3B3ee1931Dc30C1957379FAc9aba94D1C48a5405', tokenId='88362')},
+    {'date': datetime.datetime(2021, 11, 25), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 26), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='20413448389158464120102864593781297035145279087422163667103007730008737185793')},
+    {'date': datetime.datetime(2021, 11, 28), 'token': Token(registryAddress='0x1cf33f4c6c4e6391f4d2b445aa3a36639b77dd68', tokenId='711')},
+    {'date': datetime.datetime(2021, 11, 29), 'token': Token(registryAddress='0x495f947276749Ce646f68AC8c248420045cb7b5e', tokenId='37735198289038997993427628448167501432332343899935625684167414261625118523393')},
+]
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -97,6 +148,8 @@ class NotdManager:
         self.tokenClient = tokenClient
         self.requester = requester
         self._tokenCache = dict()
+        self.tokenMetadataProcessor = tokenMetadataProcessor
+        self.collectionProcessor = collectionProcessor
 
     @staticmethod
     def get_sponsored_token() -> Token:
@@ -127,9 +180,7 @@ class NotdManager:
             orders=[RandomOrder()],
             limit=1
         )
-
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
-
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
@@ -137,7 +188,6 @@ class NotdManager:
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
         )
-
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
@@ -166,14 +216,48 @@ class NotdManager:
             logging.debug('Ignoring previously saved transfer')
 
     async def process_block(self, blockNumber: int) -> None:
+        # TODO(krishan711): uncomment this when we can save in transactions (which is currently blocked by the duplication exception)
+        # blockTransfers = await self.retriever.list_token_transfers(
+        #     fieldFilters=[
+        #         IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
+        #     ], limit=1,
+        # )
+        # if len(blockTransfers) > 0:
+        #     logging.info('Skipping block because it already has transfers.')
+        #     return
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        for retrievedTokenTransfer in retrievedTokenTransfers:
-            logging.debug(f'Transferred {retrievedTokenTransfer.tokenId} from {retrievedTokenTransfer.fromAddress} to {retrievedTokenTransfer.toAddress}')
-            logging.debug(f'Paid {retrievedTokenTransfer.value / 100000000000000000.0}Ξ ({retrievedTokenTransfer.gasUsed * retrievedTokenTransfer.gasPrice / 100000000000000000.0}Ξ) to {retrievedTokenTransfer.registryAddress}')
-            logging.debug(f'OpenSea url: https://opensea.io/assets/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
-            logging.debug(f'OpenSea api url: https://api.opensea.io/api/v1/asset/{retrievedTokenTransfer.registryAddress}/{retrievedTokenTransfer.tokenId}')
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
+        retrievedAddresses = set()
+        for retrievedTokenTransfer in retrievedTokenTransfers:
+            await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId).to_message())
+            retrievedAddresses.add(retrievedTokenTransfer.registryAddress)
+        for address in retrievedAddresses:
+            await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
+
+    async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
+        savedTokenMetadatas = await self.retriever.list_token_metadata(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+            ], limit=1,
+        )
+        savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
+        if savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
+            logging.info('Skipping token because it has been updated recently.')
+            return
+        try:
+            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        except TokenDoesNotExistException:
+            logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
+            return
+        except TokenHasNoMetadataException:
+            logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
+            return
+        if savedTokenMetadata:
+            await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+        else:
+            await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
 
     async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         cacheKey = f'{registryAddress}:{tokenId}'
@@ -188,3 +272,44 @@ class NotdManager:
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
+
+    async def retreive_token_metadata(self, registryAddress: str, tokenId: str) -> RegistryToken:
+        tokenMetadatas = await self.retriever.list_token_metadata(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+            ], limit=1,
+        )
+        if len(tokenMetadatas) == 0:
+            raise NotFoundException()
+        return tokenMetadatas[0]
+
+    async def update_collection(self, address: str) -> None:
+        collections = await self.retriever.list_collection(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+            ], limit=1,
+        )
+        collection = collections[0] if len(collections) > 0 else None
+        if collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
+            logging.info('Skipping Collection because it has been updated recently.')
+            return
+        try:
+            retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)
+        except CollectionDoesNotExist:
+            logging.info(f'Failed to retrieve non-existant collection: {address}')
+            return
+        if collection:
+            await self.saver.update_collection(collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
+        else:
+            await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
+
+    async def retreive_collection(self, address: str) -> Collection:
+        collections = await self.retriever.list_collection(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+            ], limit=1,
+        )
+        if len(collections) == 0:
+            raise NotFoundException()
+        return collections[0]

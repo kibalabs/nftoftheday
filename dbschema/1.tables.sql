@@ -20,3 +20,40 @@ CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
 CREATE INDEX tbl_token_transfers_block_date ON tbl_token_transfers (block_date);
 CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_number);
 CREATE INDEX tbl_token_transfers_block_hash ON tbl_token_transfers (block_hash);
+
+CREATE TABLE tbl_token_metadatas (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    metadata_url TEXT NOT NULL,
+    image_url TEXT,
+    name TEXT,
+    description TEXT,
+    attributes JSON
+);
+CREATE UNIQUE INDEX tbl_tokens_metadatas_registry_address_token_id ON tbl_token_metadatas (registry_address, token_id);
+CREATE INDEX tbl_token_metadatas_registry_address ON tbl_token_metadatas (registry_address);
+CREATE INDEX tbl_token_metadatas_token_id ON tbl_token_metadatas (token_id);
+CREATE INDEX tbl_token_metadatas_name ON tbl_token_metadatas (name);
+
+CREATE TABLE tbl_collections (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    address TEXT NOT NULL,
+    name TEXT,
+    symbol TEXT,
+    description TEXT,
+    image_url TEXT,
+    twitter_username TEXT,
+    instagram_username TEXT,
+    wiki_url TEXT,
+    opensea_slug TEXT,
+    url TEXT,
+    discord_url TEXT,
+    banner_image_url TEXT
+);
+CREATE UNIQUE INDEX tbl_collections_address ON tbl_collections (address);
+CREATE INDEX tbl_collections_name ON tbl_collections (name);

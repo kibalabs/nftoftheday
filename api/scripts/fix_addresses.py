@@ -7,50 +7,38 @@ import asyncio
 import logging
 
 import asyncclick as click
+from core.util.chain_util import normalize_address
 from databases.core import Database
+from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql.expression import or_
 
-from notd.chain_utils import normalize_address
-from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
-
-from sqlalchemy.sql.expression import func as sqlalchemyfunc, or_
-
-
 
 
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=10000)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
-    retriever = Retriever(database=database)
-
     await database.connect()
+
     currentBlockNumber = startBlockNumber
     while currentBlockNumber < endBlockNumber:
-        nextBlockNumber = currentBlockNumber + batchSize
-        start = min(currentBlockNumber, nextBlockNumber)
-        end = max(currentBlockNumber, nextBlockNumber)
-        currentBlockNumber = nextBlockNumber
-        logging.info(f'Working on {start} to {end}')
-
-        tokenTransfersToChange = []
+        start = currentBlockNumber
+        end = min(currentBlockNumber + batchSize, endBlockNumber)
+        logging.info(f'Working on {start} to {end}...')
         async with database.transaction():
             query = TokenTransfersTable.select()
-            query = query.where(or_(
-                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,
-                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42
-                
-            ))  
             query = query.where(TokenTransfersTable.c.blockNumber >= start)
             query = query.where(TokenTransfersTable.c.blockNumber < end)
-
-            async for row in retriever.database.iterate(query=query):
-                tokenTransfer = token_transfer_from_row(row)
-                tokenTransfersToChange.append(tokenTransfer)
-
+            query = query.where(or_(
+                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,
+                sqlalchemyfunc.length(TokenTransfersTable.c.toAddress) != 42,
+            ))
+            tokenTransfersToChange = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
+            logging.info(f'Updating {len(tokenTransfersToChange)} transfers...')
             for tokenTransfer in tokenTransfersToChange:
                 query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId)
                 values = {
@@ -58,6 +46,7 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
                     TokenTransfersTable.c.fromAddress.key: normalize_address(tokenTransfer.fromAddress),
                 }
                 await database.execute(query=query, values=values)
+        currentBlockNumber = currentBlockNumber + batchSize
     await database.disconnect()
 
 if __name__ == '__main__':
