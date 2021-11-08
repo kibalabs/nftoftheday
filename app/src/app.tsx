@@ -3,8 +3,7 @@ import React from 'react';
 import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
 import { useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
-import { Helmet } from 'react-helmet';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
@@ -142,9 +141,9 @@ export const App = (): React.ReactElement => {
   return (
     <KibaApp theme={theme}>
       <GlobalsProvider globals={globals}>
-        <Helmet>
+        <Head headId='app'>
           <title>{`Token Hunt ${getTitleDateString()}`}</title>
-        </Helmet>
+        </Head>
         <BackgroundView linearGradient='#200122,#6F0000'>
           <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
             { showProductHuntBanner() && (
