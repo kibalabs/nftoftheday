@@ -85,21 +85,21 @@ class TokenMetadataProcessor():
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
         if not tokenMetadataUri:
-            tokenMetadataResponseDict = {}
+            tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
             # TODO(krishan711): parse the data here
-            tokenMetadataResponseDict = {}
+            tokenMetadataDict = {}
         else:
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
-                tokenMetadataResponseDict = tokenMetadataResponse.json()
-                if isinstance(tokenMetadataResponseDict, str):
-                    tokenMetadataResponseDict = json.loads(tokenMetadataResponseDict)
+                tokenMetadataDict = tokenMetadataResponse.json()
+                if isinstance(tokenMetadataDict, str):
+                    tokenMetadataDict = json.loads(tokenMetadataDict)
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
-                tokenMetadataResponseDict = {}
-        await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataResponseDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
-        description = tokenMetadataResponseDict.get('description')
+                tokenMetadataDict = {}
+        await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        description = tokenMetadataDict.get('description')
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
@@ -108,9 +108,9 @@ class TokenMetadataProcessor():
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
-            imageUrl=tokenMetadataResponseJson.get('image'),
-            name=tokenMetadataResponseJson.get('name'),
+            imageUrl=tokenMetadataDict.get('image'),
+            name=tokenMetadataDict.get('name'),
             description=description,
-            attributes=tokenMetadataResponseJson.get('attributes', []),
+            attributes=tokenMetadataDict.get('attributes', []),
         )
         return retrievedTokenMetadata
