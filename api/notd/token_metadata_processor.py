@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 
@@ -10,7 +11,6 @@ from core.web3.eth_client import EthClientInterface
 
 from notd.model import RetrievedTokenMetadata
 
-_BUCKET = 's3://kibatest'
 
 class TokenDoesNotExistException(NotFoundException):
     pass
@@ -22,10 +22,11 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
         self.requester = requester
         self.ethClient = ethClient
         self.s3manager = s3manager
+        self.bucketName = bucketName
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetdataContractJson = json.load(contractJsonFile)
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
@@ -98,8 +99,8 @@ class TokenMetadataProcessor():
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataResponseJson = {}
-        tokenMetadataResponseJsonBytes=str.encode(json.dumps(tokenMetadataResponseJson))
-        await self.s3manager.write_file(content=tokenMetadataResponseJsonBytes,targetPath=f'{_BUCKET}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json', accessControl='public-read')
+        tokenMetadataResponseJsonBytes = str.encode(json.dumps(tokenMetadataResponseJson))
+        await self.s3manager.write_file(content=tokenMetadataResponseJsonBytes, targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         description = tokenMetadataResponseJson.get('description')
         if isinstance(description, list):
             if len(description) != 1:

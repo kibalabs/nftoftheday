@@ -39,7 +39,7 @@ async def main():
     requester = Requester()
     openseaClient = OpenseaClient(requester=requester)
     tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager)
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient,s3manager=s3manager, bucketName=os.environ['_BUCKET'])
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient)
     
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor,collectionProcessor=collectionProcessor)
