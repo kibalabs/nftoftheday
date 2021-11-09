@@ -43,8 +43,8 @@ class CollectionProcessor:
                 response = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}')
             except ResponseException as exception:
                 if exception.statusCode == 404:
-                    raise NotFoundException()
-                if exception.statusCode == 429:
+                    raise CollectionDoesNotExist()
+                if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
                     raise
                 if exception.statusCode >= 500 and retryCount >= 3:
                     raise CollectionDoesNotExist()
