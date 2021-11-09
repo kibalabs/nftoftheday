@@ -43,8 +43,8 @@ class CollectionProcessor:
                 response = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}')
             except ResponseException as exception:
                 if exception.statusCode == 404:
-                    raise NotFoundException()
-                if exception.statusCode != 429 or retryCount >= 3:
+                    raise CollectionDoesNotExist()
+                if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
                     raise
                 logging.info(f'Retrying due to: {str(exception)}')
                 await asyncio.sleep(1.5)
