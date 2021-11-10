@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
-import { useFavicon, useUrlQueryState } from '@kibalabs/core-react';
+import { dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
+import { useDateUrlQueryState, useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
@@ -48,28 +48,28 @@ export const App = (): React.ReactElement => {
   const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
   const [error, setError] = React.useState<boolean>(false);
 
-  const getUrlDate = (key: string): Date | null => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const value = searchParams.get(key);
-    try {
-      return dateFromString(value, 'yyyy-MM-dd');
-    } catch {
-      // No-op
-    }
-    return null;
-  };
-  const [startDate, setStartDate] = React.useState<Date | null>(getUrlDate('date') || defaultDate);
-  const [startDateString, setStartDateString] = useUrlQueryState <string| null>('date', undefined, dateToString(defaultDate, 'yyyy-MM-dd'));
+  // const getUrlDate = (key: string): Date | null => {
+  //   const searchParams = new URLSearchParams(window.location.search);
+  //   const value = searchParams.get(key);
+  //   try {
+  //     return dateFromString(value, 'yyyy-MM-dd');
+  //   } catch {
+  //     // No-op
+  //   }
+  //   return null;
+  // };
 
-  const setUrlString = (key: string, value: string): void => {
-    const searchParams = new URLSearchParams(window.location.search);
-    if (value === null || value === undefined) {
-      searchParams.delete(key);
-    } else {
-      searchParams.set(key, value);
-    }
-    window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
-  };
+  const [startDate, setStartDate] = useDateUrlQueryState('date', 'yyyy-MM-dd', undefined, defaultDate);
+
+  // const setUrlString = (key: string, value: string): void => {
+  //   const searchParams = new URLSearchParams(window.location.search);
+  //   if (value === null || value === undefined) {
+  //     searchParams.delete(key);
+  //   } else {
+  //     searchParams.set(key, value);
+  //   }
+  //   window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
+  // };
 
   // const getUrlDateString = React.useCallback((): string | null => {
   //   if (isToday(startDate)) {
@@ -100,7 +100,7 @@ export const App = (): React.ReactElement => {
     setRandomTokenTransfer(null);
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
-    setUrlString('date', startDateString);
+    setStartDate('date');
     setError(false);
 
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
@@ -112,14 +112,14 @@ export const App = (): React.ReactElement => {
     }).catch(() => {
       setError(true);
     });
-  }, [startDateString, startDate]);
+  }, [setStartDate, startDate]);
 
   const onBackClicked = (): void => {
     const newDate = new Date(startDate);
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    setStartDateString(dateToString(newDate, 'yyyy-MM-dd'));
+    // setStartDate(dateToString(newDate, 'yyyy-MM-dd'));
     setTransactionCount(null);
   };
 
@@ -128,7 +128,7 @@ export const App = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    setStartDateString(dateToString(newDate, 'yyyy-MM-dd'));
+    // setStartDate(dateToString(newDate, 'yyyy-MM-dd'));
     setTransactionCount(null);
   };
 
