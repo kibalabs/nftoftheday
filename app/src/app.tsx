@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
-import { useFavicon } from '@kibalabs/core-react';
+import { useFavicon, useUrlQueryState } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
@@ -59,6 +59,7 @@ export const App = (): React.ReactElement => {
     return null;
   };
   const [startDate, setStartDate] = React.useState<Date | null>(getUrlDate('date') || defaultDate);
+  const [startDateString, setStartDateString] = useUrlQueryState <string| null>('date', undefined, dateToString(defaultDate, 'yyyy-MM-dd'));
 
   const setUrlString = (key: string, value: string): void => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -70,12 +71,12 @@ export const App = (): React.ReactElement => {
     window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
   };
 
-  const getUrlDateString = React.useCallback((): string | null => {
-    if (isToday(startDate)) {
-      return null;
-    }
-    return dateToString(startDate, 'yyyy-MM-dd');
-  }, [startDate]);
+  // const getUrlDateString = React.useCallback((): string | null => {
+  //   if (isToday(startDate)) {
+  //     return null;
+  //   }
+  //   return dateToString(startDate, 'yyyy-MM-dd');
+  // }, [startDate]);
 
   const getDateString = (): string => {
     if (isToday(startDate)) {
@@ -99,7 +100,7 @@ export const App = (): React.ReactElement => {
     setRandomTokenTransfer(null);
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
-    setUrlString('date', getUrlDateString());
+    setUrlString('date', startDateString);
     setError(false);
 
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
@@ -111,13 +112,14 @@ export const App = (): React.ReactElement => {
     }).catch(() => {
       setError(true);
     });
-  }, [getUrlDateString, startDate]);
+  }, [startDateString, startDate]);
 
   const onBackClicked = (): void => {
     const newDate = new Date(startDate);
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
+    setStartDateString(dateToString(newDate, 'yyyy-MM-dd'));
     setTransactionCount(null);
   };
 
@@ -126,6 +128,7 @@ export const App = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
+    setStartDateString(dateToString(newDate, 'yyyy-MM-dd'));
     setTransactionCount(null);
   };
 
