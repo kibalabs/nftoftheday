@@ -59,7 +59,7 @@ export const App = (): React.ReactElement => {
   //   return null;
   // };
 
-  const [startDate, setStartDate] = useDateUrlQueryState('date',  undefined, defaultDate,'yyyy-MM-dd');
+  const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, defaultDate, 'yyyy-MM-dd');
 
   // const setUrlString = (key: string, value: string): void => {
   //   const searchParams = new URLSearchParams(window.location.search);
