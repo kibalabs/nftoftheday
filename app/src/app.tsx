@@ -59,7 +59,7 @@ export const App = (): React.ReactElement => {
   //   return null;
   // };
 
-  const [startDate, setStartDate] = useDateUrlQueryState('date', 'yyyy-MM-dd', undefined, defaultDate);
+  const [startDate, setStartDate] = useDateUrlQueryState('date',  undefined, defaultDate,'yyyy-MM-dd');
 
   // const setUrlString = (key: string, value: string): void => {
   //   const searchParams = new URLSearchParams(window.location.search);
@@ -100,7 +100,6 @@ export const App = (): React.ReactElement => {
     setRandomTokenTransfer(null);
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
-    setStartDate('date');
     setError(false);
 
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
@@ -112,7 +111,7 @@ export const App = (): React.ReactElement => {
     }).catch(() => {
       setError(true);
     });
-  }, [setStartDate, startDate]);
+  }, [startDate]);
 
   const onBackClicked = (): void => {
     const newDate = new Date(startDate);
