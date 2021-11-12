@@ -47,36 +47,7 @@ export const App = (): React.ReactElement => {
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
   const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
   const [error, setError] = React.useState<boolean>(false);
-
-  // const getUrlDate = (key: string): Date | null => {
-  //   const searchParams = new URLSearchParams(window.location.search);
-  //   const value = searchParams.get(key);
-  //   try {
-  //     return dateFromString(value, 'yyyy-MM-dd');
-  //   } catch {
-  //     // No-op
-  //   }
-  //   return null;
-  // };
-
-  const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, defaultDate, 'yyyy-MM-dd');
-
-  // const setUrlString = (key: string, value: string): void => {
-  //   const searchParams = new URLSearchParams(window.location.search);
-  //   if (value === null || value === undefined) {
-  //     searchParams.delete(key);
-  //   } else {
-  //     searchParams.set(key, value);
-  //   }
-  //   window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
-  // };
-
-  // const getUrlDateString = React.useCallback((): string | null => {
-  //   if (isToday(startDate)) {
-  //     return null;
-  //   }
-  //   return dateToString(startDate, 'yyyy-MM-dd');
-  // }, [startDate]);
+  const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
 
   const getDateString = (): string => {
     if (isToday(startDate)) {
@@ -101,7 +72,6 @@ export const App = (): React.ReactElement => {
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
     setError(false);
-
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
       setRandomTokenTransfer(uiData.randomTokenTransfer);
@@ -118,7 +88,6 @@ export const App = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    // setStartDate(dateToString(newDate, 'yyyy-MM-dd'));
     setTransactionCount(null);
   };
 
@@ -127,7 +96,6 @@ export const App = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    // setStartDate(dateToString(newDate, 'yyyy-MM-dd'));
     setTransactionCount(null);
   };
 
