@@ -3,7 +3,7 @@ import React from 'react';
 import { dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
 import { useDateUrlQueryState, useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
@@ -103,11 +103,6 @@ export const App = (): React.ReactElement => {
     setIsEmailPopopShowing(true);
   };
 
-  const showProductHuntBanner = (): boolean => {
-    const currentDate = new Date();
-    return currentDate > new Date(2021, 3, 1) && currentDate < new Date(2021, 3, 2);
-  };
-
   return (
     <KibaApp theme={theme}>
       <GlobalsProvider globals={globals}>
@@ -116,25 +111,6 @@ export const App = (): React.ReactElement => {
         </Head>
         <BackgroundView linearGradient='#200122,#6F0000'>
           <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-            { showProductHuntBanner() && (
-              <Box variant='phBanner'>
-                <ContainingView>
-                  <Stack directionResponsive={{ base: Direction.Vertical, small: Direction.Horizontal }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
-                    <Text>We&apos;re live on Product Hunt 🎉</Text>
-                    <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
-                      <Text>We&apos;d love your support, please</Text>
-                      <Spacing variant={PaddingSize.Narrow} />
-                      <Link
-                        text=' leave a review here '
-                        target='https://www.producthunt.com/posts/nft-of-the-day?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-nft-of-the-day'
-                      />
-                      <Spacing variant={PaddingSize.Narrow} />
-                      <Text>🙌.</Text>
-                    </Stack>
-                  </Stack>
-                </ContainingView>
-              </Box>
-            )}
             <Spacing variant={PaddingSize.Wide2} />
             <Text variant='header1'>NFT of the day</Text>
             <Spacing variant={PaddingSize.Default} />
