@@ -46,8 +46,6 @@ class CollectionProcessor:
                     raise CollectionDoesNotExist()
                 if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
                     raise
-                if exception.statusCode >= 500 and retryCount >= 3:
-                    raise CollectionDoesNotExist()
                 logging.info(f'Retrying due to: {str(exception)}')
                 await asyncio.sleep(1.5)
                 retryCount += 1
