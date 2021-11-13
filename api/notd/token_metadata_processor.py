@@ -48,8 +48,8 @@ class TokenMetadataProcessor():
         if registryAddress == '0xE22e1e620dffb03065CD77dB0162249c0c91bf01':
             # TODO(krishan711): Implement special case for bearxlabs
             raise TokenDoesNotExistException()
-        if registryAddress == '0x57E9a39aE8eC404C08f88740A9e6E306f50c937f':
-            # TODO(krishan711): Implement special case for polkacity (their contract seems broken)
+        if registryAddress == '0x57E9a39aE8eC404C08f88740A9e6E306f50c937f' or registryAddress == '0xFFF7F797213d7aE5f654f2bC91c071745843b5B9':
+            # TODO(krishan711): Implement special case for polkacity and Elephants for Africa (their contract seems broken)
             raise TokenDoesNotExistException()
         if registryAddress == '0x772Da237fc93ded712E5823b497Db5991CC6951e':
             # TODO(krishan711): Implement special case for Everdragons(their contract is unverified)
