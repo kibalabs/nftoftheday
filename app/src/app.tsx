@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { dateFromString, dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
-import { useFavicon } from '@kibalabs/core-react';
+import { dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
+import { useDateUrlQueryState, useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, Link, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { NotdClient } from './client/client';
 import { Token, TokenTransfer, UiData } from './client/resources';
@@ -47,35 +47,7 @@ export const App = (): React.ReactElement => {
   const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
   const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
   const [error, setError] = React.useState<boolean>(false);
-
-  const getUrlDate = (key: string): Date | null => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const value = searchParams.get(key);
-    try {
-      return dateFromString(value, 'yyyy-MM-dd');
-    } catch {
-      // No-op
-    }
-    return null;
-  };
-  const [startDate, setStartDate] = React.useState<Date | null>(getUrlDate('date') || defaultDate);
-
-  const setUrlString = (key: string, value: string): void => {
-    const searchParams = new URLSearchParams(window.location.search);
-    if (value === null || value === undefined) {
-      searchParams.delete(key);
-    } else {
-      searchParams.set(key, value);
-    }
-    window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
-  };
-
-  const getUrlDateString = React.useCallback((): string | null => {
-    if (isToday(startDate)) {
-      return null;
-    }
-    return dateToString(startDate, 'yyyy-MM-dd');
-  }, [startDate]);
+  const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
 
   const getDateString = (): string => {
     if (isToday(startDate)) {
@@ -99,9 +71,7 @@ export const App = (): React.ReactElement => {
     setRandomTokenTransfer(null);
     setMostTradedTokenTransfers(null);
     setSponsoredToken(null);
-    setUrlString('date', getUrlDateString());
     setError(false);
-
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
       setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
       setRandomTokenTransfer(uiData.randomTokenTransfer);
@@ -111,7 +81,7 @@ export const App = (): React.ReactElement => {
     }).catch(() => {
       setError(true);
     });
-  }, [getUrlDateString, startDate]);
+  }, [startDate]);
 
   const onBackClicked = (): void => {
     const newDate = new Date(startDate);
@@ -133,11 +103,6 @@ export const App = (): React.ReactElement => {
     setIsEmailPopopShowing(true);
   };
 
-  const showProductHuntBanner = (): boolean => {
-    const currentDate = new Date();
-    return currentDate > new Date(2021, 3, 1) && currentDate < new Date(2021, 3, 2);
-  };
-
   return (
     <KibaApp theme={theme}>
       <GlobalsProvider globals={globals}>
@@ -146,25 +111,6 @@ export const App = (): React.ReactElement => {
         </Head>
         <BackgroundView linearGradient='#200122,#6F0000'>
           <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-            { showProductHuntBanner() && (
-              <Box variant='phBanner'>
-                <ContainingView>
-                  <Stack directionResponsive={{ base: Direction.Vertical, small: Direction.Horizontal }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
-                    <Text>We&apos;re live on Product Hunt 🎉</Text>
-                    <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
-                      <Text>We&apos;d love your support, please</Text>
-                      <Spacing variant={PaddingSize.Narrow} />
-                      <Link
-                        text=' leave a review here '
-                        target='https://www.producthunt.com/posts/nft-of-the-day?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-nft-of-the-day'
-                      />
-                      <Spacing variant={PaddingSize.Narrow} />
-                      <Text>🙌.</Text>
-                    </Stack>
-                  </Stack>
-                </ContainingView>
-              </Box>
-            )}
             <Spacing variant={PaddingSize.Wide2} />
             <Text variant='header1'>NFT of the day</Text>
             <Spacing variant={PaddingSize.Default} />

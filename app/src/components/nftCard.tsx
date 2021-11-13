@@ -3,6 +3,7 @@ import React from 'react';
 import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment, WebView } from '@kibalabs/ui-react';
 
 import { RegistryToken } from '../client/resources';
+import { truncateTitle } from '../titleUtil';
 import { shouldUseIframe } from './nftUtil';
 
 export interface NftCardProps {
@@ -59,7 +60,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                 )}
               </Box>
             </Stack.Item>
-            <Text variant='header3' alignment={TextAlignment.Center}>{title}</Text>
+            <Text variant='header3' alignment={TextAlignment.Center}>{truncateTitle(title)}</Text>
             <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
             <Spacing variant={PaddingSize.Wide} />
             {collectionTitle && (
