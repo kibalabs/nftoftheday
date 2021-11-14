@@ -4,7 +4,7 @@ from typing import Optional
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
-from notd.api.models_v1 import ApiMetadataToken
+from notd.api.models_v1 import ApiCollection, ApiMetadataToken, RetrieveCollectionResponse
 from notd.api.models_v1 import ApiRegistryToken
 from notd.api.models_v1 import ApiUiData
 from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
@@ -42,6 +42,11 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
     async def retreive_token_metadata(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest
         retrievedTokenMetadata = await notdManager.retreive_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         return RetrieveTokenMetadataResponse(retrievedTokenMetadata=ApiMetadataToken.from_model(model=retrievedTokenMetadata))
+
+    @router.get('/collections/{address}/', response_model=RetrieveCollectionResponse)
+    async def retreive_collection(address: str):  # request: RetreiveCollectionRequest
+        retrievedCollection = await notdManager.retreive_collection(address=address)
+        return RetrieveCollectionResponse(retrievedCollection=ApiCollection.from_model(model=retrievedCollection))
 
     @router.post('/subscribe')
     async def create_newsletter_subscription(request: SubscribeRequest):
