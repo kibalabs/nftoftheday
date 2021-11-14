@@ -6,7 +6,8 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from notd.model import RegistryToken, RetrievedCollection
+from notd.model import RegistryToken
+from notd.model import RetrievedCollection
 from notd.model import RetrievedTokenMetadata
 from notd.model import UiData
 
