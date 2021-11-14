@@ -51,6 +51,8 @@ class CollectionProcessor:
                 retryCount += 1
         responseJson = response.json()
         collection = responseJson.get('collection')
+        if collection is None:
+            raise CollectionDoesNotExist()
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collectionName or collection.get('name'),
