@@ -18,16 +18,16 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
   const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    notdClient.retrieveCollectionToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId).then((registryToken: CollectionToken): void => {
-      setAsset(registryToken);
-      notdClient.retrieveCollection(props.tokenTransfers[0].registryAddress).then((collection: Collection): void => {
-        setCollection(collection);
-        setIsLoading(false);
-      });
-    }).catch((apiError : unknown) => {
+    setIsLoading(true);
+    try {
+      const tokenPromise = notdClient.retrieveCollectionToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId);
+      const collectionPromise = notdClient.retrieveCollection(props.tokenTransfers[0].registryAddress);
+      setAsset(await tokenPromise);
+      setCollection(await collectionPromise);
+    } catch (apiError: unknown) {
       setError(apiError as Error);
-      setIsLoading(false);
-    });
+    }
+    setIsLoading(false);
   }, [notdClient, props.tokenTransfers]);
 
   React.useEffect((): void => {

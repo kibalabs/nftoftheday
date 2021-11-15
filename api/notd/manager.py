@@ -237,7 +237,7 @@ class NotdManager:
             await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
-        savedTokenMetadatas = await self.retriever.list_token_metadata(
+        savedTokenMetadatas = await self.retriever.list_token_metadatas(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
@@ -274,14 +274,13 @@ class NotdManager:
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
 
-    async def retrieve_collection_token(self, registryAddress: str, tokenId: str) -> TokenMetadata:
-        tokenMetadatas = await self.retriever.list_token_metadata(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-            ], limit=1,
-        )
-        if len(tokenMetadatas) == 0:
+    async def get_collection_by_address(self, registryAddress: str) -> Collection:
+        return self.retriever.get_collection_by_address(address=registryAddress)
+
+    async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
+        try:
+            tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+        except NotFoundException:
             cacheKey = f'{registryAddress}:{tokenId}'
             if cacheKey in self._tokenCache:
                 registryToken = self._tokenCache[cacheKey]
@@ -289,11 +288,11 @@ class NotdManager:
                 registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
                 self._tokenCache[cacheKey] = registryToken
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
-            tokenMetadatas.append(RetrievedTokenMetadata(registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None))
-        return tokenMetadatas[0]
+            tokenMetadata = TokenMetadata(tokenMetadataId=-1, createdDate=datetime.datetime.now(), updatedDate=datetime.datetime.now(), registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None)
+        return tokenMetadata
 
     async def update_collection(self, address: str) -> None:
-        collections = await self.retriever.list_collection(
+        collections = await self.retriever.list_collections(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
             ], limit=1,
@@ -312,12 +311,10 @@ class NotdManager:
         else:
             await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
 
-    async def retreive_collection(self, registryAddress: str) -> Collection:
-        collections = await self.retriever.list_collection(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=registryAddress),
-            ], limit=1,
-        )
-        if len(collections) == 0:
-            raise NotFoundException()
-        return collections[0]
+    async def get_collection_by_address(self, address: str) -> Collection:
+        try:
+            collection = await self.retriever.get_collection_by_address(address=address)
+        except NotFoundException:
+            await self.update_collection(address=address)
+            collection = await self.retriever.get_collection_by_address(address=address)
+        return collection

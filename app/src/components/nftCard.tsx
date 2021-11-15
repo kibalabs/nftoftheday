@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment, WebView } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { Collection, CollectionToken } from '../client/resources';
 import { truncateTitle } from '../titleUtil';
-import { shouldUseIframe } from './nftUtil';
 
 export interface NftCardProps {
   token: CollectionToken;
@@ -56,11 +55,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>
               <Box width='150px' height='150px'>
-                { shouldUseIframe(imageUrl, props.collection.address) ? (
-                  <WebView url={imageUrl} />
-                ) : (
-                  <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
-                )}
+                <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
               </Box>
             </Stack.Item>
             <Text variant='header3' alignment={TextAlignment.Center}>{truncateTitle(title)}</Text>

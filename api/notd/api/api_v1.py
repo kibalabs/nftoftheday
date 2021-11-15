@@ -42,12 +42,12 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}', response_model=RetrieveCollectionTokenResponse)
     async def retrieve_collection_token(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest
-        token = await notdManager.retrieve_collection_token(registryAddress=registryAddress, tokenId=tokenId)
+        token = await notdManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return RetrieveCollectionTokenResponse(token=ApiCollectionToken.from_model(model=token))
 
-    @router.get('/collections/{registryAddress}', response_model=RetrieveCollectionResponse)
-    async def retreive_collection(registryAddress: str):  # request: RetreiveCollectionRequest
-        collection = await notdManager.retreive_collection(registryAddress=registryAddress)
+    @router.get('/collections/{address}', response_model=RetrieveCollectionResponse)
+    async def get_collection_by_address(address: str):  # request: RetreiveCollectionRequest
+        collection = await notdManager.get_collection_by_address(address=address)
         return RetrieveCollectionResponse(collection=ApiCollection.from_model(model=collection))
 
     @router.post('/subscribe')

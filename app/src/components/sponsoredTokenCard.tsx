@@ -19,16 +19,15 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     setIsLoading(true);
-    notdClient.retrieveCollectionToken(props.token.registryAddress, props.token.tokenId).then((token: CollectionToken): void => {
-      setAsset(token);
-      notdClient.retrieveCollection(props.token.registryAddress).then((collection: Collection): void => {
-        setCollection(collection);
-        setIsLoading(false);
-      })
-    }).catch((apiError : unknown) => {
+    try {
+      const tokenPromise = notdClient.retrieveCollectionToken(props.token.registryAddress, props.token.tokenId);
+      const collectionPromise = notdClient.retrieveCollection(props.token.registryAddress);
+      setAsset(await tokenPromise);
+      setCollection(await collectionPromise);
+    } catch (apiError: unknown) {
       setError(apiError as Error);
-      setIsLoading(false);
-    });
+    }
+    setIsLoading(false);
   }, [notdClient, props.token]);
 
   React.useEffect((): void => {

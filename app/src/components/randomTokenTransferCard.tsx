@@ -19,24 +19,16 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
   const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    // retrieveAsset(requester, props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((token: CollectionToken): void => {
-    //   setAsset(registryToken);
-    //   setIsLoading(false);
-    // }).catch((apiError : unknown) => {
-    //   setError(apiError as Error);
-    //   setIsLoading(false);
-    // });
     setIsLoading(true);
-    notdClient.retrieveCollectionToken(props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((token: CollectionToken): void => {
-      setAsset(token);
-      notdClient.retrieveCollection(props.tokenTransfer.registryAddress).then((collection: Collection): void => {
-        setCollection(collection);
-        setIsLoading(false);
-      })
-    }).catch((apiError : unknown) => {
+    try {
+      const tokenPromise = notdClient.retrieveCollectionToken(props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId);
+      const collectionPromise = notdClient.retrieveCollection(props.tokenTransfer.registryAddress);
+      setAsset(await tokenPromise);
+      setCollection(await collectionPromise);
+    } catch (apiError: unknown) {
       setError(apiError as Error);
-      setIsLoading(false);
-    });
+    }
+    setIsLoading(false);
   }, [notdClient, props.tokenTransfer]);
 
   React.useEffect((): void => {
