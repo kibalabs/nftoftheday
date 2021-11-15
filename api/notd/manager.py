@@ -182,7 +182,6 @@ class NotdManager:
             limit=1
         )
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
-        logging.info(highestPricedTokenTransfers[0])
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
@@ -293,7 +292,6 @@ class NotdManager:
                 registryToken = await self.tokenClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
             self._tokenCache[cacheKey] = registryToken
             tokenMetadatas.append(RetrievedTokenMetadata(registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None))
-        logging.info(tokenMetadatas[0])
         return tokenMetadatas[0]
 
     async def update_collection(self, address: str) -> None:
