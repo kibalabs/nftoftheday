@@ -45,7 +45,7 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
         retrievedTokenMetadata = await notdManager.retreive_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         return RetrieveTokenMetadataResponse(retrievedTokenMetadata=ApiMetadataToken.from_model(model=retrievedTokenMetadata))
 
-    @router.get('/collections/{address}/', response_model=RetrieveCollectionResponse)
+    @router.get('/collections/{address}', response_model=RetrieveCollectionResponse)
     async def retreive_collection(address: str):  # request: RetreiveCollectionRequest
         retrievedCollection = await notdManager.retreive_collection(address=address)
         return RetrieveCollectionResponse(retrievedCollection=ApiCollection.from_model(model=retrievedCollection))
