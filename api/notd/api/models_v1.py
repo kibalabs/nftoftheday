@@ -7,6 +7,7 @@ from typing import Union
 from pydantic import BaseModel
 
 from notd.model import RegistryToken
+from notd.model import RetrievedCollection
 from notd.model import RetrievedTokenMetadata
 from notd.model import UiData
 
@@ -126,6 +127,37 @@ class ApiMetadataToken(BaseModel):
             attributes=model.attributes,
         )
 
+class ApiCollection(BaseModel):
+    address: str
+    name: Optional[str]
+    symbol: Optional[str]
+    description: Optional[str]
+    imageUrl: Optional[str]
+    twitterUsername: Optional[str]
+    instagramUsername: Optional[str]
+    wikiUrl: Optional[str]
+    openseaSlug: Optional[str]
+    url: Optional[str]
+    discordUrl: Optional[str]
+    bannerImageUrl: Optional[str]
+
+    @classmethod
+    def from_model(cls, model: RetrievedCollection):
+        return cls(
+            address=model.address,
+            name=model.name,
+            symbol=model.symbol,
+            description=model.description,
+            imageUrl=model.imageUrl,
+            twitterUsername=model.twitterUsername,
+            instagramUsername=model.instagramUsername,
+            wikiUrl=model.wikiUrl,
+            openseaSlug=model.openseaSlug,
+            url=model.url,
+            discordUrl=model.discordUrl,
+            bannerImageUrl=model.bannerImageUrl
+        )
+
 class RetrieveUiDataRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
@@ -159,3 +191,9 @@ class RetrieveTokenMetadataRequest(BaseModel):
 
 class RetrieveTokenMetadataResponse(BaseModel):
     retrievedTokenMetadata: ApiMetadataToken
+
+class RetrieveCollectionRequest(BaseModel):
+    address: str
+
+class RetrieveCollectionResponse(BaseModel):
+    retrievedCollection: ApiCollection
