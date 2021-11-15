@@ -282,12 +282,12 @@ class NotdManager:
             ], limit=1,
         )
         if len(tokenMetadatas) == 0:
-            tokenMetadatas = []
             cacheKey = f'{registryAddress}:{tokenId}'
             if cacheKey in self._tokenCache:
-                return self._tokenCache[cacheKey]
-            registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
-            self._tokenCache[cacheKey] = registryToken
+                registryToken = self._tokenCache[cacheKey]
+            else:
+                registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+                self._tokenCache[cacheKey] = registryToken
             tokenMetadatas.append(RetrievedTokenMetadata(registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None))
         return tokenMetadatas[0]
 
