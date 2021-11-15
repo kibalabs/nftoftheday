@@ -162,12 +162,16 @@ class NotdManager:
         return sponsoredToken
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
+        import time
+        s = time.time()
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
         )
+        print('here1', time.time() - s)
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
+        print('here2', time.time() - s)
         mostTradedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
@@ -176,12 +180,15 @@ class NotdManager:
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
         )
+        print('here3', time.time() - s)
         randomTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[RandomOrder()],
             limit=1
         )
+        print('here4', time.time() - s)
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
+        print('here5', time.time() - s)
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
