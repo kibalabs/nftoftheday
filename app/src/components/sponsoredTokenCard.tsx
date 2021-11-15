@@ -2,7 +2,7 @@ import React from 'react';
 
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
-import { RegistryToken, Token } from '../client/resources';
+import { Collection, CollectionToken, Token } from '../client/resources';
 import { useGlobals } from '../globalsContext';
 import { NftCard } from './nftCard';
 
@@ -12,15 +12,19 @@ export type SponsoredTokenCardProps = {
 
 export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactElement => {
   const { notdClient } = useGlobals();
-  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
+  const [asset, setAsset] = React.useState<CollectionToken | null>(null);
+  const [collection, setCollection] = React.useState<Collection | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
     setIsLoading(true);
-    notdClient.retrieveRegistryToken(props.token.registryAddress, props.token.tokenId).then((registryToken: RegistryToken): void => {
-      setAsset(registryToken);
-      setIsLoading(false);
+    notdClient.retrieveCollectionToken(props.token.registryAddress, props.token.tokenId).then((token: CollectionToken): void => {
+      setAsset(token);
+      notdClient.retrieveCollection(props.token.registryAddress).then((collection: Collection): void => {
+        setCollection(collection);
+        setIsLoading(false);
+      })
     }).catch((apiError : unknown) => {
       setError(apiError as Error);
       setIsLoading(false);
@@ -37,15 +41,17 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
 
   return (
     <React.Fragment>
-      { !props.token || isLoading || !asset ? (
+      { !props.token || isLoading || !asset || !collection ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
-          nft={asset}
+          token={asset}
+          collection={collection}
           label='Sponsored'
-          subtitle={asset.lastSalePrice ? `Last sold for Ξ${asset.lastSalePrice / 21000000000000000000.0}` : 'I\'m up for grabs!'}
-          primaryButtonText='View Token'
-          primaryButtonTarget={asset.openSeaUrl}
+          // subtitle={asset.lastSalePrice ? `Last sold for Ξ${asset.lastSalePrice / 21000000000000000000.0}` : 'Up for grabs!'}
+          subtitle={'Up for grabs!'}
+          primaryButtonText='View on OpenSea'
+          primaryButtonTarget={`https://opensea.io/assets/${props.token.registryAddress}/${props.token.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
           // secondaryButtonText='View Tx'
           // secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
           extraLabelVariants={['cardLabelSponsored']}

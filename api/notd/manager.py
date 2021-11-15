@@ -21,7 +21,7 @@ from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
-from notd.model import Collection
+from notd.model import Collection, TokenMetadata
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
@@ -274,7 +274,7 @@ class NotdManager:
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
 
-    async def retreive_token_metadata(self, registryAddress: str, tokenId: str) -> RegistryToken:
+    async def retrieve_collection_token(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         tokenMetadatas = await self.retriever.list_token_metadata(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
@@ -312,10 +312,10 @@ class NotdManager:
         else:
             await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
 
-    async def retreive_collection(self, address: str) -> Collection:
+    async def retreive_collection(self, registryAddress: str) -> Collection:
         collections = await self.retriever.list_collection(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=registryAddress),
             ], limit=1,
         )
         if len(collections) == 0:

@@ -6,10 +6,11 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from notd.model import TokenMetadata
 from notd.model import RegistryToken
-from notd.model import RetrievedCollection
-from notd.model import RetrievedTokenMetadata
+from notd.model import TokenMetadata
 from notd.model import UiData
+from notd.model import Collection
 
 
 class ApiTokenTransfer(BaseModel):
@@ -75,6 +76,7 @@ class ApiUiData(BaseModel):
             transactionCount=model.transactionCount
         )
 
+
 class ApiRegistryToken(BaseModel):
     registryAddress: str
     tokenId: str
@@ -106,17 +108,18 @@ class ApiRegistryToken(BaseModel):
             collectionExternalUrl=model.collectionExternalUrl,
         )
 
-class ApiMetadataToken(BaseModel):
+
+class ApiCollectionToken(BaseModel):
     registryAddress: str
     tokenId: str
     metadataUrl: str
-    imageUrl: Optional[str]
     name: Optional[str]
+    imageUrl: Optional[str]
     description: Optional[str]
     attributes: Optional[Dict[str, Union[str, int, float]]]
 
     @classmethod
-    def from_model(cls, model: RetrievedTokenMetadata):
+    def from_model(cls, model: TokenMetadata):
         return cls(
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
@@ -142,7 +145,7 @@ class ApiCollection(BaseModel):
     bannerImageUrl: Optional[str]
 
     @classmethod
-    def from_model(cls, model: RetrievedCollection):
+    def from_model(cls, model: Collection):
         return cls(
             address=model.address,
             name=model.name,
@@ -185,15 +188,15 @@ class SubscribeRequest(BaseModel):
 class SubscribeResponse(BaseModel):
     pass
 
-class RetrieveTokenMetadataRequest(BaseModel):
+class RetrieveCollectionTokenRequest(BaseModel):
     registryAddress: str
     tokenId: str
 
-class RetrieveTokenMetadataResponse(BaseModel):
-    retrievedTokenMetadata: ApiMetadataToken
+class RetrieveCollectionTokenResponse(BaseModel):
+    token: ApiCollectionToken
 
 class RetrieveCollectionRequest(BaseModel):
     address: str
 
 class RetrieveCollectionResponse(BaseModel):
-    retrievedCollection: ApiCollection
+    collection: ApiCollection

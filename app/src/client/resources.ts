@@ -93,49 +93,55 @@ export class UiData {
   }
 }
 
-export class RegistryToken {
-  readonly name: string;
-  readonly imageUrl: string | null;
-  readonly openSeaUrl: string | null;
-  readonly externalUrl: string | null;
-  readonly lastSaleDate: Date | null;
-  readonly lastSalePrice: number | null;
-  readonly collectionName: string;
-  readonly collectionImageUrl: string | null;
-  readonly collectionOpenSeaUrl: string | null;
-  readonly collectionExternalUrl: string | null;
+export class CollectionToken {
   readonly registryAddress: string;
   readonly tokenId: string;
+  readonly name: string;
+  readonly imageUrl: string | null;
+  readonly description: string | null;
 
-  public constructor(name: string, imageUrl: string | null, openSeaUrl: string | null, externalUrl: string | null, lastSaleDate: Date | null, lastSalePrice: number | null, collectionName: string, collectionImageUrl: string | null, collectionOpenSeaUrl: string | null, collectionExternalUrl: string | null, registryAddress: string, tokenId: string) {
-    this.name = name;
-    this.imageUrl = imageUrl;
-    this.openSeaUrl = openSeaUrl;
-    this.externalUrl = externalUrl;
-    this.lastSaleDate = lastSaleDate;
-    this.lastSalePrice = lastSalePrice;
-    this.collectionName = collectionName;
-    this.collectionImageUrl = collectionImageUrl;
-    this.collectionOpenSeaUrl = collectionOpenSeaUrl;
-    this.collectionExternalUrl = collectionExternalUrl;
+  public constructor(registryAddress: string, tokenId: string, name: string, imageUrl: string | null) {
     this.registryAddress = registryAddress;
     this.tokenId = tokenId;
+    this.name = name;
+    this.imageUrl = imageUrl;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RegistryToken => {
-    return new RegistryToken(
-      String(obj.name),
-      obj.imageUrl ? String(obj.imageUrl) : null,
-      obj.openSeaUrl ? String(obj.openSeaUrl) : null,
-      obj.externalUrl ? String(obj.externalUrl) : null,
-      obj.lastSaleDate ? dateFromString(obj.lastSaleDate as string) : null,
-      obj.lastSalePrice ? Number(obj.lastSalePrice) : null,
-      String(obj.collectionName),
-      obj.collectionImageUrl ? String(obj.collectionImageUrl) : null,
-      obj.collectionOpenSeaUrl ? String(obj.collectionOpenSeaUrl) : null,
-      obj.collectionExternalUrl ? String(obj.collectionExternalUrl) : null,
+  public static fromObject = (obj: Record<string, unknown>): CollectionToken => {
+    return new CollectionToken(
       String(obj.registryAddress),
       String(obj.tokenId),
+      String(obj.name),
+      obj.imageUrl ? String(obj.imageUrl) : null,
+    );
+  }
+}
+
+export class Collection {
+  readonly address: string;
+  readonly name: string;
+  readonly imageUrl: string | null;
+  readonly description: string | null;
+  readonly url: string | null;
+  readonly openseaSlug: string | null;
+
+  public constructor(address: string, name: string, imageUrl: string | null, description: string | null, url: string | null, openseaSlug: string | null) {
+    this.address = address;
+    this.name = name;
+    this.imageUrl = imageUrl;
+    this.description = description;
+    this.url = url;
+    this.openseaSlug = openseaSlug;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): Collection => {
+    return new Collection(
+      String(obj.address),
+      String(obj.name),
+      obj.imageUrl ? String(obj.imageUrl) : null,
+      obj.description ? String(obj.description) : null,
+      obj.url ? String(obj.url) : null,
+      obj.openseaSlug ? String(obj.openseaSlug) : null,
     );
   }
 }

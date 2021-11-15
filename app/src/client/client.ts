@@ -16,12 +16,20 @@ export class NotdClient extends ServiceClient {
     return response.uiData;
   }
 
-  public retrieveRegistryToken = async (registryAddress: string, tokenId: string): Promise<Resources.RegistryToken> => {
+  public retrieveCollectionToken = async (registryAddress: string, tokenId: string): Promise<Resources.CollectionToken> => {
     const method = RestMethod.GET;
-    const path = `v1/registries/${registryAddress}/tokens/${tokenId}`;
-    const request = new Endpoints.RetrieveRegistryTokenRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveRegistryTokenResponse);
-    return response.registryToken;
+    const path = `v1/collections/${registryAddress}/tokens/${tokenId}`;
+    const request = new Endpoints.RetrieveCollectionTokenRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveCollectionTokenResponse);
+    return response.token;
+  }
+
+  public retrieveCollection = async (registryAddress): Promise<Resources.Collection> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${registryAddress}`;
+    const request = new Endpoints.RetrieveCollectionRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveCollectionResponse);
+    return response.collection;
   }
 
   public subscribe = async (email: string): Promise<void> => {
