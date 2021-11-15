@@ -21,7 +21,7 @@ from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
-from notd.model import Collection
+from notd.model import Collection, RetrievedTokenMetadata
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
@@ -181,6 +181,7 @@ class NotdManager:
             limit=1
         )
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
+        logging.info(highestPricedTokenTransfers[0])
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
@@ -281,7 +282,17 @@ class NotdManager:
             ], limit=1,
         )
         if len(tokenMetadatas) == 0:
-            raise NotFoundException()
+            tokenMetadatas = []
+            cacheKey = f'{registryAddress}:{tokenId}'
+            if cacheKey in self._tokenCache:
+                return self._tokenCache[cacheKey]
+            try:
+                registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+            except NotFoundException:
+                registryToken = await self.tokenClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+            self._tokenCache[cacheKey] = registryToken
+            tokenMetadatas.append(RetrievedTokenMetadata(registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None))
+        logging.info(tokenMetadatas[0])
         return tokenMetadatas[0]
 
     async def update_collection(self, address: str) -> None:
