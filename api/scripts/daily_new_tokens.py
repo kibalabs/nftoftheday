@@ -32,6 +32,7 @@ async def daily_new_registries():
         logging.info(f'New Tokens: registry address {row[2]} and tokenId {row[5]}')
 
     await database.disconnect()
+    
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     asyncio.run(daily_new_registries())

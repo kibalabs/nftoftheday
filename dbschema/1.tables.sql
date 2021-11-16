@@ -20,6 +20,8 @@ CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
 CREATE INDEX tbl_token_transfers_block_date ON tbl_token_transfers (block_date);
 CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_number);
 CREATE INDEX tbl_token_transfers_block_hash ON tbl_token_transfers (block_hash);
+CREATE INDEX tbl_token_transfers_to_address ON tbl_token_transfers (to_address);
+CREATE INDEX tbl_token_transfers_from_address ON tbl_token_transfers (from_address);
 
 CREATE TABLE tbl_token_metadatas (
     id BIGSERIAL PRIMARY KEY,

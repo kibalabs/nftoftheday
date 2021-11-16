@@ -23,6 +23,7 @@ from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
 from notd.model import RegistryToken
+from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
 from notd.model import UiData
@@ -281,7 +282,14 @@ class NotdManager:
             ], limit=1,
         )
         if len(tokenMetadatas) == 0:
-            raise NotFoundException()
+            cacheKey = f'{registryAddress}:{tokenId}'
+            if cacheKey in self._tokenCache:
+                registryToken = self._tokenCache[cacheKey]
+            else:
+                registryToken = await self.openseaClient.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+                self._tokenCache[cacheKey] = registryToken
+            await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
+            tokenMetadatas.append(RetrievedTokenMetadata(registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None))
         return tokenMetadatas[0]
 
     async def update_collection(self, address: str) -> None:
