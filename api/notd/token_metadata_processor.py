@@ -120,5 +120,4 @@ class TokenMetadataProcessor():
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )
-        logging.info(retrievedTokenMetadata)
         return retrievedTokenMetadata
