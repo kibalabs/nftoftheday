@@ -1,5 +1,6 @@
 import json
 import logging
+import base64
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -91,7 +92,10 @@ class TokenMetadataProcessor():
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
             # TODO(krishan711): parse the data here
-            tokenMetadataDict = {}
+            basestr = tokenMetadataUri.replace('data:application/json;base64', '')
+            base64_bytes = basestr.encode('utf-8')
+            message_bytes = base64.b64decode(base64_bytes)
+            tokenMetadataDict = json.loads(message_bytes.decode('utf-8'))
         else:
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
@@ -116,4 +120,5 @@ class TokenMetadataProcessor():
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )
+        logging.info(retrievedTokenMetadata)
         return retrievedTokenMetadata
