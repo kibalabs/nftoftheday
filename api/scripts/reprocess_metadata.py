@@ -16,18 +16,18 @@ from notd.store.schema_conversions import token_metadata_from_row
 
 
 @click.command()
-@click.option('-s', '--start-id-number', 'startIDNumber', required=True, type=int)
-@click.option('-e', '--end-block-number', 'endIDNumber', required=True, type=int)
+@click.option('-s', '--start-id-number', 'startId', required=True, type=int)
+@click.option('-e', '--end-id-number', 'endId', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
-async def fix_metadata(startIDNumber: int, endIDNumber: int, batchSize: int):
+async def parse_base64_metadata(startId: int, endId: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database)
     await database.connect()
 
-    currentIDNumber = startIDNumber
-    while currentIDNumber < endIDNumber:
-        start = currentIDNumber
-        end = min(currentIDNumber + batchSize, endIDNumber)
+    currentId = startId
+    while currentId < endId:
+        start = currentId
+        end = min(currentId + batchSize, endId)
         logging.info(f'Working on {start} to {end}...')
         async with database.transaction():
             query = TokenMetadataTable.select()
@@ -43,9 +43,9 @@ async def fix_metadata(startIDNumber: int, endIDNumber: int, batchSize: int):
                 metadataBytes = base64.b64decode(base64Metadata)
                 tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
                 await saver.update_token_metadata(tokenMetadataId=tokenMetadata.tokenMetadataId, name=tokenMetadataDict.get('name') ,imageUrl=tokenMetadataDict.get('image'), description=tokenMetadataDict.get('description'), attributes=tokenMetadataDict.get('attributes'))
-    currentIDNumber = currentIDNumber + batchSize
+    currentId = currentId + batchSize
     await database.disconnect()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(fix_metadata())
+    asyncio.run(parse_base64_metadata())
