@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 
@@ -90,8 +91,14 @@ class TokenMetadataProcessor():
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
-            # TODO(krishan711): parse the data here
-            tokenMetadataDict = {}
+            if tokenMetadataUri.startswith('data:application/json;base64'):
+                basestr = tokenMetadataUri.replace('data:application/json;base64', '')
+                base64Metadata = basestr.encode('utf-8')
+                metadataBytes = base64.b64decode(base64Metadata)
+                tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
+            else:
+                # TODO(krishan711): parse the data here
+                tokenMetadataDict = {}
         else:
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
