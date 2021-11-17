@@ -92,7 +92,7 @@ class TokenMetadataProcessor():
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
             if tokenMetadataUri.startswith('data:application/json;base64'):
-                basestr = tokenMetadataUri.replace('data:application/json;base64', '')
+                basestr = tokenMetadataUri.replace('data:application/json;base64', '').strip(',')
                 base64Metadata = basestr.encode('utf-8')
                 metadataBytes = base64.b64decode(base64Metadata)
                 tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
