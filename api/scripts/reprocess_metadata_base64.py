@@ -39,13 +39,13 @@ async def reprocess_metadata_base64(startId: int, endId: int, batchSize: int):
             query = TokenMetadataTable.select()
             query = query.where(TokenMetadataTable.c.tokenMetadataId >= start)
             query = query.where(TokenMetadataTable.c.tokenMetadataId < end)
-            query = query.where(TokenMetadataTable.c.metadataUrl.startswith('data:application/json;base64'))
+            query = query.where(TokenMetadataTable.c.metadataUrl.startswith('data:application/json;base64,'))
             query = query.where(TokenMetadataTable.c.name == None)
             tokenMetadatasToChange = [token_metadata_from_row(row) async for row in database.iterate(query=query)]
             logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
             for tokenMetadata in tokenMetadatasToChange:
                 try:
-                    basestr = tokenMetadata.metadataUrl.replace('data:application/json;base64', '')
+                    basestr = tokenMetadata.metadataUrl.replace('data:application/json;base64,', '', 1)
                     base64Metadata = basestr.encode('utf-8')
                     metadataBytes = base64.b64decode(base64Metadata)
                     tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
