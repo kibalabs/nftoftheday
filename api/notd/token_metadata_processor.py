@@ -1,5 +1,6 @@
 import base64
 import json
+from json.decoder import JSONDecodeError
 import logging
 
 from core.exceptions import BadRequestException
@@ -96,9 +97,10 @@ class TokenMetadataProcessor():
                 base64Metadata = basestr.encode('utf-8')
                 metadataBytes = base64.b64decode(base64Metadata)
                 metadataString = metadataBytes.decode('utf-8')
-                metadataString = metadataString.replace("\'", "\"")
-                tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
-                
+                try:
+                    tokenMetadataDict = json.loads(metadataString)
+                except JSONDecodeError:
+                    logging.info(f'Failed to parse JSON for {registryAddress},{tokenId}')
             else:
                 # TODO(krishan711): parse the data here
                 tokenMetadataDict = {}
