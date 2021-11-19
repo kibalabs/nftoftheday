@@ -39,6 +39,7 @@ class Retriever(CoreRetriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
+        print('query', query)
         rows = await self.database.fetch_all(query=query)
         tokenTransfers = [token_transfer_from_row(row) for row in rows]
         return tokenTransfers
@@ -49,6 +50,7 @@ class Retriever(CoreRetriever):
         query = query.where(TokenTransfersTable.c.blockDate >= startDate)
         query = query.where(TokenTransfersTable.c.blockDate < endDate)
         query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+        print('query', query)
         count = await self.database.execute(query)
         return count
 
@@ -61,6 +63,7 @@ class Retriever(CoreRetriever):
         query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
         query = query.order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId).desc())
         query = query.limit(1)
+        print('query', query)
         rows = await self.database.fetch_all(query=query)
         return Token(registryAddress=rows[0][TokenTransfersTable.c.registryAddress], tokenId=rows[0][TokenTransfersTable.c.tokenId])
 
