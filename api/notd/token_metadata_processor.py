@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Dict
 from json.decoder import JSONDecodeError
+import urllib.parse
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -52,6 +53,8 @@ class TokenMetadataProcessor():
             tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8')).decode('utf-8')
         elif dataString.startswith('data:application/json;utf8,'):
             tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
+        elif dataString.startswith('data:application/json;charset=utf-8,'):
+            tokenMetadataJson = dataString.replace('data:application/json;charset=utf-8,', '', 1)
         elif dataString.startswith('data:application/json,'):
             tokenMetadataJson = dataString.replace('data:application/json,', '', 1)
         elif dataString.startswith('data:text/plain,'):
@@ -60,6 +63,8 @@ class TokenMetadataProcessor():
             logging.info(f'Failed to process data string: {dataString}')
             tokenMetadataDict = {}
         if tokenMetadataJson:
+            # NOTE(krishan711): it's safe to decode something that'd either encoded or not encoded
+            tokenMetadataJson = urllib.parse.unquote(tokenMetadataJson)
             try:
                 tokenMetadataDict = json.loads(tokenMetadataJson)
             except JSONDecodeError as exception:
