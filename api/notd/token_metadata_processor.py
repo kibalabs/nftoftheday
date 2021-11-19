@@ -46,7 +46,8 @@ class TokenMetadataProcessor():
         self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
-    def _resolve_data(self, dataString: str, registryAddress: str, tokenId: str) -> Dict:
+    @staticmethod
+    def _resolve_data(dataString: str, registryAddress: str, tokenId: str) -> Dict:
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
