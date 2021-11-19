@@ -62,8 +62,9 @@ class TokenMetadataProcessor():
         if tokenMetadataJson:
             try:
                 tokenMetadataDict = json.loads(tokenMetadataJson)
-            except JSONDecodeError:
-                logging.info(f'Failed to parse JSON for {registryAddress}/{tokenId}')
+            except JSONDecodeError as exception:
+                logging.info(f'Failed to parse JSON for {registryAddress}/{tokenId}: {exception}')
+                tokenMetadataDict = {}
         return tokenMetadataDict
 
     async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:

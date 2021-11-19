@@ -46,7 +46,7 @@ async def reprocess_metadata(startId: int, endId: int, batchSize: int):
             logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
             for tokenMetadata in tokenMetadatasToChange:
                 try:
-                    tokenMetadataDict = tokenMetadataProcessor._resolve_data(dataString=tokenMetadata.metadataUrl)
+                    tokenMetadataDict = tokenMetadataProcessor._resolve_data(dataString=tokenMetadata.metadataUrl, registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId)
                     if tokenMetadataDict:
                         logging.info(f'Processed: {tokenMetadata.tokenMetadataId}')
                         await saver.update_token_metadata(tokenMetadataId=tokenMetadata.tokenMetadataId, name=tokenMetadataDict.get('name') ,imageUrl=tokenMetadataDict.get('image'), description=tokenMetadataDict.get('description'), attributes=tokenMetadataDict.get('attributes', []))
