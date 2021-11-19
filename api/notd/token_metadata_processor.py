@@ -95,7 +95,10 @@ class TokenMetadataProcessor():
                 basestr = tokenMetadataUri.replace('data:application/json;base64,', '', 1)
                 base64Metadata = basestr.encode('utf-8')
                 metadataBytes = base64.b64decode(base64Metadata)
+                metadataString = metadataBytes.decode('utf-8')
+                metadataString = metadataString.replace("\'", "\"")
                 tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
+                
             else:
                 # TODO(krishan711): parse the data here
                 tokenMetadataDict = {}
