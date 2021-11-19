@@ -1,7 +1,7 @@
 import base64
 import json
-from json.decoder import JSONDecodeError
 import logging
+from json.decoder import JSONDecodeError
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
