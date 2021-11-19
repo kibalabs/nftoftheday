@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+from json.decoder import JSONDecodeError
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -95,7 +96,11 @@ class TokenMetadataProcessor():
                 basestr = tokenMetadataUri.replace('data:application/json;base64,', '', 1)
                 base64Metadata = basestr.encode('utf-8')
                 metadataBytes = base64.b64decode(base64Metadata)
-                tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
+                metadataString = metadataBytes.decode('utf-8')
+                try:
+                    tokenMetadataDict = json.loads(metadataString)
+                except JSONDecodeError:
+                    logging.info(f'Failed to parse JSON for {registryAddress},{tokenId}')
             else:
                 # TODO(krishan711): parse the data here
                 tokenMetadataDict = {}

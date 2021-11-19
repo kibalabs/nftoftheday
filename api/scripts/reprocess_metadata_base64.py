@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
@@ -8,14 +9,14 @@ import json
 import logging
 
 import asyncclick as click
-from databases.core import Database
 import boto3
 from core.queues.sqs_message_queue import SqsMessageQueue
+from databases.core import Database
 
+from notd.messages import UpdateTokenMetadataMessageContent
 from notd.store.saver import Saver
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema_conversions import token_metadata_from_row
-from notd.messages import UpdateTokenMetadataMessageContent
 
 
 @click.command()
