@@ -7,14 +7,14 @@ import asyncio
 import logging
 
 import asyncclick as click
-from databases.core import Database
 import boto3
 from core.queues.sqs_message_queue import SqsMessageQueue
+from databases.core import Database
 
+# from notd.messages import UpdateTokenMetadataMessageContent
 from notd.store.saver import Saver
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema_conversions import token_metadata_from_row
-from notd.messages import UpdateTokenMetadataMessageContent
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 

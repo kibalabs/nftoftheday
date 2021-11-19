@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 from typing import Dict
+from json.decoder import JSONDecodeError
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -44,26 +45,28 @@ class TokenMetadataProcessor():
         self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
-    def _resolve_data(self, dataString: str) -> Dict:
+    def _resolve_data(self, dataString: str, registryAddress: str, tokenId: str) -> Dict:
+        tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
-            metadataBytes = base64.b64decode(bse64String.encode('utf-8'))
-            tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
+            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8')).decode('utf-8')
         elif dataString.startswith('data:application/json;utf8,'):
-            jsonString = dataString.replace('data:application/json;utf8,', '', 1)
-            tokenMetadataDict = json.loads(jsonString)
+            tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
         elif dataString.startswith('data:application/json,'):
-            jsonString = dataString.replace('data:application/json,', '', 1)
-            tokenMetadataDict = json.loads(jsonString)
+            tokenMetadataJson = dataString.replace('data:application/json,', '', 1)
         elif dataString.startswith('data:text/plain,'):
-            jsonString = dataString.replace('data:text/plain,', '', 1)
-            tokenMetadataDict = json.loads(jsonString)
+            tokenMetadataJson = dataString.replace('data:text/plain,', '', 1)
         else:
             logging.info(f'Failed to process data string: {dataString}')
             tokenMetadataDict = {}
+        if tokenMetadataJson:
+            try:
+                tokenMetadataDict = json.loads(tokenMetadataJson)
+            except JSONDecodeError:
+                logging.info(f'Failed to parse JSON for {registryAddress}/{tokenId}')
         return tokenMetadataDict
 
-    async def retrieve_token_metadata(self, registryAddress: str,tokenId: str) -> RetrievedTokenMetadata:
+    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
             # TODO(krishan711): Implement special case for ENS
             raise TokenDoesNotExistException()
@@ -110,7 +113,7 @@ class TokenMetadataProcessor():
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
-            tokenMetadataDict = self._resolve_data(tokenMetadataUri)
+            tokenMetadataDict = self._resolve_data(dataString=tokenMetadataUri, registryAddress=registryAddress, tokenId=tokenId)
         else:
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
