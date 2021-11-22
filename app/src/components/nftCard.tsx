@@ -21,7 +21,7 @@ export interface NftCardProps {
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.token.name;
-  let imageUrl = props.token.imageUrl ?? props.collection.imageUrl ?? 'assets/icon.jpg';
+  let imageUrl = props.token.imageUrl ?? props.collection.imageUrl ?? 'assets/icon.png';
   if (imageUrl.startsWith('ipfs://')) {
     imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
