@@ -1,8 +1,8 @@
 import asyncio
 import datetime
+import json
 import logging
 from typing import Sequence
-import json
 
 from core.exceptions import DuplicateValueException
 from core.exceptions import NotFoundException
@@ -38,7 +38,6 @@ from notd.token_client import TokenClient
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
-
 
 json_file = open("sponsored_tokens.txt")
 SPONSORED_TOKENS = json.load(json_file)

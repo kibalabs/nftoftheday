@@ -3,9 +3,8 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from core.util.typing_util import JSON
 from core.util.date_util import datetime_to_string
-
+from core.util.typing_util import JSON
 from pydantic import dataclasses
 
 
