@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
-import { useDateUrlQueryState, useFavicon } from '@kibalabs/core-react';
+import { useDateUrlQueryState, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
@@ -27,7 +27,6 @@ const requester = new Requester();
 const notdClient = new NotdClient(requester, API_URL);
 const localStorageClient = new LocalStorageClient(window.localStorage);
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
-tracker.trackApplicationOpen();
 
 const globals = {
   requester,
@@ -48,6 +47,10 @@ export const App = (): React.ReactElement => {
   const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
   const [error, setError] = React.useState<boolean>(false);
   const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
+
+  useInitialization((): void => {
+    tracker.trackApplicationOpen();
+  })
 
   const getDateString = (): string => {
     if (isToday(startDate)) {

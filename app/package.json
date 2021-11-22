@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "build-react-app",
-    "start": "build-react-app --start",
-    "start-dev": "build-react-app --start --dev",
+    "build": "build-react-app --config-modifier ./config.build.js",
+    "start": "build-react-app --config-modifier ./config.build.js --start",
+    "start-dev": "build-react-app --config-modifier ./config.build.js --start --dev",
     "clean": "rm -rf ./node_modules ./package-lock.json ./dist",
     "lint": "lint",
     "lint-fix": "lint --fix",
