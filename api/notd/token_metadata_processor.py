@@ -1,6 +1,9 @@
 import base64
 import json
 import logging
+from typing import Dict
+from json.decoder import JSONDecodeError
+import urllib.parse
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -10,6 +13,16 @@ from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 
 from notd.model import RetrievedTokenMetadata
+
+IPFS_PROVIDER_PREFIXES = [
+    'https://gateway.pinata.cloud/ipfs/',
+    'https://ipfs.foundation.app/ipfs/',
+    'https://ipfs.io/ipfs/',
+    'https://ipfs.infura.io/ipfs/',
+    'https://niftylabs.mypinata.cloud/ipfs/',
+    'https://time.mypinata.cloud/ipfs/',
+    'https://robotos.mypinata.cloud/ipfs/',
+]
 
 
 class TokenDoesNotExistException(NotFoundException):
@@ -33,7 +46,34 @@ class TokenMetadataProcessor():
         self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
-    async def retrieve_token_metadata(self, registryAddress: str,tokenId: str) -> RetrievedTokenMetadata:
+    @staticmethod
+    def _resolve_data(dataString: str, registryAddress: str, tokenId: str) -> Dict:
+        tokenMetadataJson = None
+        if dataString.startswith('data:application/json;base64,'):
+            bse64String = dataString.replace('data:application/json;base64,', '', 1)
+            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8')).decode('utf-8')
+        elif dataString.startswith('data:application/json;utf8,'):
+            tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
+        elif dataString.startswith('data:application/json;charset=utf-8,'):
+            tokenMetadataJson = dataString.replace('data:application/json;charset=utf-8,', '', 1)
+        elif dataString.startswith('data:application/json,'):
+            tokenMetadataJson = dataString.replace('data:application/json,', '', 1)
+        elif dataString.startswith('data:text/plain,'):
+            tokenMetadataJson = dataString.replace('data:text/plain,', '', 1)
+        else:
+            logging.info(f'Failed to process data string: {dataString}')
+            tokenMetadataDict = {}
+        if tokenMetadataJson:
+            # NOTE(krishan711): it's safe to decode something that'd either encoded or not encoded
+            tokenMetadataJson = urllib.parse.unquote(tokenMetadataJson)
+            try:
+                tokenMetadataDict = json.loads(tokenMetadataJson)
+            except JSONDecodeError as exception:
+                logging.info(f'Failed to parse JSON for {registryAddress}/{tokenId}: {exception}')
+                tokenMetadataDict = {}
+        return tokenMetadataDict
+
+    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
             # TODO(krishan711): Implement special case for ENS
             raise TokenDoesNotExistException()
@@ -70,20 +110,9 @@ class TokenMetadataProcessor():
             tokenMetadataUri = None
         if not tokenMetadataUri:
             raise TokenHasNoMetadataException()
-        if tokenMetadataUri.startswith('https://gateway.pinata.cloud/ipfs/'):
-            tokenMetadataUri = tokenMetadataUri.replace('https://gateway.pinata.cloud/ipfs/', 'ipfs://')
-        if tokenMetadataUri.startswith('https://ipfs.foundation.app/ipfs/'):
-            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.foundation.app/ipfs/', 'ipfs://')
-        if tokenMetadataUri.startswith('https://ipfs.io/ipfs/'):
-            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.io/ipfs/', 'ipfs://')
-        if tokenMetadataUri.startswith('https://ipfs.infura.io/ipfs/'):
-            tokenMetadataUri = tokenMetadataUri.replace('https://ipfs.infura.io/ipfs/', 'ipfs://')
-        if tokenMetadataUri.startswith('https://niftylabs.mypinata.cloud/ipfs/'):
-            tokenMetadataUri = tokenMetadataUri.replace('https://niftylabs.mypinata.cloud/ipfs/', 'ipfs://')
-        if tokenMetadataUri.startswith('https://time.mypinata.cloud/ipfs/'):
-            tokenMetadataUri = tokenMetadataUri.replace('https://time.mypinata.cloud/ipfs/', 'ipfs://')
-        if tokenMetadataUri.startswith('https://robotos.mypinata.cloud/ipfs/'):
-            tokenMetadataUri = tokenMetadataUri.replace('https://robotos.mypinata.cloud/ipfs/', 'ipfs://')
+        for ipfsProviderPrefix in IPFS_PROVIDER_PREFIXES:
+            if tokenMetadataUri.startswith(ipfsProviderPrefix):
+                tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
@@ -91,14 +120,7 @@ class TokenMetadataProcessor():
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
-            if tokenMetadataUri.startswith('data:application/json;base64,'):
-                basestr = tokenMetadataUri.replace('data:application/json;base64,', '', 1)
-                base64Metadata = basestr.encode('utf-8')
-                metadataBytes = base64.b64decode(base64Metadata)
-                tokenMetadataDict = json.loads(metadataBytes.decode('utf-8'))
-            else:
-                # TODO(krishan711): parse the data here
-                tokenMetadataDict = {}
+            tokenMetadataDict = self._resolve_data(dataString=tokenMetadataUri, registryAddress=registryAddress, tokenId=tokenId)
         else:
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
