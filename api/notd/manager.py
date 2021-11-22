@@ -39,10 +39,9 @@ from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
-json_file = open("sponsored_tokens.txt")
-SPONSORED_TOKENS = json.load(json_file)
-json_file.close()
-
+with open("api/notd/sponsored_tokens.json", "w") as f:
+    SPONSORED_TOKENS = json.load(f)
+    f.close()
 
 class NotdManager:
 
