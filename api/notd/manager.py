@@ -9,6 +9,7 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
+from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
@@ -21,11 +22,12 @@ from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
-from notd.model import Collection, TokenMetadata
+from notd.model import Collection
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
+from notd.model import TokenMetadata
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
@@ -225,14 +227,14 @@ class NotdManager:
 
     async def process_block(self, blockNumber: int) -> None:
         # TODO(krishan711): uncomment this when we can save in transactions (which is currently blocked by the duplication exception)
-        # blockTransfers = await self.retriever.list_token_transfers(
-        #     fieldFilters=[
-        #         IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
-        #     ], limit=1,
-        # )
-        # if len(blockTransfers) > 0:
-        #     logging.info('Skipping block because it already has transfers.')
-        #     return
+        blockTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
+            ], limit=1,
+        )
+        if len(blockTransfers) > 0:
+            logging.info('Skipping block because it already has transfers.')
+            return
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
