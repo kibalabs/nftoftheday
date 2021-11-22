@@ -47,7 +47,7 @@ export const App = (): React.ReactElement => {
 
   useInitialization((): void => {
     tracker.trackApplicationOpen();
-  })
+  });
 
   const getDateString = (): string => {
     if (isToday(startDate)) {
