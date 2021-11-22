@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { dateToString, LocalStorageClient, Requester } from '@kibalabs/core';
+import { dateToString, isToday, isYesterday, LocalStorageClient, numberWithCommas, Requester } from '@kibalabs/core';
 import { useDateUrlQueryState, useFavicon } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
@@ -12,9 +12,7 @@ import { HighestPricedTokenTransferCard } from './components/highestPricedTokenT
 import { MostTradedTokenTransferCard } from './components/mostTradedTokenTransferCard';
 import { RandomTokenTransferCard } from './components/randomTokenTransferCard';
 import { SponsoredTokenCard } from './components/sponsoredTokenCard';
-import { isToday, isYesterday } from './dateUtil';
 import { GlobalsProvider } from './globalsContext';
-import { numberWithCommas } from './numberUtil';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
 
