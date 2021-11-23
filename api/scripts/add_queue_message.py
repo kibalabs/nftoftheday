@@ -24,11 +24,13 @@ from notd.store.schema_conversions import token_transfer_from_row
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
 async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
-    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
-    
+    #sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
+    #workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    sqsClient = boto3.client(service_name='sqs', region_name='us-east-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
+    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.us-east-1.amazonaws.com/113848722427/test1')
     await database.connect()
-    cache =set()
+    cache = set()
+    registryCache = set()
     currentBlockNumber = startBlockNumber
     while currentBlockNumber < endBlockNumber:
         start = currentBlockNumber
@@ -46,17 +48,19 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
             ))
             tokenTransfersToChange = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
             for tokenTransfer in tokenTransfersToChange:
-                cache.add((tokenTransfer.registryAddress,tokenTransfer.tokenId))
+                if (tokenTransfer.registryAddress, tokenTransfer.tokenId) in cache:
+                    pass
+                else:
+                    cache.add((tokenTransfer.registryAddress,tokenTransfer.tokenId))
+                    await workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId).to_message())
+                    if tokenTransfer.registryAddress in registryCache:
+                        pass
+                    else:
+                        await workQueue.send_message(message=UpdateCollectionMessageContent(address=tokenTransfer.registryAddress).to_message())
+
         logging.info(f'Found {len(cache)} unique tokens between {startBlockNumber} and {end}')
         currentBlockNumber = currentBlockNumber + batchSize
-    collectionSet = set()
-    for i in range(len(cache)):
-        registryAddress = list(list(cache)[i])[0]
-        tokenId = list(list(cache)[i])[1]
-        await workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
-        collectionSet.add(registryAddress)
-    for address in collectionSet:
-        await workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
+    
 
     await database.disconnect()
 
