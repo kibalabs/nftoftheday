@@ -1,7 +1,7 @@
 import os
 import sys
-import boto3
 
+import boto3
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -10,15 +10,10 @@ import logging
 
 import asyncclick as click
 from core.queues.sqs_message_queue import SqsMessageQueue
-
-from core.util.chain_util import normalize_address
 from databases.core import Database
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
-from sqlalchemy.sql.expression import or_
 
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
-
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
