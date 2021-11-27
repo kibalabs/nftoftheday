@@ -1,8 +1,9 @@
+import ast
 import asyncio
 import datetime
 import json
 import logging
-from typing import Sequence
+from typing import List, Sequence
 
 from core.exceptions import DuplicateValueException
 from core.exceptions import NotFoundException
@@ -22,7 +23,7 @@ from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
-from notd.model import Collection
+from notd.model import Collection, SponsoredToken
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
@@ -39,8 +40,14 @@ from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
-with open("api/notd/sponsored_tokens.json", "r") as sponsoredTokenFile:
-    SPONSORED_TOKENS = json.load(sponsoredTokenFile)
+def load_sponsored_token() -> List[SponsoredToken]:
+    sponsoredList = []
+    with open("notd/sponsored_tokens.json", "r") as sponsoredTokenFile:
+        sponsoredItems = json.load(sponsoredTokenFile)
+        for i in sponsoredItems:
+            r = ast.literal_eval(str(i))
+            sponsoredList.append(SponsoredToken(date=r.get('date'),token=r.get('token')).to_dict())
+            return(sponsoredList)
 
 class NotdManager:
 
@@ -58,12 +65,14 @@ class NotdManager:
 
     @staticmethod
     def get_sponsored_token() -> Token:
+        SPONSORED_TOKENS = load_sponsored_token()
         sponsoredToken = SPONSORED_TOKENS[0]['token']
         currentDate = date_util.datetime_from_now()
         allPastTokens = [sponsorItem['token'] for sponsorItem in SPONSORED_TOKENS if  date_util.datetime_from_string(sponsorItem['date']) < currentDate]
         if allPastTokens:
             sponsoredToken = allPastTokens[-1]
-        return sponsoredToken
+        logging.info(type(sponsoredToken))
+        return sponsoredToken    
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
