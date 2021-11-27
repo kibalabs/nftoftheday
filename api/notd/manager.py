@@ -71,7 +71,7 @@ class NotdManager:
         allPastTokens = [sponsorItem['token'] for sponsorItem in SPONSORED_TOKENS if  date_util.datetime_from_string(sponsorItem['date']) < currentDate]
         if allPastTokens:
             sponsoredToken = allPastTokens[-1]
-        logging.info(type(sponsoredToken))
+
         return sponsoredToken    
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
