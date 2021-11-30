@@ -1,4 +1,3 @@
-import ast
 import asyncio
 import datetime
 import json
@@ -41,7 +40,6 @@ from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 def load_sponsored_token() -> List[SponsoredToken]:
-    sponsoredList = []
     with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
         sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]  
