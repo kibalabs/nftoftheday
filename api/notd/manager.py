@@ -42,12 +42,10 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 
 def load_sponsored_token() -> List[SponsoredToken]:
     sponsoredList = []
-    with open("notd/sponsored_tokens.json", "r") as sponsoredTokenFile:
-        sponsoredItems = json.load(sponsoredTokenFile)
-        for sponsoredItem in sponsoredItems:
-            sponsoredItem = ast.literal_eval(str(sponsoredItem))
-            sponsoredList.append(SponsoredToken(date=sponsoredItem.get('date'),token=sponsoredItem.get('token')).to_dict())
-            return sponsoredList
+    with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
+        sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
+        sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]  
+    return sponsoredTokens
 
 class NotdManager:
 
@@ -66,12 +64,11 @@ class NotdManager:
     @staticmethod
     def get_sponsored_token() -> Token:
         sponsoredTokens = load_sponsored_token()
-        sponsoredToken = sponsoredTokens[0]['token']
+        sponsoredToken = sponsoredTokens[0].token
         currentDate = date_util.datetime_from_now()
-        allPastTokens = [sponsorItem['token'] for sponsorItem in sponsoredTokens if  date_util.datetime_from_string(sponsorItem['date']) < currentDate]
+        allPastTokens = [sponsorItem.token for sponsorItem in sponsoredTokens if  (sponsorItem.date) < currentDate]
         if allPastTokens:
             sponsoredToken = allPastTokens[-1]
-
         return sponsoredToken
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:

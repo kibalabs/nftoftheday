@@ -140,3 +140,9 @@ class SponsoredToken:
             'date': datetime_to_string(dt=self.date),
             'token': self.token.to_dict(),
         }
+
+    def from_dict(sponsoredDict:dict):
+        return SponsoredToken(
+            date = sponsoredDict.get('date'),
+            token = sponsoredDict.get('token')
+        )
