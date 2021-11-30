@@ -141,8 +141,8 @@ class SponsoredToken:
             'token': self.token.to_dict(),
         }
 
-    def from_dict(sponsoredDict:dict):
+    def from_dict(self):
         return SponsoredToken(
-            date = sponsoredDict.get('date'),
-            token = sponsoredDict.get('token')
+            date = self.get('date'),
+            token = self.get('token')
         )
