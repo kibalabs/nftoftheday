@@ -7,7 +7,6 @@ from core.util import date_util
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiRegistryToken
-from notd.api.models_v1 import ApiToken
 from notd.api.models_v1 import ApiUiData
 from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.models_v1 import RetreiveRegistryTokenResponse

@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import logging
+import time
 from typing import Sequence
 
 from core.exceptions import DuplicateValueException
@@ -24,7 +25,6 @@ from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
 from notd.model import RegistryToken
-from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
 from notd.model import Token
 from notd.model import TokenMetadata
@@ -164,16 +164,15 @@ class NotdManager:
         return sponsoredToken
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
-        import time
-        s = time.time()
+        startTime = time.time()
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
         )
-        print('here1', time.time() - s)
+        print('here1', time.time() - startTime)
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
-        print('here2', time.time() - s)
+        print('here2', time.time() - startTime)
         mostTradedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
@@ -182,15 +181,15 @@ class NotdManager:
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
         )
-        print('here3', time.time() - s)
+        print('here3', time.time() - startTime)
         randomTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[RandomOrder()],
             limit=1
         )
-        print('here4', time.time() - s)
+        print('here4', time.time() - startTime)
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
-        print('here5', time.time() - s)
+        print('here5', time.time() - startTime)
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
@@ -320,7 +319,7 @@ class NotdManager:
         else:
             await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
 
-    async def get_collection_by_address(self, address: str) -> Collection:
+    async def _get_collection_by_address(self, address: str) -> Collection:
         try:
             collection = await self.retriever.get_collection_by_address(address=address)
         except NotFoundException:
