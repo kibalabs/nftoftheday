@@ -32,9 +32,9 @@ class TokenDoesNotExistException(NotFoundException):
 class TokenHasNoMetadataException(NotFoundException):
     pass
 
-class DefaultTokenMetadata():    
-    
-    def set_default(registryAddress: str, tokenId: str):
+class DefaultTokenMetadata():
+
+    def set_default(self, registryAddress: str, tokenId: str):
         return RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
