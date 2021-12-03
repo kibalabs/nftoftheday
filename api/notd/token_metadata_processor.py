@@ -32,6 +32,15 @@ class TokenDoesNotExistException(NotFoundException):
 class TokenHasNoMetadataException(NotFoundException):
     pass
 
+class DefaultTokenMetadata():    
+    
+    def set_default(registryAddress: str, tokenId: str):
+        return RetrievedTokenMetadata(
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            name=(f'#{tokenId}')
+        )
+
 
 class TokenMetadataProcessor():
 
@@ -109,7 +118,8 @@ class TokenMetadataProcessor():
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
-            raise TokenHasNoMetadataException()
+            defaultTokenMetadata = DefaultTokenMetadata.set_default(registryAddress=registryAddress, tokenId=tokenId)
+            return defaultTokenMetadata
         for ipfsProviderPrefix in IPFS_PROVIDER_PREFIXES:
             if tokenMetadataUri.startswith(ipfsProviderPrefix):
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
