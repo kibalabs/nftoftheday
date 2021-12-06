@@ -104,7 +104,7 @@ export const App = (): React.ReactElement => {
   };
 
   return (
-    <KibaApp theme={theme}>
+    <KibaApp theme={theme} isFullPageApp={true}>
       <GlobalsProvider globals={globals}>
         <Head headId='app'>
           <title>{`Token Hunt ${getTitleDateString()}`}</title>
