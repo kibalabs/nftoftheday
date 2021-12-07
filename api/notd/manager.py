@@ -39,11 +39,6 @@ from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
-def load_sponsored_token() -> List[SponsoredToken]:
-    with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
-        sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
-        sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
-    return sponsoredTokens
 
 class NotdManager:
 
@@ -60,14 +55,21 @@ class NotdManager:
         self.collectionProcessor = collectionProcessor
 
     @staticmethod
-    def get_sponsored_token() -> Token:
-        sponsoredTokens = load_sponsored_token()
+    def get_sponsored_token(self) -> Token:
+        sponsoredTokens = self.load_sponsored_tokens()
         sponsoredToken = sponsoredTokens[0].token
         currentDate = date_util.datetime_from_now()
         allPastTokens = [sponsorItem.token for sponsorItem in sponsoredTokens if  (sponsorItem.date) < currentDate]
         if allPastTokens:
             sponsoredToken = allPastTokens[-1]
         return sponsoredToken
+    
+    def load_sponsored_tokens() -> List[SponsoredToken]:
+        with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
+            sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
+        sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
+        return sponsoredTokens
+
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
