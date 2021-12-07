@@ -54,7 +54,6 @@ class NotdManager:
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.collectionProcessor = collectionProcessor
 
-    @staticmethod
     def get_sponsored_token(self) -> Token:
         sponsoredTokens = self.load_sponsored_tokens()
         sponsoredToken = sponsoredTokens[0].token
@@ -63,7 +62,8 @@ class NotdManager:
         if allPastTokens:
             sponsoredToken = allPastTokens[-1]
         return sponsoredToken
-    
+
+    @staticmethod
     def load_sponsored_tokens() -> List[SponsoredToken]:
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
