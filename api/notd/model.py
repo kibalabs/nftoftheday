@@ -92,7 +92,6 @@ class Token:
             tokenId = self.get('tokenId')
         )
 
-
 @dataclasses.dataclass
 class UiData:
     highestPricedTokenTransfer: TokenTransfer
