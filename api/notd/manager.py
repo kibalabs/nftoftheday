@@ -2,7 +2,8 @@ import asyncio
 import datetime
 import json
 import logging
-from typing import List, Sequence
+from typing import List
+from typing import Sequence
 
 from core.exceptions import DuplicateValueException
 from core.exceptions import NotFoundException
@@ -22,10 +23,11 @@ from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
-from notd.model import Collection, SponsoredToken
+from notd.model import Collection
 from notd.model import RegistryToken
 from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
+from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
