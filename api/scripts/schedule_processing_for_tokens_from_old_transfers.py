@@ -30,6 +30,7 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+
     await database.connect()
     cache = set()
     registryCache = set()
@@ -39,22 +40,22 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
         end = min(currentBlockNumber + batchSize, endBlockNumber)
         logging.info(f'Working on {start} to {end}...')
         async with database.transaction():
-            await database.connect()
             query = TokenTransfersTable.select()
             query = query.where(TokenTransfersTable.c.blockNumber >= start)
             query = query.where(TokenTransfersTable.c.blockNumber < end)
-            query = query.where(sqlalchemy.tuple_(TokenTransfersTable.c.registryAddress,TokenTransfersTable.c.tokenId).not_in(
-                    TokenMetadataTable.select()
-                        .with_only_columns([TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId])
-                            .group_by(TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId)))
+            query = query.where(sqlalchemy.tuple_(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId).not_in(
+                TokenMetadataTable.select()
+                    .with_only_columns([TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId])
+                    .group_by(TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId)))
             tokenTransfersToChange = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
             for tokenTransfer in tokenTransfersToChange:
                 if (tokenTransfer.registryAddress, tokenTransfer.tokenId) in cache:
                     continue
-                cache.add((tokenTransfer.registryAddress,tokenTransfer.tokenId))
+                cache.add((tokenTransfer.registryAddress, tokenTransfer.tokenId))
                 await workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId).to_message())
                 if tokenTransfer.registryAddress in registryCache:
                     continue
+                registryCache.add(tokenTransfer.registryAddress)
                 await workQueue.send_message(message=UpdateCollectionMessageContent(address=tokenTransfer.registryAddress).to_message())
         currentBlockNumber = currentBlockNumber + batchSize
     await database.disconnect()
