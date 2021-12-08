@@ -81,16 +81,14 @@ class Token:
     tokenId: str
 
     def to_dict(self) -> Dict:
-        return{
+        return {
             'registryAddress': self.registryAddress,
             'tokenId': self.tokenId,
         }
 
-    def from_dict(self: Dict):
-        return Token(
-            registryAddress = self.get('registryAddress'),
-            tokenId = self.get('tokenId')
-        )
+    @classmethod
+    def from_dict(cls, tokenDict: Dict):
+        return cls(registryAddress=tokenDict['registryAddress'], tokenId=tokenDict['tokenId'])
 
 @dataclasses.dataclass
 class UiData:
@@ -142,14 +140,14 @@ class SponsoredToken:
     token: Token
 
     def to_dict(self) -> Dict:
-        return{
+        return {
             'date': date_util.datetime_to_string(dt=self.date),
             'token': self.token.to_dict(),
         }
 
-    def from_dict(self):
-        print(self)
+    @classmethod
+    def from_dict(cls, sponsoredTokenDict: Dict):
         return SponsoredToken(
-            date = date_util.datetime_from_string(self.get('date')),
-            token = Token.from_dict(self.get('token'))
+            date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
+            token=Token.from_dict(sponsoredTokenDict.get('token'))
         )
