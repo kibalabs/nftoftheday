@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import json
 import logging
-from typing import List
 from typing import Sequence
 
 from core.exceptions import DuplicateValueException
