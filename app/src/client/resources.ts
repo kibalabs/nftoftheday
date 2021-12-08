@@ -100,11 +100,12 @@ export class CollectionToken {
   readonly imageUrl: string | null;
   readonly description: string | null;
 
-  public constructor(registryAddress: string, tokenId: string, name: string, imageUrl: string | null) {
+  public constructor(registryAddress: string, tokenId: string, name: string, imageUrl: string | null, description: string | null) {
     this.registryAddress = registryAddress;
     this.tokenId = tokenId;
     this.name = name;
     this.imageUrl = imageUrl;
+    this.description = description;
   }
 
   public static fromObject = (obj: Record<string, unknown>): CollectionToken => {
@@ -113,6 +114,7 @@ export class CollectionToken {
       String(obj.tokenId),
       String(obj.name),
       obj.imageUrl ? String(obj.imageUrl) : null,
+      obj.description ? String(obj.description) : null,
     );
   }
 }
