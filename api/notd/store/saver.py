@@ -7,9 +7,11 @@ from typing import Union
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 
+from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 
@@ -103,4 +105,71 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.attributes.key] = attributes
         if len(values) > 0:
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
+        await self.database.execute(query=query, values=values)
+
+    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> Collection:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        collectionId = await self._execute(query=TokenCollectionsTable.insert(), values={  # pylint: disable=no-value-for-parameter
+            TokenCollectionsTable.c.createdDate.key: createdDate,
+            TokenCollectionsTable.c.updatedDate.key: updatedDate,
+            TokenCollectionsTable.c.address.key: address,
+            TokenCollectionsTable.c.name.key: name,
+            TokenCollectionsTable.c.symbol.key: symbol,
+            TokenCollectionsTable.c.description.key: description,
+            TokenCollectionsTable.c.imageUrl.key: imageUrl,
+            TokenCollectionsTable.c.twitterUsername.key: twitterUsername,
+            TokenCollectionsTable.c.instagramUsername.key: instagramUsername,
+            TokenCollectionsTable.c.wikiUrl.key: wikiUrl,
+            TokenCollectionsTable.c.openseaSlug.key: openseaSlug,
+            TokenCollectionsTable.c.url.key: url,
+            TokenCollectionsTable.c.discordUrl.key: discordUrl,
+            TokenCollectionsTable.c.bannerImageUrl.key: bannerImageUrl,
+
+        })
+        return Collection(
+            collectionId=collectionId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            address=address,
+            name=name,
+            symbol=symbol,
+            description=description,
+            imageUrl=imageUrl,
+            twitterUsername=twitterUsername,
+            instagramUsername=instagramUsername,
+            wikiUrl=wikiUrl,
+            openseaSlug=openseaSlug,
+            url=url,
+            discordUrl=discordUrl,
+            bannerImageUrl=bannerImageUrl,
+        )
+
+    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> None:
+        query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId)
+        values = {}
+        if name != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.name.key] = name
+        if symbol != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.symbol.key] = symbol
+        if description != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.description.key] = description
+        if imageUrl != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.imageUrl.key] = imageUrl
+        if twitterUsername != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.twitterUsername.key] = twitterUsername
+        if instagramUsername != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.instagramUsername.key] = instagramUsername
+        if wikiUrl != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.wikiUrl.key] = wikiUrl
+        if openseaSlug != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.openseaSlug.key] = openseaSlug
+        if url != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.url.key] = url
+        if discordUrl != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.discordUrl.key] = discordUrl
+        if bannerImageUrl != _EMPTY_STRING:
+            values[TokenCollectionsTable.c.bannerImageUrl.key] = openseaSlug
+        if len(values) > 0:
+            values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
         await self.database.execute(query=query, values=values)

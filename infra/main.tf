@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 0.14.7"
+  required_version = "~> 1.0.0"
 
   backend "s3" {
     # aws s3 mb s3://kiba-infra-notd-production
@@ -9,9 +9,18 @@ terraform {
     profile = "kiba"
     encrypt = true
   }
+  required_providers {
+    aws = {
+      version = "3.32.0"
+    }
+  }
 }
 
 provider "aws" {
   region = "eu-west-1"
   profile = "kiba"
+}
+
+locals {
+  project = "notd"
 }

@@ -1,8 +1,10 @@
 import datetime
 from typing import Mapping
 
+from notd.model import Collection
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 
@@ -37,4 +39,23 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
         name=row[TokenMetadataTable.c.name],
         description=row[TokenMetadataTable.c.description],
         attributes=row[TokenMetadataTable.c.attributes],
+    )
+
+def collection_from_row(row: Mapping) -> Collection:
+    return Collection(
+        collectionId=row[TokenCollectionsTable.c.collectionId],
+        createdDate=row[TokenCollectionsTable.c.createdDate],
+        updatedDate=row[TokenCollectionsTable.c.updatedDate],
+        address=row[TokenCollectionsTable.c.address],
+        name=row[TokenCollectionsTable.c.name],
+        symbol=row[TokenCollectionsTable.c.symbol],
+        description=row[TokenCollectionsTable.c.description],
+        imageUrl=row[TokenCollectionsTable.c.imageUrl],
+        twitterUsername=row[TokenCollectionsTable.c.twitterUsername],
+        instagramUsername=row[TokenCollectionsTable.c.instagramUsername],
+        wikiUrl=row[TokenCollectionsTable.c.wikiUrl],
+        openseaSlug=row[TokenCollectionsTable.c.openseaSlug],
+        url=row[TokenCollectionsTable.c.url],
+        discordUrl=row[TokenCollectionsTable.c.discordUrl],
+        bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl]
     )

@@ -3,6 +3,7 @@ import React from 'react';
 import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment, WebView } from '@kibalabs/ui-react';
 
 import { RegistryToken } from '../client/resources';
+import { truncateTitle } from '../titleUtil';
 import { shouldUseIframe } from './nftUtil';
 
 export interface NftCardProps {
@@ -20,7 +21,7 @@ export interface NftCardProps {
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   const title = props.nft.name;
-  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? 'assets/icon.jpg';
+  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? 'assets/icon.png';
   const collectionImageUrl = props.nft.collectionImageUrl;
   const collectionTitle = props.nft.collectionName;
   const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
@@ -59,7 +60,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                 )}
               </Box>
             </Stack.Item>
-            <Text variant='header3' alignment={TextAlignment.Center}>{title}</Text>
+            <Text variant='header3' alignment={TextAlignment.Center}>{truncateTitle(title)}</Text>
             <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
             <Spacing variant={PaddingSize.Wide} />
             {collectionTitle && (
