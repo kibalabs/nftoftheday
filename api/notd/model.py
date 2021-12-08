@@ -3,6 +3,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+from core.util import date_util
 from core.util.typing_util import JSON
 from pydantic import dataclasses
 
@@ -79,6 +80,16 @@ class Token:
     registryAddress: str
     tokenId: str
 
+    def to_dict(self) -> Dict:
+        return {
+            'registryAddress': self.registryAddress,
+            'tokenId': self.tokenId,
+        }
+
+    @classmethod
+    def from_dict(cls, tokenDict: Dict):
+        return cls(registryAddress=tokenDict['registryAddress'], tokenId=tokenDict['tokenId'])
+
 @dataclasses.dataclass
 class UiData:
     highestPricedTokenTransfer: TokenTransfer
@@ -122,3 +133,21 @@ class Collection(RetrievedCollection):
     collectionId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
+@dataclasses.dataclass
+class SponsoredToken:
+    date: datetime.datetime
+    token: Token
+
+    def to_dict(self) -> Dict:
+        return {
+            'date': date_util.datetime_to_string(dt=self.date),
+            'token': self.token.to_dict(),
+        }
+
+    @classmethod
+    def from_dict(cls, sponsoredTokenDict: Dict):
+        return cls(
+            date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
+            token=Token.from_dict(sponsoredTokenDict.get('token'))
+        )
