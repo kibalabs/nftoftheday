@@ -147,7 +147,7 @@ class SponsoredToken:
 
     @classmethod
     def from_dict(cls, sponsoredTokenDict: Dict):
-        return SponsoredToken(
+        return cls(
             date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
             token=Token.from_dict(sponsoredTokenDict.get('token'))
         )
