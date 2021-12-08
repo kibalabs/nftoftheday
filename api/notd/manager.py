@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import json
 import logging
-from typing import List
 from typing import Sequence
 
 from core.exceptions import DuplicateValueException
@@ -56,23 +55,17 @@ class NotdManager:
         self._tokenCache = dict()
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.collectionProcessor = collectionProcessor
+        with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
+            sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
+        self.sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
 
     def get_sponsored_token(self) -> Token:
-        sponsoredTokens = self.load_sponsored_tokens()
-        sponsoredToken = sponsoredTokens[0].token
+        sponsoredToken = self.sponsoredTokens[0].token
         currentDate = date_util.datetime_from_now()
-        allPastTokens = [sponsorItem.token for sponsorItem in sponsoredTokens if  (sponsorItem.date) < currentDate]
+        allPastTokens = [sponsoredToken.token for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
         if allPastTokens:
             sponsoredToken = allPastTokens[-1]
         return sponsoredToken
-
-    @staticmethod
-    def load_sponsored_tokens() -> List[SponsoredToken]:
-        with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
-            sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
-        sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
-        return sponsoredTokens
-
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
