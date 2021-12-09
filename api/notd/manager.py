@@ -261,10 +261,10 @@ class NotdManager:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         except TokenDoesNotExistException:
             logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
-            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId) 
+            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         except TokenHasNoMetadataException:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
-            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId) 
+            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         if savedTokenMetadata:
             await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         else:
