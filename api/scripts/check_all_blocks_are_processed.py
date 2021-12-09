@@ -4,6 +4,8 @@ import sys
 import boto3
 from core.queues.sqs_message_queue import SqsMessageQueue
 
+
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
@@ -11,12 +13,12 @@ import logging
 
 import asyncclick as click
 from databases.core import Database
-from sqlalchemy.sql.expression import distinct
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
-
+from sqlalchemy.sql.expression import distinct, func as sqlalchemyfunc
 from notd.messages import ProcessBlocksMessageContent
-from notd.store.schema import TokenTransfersTable
+
 from notd.store.schema_conversions import token_transfer_from_row
+
+from notd.store.schema import TokenTransfersTable
 
 
 @click.command()
@@ -43,10 +45,7 @@ async def check_all_processed(startBlockNumber: int, endBlockNumber: int, batchS
                 blocks_processed.append(row[0])
         currentBlockNumber = currentBlockNumber + batchSize
     await database.disconnect()
-
-    print(f'Checking for x')
     notProcessed = set(range(startBlockNumber,endBlockNumber)) - set(blocks_processed)
-    print(notProcessed)
     await workQueue.send_message(message=ProcessBlocksMessageContent(blockNumbers=notProcessed).to_message())
 
 if __name__ == '__main__':
