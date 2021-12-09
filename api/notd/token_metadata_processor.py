@@ -108,8 +108,7 @@ class TokenMetadataProcessor():
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
-            defaultTokenMetadata = TokenHasNoMetadataException()
-            return defaultTokenMetadata
+            raise TokenHasNoMetadataException()
         for ipfsProviderPrefix in IPFS_PROVIDER_PREFIXES:
             if tokenMetadataUri.startswith(ipfsProviderPrefix):
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')

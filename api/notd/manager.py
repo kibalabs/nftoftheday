@@ -238,7 +238,7 @@ class NotdManager:
             await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     @staticmethod
-    def set_default(registryAddress: str, tokenId: str):
+    def get_default_token_metadata(registryAddress: str, tokenId: str):
         return RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
@@ -261,10 +261,10 @@ class NotdManager:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         except TokenDoesNotExistException:
             logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
-            return self.set_default(registryAddress=registryAddress, tokenId=tokenId)
+            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId) 
         except TokenHasNoMetadataException:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
-            return self.set_default(registryAddress=registryAddress, tokenId=tokenId)
+            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId) 
         if savedTokenMetadata:
             await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         else:
