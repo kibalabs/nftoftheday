@@ -32,16 +32,6 @@ class TokenDoesNotExistException(NotFoundException):
 class TokenHasNoMetadataException(NotFoundException):
     pass
 
-class DefaultTokenMetadata():
-
-    def set_default(self, registryAddress: str, tokenId: str):
-        return RetrievedTokenMetadata(
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            name=(f'#{tokenId}')
-        )
-
-
 class TokenMetadataProcessor():
 
     def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
@@ -118,7 +108,7 @@ class TokenMetadataProcessor():
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
-            defaultTokenMetadata = DefaultTokenMetadata.set_default(registryAddress=registryAddress, tokenId=tokenId)
+            defaultTokenMetadata = TokenHasNoMetadataException()
             return defaultTokenMetadata
         for ipfsProviderPrefix in IPFS_PROVIDER_PREFIXES:
             if tokenMetadataUri.startswith(ipfsProviderPrefix):

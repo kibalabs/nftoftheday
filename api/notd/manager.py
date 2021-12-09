@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import datetime
 import logging
 from typing import Sequence
@@ -236,6 +237,14 @@ class NotdManager:
         for address in retrievedAddresses:
             await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
+    def set_default(self, registryAddress: str, tokenId: str):
+        return RetrievedTokenMetadata(
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            defaultMetadataUrl = base64.base64_encode('{}'),
+            name=(f'#{tokenId}')
+        )
+
     async def update_token_metadata(self, registryAddress: str, tokenId: str) -> None:
         savedTokenMetadatas = await self.retriever.list_token_metadata(
             fieldFilters=[
@@ -246,15 +255,15 @@ class NotdManager:
         savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
         if savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
             logging.info('Skipping token because it has been updated recently.')
-            return
+            return 
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         except TokenDoesNotExistException:
             logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
-            return
+            return self.set_default(registryAddress=registryAddress, tokenId=tokenId)
         except TokenHasNoMetadataException:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
-            return
+            return self.set_default(registryAddress=registryAddress, tokenId=tokenId)
         if savedTokenMetadata:
             await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         else:
