@@ -237,11 +237,12 @@ class NotdManager:
         for address in retrievedAddresses:
             await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
-    def set_default(self, registryAddress: str, tokenId: str):
+    @staticmethod
+    def set_default(registryAddress: str, tokenId: str):
         return RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
-            defaultMetadataUrl = base64.base64_encode('{}'),
+            defaultMetadataUrl=base64.b64encode('{}'),
             name=(f'#{tokenId}')
         )
 
@@ -255,7 +256,7 @@ class NotdManager:
         savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
         if savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
             logging.info('Skipping token because it has been updated recently.')
-            return 
+            return
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         except TokenDoesNotExistException:
