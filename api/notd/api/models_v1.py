@@ -176,7 +176,7 @@ class retrieveRegistryTokenRequest(BaseModel):
     # tokenId: str
     pass
 
-class retrieveRegistryTokenResponse(BaseModel):
+class RetrieveRegistryTokenResponse(BaseModel):
     registryToken: ApiRegistryToken
 
 class SubscribeRequest(BaseModel):
