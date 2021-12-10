@@ -70,16 +70,12 @@ class NotdManager:
         return sponsoredToken
 
     async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
-        import time
-        startTime = time.time()
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
         )
-        print('here1', time.time() - startTime)
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
-        print('here2', time.time() - startTime)
         mostTradedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
@@ -88,15 +84,12 @@ class NotdManager:
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
         )
-        print('here3', time.time() - startTime)
         randomTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[RandomOrder()],
             limit=1
         )
-        print('here4', time.time() - startTime)
         transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
-        print('here5', time.time() - startTime)
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
@@ -220,9 +213,6 @@ class NotdManager:
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
 
-    async def get_collection_by_address(self, registryAddress: str) -> Collection:
-        return self.retriever.get_collection_by_address(address=registryAddress)
-
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         try:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
@@ -272,7 +262,7 @@ class NotdManager:
         else:
             await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
 
-    async def _get_collection_by_address(self, address: str) -> Collection:
+    async def get_collection_by_address(self, address: str) -> Collection:
         try:
             collection = await self.retriever.get_collection_by_address(address=address)
         except NotFoundException:
