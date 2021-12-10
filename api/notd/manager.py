@@ -155,7 +155,7 @@ class NotdManager:
             tokenId=tokenId,
             metadataUrl=base64.b64encode('{}'.encode()),
             imageUrl=None,
-            name=(f'#{tokenId}'),
+            name=f'#{tokenId}',
             description=None,
             attributes=[],
         )
