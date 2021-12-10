@@ -123,7 +123,7 @@ class NotdManager:
             await asyncio.gather(*[self._create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers])
 
     async def _create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer) -> None:
-        tokenTransfers = self.retriever.list_token_transfers(
+        tokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.transactionHash.key, eq=retrievedTokenTransfer.transactionHash),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=retrievedTokenTransfer.registryAddress),
