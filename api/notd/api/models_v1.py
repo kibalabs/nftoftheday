@@ -171,7 +171,7 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
-class retrieveRegistryTokenRequest(BaseModel):
+class RetrieveRegistryTokenRequest(BaseModel):
     # registryAddress: str
     # tokenId: str
     pass
