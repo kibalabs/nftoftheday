@@ -47,7 +47,7 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor, revueApiKey: str):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -60,6 +60,7 @@ class NotdManager:
         self.collectionProcessor = collectionProcessor
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
+        self.revueApiKey = revueApiKey
         self.sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
 
     def get_sponsored_token(self) -> Token:
@@ -212,7 +213,7 @@ class NotdManager:
         return registryToken
 
     async def subscribe_email(self, email: str) -> None:
-        await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
+        await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         try:

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString, isToday, isYesterday, LocalStorageClient, numberWithCommas, Requester } from '@kibalabs/core';
-import { useDateUrlQueryState, useInitialization } from '@kibalabs/core-react';
+import { MockStorage, useDateUrlQueryState, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
@@ -16,14 +16,15 @@ import { GlobalsProvider } from './globalsContext';
 import { buildNotdTheme } from './theme';
 import './fonts.css';
 
-const theme = buildNotdTheme();
+declare global {
+  export interface Window {
+    KRT_API_URL?: string;
+  }
+}
 
-const API_URL = 'https://notd-api.kibalabs.com';
-// const API_URL = 'http://localhost:5000';
-
-const requester = new Requester();
-const notdClient = new NotdClient(requester, API_URL);
-const localStorageClient = new LocalStorageClient(window.localStorage);
+const requester = new Requester(undefined, undefined, false);
+const notdClient = new NotdClient(requester, typeof window !== 'undefined' ? window.KRT_API_URL : undefined);
+const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
 
 const globals = {
@@ -34,6 +35,8 @@ const globals = {
 
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
+
+const theme = buildNotdTheme();
 
 export const App = (): React.ReactElement => {
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
@@ -161,7 +164,7 @@ export const App = (): React.ReactElement => {
             </Stack>
             <Spacing />
             <Spacing />
-            <MarkdownText textVariant='light' source='Data provided by [OpenSea](https://opensea.io/). Made by [Kiba Labs](https://www.kibalabs.com)' />
+            <MarkdownText textVariant='light' source='Made by [Kiba Labs](https://www.kibalabs.com)' />
             <Spacing variant={PaddingSize.Narrow} />
           </Stack>
         </BackgroundView>
