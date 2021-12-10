@@ -32,7 +32,6 @@ class TokenDoesNotExistException(NotFoundException):
 class TokenHasNoMetadataException(NotFoundException):
     pass
 
-
 class TokenMetadataProcessor():
 
     def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
