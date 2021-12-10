@@ -27,6 +27,7 @@ from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
 from notd.model import RegistryToken
+from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
