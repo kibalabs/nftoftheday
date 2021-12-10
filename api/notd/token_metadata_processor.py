@@ -46,6 +46,18 @@ class TokenMetadataProcessor():
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
     @staticmethod
+    def get_default_token_metadata(registryAddress: str, tokenId: str):
+        return RetrievedTokenMetadata(
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            metadataUrl=base64.b64encode('{}'.encode()),
+            imageUrl=None,
+            name=f'#{tokenId}',
+            description=None,
+            attributes=[],
+        )
+
+    @staticmethod
     def _resolve_data(dataString: str, registryAddress: str, tokenId: str) -> Dict:
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
@@ -140,7 +152,7 @@ class TokenMetadataProcessor():
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             imageUrl=tokenMetadataDict.get('image'),
-            name=tokenMetadataDict.get('name'),
+            name=tokenMetadataDict.get('name', f'#{tokenId}'),
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )

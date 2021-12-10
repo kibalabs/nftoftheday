@@ -1,5 +1,4 @@
 import asyncio
-import base64
 import datetime
 import json
 import logging
@@ -27,7 +26,6 @@ from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
 from notd.model import RegistryToken
-from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -149,53 +147,39 @@ class NotdManager:
         await asyncio.gather(*[self.update_token_metadata_deferred(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers])
         await asyncio.gather(*[self.update_collection_deferred(address=address) for address in set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers)])
 
-    @staticmethod
-    def get_default_token_metadata(registryAddress: str, tokenId: str):
-        return RetrievedTokenMetadata(
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            metadataUrl=base64.b64encode('{}'.encode()),
-            imageUrl=None,
-            name=f'#{tokenId}',
-            description=None,
-            attributes=[],
-        )
-
     @async_lru.alru_cache(maxsize=100000)
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        if not shouldForce:
-            savedTokenMetadatas = await self.retriever.list_token_metadatas(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-                ], limit=1,
-            )
-            savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
-            if savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
-                logging.info('Skipping token because it has been updated recently.')
-                return
+        savedTokenMetadatas = await self.retriever.list_token_metadatas(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+            ], limit=1,
+        )
+        savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
+        if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
+            logging.info('Skipping token because it has been updated recently.')
+            return
         await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        if not shouldForce:
-            savedTokenMetadatas = await self.retriever.list_token_metadatas(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-                ], limit=1,
-            )
-            savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
-            if savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
-                logging.info('Skipping token because it has been updated recently.')
-                return
+        savedTokenMetadatas = await self.retriever.list_token_metadatas(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+            ], limit=1,
+        )
+        savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
+        if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
+            logging.info('Skipping token because it has been updated recently.')
+            return
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         except TokenDoesNotExistException:
             logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
-            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+            retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         except TokenHasNoMetadataException:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
-            retrievedTokenMetadata = self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+            retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         if savedTokenMetadata:
             await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
         else:
@@ -231,29 +215,27 @@ class NotdManager:
 
     @async_lru.alru_cache(maxsize=10000)
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
-        if not shouldForce:
-            collections = await self.retriever.list_collections(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
-                ], limit=1,
-            )
-            collection = collections[0] if len(collections) > 0 else None
-            if collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
-                logging.info('Skipping collection because it has been updated recently.')
-                return
+        collections = await self.retriever.list_collections(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+            ], limit=1,
+        )
+        collection = collections[0] if len(collections) > 0 else None
+        if not shouldForce and collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
+            logging.info('Skipping collection because it has been updated recently.')
+            return
         await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
-        if not shouldForce:
-            collections = await self.retriever.list_collections(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
-                ], limit=1,
-            )
-            collection = collections[0] if len(collections) > 0 else None
-            if collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
-                logging.info('Skipping collection because it has been updated recently.')
-                return
+        collections = await self.retriever.list_collections(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+            ], limit=1,
+        )
+        collection = collections[0] if len(collections) > 0 else None
+        if not shouldForce and collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
+            logging.info('Skipping collection because it has been updated recently.')
+            return
         try:
             retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)
         except CollectionDoesNotExist:
