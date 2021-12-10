@@ -32,7 +32,6 @@ class TokenDoesNotExistException(NotFoundException):
 class TokenHasNoMetadataException(NotFoundException):
     pass
 
-
 class TokenMetadataProcessor():
 
     def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
@@ -92,8 +91,8 @@ class TokenMetadataProcessor():
         if registryAddress in ('0x57E9a39aE8eC404C08f88740A9e6E306f50c937f', '0xFFF7F797213d7aE5f654f2bC91c071745843b5B9'):
             # TODO(krishan711): Implement special case for polkacity and Elephants for Africa (their contract seems broken)
             raise TokenDoesNotExistException()
-        if registryAddress == '0x772Da237fc93ded712E5823b497Db5991CC6951e':
-            # TODO(krishan711): Implement special case for Everdragons(their contract is unverified)
+        if registryAddress in ('0x772Da237fc93ded712E5823b497Db5991CC6951e', '0xE072AA2B0d39587A08813391e84495971A098084'):
+            # TODO(krishan711): Implement special case for Everdragons, DISTXR (their contract is unverified)
             raise TokenDoesNotExistException()
         try:
             tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})

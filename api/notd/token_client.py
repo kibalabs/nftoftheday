@@ -18,7 +18,7 @@ class TokenClient:
         self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
 
-    async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
+    async def retrieve_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
         tokenMetadataUri = tokenMetadataUriResponse[0]
         if not tokenMetadataUri:

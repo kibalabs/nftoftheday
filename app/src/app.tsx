@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString, isToday, isYesterday, LocalStorageClient, numberWithCommas, Requester } from '@kibalabs/core';
-import { useDateUrlQueryState, useFavicon } from '@kibalabs/core-react';
+import { useDateUrlQueryState, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
@@ -25,7 +25,6 @@ const requester = new Requester();
 const notdClient = new NotdClient(requester, API_URL);
 const localStorageClient = new LocalStorageClient(window.localStorage);
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
-tracker.trackApplicationOpen();
 
 const globals = {
   requester,
@@ -37,7 +36,6 @@ const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
 export const App = (): React.ReactElement => {
-  useFavicon('/assets/favicon.svg');
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
@@ -46,6 +44,10 @@ export const App = (): React.ReactElement => {
   const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
   const [error, setError] = React.useState<boolean>(false);
   const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
+
+  useInitialization((): void => {
+    tracker.trackApplicationOpen();
+  });
 
   const getDateString = (): string => {
     if (isToday(startDate)) {
@@ -102,7 +104,7 @@ export const App = (): React.ReactElement => {
   };
 
   return (
-    <KibaApp theme={theme}>
+    <KibaApp theme={theme} isFullPageApp={true}>
       <GlobalsProvider globals={globals}>
         <Head headId='app'>
           <title>{`Token Hunt ${getTitleDateString()}`}</title>

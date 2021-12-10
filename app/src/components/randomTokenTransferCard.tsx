@@ -3,8 +3,7 @@ import React from 'react';
 import { dateToString } from '@kibalabs/core';
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
-import { retrieveAsset } from '../assetUtil';
-import { RegistryToken, TokenTransfer } from '../client/resources';
+import { Collection, CollectionToken, TokenTransfer } from '../client/resources';
 import { useGlobals } from '../globalsContext';
 import { NftCard } from './nftCard';
 
@@ -13,20 +12,24 @@ export type RandomTokenTransferCardProps = {
 }
 
 export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): React.ReactElement => {
-  const { requester } = useGlobals();
-  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
+  const { notdClient } = useGlobals();
+  const [asset, setAsset] = React.useState<CollectionToken | null>(null);
+  const [collection, setCollection] = React.useState<Collection | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    retrieveAsset(requester, props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId).then((registryToken: RegistryToken): void => {
-      setAsset(registryToken);
-      setIsLoading(false);
-    }).catch((apiError : unknown) => {
+    setIsLoading(true);
+    try {
+      const tokenPromise = notdClient.retrieveCollectionToken(props.tokenTransfer.registryAddress, props.tokenTransfer.tokenId);
+      const collectionPromise = notdClient.retrieveCollection(props.tokenTransfer.registryAddress);
+      setAsset(await tokenPromise);
+      setCollection(await collectionPromise);
+    } catch (apiError: unknown) {
       setError(apiError as Error);
-      setIsLoading(false);
-    });
-  }, [requester, props.tokenTransfer]);
+    }
+    setIsLoading(false);
+  }, [notdClient, props.tokenTransfer]);
 
   React.useEffect((): void => {
     if (!props.tokenTransfer) {
@@ -38,15 +41,16 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
 
   return (
     <React.Fragment>
-      { !props.tokenTransfer || isLoading || !asset ? (
+      { !props.tokenTransfer || isLoading || !asset || !collection ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
-          nft={asset}
+          token={asset}
+          collection={collection}
           label='Random'
           subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-          primaryButtonText='View Token'
-          primaryButtonTarget={asset.openSeaUrl}
+          primaryButtonText='View on OpenSea'
+          primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfer.registryAddress}/${props.tokenTransfer.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
           secondaryButtonText='View Tx'
           secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
           extraLabelVariants={['cardLabelRandom']}
