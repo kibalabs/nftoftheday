@@ -7,7 +7,6 @@ from typing import List
 from typing import Sequence
 
 import async_lru
-from core.exceptions import DuplicateValueException
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
