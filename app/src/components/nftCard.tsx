@@ -55,10 +55,14 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>
               <Box width='150px' height='150px'>
-                <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
+                {imageUrl.startsWith('data:image/svg+xml;base64,') ? (
+                  <div dangerouslySetInnerHTML={{ __html: atob(imageUrl.slice('data:image/svg+xml;base64,'.length)) }} />
+                ) : (
+                  <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
+                )}
               </Box>
             </Stack.Item>
-            <Text variant='header3' alignment={TextAlignment.Center}>{truncateTitle(title)}</Text>
+            <Text variant='header3-singleLine' alignment={TextAlignment.Center}>{truncateTitle(title)}</Text>
             <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
             <Spacing variant={PaddingSize.Wide} />
             {collectionTitle && (

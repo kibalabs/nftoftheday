@@ -115,7 +115,7 @@ class ApiCollectionToken(BaseModel):
     name: Optional[str]
     imageUrl: Optional[str]
     description: Optional[str]
-    attributes: Optional[Dict[str, Union[str, int, float]]]
+    attributes: Optional[List[Dict[str, Union[str, int, float]]]]
 
     @classmethod
     def from_model(cls, model: TokenMetadata):
