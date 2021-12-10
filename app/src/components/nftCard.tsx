@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment, WebView } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { RegistryToken } from '../client/resources';
+import { Collection, CollectionToken } from '../client/resources';
 import { truncateTitle } from '../titleUtil';
-import { shouldUseIframe } from './nftUtil';
 
 export interface NftCardProps {
-  nft: RegistryToken;
+  token: CollectionToken;
+  collection: Collection;
   label: string;
   subtitle: string;
   secondaryButtonTarget?: string;
@@ -20,14 +20,16 @@ export interface NftCardProps {
 }
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
-  const title = props.nft.name;
-  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? 'assets/icon.png';
-  const collectionImageUrl = props.nft.collectionImageUrl;
-  const collectionTitle = props.nft.collectionName;
-  const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
+  const title = props.token.name;
+  let imageUrl = props.token.imageUrl ?? props.collection.imageUrl ?? 'assets/icon.png';
+  if (imageUrl.startsWith('ipfs://')) {
+    imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  }
+  const collectionImageUrl = props.collection.imageUrl;
+  const collectionTitle = props.collection.name;
+  const collectionUrl = props.collection.url ?? (props.collection.openseaSlug ? `https://opensea.io/collections/${props.collection.openseaSlug}` : null);
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
-  const error = props.error;
 
   return (
     <Box variant='card'>
@@ -38,7 +40,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           </Box>
           <Spacing variant={PaddingSize.Wide} />
         </Stack.Item>
-        {error ? (
+        {props.error ? (
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
               <Box width='175px' height='300px'>
@@ -53,11 +55,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>
               <Box width='150px' height='150px'>
-                { shouldUseIframe(props.nft) ? (
-                  <WebView url={imageUrl} />
-                ) : (
-                  <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
-                )}
+                <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
               </Box>
             </Stack.Item>
             <Text variant='header3' alignment={TextAlignment.Center}>{truncateTitle(title)}</Text>

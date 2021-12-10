@@ -31,6 +31,7 @@ from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
+from notd.model import TokenMetadata
 from notd.model import UiData
 from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
@@ -213,14 +214,10 @@ class NotdManager:
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post(url='https://api.kiba.dev/v1/newsletter-subscriptions', dataDict={'topic': 'tokenhunt', 'email': email.lower()})
 
-    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RegistryToken:
-        tokenMetadatas = await self.retriever.list_token_metadatas(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-            ], limit=1,
-        )
-        if len(tokenMetadatas) == 0:
+    async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
+        try:
+            tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+        except NotFoundException:
             cacheKey = f'{registryAddress}:{tokenId}'
             if cacheKey in self._tokenCache:
                 registryToken = self._tokenCache[cacheKey]
@@ -228,8 +225,8 @@ class NotdManager:
                 registryToken = await self.openseaClient.retrieve_registry_token(registryAddress=registryAddress, tokenId=tokenId)
                 self._tokenCache[cacheKey] = registryToken
             await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
-            tokenMetadatas.append(RetrievedTokenMetadata(registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None))
-        return tokenMetadatas[0]
+            tokenMetadata = TokenMetadata(tokenMetadataId=-1, createdDate=datetime.datetime.now(), updatedDate=datetime.datetime.now(), registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=None)
+        return tokenMetadata
 
     @async_lru.alru_cache(maxsize=10000)
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
@@ -266,12 +263,10 @@ class NotdManager:
         else:
             await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl)
 
-    async def retrieve_collection(self, address: str) -> Collection:
-        collections = await self.retriever.list_collections(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
-            ], limit=1,
-        )
-        if len(collections) == 0:
-            raise NotFoundException()
-        return collections[0]
+    async def get_collection_by_address(self, address: str) -> Collection:
+        try:
+            collection = await self.retriever.get_collection_by_address(address=address)
+        except NotFoundException:
+            await self.update_collection(address=address)
+            collection = await self.retriever.get_collection_by_address(address=address)
+        return collection

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { LoadingSpinner } from '@kibalabs/ui-react';
 
-import { RegistryToken, TokenTransfer } from '../client/resources';
+import { Collection, CollectionToken, TokenTransfer } from '../client/resources';
 import { useGlobals } from '../globalsContext';
 import { NftCard } from './nftCard';
 
@@ -12,18 +12,22 @@ export type MostTradedTokenTransferCardProps = {
 
 export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardProps): React.ReactElement => {
   const { notdClient } = useGlobals();
-  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
+  const [asset, setAsset] = React.useState<CollectionToken | null>(null);
+  const [collection, setCollection] = React.useState<Collection | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<Error | null>(null);
 
   const updateAsset = React.useCallback(async (): Promise<void> => {
-    notdClient.retrieveRegistryToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId).then((registryToken: RegistryToken): void => {
-      setAsset(registryToken);
-      setIsLoading(false);
-    }).catch((apiError : unknown) => {
+    setIsLoading(true);
+    try {
+      const tokenPromise = notdClient.retrieveCollectionToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId);
+      const collectionPromise = notdClient.retrieveCollection(props.tokenTransfers[0].registryAddress);
+      setAsset(await tokenPromise);
+      setCollection(await collectionPromise);
+    } catch (apiError: unknown) {
       setError(apiError as Error);
-      setIsLoading(false);
-    });
+    }
+    setIsLoading(false);
   }, [notdClient, props.tokenTransfers]);
 
   React.useEffect((): void => {
@@ -36,15 +40,16 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
 
   return (
     <React.Fragment>
-      { !props.tokenTransfers || isLoading || !asset ? (
+      { !error && (!props.tokenTransfers || isLoading || !asset || !collection) ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard
-          nft={asset}
+          token={asset}
+          collection={collection}
           label='Most Traded'
           subtitle={`Traded ${props.tokenTransfers.length} times today`}
-          primaryButtonText='View Token'
-          primaryButtonTarget={asset.openSeaUrl}
+          primaryButtonText='View on OpenSea'
+          primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfers[0].registryAddress}/${props.tokenTransfers[0].tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
           secondaryButtonText='View Tx'
           secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
           error={error}
