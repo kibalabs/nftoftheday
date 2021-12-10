@@ -1,6 +1,6 @@
-from operator import concat
 import os
 import sys
+from operator import concat
 
 import boto3
 import sqlalchemy
@@ -13,12 +13,12 @@ import logging
 import asyncclick as click
 from core.queues.sqs_message_queue import SqsMessageQueue
 from databases.core import Database
-
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
-from notd.store.schema import TokenMetadataTable, TokenTransfersTable
+from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
 

@@ -171,12 +171,12 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
-class RetreiveRegistryTokenRequest(BaseModel):
+class RetrieveRegistryTokenRequest(BaseModel):
     # registryAddress: str
     # tokenId: str
     pass
 
-class RetreiveRegistryTokenResponse(BaseModel):
+class RetrieveRegistryTokenResponse(BaseModel):
     registryToken: ApiRegistryToken
 
 class SubscribeRequest(BaseModel):

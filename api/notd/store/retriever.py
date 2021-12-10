@@ -2,6 +2,7 @@ import datetime
 from typing import Optional
 from typing import Sequence
 
+from core.exceptions import NotFoundException
 from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
@@ -63,7 +64,7 @@ class Retriever(CoreRetriever):
         rows = await self.database.fetch_all(query=query)
         return Token(registryAddress=rows[0][TokenTransfersTable.c.registryAddress], tokenId=rows[0][TokenTransfersTable.c.tokenId])
 
-    async def list_token_metadata(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenMetadata]:
+    async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenMetadata]:
         query = TokenMetadataTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenMetadataTable, fieldFilters=fieldFilters)
@@ -75,7 +76,17 @@ class Retriever(CoreRetriever):
         tokenMetdata = [token_metadata_from_row(row) for row in rows]
         return tokenMetdata
 
-    async def list_collection(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[Collection]:
+    async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
+        query = TokenMetadataTable.select() \
+            .where(TokenMetadataTable.c.registryAddress == registryAddress) \
+            .where(TokenMetadataTable.c.tokenId == tokenId)
+        row = await self.database.fetch_one(query=query)
+        if not row:
+            raise NotFoundException(message=f'TokenMetadata with registry {registryAddress} tokenId {tokenId} not found')
+        tokenMetdata = token_metadata_from_row(row)
+        return tokenMetdata
+
+    async def list_collections(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[Collection]:
         query = TokenCollectionsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenCollectionsTable, fieldFilters=fieldFilters)
@@ -86,3 +97,12 @@ class Retriever(CoreRetriever):
         rows = await self.database.fetch_all(query=query)
         tokenCollection = [collection_from_row(row) for row in rows]
         return tokenCollection
+
+    async def get_collection_by_address(self, address: str) -> Collection:
+        query = TokenCollectionsTable.select() \
+            .where(TokenCollectionsTable.c.address == address)
+        row = await self.database.fetch_one(query=query)
+        if not row:
+            raise NotFoundException(message=f'Collection with registry {address} not found')
+        collection = collection_from_row(row)
+        return collection
