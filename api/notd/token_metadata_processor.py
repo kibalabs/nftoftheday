@@ -109,7 +109,6 @@ class TokenMetadataProcessor():
         try:
             tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
         except BadRequestException as exception:
-            print('exception', exception)
             if 'URI query for nonexistent token' in exception.message:
                 raise TokenDoesNotExistException()
             if 'execution reverted' in exception.message:
@@ -118,7 +117,6 @@ class TokenMetadataProcessor():
                 raise TokenDoesNotExistException()
             raise exception
         tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
-        print('tokenMetadataUri', tokenMetadataUri)
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
