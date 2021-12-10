@@ -26,7 +26,7 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == ReceiveNewBlocksMessageContent.get_command():
             messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
-            # await self.notdManager.receive_new_blocks()
+            await self.notdManager.receive_new_blocks()
             return
         if message.command == UpdateTokenMetadataMessageContent.get_command():
             messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
