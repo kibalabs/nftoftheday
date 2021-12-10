@@ -1,4 +1,5 @@
 import contextlib
+import logging
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -26,7 +27,8 @@ class Saver(CoreSaver):
         try:
             await transaction.start()
             yield None
-        except:
+        except Exception as exception:
+            logging.info(f'Rolling back due to exception: {exception}')
             await transaction.rollback()
             raise
         else:

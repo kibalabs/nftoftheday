@@ -23,6 +23,7 @@ class RetrievedTokenTransfer:
     blockHash: str
     blockDate: datetime.datetime
 
+
 @dataclasses.dataclass
 class RetrievedTokenMetadata:
     registryAddress: str
@@ -32,6 +33,7 @@ class RetrievedTokenMetadata:
     name: Optional[str]
     description: Optional[str]
     attributes: JSON
+
 
 @dataclasses.dataclass
 class TokenMetadata(RetrievedTokenMetadata):
@@ -52,6 +54,7 @@ class TokenMetadata(RetrievedTokenMetadata):
             'description': self.description,
             'attributes': self.attributes,
         }
+
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
@@ -90,6 +93,7 @@ class Token:
     def from_dict(cls, tokenDict: Dict):
         return cls(registryAddress=tokenDict['registryAddress'], tokenId=tokenDict['tokenId'])
 
+
 @dataclasses.dataclass
 class UiData:
     highestPricedTokenTransfer: TokenTransfer
@@ -97,6 +101,7 @@ class UiData:
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
     transactionCount: int
+
 
 @dataclasses.dataclass
 class RegistryToken:
@@ -113,6 +118,7 @@ class RegistryToken:
     collectionOpenSeaUrl: Optional[str]
     collectionExternalUrl: Optional[str]
 
+
 @dataclasses.dataclass
 class RetrievedCollection:
     address: str
@@ -128,11 +134,13 @@ class RetrievedCollection:
     discordUrl: Optional[str]
     bannerImageUrl: Optional[str]
 
+
 @dataclasses.dataclass
 class Collection(RetrievedCollection):
     collectionId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
 
 @dataclasses.dataclass
 class SponsoredToken:

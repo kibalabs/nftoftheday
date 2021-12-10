@@ -9,9 +9,9 @@ from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiRegistryToken
 from notd.api.models_v1 import ApiUiData
 from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
-from notd.api.models_v1 import RetreiveRegistryTokenResponse
 from notd.api.models_v1 import RetrieveCollectionResponse
 from notd.api.models_v1 import RetrieveCollectionTokenResponse
+from notd.api.models_v1 import RetrieveRegistryTokenResponse
 from notd.api.models_v1 import RetrieveUiDataRequest
 from notd.api.models_v1 import RetrieveUiDataResponse
 from notd.api.models_v1 import SubscribeRequest
@@ -35,10 +35,10 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
         await notdManager.receive_new_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
-    @router.get('/registries/{registryAddress}/tokens/{tokenId}', response_model=RetreiveRegistryTokenResponse)
-    async def retreive_registry_token(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest
-        registryToken = await notdManager.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
-        return RetreiveRegistryTokenResponse(registryToken=ApiRegistryToken.from_model(model=registryToken))
+    @router.get('/registries/{registryAddress}/tokens/{tokenId}', response_model=RetrieveRegistryTokenResponse)
+    async def retrieve_registry_token(registryAddress: str, tokenId: str):  # request: RetrieveRegistryTokenRequest
+        registryToken = await notdManager.retrieve_registry_token(registryAddress=registryAddress, tokenId=tokenId)
+        return RetrieveRegistryTokenResponse(registryToken=ApiRegistryToken.from_model(model=registryToken))
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}', response_model=RetrieveCollectionTokenResponse)
     async def retrieve_collection_token(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest

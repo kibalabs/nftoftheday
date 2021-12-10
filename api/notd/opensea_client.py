@@ -14,7 +14,7 @@ class OpenseaClient:
     def __init__(self, requester: Requester):
         self.requester = requester
 
-    async def retreive_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
+    async def retrieve_registry_token(self, registryAddress: str, tokenId: str) -> RegistryToken:
         response = None
         retryCount = 0
         while not response:
