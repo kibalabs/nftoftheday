@@ -92,6 +92,7 @@ class TokenMetadataProcessor():
             # TODO(krishan711): Implement special case for cryptokitties
             raise TokenDoesNotExistException()
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
+            # NOTE(krishan711): CryptoPunks doesn't have on-chain metadata
             return RetrievedTokenMetadata(
                 registryAddress=registryAddress,
                 tokenId=tokenId,
