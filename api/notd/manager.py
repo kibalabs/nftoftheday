@@ -89,7 +89,7 @@ class NotdManager:
             orders=[RandomOrder()],
             limit=1
         )
-        transactionCount = await self.retriever.get_transaction_count(startDate=startDate,endDate=endDate)
+        transactionCount = await self.retriever.get_transaction_count(startDate=startDate, endDate=endDate)
         return UiData(
             highestPricedTokenTransfer=highestPricedTokenTransfers[0],
             mostTradedTokenTransfers=mostTradedTokenTransfers,
