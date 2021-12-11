@@ -22,7 +22,8 @@ async def post():
         messages.append(f"queue_name {queueUrl}: queue_size {len} ")
     
     text = f'AWS SQS Stats: {"".join(map(str,messages))}'
-    slackClient.post(text)
+    await slackClient.post(text)
+    logging.info("Going to sleep for 1 hour")
     time.sleep(3600)
 
 if __name__ == '__main__':
