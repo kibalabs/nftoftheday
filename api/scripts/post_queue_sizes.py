@@ -16,14 +16,13 @@ async def post():
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     sqsResponse = sqsClient.list_queues()
     sqsQueueUrls = sqsResponse.get("QueueUrls")
-
     messages =[]
     for sqsQueueUrl in sqsQueueUrls:
         len = sqsClient.get_queue_attributes(QueueUrl=sqsQueueUrl, AttributeNames=['ApproximateNumberOfMessages',])
         len = len.get("Attributes").get("ApproximateNumberOfMessages")
-        messages.append(f"queue_name {sqsQueueUrl}: queue_size {len} ")
+        messages.append(f"{sqsQueueUrl}: {len}\n")
     
-    text = f'AWS SQS Stats: {"".join(map(str,messages))}'
+    text = f'AWS SQS Stats:\n{"".join(map(str,messages))}'
     await slackClient.post(text)
     logging.info("Going to sleep for 1 hour")
     time.sleep(3600)
