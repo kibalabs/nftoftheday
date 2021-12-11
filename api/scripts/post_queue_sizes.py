@@ -17,7 +17,7 @@ async def post():
 
     messages =[]
     for queueUrl in queueUrls:
-        len = await workQueue.get_queues_attribute(queue=queueUrl)
+        len = await workQueue.get_queue_attributes(queue=queueUrl)
         len = len.get("Attributes").get("ApproximateNumberOfMessages")
         messages.append(f"queue_name {queueUrl}: queue_size {len} ")
     
