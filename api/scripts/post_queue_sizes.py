@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from typing import List
 import boto3
 import time
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -8,21 +9,21 @@ from core.requester import Requester
 from core.slack_client import SlackClient
 
 async def post():
-    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    sqsClient = boto3.client(service_name='sqs', region_name='us-east-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     requester = Requester()
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
+    sqsResponse = sqsClient.list_queues()
+    sqsQueueUrls = sqsResponse.get("QueueUrls")
 
-    queuesResponse = await workQueue.get_queues()
-    queueUrls = queuesResponse.get("QueueUrls")
     messages =[]
-    for queueUrl in queueUrls:
-        len = await workQueue.get_queue_attributes(queue=queueUrl)
+    for sqsQueueUrl in sqsQueueUrls:
+        len = sqsClient.get_queue_attributes(QueueUrl=sqsQueueUrl, AttributeNames=['ApproximateNumberOfMessages',])
         len = len.get("Attributes").get("ApproximateNumberOfMessages")
-        messages.append(f"queue_name {queueUrl}: queue_size {len} ")
+        messages.append(f"queue_name {sqsQueueUrl}: queue_size {len} ")
     
     text = f'AWS SQS Stats: {"".join(map(str,messages))}'
-    await slackClient.post(text)
+    print(text)
+    #await slackClient.post(text)
     logging.info("Going to sleep for 1 hour")
     time.sleep(3600)
 
