@@ -11,6 +11,7 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
+from web3.main import Web3
 
 from notd.model import RetrievedTokenMetadata
 
@@ -39,11 +40,17 @@ class TokenMetadataProcessor():
         self.ethClient = ethClient
         self.s3manager = s3manager
         self.bucketName = bucketName
+        self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
-            erc721MetdataContractJson = json.load(contractJsonFile)
-        self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
-        self.erc721MetdataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'tokenURI'][0]
-        self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
+            erc721MetadataContractJson = json.load(contractJsonFile)
+        self.erc721MetadataContractAbi = erc721MetadataContractJson['abi']
+        self.erc721MetadataUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetadataContractAbi if internalAbi.get('name') == 'tokenURI'][0]
+        self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetadataContractAbi if internalAbi.get('name') == 'name'][0]
+        with open('./contracts/CryptoPunksMetadata.json') as contractJsonFile:
+            contractJson = json.load(contractJsonFile)
+        self.cryptoPunksContract = self.w3.eth.contract(address='0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2', abi=contractJson['abi'])
+        self.cryptoPunksAttributesFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkAttributes'][0]
+        self.cryptoPunksImageSvgFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkImageSvg'][0]
 
     @staticmethod
     def get_default_token_metadata(registryAddress: str, tokenId: str):
@@ -86,15 +93,17 @@ class TokenMetadataProcessor():
 
     async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
-            # NOTE(krishan711): CryptoPunks doesn't have on-chain metadata
+            attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
+            attributes = [{"trait_type": "Accessory", "value": attribute} for attribute in attributesResponse]
+            imageSvgResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksImageSvgFunctionAbi, arguments={'index': int(tokenId)})
             return RetrievedTokenMetadata(
                 registryAddress=registryAddress,
                 tokenId=tokenId,
                 metadataUrl=base64.b64encode('{}'.encode()),
-                imageUrl=f'https://www.larvalabs.com/public/images/cryptopunks/punk{tokenId}.png',
+                imageUrl=imageSvgResponse[0],
                 name=f'#{tokenId}',
                 description=None,
-                attributes=[],
+                attributes=attributes,
             )
         if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
             # TODO(krishan711): Implement special case for ENS
@@ -115,7 +124,7 @@ class TokenMetadataProcessor():
             # TODO(krishan711): Implement special case for Everdragons, DISTXR (their contract is unverified)
             raise TokenDoesNotExistException()
         try:
-            tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+            tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
         except BadRequestException as exception:
             if 'URI query for nonexistent token' in exception.message:
                 raise TokenDoesNotExistException()
