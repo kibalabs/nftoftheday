@@ -136,7 +136,7 @@ class NotdManager:
             blockTransfers = await self.retriever.list_token_transfers(
                 fieldFilters=[
                     IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
-                ], limit=1,
+                ], limit=1, ignoreRegistryBlacklist=True,
             )
             if len(blockTransfers) > 0:
                 logging.info('Skipping block because it already has transfers.')
