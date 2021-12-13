@@ -94,7 +94,7 @@ class TokenMetadataProcessor():
     async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
-            attributes = [{"trait_type": "Accessory", "value": attribute} for attribute in attributesResponse]
+            attributes = [{"trait_type": "Accessory", "value": attribute.strip()} for attribute in attributesResponse[0].split(',')]
             imageSvgResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksImageSvgFunctionAbi, arguments={'index': int(tokenId)})
             return RetrievedTokenMetadata(
                 registryAddress=registryAddress,
