@@ -126,7 +126,7 @@ class NotdManager:
                         StringFieldFilter(fieldName=TokenTransfersTable.c.transactionHash.key, eq=retrievedTokenTransfer.transactionHash),
                         StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=retrievedTokenTransfer.registryAddress),
                         StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=retrievedTokenTransfer.tokenId),
-                    ], limit=1,
+                    ], limit=1, shouldIgnoreRegistryBlacklist=True
                 )
                 if len(tokenTransfers) == 0:
                     await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
@@ -136,7 +136,7 @@ class NotdManager:
             blockTransfers = await self.retriever.list_token_transfers(
                 fieldFilters=[
                     IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
-                ], limit=1, ignoreRegistryBlacklist=True,
+                ], limit=1, shouldIgnoreRegistryBlacklist=True,
             )
             if len(blockTransfers) > 0:
                 logging.info('Skipping block because it already has transfers.')
