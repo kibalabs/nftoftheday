@@ -51,6 +51,11 @@ class TokenMetadataProcessor():
         self.cryptoPunksContract = self.w3.eth.contract(address='0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2', abi=contractJson['abi'])
         self.cryptoPunksAttributesFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkAttributes'][0]
         self.cryptoPunksImageSvgFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkImageSvg'][0]
+        with open('./contracts/IERC1155MetadataURI.json') as contractJsonFile:
+             erc1155MetadataContractJson = json.load(contractJsonFile)
+        self.erc1155MetadataContractAbi = erc1155MetadataContractJson['abi']
+        self.erc1155MetadataUriFunctionAbi = [internalAbi for internalAbi in self.erc1155MetadataContractAbi if internalAbi.get('name') == 'uri'][0]
+        #self.erc1155MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc1155MetadataContractAbi if internalAbi.get('name') == 'name'][0]
 
     @staticmethod
     def get_default_token_metadata(registryAddress: str, tokenId: str):
@@ -126,13 +131,17 @@ class TokenMetadataProcessor():
         try:
             tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
         except BadRequestException as exception:
-            if 'URI query for nonexistent token' in exception.message:
-                raise TokenDoesNotExistException()
-            if 'execution reverted' in exception.message:
-                raise TokenDoesNotExistException()
-            if 'out of gas' in exception.message:
-                raise TokenDoesNotExistException()
-            raise exception
+            try:
+                tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)})
+                print(tokenMetadataUriResponse)
+            except BadRequestException as exception:
+                if 'URI query for nonexistent token' in exception.message:
+                    raise TokenDoesNotExistException()
+                if 'execution reverted' in exception.message:
+                    raise TokenDoesNotExistException()
+                if 'out of gas' in exception.message:
+                    raise TokenDoesNotExistException()
+                raise exception
         tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
