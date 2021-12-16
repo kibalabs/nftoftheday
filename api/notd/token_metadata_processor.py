@@ -23,7 +23,6 @@ IPFS_PROVIDER_PREFIXES = [
     'https://niftylabs.mypinata.cloud/ipfs/',
     'https://time.mypinata.cloud/ipfs/',
     'https://robotos.mypinata.cloud/ipfs/',
-    'ipfs://ipfs/',
 ]
 
 
@@ -57,6 +56,10 @@ class TokenMetadataProcessor():
         self.erc1155MetadataContractAbi = erc1155MetadataContractJson['abi']
         self.erc1155MetadataUriFunctionAbi = [internalAbi for internalAbi in self.erc1155MetadataContractAbi if internalAbi.get('name') == 'uri'][0]
         #self.erc1155MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc1155MetadataContractAbi if internalAbi.get('name') == 'name'][0]
+        with open('./contracts/IERC165.json') as contractJsonFile:
+            erc165MetadataContractJson = json.load(contractJsonFile)
+        self.erc165MetadataContractAbi = erc165MetadataContractJson['abi']
+        self.erc165SupportInterfaceUriFunctionAbi = [internalAbi for internalAbi in self.erc165MetadataContractAbi if internalAbi.get('name') == 'supportsInterface'][0]
 
     @staticmethod
     def get_default_token_metadata(registryAddress: str, tokenId: str):
@@ -129,9 +132,19 @@ class TokenMetadataProcessor():
         if registryAddress in ('0x772Da237fc93ded712E5823b497Db5991CC6951e', '0xE072AA2B0d39587A08813391e84495971A098084'):
             # TODO(krishan711): Implement special case for Everdragons, DISTXR (their contract is unverified)
             raise TokenDoesNotExistException()
-        try:
-            tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
-        except BadRequestException as exception:
+        tokenMetadataUriResponse = []
+        if (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': '0x5b5e139f'}))[0]:
+            try:
+                tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+            except BadRequestException as exception:
+                if 'URI query for nonexistent token' in exception.message:
+                    raise TokenDoesNotExistException()
+                if 'execution reverted' in exception.message:
+                    raise TokenDoesNotExistException()
+                if 'out of gas' in exception.message:
+                    raise TokenDoesNotExistException()
+                raise exception
+        elif (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': '0xd9b67a26'}))[0]:
             try:
                 tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)})
                 tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace("0x{id}", hex(int(tokenId)))
