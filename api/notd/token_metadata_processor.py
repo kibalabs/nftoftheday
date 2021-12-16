@@ -133,7 +133,7 @@ class TokenMetadataProcessor():
         except BadRequestException as exception:
             try:
                 tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)})
-                print(tokenMetadataUriResponse)
+                tokenMetadataUriResponse = tokenMetadataUriResponse[0].replace("0x{id}", hex(int(tokenId)))
             except BadRequestException as exception:
                 if 'URI query for nonexistent token' in exception.message:
                     raise TokenDoesNotExistException()
@@ -142,7 +142,10 @@ class TokenMetadataProcessor():
                 if 'out of gas' in exception.message:
                     raise TokenDoesNotExistException()
                 raise exception
-        tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
+        if isinstance(tokenMetadataUriResponse, list):
+            tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
+        else:
+            tokenMetadataUri = tokenMetadataUriResponse
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
