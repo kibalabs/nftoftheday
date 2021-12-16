@@ -131,11 +131,10 @@ class TokenMetadataProcessor():
             raise TokenDoesNotExistException()
         try:
             tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
-            tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
         except BadRequestException as exception:
             try:
                 tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)})
-                tokenMetadataUri = tokenMetadataUriResponse[0].replace("0x{id}", hex(int(tokenId)))
+                tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace("0x{id}", hex(int(tokenId)))
             except BadRequestException as exception:
                 if 'URI query for nonexistent token' in exception.message:
                     raise TokenDoesNotExistException()
@@ -144,6 +143,7 @@ class TokenMetadataProcessor():
                 if 'out of gas' in exception.message:
                     raise TokenDoesNotExistException()
                 raise exception
+        tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -153,10 +153,8 @@ class TokenMetadataProcessor():
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
-        print(metadataUrl)
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
-            print(tokenMetadataUri)
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
