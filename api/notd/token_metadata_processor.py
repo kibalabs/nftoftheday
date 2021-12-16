@@ -23,6 +23,7 @@ IPFS_PROVIDER_PREFIXES = [
     'https://niftylabs.mypinata.cloud/ipfs/',
     'https://time.mypinata.cloud/ipfs/',
     'https://robotos.mypinata.cloud/ipfs/',
+    'ipfs://ipfs/',
 ]
 
 
@@ -52,7 +53,7 @@ class TokenMetadataProcessor():
         self.cryptoPunksAttributesFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkAttributes'][0]
         self.cryptoPunksImageSvgFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkImageSvg'][0]
         with open('./contracts/IERC1155MetadataURI.json') as contractJsonFile:
-             erc1155MetadataContractJson = json.load(contractJsonFile)
+            erc1155MetadataContractJson = json.load(contractJsonFile)
         self.erc1155MetadataContractAbi = erc1155MetadataContractJson['abi']
         self.erc1155MetadataUriFunctionAbi = [internalAbi for internalAbi in self.erc1155MetadataContractAbi if internalAbi.get('name') == 'uri'][0]
         #self.erc1155MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc1155MetadataContractAbi if internalAbi.get('name') == 'name'][0]
@@ -155,8 +156,10 @@ class TokenMetadataProcessor():
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
+        print(metadataUrl)
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+            print(tokenMetadataUri)
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
