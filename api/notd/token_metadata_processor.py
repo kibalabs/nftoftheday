@@ -122,47 +122,38 @@ class TokenMetadataProcessor():
         if registryAddress == '0x06012c8cf97BEaD5deAe237070F9587f8E7A266d':
             # TODO(krishan711): Implement special case for cryptokitties
             raise TokenDoesNotExistException()
-        if registryAddress == '0x66018A2AC8F28f4d68d1F018680957F2F22528Da':
-            # TODO(krishan711): Implement special case for etherland
-            raise TokenDoesNotExistException()
-        if registryAddress == '0xE22e1e620dffb03065CD77dB0162249c0c91bf01':
-            # TODO(krishan711): Implement special case for bearxlabs
-            raise TokenDoesNotExistException()
         if registryAddress in ('0x57E9a39aE8eC404C08f88740A9e6E306f50c937f', '0xFFF7F797213d7aE5f654f2bC91c071745843b5B9'):
             # TODO(krishan711): Implement special case for polkacity and Elephants for Africa (their contract seems broken)
             raise TokenDoesNotExistException()
         if registryAddress in ('0x772Da237fc93ded712E5823b497Db5991CC6951e', '0xE072AA2B0d39587A08813391e84495971A098084'):
             # TODO(krishan711): Implement special case for Everdragons, DISTXR (their contract is unverified)
             raise TokenDoesNotExistException()
-        tokenMetadataUriResponse = []
-        tokenException = ''
-        isFlag = False
-        isContractSupportingErc721=(await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        isContractSupportingErc1155= (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
+        tokenMetadataUriResponse = None
+        badRequestException = None
+        isContractSupportingErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
+        isContractSupportingErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
         if isContractSupportingErc721:
             try:
-                tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
             except BadRequestException as exception:
-                isFlag = True
-                tokenException = exception.message
+                badRequestException = exception
         elif isContractSupportingErc1155:
             try:
-                tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)})
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
             except BadRequestException as exception:
-                isFlag = True
-                tokenException = exception.message
+                badRequestException = exception
         else:
             logging.info(f'{registryAddress} Contract does not support ERC721 or ERC1155')
-        if isFlag:
-            if 'URI query for nonexistent token' in tokenException:
+        if badRequestException is not None:
+            if 'URI query for nonexistent token' in badRequestException:
                 raise TokenDoesNotExistException()
-            if 'execution reverted' in tokenException:
+            if 'execution reverted' in badRequestException:
                 raise TokenDoesNotExistException()
-            if 'out of gas' in tokenException:
+            if 'out of gas' in badRequestException:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUriResponse[0] = tokenMetadataUriResponse[0].replace("0x{id}", hex(int(tokenId)))
-        tokenMetadataUri = tokenMetadataUriResponse[0].replace('\x00', '')
+        tokenMetadataUriResponse = tokenMetadataUriResponse.replace("0x{id}", hex(int(tokenId)))
+        tokenMetadataUri = tokenMetadataUriResponse.replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -202,4 +193,5 @@ class TokenMetadataProcessor():
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )
+        print(retrievedTokenMetadata)
         return retrievedTokenMetadata
