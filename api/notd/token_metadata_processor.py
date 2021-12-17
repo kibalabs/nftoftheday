@@ -143,7 +143,7 @@ class TokenMetadataProcessor():
             try:
                 tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
             except BadRequestException as exception:
-                isFlag = True 
+                isFlag = True
                 tokenException = exception.message
         elif isContractSupportingErc1155:
             try:
