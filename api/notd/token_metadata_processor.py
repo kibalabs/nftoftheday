@@ -193,5 +193,4 @@ class TokenMetadataProcessor():
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )
-        print(retrievedTokenMetadata)
         return retrievedTokenMetadata
