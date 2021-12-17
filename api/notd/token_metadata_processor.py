@@ -144,6 +144,7 @@ class TokenMetadataProcessor():
                 badRequestException = exception
         else:
             logging.info(f'{registryAddress} Contract does not support ERC721 or ERC1155')
+            raise TokenDoesNotExistException()
         if badRequestException is not None:
             if 'URI query for nonexistent token' in badRequestException:
                 raise TokenDoesNotExistException()
