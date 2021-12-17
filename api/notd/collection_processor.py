@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 
+from httpx import ReadTimeout
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -36,35 +37,40 @@ class CollectionProcessor:
             collectionSymbol = tokenMetadataSymbolResponse[0]
         except BadRequestException:
             collectionSymbol = None
-        response = None
+        openseaResponse = None
         retryCount = 0
-        while not response:
+        while not openseaResponse:
             try:
-                response = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}')
+                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}')
             except ResponseException as exception:
                 if exception.statusCode == 404:
                     raise CollectionDoesNotExist()
                 if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
-                    raise
+                    break
                 logging.info(f'Retrying due to: {str(exception)}')
                 await asyncio.sleep(1.5)
-                retryCount += 1
-        responseJson = response.json()
-        collection = responseJson.get('collection')
-        if collection is None:
-            raise CollectionDoesNotExist()
+            except ReadTimeout as exception:
+                if retryCount >= 3:
+                    break
+                logging.info(f'Retrying due to: {str(exception)}')
+                await asyncio.sleep(1.5)
+            retryCount += 1
+        openseaCollection = openseaResponse.json().get('collection') if openseaResponse else {}
+        if openseaCollection is None:
+            logging.info(f'Failed to load collection from opensea: {address}')
+            openseaCollection = {}
         retrievedCollection = RetrievedCollection(
             address=address,
-            name=collectionName or collection.get('name'),
-            symbol=collectionSymbol or collection.get('symbol'),
-            description=collection.get('description'),
-            imageUrl=collection.get('image_url'),
-            twitterUsername=collection.get('twitter_username'),
-            instagramUsername=collection.get('instagram_username'),
-            wikiUrl=collection.get('wiki_url'),
-            openseaSlug=collection.get('slug'),
-            url=collection.get('external_url'),
-            discordUrl=collection.get('discord_url'),
-            bannerImageUrl=collection.get('banner_image_url'),
+            name=collectionName or openseaCollection.get('name'),
+            symbol=collectionSymbol or openseaCollection.get('symbol'),
+            description=openseaCollection.get('description'),
+            imageUrl=openseaCollection.get('image_url'),
+            twitterUsername=openseaCollection.get('twitter_username'),
+            instagramUsername=openseaCollection.get('instagram_username'),
+            wikiUrl=openseaCollection.get('wiki_url'),
+            openseaSlug=openseaCollection.get('slug'),
+            url=openseaCollection.get('external_url'),
+            discordUrl=openseaCollection.get('discord_url'),
+            bannerImageUrl=openseaCollection.get('banner_image_url'),
         )
         return retrievedCollection
