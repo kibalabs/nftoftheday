@@ -55,10 +55,10 @@ async def process_collection(address: str, shouldDefer: bool):
 
     await database.connect()
     retrievedCollectionTokenMetadatas = await retriever.list_token_metadatas(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
-            ],
-        )
+        fieldFilters=[
+            StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
+        ],
+    )
     for tokenMetadata in (retrievedCollectionTokenMetadatas):
         tokenId = tokenMetadata.tokenId
         if shouldDefer:
