@@ -59,12 +59,12 @@ async def update_collection(address: str, shouldDefer: bool):
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
             ],
         )
-    for i in range(len(retrievedCollectionTokenMetadatas)):
-        tokenId = retrievedCollectionTokenMetadatas[i].tokenId
+    for tokenMetadata in range(len(retrievedCollectionTokenMetadatas)):
+        tokenId = retrievedCollectionTokenMetadatas[tokenMetadata].tokenId
         if shouldDefer:
-            await notdManager.update_token_metadata_deferred(address=address, tokenId=tokenId, shouldForce=True)
+            await notdManager.update_token_metadata_deferred(registryAddress=address, tokenId=tokenId, shouldForce=True)
         else:
-            await notdManager.update_token_metadata(address=address, tokenId=tokenId, shouldForce=True)
+            await notdManager.update_token_metadata(registryAddress=address, tokenId=tokenId, shouldForce=True)
     await database.disconnect()
     await requester.close_connections()
 
