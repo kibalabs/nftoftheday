@@ -137,7 +137,7 @@ class TokenMetadataProcessor():
         doesSupportErc1155 = False
         try:
             doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        except:
+        except:  # pylint: disable=bare-except
             pass
         if doesSupportErc721:
             try:
@@ -147,7 +147,7 @@ class TokenMetadataProcessor():
         else:
             try:
                 doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
-            except:
+            except:  # pylint: disable=bare-except
                 pass
             if doesSupportErc1155:
                 try:
