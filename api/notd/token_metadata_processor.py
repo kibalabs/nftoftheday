@@ -128,23 +128,35 @@ class TokenMetadataProcessor():
         if registryAddress in ('0x772Da237fc93ded712E5823b497Db5991CC6951e', '0xE072AA2B0d39587A08813391e84495971A098084'):
             # TODO(krishan711): Implement special case for Everdragons, DISTXR (their contract is unverified)
             raise TokenDoesNotExistException()
+        if registryAddress == '0xdF5d68D54433661b1e5e90a547237fFB0AdF6EC2':
+            # TODO(krishan711): Implement special case for  Arcona Digital Land (it's a really old contract)
+            raise TokenDoesNotExistException()
         tokenMetadataUriResponse = None
         badRequestException = None
-        isContractSupportingErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        isContractSupportingErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
-        if isContractSupportingErc721:
+        doesSupportErc721 = False
+        doesSupportErc1155 = False
+        try:
+            doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
+        except:  # pylint: disable=bare-except
+            pass
+        if doesSupportErc721:
             try:
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
-        elif isContractSupportingErc1155:
-            try:
-                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
-            except BadRequestException as exception:
-                badRequestException = exception
         else:
-            logging.info(f'{registryAddress} Contract does not support ERC721 or ERC1155')
-            raise TokenDoesNotExistException()
+            try:
+                doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
+            except:  # pylint: disable=bare-except
+                pass
+            if doesSupportErc1155:
+                try:
+                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
+                except BadRequestException as exception:
+                    badRequestException = exception
+            else:
+                logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+                raise TokenDoesNotExistException()
         if badRequestException is not None:
             if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
