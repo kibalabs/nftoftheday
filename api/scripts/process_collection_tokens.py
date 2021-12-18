@@ -32,7 +32,7 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 @click.command()
 @click.option('-a', '--collection-address', 'address', required=True, type=str)
 @click.option('-d', '--defer', 'shouldDefer', default=False, is_flag=True)
-async def update_collection(address: str, shouldDefer: bool):
+async def process_collection(address: str, shouldDefer: bool):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database=database)
     retriever = Retriever(database=database)
@@ -70,4 +70,4 @@ async def update_collection(address: str, shouldDefer: bool):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(update_collection())
+    asyncio.run(process_collection())
