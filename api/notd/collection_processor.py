@@ -2,12 +2,12 @@ import asyncio
 import json
 import logging
 
-from httpx import ReadTimeout
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.requester import ResponseException
 from core.web3.eth_client import EthClientInterface
+from httpx import ReadTimeout
 
 from notd.model import RetrievedCollection
 
