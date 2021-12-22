@@ -1,5 +1,4 @@
 import asyncio
-from asyncio import events
 import datetime
 import json
 import logging
@@ -81,7 +80,7 @@ class BlockProcessor:
         for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 5):
             erc1155TokenTransfers += await asyncio.gather(*[self._process_erc1155_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk])
         return [tokenTransfer for tokenTransfer in erc721TokenTransfers or erc1155TokenTransfers if tokenTransfer]
-    
+
     async def _process_erc1155_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         #print(f"transactionHash: {event['transactionHash'].hex()},fromAddress:{ normalize_address(event['topics'][2].hex())}, toAddress: {normalize_address(event['topics'][3].hex())} ,tokenId: { int.from_bytes(bytes(event['topics'][1]), 'big')}")
         transactionHash = event['transactionHash'].hex()
