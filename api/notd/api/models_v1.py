@@ -11,6 +11,7 @@ from notd.model import RegistryToken
 from notd.model import TokenMetadata
 from notd.model import UiData
 
+VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
 
 class ApiTokenTransfer(BaseModel):
     tokenTransferId: int
@@ -119,6 +120,7 @@ class ApiCollectionToken(BaseModel):
 
     @classmethod
     def from_model(cls, model: TokenMetadata):
+        attributes = [{key: value for (key,value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in model.attributes]
         return cls(
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
@@ -126,7 +128,7 @@ class ApiCollectionToken(BaseModel):
             imageUrl=model.imageUrl,
             name=model.name,
             description=model.description,
-            attributes=model.attributes,
+            attributes=attributes,
         )
 
 class ApiCollection(BaseModel):
