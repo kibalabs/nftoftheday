@@ -119,6 +119,7 @@ class ApiCollectionToken(BaseModel):
 
     @classmethod
     def from_model(cls, model: TokenMetadata):
+        attributes = [{key:value for (key,value) in elem.items() if isinstance(value,(str,int,float))} for elem in model.attributes]
         return cls(
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
@@ -126,7 +127,7 @@ class ApiCollectionToken(BaseModel):
             imageUrl=model.imageUrl,
             name=model.name,
             description=model.description,
-            attributes=model.attributes,
+            attributes=attributes,
         )
 
 class ApiCollection(BaseModel):
