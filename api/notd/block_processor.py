@@ -102,31 +102,26 @@ class BlockProcessor:
         operatorAddress = normalize_address(event['topics'][1].hex())
         fromAddress = normalize_address(event['topics'][2].hex())
         toAddress = normalize_address(event['topics'][3].hex())
-        print(transactionHash)
+        #print(transactionHash)
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
-        print(ethTransaction)
+        #print(ethTransaction)
         func_obj = None
         func_params = None
-        #tokenId = None
 
-        #abi_endpoint = f"https://api.etherscan.io/api?module=contract&action=getabi&address={tx['to']}&apikey={ETHERSCAN_API_KEY}"
-        #abi = json.loads(requests.get(abi_endpoint).text)        
         try:
             func_obj, func_params = self.ierc1155Contract.decode_function_input(ethTransaction["input"])
             tokenId = func_params["id"]
             amount = func_params["amount"]
         except ValueError:
-            tokenId = '0'
-            #print(ethTransaction)
-            pass
-        print(f"obj ,{func_obj}, params: {func_params}")
-        amount = None
+            logging.info(f'Cannot decode input function of transactionHash: {transactionHash}')
+            return
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']#int.from_bytes(bytes(event['topics'][5]), 'big')
         ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
         gasUsed = ethTransactionReceipt['gasUsed']
-        transaction = RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
+        #print(amount,gasLimit,gasPrice,value,gasUsed,ethTransaction)
+        transaction = ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
         return transaction
 
     async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:

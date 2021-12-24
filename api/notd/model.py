@@ -23,12 +23,16 @@ class RetrievedTokenTransfer:
     blockHash: str
     blockDate: datetime.datetime
 
-
+@dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class ERC1155TokenTransfer:
     transactionHash: str
+    registryAddress: str
     operatorAddress: str
     fromAddress: str
     toAddress: str
+    tokenId: Optional[str]
+    amount: Optional[int]
+    value: Optional[int]
     gasLimit: int
     gasPrice: int
     gasUsed: int
