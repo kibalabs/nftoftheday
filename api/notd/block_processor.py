@@ -5,6 +5,8 @@ import logging
 from typing import List
 from typing import Optional
 from ast import literal_eval
+import textwrap
+
 
 
 import async_lru
@@ -91,10 +93,16 @@ class BlockProcessor:
             erc1155TokenTransfers += await asyncio.gather(*[self._process_erc1155_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk])
         return [tokenTransfer for tokenTransfer in erc721TokenTransfers or erc1155TokenTransfers if tokenTransfer]
 
+    @staticmethod
+    def decode_transaction_data(data):
+        ids = textwrap.wrap(data[:len(data)//2],64)
+        values = textwrap.wrap(data[len(data)//2:],64)
+        ids = [literal_eval(f'0x{id}') for id in ids]
+        values = [literal_eval(f'0x{value}') for value in values]
+        return ids, values
+    
     async def _process_erc1155_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
-        data = event['data'][2:]
         transactionHash = event['transactionHash'].hex()
-        print(transactionHash)
         registryAddress = event['address']
         logging.debug(f'------------- {transactionHash} ------------')
         if len(event['topics']) < 4:
@@ -103,8 +111,11 @@ class BlockProcessor:
         operatorAddress = normalize_address(event['topics'][1].hex())
         fromAddress = normalize_address(event['topics'][2].hex())
         toAddress = normalize_address(event['topics'][3].hex())
-        tokenId = literal_eval(f"0x{data[:len(data)//2]}")
-        amount =  literal_eval(f"0x{data[len(data)//2:]}")
+        data = event['data'][2:]
+        ids, values = self.decode_transaction_data(data)
+        for i in range(len(ids)):
+            tokenId = ids[i]
+            amount =  values[i]
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
