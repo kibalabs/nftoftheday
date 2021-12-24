@@ -24,6 +24,19 @@ class RetrievedTokenTransfer:
     blockDate: datetime.datetime
 
 
+class ERC1155TokenTransfer:
+    transactionHash: str
+    operatorAddress: str
+    fromAddress: str
+    toAddress: str
+    gasLimit: int
+    gasPrice: int
+    gasUsed: int
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime
+
+
 @dataclasses.dataclass
 class RetrievedTokenMetadata:
     registryAddress: str
