@@ -91,36 +91,28 @@ class BlockProcessor:
         return [tokenTransfer for tokenTransfer in erc721TokenTransfers or erc1155TokenTransfers if tokenTransfer]
 
     async def _process_erc1155_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
-        #print(f"transactionHash: {event['transactionHash'].hex()},fromAddress:{ normalize_address(event['topics'][2].hex())}, toAddress: {normalize_address(event['topics'][3].hex())} ,tokenId: { int.from_bytes(bytes(event['topics'][1]), 'big')}")
         transactionHash = event['transactionHash'].hex()
         registryAddress = event['address']
         logging.debug(f'------------- {transactionHash} ------------')
         if len(event['topics']) < 4:
             logging.debug('Ignoring event with less than 4 topics')
             return None
-        #print(f"transactionHash: {event['transactionHash'].hex()},toAddress: {event['topics'][3].hex()}")
         operatorAddress = normalize_address(event['topics'][1].hex())
         fromAddress = normalize_address(event['topics'][2].hex())
         toAddress = normalize_address(event['topics'][3].hex())
-        #print(transactionHash)
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
-        #print(ethTransaction)
-        func_obj = None
-        func_params = None
-
         try:
-            func_obj, func_params = self.ierc1155Contract.decode_function_input(ethTransaction["input"])
-            tokenId = func_params["id"]
-            amount = func_params["amount"]
+            _, inputParams = self.ierc1155Contract.decode_function_input(ethTransaction["input"])
+            tokenId = inputParams["id"]
+            amount = inputParams["amount"]
         except ValueError:
             logging.info(f'Cannot decode input function of transactionHash: {transactionHash}')
             return
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
-        value = ethTransaction['value']#int.from_bytes(bytes(event['topics'][5]), 'big')
+        value = ethTransaction['value']
         ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
         gasUsed = ethTransactionReceipt['gasUsed']
-        #print(amount,gasLimit,gasPrice,value,gasUsed,ethTransaction)
         transaction = ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
         return transaction
 
