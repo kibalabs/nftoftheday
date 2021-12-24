@@ -14,7 +14,6 @@ from core.util import list_util
 from core.util.chain_util import normalize_address
 from core.web3.eth_client import EthClientInterface
 from web3 import Web3
-import web3
 from web3.types import HexBytes
 from web3.types import LogReceipt
 from web3.types import TxData
@@ -100,7 +99,7 @@ class BlockProcessor:
         ids = [literal_eval(f'0x{id}') for id in ids]
         values = [literal_eval(f'0x{value}') for value in values]
         return ids, values
-    
+
     async def _process_erc1155_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = event['address']
@@ -113,9 +112,8 @@ class BlockProcessor:
         toAddress = normalize_address(event['topics'][3].hex())
         data = event['data'][2:]
         ids, values = self.decode_transaction_data(data)
-        for i in range(len(ids)):
-            tokenId = ids[i]
-            amount =  values[i]
+        for index, tokenId in enumerate(ids):
+            amount =  values[index]
             ethTransaction = await self._get_transaction(transactionHash=transactionHash)
             gasLimit = ethTransaction['gas']
             gasPrice = ethTransaction['gasPrice']
