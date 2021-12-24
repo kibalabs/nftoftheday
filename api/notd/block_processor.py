@@ -116,14 +116,14 @@ class BlockProcessor:
         for i in range(len(ids)):
             tokenId = ids[i]
             amount =  values[i]
-        ethTransaction = await self._get_transaction(transactionHash=transactionHash)
-        gasLimit = ethTransaction['gas']
-        gasPrice = ethTransaction['gasPrice']
-        value = ethTransaction['value']
-        ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
-        gasUsed = ethTransactionReceipt['gasUsed']
-        transaction = ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
-        return transaction
+            ethTransaction = await self._get_transaction(transactionHash=transactionHash)
+            gasLimit = ethTransaction['gas']
+            gasPrice = ethTransaction['gasPrice']
+            value = ethTransaction['value']
+            ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+            gasUsed = ethTransactionReceipt['gasUsed']
+            transaction = ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=tokenId, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate)
+            return transaction
 
     async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
