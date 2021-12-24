@@ -79,13 +79,13 @@ class BlockProcessor:
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         erc721TokenTransfers = []
-        erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
-        logging.info(f'Found {len(erc721events)} events in block #{blockNumber}')
-        for erc721EventsChunk in list_util.generate_chunks(erc721events, 5):
-            erc721TokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc721EventsChunk])
+        #erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
+        #logging.info(f'Found {len(erc721events)} events in block #{blockNumber}')
+        #for erc721EventsChunk in list_util.generate_chunks(erc721events, 5):
+        #    erc721TokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc721EventsChunk])
 
         erc1155TokenTransfers = []
-        erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
+        erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
         logging.info(f'Found {len(erc1155events)} erc1155events in block #{blockNumber}')
         for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 5):
             erc1155TokenTransfers += await asyncio.gather(*[self._process_erc1155_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk])
@@ -94,6 +94,7 @@ class BlockProcessor:
     async def _process_erc1155_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
         data = event['data'][2:]
         transactionHash = event['transactionHash'].hex()
+        print(transactionHash)
         registryAddress = event['address']
         logging.debug(f'------------- {transactionHash} ------------')
         if len(event['topics']) < 4:
