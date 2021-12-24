@@ -30,9 +30,9 @@ class ERC1155TokenTransfer:
     operatorAddress: str
     fromAddress: str
     toAddress: str
-    tokenId: Optional[str]
-    amount: Optional[int]
-    value: Optional[int]
+    tokenId: str
+    amount: int
+    value: int
     gasLimit: int
     gasPrice: int
     gasUsed: int
