@@ -2,12 +2,10 @@ import asyncio
 import datetime
 import json
 import logging
+import textwrap
+from ast import literal_eval
 from typing import List
 from typing import Optional
-from ast import literal_eval
-import textwrap
-
-
 
 import async_lru
 from core.util import list_util
@@ -19,7 +17,8 @@ from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
 
-from notd.model import ERC1155TokenTransfer, RetrievedTokenTransfer
+from notd.model import ERC1155TokenTransfer
+from notd.model import RetrievedTokenTransfer
 
 
 class BlockProcessor:
