@@ -56,7 +56,7 @@ class BlockProcessor:
         with open('./contracts/IERC1155.json') as contractJsonFile:
             contractJson = json.load(contractJsonFile)
         self.ierc1155Contract = self.w3.eth.contract(abi=contractJson['abi'])
-        self.ierc1155TransferEvent = self.ierc1155Contract.events.TransferSingle()
+        self.ierc1155TransferEvent = self.ierc1155Contract.events.TransferBatch()
         # TODO(krishan711): use the contract to get the signature hash instead of doing manually
         # self.contractFilter = self.ierc1155Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc1155TansferBatchEventSignatureHash = Web3.keccak(text='TransferBatch(address,address,address,uint256[],uint256[])').hex()
@@ -100,11 +100,20 @@ class BlockProcessor:
 
     @staticmethod
     def decode_transaction_data(data):
-        ids = textwrap.wrap(data[:len(data)//2],64)
-        values = textwrap.wrap(data[len(data)//2:],64)
-        ids = [literal_eval(f'0x{id}') for id in ids]
-        values = [literal_eval(f'0x{value}') for value in values]
-        dataDict = {ids[i]: values[i] for i in range(len(ids))}
+        tokenIds = []
+        amount = []
+        test = textwrap.wrap(data[2:],64)
+        test = [literal_eval(f'0x{elem}') for elem in test]
+        if len(test) >2:
+            lengthOfArray = test[2]
+            tokenIds = test[3:3+lengthOfArray]
+            lengthOfValue = test[3+lengthOfArray]
+            amount = test[4+lengthOfArray:4+lengthOfArray+lengthOfValue]
+        else:
+            tokenIds = test[:1]
+            amount = test[1:]
+
+        dataDict = {tokenIds[i]: amount[i] for i in range(len(tokenIds))}
         return dataDict
 
     async def _process_erc1155_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
@@ -117,15 +126,14 @@ class BlockProcessor:
         operatorAddress = normalize_address(event['topics'][1].hex())
         fromAddress = normalize_address(event['topics'][2].hex())
         toAddress = normalize_address(event['topics'][3].hex())
-        data = event['data'][2:]
-        dict = self.decode_transaction_data(data)
+        data = self.decode_transaction_data(event['data'])
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
         ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
         gasUsed = ethTransactionReceipt['gasUsed']
-        transaction = [ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for (id, amount) in dict.items()]
+        transaction = [ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for (id, amount) in data.items()]
         return transaction
 
     async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
