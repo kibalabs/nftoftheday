@@ -143,9 +143,15 @@ class NotdManager:
                 return
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        await self._create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfers)
-        await asyncio.gather(*[self.update_token_metadata_deferred(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers])
-        await asyncio.gather(*[self.update_collection_deferred(address=address) for address in set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers)])
+        if isinstance(retrievedTokenTransfers,list):
+            for retrievedTokenTransfer in retrievedTokenTransfers:
+                await self._create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfer)
+                await asyncio.gather(*[self.update_token_metadata_deferred(registryAddress=retrievedTokenT.registryAddress, tokenId=retrievedTokenT.tokenId) for retrievedTokenT in retrievedTokenTransfer])
+                await asyncio.gather(*[self.update_collection_deferred(address=address) for address in set(retrievedToken.registryAddress for retrievedToken in retrievedTokenTransfer)])
+        else :
+            await self._create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfers)
+            await asyncio.gather(*[self.update_token_metadata_deferred(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers])
+            await asyncio.gather(*[self.update_collection_deferred(address=address) for address in set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers)])
 
     @async_lru.alru_cache(maxsize=100000)
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
