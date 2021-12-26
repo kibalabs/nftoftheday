@@ -78,16 +78,16 @@ class BlockProcessor:
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         erc721TokenTransfers = []
-        erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
-        logging.info(f'Found {len(erc721events)} events in block #{blockNumber}')
-        for erc721EventsChunk in list_util.generate_chunks(erc721events, 5):
-            erc721TokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc721EventsChunk])
+        #erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
+        #logging.info(f'Found {len(erc721events)} events in block #{blockNumber}')
+        #for erc721EventsChunk in list_util.generate_chunks(erc721events, 5):
+        #    erc721TokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc721EventsChunk])
 
         erc1155TokenTransfers = []
-        erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
-        logging.info(f'Found {len(erc1155events)} erc1155events in block #{blockNumber}')
-        for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 5):
-            erc1155TokenTransfers += await asyncio.gather(*[self._process_erc1155_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk])
+        #erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
+        #logging.info(f'Found {len(erc1155events)} erc1155events in block #{blockNumber}')
+        #for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 5):
+        #    erc1155TokenTransfers += await asyncio.gather(*[self._process_erc1155_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk])
 
         erc1155BatchTokenTransfers = []
         erc1155Batchevents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
@@ -112,7 +112,6 @@ class BlockProcessor:
         else:
             tokenIds = test[:1]
             amount = test[1:]
-
         dataDict = {tokenIds[i]: amount[i] for i in range(len(tokenIds))}
         return dataDict
 
