@@ -108,6 +108,7 @@ jobs:
           host: ${{ secrets.APIBOX_URL }}
           username: ${{ secrets.APIBOX_USER }}
           key: ${{ secrets.APIBOX_SSH_KEY }}
+          port: ${{ secrets.APIBOX_PORT }}
           envs: DOCKER_IMAGE,NAME
           script_stop: true
           script: |
