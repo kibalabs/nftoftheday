@@ -78,16 +78,16 @@ class BlockProcessor:
         blockHash = block['hash'].hex()
         blockDate = datetime.datetime.fromtimestamp(block['timestamp'])
         erc721TokenTransfers = []
-        #erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
-        #logging.info(f'Found {len(erc721events)} events in block #{blockNumber}')
-        #for erc721EventsChunk in list_util.generate_chunks(erc721events, 5):
-        #    erc721TokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc721EventsChunk])
+        erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
+        logging.info(f'Found {len(erc721events)} events in block #{blockNumber}')
+        for erc721EventsChunk in list_util.generate_chunks(erc721events, 5):
+            erc721TokenTransfers += await asyncio.gather(*[self._process_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc721EventsChunk])
 
         erc1155TokenTransfers = []
-        #erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
-        #logging.info(f'Found {len(erc1155events)} erc1155events in block #{blockNumber}')
-        #for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 5):
-        #    erc1155TokenTransfers += await asyncio.gather(*[self._process_erc1155_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk])
+        erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
+        logging.info(f'Found {len(erc1155events)} erc1155events in block #{blockNumber}')
+        for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 5):
+            erc1155TokenTransfers += await asyncio.gather(*[self._process_erc1155_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk])
 
         erc1155BatchTokenTransfers = []
         erc1155Batchevents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
@@ -95,7 +95,7 @@ class BlockProcessor:
         for erc1155BatchEventsChunk in list_util.generate_chunks(erc1155Batchevents, 5):
             erc1155BatchTokenTransfers += await asyncio.gather(*[self._process_erc1155_batch_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155BatchEventsChunk])
 
-        tokenTransferList = [tokenTransfer for tokenTransfer in erc1155BatchTokenTransfers[0] if tokenTransfer] + [tokenTransfer for tokenTransfer in erc1155TokenTransfers if tokenTransfer] + [tokenTransfer for tokenTransfer in erc721TokenTransfers if tokenTransfer]
+        tokenTransferList = [tokenTransfer for tokenTransfer in erc1155BatchTokenTransfers for tokenTransfer in tokenTransfer] + [tokenTransfer for tokenTransfer in erc1155TokenTransfers if tokenTransfer] + [tokenTransfer for tokenTransfer in erc721TokenTransfers if tokenTransfer]
         return  tokenTransferList
 
     @staticmethod
@@ -147,15 +147,21 @@ class BlockProcessor:
         operatorAddress = normalize_address(event['topics'][1].hex())
         fromAddress = normalize_address(event['topics'][2].hex())
         toAddress = normalize_address(event['topics'][3].hex())
-        data = self.decode_transaction_data(event['data'])
+        data = event['data']
+        data = textwrap.wrap(data[2:],64)
+        data = [literal_eval(f'0x{elem}') for elem in data]
+        lengthOfArray = data[2]
+        tokenIds = data[3:3+lengthOfArray]
+        lengthOfValue = data[3+lengthOfArray]
+        amounts = data[4+lengthOfArray:4+lengthOfArray+lengthOfValue]
+        dataDict = {tokenIds[i]: amounts[i] for i in range(len(tokenIds))}
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
         ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
         gasUsed = ethTransactionReceipt['gasUsed']
-        transaction = [ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for (id, amount) in data.items()]
-        #print(f'transactions : {transaction}')
+        transaction = [ERC1155TokenTransfer(transactionHash=transactionHash, operatorAddress=operatorAddress, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for (id, amount) in dataDict.items()]
         return transaction
 
     async def _process_event(self, event: LogReceipt, blockNumber: int, blockHash: str, blockDate: datetime.datetime) -> Optional[RetrievedTokenTransfer]:
