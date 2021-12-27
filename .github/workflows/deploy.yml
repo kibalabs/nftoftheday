@@ -1,6 +1,6 @@
 name: Deploy
 on:
-  push:
+  pull_request:
     branches: [ main ]
 jobs:
   deploy-app:
@@ -75,9 +75,10 @@ jobs:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.FREEBOX_URL }}
-          username: ${{ secrets.FREEBOX_USER }}
-          key: ${{ secrets.FREEBOX_SSH_KEY }}
+          host: ${{ secrets.WORKERBOX_URL }}
+          username: ${{ secrets.WORKERBOX_USER }}
+          key: ${{ secrets.WORKERBOX_SSH_KEY }}
+          port: ${{ secrets.PORT }}
           envs: DOCKER_IMAGE,NAME
           script_stop: true
           script: |
@@ -104,9 +105,9 @@ jobs:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.FREEBOX_URL }}
-          username: ${{ secrets.FREEBOX_USER }}
-          key: ${{ secrets.FREEBOX_SSH_KEY }}
+          host: ${{ secrets.APIBOX_URL }}
+          username: ${{ secrets.APIBOX_USER }}
+          key: ${{ secrets.APIBOX_SSH_KEY }}
           envs: DOCKER_IMAGE,NAME
           script_stop: true
           script: |
