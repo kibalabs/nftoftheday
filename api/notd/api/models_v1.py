@@ -120,7 +120,7 @@ class ApiCollectionToken(BaseModel):
 
     @classmethod
     def from_model(cls, model: TokenMetadata):
-        attributes = [{key: value for (key,value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in model.attributes]
+        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in model.attributes]
         return cls(
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
