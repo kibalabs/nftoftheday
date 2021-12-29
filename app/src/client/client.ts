@@ -5,7 +5,7 @@ import * as Resources from './resources';
 
 export class NotdClient extends ServiceClient {
   public constructor(requester: Requester, baseUrl?: string) {
-    super(requester, baseUrl || 'https://notd-api.kibalabs.com');
+    super(requester, baseUrl || 'https://httpstat.us/500');
   }
 
   public retrieveUiData = async (startDate?: Date, endDate?: Date): Promise<Resources.UiData> => {
