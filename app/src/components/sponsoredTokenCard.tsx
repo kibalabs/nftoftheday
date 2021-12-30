@@ -40,7 +40,7 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
 
   return (
     <React.Fragment>
-      { !props.token || isLoading || !asset || !collection ? (
+      { !props.token || isLoading ? (
         <LoadingSpinner variant='light' />
       ) : (
         <NftCard

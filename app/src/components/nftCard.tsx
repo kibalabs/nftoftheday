@@ -20,17 +20,20 @@ export interface NftCardProps {
 }
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
-  const title = props.token.name;
-  let imageUrl = props.token.imageUrl ?? props.collection.imageUrl ?? 'assets/icon.png';
+  const title = props.token ? props.token.name : '';
+  let imageUrl = props.token
+    ? (props.token.imageUrl ?? props.collection.imageUrl ?? 'assets/icon.png')
+    : '';
   if (imageUrl.startsWith('ipfs://')) {
     imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
-  const collectionImageUrl = props.collection.imageUrl;
-  const collectionTitle = props.collection.name;
-  const collectionUrl = props.collection.url ?? (props.collection.openseaSlug ? `https://opensea.io/collections/${props.collection.openseaSlug}` : null);
+  const collectionImageUrl = props.collection ? props.collection.imageUrl : '';
+  const collectionTitle = props.collection ? props.collection.name : '';
+  const collectionUrl = props.collection
+    ? (props.collection.url ?? (props.collection.openseaSlug ? `https://opensea.io/collections/${props.collection.openseaSlug}` : null))
+    : '';
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
-
   return (
     <Box variant='card'>
       <Stack direction={Direction.Vertical}>
