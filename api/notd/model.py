@@ -14,22 +14,7 @@ class RetrievedTokenTransfer:
     registryAddress: str
     fromAddress: str
     toAddress: str
-    tokenId: str
-    value: int
-    gasLimit: int
-    gasPrice: int
-    gasUsed: int
-    blockNumber: int
-    blockHash: str
-    blockDate: datetime.datetime
-
-@dataclasses.dataclass(frozen=True, unsafe_hash=True)
-class ERC1155TokenTransfer:
-    transactionHash: str
-    registryAddress: str
     operatorAddress: str
-    fromAddress: str
-    toAddress: str
     tokenId: str
     amount: int
     value: int
@@ -39,7 +24,7 @@ class ERC1155TokenTransfer:
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
-
+    tokenType: str
 
 @dataclasses.dataclass
 class RetrievedTokenMetadata:
@@ -84,14 +69,17 @@ class TokenTransfer(RetrievedTokenTransfer):
             'registryAddress': self.registryAddress,
             'fromAddress': self.fromAddress,
             'toAddress': self.toAddress,
+            'operatorAddress':self.operatorAddress,
             'tokenId': self.tokenId,
             'value': self.value,
+            'amount': self.amount,
             'gasLimit': self.gasLimit,
             'gasPrice': self.gasPrice,
             'gasUsed': self.gasUsed,
             'blockNumber': self.blockNumber,
             'blockHash': self.blockHash,
             'blockDate': self.blockDate.isoformat(),
+            'tokenType': self.tokenType,
         }
 
 
