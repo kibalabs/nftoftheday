@@ -69,7 +69,7 @@ class TokenTransfer(RetrievedTokenTransfer):
             'registryAddress': self.registryAddress,
             'fromAddress': self.fromAddress,
             'toAddress': self.toAddress,
-            'operatorAddress':self.operatorAddress,
+            'operatorAddress': self.operatorAddress,
             'tokenId': self.tokenId,
             'value': self.value,
             'amount': self.amount,
