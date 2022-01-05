@@ -126,8 +126,6 @@ class NotdManager:
                         StringFieldFilter(fieldName=TokenTransfersTable.c.transactionHash.key, eq=retrievedTokenTransfer.transactionHash),
                         StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=retrievedTokenTransfer.registryAddress),
                         StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=retrievedTokenTransfer.tokenId),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=retrievedTokenTransfer.fromAddress),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=retrievedTokenTransfer.toAddress),
                     ], limit=1, shouldIgnoreRegistryBlacklist=True
                 )
                 if len(tokenTransfers) == 0:
