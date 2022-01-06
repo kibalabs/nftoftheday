@@ -50,9 +50,7 @@ async def main():
     messageQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient)
 
     await database.connect()
-    await messageQueueProcessor.run()
-
-    # NOTE(krishan711): This is to tidy up, I'm not sure if this will ever be called
+    await messageQueueProcessor.run_batches(batchSize=10, totalMessageLimit=10000)
     await database.disconnect()
     await requester.close_connections()
 
