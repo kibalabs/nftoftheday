@@ -60,7 +60,7 @@ jobs:
                 --name ${NAME} \
                 --detach \
                 --publish-all \
-                --restart on-failure \
+                --restart unless-stopped \
                 --env NAME=${NAME} \
                 --env VIRTUAL_HOST=${url} \
                 --env LETSENCRYPT_HOST=${url} \
@@ -91,7 +91,7 @@ jobs:
                 --name ${NAME} \
                 --detach \
                 --publish-all \
-                --restart on-failure \
+                --restart unless-stopped \
                 --env NAME=${NAME} \
                 --env VIRTUAL_HOST=${url} \
                 --env LETSENCRYPT_HOST=${url} \
@@ -121,7 +121,7 @@ jobs:
                 --name ${NAME} \
                 --detach \
                 --publish-all \
-                --restart on-failure \
+                --restart unless-stopped \
                 --memory=768m \
                 --cpus=$(echo "scale=2 ; $(grep -c ^processor /proc/cpuinfo) / 1.5" | bc) \
                 --env NAME=${NAME} \

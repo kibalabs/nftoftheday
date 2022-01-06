@@ -128,8 +128,10 @@ class NotdManager:
                         StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=retrievedTokenTransfer.tokenId),
                     ], limit=1, shouldIgnoreRegistryBlacklist=True
                 )
-                if len(tokenTransfers) == 0:
-                    await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
+                if len(tokenTransfers) > 0:
+                    logging.info(f'Skipping saving {retrievedTokenTransfer.transactionHash}:{retrievedTokenTransfer.registryAddress}:{retrievedTokenTransfer.tokenId} as its already saved')
+                    continue
+                await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
 
     async def process_block(self, blockNumber: int, shouldForce: bool = False) -> None:
         if not shouldForce:
