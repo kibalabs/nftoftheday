@@ -45,11 +45,12 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor, revueApiKey: str):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor, revueApiKey: str):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
+        self.tokenQueue = tokenQueue
         self.openseaClient = openseaClient
         self.tokenClient = tokenClient
         self.requester = requester
@@ -161,7 +162,7 @@ class NotdManager:
         if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
             logging.info('Skipping token because it has been updated recently.')
             return
-        await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
+        await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         savedTokenMetadatas = await self.retriever.list_token_metadatas(
@@ -211,7 +212,7 @@ class NotdManager:
             else:
                 registryToken = await self.openseaClient.retrieve_registry_token(registryAddress=registryAddress, tokenId=tokenId)
                 self._tokenCache[cacheKey] = registryToken
-            await self.workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
+            await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
             tokenMetadata = TokenMetadata(tokenMetadataId=-1, createdDate=datetime.datetime.now(), updatedDate=datetime.datetime.now(), registryAddress=registryToken.registryAddress, tokenId=registryToken.tokenId, metadataUrl=registryToken.openSeaUrl, imageUrl=registryToken.imageUrl, name=registryToken.name, description=None, attributes=[])
         return tokenMetadata
 
@@ -226,7 +227,7 @@ class NotdManager:
         if not shouldForce and collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
             logging.info('Skipping collection because it has been updated recently.')
             return
-        await self.workQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
+        await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
         collections = await self.retriever.list_collections(
