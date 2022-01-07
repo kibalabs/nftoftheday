@@ -4,7 +4,6 @@ import json
 import logging
 from typing import List
 from typing import Optional
-from ast import literal_eval
 import textwrap
 
 import async_lru
@@ -105,7 +104,7 @@ class BlockProcessor:
         toAddress = normalize_address(event['topics'][3].hex())
         data = event['data']
         data = textwrap.wrap(data[2:], 64)
-        data = [literal_eval(f'0x{elem}') for elem in data]
+        data = [int(f'0x{elem}',16) for elem in data]
         tokenId = data[0]
         amount = data[1]
         ethTransaction = await self._get_transaction(transactionHash=transactionHash)
@@ -129,7 +128,7 @@ class BlockProcessor:
         toAddress = normalize_address(event['topics'][3].hex())
         data = event['data']
         data = textwrap.wrap(data[2:], 64)
-        data = [literal_eval(f'0x{elem}') for elem in data]
+        data = [int(f'0x{elem}',16) for elem in data]
         lengthOfArray = data[2]
         tokenIds = data[3:3+lengthOfArray]
         lengthOfValue = data[3+lengthOfArray]
