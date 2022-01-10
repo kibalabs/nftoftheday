@@ -42,11 +42,12 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
 
   return (
     <React.Fragment>
-      { !error && (!props.tokenTransfer || isLoading || !asset || !collection) ? (
-        <LoadingSpinner variant='light' />
-      ) : error ? (
+     {error ? (
         <ErrorCard error={error} label='Random' />
       ) : (
+        !props.tokenTransfer || isLoading || !asset || !collection) ? (
+        <LoadingSpinner variant='light' />
+         ) : (
         <NftCard
           token={asset}
           collection={collection}

@@ -24,9 +24,9 @@ export const ErrorCard = (props: ErrorCardProps): React.ReactElement => {
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide}>
           <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
             <Box width='175px' height='300px'>
-              <Text variant='header3'>Sorry, Something went wrong.   </Text>
+              <Text variant='header4'>Sorry, Something went wrong.   </Text>
               <Spacing variant={PaddingSize.Wide} />
-              <Text variant='header3'> Please Refresh the page.</Text>
+              <Text variant='header4'> Please Refresh the page.</Text>
             </Box>
           </Stack.Item>
           <Spacing variant={PaddingSize.Wide} />

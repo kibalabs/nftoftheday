@@ -41,11 +41,12 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
 
   return (
     <React.Fragment>
-      { !error && (!props.tokenTransfers || isLoading || !asset || !collection) ? (
-        <LoadingSpinner variant='light' />
-      ) : error ? (
+      {error ? (
         <ErrorCard error={error} label='Most Traded' />
       ) : (
+        !props.tokenTransfers || isLoading || !asset || !collection) ? (
+        <LoadingSpinner variant='light' />
+         ) : (
         <NftCard
           token={asset}
           collection={collection}

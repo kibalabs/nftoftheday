@@ -40,18 +40,6 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           </Box>
           <Spacing variant={PaddingSize.Wide} />
         </Stack.Item>
-        {props.error ? (
-          <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide}>
-            <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
-              <Box width='175px' height='300px'>
-                <Text variant='header3'>Sorry, Something went wrong.   </Text>
-                <Spacing variant={PaddingSize.Wide} />
-                <Text variant='header3'> Please Refresh the page.</Text>
-              </Box>
-            </Stack.Item>
-            <Spacing variant={PaddingSize.Wide} />
-          </Stack>
-        ) : (
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>
               <Box width='150px' height='150px'>
@@ -98,7 +86,6 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
             </Stack>
             <Spacing variant={PaddingSize.Wide2} />
           </Stack>
-        )}
       </Stack>
     </Box>
   );

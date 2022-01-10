@@ -41,11 +41,12 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
 
   return (
     <React.Fragment>
-      {!error && (!props.token || isLoading || !asset || !collection) ? (
-        <LoadingSpinner variant='light' />
-      ) : error ? (
+     {error ? (
         <ErrorCard error={error} label='Sponsored' />
       ) : (
+        !props.token || isLoading || !asset || !collection) ? (
+        <LoadingSpinner variant='light' />
+         ) : (
         <NftCard
           token={asset}
           collection={collection}

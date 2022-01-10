@@ -42,11 +42,12 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
 
   return (
     <React.Fragment>
-      {!error && (!props.tokenTransfer || isLoading || !asset || !collection) ? (
-        <LoadingSpinner variant='light' />
-      ) : error ? (
+    {error ? (
         <ErrorCard error={error} label='Highest Priced' />
       ) : (
+        !props.tokenTransfer || isLoading || !asset || !collection) ? (
+        <LoadingSpinner variant='light' />
+         ) : (
         <NftCard
           token={asset}
           collection={collection}
