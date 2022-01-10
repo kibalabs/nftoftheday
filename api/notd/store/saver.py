@@ -40,14 +40,17 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
             TokenTransfersTable.c.fromAddress.key: retrievedTokenTransfer.fromAddress,
             TokenTransfersTable.c.toAddress.key: retrievedTokenTransfer.toAddress,
+            TokenTransfersTable.c.operatorAddress.key: retrievedTokenTransfer.operatorAddress,
             TokenTransfersTable.c.tokenId.key: retrievedTokenTransfer.tokenId,
             TokenTransfersTable.c.value.key: retrievedTokenTransfer.value,
+            TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,
             TokenTransfersTable.c.gasLimit.key: retrievedTokenTransfer.gasLimit,
             TokenTransfersTable.c.gasPrice.key: retrievedTokenTransfer.gasPrice,
             TokenTransfersTable.c.gasUsed.key: retrievedTokenTransfer.gasUsed,
             TokenTransfersTable.c.blockNumber.key: retrievedTokenTransfer.blockNumber,
             TokenTransfersTable.c.blockHash.key: retrievedTokenTransfer.blockHash,
             TokenTransfersTable.c.blockDate.key: retrievedTokenTransfer.blockDate,
+            TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
         })
         return TokenTransfer(
             tokenTransferId=tokenTransferId,
@@ -55,14 +58,17 @@ class Saver(CoreSaver):
             registryAddress=retrievedTokenTransfer.registryAddress,
             fromAddress=retrievedTokenTransfer.fromAddress,
             toAddress=retrievedTokenTransfer.toAddress,
+            operatorAddress=retrievedTokenTransfer.operatorAddress,
             tokenId=retrievedTokenTransfer.tokenId,
             value=retrievedTokenTransfer.value,
+            amount=retrievedTokenTransfer.amount,
             gasLimit=retrievedTokenTransfer.gasLimit,
             gasPrice=retrievedTokenTransfer.gasPrice,
             gasUsed=retrievedTokenTransfer.gasUsed,
             blockNumber=retrievedTokenTransfer.blockNumber,
             blockHash=retrievedTokenTransfer.blockHash,
             blockDate=retrievedTokenTransfer.blockDate,
+            tokenType=retrievedTokenTransfer.tokenType
         )
 
     async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:

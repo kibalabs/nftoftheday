@@ -14,7 +14,9 @@ class RetrievedTokenTransfer:
     registryAddress: str
     fromAddress: str
     toAddress: str
+    operatorAddress: Optional[str]
     tokenId: str
+    amount: Optional[int]
     value: int
     gasLimit: int
     gasPrice: int
@@ -22,7 +24,7 @@ class RetrievedTokenTransfer:
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
-
+    tokenType: Optional[str]
 
 @dataclasses.dataclass
 class RetrievedTokenMetadata:
@@ -67,14 +69,17 @@ class TokenTransfer(RetrievedTokenTransfer):
             'registryAddress': self.registryAddress,
             'fromAddress': self.fromAddress,
             'toAddress': self.toAddress,
+            'operatorAddress': self.operatorAddress,
             'tokenId': self.tokenId,
             'value': self.value,
+            'amount': self.amount,
             'gasLimit': self.gasLimit,
             'gasPrice': self.gasPrice,
             'gasUsed': self.gasUsed,
             'blockNumber': self.blockNumber,
             'blockHash': self.blockHash,
             'blockDate': self.blockDate.isoformat(),
+            'tokenType': self.tokenType,
         }
 
 

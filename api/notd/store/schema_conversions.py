@@ -17,14 +17,17 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         registryAddress=row[TokenTransfersTable.c.registryAddress],
         fromAddress=row[TokenTransfersTable.c.fromAddress],
         toAddress=row[TokenTransfersTable.c.toAddress],
+        operatorAddress=row[TokenTransfersTable.c.operatorAddress],
         tokenId=row[TokenTransfersTable.c.tokenId],
         value=row[TokenTransfersTable.c.value],
+        amount=row[TokenTransfersTable.c.amount],
         gasLimit=row[TokenTransfersTable.c.gasLimit],
         gasPrice=row[TokenTransfersTable.c.gasPrice],
         gasUsed=row[TokenTransfersTable.c.gasUsed],
         blockNumber=row[TokenTransfersTable.c.blockNumber],
         blockHash=row[TokenTransfersTable.c.blockHash],
         blockDate=row[TokenTransfersTable.c.blockDate].replace(tzinfo=datetime.timezone.utc),
+        tokenType=row[TokenTransfersTable.c.tokenType],
     )
 
 def token_metadata_from_row(row: Mapping) -> TokenMetadata:
