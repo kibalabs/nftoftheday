@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@kibalabs/ui-react';
 
 import { Collection, CollectionToken, TokenTransfer } from '../client/resources';
 import { useGlobals } from '../globalsContext';
+import { ErrorCard } from './errorCard';
 import { NftCard } from './nftCard';
 
 export type HighestPricedTokenTransferCardProps = {
@@ -41,21 +42,23 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
 
   return (
     <React.Fragment>
-      { !props.tokenTransfer || isLoading || !asset || !collection ? (
-        <LoadingSpinner variant='light' />
+      {error ? (
+        <ErrorCard error={error} label='Highest Priced' />
       ) : (
-        <NftCard
-          token={asset}
-          collection={collection}
-          label='Highest Priced'
-          subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-          primaryButtonText='View on OpenSea'
-          primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfer.registryAddress}/${props.tokenTransfer.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
-          secondaryButtonText='View Tx'
-          secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
-          error ={error}
-        />
-      )}
+        !props.tokenTransfer || isLoading || !asset || !collection) ? (
+          <LoadingSpinner variant='light' />
+        ) : (
+          <NftCard
+            token={asset}
+            collection={collection}
+            label='Highest Priced'
+            subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
+            primaryButtonText='View on OpenSea'
+            primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfer.registryAddress}/${props.tokenTransfer.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
+            secondaryButtonText='View Tx'
+            secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
+          />
+        )}
     </React.Fragment>
   );
 };
