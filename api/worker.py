@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 
 import boto3
 from core.aws_requester import AwsRequester
@@ -30,6 +31,7 @@ async def main():
 
     sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    tokenQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     s3Client = boto3.client(service_name='s3', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     requester = Requester()
@@ -43,16 +45,24 @@ async def main():
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient)
 
     revueApiKey = os.environ['REVUE_API_KEY']
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor, collectionProcessor=collectionProcessor, revueApiKey=revueApiKey)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor, collectionProcessor=collectionProcessor, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-    messageQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient)
+    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient)
+    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, slackClient=slackClient)
 
     await database.connect()
-    await messageQueueProcessor.run()
-
-    # NOTE(krishan711): This is to tidy up, I'm not sure if this will ever be called
+    while True:
+        hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=10)
+        if hasProcessedWork:
+            continue
+        hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10)
+        if hasProcessedToken:
+            continue
+        logging.info('No message received.. sleeping')
+        time.sleep(30)
+    # NOTE(krishan711): code will never get here
     await database.disconnect()
     await requester.close_connections()
 

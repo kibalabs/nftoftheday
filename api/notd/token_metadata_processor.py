@@ -83,6 +83,8 @@ class TokenMetadataProcessor():
             tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8')).decode('utf-8')
         elif dataString.startswith('data:application/json;utf8,'):
             tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
+        elif dataString.startswith('data:application/json;ascii,'):
+            tokenMetadataJson = dataString.replace('data:application/json;ascii,', '', 1)
         elif dataString.startswith('data:application/json;charset=utf-8,'):
             tokenMetadataJson = dataString.replace('data:application/json;charset=utf-8,', '', 1)
         elif dataString.startswith('data:application/json,'):
@@ -133,12 +135,10 @@ class TokenMetadataProcessor():
             raise TokenDoesNotExistException()
         tokenMetadataUriResponse = None
         badRequestException = None
-        doesSupportErc721 = False
-        doesSupportErc1155 = False
         try:
             doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
         except:  # pylint: disable=bare-except
-            pass
+            doesSupportErc721 = False
         if doesSupportErc721:
             try:
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
@@ -148,7 +148,7 @@ class TokenMetadataProcessor():
             try:
                 doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
             except:  # pylint: disable=bare-except
-                pass
+                doesSupportErc1155 = False
             if doesSupportErc1155:
                 try:
                     tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]

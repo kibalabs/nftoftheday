@@ -1,7 +1,7 @@
 name: Deploy
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
@@ -53,18 +53,17 @@ jobs:
           script_stop: true
           script: |
             url="nft.tokenhunt.io"
-            varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
                 --name ${NAME} \
                 --detach \
                 --publish-all \
-                --restart on-failure \
+                --restart unless-stopped \
                 --env NAME=${NAME} \
                 --env VIRTUAL_HOST=${url} \
                 --env LETSENCRYPT_HOST=${url} \
-                --env-file ${varsFile} \
+                --env-file ~/.${NAME}.vars \
                 ${DOCKER_IMAGE}
   run-api:
     needs: deploy-api
@@ -84,18 +83,17 @@ jobs:
           script_stop: true
           script: |
             url="notd-api.kibalabs.com"
-            varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
                 --name ${NAME} \
                 --detach \
                 --publish-all \
-                --restart on-failure \
+                --restart unless-stopped \
                 --env NAME=${NAME} \
                 --env VIRTUAL_HOST=${url} \
                 --env LETSENCRYPT_HOST=${url} \
-                --env-file ${varsFile} \
+                --env-file ~/.${NAME}.vars \
                 ${DOCKER_IMAGE} './start-api.sh'
   run-worker:
     needs: deploy-api
@@ -114,16 +112,15 @@ jobs:
           envs: DOCKER_IMAGE,NAME
           script_stop: true
           script: |
-            varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
                 --name ${NAME} \
                 --detach \
                 --publish-all \
-                --restart on-failure \
+                --restart unless-stopped \
                 --memory=768m \
                 --cpus=$(echo "scale=2 ; $(grep -c ^processor /proc/cpuinfo) / 1.5" | bc) \
                 --env NAME=${NAME} \
-                --env-file ${varsFile} \
+                --env-file ~/.${NAME}.vars \
                 ${DOCKER_IMAGE} './start-worker.sh'
