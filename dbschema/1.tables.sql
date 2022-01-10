@@ -4,7 +4,7 @@ CREATE TABLE tbl_token_transfers (
     registry_address TEXT NOT NULL,
     from_address TEXT NOT NULL,
     to_address TEXT NOT NULL,
-    operator_address TEXT NOT NULL,
+    operator_address TEXT,
     token_id TEXT NOT NULL,
     value NUMERIC(256, 0) NOT NULL,
     amount NUMERIC(256, 0) NOT NULL,
