@@ -16,7 +16,7 @@ class RetrievedTokenTransfer:
     toAddress: str
     operatorAddress: Optional[str]
     tokenId: str
-    amount: int
+    amount: Optional[int]
     value: int
     gasLimit: int
     gasPrice: int
@@ -24,7 +24,7 @@ class RetrievedTokenTransfer:
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
-    tokenType: str
+    tokenType: Optional[str]
 
 @dataclasses.dataclass
 class RetrievedTokenMetadata:
