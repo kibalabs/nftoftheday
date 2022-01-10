@@ -14,7 +14,7 @@ class RetrievedTokenTransfer:
     registryAddress: str
     fromAddress: str
     toAddress: str
-    operatorAddress: str
+    operatorAddress: Optional[str]
     tokenId: str
     amount: int
     value: int
