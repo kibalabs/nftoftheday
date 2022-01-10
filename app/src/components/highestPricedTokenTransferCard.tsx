@@ -42,23 +42,23 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
 
   return (
     <React.Fragment>
-    {error ? (
+      {error ? (
         <ErrorCard error={error} label='Highest Priced' />
       ) : (
         !props.tokenTransfer || isLoading || !asset || !collection) ? (
-        <LoadingSpinner variant='light' />
-         ) : (
-        <NftCard
-          token={asset}
-          collection={collection}
-          label='Highest Priced'
-          subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-          primaryButtonText='View on OpenSea'
-          primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfer.registryAddress}/${props.tokenTransfer.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
-          secondaryButtonText='View Tx'
-          secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
-        />
-      )}
+          <LoadingSpinner variant='light' />
+        ) : (
+          <NftCard
+            token={asset}
+            collection={collection}
+            label='Highest Priced'
+            subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
+            primaryButtonText='View on OpenSea'
+            primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfer.registryAddress}/${props.tokenTransfer.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
+            secondaryButtonText='View Tx'
+            secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
+          />
+        )}
     </React.Fragment>
   );
 };

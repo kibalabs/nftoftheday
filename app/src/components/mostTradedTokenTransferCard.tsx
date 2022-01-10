@@ -45,19 +45,19 @@ export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardPr
         <ErrorCard error={error} label='Most Traded' />
       ) : (
         !props.tokenTransfers || isLoading || !asset || !collection) ? (
-        <LoadingSpinner variant='light' />
-         ) : (
-        <NftCard
-          token={asset}
-          collection={collection}
-          label='Most Traded'
-          subtitle={`Traded ${props.tokenTransfers.length} times today`}
-          primaryButtonText='View on OpenSea'
-          primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfers[0].registryAddress}/${props.tokenTransfers[0].tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
-          secondaryButtonText='View Tx'
-          secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
-        />
-      )}
+          <LoadingSpinner variant='light' />
+        ) : (
+          <NftCard
+            token={asset}
+            collection={collection}
+            label='Most Traded'
+            subtitle={`Traded ${props.tokenTransfers.length} times today`}
+            primaryButtonText='View on OpenSea'
+            primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfers[0].registryAddress}/${props.tokenTransfers[0].tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
+            secondaryButtonText='View Tx'
+            secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
+          />
+        )}
     </React.Fragment>
   );
 };
