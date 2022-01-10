@@ -35,7 +35,6 @@ class Saver(CoreSaver):
             await transaction.commit()
 
     async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer) -> TokenTransfer:
-        print('retrievedTokenTransfer', retrievedTokenTransfer)
         tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={  # pylint: disable=no-value-for-parameter
             TokenTransfersTable.c.transactionHash.key: retrievedTokenTransfer.transactionHash,
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
