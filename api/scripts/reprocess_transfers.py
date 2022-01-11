@@ -1,3 +1,4 @@
+from contextvars import Token
 import os
 import sys
 
@@ -21,7 +22,7 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 @click.command()
 @click.option('-s', '--start-id-number', 'startId', required=True, type=int)
 @click.option('-e', '--end-id-number', 'endId', required=True, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=5)
 async def reprocess_metadata(startId: int, endId: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database)
@@ -37,17 +38,19 @@ async def reprocess_metadata(startId: int, endId: int, batchSize: int):
         logging.info(f'Working on {start} to {end}...')
         async with database.transaction():
             query = TokenTransfersTable.select()
-            query = query.where(TokenTransfersTable.c.tokenTransfersId >= start)
-            query = query.where(TokenTransfersTable.c.tokenTransfersId < end)
+            query = query.where(TokenTransfersTable.c.tokenTransferId >= start)
+            query = query.where(TokenTransfersTable.c.tokenTransferId < end)
             query = query.where(TokenTransfersTable.c.tokenType == None)
-            tokenTransfersToUpdate = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
-            logging.info(f'Updating {len(tokenTransfersToUpdate)} transfers...')
-            for tokenTransfers in tokenTransfersToUpdate:
-                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransfersId == tokenTransfers)
-                values = {}
-                values[TokenTransfersTable.c.tokenType.key] = 'erc721single'
-                values[TokenTransfersTable.c.amount.key] = 1
-            await database.execute(query=query, values=values)
+            query = query.where(TokenTransfersTable.c.amount == None)
+            tokenTransfersToChange = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
+            logging.info(f'Updating {len(tokenTransfersToChange)} transfers...')
+            for tokenTransfer in tokenTransfersToChange:
+                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId)
+                values = {
+                    TokenTransfersTable.c.tokenType.key: 'erc721single',
+                    TokenTransfersTable.c.amount.key: 1,
+                }
+                await database.execute(query=query, values=values)
 
         currentId = currentId + batchSize
     await database.disconnect()
