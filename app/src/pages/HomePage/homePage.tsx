@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaApp, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, MarkdownText, PaddingSize, ResponsiveContainingView, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Token, TokenTransfer, UiData } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
@@ -11,13 +11,23 @@ import { MostTradedTokenTransferCard } from '../../components/mostTradedTokenTra
 import { RandomTokenTransferCard } from '../../components/randomTokenTransferCard';
 import { SponsoredTokenCard } from '../../components/sponsoredTokenCard';
 import { useGlobals } from '../../globalsContext';
-import { buildNotdTheme } from '../../theme';
 import '../../fonts.css';
 
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
-const theme = buildNotdTheme();
+const getDateString = (startDate: Date): string => {
+  if (startDate !== null) {
+    if (isToday(startDate)) {
+      return 'Today';
+    }
+    if (isYesterday(startDate)) {
+      return 'Yesterday';
+    }
+    return dateToString(startDate, 'dd MMMM yyyy');
+  }
+  return '';
+};
 
 export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
@@ -30,21 +40,15 @@ export const HomePage = (): React.ReactElement => {
   const [error, setError] = React.useState<boolean>(false);
   const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
 
-  const getDateString = (): string => {
-    if (isToday(startDate)) {
-      return 'Today';
-    }
-    if (isYesterday(startDate)) {
-      return 'Yesterday';
-    }
-    return dateToString(startDate, 'dd MMMM yyyy');
-  };
 
   const getTitleDateString = (): string => {
-    if (isToday(startDate)) {
-      return '';
+    if (startDate !== null) {
+      if (isToday(startDate)) {
+        return '';
+      }
+      return `| ${dateToString(startDate, 'dd MMMM yyyy')}`;
     }
-    return `| ${dateToString(startDate, 'dd MMMM yyyy')}`;
+    return '';
   };
 
   React.useEffect((): void => {
@@ -85,7 +89,7 @@ export const HomePage = (): React.ReactElement => {
   };
 
   return (
-    <KibaApp theme={theme} isFullPageApp={true}>
+    <ResponsiveContainingView sizeResponsive={{ base: 12, medium: 10, large: 8 }}>
       <Head headId='home'>
         <title>{`Token Hunt ${getTitleDateString()}`}</title>
       </Head>
@@ -96,7 +100,7 @@ export const HomePage = (): React.ReactElement => {
           <Spacing variant={PaddingSize.Default} />
           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
             <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2019, 10, 1) } />
-            <Text variant='header3'>{getDateString()}</Text>
+            <Text variant='header3'>{getDateString(startDate)}</Text>
             <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
           </Stack>
           <Spacing variant={PaddingSize.Wide2} />
@@ -149,6 +153,6 @@ export const HomePage = (): React.ReactElement => {
         isOpen={isEmailPopupShowing}
         onCloseClicked={() => setIsEmailPopopShowing(false)}
       />
-    </KibaApp>
+    </ResponsiveContainingView>
   );
 };

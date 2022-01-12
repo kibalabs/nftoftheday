@@ -3,7 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Head, KibaApp } from '@kibalabs/ui-react';
+import { KibaApp } from '@kibalabs/ui-react';
 
 import { NotdClient } from './client/client';
 import { GlobalsProvider } from './globalsContext';
@@ -42,8 +42,7 @@ export const App = (): React.ReactElement => {
   return (
     <KibaApp theme={theme} isFullPageApp={true}>
       <GlobalsProvider globals={globals}>
-        <Head headId='app' />
-        <Router routes ={routes} />
+        <Router routes={routes} />
       </GlobalsProvider>
     </KibaApp>
   );
