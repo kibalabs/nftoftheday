@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, MarkdownText, PaddingSize, ResponsiveContainingView, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Token, TokenTransfer, UiData } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
@@ -39,7 +39,6 @@ export const HomePage = (): React.ReactElement => {
   const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
   const [error, setError] = React.useState<boolean>(false);
   const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
-
 
   const getTitleDateString = (): string => {
     if (startDate !== null) {
@@ -89,7 +88,7 @@ export const HomePage = (): React.ReactElement => {
   };
 
   return (
-    <ResponsiveContainingView sizeResponsive={{ base: 12, medium: 10, large: 8 }}>
+    <React.Fragment>
       <Head headId='home'>
         <title>{`Token Hunt ${getTitleDateString()}`}</title>
       </Head>
@@ -153,6 +152,6 @@ export const HomePage = (): React.ReactElement => {
         isOpen={isEmailPopupShowing}
         onCloseClicked={() => setIsEmailPopopShowing(false)}
       />
-    </ResponsiveContainingView>
+    </React.Fragment>
   );
 };
