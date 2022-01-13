@@ -143,9 +143,9 @@ class NotdManager:
                     IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
                 ], limit=1, shouldIgnoreRegistryBlacklist=True,
             )
-            if len(blockTransfers) > 0:
-                logging.info('Skipping block because it already has transfers.')
-                return
+            #if len(blockTransfers) > 0:
+            #    logging.info('Skipping block because it already has transfers.')
+            #    return
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         await self._create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfers)
