@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, LoadingSpinner, MarkdownText, Media, PaddingSize, PaddingView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, LoadingSpinner, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { Collection, CollectionToken } from '../client/resources';
 import { useGlobals } from '../globalsContext';
@@ -70,9 +70,9 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
         {error ? (
           <Text>{error.message}</Text>
         ) : !props.collectionAddress || !props.tokenId || isLoading || !asset || !collection ? (
-            <Stack padding={PaddingSize.Wide3}>
-              <LoadingSpinner variant='light' />
-            </Stack>
+          <Stack padding={PaddingSize.Wide3}>
+            <LoadingSpinner variant='light' />
+          </Stack>
         ) : (
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>

@@ -1,10 +1,10 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, PaddingView, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Token, TokenTransfer, UiData } from '../../client/resources';
+import { UiData } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
 import { HighestPricedTokenTransferCard } from '../../components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from '../../components/mostTradedTokenTransferCard';
@@ -49,10 +49,10 @@ export const HomePage = (): React.ReactElement => {
 
   React.useEffect((): void => {
     setUiData(null);
-    notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
-      setUiData(uiData);
-
-    }).catch(() => {      setError(true);
+    notdClient.retrieveUiData(startDate).then((retrievedUiData: UiData): void => {
+      setUiData(retrievedUiData);
+    }).catch(() => {
+      setError(true);
     });
   }, [startDate, notdClient]);
 
