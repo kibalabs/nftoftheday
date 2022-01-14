@@ -1,4 +1,3 @@
-from contextvars import Token
 import os
 import sys
 
@@ -22,16 +21,9 @@ from databases.core import Database
 
 # from notd.messages import UpdateTokenMetadataMessageContent
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadataTable, TokenTransfersTable
-from notd.store.schema_conversions import token_metadata_from_row, token_transfer_from_row
-from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.store.schema import  TokenTransfersTable
 from notd.block_processor import BlockProcessor
-from notd.model import RetrievedTokenTransfer, TokenTransfer
-from notd.collection_processor import CollectionProcessor
-from notd.manager import NotdManager
-from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
-from notd.token_client import TokenClient
 
 
 @click.command()
@@ -55,19 +47,26 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     await database.connect()
     currentBlockNumber = startBlockNumber
     while currentBlockNumber < endBlockNumber:
-        start = currentBlockNumber
-        end = min(currentBlockNumber + batchSize, endBlockNumber)
-        logging.info(f'Working on {start} to {end}...')
+        logging.info(f'Working on {currentBlockNumber}')
         print(currentBlockNumber)
         retrievedTokenTransfers = await blockProcessor.get_transfers_in_block(blockNumber=currentBlockNumber)
-        tokenTransferInDb = await retriever.list_token_transfers(
+        dbTokenTransfers = await retriever.list_token_transfers(
             fieldFilters=[
-                IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, gte=start),
-                IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, lt=end)
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber),
             ])
-        
-        print(len(set(retrievedTokenTransfers)-set(a)))
-        #print(retrievedTokenTransfers)
+        retrievedTuples = [(retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress, retrievedTokenTransfer.toAddress) for retrievedTokenTransfer in retrievedTokenTransfers]
+        dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress, dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress, dbTokenTransfer.toAddress) for dbTokenTransfer in dbTokenTransfers]
+        for index,tuple in enumerate(retrievedTuples):
+            if tuple not in dbTuples:
+                await saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfers[index])
+            else:
+                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == dbTokenTransfers[dbTuples.index(tuple)].tokenTransferId)
+                values = {}
+                values[TokenTransfersTable.c.operatorAddress.key] = retrievedTokenTransfers[index].operatorAddress
+                values[TokenTransfersTable.c.amount.key] = retrievedTokenTransfers[index].amount
+                values[TokenTransfersTable.c.tokenType.key] = retrievedTokenTransfers[index].tokenType
+                await database.execute(query=query, values=values)
+
         currentBlockNumber = currentBlockNumber + 1
     await database.disconnect()
 
