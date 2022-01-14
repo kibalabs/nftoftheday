@@ -43,6 +43,9 @@ from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 
+_TOKEN_UPDATE_MIN_DAYS = 30
+_COLLECTION_UPDATE_MIN_DAYS = 90
+
 class NotdManager:
 
     def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, openseaClient: OpenseaClient, tokenClient: TokenClient, requester: Requester, tokenMetadataProcessor: TokenMetadataProcessor, collectionProcessor: CollectionProcessor, revueApiKey: str):
@@ -174,7 +177,7 @@ class NotdManager:
             ], limit=1,
         )
         savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
-        if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
+        if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS):
             logging.info('Skipping token because it has been updated recently.')
             return
         try:
@@ -226,7 +229,7 @@ class NotdManager:
             ], limit=1,
         )
         collection = collections[0] if len(collections) > 0 else None
-        if not shouldForce and collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
+        if not shouldForce and collection and collection.updatedDate >= date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS):
             logging.info('Skipping collection because it has been updated recently.')
             return
         await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
