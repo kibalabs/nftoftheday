@@ -121,7 +121,6 @@ export class SubscribeRequest extends RequestData {
 
 export class SubscribeResponse extends ResponseData {
   public static fromObject = (): SubscribeResponse => {
-    return new SubscribeResponse(
-    );
+    return new SubscribeResponse();
   }
 }
