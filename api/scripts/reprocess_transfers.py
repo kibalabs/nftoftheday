@@ -2,6 +2,9 @@ from contextvars import Token
 import os
 import sys
 
+from core.store.retriever import IntegerFieldFilter
+
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
@@ -23,6 +26,7 @@ from notd.store.schema import TokenMetadataTable, TokenTransfersTable
 from notd.store.schema_conversions import token_metadata_from_row, token_transfer_from_row
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.block_processor import BlockProcessor
+from notd.model import RetrievedTokenTransfer, TokenTransfer
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.opensea_client import OpenseaClient
@@ -47,38 +51,24 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
     ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
-    requester = Requester()
-    openseaClient = OpenseaClient(requester=requester)
-    tokenClient = TokenClient(requester=requester, ethClient=ethClient)
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester,ethClient=ethClient,s3manager=s3Manager,bucketName=os.environ['S3_BUCKET'])
-    #slackClient = SlackClient()
-    collectionProcessor=CollectionProcessor(requester=requester,ethClient=ethClient)
-    #blockNumber = await blockProcessor.get_latest_block_number()
-    revueApiKey = ""
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=workQueue ,openseaClient=openseaClient, tokenClient=tokenClient, requester=requester,tokenMetadataProcessor=tokenMetadataProcessor, collectionProcessor=collectionProcessor,  revueApiKey=revueApiKey)
+    
     await database.connect()
     currentBlockNumber = startBlockNumber
     while currentBlockNumber < endBlockNumber:
         start = currentBlockNumber
         end = min(currentBlockNumber + batchSize, endBlockNumber)
         logging.info(f'Working on {start} to {end}...')
-        await notdManager.process_block_range(startBlockNumber=start, endBlockNumber=end)
-        async with database.transaction():
-            query = TokenTransfersTable.select()
-            query = query.where(TokenTransfersTable.c.blockNumber >= start)
-            query = query.where(TokenTransfersTable.c.blockNumber < end)
-            query = query.where(TokenTransfersTable.c.tokenType == None)
-            query = query.where(TokenTransfersTable.c.amount == None)
-            tokenTransfersToChange = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
-            logging.info(f'Updating {len(tokenTransfersToChange)} transfers...')
-            for tokenTransfer in tokenTransfersToChange:
-                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId)
-                values = {
-                    TokenTransfersTable.c.tokenType.key: 'erc721single',
-                    TokenTransfersTable.c.amount.key: 1,
-                }
-                await database.execute(query=query, values=values)            
-        currentBlockNumber = currentBlockNumber + batchSize
+        print(currentBlockNumber)
+        retrievedTokenTransfers = await blockProcessor.get_transfers_in_block(blockNumber=currentBlockNumber)
+        tokenTransferInDb = await retriever.list_token_transfers(
+            fieldFilters=[
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, gte=start),
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, lt=end)
+            ])
+        
+        print(len(set(retrievedTokenTransfers)-set(a)))
+        #print(retrievedTokenTransfers)
+        currentBlockNumber = currentBlockNumber + 1
     await database.disconnect()
 
 if __name__ == '__main__':
