@@ -49,7 +49,6 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
             fieldFilters=[
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber),
             ])
-        #retrievedTuples = [ for retrievedTokenTransfer in retrievedTokenTransfers]
         dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress, dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress, dbTokenTransfer.toAddress) for dbTokenTransfer in dbTokenTransfers]
         for retrievedTokenTransfer in retrievedTokenTransfers:
             tuple = (retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress, retrievedTokenTransfer.toAddress)
