@@ -34,11 +34,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-
-    sqsClient = boto3.client(service_name='sqs', region_name='us-east-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.us-east-1.amazonaws.com/113848722427/test1')
-    s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    s3Manager = S3Manager(s3Client=s3Client)
+    
     infuraAuth = BasicAuthentication(username='', password=os.environ['INFURA_PROJECT_SECRET'])
     infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
     ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
