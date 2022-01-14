@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, PaddingView, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Token, TokenTransfer, UiData } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
@@ -32,13 +32,10 @@ const getDateString = (startDate: Date): string => {
 export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
-  const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer | null>(null);
-  const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
-  const [mostTradedTokenTransfers, setMostTradedTokenTransfers] = React.useState<TokenTransfer[] | null>(null);
-  const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
-  const [transactionCount, setTransactionCount] = React.useState<number | null>(null);
+  const [uiData, setUiData] = React.useState<UiData | null>(null);
   const [error, setError] = React.useState<boolean>(false);
-  const [startDate, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
+  const [startDate_, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
+  const startDate = startDate_ as Date;
 
   const getTitleDateString = (): string => {
     if (startDate !== null) {
@@ -51,19 +48,11 @@ export const HomePage = (): React.ReactElement => {
   };
 
   React.useEffect((): void => {
-    setHighestPricedTokenTransfer(null);
-    setRandomTokenTransfer(null);
-    setMostTradedTokenTransfers(null);
-    setSponsoredToken(null);
-    setError(false);
+    setUiData(null);
     notdClient.retrieveUiData(startDate).then((uiData: UiData): void => {
-      setHighestPricedTokenTransfer(uiData.highestPricedTokenTransfer);
-      setRandomTokenTransfer(uiData.randomTokenTransfer);
-      setMostTradedTokenTransfers(uiData.mostTradedTokenTransfers);
-      setSponsoredToken(uiData.sponsoredToken);
-      setTransactionCount(uiData.transactionCount);
-    }).catch(() => {
-      setError(true);
+      setUiData(uiData);
+
+    }).catch(() => {      setError(true);
     });
   }, [startDate, notdClient]);
 
@@ -72,7 +61,6 @@ export const HomePage = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    setTransactionCount(null);
   };
 
   const onForwardClicked = (): void => {
@@ -80,7 +68,6 @@ export const HomePage = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    setTransactionCount(null);
   };
 
   const onEmailClicked = (): void => {
@@ -103,8 +90,8 @@ export const HomePage = (): React.ReactElement => {
             <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
           </Stack>
           <Spacing variant={PaddingSize.Wide2} />
-          { transactionCount !== null ? (
-            <Text variant='header3'>{`${numberWithCommas(transactionCount)} transactions in total`}</Text>
+          { uiData !== null ? (
+            <Text variant='header3'>{`${numberWithCommas(uiData.transactionCount)} transactions in total`}</Text>
           ) : (
             <Text variant='header3'>Loading transactions...</Text>
           )}
@@ -119,10 +106,18 @@ export const HomePage = (): React.ReactElement => {
               </Box>
             ) : (
               <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
-                <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-                <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfers} />
-                <SponsoredTokenCard token={sponsoredToken} />
+                {!uiData ? (
+                  <Stack padding={PaddingSize.Wide3}>
+                    <LoadingSpinner variant='light' />
+                  </Stack>
+                ) : (
+                  <React.Fragment>
+                    <RandomTokenTransferCard tokenTransfer={uiData.randomTokenTransfer} />
+                    <HighestPricedTokenTransferCard tokenTransfer={uiData.highestPricedTokenTransfer} />
+                    <MostTradedTokenTransferCard tokenTransfers={uiData.mostTradedTokenTransfers} />
+                    <SponsoredTokenCard token={uiData.sponsoredToken} />
+                  </React.Fragment>
+                )}
               </EqualGrid>
             )}
           </ContainingView>
