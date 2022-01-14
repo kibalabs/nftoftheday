@@ -48,7 +48,6 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     currentBlockNumber = startBlockNumber
     while currentBlockNumber < endBlockNumber:
         logging.info(f'Working on {currentBlockNumber}')
-        print(currentBlockNumber)
         retrievedTokenTransfers = await blockProcessor.get_transfers_in_block(blockNumber=currentBlockNumber)
         dbTokenTransfers = await retriever.list_token_transfers(
             fieldFilters=[
