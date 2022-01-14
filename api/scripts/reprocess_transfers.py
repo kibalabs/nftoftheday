@@ -34,7 +34,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    
+
     infuraAuth = BasicAuthentication(username='', password=os.environ['INFURA_PROJECT_SECRET'])
     infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
     ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
@@ -49,17 +49,18 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
             fieldFilters=[
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber),
             ])
-        retrievedTuples = [(retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress, retrievedTokenTransfer.toAddress) for retrievedTokenTransfer in retrievedTokenTransfers]
+        #retrievedTuples = [ for retrievedTokenTransfer in retrievedTokenTransfers]
         dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress, dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress, dbTokenTransfer.toAddress) for dbTokenTransfer in dbTokenTransfers]
-        for index,tuple in enumerate(retrievedTuples):
+        for retrievedTokenTransfer in retrievedTokenTransfers:
+            tuple = (retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress, retrievedTokenTransfer.toAddress)
             if tuple not in dbTuples:
-                await saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfers[index])
+                await saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
             else:
                 query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == dbTokenTransfers[dbTuples.index(tuple)].tokenTransferId)
                 values = {}
-                values[TokenTransfersTable.c.operatorAddress.key] = retrievedTokenTransfers[index].operatorAddress
-                values[TokenTransfersTable.c.amount.key] = retrievedTokenTransfers[index].amount
-                values[TokenTransfersTable.c.tokenType.key] = retrievedTokenTransfers[index].tokenType
+                values[TokenTransfersTable.c.operatorAddress.key] = retrievedTokenTransfer.operatorAddress
+                values[TokenTransfersTable.c.amount.key] = retrievedTokenTransfer.amount
+                values[TokenTransfersTable.c.tokenType.key] = retrievedTokenTransfer.tokenType
                 await database.execute(query=query, values=values)
 
         currentBlockNumber = currentBlockNumber + 1
