@@ -54,7 +54,7 @@ async def main():
 
     await database.connect()
     while True:
-        hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=True)
+        hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=False)
         if hasProcessedWork:
             continue
         hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=True)
