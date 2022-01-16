@@ -54,10 +54,10 @@ async def main():
 
     await database.connect()
     while True:
-        hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1)
+        hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=False)
         if hasProcessedWork:
             continue
-        hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1)
+        hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=True)
         if hasProcessedToken:
             continue
         logging.info('No message received.. sleeping')
