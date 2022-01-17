@@ -104,7 +104,7 @@ class NotdManager:
 
     async def receive_new_blocks_deferred(self) -> None:
         postDate = date_util.datetime_from_now()
-        await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent(_postDate=postDate).to_message())
+        await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
 
     async def receive_new_blocks(self) -> None:
         latestTokenTransfers = await self.retriever.list_token_transfers(orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)], limit=1)
