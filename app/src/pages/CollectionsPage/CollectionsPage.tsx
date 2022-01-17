@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Link, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, BackgroundView, Box, ContainingView, Direction, EqualGrid, Image, PaddingSize, Pill, Stack, Text } from '@kibalabs/ui-react';
+import { useRouteParams } from '@kibalabs/core-react';
+import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Image, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Collection } from '../../client/resources';
 import { useGlobals } from '../../globalsContext';
@@ -9,7 +9,13 @@ import { useGlobals } from '../../globalsContext';
 export const CollectionsPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null>(null);
+  const collectionBannerUrl = collection?.imageUrl as string;
+  const collectionDiscord = collection?.discordUrl as string;
+  const collectionInstagram = collection?.instagramUsername as string;
   const collectionImageUrl = collection?.imageUrl as string;
+  const collectionDescription = collection?.discordUrl as string;
+  const collectionTwitter = collection?.twitterUsername as string;
+
 
   const routeParams = useRouteParams();
   const address = routeParams.address as string;
@@ -27,30 +33,29 @@ export const CollectionsPage = (): React.ReactElement => {
     <React.Fragment>
       <BackgroundView linearGradient='#200122,#6F0000'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} padding={PaddingSize.Wide2} isScrollableVertically={true}>
+          <Image source={collectionBannerUrl} alternativeText='image' fitType='cover' />
           <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
             <Box variant='rounded-borderColored' shouldClipContent={true} width='100px' height='100px'>
               <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
             </Box>
+            <Spacing variant={PaddingSize.Wide2} />
             <Text variant='header1'>{collection?.name}</Text>
           </Stack>
-          <Text variant='header3'>{collection?.description}</Text>
+          <MarkdownText textVariant='light' source={collectionDescription} />
+
           <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2} shouldAddGutters={true}>
-            <Text variant='header5'>{collection?.description}</Text>
-            <Stack direction={Direction.Vertical} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-              <Link href={'https://opensea.com'}>opensea</Link>
-              <Link href={'www.discord.com'}>Discord</Link>
-              <Link href={'www.instagram.com'}>Instagram</Link>
-              <Link href={'www.twitter.com'}>Twitter</Link>
-              <Link href={'www.Activity.com'}>Activity</Link>
+            <MarkdownText textVariant='light' source={collectionDescription} />
+            <Stack direction={Direction.Vertical} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
+              {collectionDiscord
+                ? (<Button variant='tertiary' text= 'Discord' iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collectionDiscord} />
+                ) : collectionInstagram ? (
+                  <Button variant='tertiary' text={'Instagram'} target={collectionInstagram} iconLeft={<KibaIcon iconId='feather-instagram' />} />
+                ) : collectionTwitter ? (
+                  <Button variant='tertiary' text={'Twitter'} target={collectionTwitter} iconLeft={<KibaIcon iconId='feather-twitter' />} />
+                ) : (
+                  <Button variant='tertiary' text={'opensea'} target={'https://opensea.io/phunky-ape-yacht'} />
+                )}
             </Stack>
-          </Stack>
-          <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2} shouldAddGutters={true}>
-            <Pill variant='secondary' text='created over 2 years ago' />
-            <Pill variant='secondary' text='fee' />
-            <Pill variant='secondary' text='opensea verified' />
-            <Pill variant='secondary' text='token supplied' />
-            <Pill variant='secondary' text='discord members' />
-            <Pill variant='secondary' text='twitter followers' />
           </Stack>
           <ContainingView>
             <Stack direction={Direction.Horizontal} isFullWidth={true}childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2} shouldAddGutters={true}>
@@ -172,6 +177,7 @@ sold for $37k yesterday
                   <Text variant='header2'>$2324</Text>
                 </Stack>
               </Box>
+
               <Box variant='card'>
                 <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
                   <Text variant='header3'>90th percentile price</Text>

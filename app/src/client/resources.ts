@@ -126,14 +126,23 @@ export class Collection {
   readonly description: string | null;
   readonly url: string | null;
   readonly openseaSlug: string | null;
+  readonly bannerImageUrl: string | null;
+  readonly discordUrl: string | null;
+  readonly instagramUsername: string | null;
+  readonly twitterUsername: string | null;
 
-  public constructor(address: string, name: string, imageUrl: string | null, description: string | null, url: string | null, openseaSlug: string | null) {
+
+  public constructor(address: string, name: string, imageUrl: string | null, description: string | null, url: string | null, openseaSlug: string | null, bannerImageUrl: string | null, discordUrl: string | null, instagramUsername: string | null, twitterUsername: string | null) {
     this.address = address;
     this.name = name;
     this.imageUrl = imageUrl;
     this.description = description;
     this.url = url;
     this.openseaSlug = openseaSlug;
+    this.bannerImageUrl = bannerImageUrl;
+    this.discordUrl = discordUrl;
+    this.instagramUsername = instagramUsername;
+    this.twitterUsername = twitterUsername;
   }
 
   public static fromObject = (obj: Record<string, unknown>): Collection => {
@@ -144,6 +153,10 @@ export class Collection {
       obj.description ? String(obj.description) : null,
       obj.url ? String(obj.url) : null,
       obj.openseaSlug ? String(obj.openseaSlug) : null,
+      obj.bannerImageUrl ? String(obj.bannerImageUrl) : null,
+      obj.discordUrl ? String(obj.discordUrl) : null,
+      obj.instagramUsername ? String(obj.instagramUsername) : null,
+      obj.twitterUsername ? String(obj.twitterUsername) : null,
     );
   }
 }
