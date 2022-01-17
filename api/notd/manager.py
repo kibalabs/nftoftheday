@@ -103,7 +103,6 @@ class NotdManager:
         )
 
     async def receive_new_blocks_deferred(self) -> None:
-        postDate = date_util.datetime_from_now()
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
 
     async def receive_new_blocks(self) -> None:
