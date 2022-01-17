@@ -1,4 +1,5 @@
-from typing import List
+import datetime
+from typing import List, Optional
 
 from core.queues.model import MessageContent
 
@@ -14,6 +15,7 @@ class ProcessBlockRangeMessageContent(MessageContent):
 
 class ReceiveNewBlocksMessageContent(MessageContent):
     _COMMAND = 'RECEIVE_NEW_BLOCKS'
+    _postDate = Optional[datetime.datetime]
 
 class UpdateTokenMetadataMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_METADATA'
