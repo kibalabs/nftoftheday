@@ -7,9 +7,9 @@ import { KibaApp } from '@kibalabs/ui-react';
 
 import { NotdClient } from './client/client';
 import { GlobalsProvider } from './globalsContext';
+import { CollectionsPage } from './pages/CollectionsPage';
 import { HomePage } from './pages/HomePage';
 import { buildNotdTheme } from './theme';
-
 
 declare global {
   export interface Window {
@@ -37,6 +37,7 @@ export const App = (): React.ReactElement => {
 
   const routes: IRoute[] = [
     { path: '/', page: HomePage },
+    { path: '/collections/:address', page: CollectionsPage },
   ];
 
   return (
