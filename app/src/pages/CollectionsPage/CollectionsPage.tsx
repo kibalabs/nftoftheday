@@ -9,6 +9,7 @@ import { useGlobals } from '../../globalsContext';
 export const CollectionsPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null>(null);
+  const collectionImageUrl = collection?.imageUrl as string;
 
   const routeParams = useRouteParams();
   const address = routeParams.address as string;
@@ -28,7 +29,7 @@ export const CollectionsPage = (): React.ReactElement => {
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} padding={PaddingSize.Wide2} isScrollableVertically={true}>
           <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
             <Box variant='rounded-borderColored' shouldClipContent={true} width='100px' height='100px'>
-              <Image source={collection?.imageUrl} alternativeText='image' fitType='contain' />
+              <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
             </Box>
             <Text variant='header1'>{collection?.name}</Text>
           </Stack>
@@ -110,7 +111,7 @@ sales
               <Box variant='card'>
                 <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
                   <Box variant='card' width='250px' height='250px'>
-                    <Image source={collection?.imageUrl} alternativeText='image' fitType='contain' />
+                    <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
                   <Text variant='header7'>
                     {collection?.description}
@@ -122,7 +123,7 @@ sold for $37k yesterday
               <Box variant='card'>
                 <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
                   <Box variant='card' width='250px' height='250px'>
-                    <Image source={collection?.imageUrl} alternativeText='image' fitType='contain' />
+                    <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
                   <Text variant='header7'>
                     {collection?.description}
@@ -134,7 +135,7 @@ sold for $37k yesterday
               <Box variant='card'>
                 <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
                   <Box variant='card' width='250px' height='250px'>
-                    <Image source={collection?.imageUrl} alternativeText='image' fitType='contain' />
+                    <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
                   <Text variant='header7'>
                     {collection?.description}
@@ -146,7 +147,7 @@ sold for $37k yesterday
               <Box variant='card'>
                 <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
                   <Box variant='card' width='250px' height='250px'>
-                    <Image source={collection?.imageUrl} alternativeText='image' fitType='contain' />
+                    <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
                   <Text variant='header7'>
                     {collection?.description}
