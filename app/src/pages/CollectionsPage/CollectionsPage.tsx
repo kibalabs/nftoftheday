@@ -9,11 +9,11 @@ import { useGlobals } from '../../globalsContext';
 export const CollectionsPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null>(null);
-  const collectionBannerUrl = collection?.imageUrl as string;
+  const collectionBannerUrl = collection?.bannerImageUrl as string;
   const collectionDiscord = collection?.discordUrl as string;
   const collectionInstagram = collection?.instagramUsername as string;
   const collectionImageUrl = collection?.imageUrl as string;
-  const collectionDescription = collection?.discordUrl as string;
+  const collectionDescription = collection?.description as string;
   const collectionTwitter = collection?.twitterUsername as string;
 
 
