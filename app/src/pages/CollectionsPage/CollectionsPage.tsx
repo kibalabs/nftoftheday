@@ -15,7 +15,8 @@ export const CollectionsPage = (): React.ReactElement => {
   const collectionImageUrl = collection?.imageUrl as string;
   const collectionDescription = collection?.description as string;
   const collectionTwitter = collection?.twitterUsername as string;
-
+  const collectionName = collection?.name as string;
+  const collectionOpenSeaSlug = collection?.openseaSlug as string;
 
   const routeParams = useRouteParams();
   const address = routeParams.address as string;
@@ -39,21 +40,20 @@ export const CollectionsPage = (): React.ReactElement => {
               <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
             </Box>
             <Spacing variant={PaddingSize.Wide2} />
-            <Text variant='header1'>{collection?.name}</Text>
+            <Text variant='header1'>{collectionName}</Text>
           </Stack>
           <MarkdownText textVariant='light' source={collectionDescription} />
-
           <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2} shouldAddGutters={true}>
             <MarkdownText textVariant='light' source={collectionDescription} />
             <Stack direction={Direction.Vertical} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
               {collectionDiscord
                 ? (<Button variant='tertiary' text= 'Discord' iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collectionDiscord} />
                 ) : collectionInstagram ? (
-                  <Button variant='tertiary' text={'Instagram'} target={collectionInstagram} iconLeft={<KibaIcon iconId='feather-instagram' />} />
+                  <Button variant='tertiary' text={'Instagram'} target={`https://instagram.com/${collectionInstagram}`} iconLeft={<KibaIcon iconId='feather-instagram' />} />
                 ) : collectionTwitter ? (
-                  <Button variant='tertiary' text={'Twitter'} target={collectionTwitter} iconLeft={<KibaIcon iconId='feather-twitter' />} />
+                  <Button variant='tertiary' text={'Twitter'} target={`https://instagram.com/${collectionTwitter}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
                 ) : (
-                  <Button variant='tertiary' text={'opensea'} target={'https://opensea.io/phunky-ape-yacht'} />
+                  <Button variant='tertiary' text={'opensea'} target={`https://opensea.io/collection/${collectionOpenSeaSlug}`} />
                 )}
             </Stack>
           </Stack>
@@ -106,10 +106,7 @@ export const CollectionsPage = (): React.ReactElement => {
             </Stack>
           </ContainingView>
           <Text variant='header2'>
-Recent
-            {collection?.name}
-            {' '}
-sales
+            {`Recent ${collectionName} sales`}
           </Text>
           <ContainingView>
             <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
@@ -118,10 +115,9 @@ sales
                   <Box variant='card' width='250px' height='250px'>
                     <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
+                  <Spacing variant={PaddingSize.Wide2} />
                   <Text variant='header7'>
-                    {collection?.description}
-                    {' '}
-sold for $37k yesterday
+                    {`${collectionDescription}sold for $37k yesterday`}
                   </Text>
                 </Stack>
               </Box>
@@ -130,10 +126,9 @@ sold for $37k yesterday
                   <Box variant='card' width='250px' height='250px'>
                     <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
+                  <Spacing variant={PaddingSize.Wide2} />
                   <Text variant='header7'>
-                    {collection?.description}
-                    {' '}
-sold for $37k yesterday
+                    {`${collectionDescription}sold for $37k yesterday`}
                   </Text>
                 </Stack>
               </Box>
@@ -142,10 +137,9 @@ sold for $37k yesterday
                   <Box variant='card' width='250px' height='250px'>
                     <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
+                  <Spacing variant={PaddingSize.Wide2} />
                   <Text variant='header7'>
-                    {collection?.description}
-                    {' '}
-sold for $37k yesterday
+                    {`${collectionDescription}sold for $37k yesterday`}
                   </Text>
                 </Stack>
               </Box>
@@ -154,39 +148,38 @@ sold for $37k yesterday
                   <Box variant='card' width='250px' height='250px'>
                     <Image source={collectionImageUrl} alternativeText='image' fitType='contain' />
                   </Box>
+                  <Spacing variant={PaddingSize.Wide2} />
                   <Text variant='header7'>
-                    {collection?.description}
-                    {' '}
-sold for $37k yesterday
+                    {`${collectionDescription}sold for $37k yesterday`}
                   </Text>
                 </Stack>
               </Box>
             </EqualGrid>
-            <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 10, small: 8, large: 6, extraLarge: 4 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-              <Box variant='card'>
-                <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
-                  <Text variant='header3'>10th percentile price</Text>
-                  <Text variant='header7'>Last 7 days</Text>
-                  <Text variant='header2'>187</Text>
-                </Stack>
-              </Box>
-              <Box variant='card'>
-                <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
-                  <Text variant='header3'>Median price</Text>
-                  <Text variant='header7'>Last 7 days</Text>
-                  <Text variant='header2'>$2324</Text>
-                </Stack>
-              </Box>
-
-              <Box variant='card'>
-                <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
-                  <Text variant='header3'>90th percentile price</Text>
-                  <Text variant='header7'>Last 7 days</Text>
-                  <Text variant='header2'>$8.3k</Text>
-                </Stack>
-              </Box>
-            </EqualGrid>
-
+            <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
+              <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 10, small: 8, large: 6, extraLarge: 4 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                <Box variant='card' isFullWidth={true}>
+                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
+                    <Text variant='header3'>10th percentile price</Text>
+                    <Text variant='header7'>Last 7 days</Text>
+                    <Text variant='header2'>187</Text>
+                  </Stack>
+                </Box>
+                <Box variant='card'>
+                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
+                    <Text variant='header3'>Median price</Text>
+                    <Text variant='header7'>Last 7 days</Text>
+                    <Text variant='header2'>$2324</Text>
+                  </Stack>
+                </Box>
+                <Box variant='card'>
+                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
+                    <Text variant='header3'>90th percentile price</Text>
+                    <Text variant='header7'>Last 7 days</Text>
+                    <Text variant='header2'>$8.3k</Text>
+                  </Stack>
+                </Box>
+              </EqualGrid>
+            </Stack>
           </ContainingView>
           <Text variant='header7'>Ten percent of the CryptoSkulls sales were for $187 or less, half of the sales were for less than $2327 and the highest ten percent were sold for $8.3k or higher.</Text>
         </Stack>
