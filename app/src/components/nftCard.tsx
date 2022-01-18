@@ -97,12 +97,11 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                   </Box>
                 )}
                 <Stack.Item growthFactor={1} shrinkFactor={1}>
-                  { collectionUrl != null && (
-                    collectionUrl ? (
-                      <MarkdownText textVariant='small' source={`Part of [${collection.name}](${collectionUrl})`} />
-                    ) : (
-                      <Text variant='small'>{`Part of ${collection.name}`}</Text>
-                    ))}
+                  {collectionUrl ? collection.name !== 'null' && (
+                    <MarkdownText textVariant='small' source={`Part of [${collection.name}](${collectionUrl})`} />
+                  ) : collection.name !== 'null' && (
+                    <Text variant='small'>{`Part of ${collection.name}`}</Text>
+                  )}
                 </Stack.Item>
               </Stack>
             )}
