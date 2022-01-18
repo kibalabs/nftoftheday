@@ -29,6 +29,7 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == ReceiveNewBlocksMessageContent.get_command():
             if message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
                 logging.info(f'Skipping received new blocks from more than 5 minutes ago')
+                return
             messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
             await self.notdManager.receive_new_blocks()
             return
