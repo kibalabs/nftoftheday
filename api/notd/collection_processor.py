@@ -60,7 +60,6 @@ class CollectionProcessor:
         if openseaCollection is None:
             logging.info(f'Failed to load collection from opensea: {address}')
             openseaCollection = {}
-        print(openseaCollection)
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collectionName or openseaCollection.get('name'),
