@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -41,7 +42,7 @@ class CollectionProcessor:
         retryCount = 0
         while not openseaResponse:
             try:
-                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}')
+                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d',headers={"X-API-KEY": f"{os.environ['OPENSEA_API_KEY']}"})
             except ResponseException as exception:
                 if exception.statusCode == 404:
                     raise CollectionDoesNotExist()
@@ -59,6 +60,7 @@ class CollectionProcessor:
         if openseaCollection is None:
             logging.info(f'Failed to load collection from opensea: {address}')
             openseaCollection = {}
+        print(openseaCollection)
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collectionName or openseaCollection.get('name'),
@@ -73,4 +75,5 @@ class CollectionProcessor:
             discordUrl=openseaCollection.get('discord_url'),
             bannerImageUrl=openseaCollection.get('banner_image_url'),
         )
+        print(retrievedCollection)
         return retrievedCollection
