@@ -6,7 +6,7 @@ from core.util import date_util
 
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockRangeMessageContent
-from notd.messages import ProcessBlocksMessageContent
+from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
@@ -18,9 +18,9 @@ class NotdMessageProcessor(MessageProcessor):
         self.notdManager = notdManager
 
     async def process_message(self, message: SqsMessage) -> None:
-        if message.command == ProcessBlocksMessageContent.get_command():
-            messageContent = ProcessBlocksMessageContent.parse_obj(message.content)
-            await self.notdManager.process_blocks(blockNumbers=messageContent.blockNumbers)
+        if message.command == ProcessBlockMessageContent.get_command():
+            messageContent = ProcessBlockMessageContent.parse_obj(message.content)
+            await self.notdManager.process_block(blockNumber=messageContent.blockNumber)
             return
         if message.command == ProcessBlockRangeMessageContent.get_command():
             messageContent = ProcessBlockRangeMessageContent.parse_obj(message.content)

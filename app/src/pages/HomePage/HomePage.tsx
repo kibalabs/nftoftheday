@@ -104,20 +104,16 @@ export const HomePage = (): React.ReactElement => {
               <Box isFullWidth={false}>
                 <Text variant='header3'>Sorry, something went wrong. Please Refresh the page</Text>
               </Box>
+            ) : !uiData ? (
+              <LoadingSpinner variant='light' />
             ) : (
               <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                {!uiData ? (
-                  <Stack padding={PaddingSize.Wide3}>
-                    <LoadingSpinner variant='light' />
-                  </Stack>
-                ) : (
-                  <React.Fragment>
-                    <RandomTokenTransferCard tokenTransfer={uiData.randomTokenTransfer} />
-                    <HighestPricedTokenTransferCard tokenTransfer={uiData.highestPricedTokenTransfer} />
-                    <MostTradedTokenTransferCard tokenTransfers={uiData.mostTradedTokenTransfers} />
-                    <SponsoredTokenCard token={uiData.sponsoredToken} />
-                  </React.Fragment>
-                )}
+                <React.Fragment>
+                  <RandomTokenTransferCard tokenTransfer={uiData.randomTokenTransfer} />
+                  <HighestPricedTokenTransferCard tokenTransfer={uiData.highestPricedTokenTransfer} />
+                  <MostTradedTokenTransferCard tokenTransfers={uiData.mostTradedTokenTransfers} />
+                  <SponsoredTokenCard token={uiData.sponsoredToken} />
+                </React.Fragment>
               </EqualGrid>
             )}
           </ContainingView>
