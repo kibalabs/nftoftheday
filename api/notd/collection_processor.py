@@ -74,5 +74,4 @@ class CollectionProcessor:
             discordUrl=openseaCollection.get('discord_url'),
             bannerImageUrl=openseaCollection.get('banner_image_url'),
         )
-        print(retrievedCollection)
         return retrievedCollection
