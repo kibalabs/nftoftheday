@@ -17,10 +17,9 @@ from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.notd_message_processor import NotdMessageProcessor
-from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.token_client import TokenClient
+from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 
@@ -39,13 +38,11 @@ async def main():
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
-    openseaClient = OpenseaClient(requester=requester)
-    tokenClient = TokenClient(requester=requester, ethClient=ethClient)
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient)
-
     revueApiKey = os.environ['REVUE_API_KEY']
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor, collectionProcessor=collectionProcessor, revueApiKey=revueApiKey)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
