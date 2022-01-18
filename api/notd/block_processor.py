@@ -78,15 +78,15 @@ class BlockProcessor:
         totalTokenTransferList = []
         erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
         logging.info(f'Found {len(erc721events)} events in block #{blockNumber}')
-        for erc721EventsChunk in list_util.generate_chunks(erc721events, 5):
+        for erc721EventsChunk in list_util.generate_chunks(erc721events, 10):
             totalTokenTransferList += [tokenTransfer for tokenTransfer in await asyncio.gather(*[self._process_erc721_single_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc721EventsChunk]) for tokenTransfer in tokenTransfer]
         erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
         logging.info(f'Found {len(erc1155events)} erc1155SingleEvents in block #{blockNumber}')
-        for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 5):
+        for erc1155EventsChunk in list_util.generate_chunks(erc1155events, 10):
             totalTokenTransferList += [tokenTransfer for tokenTransfer in await asyncio.gather(*[self._process_erc1155_single_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155EventsChunk]) for tokenTransfer in tokenTransfer]
         erc1155Batchevents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
         logging.info(f'Found {len(erc1155Batchevents)} erc1155BatchEvents in block #{blockNumber}')
-        for erc1155BatchEventsChunk in list_util.generate_chunks(erc1155Batchevents, 5):
+        for erc1155BatchEventsChunk in list_util.generate_chunks(erc1155Batchevents, 10):
             totalTokenTransferList += [tokenTransfer for tokenTransfer in await asyncio.gather(*[self._process_erc1155_batch_event(event=dict(event), blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate) for event in erc1155BatchEventsChunk]) for tokenTransfer in tokenTransfer]
         return  totalTokenTransferList
 
