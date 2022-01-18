@@ -89,7 +89,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
             <Text variant='header3-singleLine' alignment={TextAlignment.Center}>{truncateTitle(asset.name)}</Text>
             <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
             <Spacing variant={PaddingSize.Wide} />
-            {collection.name && (
+            {collection?.name && (
               <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                 {collectionImageUrl && (
                   <Box width='25px' height='25px'>
@@ -97,11 +97,12 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                   </Box>
                 )}
                 <Stack.Item growthFactor={1} shrinkFactor={1}>
-                  {collectionUrl ? (
-                    <MarkdownText textVariant='small' source={`Part of [${collection.name}](${collectionUrl})`} />
-                  ) : (
-                    <Text variant='small'>{`Part of ${collection.name}`}</Text>
-                  )}
+                  { collectionUrl != null && (
+                    collectionUrl ? (
+                      <MarkdownText textVariant='small' source={`Part of [${collection.name}](${collectionUrl})`} />
+                    ) : (
+                      <Text variant='small'>{`Part of ${collection.name}`}</Text>
+                    ))}
                 </Stack.Item>
               </Stack>
             )}
