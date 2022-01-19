@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import os
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -21,7 +20,7 @@ class CollectionProcessor:
     def __init__(self, requester: Requester, ethClient: EthClientInterface, openseaApiKey: str):
         self.requester = requester
         self.ethClient = ethClient
-        self.openseaApiKey = openseaApiKey 
+        self.openseaApiKey = openseaApiKey
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetdataContractJson = json.load(contractJsonFile)
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
@@ -43,7 +42,7 @@ class CollectionProcessor:
         retryCount = 0
         while not openseaResponse:
             try:
-                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}',headers={"X-API-KEY": f"{self.openseaApiKey}"})
+                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}', headers={"X-API-KEY": f"{self.openseaApiKey}"})
             except ResponseException as exception:
                 if exception.statusCode == 404:
                     raise CollectionDoesNotExist()
