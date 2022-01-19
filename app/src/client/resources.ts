@@ -121,13 +121,13 @@ export class CollectionToken {
 
 export class Collection {
   readonly address: string;
-  readonly name: string;
+  readonly name: string | null;
   readonly imageUrl: string | null;
   readonly description: string | null;
   readonly url: string | null;
   readonly openseaSlug: string | null;
 
-  public constructor(address: string, name: string, imageUrl: string | null, description: string | null, url: string | null, openseaSlug: string | null) {
+  public constructor(address: string, name: string | null, imageUrl: string | null, description: string | null, url: string | null, openseaSlug: string | null) {
     this.address = address;
     this.name = name;
     this.imageUrl = imageUrl;
@@ -139,7 +139,7 @@ export class Collection {
   public static fromObject = (obj: Record<string, unknown>): Collection => {
     return new Collection(
       String(obj.address),
-      String(obj.name),
+      obj.name ? String(obj.name) : null,
       obj.imageUrl ? String(obj.imageUrl) : null,
       obj.description ? String(obj.description) : null,
       obj.url ? String(obj.url) : null,
