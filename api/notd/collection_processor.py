@@ -42,7 +42,7 @@ class CollectionProcessor:
         retryCount = 0
         while not openseaResponse:
             try:
-                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}', headers={"X-API-KEY": f"{self.openseaApiKey}"})
+                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}', headers={"X-API-KEY": self.openseaApiKey})
             except ResponseException as exception:
                 if exception.statusCode == 404:
                     raise CollectionDoesNotExist()
