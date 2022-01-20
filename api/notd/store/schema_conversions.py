@@ -60,5 +60,7 @@ def collection_from_row(row: Mapping) -> Collection:
         openseaSlug=row[TokenCollectionsTable.c.openseaSlug],
         url=row[TokenCollectionsTable.c.url],
         discordUrl=row[TokenCollectionsTable.c.discordUrl],
-        bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl]
+        bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl],
+        doesSupportErc721=row[TokenCollectionsTable.c.doesSupportErc721],
+        doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155]
     )

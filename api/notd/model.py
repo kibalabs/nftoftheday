@@ -138,6 +138,8 @@ class RetrievedCollection:
     url: Optional[str]
     discordUrl: Optional[str]
     bannerImageUrl: Optional[str]
+    doesSupportErc721: Optional[str]
+    doesSupportErc1155: Optional[str]
 
 
 @dataclasses.dataclass

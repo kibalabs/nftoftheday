@@ -63,7 +63,9 @@ CREATE TABLE tbl_collections (
     opensea_slug TEXT,
     url TEXT,
     discord_url TEXT,
-    banner_image_url TEXT
+    banner_image_url TEXT,
+    does_support_erc721 TEXT,
+    does_support_erc1155 TEXT
 );
 CREATE UNIQUE INDEX tbl_collections_address ON tbl_collections (address);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);
