@@ -26,6 +26,7 @@ class CollectionProcessor:
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
         self.erc721MetadataSymbolFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'symbol'][0]
+        #self.erc721ContractURL = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'contractURI'][0]
 
     async def retrieve_collection(self, address: str) -> RetrievedCollection:
         try:
@@ -38,6 +39,12 @@ class CollectionProcessor:
             collectionSymbol = tokenMetadataSymbolResponse[0]
         except BadRequestException:
             collectionSymbol = None
+        #try:
+        #    contractUriResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721ContractURL)
+        #    contract = contractUriResponse[0]
+        #    print(contract)
+        #except BadRequestException:
+        #    collectionSymbol = None
         openseaResponse = None
         retryCount = 0
         while not openseaResponse:
@@ -74,4 +81,5 @@ class CollectionProcessor:
             discordUrl=openseaCollection.get('discord_url'),
             bannerImageUrl=openseaCollection.get('banner_image_url'),
         )
+        print(retrievedCollection)
         return retrievedCollection
