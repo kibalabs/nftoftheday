@@ -62,5 +62,5 @@ def collection_from_row(row: Mapping) -> Collection:
         discordUrl=row[TokenCollectionsTable.c.discordUrl],
         bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl],
         doesSupportErc721=row[TokenCollectionsTable.c.doesSupportErc721],
-        doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155]
+        doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
     )
