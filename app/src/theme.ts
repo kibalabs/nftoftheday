@@ -43,24 +43,12 @@ export const buildNotdTheme = (): ITheme => {
         'font-family': "'Post No Bills Jaffna', sans-serif",
         'font-weight': '400',
       },
-      header2: {
-        'font-size': '1.9rem',
-        'font-weight': '600',
-      },
       header3: {
         'font-size': '1.5rem',
         'font-weight': '600',
       },
       header4: {
         'font-size': '1.3rem',
-        'font-weight': '600',
-      },
-      header5: {
-        'font-size': '1.1rem',
-        'font-weight': '600',
-      },
-      header7: {
-        'font-size': '0.9rem',
         'font-weight': '600',
       },
       subtitle: {
