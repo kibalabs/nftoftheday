@@ -8,7 +8,6 @@ from core.requester import Requester
 from core.requester import ResponseException
 from core.web3.eth_client import EthClientInterface
 from httpx import ReadTimeout
-from importlib_metadata import re
 
 from notd.model import RetrievedCollection
 
@@ -75,7 +74,6 @@ class CollectionProcessor:
         if openseaCollection is None:
             logging.info(f'Failed to load collection from opensea: {address}')
             openseaCollection = {}
-        print(openseaCollection)
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collectionName or openseaCollection.get('name'),
@@ -92,5 +90,4 @@ class CollectionProcessor:
             doesSupportErc721=doesSupportErc721,
             doesSupportErc1155=doesSupportErc1155
         )
-        print(retrievedCollection)
         return retrievedCollection
