@@ -8,6 +8,7 @@ from core.requester import Requester
 from core.requester import ResponseException
 from core.web3.eth_client import EthClientInterface
 from httpx import ReadTimeout
+from importlib_metadata import re
 
 from notd.model import RetrievedCollection
 
@@ -57,6 +58,7 @@ class CollectionProcessor:
             try:
                 openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}', headers={"X-API-KEY": self.openseaApiKey})
             except ResponseException as exception:
+                print(exception)
                 if exception.statusCode == 404:
                     raise CollectionDoesNotExist()
                 if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
@@ -73,6 +75,7 @@ class CollectionProcessor:
         if openseaCollection is None:
             logging.info(f'Failed to load collection from opensea: {address}')
             openseaCollection = {}
+        print(openseaCollection)
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collectionName or openseaCollection.get('name'),
@@ -89,4 +92,5 @@ class CollectionProcessor:
             doesSupportErc721=doesSupportErc721,
             doesSupportErc1155=doesSupportErc1155
         )
+        print(retrievedCollection)
         return retrievedCollection
