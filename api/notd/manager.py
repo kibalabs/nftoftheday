@@ -9,7 +9,6 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
-from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
