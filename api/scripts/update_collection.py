@@ -43,6 +43,8 @@ async def update_collection(address: str, shouldDefer: bool):
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
+    openseaClient = OpenseaClient(requester=requester)
+    tokenClient = TokenClient(requester=requester, ethClient=ethClient)
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient)
 
