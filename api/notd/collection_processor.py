@@ -11,6 +11,9 @@ from httpx import ReadTimeout
 
 from notd.model import RetrievedCollection
 
+_INTERFACE_ID_ERC721 = '0x5b5e139f'
+_INTERFACE_ID_ERC1155 = '0xd9b67a26'
+
 
 class CollectionDoesNotExist(NotFoundException):
     pass
@@ -26,8 +29,18 @@ class CollectionProcessor:
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
         self.erc721MetadataSymbolFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'symbol'][0]
+        with open('./contracts/IERC1155MetadataURI.json') as contractJsonFile:
+            erc1155MetadataContractJson = json.load(contractJsonFile)
+        self.erc1155MetadataContractAbi = erc1155MetadataContractJson['abi']
+        self.erc1155MetadataUriFunctionAbi = [internalAbi for internalAbi in self.erc1155MetadataContractAbi if internalAbi.get('name') == 'uri'][0]
+        with open('./contracts/IERC165.json') as contractJsonFile:
+            erc165MetadataContractJson = json.load(contractJsonFile)
+        self.erc165MetadataContractAbi = erc165MetadataContractJson['abi']
+        self.erc165SupportInterfaceUriFunctionAbi = [internalAbi for internalAbi in self.erc165MetadataContractAbi if internalAbi.get('name') == 'supportsInterface'][0]
 
     async def retrieve_collection(self, address: str) -> RetrievedCollection:
+        doesSupportErc721 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
+        doesSupportErc1155 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
         try:
             tokenMetadataNameResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataNameFunctionAbi)
             collectionName = tokenMetadataNameResponse[0]
@@ -73,5 +86,7 @@ class CollectionProcessor:
             url=openseaCollection.get('external_url'),
             discordUrl=openseaCollection.get('discord_url'),
             bannerImageUrl=openseaCollection.get('banner_image_url'),
+            doesSupportErc721=doesSupportErc721,
+            doesSupportErc1155=doesSupportErc1155
         )
         return retrievedCollection
