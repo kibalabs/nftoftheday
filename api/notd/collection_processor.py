@@ -39,8 +39,14 @@ class CollectionProcessor:
         self.erc165SupportInterfaceUriFunctionAbi = [internalAbi for internalAbi in self.erc165MetadataContractAbi if internalAbi.get('name') == 'supportsInterface'][0]
 
     async def retrieve_collection(self, address: str) -> RetrievedCollection:
-        doesSupportErc721 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        doesSupportErc1155 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
+        try:
+            doesSupportErc721 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
+        except BadRequestException as excpetion:
+            doesSupportErc721 = False
+        try:
+            doesSupportErc1155 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
+        except BadRequestException as exception:
+            doesSupportErc1155= False
         try:
             tokenMetadataNameResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataNameFunctionAbi)
             collectionName = tokenMetadataNameResponse[0]
@@ -88,6 +94,7 @@ class CollectionProcessor:
             discordUrl=openseaCollection.get('discord_url'),
             bannerImageUrl=openseaCollection.get('banner_image_url'),
             doesSupportErc721=doesSupportErc721,
-            doesSupportErc1155=doesSupportErc1155
+            doesSupportErc1155=doesSupportErc1155,
         )
+        print(retrievedCollection)
         return retrievedCollection
