@@ -96,5 +96,4 @@ class CollectionProcessor:
             doesSupportErc721=doesSupportErc721,
             doesSupportErc1155=doesSupportErc1155,
         )
-        print(retrievedCollection)
         return retrievedCollection
