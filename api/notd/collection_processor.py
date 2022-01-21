@@ -41,7 +41,7 @@ class CollectionProcessor:
     async def retrieve_collection(self, address: str) -> RetrievedCollection:
         try:
             doesSupportErc721 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        except BadRequestException as excpetion:
+        except BadRequestException as exception:
             doesSupportErc721 = False
         try:
             doesSupportErc1155 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
