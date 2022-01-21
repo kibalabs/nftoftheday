@@ -69,8 +69,6 @@ export const CollectionPage = (): React.ReactElement => {
               {collection.description && (
                 <MarkdownText textVariant='light' source={collection.description} />
               )}
-\
-              {' '}
             </ContainingView>
           </Stack>
         )}
