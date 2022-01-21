@@ -46,7 +46,7 @@ class CollectionProcessor:
         try:
             doesSupportErc1155 = (await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
         except BadRequestException as exception:
-            doesSupportErc1155= False
+            doesSupportErc1155 = False
         try:
             tokenMetadataNameResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataNameFunctionAbi)
             collectionName = tokenMetadataNameResponse[0]
@@ -63,7 +63,6 @@ class CollectionProcessor:
             try:
                 openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}', headers={"X-API-KEY": self.openseaApiKey})
             except ResponseException as exception:
-                print(exception)
                 if exception.statusCode == 404:
                     raise CollectionDoesNotExist()
                 if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
