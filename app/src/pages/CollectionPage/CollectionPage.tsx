@@ -36,7 +36,7 @@ export const CollectionPage = (): React.ReactElement => {
               </Box>
             )}
             <ContainingView>
-              <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingTop={PaddingSize.Wide3}>
+              <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} paddingTop={PaddingSize.Wide3}>
                 {collection.imageUrl && (
                   <Box variant='rounded-borderColored' shouldClipContent={true} width='100px' height='100px'>
                     <Image source={collection.imageUrl} alternativeText='image' fitType='contain' />
