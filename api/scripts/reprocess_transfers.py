@@ -47,6 +47,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
         except Exception as exception:
             logging.info(f'Got exception whilst getting blocks: {str(exception)}. Will retry in 10 secs.')
             time.sleep(60)
+            currentBlockNumber -= 1
             continue
         dbTokenTransfers = await retriever.list_token_transfers(fieldFilters=[IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber)])
         dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress.lower(), dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress.lower(), dbTokenTransfer.toAddress.lower()) for dbTokenTransfer in dbTokenTransfers]

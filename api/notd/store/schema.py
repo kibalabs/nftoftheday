@@ -54,6 +54,6 @@ TokenCollectionsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='url', name='url', type_=sqlalchemy.Integer, nullable=True),
     sqlalchemy.Column(key='discordUrl', name='discord_url', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='bannerImageUrl', name='banner_image_url', type_=sqlalchemy.Text, nullable=True),
-    sqlalchemy.Column(key='doesSupportErc721', name='does_support_erc_721', type_=sqlalchemy.Boolean, nullable=True),
-    sqlalchemy.Column(key='doesSupportErc1155', name='does_support_erc_1155', type_=sqlalchemy.Boolean, nullable=True),
+    sqlalchemy.Column(key='doesSupportErc721', name='does_support_erc721', type_=sqlalchemy.Boolean, nullable=True),
+    sqlalchemy.Column(key='doesSupportErc1155', name='does_support_erc1155', type_=sqlalchemy.Boolean, nullable=True),
 )
