@@ -36,41 +36,41 @@ export const CollectionPage = (): React.ReactElement => {
               </Box>
             )}
             <ContainingView>
-              <Stack isFullWidth={true} isFullHeight={true} paddingHorizontal={PaddingSize.Wide3}>
-                <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingTop={PaddingSize.Wide3}>
-                  {collection.imageUrl && (
-                    <Box variant='rounded-borderColored' shouldClipContent={true} width='100px' height='100px'>
-                      <Image source={collection.imageUrl} alternativeText='image' fitType='contain' />
-                    </Box>
-                  )}
-                  <Spacing variant={PaddingSize.Wide2} />
-                  <Stack.Item shrinkFactor={1}>
-                    <Text variant='title'>{collection.name}</Text>
-                  </Stack.Item>
-                </Stack>
+              <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingTop={PaddingSize.Wide3}>
+                {collection.imageUrl && (
+                  <Box variant='rounded-borderColored' shouldClipContent={true} width='100px' height='100px'>
+                    <Image source={collection.imageUrl} alternativeText='image' fitType='contain' />
+                  </Box>
+                )}
                 <Spacing variant={PaddingSize.Wide2} />
-                <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
-                  {collection.discordUrl && (
-                    <Button variant='tertiary' text= 'Discord' iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
-                  )}
-                  {collection.instagramUsername && (
-                    <Button variant='tertiary' text={'Instagram'} target={`https://instagram.com/${collection.instagramUsername}`} iconLeft={<KibaIcon iconId='feather-instagram' />} />
-                  )}
-                  {collection.twitterUsername && (
-                    <Button variant='tertiary' text={'Twitter'} target={`https://instagram.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
-                  )}
-                  {collection.openseaSlug && (
-                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
-                  )}
-                  {collection.url && (
-                    <Button variant='tertiary' text={'Website'} target={`https://opensea.io/collection/${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                  )}
-                </Stack>
-                <Spacing variant={PaddingSize.Wide2} />
-                {collection.description && (
-                  <MarkdownText textVariant='light' source={collection.description} />
+                <Stack.Item shrinkFactor={1}>
+                  <Text variant='title'>{collection.name}</Text>
+                </Stack.Item>
+              </Stack>
+              <Spacing variant={PaddingSize.Wide2} />
+              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
+                {collection.discordUrl && (
+                  <Button variant='tertiary' text= 'Discord' iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
+                )}
+                {collection.instagramUsername && (
+                  <Button variant='tertiary' text={'Instagram'} target={`https://instagram.com/${collection.instagramUsername}`} iconLeft={<KibaIcon iconId='feather-instagram' />} />
+                )}
+                {collection.twitterUsername && (
+                  <Button variant='tertiary' text={'Twitter'} target={`https://instagram.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
+                )}
+                {collection.openseaSlug && (
+                  <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
+                )}
+                {collection.url && (
+                  <Button variant='tertiary' text={'Website'} target={`https://opensea.io/collection/${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
                 )}
               </Stack>
+              <Spacing variant={PaddingSize.Wide2} />
+              {collection.description && (
+                <MarkdownText textVariant='light' source={collection.description} />
+              )}
+\
+              {' '}
             </ContainingView>
           </Stack>
         )}
