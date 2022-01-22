@@ -168,7 +168,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUri.replace("0x{id}", hex(int(tokenId))).replace('\x00', '')
+        tokenMetadataUri = tokenMetadataUri.replace("0x{id}", hex(int(tokenId))).replace("{id}", hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
