@@ -181,9 +181,9 @@ class Saver(CoreSaver):
             values[TokenCollectionsTable.c.discordUrl.key] = discordUrl
         if bannerImageUrl != _EMPTY_STRING:
             values[TokenCollectionsTable.c.bannerImageUrl.key] = bannerImageUrl
-        if doesSupportErc721 != None:
+        if doesSupportErc721 is not None:
             values[TokenCollectionsTable.c.doesSupportErc721.key] = doesSupportErc721
-        if doesSupportErc1155 != None:
+        if doesSupportErc1155 is not None:
             values[TokenCollectionsTable.c.doesSupportErc1155.key] = doesSupportErc1155
         if len(values) > 0:
             values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
