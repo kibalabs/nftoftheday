@@ -186,6 +186,8 @@ class TokenMetadataProcessor():
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=5)
                 tokenMetadataDict = tokenMetadataResponse.json()
+                if tokenMetadataDict is None:
+                    raise Exception('Empty response')
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
             except Exception as exception:  # pylint: disable=broad-except
