@@ -115,7 +115,7 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
         await self.database.execute(query=query, values=values)
 
-    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> Collection:
+    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool]) -> Collection:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         collectionId = await self._execute(query=TokenCollectionsTable.insert(), values={  # pylint: disable=no-value-for-parameter
@@ -133,7 +133,8 @@ class Saver(CoreSaver):
             TokenCollectionsTable.c.url.key: url,
             TokenCollectionsTable.c.discordUrl.key: discordUrl,
             TokenCollectionsTable.c.bannerImageUrl.key: bannerImageUrl,
-
+            TokenCollectionsTable.c.doesSupportErc721.key: doesSupportErc721,
+            TokenCollectionsTable.c.doesSupportErc1155.key: doesSupportErc1155,
         })
         return Collection(
             collectionId=collectionId,
@@ -151,9 +152,11 @@ class Saver(CoreSaver):
             url=url,
             discordUrl=discordUrl,
             bannerImageUrl=bannerImageUrl,
+            doesSupportErc721=doesSupportErc721,
+            doesSupportErc1155=doesSupportErc1155,
         )
 
-    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> None:
+    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool]) -> None:
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId)
         values = {}
         if name != _EMPTY_STRING:
@@ -177,7 +180,11 @@ class Saver(CoreSaver):
         if discordUrl != _EMPTY_STRING:
             values[TokenCollectionsTable.c.discordUrl.key] = discordUrl
         if bannerImageUrl != _EMPTY_STRING:
-            values[TokenCollectionsTable.c.bannerImageUrl.key] = openseaSlug
+            values[TokenCollectionsTable.c.bannerImageUrl.key] = bannerImageUrl
+        if doesSupportErc721 != None:
+            values[TokenCollectionsTable.c.doesSupportErc721.key] = doesSupportErc721
+        if doesSupportErc1155 != None:
+            values[TokenCollectionsTable.c.doesSupportErc1155.key] = doesSupportErc1155
         if len(values) > 0:
             values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
         await self.database.execute(query=query, values=values)
