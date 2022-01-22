@@ -142,8 +142,7 @@ class TokenMetadataProcessor():
             doesSupportErc721 = False
         if doesSupportErc721:
             try:
-                tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
-                tokenMetadataUri = tokenMetadataUriResponse[0]
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
         else:
@@ -153,8 +152,7 @@ class TokenMetadataProcessor():
                 doesSupportErc1155 = False
             if doesSupportErc1155:
                 try:
-                    tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)})
-                    tokenMetadataUri = tokenMetadataUriResponse[0]
+                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
                 except BadRequestException as exception:
                     badRequestException = exception
             else:
@@ -168,7 +166,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUri.replace("0x{id}", hex(int(tokenId))).replace("{id}", hex(int(tokenId))).replace('\x00', '')
+        tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
