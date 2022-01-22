@@ -44,7 +44,6 @@ class CollectionProcessor:
             doesSupportErc721 = doesSupportErc721Response[0]
         except BadRequestException as exception:
             doesSupportErc721 = False
-        print('doesSupportErc721', doesSupportErc721)
         try:
             doesSupportErc1155Response = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155})
             doesSupportErc1155 = doesSupportErc1155Response[0]
