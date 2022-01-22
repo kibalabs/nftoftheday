@@ -106,6 +106,7 @@ class TokenMetadataProcessor():
 
     async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
+            # NOTE(krishan711): special case for CryptoPunks
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
             attributes = [{"trait_type": "Accessory", "value": attribute.strip()} for attribute in attributesResponse[0].split(',')]
             imageSvgResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksImageSvgFunctionAbi, arguments={'index': int(tokenId)})
@@ -141,7 +142,8 @@ class TokenMetadataProcessor():
             doesSupportErc721 = False
         if doesSupportErc721:
             try:
-                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
+                tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)})
+                tokenMetadataUri = tokenMetadataUriResponse[0]
             except BadRequestException as exception:
                 badRequestException = exception
         else:
@@ -151,7 +153,8 @@ class TokenMetadataProcessor():
                 doesSupportErc1155 = False
             if doesSupportErc1155:
                 try:
-                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
+                    tokenMetadataUriResponse = await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)})
+                    tokenMetadataUri = tokenMetadataUriResponse[0]
                 except BadRequestException as exception:
                     badRequestException = exception
             else:
@@ -165,7 +168,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUriResponse.replace("0x{id}", hex(int(tokenId))).replace('\x00', '')
+        tokenMetadataUri = tokenMetadataUri.replace("0x{id}", hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -183,7 +186,7 @@ class TokenMetadataProcessor():
             tokenMetadataDict = self._resolve_data(dataString=tokenMetadataUri, registryAddress=registryAddress, tokenId=tokenId)
         else:
             try:
-                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
+                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=5)
                 tokenMetadataDict = tokenMetadataResponse.json()
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
