@@ -54,7 +54,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
         for retrievedTokenTransfer in retrievedTokenTransfers:
             tuple = (retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress.lower(), retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress.lower(), retrievedTokenTransfer.toAddress.lower())
             if tuple not in dbTuples:
-                print('Saving new')
+                logging.info('Saving new')
                 await saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
             else:
                 query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == dbTokenTransfers[dbTuples.index(tuple)].tokenTransferId)
@@ -66,7 +66,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
                     TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,
                     TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
                 }
-                print('Updating old')
+                logging.info('Updating old')
                 await database.execute(query=query, values=values)
 
         currentBlockNumber = currentBlockNumber + 1
