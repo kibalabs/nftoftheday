@@ -69,7 +69,7 @@ class CollectionProcessor:
             contractMetadataUriResponse = await self.requester.get(url=contractMetadataUri)
             openseaCollection = contractMetadataUriResponse.json()
             if isinstance(openseaCollection, str):
-                    openseaCollection = json.loads(openseaCollection)
+                openseaCollection = json.loads(openseaCollection)
         else:
             openseaResponse = None
             retryCount = 0
