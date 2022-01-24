@@ -110,11 +110,12 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
-        if ethTransactionReceipt['status'] != 1:
-            logging.debug('Ignoring failed transaction')
-            return []
-        gasUsed = ethTransactionReceipt['gasUsed']
+        # ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+        # if ethTransactionReceipt['status'] != 1:
+        #     logging.debug('Ignoring failed transaction')
+        #     return []
+        # gasUsed = ethTransactionReceipt['gasUsed']
+        gasUsed = 0
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, tokenType='erc1155single')]
         return transactions
 
@@ -143,11 +144,12 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
-        if ethTransactionReceipt['status'] != 1:
-            logging.debug('Ignoring failed transaction')
-            return []
-        gasUsed = ethTransactionReceipt['gasUsed']
+        # ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+        # if ethTransactionReceipt['status'] != 1:
+        #     logging.debug('Ignoring failed transaction')
+        #     return []
+        # gasUsed = ethTransactionReceipt['gasUsed']
+        gasUsed = 0
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
         return transactions
 
@@ -183,10 +185,11 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
-        if ethTransactionReceipt['status'] != 1:
-            logging.debug('Ignoring failed transaction')
-            return []
-        gasUsed = ethTransactionReceipt['gasUsed']
+        # ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+        # if ethTransactionReceipt['status'] != 1:
+        #     logging.debug('Ignoring failed transaction')
+        #     return []
+        # gasUsed = ethTransactionReceipt['gasUsed']
+        gasUsed = 0
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=gasUsed, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, tokenType='erc721')]
         return transactions
