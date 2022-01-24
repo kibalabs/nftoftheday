@@ -201,7 +201,6 @@ class TokenMetadataProcessor():
                 raise BadRequestException(f'description is an array with len != 1: {description}')
             description = description[0]
         description = description.replace('\u0000', '') if description else None
-        # print(name.encode('utf-16').decode("utf-8"))
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
