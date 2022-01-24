@@ -194,17 +194,20 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        name = tokenMetadataDict.get('name', f'#{tokenId}').replace('\u0000', '')
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
             description = description[0]
+        description = description.replace('\u0000', '') if description else None
+        # print(name.encode('utf-16').decode("utf-8"))
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_data'),
-            name=tokenMetadataDict.get('name', f'#{tokenId}'),
+            name=name,
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )
