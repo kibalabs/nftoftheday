@@ -80,7 +80,7 @@ class TokenMetadataProcessor():
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
-            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8')).decode('utf-8')
+            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8') + b'==').decode('utf-8')
         elif dataString.startswith('data:application/json;utf8,'):
             tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
         elif dataString.startswith('data:application/json;ascii,'):
