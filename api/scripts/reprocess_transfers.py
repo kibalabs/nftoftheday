@@ -51,12 +51,16 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
             continue
         dbTokenTransfers = await retriever.list_token_transfers(fieldFilters=[IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber)])
         dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress.lower(), dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress.lower(), dbTokenTransfer.toAddress.lower()) for dbTokenTransfer in dbTokenTransfers]
+        savedTuples = []
         for retrievedTokenTransfer in retrievedTokenTransfers:
             tuple = (retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress.lower(), retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress.lower(), retrievedTokenTransfer.toAddress.lower())
+            if tuple in savedTuples:
+                logging.info(f'Ignoring duplicate tuple: {tuple}')
+                continue
             if tuple not in dbTuples:
                 logging.info('Saving new')
                 await saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
-                dbTuples.append(tuple)
+                savedTuples.append(tuple)
             else:
                 query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == dbTokenTransfers[dbTuples.index(tuple)].tokenTransferId)
                 values = {
