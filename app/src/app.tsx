@@ -3,9 +3,10 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { KibaApp } from '@kibalabs/ui-react';
+import { Direction, KibaApp, Stack } from '@kibalabs/ui-react';
 
 import { NotdClient } from './client/client';
+import { NavBar } from './components/navBar';
 import { GlobalsProvider } from './globalsContext';
 import { CollectionPage } from './pages/CollectionPage';
 import { HomePage } from './pages/HomePage';
@@ -43,7 +44,12 @@ export const App = (): React.ReactElement => {
   return (
     <KibaApp theme={theme} isFullPageApp={true}>
       <GlobalsProvider globals={globals}>
-        <Router routes={routes} />
+        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+          <NavBar />
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
+            <Router routes={routes} />
+          </Stack.Item>
+        </Stack>
       </GlobalsProvider>
     </KibaApp>
   );
