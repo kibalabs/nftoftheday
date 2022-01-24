@@ -69,7 +69,6 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
                 }
                 logging.info('Updating old')
                 await database.execute(query=query, values=values)
-                dbTuples.append(tuple)
 
         currentBlockNumber = currentBlockNumber + 1
     await database.disconnect()
