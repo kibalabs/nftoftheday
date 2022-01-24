@@ -9,7 +9,6 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
-from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
@@ -115,21 +114,20 @@ class NotdManager:
             await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message())
 
     async def _create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer]) -> None:
-        async with self.saver.create_transaction():
-            for retrievedTokenTransfer in retrievedTokenTransfers:
-                tokenTransfers = await self.retriever.list_token_transfers(
-                    fieldFilters=[
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.transactionHash.key, eq=retrievedTokenTransfer.transactionHash),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=retrievedTokenTransfer.registryAddress),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=retrievedTokenTransfer.tokenId),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=retrievedTokenTransfer.fromAddress),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=retrievedTokenTransfer.toAddress),
-                    ], limit=1, shouldIgnoreRegistryBlacklist=True
-                )
-                if len(tokenTransfers) > 0:
-                    logging.info(f'Skipping saving {retrievedTokenTransfer.transactionHash}:{retrievedTokenTransfer.registryAddress}:{retrievedTokenTransfer.tokenId} as its already saved')
-                    continue
-                await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
+        for retrievedTokenTransfer in retrievedTokenTransfers:
+            tokenTransfers = await self.retriever.list_token_transfers(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.transactionHash.key, eq=retrievedTokenTransfer.transactionHash),
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=retrievedTokenTransfer.registryAddress),
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=retrievedTokenTransfer.tokenId),
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=retrievedTokenTransfer.fromAddress),
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=retrievedTokenTransfer.toAddress),
+                ], limit=1, shouldIgnoreRegistryBlacklist=True
+            )
+            if len(tokenTransfers) > 0:
+                logging.info(f'Skipping saving {retrievedTokenTransfer.transactionHash}:{retrievedTokenTransfer.registryAddress}:{retrievedTokenTransfer.tokenId} as its already saved')
+                continue
+            await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
 
     async def process_block_range(self, startBlockNumber: int, endBlockNumber: int) -> None:
         blockNumbers = list(range(startBlockNumber, endBlockNumber))
@@ -138,18 +136,9 @@ class NotdManager:
     async def process_blocks(self, blockNumbers: Sequence[int]) -> None:
         await asyncio.gather(*[self.process_block(blockNumber=blockNumber) for blockNumber in blockNumbers])
 
-    async def process_block(self, blockNumber: int, shouldForce: bool = False) -> None:
-        if not shouldForce:
-            blockTransfers = await self.retriever.list_token_transfers(
-                fieldFilters=[
-                    IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
-                ], limit=1, shouldIgnoreRegistryBlacklist=True,
-            )
-            if len(blockTransfers) > 0:
-                logging.info('Skipping block because it already has transfers.')
-                return
+    async def process_block(self, blockNumber: int) -> None:
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        await self._create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfers)
         await asyncio.gather(*[self.update_token_metadata_deferred(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers])
         await asyncio.gather(*[self.update_collection_deferred(address=address) for address in set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers)])
+        await self._create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfers)
