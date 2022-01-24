@@ -50,7 +50,6 @@ class CollectionProcessor:
         except BadRequestException:
             collectionSymbol = None
         if contractMetadataUri is not None:
-            print(contractMetadataUri)
             contractMetadataUriResponse = await self.requester.get(url=contractMetadataUri)
             openseaCollection = contractMetadataUriResponse.json()
             if isinstance(openseaCollection, str):
