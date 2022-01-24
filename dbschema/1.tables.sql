@@ -9,7 +9,7 @@ CREATE TABLE tbl_token_transfers (
     token_id TEXT NOT NULL,
     value NUMERIC(256, 0) NOT NULL,
     -- NOTE(krishan711): amount should be NOT NULL once filled
-    amount INTEGER,
+    amount BIGINT,
     gas_limit NUMERIC(256, 0) NOT NULL,
     gas_price NUMERIC(256, 0) NOT NULL,
     gas_used NUMERIC(256, 0) NOT NULL,
