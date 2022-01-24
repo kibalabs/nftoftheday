@@ -8,8 +8,8 @@ CREATE TABLE tbl_token_transfers (
     operator_address TEXT,
     token_id TEXT NOT NULL,
     value NUMERIC(256, 0) NOT NULL,
-    -- NOTE(krishan711): amount should be NOT NULL once filled
-    amount BIGINT,
+    -- NOTE(krishan711): amount2 should be changed to amount and NOT NULL once filled
+    amount2 NUMERIC(256, 0),
     gas_limit NUMERIC(256, 0) NOT NULL,
     gas_price NUMERIC(256, 0) NOT NULL,
     gas_used NUMERIC(256, 0) NOT NULL,
