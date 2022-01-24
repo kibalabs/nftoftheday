@@ -63,9 +63,9 @@ class BlockProcessor:
     async def _get_transaction(self, transactionHash: str, blockData: BlockData) -> TxData:
         return next((transaction for transaction in blockData['transactions'] if transaction['hash'].hex() == transactionHash), None)
 
-    # @async_lru.alru_cache(maxsize=100000)
-    # async def _get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
-    #     return await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
+    @async_lru.alru_cache(maxsize=100000)
+    async def _get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+        return await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
 
     async def get_latest_block_number(self) -> int:
         return await self.ethClient.get_latest_block_number()
