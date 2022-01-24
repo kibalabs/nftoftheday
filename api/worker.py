@@ -51,18 +51,19 @@ async def main():
     tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, slackClient=slackClient)
 
     await database.connect()
-    while True:
-        hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=3, longPollSeconds=1, shouldProcessInParallel=True)
-        if hasProcessedWork:
-            continue
-        hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=True)
-        if hasProcessedToken:
-            continue
-        logging.info('No message received.. sleeping')
-        time.sleep(60)
-    # NOTE(krishan711): code will never get here
-    await database.disconnect()
-    await requester.close_connections()
+    try:
+        while True:
+            hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=3, longPollSeconds=1, shouldProcessInParallel=True)
+            if hasProcessedWork:
+                continue
+            hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=True)
+            if hasProcessedToken:
+                continue
+            logging.info('No message received.. sleeping')
+            time.sleep(60)
+    finally:
+        await database.disconnect()
+        await requester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

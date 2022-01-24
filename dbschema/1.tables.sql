@@ -8,8 +8,8 @@ CREATE TABLE tbl_token_transfers (
     operator_address TEXT,
     token_id TEXT NOT NULL,
     value NUMERIC(256, 0) NOT NULL,
-    -- NOTE(krishan711): amount should be NOT NULL once filled
-    amount INTEGER,
+    -- NOTE(krishan711): amount2 should be changed to amount and NOT NULL once filled
+    amount_2 NUMERIC(256, 0),
     gas_limit NUMERIC(256, 0) NOT NULL,
     gas_price NUMERIC(256, 0) NOT NULL,
     gas_used NUMERIC(256, 0) NOT NULL,
@@ -63,7 +63,9 @@ CREATE TABLE tbl_collections (
     opensea_slug TEXT,
     url TEXT,
     discord_url TEXT,
-    banner_image_url TEXT
+    banner_image_url TEXT,
+    does_support_erc721 BOOLEAN,
+    does_support_erc1155 BOOLEAN
 );
 CREATE UNIQUE INDEX tbl_collections_address ON tbl_collections (address);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);

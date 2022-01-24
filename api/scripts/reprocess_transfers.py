@@ -47,14 +47,16 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
         except Exception as exception:
             logging.info(f'Got exception whilst getting blocks: {str(exception)}. Will retry in 10 secs.')
             time.sleep(60)
+            currentBlockNumber -= 1
             continue
         dbTokenTransfers = await retriever.list_token_transfers(fieldFilters=[IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber)])
         dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress.lower(), dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress.lower(), dbTokenTransfer.toAddress.lower()) for dbTokenTransfer in dbTokenTransfers]
         for retrievedTokenTransfer in retrievedTokenTransfers:
             tuple = (retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress.lower(), retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress.lower(), retrievedTokenTransfer.toAddress.lower())
             if tuple not in dbTuples:
-                print('Saving new')
+                logging.info('Saving new')
                 await saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
+                dbTuples.append(tuple)
             else:
                 query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == dbTokenTransfers[dbTuples.index(tuple)].tokenTransferId)
                 values = {
@@ -65,7 +67,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
                     TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,
                     TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
                 }
-                print('Updating old')
+                logging.info('Updating old')
                 await database.execute(query=query, values=values)
 
         currentBlockNumber = currentBlockNumber + 1

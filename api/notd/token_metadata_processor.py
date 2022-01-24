@@ -80,7 +80,7 @@ class TokenMetadataProcessor():
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
-            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8')).decode('utf-8')
+            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8') + b'==').decode('utf-8')
         elif dataString.startswith('data:application/json;utf8,'):
             tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
         elif dataString.startswith('data:application/json;ascii,'):
@@ -106,6 +106,7 @@ class TokenMetadataProcessor():
 
     async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
+            # NOTE(krishan711): special case for CryptoPunks
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
             attributes = [{"trait_type": "Accessory", "value": attribute.strip()} for attribute in attributesResponse[0].split(',')]
             imageSvgResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksImageSvgFunctionAbi, arguments={'index': int(tokenId)})
@@ -165,7 +166,7 @@ class TokenMetadataProcessor():
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise exception
-        tokenMetadataUri = tokenMetadataUriResponse.replace("0x{id}", hex(int(tokenId))).replace('\x00', '')
+        tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -183,25 +184,30 @@ class TokenMetadataProcessor():
             tokenMetadataDict = self._resolve_data(dataString=tokenMetadataUri, registryAddress=registryAddress, tokenId=tokenId)
         else:
             try:
-                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri)
+                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=5)
                 tokenMetadataDict = tokenMetadataResponse.json()
+                if tokenMetadataDict is None:
+                    raise Exception('Empty response')
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        name = str(tokenMetadataDict.get('name', f'#{tokenId}')).replace('\u0000', '')
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
             description = description[0]
+        if description is not None:
+            description = str(description).replace('\u0000', '')
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_data'),
-            name=tokenMetadataDict.get('name', f'#{tokenId}'),
+            name=name,
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )
