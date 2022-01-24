@@ -1,13 +1,14 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment, WebView } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, LoadingSpinner, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { RegistryToken } from '../client/resources';
+import { Collection, CollectionToken } from '../client/resources';
+import { useGlobals } from '../globalsContext';
 import { truncateTitle } from '../titleUtil';
-import { shouldUseIframe } from './nftUtil';
 
 export interface NftCardProps {
-  nft: RegistryToken;
+  tokenId: string;
+  collectionAddress: string;
   label: string;
   subtitle: string;
   secondaryButtonTarget?: string;
@@ -20,18 +21,46 @@ export interface NftCardProps {
 }
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
-  const title = props.nft.name;
-  const imageUrl = props.nft.imageUrl ?? props.nft.collectionImageUrl ?? 'assets/icon.jpg';
-  const collectionImageUrl = props.nft.collectionImageUrl;
-  const collectionTitle = props.nft.collectionName;
-  const collectionUrl = props.nft.collectionExternalUrl ?? props.nft.collectionOpenSeaUrl;
+  const { notdClient } = useGlobals();
+  const [asset, setAsset] = React.useState<CollectionToken | null>(null);
+  const [collection, setCollection] = React.useState<Collection | null>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<Error | null>(null);
+
+  const updateAsset = React.useCallback(async (): Promise<void> => {
+    if (!props.collectionAddress || !props.tokenId) {
+      setAsset(null);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const tokenPromise = notdClient.retrieveCollectionToken(props.collectionAddress, props.tokenId);
+      const collectionPromise = notdClient.retrieveCollection(props.collectionAddress);
+      setAsset(await tokenPromise);
+      setCollection(await collectionPromise);
+    } catch (apiError: unknown) {
+      setError(apiError as Error);
+    }
+    setIsLoading(false);
+  }, [notdClient, props.collectionAddress, props.tokenId]);
+
+  React.useEffect((): void => {
+    updateAsset();
+  }, [updateAsset]);
+
+  let imageUrl = asset?.imageUrl ?? collection?.imageUrl ?? 'assets/icon.png';
+  if (imageUrl.startsWith('ipfs://')) {
+    imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  }
+
+  const collectionImageUrl = collection?.imageUrl;
+  const collectionUrl = collection?.url ?? (collection?.openseaSlug ? `https://opensea.io/collections/${collection?.openseaSlug}` : null);
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
-  const error = props.error;
 
   return (
     <Box variant='card'>
-      <Stack direction={Direction.Vertical}>
+      <Stack direction={Direction.Vertical} childAlignment={Alignment.Center}>
         <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
           <Box variant={`cardLabelBox${extraLabelBoxVariantsString}`} isFullWidth={false}>
             <Text variant={`cardLabel${extraLabelVariantsString}`}>{props.label}</Text>
@@ -39,44 +68,43 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Spacing variant={PaddingSize.Wide} />
         </Stack.Item>
         {error ? (
-          <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide}>
-            <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
-              <Box width='175px' height='300px'>
-                <Text variant='header3'>Sorry, Something went wrong.   </Text>
-                <Spacing variant={PaddingSize.Wide} />
-                <Text variant='header3'> Please Refresh the page.</Text>
-              </Box>
-            </Stack.Item>
-            <Spacing variant={PaddingSize.Wide} />
+          <Text>{error.message}</Text>
+        ) : !props.collectionAddress || !props.tokenId || isLoading || !asset || !collection ? (
+          <Stack padding={PaddingSize.Wide3}>
+            <LoadingSpinner variant='light' />
           </Stack>
         ) : (
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>
               <Box width='150px' height='150px'>
-                { shouldUseIframe(props.nft) ? (
-                  <WebView url={imageUrl} />
+                {imageUrl.startsWith('data:image/svg+xml;utf8,') ? (
+                  <div dangerouslySetInnerHTML={{ __html: imageUrl.slice('data:image/svg+xml;utf8,'.length) }} />
+                ) : imageUrl.startsWith('data:image/svg+xml;base64,') ? (
+                  <div dangerouslySetInnerHTML={{ __html: atob(imageUrl.slice('data:image/svg+xml;base64,'.length)) }} />
                 ) : (
-                  <Media source={imageUrl} alternativeText={`${title} image`} fitType='contain' />
+                  <Media source={imageUrl} alternativeText={`${asset.name} image`} fitType='contain' />
                 )}
               </Box>
             </Stack.Item>
-            <Text variant='header3' alignment={TextAlignment.Center}>{truncateTitle(title)}</Text>
+            <Text variant='header3-singleLine' alignment={TextAlignment.Center}>{truncateTitle(asset.name)}</Text>
             <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
             <Spacing variant={PaddingSize.Wide} />
-            {collectionTitle && (
+            {collection.name && (
               <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                 {collectionImageUrl && (
                   <Box width='25px' height='25px'>
-                    <Image source={collectionImageUrl} alternativeText={collectionTitle} fitType='contain' />
+                    <Image source={collectionImageUrl} alternativeText={collection.name} fitType='contain' />
                   </Box>
                 )}
-                <Stack.Item growthFactor={1} shrinkFactor={1}>
-                  {collectionUrl ? (
-                    <MarkdownText textVariant='small' source={`Part of [${collectionTitle}](${collectionUrl})`} />
-                  ) : (
-                    <Text variant='small'>{`Part of ${collectionTitle}`}</Text>
-                  )}
-                </Stack.Item>
+                {collection && collection.name && (
+                  <Stack.Item growthFactor={1} shrinkFactor={1}>
+                    {collectionUrl ? (
+                      <MarkdownText textVariant='small' source={`Part of [${collection.name}](${collectionUrl})`} />
+                    ) : (
+                      <Text variant='small'>{`Part of ${collection.name}`}</Text>
+                    )}
+                  </Stack.Item>
+                )}
               </Stack>
             )}
             <Spacing variant={PaddingSize.Wide2} />

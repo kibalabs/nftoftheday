@@ -1,4 +1,5 @@
 import contextlib
+import logging
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -26,7 +27,8 @@ class Saver(CoreSaver):
         try:
             await transaction.start()
             yield None
-        except:
+        except Exception as exception:
+            logging.info(f'Rolling back due to exception: {exception}')
             await transaction.rollback()
             raise
         else:
@@ -38,14 +40,17 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
             TokenTransfersTable.c.fromAddress.key: retrievedTokenTransfer.fromAddress,
             TokenTransfersTable.c.toAddress.key: retrievedTokenTransfer.toAddress,
+            TokenTransfersTable.c.operatorAddress.key: retrievedTokenTransfer.operatorAddress,
             TokenTransfersTable.c.tokenId.key: retrievedTokenTransfer.tokenId,
             TokenTransfersTable.c.value.key: retrievedTokenTransfer.value,
+            TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,
             TokenTransfersTable.c.gasLimit.key: retrievedTokenTransfer.gasLimit,
             TokenTransfersTable.c.gasPrice.key: retrievedTokenTransfer.gasPrice,
             TokenTransfersTable.c.gasUsed.key: retrievedTokenTransfer.gasUsed,
             TokenTransfersTable.c.blockNumber.key: retrievedTokenTransfer.blockNumber,
             TokenTransfersTable.c.blockHash.key: retrievedTokenTransfer.blockHash,
             TokenTransfersTable.c.blockDate.key: retrievedTokenTransfer.blockDate,
+            TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
         })
         return TokenTransfer(
             tokenTransferId=tokenTransferId,
@@ -53,14 +58,17 @@ class Saver(CoreSaver):
             registryAddress=retrievedTokenTransfer.registryAddress,
             fromAddress=retrievedTokenTransfer.fromAddress,
             toAddress=retrievedTokenTransfer.toAddress,
+            operatorAddress=retrievedTokenTransfer.operatorAddress,
             tokenId=retrievedTokenTransfer.tokenId,
             value=retrievedTokenTransfer.value,
+            amount=retrievedTokenTransfer.amount,
             gasLimit=retrievedTokenTransfer.gasLimit,
             gasPrice=retrievedTokenTransfer.gasPrice,
             gasUsed=retrievedTokenTransfer.gasUsed,
             blockNumber=retrievedTokenTransfer.blockNumber,
             blockHash=retrievedTokenTransfer.blockHash,
             blockDate=retrievedTokenTransfer.blockDate,
+            tokenType=retrievedTokenTransfer.tokenType
         )
 
     async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
@@ -107,7 +115,7 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
         await self.database.execute(query=query, values=values)
 
-    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> Collection:
+    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool]) -> Collection:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         collectionId = await self._execute(query=TokenCollectionsTable.insert(), values={  # pylint: disable=no-value-for-parameter
@@ -125,7 +133,8 @@ class Saver(CoreSaver):
             TokenCollectionsTable.c.url.key: url,
             TokenCollectionsTable.c.discordUrl.key: discordUrl,
             TokenCollectionsTable.c.bannerImageUrl.key: bannerImageUrl,
-
+            TokenCollectionsTable.c.doesSupportErc721.key: doesSupportErc721,
+            TokenCollectionsTable.c.doesSupportErc1155.key: doesSupportErc1155,
         })
         return Collection(
             collectionId=collectionId,
@@ -143,9 +152,11 @@ class Saver(CoreSaver):
             url=url,
             discordUrl=discordUrl,
             bannerImageUrl=bannerImageUrl,
+            doesSupportErc721=doesSupportErc721,
+            doesSupportErc1155=doesSupportErc1155,
         )
 
-    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str]) -> None:
+    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool]) -> None:
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId)
         values = {}
         if name != _EMPTY_STRING:
@@ -169,7 +180,11 @@ class Saver(CoreSaver):
         if discordUrl != _EMPTY_STRING:
             values[TokenCollectionsTable.c.discordUrl.key] = discordUrl
         if bannerImageUrl != _EMPTY_STRING:
-            values[TokenCollectionsTable.c.bannerImageUrl.key] = openseaSlug
+            values[TokenCollectionsTable.c.bannerImageUrl.key] = bannerImageUrl
+        if doesSupportErc721 is not None:
+            values[TokenCollectionsTable.c.doesSupportErc721.key] = doesSupportErc721
+        if doesSupportErc1155 is not None:
+            values[TokenCollectionsTable.c.doesSupportErc1155.key] = doesSupportErc1155
         if len(values) > 0:
             values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
         await self.database.execute(query=query, values=values)

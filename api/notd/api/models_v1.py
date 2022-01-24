@@ -6,11 +6,12 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from notd.model import Collection
 from notd.model import RegistryToken
-from notd.model import RetrievedCollection
-from notd.model import RetrievedTokenMetadata
+from notd.model import TokenMetadata
 from notd.model import UiData
 
+VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
 
 class ApiTokenTransfer(BaseModel):
     tokenTransferId: int
@@ -75,6 +76,7 @@ class ApiUiData(BaseModel):
             transactionCount=model.transactionCount
         )
 
+
 class ApiRegistryToken(BaseModel):
     registryAddress: str
     tokenId: str
@@ -106,17 +108,19 @@ class ApiRegistryToken(BaseModel):
             collectionExternalUrl=model.collectionExternalUrl,
         )
 
-class ApiMetadataToken(BaseModel):
+
+class ApiCollectionToken(BaseModel):
     registryAddress: str
     tokenId: str
     metadataUrl: str
-    imageUrl: Optional[str]
     name: Optional[str]
+    imageUrl: Optional[str]
     description: Optional[str]
-    attributes: Optional[Dict[str, Union[str, int, float]]]
+    attributes: Optional[List[Dict[str, Union[str, int, float]]]]
 
     @classmethod
-    def from_model(cls, model: RetrievedTokenMetadata):
+    def from_model(cls, model: TokenMetadata):
+        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in model.attributes]
         return cls(
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
@@ -124,7 +128,7 @@ class ApiMetadataToken(BaseModel):
             imageUrl=model.imageUrl,
             name=model.name,
             description=model.description,
-            attributes=model.attributes,
+            attributes=attributes,
         )
 
 class ApiCollection(BaseModel):
@@ -142,7 +146,7 @@ class ApiCollection(BaseModel):
     bannerImageUrl: Optional[str]
 
     @classmethod
-    def from_model(cls, model: RetrievedCollection):
+    def from_model(cls, model: Collection):
         return cls(
             address=model.address,
             name=model.name,
@@ -171,12 +175,12 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
-class RetreiveRegistryTokenRequest(BaseModel):
+class RetrieveRegistryTokenRequest(BaseModel):
     # registryAddress: str
     # tokenId: str
     pass
 
-class RetreiveRegistryTokenResponse(BaseModel):
+class RetrieveRegistryTokenResponse(BaseModel):
     registryToken: ApiRegistryToken
 
 class SubscribeRequest(BaseModel):
@@ -185,15 +189,15 @@ class SubscribeRequest(BaseModel):
 class SubscribeResponse(BaseModel):
     pass
 
-class RetrieveTokenMetadataRequest(BaseModel):
+class RetrieveCollectionTokenRequest(BaseModel):
     registryAddress: str
     tokenId: str
 
-class RetrieveTokenMetadataResponse(BaseModel):
-    retrievedTokenMetadata: ApiMetadataToken
+class RetrieveCollectionTokenResponse(BaseModel):
+    token: ApiCollectionToken
 
 class RetrieveCollectionRequest(BaseModel):
     address: str
 
 class RetrieveCollectionResponse(BaseModel):
-    retrievedCollection: ApiCollection
+    collection: ApiCollection

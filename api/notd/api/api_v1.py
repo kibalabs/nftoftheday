@@ -5,13 +5,11 @@ from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
 from notd.api.models_v1 import ApiCollection
-from notd.api.models_v1 import ApiMetadataToken
-from notd.api.models_v1 import ApiRegistryToken
+from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiUiData
 from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
-from notd.api.models_v1 import RetreiveRegistryTokenResponse
 from notd.api.models_v1 import RetrieveCollectionResponse
-from notd.api.models_v1 import RetrieveTokenMetadataResponse
+from notd.api.models_v1 import RetrieveCollectionTokenResponse
 from notd.api.models_v1 import RetrieveUiDataRequest
 from notd.api.models_v1 import RetrieveUiDataResponse
 from notd.api.models_v1 import SubscribeRequest
@@ -35,20 +33,15 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
         await notdManager.receive_new_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
-    @router.get('/registries/{registryAddress}/tokens/{tokenId}', response_model=RetreiveRegistryTokenResponse)
-    async def retreive_registry_token(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest
-        registryToken = await notdManager.retreive_registry_token(registryAddress=registryAddress, tokenId=tokenId)
-        return RetreiveRegistryTokenResponse(registryToken=ApiRegistryToken.from_model(model=registryToken))
+    @router.get('/collections/{registryAddress}', response_model=RetrieveCollectionResponse)
+    async def get_collection_by_address(registryAddress: str):  # request: RetreiveCollectionRequest
+        collection = await notdManager.get_collection_by_address(address=registryAddress)
+        return RetrieveCollectionResponse(collection=ApiCollection.from_model(model=collection))
 
-    @router.get('/contract/{registryAddress}/tokens/{tokenId}', response_model=RetrieveTokenMetadataResponse)
-    async def retreive_token_metadata(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest
-        retrievedTokenMetadata = await notdManager.retreive_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        return RetrieveTokenMetadataResponse(retrievedTokenMetadata=ApiMetadataToken.from_model(model=retrievedTokenMetadata))
-
-    @router.get('/collections/{address}', response_model=RetrieveCollectionResponse)
-    async def retreive_collection(address: str):  # request: RetreiveCollectionRequest
-        retrievedCollection = await notdManager.retreive_collection(address=address)
-        return RetrieveCollectionResponse(retrievedCollection=ApiCollection.from_model(model=retrievedCollection))
+    @router.get('/collections/{registryAddress}/tokens/{tokenId}', response_model=RetrieveCollectionTokenResponse)
+    async def retrieve_collection_token(registryAddress: str, tokenId: str):  # request: RetreiveRegistryTokenRequest
+        token = await notdManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+        return RetrieveCollectionTokenResponse(token=ApiCollectionToken.from_model(model=token))
 
     @router.post('/subscribe')
     async def create_newsletter_subscription(request: SubscribeRequest):

@@ -1,55 +1,23 @@
 import React from 'react';
 
-import { LoadingSpinner } from '@kibalabs/ui-react';
-
-import { RegistryToken, TokenTransfer } from '../client/resources';
-import { useGlobals } from '../globalsContext';
+import { TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
 
 export type MostTradedTokenTransferCardProps = {
-  tokenTransfers: TokenTransfer[] | null;
+  tokenTransfers: TokenTransfer[];
 }
 
 export const MostTradedTokenTransferCard = (props: MostTradedTokenTransferCardProps): React.ReactElement => {
-  const { notdClient } = useGlobals();
-  const [asset, setAsset] = React.useState<RegistryToken | null>(null);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<Error | null>(null);
-
-  const updateAsset = React.useCallback(async (): Promise<void> => {
-    notdClient.retrieveRegistryToken(props.tokenTransfers[0].registryAddress, props.tokenTransfers[0].tokenId).then((registryToken: RegistryToken): void => {
-      setAsset(registryToken);
-      setIsLoading(false);
-    }).catch((apiError : unknown) => {
-      setError(apiError as Error);
-      setIsLoading(false);
-    });
-  }, [notdClient, props.tokenTransfers]);
-
-  React.useEffect((): void => {
-    if (!props.tokenTransfers) {
-      setAsset(null);
-      return;
-    }
-    updateAsset();
-  }, [props.tokenTransfers, updateAsset]);
-
   return (
-    <React.Fragment>
-      { !props.tokenTransfers || isLoading || !asset ? (
-        <LoadingSpinner variant='light' />
-      ) : (
-        <NftCard
-          nft={asset}
-          label='Most Traded'
-          subtitle={`Traded ${props.tokenTransfers.length} times today`}
-          primaryButtonText='View Token'
-          primaryButtonTarget={asset.openSeaUrl}
-          secondaryButtonText='View Tx'
-          secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
-          error={error}
-        />
-      )}
-    </React.Fragment>
+    <NftCard
+      tokenId={props.tokenTransfers[0].tokenId}
+      collectionAddress={props.tokenTransfers[0].registryAddress}
+      label='Most Traded'
+      subtitle={`Traded ${props.tokenTransfers.length} times today`}
+      primaryButtonText='View on OpenSea'
+      primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfers[0].registryAddress}/${props.tokenTransfers[0].tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
+      secondaryButtonText='View Tx'
+      secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
+    />
   );
 };

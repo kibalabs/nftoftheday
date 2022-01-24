@@ -47,6 +47,10 @@ export const buildNotdTheme = (): ITheme => {
         'font-size': '1.5rem',
         'font-weight': '600',
       },
+      header4: {
+        'font-size': '1.3rem',
+        'font-weight': '600',
+      },
       subtitle: {
         'font-size': '0.75rem',
         'font-weight': '600',
@@ -65,6 +69,12 @@ export const buildNotdTheme = (): ITheme => {
       },
       cardLabelRandom: {
         color: 'rgba(46, 180, 255, 1)',
+      },
+      // NOTE(krishan711): this is a hack, update the library to add a 'shouldClipContent' param or similar
+      singleLine: {
+        'max-width': '100%',
+        overflow: 'hidden',
+        'text-overflow': 'ellipsis',
       },
     },
     boxes: {
