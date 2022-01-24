@@ -29,7 +29,7 @@ class CollectionProcessor:
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
         self.erc721MetadataSymbolFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'symbol'][0]
-        self.erc721MetadataSymbolFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'contractURI'][0]
+        self.erc721MetadataContractUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'contractURI'][0]
         with open('./contracts/IERC1155MetadataURI.json') as contractJsonFile:
             erc1155MetadataContractJson = json.load(contractJsonFile)
         self.erc1155MetadataContractAbi = erc1155MetadataContractJson['abi']
@@ -61,7 +61,7 @@ class CollectionProcessor:
         except BadRequestException:
             collectionSymbol = None
         try:
-            contractUriResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetdataContractURI)
+            contractUriResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataContractUriFunctionAbi)
             contractMetadataUri = contractUriResponse[0]
         except BadRequestException:
             contractMetadataUri = None
