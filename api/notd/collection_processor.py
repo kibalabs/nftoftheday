@@ -7,6 +7,8 @@ from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.requester import ResponseException
 from core.web3.eth_client import EthClientInterface
+from core.s3_manager import S3Manager
+from core.util import date_util
 from httpx import ReadTimeout
 
 from notd.model import RetrievedCollection
@@ -14,16 +16,17 @@ from notd.model import RetrievedCollection
 _INTERFACE_ID_ERC721 = '0x5b5e139f'
 _INTERFACE_ID_ERC1155 = '0xd9b67a26'
 
-
 class CollectionDoesNotExist(NotFoundException):
     pass
 
 class CollectionProcessor:
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, openseaApiKey: str):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, openseaApiKey: str, s3manager: S3Manager, bucketName: str):
         self.requester = requester
         self.ethClient = ethClient
         self.openseaApiKey = openseaApiKey
+        self.s3manager = s3manager
+        self.bucketName = bucketName
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetdataContractJson = json.load(contractJsonFile)
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
@@ -70,6 +73,8 @@ class CollectionProcessor:
             openseaCollection = contractMetadataUriResponse.json()
             if isinstance(openseaCollection, str):
                 openseaCollection = json.loads(openseaCollection)
+            print(openseaCollection)
+            await self.s3manager.write_file(content=str.encode(json.dumps(openseaCollection)), targetPath=f'{self.bucketName}/collection-metadatas/{address}/{date_util.datetime_from_now()}.json')
         else:
             openseaResponse = None
             retryCount = 0
