@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, Image, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
+
+import { Account } from './account';
 
 export const NavBar = (): React.ReactElement => {
   return (
@@ -13,11 +15,7 @@ export const NavBar = (): React.ReactElement => {
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <Spacing variant={PaddingSize.Wide2} />
         </Stack.Item>
-        <Button variant='secondary' text= 'Connect Wallet' />
-        <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
-          <Image source='assets/icon.png' alternativeText='profile picture' />
-        </Box>
-        <Text>0x876...988765</Text>
+        <Account />
       </Stack>
     </Box>
   );
