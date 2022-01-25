@@ -49,7 +49,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
             time.sleep(60)
             currentBlockNumber -= 1
             continue
-        dbTokenTransfers = await retriever.list_token_transfers(fieldFilters=[IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber)])
+        dbTokenTransfers = await retriever.list_token_transfers(fieldFilters=[IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber)], shouldIgnoreRegistryBlacklist=True)
         dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress.lower(), dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress.lower(), dbTokenTransfer.toAddress.lower()) for dbTokenTransfer in dbTokenTransfers]
         savedTuples = []
         for retrievedTokenTransfer in retrievedTokenTransfers:
