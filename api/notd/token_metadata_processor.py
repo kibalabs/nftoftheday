@@ -80,7 +80,7 @@ class TokenMetadataProcessor():
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
-            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8')).decode('utf-8')
+            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8') + b'==').decode('utf-8')
         elif dataString.startswith('data:application/json;utf8,'):
             tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
         elif dataString.startswith('data:application/json;ascii,'):
@@ -194,17 +194,20 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        name = str(tokenMetadataDict.get('name', f'#{tokenId}')).replace('\u0000', '')
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
             description = description[0]
+        if description is not None:
+            description = str(description).replace('\u0000', '')
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_data'),
-            name=tokenMetadataDict.get('name', f'#{tokenId}'),
+            name=name,
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
         )
