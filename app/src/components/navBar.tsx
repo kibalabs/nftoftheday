@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Alignment, Box, Direction, Image, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 
-import { Account } from './account';
+import { Account } from './Account';
 
 export const NavBar = (): React.ReactElement => {
   return (

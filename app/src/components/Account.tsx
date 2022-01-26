@@ -7,7 +7,7 @@ export const Account = (): React.ReactElement => {
     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
       <Button variant='secondary' text= 'Connect Wallet' />
       <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
-        <Image source='assets/icon.png' alternativeText='profile picture' />
+        <Image source='/assets/icon.png' alternativeText='Avatar' />
       </Box>
       <Text>0x876...988765</Text>
     </Stack>
