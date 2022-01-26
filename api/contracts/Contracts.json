@@ -1,0 +1,27 @@
+{
+    "contractName": "contract",
+    "abi": [
+        {
+        "constant": true,
+        "inputs": [
+            
+        ],
+        "name": "contractURI",
+        "outputs": [
+            {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "pure",
+        "type": "function"
+        }
+    ],
+    "bytecode": "0x",
+    "deployedBytecode": "0x",
+    "linkReferences": {},
+    "deployedLinkReferences": {}
+
+}

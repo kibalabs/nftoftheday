@@ -70,47 +70,45 @@ class CollectionProcessor:
             contractMetadataUri = None
         if contractMetadataUri is not None:
             contractMetadataUriResponse = await self.requester.get(url=contractMetadataUri)
-            openseaCollection = contractMetadataUriResponse.json()
-            if isinstance(openseaCollection, str):
-                openseaCollection = json.loads(openseaCollection)
-            print(openseaCollection)
-            await self.s3manager.write_file(content=str.encode(json.dumps(openseaCollection)), targetPath=f'{self.bucketName}/collection-metadatas/{address}/{date_util.datetime_from_now()}.json')
-        else:
-            openseaResponse = None
-            retryCount = 0
-            while not openseaResponse:
-                try:
-                    openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}', headers={"X-API-KEY": self.openseaApiKey})
-                except ResponseException as exception:
-                    if exception.statusCode == 404:
-                        raise CollectionDoesNotExist()
-                    if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
-                        break
-                    logging.info(f'Retrying due to: {str(exception)}')
-                    await asyncio.sleep(1.5)
-                except ReadTimeout as exception:
-                    if retryCount >= 3:
-                        break
-                    logging.info(f'Retrying due to: {str(exception)}')
-                    await asyncio.sleep(1.5)
-                retryCount += 1
-            openseaCollection = openseaResponse.json().get('collection') if openseaResponse else {}
-            if openseaCollection is None:
-                logging.info(f'Failed to load collection from opensea: {address}')
-                openseaCollection = {}
+            collectionMetadata = contractMetadataUriResponse.json()
+            if isinstance(collectionMetadata, str):
+                collectionMetadata = json.loads(collectionMetadata)
+            await self.s3manager.write_file(content=str.encode(json.dumps(collectionMetadata)), targetPath=f'{self.bucketName}/collection-metadatas/{address}/{date_util.datetime_from_now()}.json')
+        openseaResponse = None
+        retryCount = 0
+        while not openseaResponse:
+            try:
+                openseaResponse = await self.requester.get(url=f'https://api.opensea.io/api/v1/asset_contract/{address}', headers={"X-API-KEY": self.openseaApiKey})
+            except ResponseException as exception:
+                if exception.statusCode == 404:
+                    raise CollectionDoesNotExist()
+                if retryCount >= 3 or (exception.statusCode < 500 and exception.statusCode != 429):
+                    break
+                logging.info(f'Retrying due to: {str(exception)}')
+                await asyncio.sleep(1.5)
+            except ReadTimeout as exception:
+                if retryCount >= 3:
+                    break
+                logging.info(f'Retrying due to: {str(exception)}')
+                await asyncio.sleep(1.5)
+            retryCount += 1
+        openseaCollection = openseaResponse.json().get('collection') if openseaResponse else {}
+        if openseaCollection is None:
+            logging.info(f'Failed to load collection from opensea: {address}')
+            openseaCollection = {}
         retrievedCollection = RetrievedCollection(
             address=address,
             name=collectionName or openseaCollection.get('name'),
             symbol=collectionSymbol or openseaCollection.get('symbol'),
-            description=openseaCollection.get('description'),
-            imageUrl=openseaCollection.get('image_url'),
-            twitterUsername=openseaCollection.get('twitter_username'),
-            instagramUsername=openseaCollection.get('instagram_username'),
-            wikiUrl=openseaCollection.get('wiki_url'),
-            openseaSlug=openseaCollection.get('slug'),
-            url=openseaCollection.get('external_url') or contractMetadataUri,
-            discordUrl=openseaCollection.get('discord_url'),
-            bannerImageUrl=openseaCollection.get('banner_image_url'),
+            description=collectionMetadata['description'] or openseaCollection.get('description'),
+            imageUrl=collectionMetadata['image'] or openseaCollection.get('image_url'),
+            twitterUsername=collectionMetadata['twitterUsername'] or openseaCollection.get('twitter_username'),
+            instagramUsername=collectionMetadata['instagramUsername'] or openseaCollection.get('instagram_username'),
+            wikiUrl=collectionMetadata['wikiUrl'] or openseaCollection.get('wiki_url'),
+            openseaSlug=collectionMetadata['openseaSlug'] or openseaCollection.get('slug'),
+            url=collectionMetadata['external_link'] or openseaCollection.get('external_url'),
+            discordUrl=collectionMetadata['discordUrl'] or openseaCollection.get('discord_url'),
+            bannerImageUrl=collectionMetadata['bannerImageUrl'] or openseaCollection.get('banner_image_url'),
             doesSupportErc721=doesSupportErc721,
             doesSupportErc1155=doesSupportErc1155,
         )
