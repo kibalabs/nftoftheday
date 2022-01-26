@@ -101,6 +101,17 @@ export const buildNotdTheme = (): ITheme => {
       cardLabelBoxRandom: {
         'background-color': 'rgba(46, 180, 255, 0.25)',
       },
+      unrounded: {
+        'border-radius': '0',
+      },
+      borderColored: {
+        'background-color': 'rgba(255, 255, 255, 1)',
+      },
+    },
+    images: {
+      default: {
+        'border-radius': '0',
+      },
     },
     iconButtons: {
       default: {
