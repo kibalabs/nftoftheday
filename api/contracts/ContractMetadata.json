@@ -1,5 +1,5 @@
 {
-    "contractName": "contract",
+    "contractName": "ContractMetadata",
     "abi": [
         {
         "constant": true,

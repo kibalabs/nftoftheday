@@ -32,7 +32,6 @@ class CollectionProcessor:
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'name'][0]
         self.erc721MetadataSymbolFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'symbol'][0]
-        self.erc721MetadataContractUriFunctionAbi = [internalAbi for internalAbi in self.erc721MetdataContractAbi if internalAbi['name'] == 'contractURI'][0]
         with open('./contracts/IERC1155MetadataURI.json') as contractJsonFile:
             erc1155MetadataContractJson = json.load(contractJsonFile)
         self.erc1155MetadataContractAbi = erc1155MetadataContractJson['abi']
@@ -41,6 +40,10 @@ class CollectionProcessor:
             erc165MetadataContractJson = json.load(contractJsonFile)
         self.erc165MetadataContractAbi = erc165MetadataContractJson['abi']
         self.erc165SupportInterfaceUriFunctionAbi = [internalAbi for internalAbi in self.erc165MetadataContractAbi if internalAbi.get('name') == 'supportsInterface'][0]
+        with open('./contracts/ContractMetadata.json') as contractJsonFile:
+            contractMetadataJson = json.load(contractJsonFile)
+        self.contractAbi = contractMetadataJson['abi']
+        self.contractUriFunctionAbi = [internalAbi for internalAbi in self.contractAbi if internalAbi['name'] == 'contractURI'][0]
 
     async def retrieve_collection(self, address: str) -> RetrievedCollection:
         try:
@@ -64,7 +67,7 @@ class CollectionProcessor:
         except BadRequestException:
             collectionSymbol = None
         try:
-            contractUriResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataContractUriFunctionAbi)
+            contractUriResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.contractAbi, functionAbi=self.contractUriFunctionAbi)
             contractMetadataUri = contractUriResponse[0]
         except BadRequestException:
             contractMetadataUri = None
@@ -74,6 +77,8 @@ class CollectionProcessor:
             if isinstance(collectionMetadata, str):
                 collectionMetadata = json.loads(collectionMetadata)
             await self.s3manager.write_file(content=str.encode(json.dumps(collectionMetadata)), targetPath=f'{self.bucketName}/collection-metadatas/{address}/{date_util.datetime_from_now()}.json')
+        else:
+            collectionMetadata = None
         openseaResponse = None
         retryCount = 0
         while not openseaResponse:
@@ -96,20 +101,38 @@ class CollectionProcessor:
         if openseaCollection is None:
             logging.info(f'Failed to load collection from opensea: {address}')
             openseaCollection = {}
-        retrievedCollection = RetrievedCollection(
-            address=address,
-            name=collectionName or collectionMetadata['name'] or openseaCollection.get('name'),
-            symbol=collectionSymbol or collectionMetadata['symbol'] or openseaCollection.get('symbol'),
-            description=collectionMetadata['description'] or openseaCollection.get('description'),
-            imageUrl=collectionMetadata['image'] or openseaCollection.get('image_url'),
-            twitterUsername=collectionMetadata['twitterUsername'] or openseaCollection.get('twitter_username'),
-            instagramUsername=collectionMetadata['instagramUsername'] or openseaCollection.get('instagram_username'),
-            wikiUrl=collectionMetadata['wikiUrl'] or openseaCollection.get('wiki_url'),
-            openseaSlug=collectionMetadata['openseaSlug'] or openseaCollection.get('slug'),
-            url=collectionMetadata['external_link'] or openseaCollection.get('external_url'),
-            discordUrl=collectionMetadata['discord_url'] or openseaCollection.get('discord_url'),
-            bannerImageUrl=collectionMetadata['bannerImageUrl'] or openseaCollection.get('banner_image_url'),
-            doesSupportErc721=doesSupportErc721,
-            doesSupportErc1155=doesSupportErc1155,
-        )
+        if collectionMetadata is None:
+            retrievedCollection = RetrievedCollection(
+                address=address,
+                name=collectionName or openseaCollection.get('name'),
+                symbol=collectionSymbol or openseaCollection.get('symbol'),
+                description=openseaCollection.get('description'),
+                imageUrl=openseaCollection.get('image_url'),
+                twitterUsername=openseaCollection.get('twitter_username'),
+                instagramUsername=openseaCollection.get('instagram_username'),
+                wikiUrl=openseaCollection.get('wiki_url'),
+                openseaSlug=openseaCollection.get('slug'),
+                url=openseaCollection.get('external_url'),
+                discordUrl=openseaCollection.get('discord_url'),
+                bannerImageUrl=openseaCollection.get('banner_image_url'),
+                doesSupportErc721=doesSupportErc721,
+                doesSupportErc1155=doesSupportErc1155,
+            )
+        else:
+            retrievedCollection = RetrievedCollection(
+                address=address,
+                name=collectionName or collectionMetadata.get('name'),
+                symbol=collectionSymbol or collectionMetadata.get('symbol'),
+                description=collectionMetadata.get('description'),
+                imageUrl=collectionMetadata.get('image'),
+                twitterUsername=collectionMetadata.get('twitterUsername'),
+                instagramUsername=collectionMetadata.get('instagramUsername'),
+                wikiUrl=collectionMetadata.get('wikiUrl'),
+                openseaSlug=collectionMetadata.get('openseaSlug'),
+                url=collectionMetadata.get('external_link'),
+                discordUrl=collectionMetadata.get('discord_url'),
+                bannerImageUrl=collectionMetadata.get('bannerImageUrl'),
+                doesSupportErc721=doesSupportErc721,
+                doesSupportErc1155=doesSupportErc1155,
+            )
         return retrievedCollection
