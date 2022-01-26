@@ -107,7 +107,7 @@ class CollectionProcessor:
             wikiUrl=collectionMetadata['wikiUrl'] or openseaCollection.get('wiki_url'),
             openseaSlug=collectionMetadata['openseaSlug'] or openseaCollection.get('slug'),
             url=collectionMetadata['external_link'] or openseaCollection.get('external_url'),
-            discordUrl=collectionMetadata['discordUrl'] or openseaCollection.get('discord_url'),
+            discordUrl=collectionMetadata['discord_url'] or openseaCollection.get('discord_url'),
             bannerImageUrl=collectionMetadata['bannerImageUrl'] or openseaCollection.get('banner_image_url'),
             doesSupportErc721=doesSupportErc721,
             doesSupportErc1155=doesSupportErc1155,
