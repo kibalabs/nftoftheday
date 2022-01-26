@@ -98,8 +98,8 @@ class CollectionProcessor:
             openseaCollection = {}
         retrievedCollection = RetrievedCollection(
             address=address,
-            name=collectionName or openseaCollection.get('name'),
-            symbol=collectionSymbol or openseaCollection.get('symbol'),
+            name=collectionName or collectionMetadata['name'] or openseaCollection.get('name'),
+            symbol=collectionSymbol or collectionMetadata['symbol'] or openseaCollection.get('symbol'),
             description=collectionMetadata['description'] or openseaCollection.get('description'),
             imageUrl=collectionMetadata['image'] or openseaCollection.get('image_url'),
             twitterUsername=collectionMetadata['twitterUsername'] or openseaCollection.get('twitter_username'),
