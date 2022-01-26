@@ -6,7 +6,7 @@ import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { BackgroundView, Direction, KibaApp, Stack } from '@kibalabs/ui-react';
 
 import { NotdClient } from './client/client';
-import { NavBar } from './components/navBar';
+import { NavBar } from './components/NavBar';
 import { isProduction } from './envUtil';
 import { GlobalsProvider } from './globalsContext';
 import { CollectionPage } from './pages/CollectionPage';
