@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Collection } from '../../client/resources';
 import { useGlobals } from '../../globalsContext';
@@ -29,23 +29,27 @@ export const CollectionPage = (): React.ReactElement => {
         <Text variant='error'>Collection failed to load</Text>
       ) : (
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
-          {collection.bannerImageUrl && (
-            <Box variant='card' isFullWidth={true}>
-              <Image source={collection.bannerImageUrl} alternativeText='image' isFullWidth={true} fitType='cover' />
-            </Box>
-          )}
+          <Box height='200px'>
+            <LayerContainer>
+              <LayerContainer.Layer isFullHeight={false} alignmentVertical={Alignment.Start}>
+                {collection.bannerImageUrl && (
+                  <Box variant='cpBanner' height='250px' isFullWidth={true}>
+                    <Image source={collection.bannerImageUrl} alternativeText='image' isFullWidth={true} fitType='cover' />
+                  </Box>
+                )}
+              </LayerContainer.Layer>
+              <LayerContainer.Layer isFullHeight={false} isFullWidth={false} alignmentVertical={Alignment.End} alignmentHorizontal={Alignment.Center}>
+                {collection.imageUrl && (
+                  <Box variant='rounded-borderIcon' shouldClipContent={true} width='100px' height='100px'>
+                    <Image source={collection.imageUrl} alternativeText='image' fitType='contain' />
+                  </Box>
+                )}
+              </LayerContainer.Layer>
+            </LayerContainer>
+          </Box>
+          <Spacing variant={PaddingSize.Wide2} />
+          <Text variant='title'>{collection.name}</Text>
           <ContainingView>
-            <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} paddingTop={PaddingSize.Wide3}>
-              {collection.imageUrl && (
-                <Box variant='rounded-borderColored' shouldClipContent={true} width='100px' height='100px'>
-                  <Image source={collection.imageUrl} alternativeText='image' fitType='contain' />
-                </Box>
-              )}
-              <Spacing variant={PaddingSize.Wide2} />
-              <Stack.Item shrinkFactor={1}>
-                <Text variant='title'>{collection.name}</Text>
-              </Stack.Item>
-            </Stack>
             <Spacing variant={PaddingSize.Wide2} />
             <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
               {collection.discordUrl && (

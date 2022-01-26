@@ -107,12 +107,23 @@ export const buildNotdTheme = (): ITheme => {
       borderColored: {
         'background-color': 'rgba(255, 255, 255, 1)',
       },
+      borderIcon: {
+        'border-color': '#4B0312',
+        'border-width': '7px',
+      },
+      cpBanner: {
+        'padding-bottom': '100px',
+      },
+
     },
     images: {
       default: {
-        'border-radius': '0',
+        background: {
+          'border-radius': '0',
+        },
       },
     },
+
     iconButtons: {
       default: {
         disabled: {
