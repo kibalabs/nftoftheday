@@ -34,7 +34,7 @@ export const CollectionPage = (): React.ReactElement => {
               <LayerContainer.Layer isFullHeight={false} alignmentVertical={Alignment.Start}>
                 {collection.bannerImageUrl && (
                   <Box height='230px' isFullWidth={true}>
-                    <Image source={collection.bannerImageUrl} alternativeText='image' isFullWidth={true} fitType='cover' />
+                    <Image source={collection.bannerImageUrl} alternativeText='image' isFullWidth={true} fitType='cover' isFullHeight={true} />
                   </Box>
                 )}
               </LayerContainer.Layer>
