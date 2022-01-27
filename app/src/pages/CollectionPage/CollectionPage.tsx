@@ -47,12 +47,11 @@ export const CollectionPage = (): React.ReactElement => {
               </LayerContainer.Layer>
             </LayerContainer>
           </Box>
-          <Spacing variant={PaddingSize.Wide2} />
           <ContainingView>
             <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
               <Text variant='header1'>{collection.name}</Text>
               <Spacing variant={PaddingSize.Wide2} />
-              <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullWidth={true} shouldWrapItems={true}>
+              <Stack direction={Direction.Horizontal} shouldAddGutters={true}  contentAlignment={Alignment.Center}  childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
                 {collection.discordUrl && (
                   <Stack.Item baseSize='10em'>
                     <Button variant='tertiary' text= 'Discord' iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
