@@ -113,7 +113,6 @@ class CollectionProcessor:
         discordUrl = None
         bannerImageUrl = None
         if collectionMetadata:
-            address=address
             name=name or collectionMetadata.get('name')
             symbol=symbol or collectionMetadata.get('symbol')
             description=collectionMetadata.get('description')
@@ -126,7 +125,6 @@ class CollectionProcessor:
             discordUrl=collectionMetadata.get('discord_url')
             bannerImageUrl=collectionMetadata.get('bannerImageUrl')
         if openseaCollection:
-            address=address
             name=name or openseaCollection.get('name')
             symbol=symbol or openseaCollection.get('symbol')
             description=description or openseaCollection.get('description')
