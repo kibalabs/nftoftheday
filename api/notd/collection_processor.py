@@ -101,38 +101,57 @@ class CollectionProcessor:
         if openseaCollection is None:
             logging.info(f'Failed to load collection from opensea: {address}')
             openseaCollection = {}
-        if collectionMetadata is None:
-            retrievedCollection = RetrievedCollection(
-                address=address,
-                name=collectionName or openseaCollection.get('name'),
-                symbol=collectionSymbol or openseaCollection.get('symbol'),
-                description=openseaCollection.get('description'),
-                imageUrl=openseaCollection.get('image_url'),
-                twitterUsername=openseaCollection.get('twitter_username'),
-                instagramUsername=openseaCollection.get('instagram_username'),
-                wikiUrl=openseaCollection.get('wiki_url'),
-                openseaSlug=openseaCollection.get('slug'),
-                url=openseaCollection.get('external_url'),
-                discordUrl=openseaCollection.get('discord_url'),
-                bannerImageUrl=openseaCollection.get('banner_image_url'),
-                doesSupportErc721=doesSupportErc721,
-                doesSupportErc1155=doesSupportErc1155,
-            )
-        else:
-            retrievedCollection = RetrievedCollection(
-                address=address,
-                name=collectionName or collectionMetadata.get('name'),
-                symbol=collectionSymbol or collectionMetadata.get('symbol'),
-                description=collectionMetadata.get('description'),
-                imageUrl=collectionMetadata.get('image'),
-                twitterUsername=collectionMetadata.get('twitterUsername'),
-                instagramUsername=collectionMetadata.get('instagramUsername'),
-                wikiUrl=collectionMetadata.get('wikiUrl'),
-                openseaSlug=collectionMetadata.get('openseaSlug'),
-                url=collectionMetadata.get('external_link'),
-                discordUrl=collectionMetadata.get('discord_url'),
-                bannerImageUrl=collectionMetadata.get('bannerImageUrl'),
-                doesSupportErc721=doesSupportErc721,
-                doesSupportErc1155=doesSupportErc1155,
-            )
+        name = collectionName
+        symbol = collectionSymbol
+        description = None
+        imageUrl = None
+        twitterUsername = None
+        instagramUsername = None
+        wikiUrl = None
+        openseaSlug = None
+        url = None
+        discordUrl = None
+        bannerImageUrl = None
+        if collectionMetadata:
+                address=address
+                name=name or collectionMetadata.get('name')
+                symbol=symbol or collectionMetadata.get('symbol')
+                description=collectionMetadata.get('description')
+                imageUrl=collectionMetadata.get('image')
+                twitterUsername=collectionMetadata.get('twitterUsername')
+                instagramUsername=collectionMetadata.get('instagramUsername')
+                wikiUrl=collectionMetadata.get('wikiUrl')
+                openseaSlug=collectionMetadata.get('openseaSlug')
+                url=collectionMetadata.get('external_link')
+                discordUrl=collectionMetadata.get('discord_url')
+                bannerImageUrl=collectionMetadata.get('bannerImageUrl')
+        if openseaCollection:
+                address=address
+                name=name or openseaCollection.get('name')
+                symbol=symbol or openseaCollection.get('symbol')
+                description=description or openseaCollection.get('description')
+                imageUrl=imageUrl or openseaCollection.get('image_url')
+                twitterUsername=twitterUsername or openseaCollection.get('twitter_username')
+                instagramUsername=instagramUsername or openseaCollection.get('instagram_username')
+                wikiUrl=wikiUrl or openseaCollection.get('wiki_url')
+                openseaSlug=openseaSlug or openseaCollection.get('slug')
+                url=url or openseaCollection.get('external_url')
+                discordUrl=discordUrl or openseaCollection.get('discord_url')
+                bannerImageUrl=bannerImageUrl or openseaCollection.get('banner_image_url')
+        retrievedCollection = RetrievedCollection(
+            address=address,
+            name=name,
+            symbol=symbol,
+            description=description,
+            imageUrl=imageUrl,
+            twitterUsername=twitterUsername,
+            instagramUsername=instagramUsername,
+            wikiUrl=wikiUrl,
+            openseaSlug=openseaSlug,
+            url=url,
+            discordUrl=discordUrl,
+            bannerImageUrl=bannerImageUrl,
+            doesSupportErc721=doesSupportErc721,
+            doesSupportErc1155=doesSupportErc1155,
+        )
         return retrievedCollection

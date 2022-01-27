@@ -35,11 +35,20 @@ async def main():
 
     #Has ContractURI
     result = await collectionProcessor.retrieve_collection('0x3E3bF91740a8363D9433c8d3535B9b3C9E55f669')
-    expected = RetrievedCollection(address='0x3E3bF91740a8363D9433c8d3535B9b3C9E55f669', name='Civit Illustrations', symbol='CIV20', description=None, imageUrl='QmXKBRxpTFdRsqLDRUxXNoTJRChwcEQAqQVF8LXKaXmMTf', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug=None, url='https://app.rarible.com/collection/0x3e3bf91740a8363d9433c8d3535b9b3c9e55f669', discordUrl=None, bannerImageUrl=None, doesSupportErc721=True, doesSupportErc1155=False)
+    expected = RetrievedCollection(address='0x3E3bF91740a8363D9433c8d3535B9b3C9E55f669', name='Civit Illustrations', symbol='CIV20', description='Series of digital illustrations and animations', imageUrl='QmXKBRxpTFdRsqLDRUxXNoTJRChwcEQAqQVF8LXKaXmMTf', twitterUsername='ascii_bit', instagramUsername=None, wikiUrl=None, openseaSlug='civit-illustrations', url='https://app.rarible.com/collection/0x3e3bf91740a8363d9433c8d3535b9b3c9e55f669', discordUrl='https://discord.gg/CIVIT', bannerImageUrl='https://lh3.googleusercontent.com/zJOeUEKzl2Rs2JiGOxlZQR5WUru-6I-a8n_sp22USaBVxt0LxeYTe-xSfQhjIK8N6u1SyRaEfRWnyp9j-nDpPfeJWxNgSeDwziAI6Q=s2500', doesSupportErc721=True, doesSupportErc1155=False)
     assert (result == expected)
-    
+
     result = await collectionProcessor.retrieve_collection('0xDb68Df0e86Bc7C6176E6a2255a5365f51113BCe8')
-    expected = RetrievedCollection(address='0xDb68Df0e86Bc7C6176E6a2255a5365f51113BCe8', name='Rope Makers United', symbol='RMU', description='Rope Makers United Storefront', imageUrl='https://rope.lol/images/RopeLogo3D.gif', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug=None, url='https://rope.lol', discordUrl=None, bannerImageUrl=None, doesSupportErc721=False, doesSupportErc1155=True)
+    expected = RetrievedCollection(address='0xDb68Df0e86Bc7C6176E6a2255a5365f51113BCe8', name='Rope Makers United', symbol='RMU', description='Rope Makers United Storefront', imageUrl='https://rope.lol/images/RopeLogo3D.gif', twitterUsername='dontbuyrope', instagramUsername=None, wikiUrl=None, openseaSlug='rope-makers-united', url='https://rope.lol', discordUrl='https://discord.gg/kWE5G2', bannerImageUrl=None, doesSupportErc721=False, doesSupportErc1155=True)
+    assert (result == expected)
+
+    # Has no Name or Symbol
+    result = await collectionProcessor.retrieve_collection('0x12F01AF7FBEAFB088E1d3384BFf67390f41E8404')
+    expected = RetrievedCollection(address='0x12F01AF7FBEAFB088E1d3384BFf67390f41E8404', name='FVCK_BAEIGE//', symbol=None, description='Collaborative contract between Baeige and Fvckrender', imageUrl='https://lh3.googleusercontent.com/BJECOBeDJqpaVLWgxza8DYaP9SQGq6h7kLFsOUAlTk3G7naycl4GsjjALsnCPayhHTlctEkvChvpxhGWfDh0hiH2-xd9eUU_yBqmYQ=s120', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug='unidentified-contract-b46angemew', url=None, discordUrl=None, bannerImageUrl='https://lh3.googleusercontent.com/BJECOBeDJqpaVLWgxza8DYaP9SQGq6h7kLFsOUAlTk3G7naycl4GsjjALsnCPayhHTlctEkvChvpxhGWfDh0hiH2-xd9eUU_yBqmYQ=s2500', doesSupportErc721=False, doesSupportErc1155=True) 
+    assert (result == expected)
+
+    result = await collectionProcessor.retrieve_collection('0x236E7Af5FcAb94770E621c97a1E58b4d0143E95B')
+    expected = RetrievedCollection(address='0x236E7Af5FcAb94770E621c97a1E58b4d0143E95B', name="Ethernity's Master Collection", symbol=None, description="Ethernity's Master Collection of Exclusive NFTs on Opensea.", imageUrl='https://lh3.googleusercontent.com/GId53RudYB4l7e6Irj3_5JGyC3bwybdotwXAEgGaq4KCqjtfQChbolTQSJRYzb1bYrHM_G9xH4Il9vh_CM3ZPtMTwSgtkU5Wu7RVVQ=s120', twitterUsername='ethernitychain', instagramUsername=None, wikiUrl=None, openseaSlug='ethernity-master', url='http://ethernity.io', discordUrl='https://discord.gg/c29ASPJGj6', bannerImageUrl='https://lh3.googleusercontent.com/xWwplVCKh2mIkbsHObxlVWPkW-kT0vlptGihpjaqyU4zTvAD90BwkcnTe25sPQuNlreb3cfT_LgRlYiuqLVJD0YYYWipq1s42A0T=s2500', doesSupportErc721=False, doesSupportErc1155=True)
     assert (result == expected)
 
 if __name__ == '__main__':
