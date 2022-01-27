@@ -107,10 +107,16 @@ export const buildNotdTheme = (): ITheme => {
       borderColored: {
         'background-color': 'rgba(255, 255, 255, 1)',
       },
+      wideBorder: {
+        'border-color': '#4B0312',
+        'border-width': '7px',
+      },
     },
     images: {
       default: {
-        'border-radius': '0',
+        background: {
+          'border-radius': '0',
+        },
       },
     },
     iconButtons: {
