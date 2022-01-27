@@ -29,18 +29,18 @@ export const CollectionPage = (): React.ReactElement => {
         <Text variant='error'>Collection failed to load</Text>
       ) : (
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
-          <Box height='200px'>
+          <Box height='300px'>
             <LayerContainer>
               <LayerContainer.Layer isFullHeight={false} alignmentVertical={Alignment.Start}>
                 {collection.bannerImageUrl && (
-                  <Box variant='cpBanner' height='250px' isFullWidth={true}>
+                  <Box height='230px' isFullWidth={true}>
                     <Image source={collection.bannerImageUrl} alternativeText='image' isFullWidth={true} fitType='cover' />
                   </Box>
                 )}
               </LayerContainer.Layer>
               <LayerContainer.Layer isFullHeight={false} isFullWidth={false} alignmentVertical={Alignment.End} alignmentHorizontal={Alignment.Center}>
                 {collection.imageUrl && (
-                  <Box variant='rounded-borderIcon' shouldClipContent={true} width='100px' height='100px'>
+                  <Box variant='rounded-wideBorder' shouldClipContent={true} width='130px' height='130px'>
                     <Image source={collection.imageUrl} alternativeText='image' fitType='contain' />
                   </Box>
                 )}
