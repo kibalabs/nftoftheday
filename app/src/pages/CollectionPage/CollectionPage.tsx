@@ -47,31 +47,42 @@ export const CollectionPage = (): React.ReactElement => {
               </LayerContainer.Layer>
             </LayerContainer>
           </Box>
-          <Spacing variant={PaddingSize.Wide2} />
-          <Text variant='title'>{collection.name}</Text>
           <ContainingView>
-            <Spacing variant={PaddingSize.Wide2} />
-            <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
-              {collection.discordUrl && (
-                <Button variant='tertiary' text= 'Discord' iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
-              )}
-              {collection.instagramUsername && (
-                <Button variant='tertiary' text={'Instagram'} target={`https://instagram.com/${collection.instagramUsername}`} iconLeft={<KibaIcon iconId='feather-instagram' />} />
-              )}
-              {collection.twitterUsername && (
-                <Button variant='tertiary' text={'Twitter'} target={`https://instagram.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
-              )}
-              {collection.openseaSlug && (
-                <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
-              )}
-              {collection.url && (
-                <Button variant='tertiary' text={'Website'} target={`https://opensea.io/collection/${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+            <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
+              <Text variant='header1'>{collection.name}</Text>
+              <Spacing variant={PaddingSize.Wide2} />
+              <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
+                {collection.discordUrl && (
+                  <Stack.Item baseSize='10em'>
+                    <Button variant='tertiary' text= {'Discord'} iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
+                  </Stack.Item>
+                )}
+                {collection.instagramUsername && (
+                  <Stack.Item baseSize='10em'>
+                    <Button variant='tertiary' text={'Instagram'} target={`https://instagram.com/${collection.instagramUsername}`} iconLeft={<KibaIcon iconId='feather-instagram' />} />
+                  </Stack.Item>
+                )}
+                {collection.twitterUsername && (
+                  <Stack.Item baseSize='10em'>
+                    <Button variant='tertiary' text={'Twitter'} target={`https://instagram.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
+                  </Stack.Item>
+                )}
+                {collection.openseaSlug && (
+                  <Stack.Item baseSize='10em'>
+                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
+                  </Stack.Item>
+                )}
+                {collection.url && (
+                  <Stack.Item baseSize='10em'>
+                    <Button variant='tertiary' text={'Website'} target={`https://opensea.io/collection/${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                  </Stack.Item>
+                )}
+              </Stack>
+              <Spacing variant={PaddingSize.Wide2} />
+              {collection.description && (
+                <MarkdownText textVariant='light' source={collection.description} />
               )}
             </Stack>
-            <Spacing variant={PaddingSize.Wide2} />
-            {collection.description && (
-              <MarkdownText textVariant='light' source={collection.description} />
-            )}
           </ContainingView>
         </Stack>
       )}
