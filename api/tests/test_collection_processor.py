@@ -58,6 +58,10 @@ async def main():
     result = await collectionProcessor.retrieve_collection('0x48531836e57bc28d6fee33840f43826b889aa2fc')
     expected = RetrievedCollection(address='0x48531836e57bc28d6fee33840f43826b889aa2fc', name='Super Crypto Man', symbol='PIPPI', description='New generation of Japanese sticker culture × NFT.Making 3D Collective NFT with Cryptoworld as a theme. ', imageUrl='ipfs://ipfs/QmUvzee6ZvY41S5W842fm8wiFr8ueqQSDimfLQhHyp76Tk', twitterUsername='@Pippi_NFTart', instagramUsername=None, wikiUrl=None, openseaSlug='super-crypto-man', url='https://app.rarible.com/collection/0x48531836e57bc28d6fee33840f43826b889aa2fc', discordUrl=None, bannerImageUrl='https://lh3.googleusercontent.com/TvePJaCzrlt4m-kNSiD0HUkryq5wTYlU0vkugYC9F0CBhThEO2PGCN0m6BRawoNDF2RWNn3E0AixFsSefikyr-5tmWIZkLHoPmxQ-w=s2500', doesSupportErc721=False, doesSupportErc1155=True)
 
+    result =     await collectionProcessor.retrieve_collection('0xDD97c0b7ED3DC93d09A681dE0E7228b5dfEAE463')
+    expected = RetrievedCollection(address='0xDD97c0b7ED3DC93d09A681dE0E7228b5dfEAE463', name='Beanterra', symbol='BEANEL', description='Beanels of Beanterra - Diverse and lovable creatures that roam the realm filled with lush landscapes, snow-capped mountains, and deep blue oceans.', imageUrl='https://lh3.googleusercontent.com/ZT-Zq2CWSG0mBzzeeTCsAdMFVyu3au6sPyN_v3CVYXguuI19EL0JrB9QVgg-3tFMJxvg2FJbtpjM8iz5n77tC_gg4t37y-9UP7dQmmA=s120', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug='beanterra', url='https://beanterra.io/', discordUrl='https://discord.gg/beanterra', bannerImageUrl='https://lh3.googleusercontent.com/tBVqF5do5ZpKVqqM6qgcyU44u_Utin0JAH_ygwaqVXMDq3KtsfxG10xXtYliGz6rhjEfngx4eb8LA8IcHn7U2oH_5WlRt9JIUZea7Oc=s2500', doesSupportErc721=True, doesSupportErc1155=False)
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     asyncio.run(main())
