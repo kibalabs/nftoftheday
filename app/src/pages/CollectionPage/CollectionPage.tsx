@@ -54,7 +54,7 @@ export const CollectionPage = (): React.ReactElement => {
               <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
                 {collection.discordUrl && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text= 'Discord' iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
+                    <Button variant='tertiary' text= {'Discord'} iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
                   </Stack.Item>
                 )}
                 {collection.instagramUsername && (
@@ -78,10 +78,6 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack.Item>
                 )}
               </Stack>
-              <Spacing variant={PaddingSize.Wide2} />
-              {collection.description && (
-                <MarkdownText textVariant='light' source={collection.description} />
-              )}
               <Spacing variant={PaddingSize.Wide2} />
               {collection.description && (
                 <MarkdownText textVariant='light' source={collection.description} />
