@@ -51,6 +51,13 @@ async def main():
     expected = RetrievedCollection(address='0x236E7Af5FcAb94770E621c97a1E58b4d0143E95B', name="Ethernity's Master Collection", symbol=None, description="Ethernity's Master Collection of Exclusive NFTs on Opensea.", imageUrl='https://lh3.googleusercontent.com/GId53RudYB4l7e6Irj3_5JGyC3bwybdotwXAEgGaq4KCqjtfQChbolTQSJRYzb1bYrHM_G9xH4Il9vh_CM3ZPtMTwSgtkU5Wu7RVVQ=s120', twitterUsername='ethernitychain', instagramUsername=None, wikiUrl=None, openseaSlug='ethernity-master', url='http://ethernity.io', discordUrl='https://discord.gg/c29ASPJGj6', bannerImageUrl='https://lh3.googleusercontent.com/xWwplVCKh2mIkbsHObxlVWPkW-kT0vlptGihpjaqyU4zTvAD90BwkcnTe25sPQuNlreb3cfT_LgRlYiuqLVJD0YYYWipq1s42A0T=s2500', doesSupportErc721=False, doesSupportErc1155=True)
     assert (result == expected)
 
+    #dynamic contractURI
+    result = await collectionProcessor.retrieve_collection('0x700CE4AB68aD109224Be3aC85f5A99213bf04f67')
+    expected = RetrievedCollection(address='0x700CE4AB68aD109224Be3aC85f5A99213bf04f67', name='Microdoses', symbol='DOSES', description='Smaller graphics and topical comics from Killer Acid, in small editions. ', imageUrl='ipfs://ipfs/QmQ52XALRGEfRKCjDryeqXkq5nnSnDuRaiGaLwhs3R77Dz', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug='microdoses', url='https://app.rarible.com/collection/0x700ce4ab68ad109224be3ac85f5a99213bf04f67', discordUrl=None, bannerImageUrl=None, doesSupportErc721=False, doesSupportErc1155=True)
+
+    result = await collectionProcessor.retrieve_collection('0x48531836e57bc28d6fee33840f43826b889aa2fc')
+    expected = RetrievedCollection(address='0x48531836e57bc28d6fee33840f43826b889aa2fc', name='Super Crypto Man', symbol='PIPPI', description='New generation of Japanese sticker culture × NFT.Making 3D Collective NFT with Cryptoworld as a theme. ', imageUrl='ipfs://ipfs/QmUvzee6ZvY41S5W842fm8wiFr8ueqQSDimfLQhHyp76Tk', twitterUsername='@Pippi_NFTart', instagramUsername=None, wikiUrl=None, openseaSlug='super-crypto-man', url='https://app.rarible.com/collection/0x48531836e57bc28d6fee33840f43826b889aa2fc', discordUrl=None, bannerImageUrl='https://lh3.googleusercontent.com/TvePJaCzrlt4m-kNSiD0HUkryq5wTYlU0vkugYC9F0CBhThEO2PGCN0m6BRawoNDF2RWNn3E0AixFsSefikyr-5tmWIZkLHoPmxQ-w=s2500', doesSupportErc721=False, doesSupportErc1155=True)
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     asyncio.run(main())
