@@ -71,6 +71,7 @@ class CollectionProcessor:
             contractMetadataUri = contractUriResponse[0]
         except BadRequestException:
             contractMetadataUri = None
+        print(contractMetadataUri)
         if contractMetadataUri is not None and bool(contractMetadataUri):
             if contractMetadataUri.startswith('ipfs://'):
                 contractMetadataUri = contractMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
