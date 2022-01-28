@@ -75,7 +75,7 @@ class CollectionProcessor:
             if contractMetadataUri.startswith('ipfs://'):
                 contractMetadataUri = contractMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
             if "address" in contractMetadataUri:
-                contractMetadataUri = contractMetadataUri.replace('address','').format(address)
+                contractMetadataUri = contractMetadataUri.replace('{address}',address)
             contractMetadataUriResponse = await self.requester.get(url=contractMetadataUri)
             collectionMetadata = contractMetadataUriResponse.json()
             if isinstance(collectionMetadata, str):
