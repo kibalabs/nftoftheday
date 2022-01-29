@@ -64,8 +64,8 @@ CREATE TABLE tbl_collections (
     url TEXT,
     discord_url TEXT,
     banner_image_url TEXT,
-    does_support_erc721 BOOLEAN,
-    does_support_erc1155 BOOLEAN
+    does_support_erc721 BOOLEAN NOT NULL,
+    does_support_erc1155 BOOLEAN NOT NULL
 );
 CREATE UNIQUE INDEX tbl_collections_address ON tbl_collections (address);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);
