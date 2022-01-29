@@ -71,7 +71,7 @@ class CollectionProcessor:
             contractMetadataUri = contractUriResponse[0]
         except BadRequestException:
             contractMetadataUri = None
-        if contractMetadataUri is not None:
+        if contractMetadataUri:
             if contractMetadataUri.startswith('ipfs://'):
                 contractMetadataUri = contractMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
             if "{address}" in contractMetadataUri:
