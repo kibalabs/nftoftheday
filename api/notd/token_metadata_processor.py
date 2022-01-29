@@ -12,8 +12,11 @@ from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 from web3.main import Web3
+from notd.store.retriever import Retriever
 
 from notd.model import RetrievedTokenMetadata
+from notd.store.schema import TokenCollectionsTable
+
 
 IPFS_PROVIDER_PREFIXES = [
     'https://gateway.pinata.cloud/ipfs/',
@@ -37,11 +40,12 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str, retriever: Retriever):
         self.requester = requester
         self.ethClient = ethClient
         self.s3manager = s3manager
         self.bucketName = bucketName
+        self.retriever = retriever
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetadataContractJson = json.load(contractJsonFile)
@@ -136,28 +140,22 @@ class TokenMetadataProcessor():
             raise TokenDoesNotExistException()
         tokenMetadataUriResponse = None
         badRequestException = None
-        try:
-            doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        except:  # pylint: disable=bare-except
-            doesSupportErc721 = False
+        collection =  await self.retriever.get_collection_by_address(address=registryAddress)
+        doesSupportErc721 = collection.doesSupportErc721
+        doesSupportErc1155 = collection.doesSupportErc1155
         if doesSupportErc721:
             try:
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
-        else:
+        elif doesSupportErc1155:
             try:
-                doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
-            except:  # pylint: disable=bare-except
-                doesSupportErc1155 = False
-            if doesSupportErc1155:
-                try:
-                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
-                except BadRequestException as exception:
-                    badRequestException = exception
-            else:
-                logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
-                raise TokenDoesNotExistException()
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
+            except BadRequestException as exception:
+                badRequestException = exception
+        else:
+            logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+            raise TokenDoesNotExistException()
         if badRequestException is not None:
             if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
@@ -165,7 +163,7 @@ class TokenMetadataProcessor():
                 raise TokenDoesNotExistException()
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
-            raise exception
+            raise badRequestException
         tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
@@ -177,13 +175,14 @@ class TokenMetadataProcessor():
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
-            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/')
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
             tokenMetadataDict = self._resolve_data(dataString=tokenMetadataUri, registryAddress=registryAddress, tokenId=tokenId)
         else:
             try:
+                print(tokenMetadataUri)
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=5)
                 tokenMetadataDict = tokenMetadataResponse.json()
                 if tokenMetadataDict is None:
