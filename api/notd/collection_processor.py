@@ -45,7 +45,7 @@ class CollectionProcessor:
         self.contractAbi = contractMetadataJson['abi']
         self.contractUriFunctionAbi = [internalAbi for internalAbi in self.contractAbi if internalAbi['name'] == 'contractURI'][0]
 
-    async def retrieve_collection(self, address: str) -> RetrievedCollection:
+    async def retrieve_collection(self, address: str) -> RetrievedCollection:  # pylint: disable=too-many-statements
         try:
             doesSupportErc721Response = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721})
             doesSupportErc721 = doesSupportErc721Response[0]
@@ -83,7 +83,7 @@ class CollectionProcessor:
                 if isinstance(collectionMetadata, str):
                     collectionMetadata = json.loads(collectionMetadata)
                 await self.s3manager.write_file(content=str.encode(json.dumps(collectionMetadata)), targetPath=f'{self.bucketName}/collection-metadatas/{address}/{date_util.datetime_from_now()}.json')
-            except Exception as exception:
+            except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Error loading collection from metadata uri for address {address}: {str(exception)}')
         openseaResponse = None
         retryCount = 0
@@ -104,7 +104,7 @@ class CollectionProcessor:
                     break
                 logging.info(f'Retrying due to: {str(exception)}')
                 await asyncio.sleep(1.5)
-            except Exception as exception:
+            except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Error loading collection from opensea for address {address}: {str(exception)}')
                 break
             retryCount += 1
