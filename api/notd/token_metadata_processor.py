@@ -144,12 +144,12 @@ class TokenMetadataProcessor():
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
-        elif doesSupportErc1155:
+        if doesSupportErc1155:
             try:
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
-        else:
+        if not doesSupportErc721 and not doesSupportErc1155:
             logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
             raise TokenDoesNotExistException()
         if badRequestException is not None:
