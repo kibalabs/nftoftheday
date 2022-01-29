@@ -127,8 +127,8 @@ class RegistryToken:
 @dataclasses.dataclass
 class RetrievedCollection:
     address: str
-    name: str
-    symbol: str
+    name: Optional[str]
+    symbol: Optional[str]
     description: Optional[str]
     imageUrl: Optional[str]
     twitterUsername: Optional[str]
