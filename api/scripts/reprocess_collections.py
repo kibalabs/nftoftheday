@@ -1,7 +1,6 @@
 import os
 import sys
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
@@ -19,9 +18,12 @@ from core.aws_requester import AwsRequester
 
 # from notd.messages import UpdateTokenMetadataMessageContent
 from notd.store.saver import Saver
+from notd.store.retriever import Retriever
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema_conversions import collection_from_row
 from notd.collection_processor import CollectionProcessor
+from notd.token_manager import TokenManager
+
 
 
 
@@ -32,15 +34,19 @@ from notd.collection_processor import CollectionProcessor
 async def reprocess_collections(startId: int, endId: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database)
+    retriever = Retriever(database)
     sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     openseaApiKey = os.environ['OPENSEA_API_KEY']
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    requester = Requester()
+    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
+    #ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     s3Client = boto3.client(service_name='s3', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     requester = Requester()
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=collectionProcessor, tokenMetadataProcessor=None)
 
     await database.connect()
 
@@ -57,10 +63,7 @@ async def reprocess_collections(startId: int, endId: int, batchSize: int):
             logging.info(f'Updating {len(collectionsToChange)} collections...')
             for collection in collectionsToChange:
                 try:
-                    collectionDict = await collectionProcessor.retrieve_collection(address=collection.address)
-                    if collectionDict:
-                        logging.info(f'Processed: {collection.collectionId}')
-                        await saver.update_collection(collectionId=collection.collectionId, name=collectionDict.get("name"), symbol=collectionDict.get("symbol"), description=collectionDict.get("description"), imageUrl=collectionDict.get("imageUrl"), twitterUsername=collectionDict.get("twitterUsername"), instagramUsername=collectionDict.get("instagramUsername"), wikiUrl=collectionDict.get("wikiUrl"), openseaSlug=collectionDict.get("openseaSlug"), url=collectionDict.get("url"), discordUrl=collectionDict.get("discordUrl"), bannerImageUrl=collectionDict.get("bannerImageUrl"), doesSupportErc721=collectionDict.get("doesSupportErc721"), doesSupportErc1155=collectionDict.get("doesSupportErc1155"))
+                   await tokenManager.update_collection(address=collection.address, shouldForce=True)
                 except Exception as e:
                     logging.exception(f'Error processing {collection.collectionId}: {e}')
         currentId = currentId + batchSize
