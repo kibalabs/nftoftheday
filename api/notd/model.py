@@ -127,8 +127,8 @@ class RegistryToken:
 @dataclasses.dataclass
 class RetrievedCollection:
     address: str
-    name: Optional[str]
-    symbol: Optional[str]
+    name: str
+    symbol: str
     description: Optional[str]
     imageUrl: Optional[str]
     twitterUsername: Optional[str]
@@ -138,8 +138,8 @@ class RetrievedCollection:
     url: Optional[str]
     discordUrl: Optional[str]
     bannerImageUrl: Optional[str]
-    doesSupportErc721: Optional[bool]
-    doesSupportErc1155: Optional[bool]
+    doesSupportErc721: bool
+    doesSupportErc1155: bool
 
 
 @dataclasses.dataclass
