@@ -15,7 +15,6 @@ from web3.main import Web3
 from notd.store.retriever import Retriever
 
 from notd.model import RetrievedTokenMetadata
-from notd.store.schema import TokenCollectionsTable
 
 
 IPFS_PROVIDER_PREFIXES = [
@@ -27,9 +26,6 @@ IPFS_PROVIDER_PREFIXES = [
     'https://time.mypinata.cloud/ipfs/',
     'https://robotos.mypinata.cloud/ipfs/',
 ]
-
-_INTERFACE_ID_ERC721 = '0x5b5e139f'
-_INTERFACE_ID_ERC1155 = '0xd9b67a26'
 
 class TokenDoesNotExistException(NotFoundException):
     pass
