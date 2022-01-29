@@ -4,6 +4,7 @@ import logging
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
+from core.exceptions import InternalServerErrorException
 from core.requester import Requester
 from core.requester import ResponseException
 from core.web3.eth_client import EthClientInterface
@@ -82,9 +83,12 @@ class CollectionProcessor:
                 collectionMetadata = contractMetadataUriResponse.json()
                 if isinstance(collectionMetadata, str):
                     collectionMetadata = json.loads(collectionMetadata)
+                if not isinstance(collectionMetadata, dict):
+                    raise InternalServerErrorException(f'Bad response type from collection metadata: {type(collectionMetadata)}')
                 await self.s3manager.write_file(content=str.encode(json.dumps(collectionMetadata)), targetPath=f'{self.bucketName}/collection-metadatas/{address}/{date_util.datetime_from_now()}.json')
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Error loading collection from metadata uri for address {address}: {str(exception)}')
+                collectionMetadata = None
         openseaResponse = None
         retryCount = 0
         openseaCollection = None
