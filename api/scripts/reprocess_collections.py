@@ -8,7 +8,6 @@ import logging
 
 import asyncclick as click
 import boto3
-from core.queues.sqs_message_queue import SqsMessageQueue
 from databases.core import Database
 from core.requester import Requester
 from core.s3_manager import S3Manager
@@ -16,7 +15,6 @@ from core.web3.eth_client import RestEthClient
 from core.aws_requester import AwsRequester
 
 
-# from notd.messages import UpdateTokenMetadataMessageContent
 from notd.store.saver import Saver
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenCollectionsTable
@@ -35,13 +33,11 @@ async def reprocess_collections(startId: int, endId: int, batchSize: int):
     database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     saver = Saver(database)
     retriever = Retriever(database)
-    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     openseaApiKey = os.environ['OPENSEA_API_KEY']
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     requester = Requester()
-    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
-    #ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
+    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     s3Client = boto3.client(service_name='s3', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     requester = Requester()
@@ -62,12 +58,15 @@ async def reprocess_collections(startId: int, endId: int, batchSize: int):
             collectionsToChange = [collection_from_row(row) async for row in database.iterate(query=query)]
             logging.info(f'Updating {len(collectionsToChange)} collections...')
             for collection in collectionsToChange:
+                logging.info(f'Updating collection: {collection.address}')
                 try:
                    await tokenManager.update_collection(address=collection.address, shouldForce=True)
                 except Exception as e:
                     logging.exception(f'Error processing {collection.collectionId}: {e}')
         currentId = currentId + batchSize
     await database.disconnect()
+    await requester.close_connections()
+    await awsRequester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
