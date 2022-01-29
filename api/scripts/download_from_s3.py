@@ -29,11 +29,12 @@ async def download_from_s3():
     bucketName = os.environ['S3_BUCKET']
     
     set_of_attributes = set()
-    for s3_file in (await s3manager.list_directory_files(s3Directory=f'{bucketName}/token-metadatas/'))[:100]:
+    for s3_file in (await s3manager.list_directory_files(s3Directory=f'{bucketName}/token-metadatas/')):
         a = await s3manager.read_file(sourcePath=f'{s3_file.bucket}/{s3_file.path}')
         f = json.loads(a)
-        set_of_attributes.add(set(f.keys()))
-        print(set_of_attributes)
+        b = set(list(f.keys()))
+        set_of_attributes = set_of_attributes | b
+    print(set_of_attributes)
     return
 
 
