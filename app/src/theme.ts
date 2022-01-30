@@ -215,6 +215,34 @@ export const buildNotdTheme = (): ITheme => {
           },
         },
       },
+      small: {
+        normal: {
+          default: {
+            background: {
+              'border-width': '0',
+            },
+            text: {
+              color: '$colors.textOnBrand',
+              'font-size': '1em',
+            },
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.35)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.55)',
+            },
+          },
+          focus: {
+            background: {
+              'border-color': 'rgba(255, 255, 255, 0.75)',
+            },
+          },
+        },
+      },
     },
     dialogs: {
       default: {

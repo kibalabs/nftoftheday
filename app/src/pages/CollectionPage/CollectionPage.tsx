@@ -1,9 +1,10 @@
 import React from 'react';
 
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Collection } from '../../client/resources';
+import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
 
 export const CollectionPage = (): React.ReactElement => {
@@ -80,7 +81,10 @@ export const CollectionPage = (): React.ReactElement => {
               </Stack>
               <Spacing variant={PaddingSize.Wide2} />
               {collection.description && (
-                <MarkdownText textVariant='light' source={collection.description} />
+                <TruncateText
+                  markdownText={collection.description}
+                  maximumCharacters={300}
+                />
               )}
             </Stack>
           </ContainingView>
