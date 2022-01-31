@@ -98,14 +98,13 @@ export const CollectionPage = (): React.ReactElement => {
                   <MetricView name={'Total Volume'} value={140} />
                 </Stack>
                 <MatricDivider />
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}padding={PaddingSize.Wide2}>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} padding={PaddingSize.Wide2}>
                   <MetricView name={'24h low sale'} value={2.5} />
                   <Spacing variant={PaddingSize.Wide1} />
                   <MetricView name={'24h high sale'} value={150} />
                   <Spacing variant={PaddingSize.Wide1} />
                   <MetricView name={'24h volume'} value={350} />
                 </Stack>
-
               </Stack>
             </Stack>
           </ContainingView>
