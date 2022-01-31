@@ -74,8 +74,9 @@ class TokenManager:
         if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS):
             logging.info('Skipping token because it has been updated recently.')
             return
+        collection = await self.get_collection_by_address(address=registryAddress)
         try:
-            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
         except TokenDoesNotExistException:
             logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)

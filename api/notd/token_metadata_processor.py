@@ -7,7 +7,6 @@ from typing import Dict
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.util import date_util
@@ -15,8 +14,7 @@ from core.web3.eth_client import EthClientInterface
 from web3.main import Web3
 from notd.store.retriever import Retriever
 
-from notd.model import RetrievedTokenMetadata
-from notd.messages import UpdateCollectionMessageContent
+from notd.model import Collection, RetrievedTokenMetadata
 
 
 
@@ -42,13 +40,12 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str, retriever: Retriever, tokenQueue: SqsMessageQueue):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str, retriever: Retriever):
         self.requester = requester
         self.ethClient = ethClient
         self.s3manager = s3manager
         self.bucketName = bucketName
         self.retriever = retriever
-        self.tokenQueue = tokenQueue
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetadataContractJson = json.load(contractJsonFile)
@@ -111,43 +108,7 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         return tokenMetadataDict
 
-    async def _check_interface(self, registryAddress: str, tokenId: str):
-        tokenMetadataUriResponse = None
-        badRequestException = None
-        try:
-            doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        except:  # pylint: disable=bare-except
-            doesSupportErc721 = False
-        if doesSupportErc721:
-            try:
-                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
-            except BadRequestException as exception:
-                badRequestException = exception
-        else:
-            try:
-                doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
-            except:  # pylint: disable=bare-except
-                doesSupportErc1155 = False
-            if doesSupportErc1155:
-                try:
-                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
-                except BadRequestException as exception:
-                    badRequestException = exception
-            else:
-                logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
-                raise TokenDoesNotExistException()
-            if badRequestException is not None:
-                if 'URI query for nonexistent token' in badRequestException.message:
-                    raise TokenDoesNotExistException()
-                if 'execution reverted' in badRequestException.message:
-                    raise TokenDoesNotExistException()
-                if 'out of gas' in badRequestException.message:
-                    raise TokenDoesNotExistException()
-                raise badRequestException
-
-        return tokenMetadataUriResponse
-
-    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
+    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str, collection: Collection) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             # NOTE(krishan711): special case for CryptoPunks
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
@@ -180,12 +141,6 @@ class TokenMetadataProcessor():
         tokenMetadataUriResponse = None
         badRequestException = None
         collection = None
-        try:
-            collection =  await self.retriever.get_collection_by_address(address=registryAddress)
-        except Exception as exception:  # pylint: disable=broad-except
-            logging.info(f'Collection {registryAddress} not in database')
-            await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=registryAddress).to_message())
-            tokenMetadataUriResponse = await self._check_interface(registryAddress=registryAddress, tokenId=tokenId)
         if collection:
             if collection.doesSupportErc721:
                 try:
