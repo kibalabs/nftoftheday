@@ -30,6 +30,9 @@ IPFS_PROVIDER_PREFIXES = [
     'https://robotos.mypinata.cloud/ipfs/',
 ]
 
+_INTERFACE_ID_ERC721 = '0x5b5e139f'
+_INTERFACE_ID_ERC1155 = '0xd9b67a26'
+
 class TokenDoesNotExistException(NotFoundException):
     pass
 
@@ -140,12 +143,34 @@ class TokenMetadataProcessor():
             raise TokenDoesNotExistException()
         tokenMetadataUriResponse = None
         badRequestException = None
+        collection = None
         try:
             collection =  await self.retriever.get_collection_by_address(address=registryAddress)
         except Exception as exception:  # pylint: disable=broad-except
             logging.info(f'Collection {registryAddress} not in database')
             await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=registryAddress).to_message())
-            return
+            try:
+                doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
+            except:  # pylint: disable=bare-except
+                doesSupportErc721 = False
+            if doesSupportErc721:
+                try:
+                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
+                except BadRequestException as exception:
+                    badRequestException = exception
+            else:
+                try:
+                    doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
+                except:  # pylint: disable=bare-except
+                    doesSupportErc1155 = False
+                if doesSupportErc1155:
+                    try:
+                        tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
+                    except BadRequestException as exception:
+                        badRequestException = exception
+                else:
+                    logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+                    raise TokenDoesNotExistException()
         if collection:
             if collection.doesSupportErc721:
                 try:
