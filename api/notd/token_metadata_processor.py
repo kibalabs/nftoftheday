@@ -138,29 +138,27 @@ class TokenMetadataProcessor():
             raise TokenDoesNotExistException()
         tokenMetadataUriResponse = None
         badRequestException = None
-        collection = None
-        if collection:
-            if collection.doesSupportErc721:
-                try:
-                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
-                except BadRequestException as exception:
-                    badRequestException = exception
-            if collection.doesSupportErc1155:
-                try:
-                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
-                except BadRequestException as exception:
-                    badRequestException = exception
-            if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
-                logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+        if collection.doesSupportErc721:
+            try:
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
+            except BadRequestException as exception:
+                badRequestException = exception
+        if collection.doesSupportErc1155:
+            try:
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
+            except BadRequestException as exception:
+                badRequestException = exception
+        if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
+            logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+            raise TokenDoesNotExistException()
+        if badRequestException is not None:
+            if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
-            if badRequestException is not None:
-                if 'URI query for nonexistent token' in badRequestException.message:
-                    raise TokenDoesNotExistException()
-                if 'execution reverted' in badRequestException.message:
-                    raise TokenDoesNotExistException()
-                if 'out of gas' in badRequestException.message:
-                    raise TokenDoesNotExistException()
-                raise badRequestException
+            if 'execution reverted' in badRequestException.message:
+                raise TokenDoesNotExistException()
+            if 'out of gas' in badRequestException.message:
+                raise TokenDoesNotExistException()
+            raise badRequestException
         tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
