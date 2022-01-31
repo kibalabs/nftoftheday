@@ -111,7 +111,6 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         return tokenMetadataDict
 
-    
     async def _check_interface(self, registryAddress: str, tokenId: str):
         tokenMetadataUriResponse = None
         badRequestException = None
