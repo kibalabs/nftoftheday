@@ -34,6 +34,8 @@ async def download_from_s3():
         f = json.loads(a)
         b = set(list(f.keys()))
         set_of_attributes = set_of_attributes | b
+        print(set_of_attributes)
+
     print(set_of_attributes)
     return
 
