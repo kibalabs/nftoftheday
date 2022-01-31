@@ -28,8 +28,6 @@ IPFS_PROVIDER_PREFIXES = [
     'https://robotos.mypinata.cloud/ipfs/',
 ]
 
-_INTERFACE_ID_ERC721 = '0x5b5e139f'
-_INTERFACE_ID_ERC1155 = '0xd9b67a26'
 
 class TokenDoesNotExistException(NotFoundException):
     pass
