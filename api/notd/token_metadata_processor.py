@@ -111,6 +111,43 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         return tokenMetadataDict
 
+    
+    async def _check_interface(self, registryAddress: str, tokenId: str):
+        tokenMetadataUriResponse = None
+        badRequestException = None
+        try:
+            doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
+        except:  # pylint: disable=bare-except
+            doesSupportErc721 = False
+        if doesSupportErc721:
+            try:
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
+            except BadRequestException as exception:
+                badRequestException = exception
+        else:
+            try:
+                doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
+            except:  # pylint: disable=bare-except
+                doesSupportErc1155 = False
+            if doesSupportErc1155:
+                try:
+                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
+                except BadRequestException as exception:
+                    badRequestException = exception
+            else:
+                logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+                raise TokenDoesNotExistException()
+            if badRequestException is not None:
+                if 'URI query for nonexistent token' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'execution reverted' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'out of gas' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                raise badRequestException
+
+        return tokenMetadataUriResponse
+
     async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             # NOTE(krishan711): special case for CryptoPunks
@@ -149,28 +186,7 @@ class TokenMetadataProcessor():
         except Exception as exception:  # pylint: disable=broad-except
             logging.info(f'Collection {registryAddress} not in database')
             await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=registryAddress).to_message())
-            try:
-                doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-            except:  # pylint: disable=bare-except
-                doesSupportErc721 = False
-            if doesSupportErc721:
-                try:
-                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
-                except BadRequestException as exception:
-                    badRequestException = exception
-            else:
-                try:
-                    doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
-                except:  # pylint: disable=bare-except
-                    doesSupportErc1155 = False
-                if doesSupportErc1155:
-                    try:
-                        tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
-                    except BadRequestException as exception:
-                        badRequestException = exception
-                else:
-                    logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
-                    raise TokenDoesNotExistException()
+            tokenMetadataUriResponse = await self._check_interface(registryAddress=registryAddress, tokenId=tokenId)
         if collection:
             if collection.doesSupportErc721:
                 try:
@@ -185,14 +201,14 @@ class TokenMetadataProcessor():
             if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
                 logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
                 raise TokenDoesNotExistException()
-        if badRequestException is not None:     
-            if 'URI query for nonexistent token' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            if 'execution reverted' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            if 'out of gas' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            raise badRequestException
+            if badRequestException is not None:
+                if 'URI query for nonexistent token' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'execution reverted' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'out of gas' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                raise badRequestException
         tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
