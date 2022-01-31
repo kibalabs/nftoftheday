@@ -38,12 +38,11 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str, retriever: Retriever):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
         self.requester = requester
         self.ethClient = ethClient
         self.s3manager = s3manager
         self.bucketName = bucketName
-        self.retriever = retriever
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetadataContractJson = json.load(contractJsonFile)
