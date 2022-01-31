@@ -111,6 +111,10 @@ export const buildNotdTheme = (): ITheme => {
         'border-color': '#4B0312',
         'border-width': '7px',
       },
+      divider: {
+        'background-color': '#832D2C',
+
+      },
     },
     images: {
       default: {

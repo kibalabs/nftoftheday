@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Alignment, Direction, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
 
 export interface MetricViewProps {
   name: string;
@@ -9,13 +9,11 @@ export interface MetricViewProps {
 
 export const MetricView = (props: MetricViewProps): React.ReactElement => {
   return (
-    <Stack directionResponsive={{ base: Direction.Horizontal, medium: Direction.Vertical }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+    <Box variant='card' isFullWidth={true}>
+      <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}padding={PaddingSize.Wide2}>
         <Text variant='bold-large'>{props.value}</Text>
-      </Stack>
-      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
         <Text>{props.name}</Text>
       </Stack>
-    </Stack>
+    </Box>
   );
 };

@@ -4,6 +4,8 @@ import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Collection } from '../../client/resources';
+import { MatricDivider } from '../../components/MatricDivider';
+import { MetricView } from '../../components/MetricView';
 import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
 
@@ -86,6 +88,25 @@ export const CollectionPage = (): React.ReactElement => {
                   maximumCharacters={300}
                 />
               )}
+              <Spacing variant={PaddingSize.Wide2} />
+              <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} padding={PaddingSize.Wide2}>
+                  <MetricView name={'Items'} value={10000} />
+                  <Spacing variant={PaddingSize.Wide1} />
+                  <MetricView name={'owners'} value={5432} />
+                  <Spacing variant={PaddingSize.Wide1} />
+                  <MetricView name={'Total Volume'} value={140} />
+                </Stack>
+                <MatricDivider />
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}padding={PaddingSize.Wide2}>
+                  <MetricView name={'24h low sale'} value={2.5} />
+                  <Spacing variant={PaddingSize.Wide1} />
+                  <MetricView name={'24h high sale'} value={150} />
+                  <Spacing variant={PaddingSize.Wide1} />
+                  <MetricView name={'24h volume'} value={350} />
+                </Stack>
+
+              </Stack>
             </Stack>
           </ContainingView>
         </Stack>
