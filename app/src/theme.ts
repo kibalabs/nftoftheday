@@ -111,6 +111,15 @@ export const buildNotdTheme = (): ITheme => {
         'border-color': '#4B0312',
         'border-width': '7px',
       },
+      divider: {
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+      },
+      metricCard: {
+        padding: '0',
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'border-width': '0',
+        margin: '0',
+      },
     },
     images: {
       default: {
