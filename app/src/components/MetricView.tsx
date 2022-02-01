@@ -10,7 +10,7 @@ export interface MetricViewProps {
 export const MetricView = (props: MetricViewProps): React.ReactElement => {
   return (
     <Box variant='metricCard' height='100px'>
-      <Stack direction={Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}padding={PaddingSize.Wide2}>
+      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide}>
         <Text variant='bold-large'>{props.value}</Text>
         <Text variant='small' alignment={TextAlignment.Center}>{props.name}</Text>
       </Stack>
