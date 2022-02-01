@@ -50,7 +50,7 @@ export const CollectionPage = (): React.ReactElement => {
             </LayerContainer>
           </Box>
           <ContainingView>
-            <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
+            <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center}>
               <Text variant='header1'>{collection.name}</Text>
               <Spacing variant={PaddingSize.Wide2} />
               <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
@@ -89,7 +89,7 @@ export const CollectionPage = (): React.ReactElement => {
               )}
               <Spacing variant={PaddingSize.Wide2} />
               <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} padding={PaddingSize.Wide2}>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide2}>
                   <MetricView name={'Items'} value={10000} />
                   <Spacing variant={PaddingSize.Wide1} />
                   <MetricView name={'owners'} value={5432} />
