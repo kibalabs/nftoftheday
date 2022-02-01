@@ -56,7 +56,7 @@ export const buildNotdTheme = (): ITheme => {
         'font-weight': '600',
       },
       small: {
-        'font-size': '0.86rem',
+        'font-size': '0.85rem',
       },
       light: {
         color: 'rgba(255, 255, 255, 0.75)',
