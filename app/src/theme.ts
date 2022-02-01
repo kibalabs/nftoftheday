@@ -56,7 +56,7 @@ export const buildNotdTheme = (): ITheme => {
         'font-weight': '600',
       },
       small: {
-        'font-size': '0.85rem',
+        'font-size': '0.86rem',
       },
       light: {
         color: 'rgba(255, 255, 255, 0.75)',
@@ -112,11 +112,11 @@ export const buildNotdTheme = (): ITheme => {
         'border-width': '7px',
       },
       divider: {
-        'background-color': '#592638',
+        'background-color': 'rgba(255, 255, 255, 0.25)',
       },
       metricCard: {
         padding: '0',
-        'background-color': '#592638',
+        'background-color': 'rgba(255, 255, 255, 0.25)',
         'border-width': '0',
         margin: '0',
       },
