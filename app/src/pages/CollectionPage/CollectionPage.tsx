@@ -1,10 +1,9 @@
 import React from 'react';
 
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Collection } from '../../client/resources';
-import { MatricDivider } from '../../components/MatricDivider';
 import { MetricView } from '../../components/MetricView';
 import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
@@ -97,7 +96,9 @@ export const CollectionPage = (): React.ReactElement => {
                   <Spacing variant={PaddingSize.Wide1} />
                   <MetricView name={'Total Volume'} value={140} />
                 </Stack>
-                <MatricDivider />
+                <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                  <Box variant='divider' isFullHeight={true} width='1px' />
+                </ResponsiveHidingView>
                 <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} padding={PaddingSize.Wide2}>
                   <MetricView name={'24h low sale'} value={2.5} />
                   <Spacing variant={PaddingSize.Wide1} />
