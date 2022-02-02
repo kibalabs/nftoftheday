@@ -12,7 +12,7 @@ export interface TokenCardProps {
 
 export const TokenCard = (props:TokenCardProps): React.ReactElement => {
   return (
-    <Box variant='card'>
+    <Box variant='tokenCard' shouldClipContent={true}>
       {CollectionToken === null ? (
         <LoadingSpinner />
       ) : CollectionToken === undefined ? (
