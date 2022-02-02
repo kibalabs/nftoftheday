@@ -1,3 +1,4 @@
+import csv
 import datetime
 import os
 import sys
@@ -38,14 +39,15 @@ async def download_from_s3(startId: int, endId: int, batchSize: int):
             query = query.where(TokenCollectionsTable.c.collectionId >= start)
             query = query.where(TokenCollectionsTable.c.collectionId < end)
         collections = [collection_from_row(row) async for row in database.iterate(query=query)]
-        for collection in collections:
-            tokens = []
-            for s3_file in (await s3manager.list_directory_files(s3Directory=f'{bucketName}/token-metadatas/{collection.address}')):
-                path = s3_file.path
-                token = path.split('/')[2]#.replace(" ","T")
-                if token not in tokens:
-                    tokens.append(path) 
-            
+
+        with open('api/scripts/names.csv', 'w', newline='') as csvfile:
+            for collection in collections:
+                fieldNames = []
+                for s3_file in (await s3manager.list_directory_files(s3Directory=f'{bucketName}/token-metadatas/{collection.address}')): 
+                    s3json = json.loads(await s3manager.read_file(sourcePath=f'{s3_file.bucket}/{s3_file.path}'))
+                    fieldNames = [collection.address] + list(s3json.keys())
+                    writer = csv.DictWriter(csvfile, fieldnames=fieldNames)
+                    writer.writeheader()
         currentId = currentId + batchSize
         
     await database.disconnect()
