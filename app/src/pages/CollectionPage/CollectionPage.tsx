@@ -5,6 +5,7 @@ import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, Lay
 
 import { Collection } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
+import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
 
@@ -107,6 +108,7 @@ export const CollectionPage = (): React.ReactElement => {
                   <MetricView name={'24h volume'} value={350} />
                 </Stack>
               </Stack>
+              <TokenCard />
             </Stack>
           </ContainingView>
         </Stack>
