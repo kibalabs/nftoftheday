@@ -3,7 +3,7 @@ import React from 'react';
 import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Collection } from '../../client/resources';
+import { Collection, CollectionToken } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -23,6 +23,12 @@ export const CollectionPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
+
+  const COLLECTION_TOKENS = [
+    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', 'sold 12/12/21 for 0.3'),
+    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', 'sold 12/12/21 for 0.3'),
+    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', 'sold 12/12/21 for 0.3'),
+  ];
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
@@ -108,7 +114,19 @@ export const CollectionPage = (): React.ReactElement => {
                   <MetricView name={'24h volume'} value={350} />
                 </Stack>
               </Stack>
-              <TokenCard />
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+                <Text variant='header3-singleLine'>Your Holdings (2)</Text>
+                <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => <TokenCard key={index} collectionToken={collectionToken} />)}
+                </Stack>
+                <Text variant='large'>Connect your wallet to show your holdings and watchlist.</Text>
+              </Stack>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+                <Text variant='header3-singleLine'>Recent Sales</Text>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => <TokenCard key={index} collectionToken={collectionToken} />)}
+                </Stack>
+              </Stack>
             </Stack>
           </ContainingView>
         </Stack>

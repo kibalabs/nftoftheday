@@ -76,6 +76,10 @@ export const buildNotdTheme = (): ITheme => {
         overflow: 'hidden',
         'text-overflow': 'ellipsis',
       },
+      tokenTitle: {
+        'font-size': '1.5rem',
+        'font-weight': '500',
+      },
     },
     boxes: {
       phBanner: {

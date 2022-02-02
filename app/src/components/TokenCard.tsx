@@ -1,23 +1,31 @@
 
 import React from 'react';
 
-import { Box, Direction, Image, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-export const TokenCard = (): React.ReactElement => {
+import { Alignment, Box, Direction, Image, LoadingSpinner, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+
+import { CollectionToken } from '../client/resources';
+
+export interface TokenCardProps {
+  collectionToken: CollectionToken;
+}
+
+export const TokenCard = (props:TokenCardProps): React.ReactElement => {
   return (
-    <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} padding={PaddingSize.Wide}>
-      <Text variant='header3-singleLine'>Your Holdings</Text>
-      <Spacing variant={PaddingSize.Wide} />
-      <Box variant='card' height='204px' width='140px'>
-        <Box height='140px' width='140px'>
-          <Image source={'/assets/icon.png'} alternativeText='image' fitType='contain' />
-        </Box>
-        <Spacing variant={PaddingSize.Wide} />
-        <Text variant='subtitle' alignment={TextAlignment.Center}>mdtp</Text>
-        <Text variant='small' alignment={TextAlignment.Center}>bought on 12/12/21 for 0.3</Text>
-      </Box>
-      <Spacing variant={PaddingSize.Wide} />
-      <Text variant='bold'>Connect your wallet to show your holdings and watchlist.</Text>
-    </Stack>
+    <Box variant='card'>
+      {CollectionToken === null ? (
+        <LoadingSpinner />
+      ) : CollectionToken === undefined ? (
+        <Text variant='error'>Token failed to load</Text>
+      ) : (
+        <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
+          <Box>
+            <Image source={props.collectionToken.imageUrl as string} alternativeText='image' fitType='contain' />
+          </Box>
+          <Text variant='tokenTitle' alignment={TextAlignment.Center}>{props.collectionToken.name}</Text>
+          <Text alignment={TextAlignment.Center}>{props.collectionToken.description}</Text>
+        </Stack>
+      )}
+    </Box>
   );
 };
