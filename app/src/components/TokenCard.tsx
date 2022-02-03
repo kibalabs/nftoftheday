@@ -18,13 +18,13 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
           <Image source={ props.collectionToken.imageUrl || defaultImage} alternativeText='image' fitType='contain' />
         </Box>
         <PaddingView padding={PaddingSize.Wide}>
-          <Box >
-          <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-            <Text variant='subtitle' alignment={TextAlignment.Center}>{props.collectionToken.name}</Text>
-            <Text variant='small' alignment={TextAlignment.Center}>sold 12/12/21 for 0.3</Text>
+          <Box>
+            <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+              <Text variant='subtitle' alignment={TextAlignment.Center}>{props.collectionToken.name}</Text>
+              <Text variant='small' alignment={TextAlignment.Center}>sold 12/12/21 for 0.3</Text>
             </Stack>
           </Box>
-          </PaddingView>
+        </PaddingView>
       </Stack>
     </Box>
   );
