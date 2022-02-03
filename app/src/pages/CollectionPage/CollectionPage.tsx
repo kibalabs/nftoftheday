@@ -114,7 +114,7 @@ export const CollectionPage = (): React.ReactElement => {
                   <MetricView name={'24h volume'} value={350} />
                 </Stack>
               </Stack>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
                 <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
                   { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => (
@@ -122,14 +122,6 @@ export const CollectionPage = (): React.ReactElement => {
                   ))}
                 </Stack>
                 <Text variant='large'>Connect your wallet to show your holdings and watchlist.</Text>
-              </Stack>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
-                <Text variant='header3'>Recent Sales</Text>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => (
-                    <TokenCard key={index} collectionToken={collectionToken} />
-                  ))}
-                </Stack>
               </Stack>
             </Stack>
           </ContainingView>

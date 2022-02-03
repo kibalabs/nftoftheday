@@ -14,11 +14,11 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
   return (
     <Box variant='tokenCard' shouldClipContent={true}>
       <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-        <Box>
+        <Box height='9rem' width='9rem'>
           <Image source={ props.collectionToken.imageUrl || defaultImage} alternativeText='image' fitType='contain' />
         </Box>
-        <Text variant='tokenTitle' alignment={TextAlignment.Center}>{props.collectionToken.name}</Text>
-        <Text alignment={TextAlignment.Center}>sold 12/12/21 for 0.3</Text>
+        <Text variant='subtitle' alignment={TextAlignment.Center}>{props.collectionToken.name}</Text>
+        <Text variant='small' alignment={TextAlignment.Center}>sold 12/12/21 for 0.3</Text>
       </Stack>
     </Box>
   );
