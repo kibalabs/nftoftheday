@@ -3,7 +3,7 @@ import React from 'react';
 import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Collection, CollectionToken } from '../../client/resources';
+import { Collection, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -23,6 +23,10 @@ export const CollectionPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
+
+  const TOKENTRANSFER = [
+    new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 69633, 8999999, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', new Date(2011, 11, 10)),
+  ];
 
   const COLLECTION_TOKENS = [
     new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', ''),
@@ -117,9 +121,10 @@ export const CollectionPage = (): React.ReactElement => {
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
                 <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => (
-                    <TokenCard key={index} collectionToken={collectionToken} />
-                  ))}
+                  { TOKENTRANSFER.map((tokenTransfer: TokenTransfer, index: number) => (
+                    COLLECTION_TOKENS.map((collectionToken: CollectionToken) : React.ReactElement => (
+                      <TokenCard key={index} collectionToken={collectionToken} tokenTranfer={tokenTransfer} />
+                    ))))}
                 </Stack>
                 <Text variant='large'>Connect your wallet to show your holdings and watchlist.</Text>
               </Stack>
