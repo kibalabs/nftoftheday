@@ -1,7 +1,6 @@
 
 import React from 'react';
 
-
 import { Alignment, Box, Direction, Image, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { CollectionToken } from '../client/resources';
