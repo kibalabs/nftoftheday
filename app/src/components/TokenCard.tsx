@@ -2,11 +2,11 @@ import React from 'react';
 
 import { Alignment, Box, Direction, Image, PaddingSize, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { CollectionToken, TokenTransfer } from '../client/resources';
+import { CollectionToken } from '../client/resources';
 
 export interface TokenCardProps {
   collectionToken: CollectionToken;
-  tokenTranfer: TokenTransfer;
+  subtitle: string
 }
 
 const defaultImage = '/assets/icon.png';
@@ -21,7 +21,7 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
         <Box>
           <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingVertical={PaddingSize.Wide}>
             <Text variant='note' lineLimit={2} alignment={TextAlignment.Center}>{props.collectionToken.name}</Text>
-            <Text variant='small' lineLimit={2} alignment={TextAlignment.Center}>{`sold on ${props.tokenTranfer.blockDate} for ${props.tokenTranfer.value}`}</Text>
+            <Text variant='small' lineLimit={2} alignment={TextAlignment.Center}>{props.subtitle}</Text>
           </Stack>
         </Box>
       </Stack>
