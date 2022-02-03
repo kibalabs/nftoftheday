@@ -117,7 +117,9 @@ export const CollectionPage = (): React.ReactElement => {
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
                 <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => <TokenCard key={index} collectionToken={collectionToken} />)}
+                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => (
+                    <TokenCard key={index} collectionToken={collectionToken} />
+                  ))}
                 </Stack>
                 <Text variant='large'>Connect your wallet to show your holdings and watchlist.</Text>
               </Stack>
