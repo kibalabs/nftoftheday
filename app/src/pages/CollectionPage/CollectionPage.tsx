@@ -116,7 +116,7 @@ export const CollectionPage = (): React.ReactElement => {
               </Stack>
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
                 <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
-                <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
                   { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => (
                     <TokenCard key={index} collectionToken={collectionToken} />
                   ))}
