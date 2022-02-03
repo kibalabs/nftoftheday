@@ -40,12 +40,14 @@ export const buildNotdTheme = (): ITheme => {
     },
     texts: {
       default: {
+        'font-size': '1.2rem',
         'font-family': "'Post No Bills Jaffna', sans-serif",
         'font-weight': '400',
       },
       header3: {
         'font-size': '1.5rem',
         'font-weight': '600',
+        'margin-bottom': '0.25em',
       },
       header4: {
         'font-size': '1.3rem',
@@ -57,6 +59,7 @@ export const buildNotdTheme = (): ITheme => {
       },
       small: {
         'font-size': '0.85rem',
+        'line-height': '1em',
       },
       light: {
         color: 'rgba(255, 255, 255, 0.75)',
@@ -119,6 +122,12 @@ export const buildNotdTheme = (): ITheme => {
         'background-color': 'rgba(255, 255, 255, 0.15)',
         'border-width': '0',
         margin: '0',
+      },
+      tokenCard: {
+        padding: '0px',
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'border-width': '0',
+        'border-radius': '10px',
       },
     },
     images: {

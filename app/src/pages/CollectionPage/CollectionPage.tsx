@@ -1,12 +1,22 @@
 import React from 'react';
 
+import { dateToString } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Collection } from '../../client/resources';
+import { Collection, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
+import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
+
+const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 6, 8999999, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', new Date());
+
+const COLLECTION_TOKENS = [
+  new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', ''),
+  new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', ''),
+  new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', ''),
+];
 
 export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
@@ -23,8 +33,12 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollection();
   }, [updateCollection]);
 
+  // const onConnectWalletClicked = (): void => {
+  //    console.log('onConnectWalletClicked');
+  // }
+
   return (
-    <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
+    <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collection === null ? (
         <LoadingSpinner />
       ) : collection === undefined ? (
@@ -50,9 +64,9 @@ export const CollectionPage = (): React.ReactElement => {
             </LayerContainer>
           </Box>
           <ContainingView>
-            <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
+            <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} paddingBottom={PaddingSize.Wide2} paddingTop={PaddingSize.Default}>
               <Text variant='header1'>{collection.name}</Text>
-              <Spacing variant={PaddingSize.Wide2} />
+              <Spacing variant={PaddingSize.Wide} />
               <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
                 {collection.discordUrl && (
                   <Stack.Item baseSize='10em'>
@@ -88,23 +102,37 @@ export const CollectionPage = (): React.ReactElement => {
                 />
               )}
               <Spacing variant={PaddingSize.Wide2} />
-              <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide2}>
-                  <MetricView name={'Items'} value={10000} />
-                  <Spacing variant={PaddingSize.Wide1} />
-                  <MetricView name={'owners'} value={5432} />
-                  <Spacing variant={PaddingSize.Wide1} />
-                  <MetricView name={'Total Volume'} value={140} />
+              <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                  <MetricView name={'Items'} value={'10000'} />
+                  <MetricView name={'Owners'} value={'5432'} />
+                  <MetricView name={'Total Volume'} value={'140Ξ'} />
                 </Stack>
                 <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
                   <Box variant='divider' isFullHeight={true} width='1px' />
                 </ResponsiveHidingView>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} padding={PaddingSize.Wide2}>
-                  <MetricView name={'24h low sale'} value={2.5} />
-                  <Spacing variant={PaddingSize.Wide1} />
-                  <MetricView name={'24h high sale'} value={150} />
-                  <Spacing variant={PaddingSize.Wide1} />
-                  <MetricView name={'24h volume'} value={350} />
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                  <MetricView name={'24h Low Sale'} value={'2.5Ξ'} />
+                  <MetricView name={'24h High Sale'} value={'150Ξ'} />
+                  <MetricView name={'24h Volume'} value={'350Ξ'} />
+                </Stack>
+              </Stack>
+              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+                <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
+                <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                  {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
+                    <TokenCard
+                      key={index}
+                      collectionToken={collectionToken}
+                      subtitle={`Sold at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
+                      target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
+                    />
+                  ))}
+                </Stack>
+                <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                  {/* <Link onClicked={onConnectWalletClicked} text='Connect your wallet' /> */}
+                  <Link target={'/'} text='Connect your wallet' />
+                  <Text>to show your holdings and watchlist.</Text>
                 </Stack>
               </Stack>
             </Stack>
