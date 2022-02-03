@@ -25,9 +25,9 @@ export const CollectionPage = (): React.ReactElement => {
   }, [updateCollection]);
 
   const COLLECTION_TOKENS = [
-    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', 'sold 12/12/21 for 0.3'),
-    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', 'sold 12/12/21 for 0.3'),
-    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', 'sold 12/12/21 for 0.3'),
+    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', ''),
+    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', ''),
+    new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', ''),
   ];
 
   return (
@@ -115,16 +115,22 @@ export const CollectionPage = (): React.ReactElement => {
                 </Stack>
               </Stack>
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
-                <Text variant='header3-singleLine'>Your Holdings (2)</Text>
+                <Text variant='header3'>
+Your Holdings (
+                  {COLLECTION_TOKENS.length}
+)
+                </Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                   { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => <TokenCard key={index} collectionToken={collectionToken} />)}
                 </Stack>
                 <Text variant='large'>Connect your wallet to show your holdings and watchlist.</Text>
               </Stack>
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
-                <Text variant='header3-singleLine'>Recent Sales</Text>
+                <Text variant='header3'>Recent Sales</Text>
                 <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => <TokenCard key={index} collectionToken={collectionToken} />)}
+                  { COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number): React.ReactElement => (
+                    <TokenCard key={index} collectionToken={collectionToken} />
+                  ))}
                 </Stack>
               </Stack>
             </Stack>
