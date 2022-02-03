@@ -8,7 +8,7 @@ export interface TokenCardProps {
   collectionToken: CollectionToken;
 }
 
-const defaultImage = "/assets/icon.png";
+const defaultImage = '/assets/icon.png';
 
 export const TokenCard = (props:TokenCardProps): React.ReactElement => {
   return (
