@@ -46,7 +46,7 @@ export const buildNotdTheme = (): ITheme => {
       header3: {
         'font-size': '1.5rem',
         'font-weight': '600',
-        'margin-bottom': '0.9rem',
+        'margin-bottom': '1rem',
       },
       header4: {
         'font-size': '1.3rem',
