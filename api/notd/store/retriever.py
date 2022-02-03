@@ -8,6 +8,7 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql import Select
 
 from notd.model import Collection
 from notd.model import Token
@@ -65,6 +66,11 @@ class Retriever(CoreRetriever):
         rows = await self.database.fetch_all(query=query)
         return Token(registryAddress=rows[0][TokenTransfersTable.c.registryAddress], tokenId=rows[0][TokenTransfersTable.c.tokenId])
 
+    async def query_token_metadatas(self, query: Select) -> Sequence[TokenMetadata]:
+        rows = await self.database.fetch_all(query=query)
+        tokenMetdatas = [token_metadata_from_row(row) for row in rows]
+        return tokenMetdatas
+
     async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenMetadata]:
         query = TokenMetadataTable.select()
         if fieldFilters:
@@ -73,9 +79,7 @@ class Retriever(CoreRetriever):
             query = self._apply_orders(query=query, table=TokenMetadataTable, orders=orders)
         if limit:
             query = query.limit(limit)
-        rows = await self.database.fetch_all(query=query)
-        tokenMetdata = [token_metadata_from_row(row) for row in rows]
-        return tokenMetdata
+        return self.query_token_metadatas(query=query)
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         query = TokenMetadataTable.select() \

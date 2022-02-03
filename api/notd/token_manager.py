@@ -1,10 +1,12 @@
 import logging
+from typing import List, Tuple
 
-import async_lru
 from core.util import date_util
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
+from core.store.retriever import DateFieldFilter
 from core.exceptions import NotFoundException
+import sqlalchemy
 
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
@@ -49,18 +51,34 @@ class TokenManager:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return tokenMetadata
 
-    @async_lru.alru_cache(maxsize=100000)
+    async def update_token_metadatas_deferred(self, registryTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
+        print(registryTokenIds[:1])
+        if not shouldForce:
+            # NOTE(krishan711): error looks realted to https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4645
+            query = (
+                TokenMetadataTable.select()
+                    .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_([(1, 10), (2, 20), (3, 30)]))
+                    .where(TokenMetadataTable.c.updatedDate > date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
+            )
+            print(query)
+            recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
+            recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
+            logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} registryTokenIds because they have been updated recently.')
+            registryTokenIds = set(registryTokenIds) - recentlyUpdatedTokenIds
+        messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in registryTokenIds]
+        await self.tokenQueue.send_messages(messages=messages)
+
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        savedTokenMetadatas = await self.retriever.list_token_metadatas(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-            ], limit=1,
-        )
-        savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
-        if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-3):
-            logging.info('Skipping token because it has been updated recently.')
-            return
+        if not shouldForce:
+            recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+                    DateFieldFilter(fieldName=TokenMetadataTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
+                ],
+            )
+            if len(recentlyUpdatedTokens) > 0:
+                logging.info('Skipping token because it has been updated recently.')
         await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
@@ -88,17 +106,30 @@ class TokenManager:
         else:
             await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
 
-    @async_lru.alru_cache(maxsize=10000)
+    async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
+        if not shouldForce:
+            recentlyUpdatedCollections = await self.retriever.list_collections(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=addresses),
+                    DateFieldFilter(fieldName=TokenCollectionsTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
+                ],
+            )
+            recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
+            logging.info(f'Skipping {len(recentlyUpdatedAddresses)} collections because they have been updated recently.')
+            addresses = set(addresses) - recentlyUpdatedAddresses
+        messages = [UpdateCollectionMessageContent(address=address).to_message() for address in addresses]
+        await self.tokenQueue.send_messages(messages=messages)
+
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
-        collections = await self.retriever.list_collections(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
-            ], limit=1,
-        )
-        collection = collections[0] if len(collections) > 0 else None
-        if not shouldForce and collection and collection.updatedDate >= date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS):
-            logging.info('Skipping collection because it has been updated recently.')
-            return
+        if not shouldForce:
+            recentlyUpdatedCollections = await self.retriever.list_collections(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+                    DateFieldFilter(fieldName=TokenCollectionsTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
+                ],
+            )
+            if len(recentlyUpdatedCollections) > 0:
+                logging.info('Skipping collection because it has been updated recently.')
         await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
