@@ -20,22 +20,39 @@ const COLLECTION_TOKENS = [
 
 export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
-  const [collection, setCollection] = React.useState<Collection | null>(null);
-  const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined>(undefined);
+  const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
+  const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
 
   const routeParams = useRouteParams();
   const address = routeParams.address as string;
 
   const updateCollection = React.useCallback(async (): Promise<void> => {
-    const collectionPromise = notdClient.retrieveCollection(address);
-    const collectionStatsPromise = notdClient.getCollectionStatistics(address);
-    setCollection(await collectionPromise);
-    setCollectionStatistics(await collectionStatsPromise);
+    setCollection(undefined);
+    notdClient.retrieveCollection(address).then((retrievedCollection: Collection): void => {
+      setCollection(retrievedCollection);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setCollection(null);
+    });
   }, [notdClient, address]);
 
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
+
+  const updateCollectionStatistics = React.useCallback(async (): Promise<void> => {
+    setCollectionStatistics(undefined);
+    notdClient.getCollectionStatistics(address).then((retrievedCollectionStatistics: CollectionStatistics): void => {
+      setCollectionStatistics(retrievedCollectionStatistics);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setCollectionStatistics(null);
+    });
+  }, [notdClient, address]);
+
+  React.useEffect((): void => {
+    updateCollectionStatistics();
+  }, [updateCollectionStatistics]);
 
   // const onConnectWalletClicked = (): void => {
   //    console.log('onConnectWalletClicked');
