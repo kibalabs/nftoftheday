@@ -80,7 +80,7 @@ class NotdManager:
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
         )
-    async def get_collection_stats(self, address: str) -> CollectionStatistics:
+    async def get_collection_stats(self, address: str, startDate: datetime.datetime, endDate: datetime.datetime) -> CollectionStatistics:
         items = await self.retriever.list_token_metadatas(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
@@ -95,13 +95,13 @@ class NotdManager:
         )
         toAddresses = [holder.toAddress for holder in holders]
         fromAddresses = [holder.fromAddress for holder in holders]
-        for address in toAddresses:
-            if address in fromAddresses:
-                toAddresses.remove(address)
+        for holderAddress in toAddresses:
+            if holderAddress in fromAddresses:
+                toAddresses.remove(holderAddress)
 
-        holderCount = len(toAddresses)
+        holderCount = len(holderAddress)
 
-        trades= await self.retriever.list_token_metadatas(
+        trades= await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
             ],
@@ -109,14 +109,25 @@ class NotdManager:
         print(trades[0].value)
         totalTradeVolume = sum([trade.value for trade in trades])
 
+        trades24h = trades= await self.retriever.list_token_transfers(
+            fieldFilters=[
+                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+        )
+        tradeVolume24Hours = sum([trade.value for trade in trades24h])
+        highestSaleLast24Hours = trades24h[0] if len(trades24h) >0 else None
+        lowestSaleLast24Hours = trades24h[len(trades24h)] if len(trades24h) >0 else None
 
+    
         return CollectionStatistics(
             itemCount=itemCount,
             holderCount=holderCount,
             totalTradeVolume=totalTradeVolume,
-            lowestSaleLast24Hours=200,
-            highestSaleLast24Hours=400,
-            tradeVolume24Hours=1000,
+            lowestSaleLast24Hours=lowestSaleLast24Hours,
+            highestSaleLast24Hours=highestSaleLast24Hours,
+            tradeVolume24Hours=tradeVolume24Hours,
             )
 
     async def subscribe_email(self, email: str) -> None:

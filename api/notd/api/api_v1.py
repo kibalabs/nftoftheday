@@ -44,9 +44,11 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
         return RetrieveCollectionTokenResponse(token=ApiCollectionToken.from_model(model=token))
 
     @router.get('/collections/{registryAddress}/stats', response_model=RetrieveCollectionStatisticsResponse)
-    async def get_collection_stats(registryAddress: str):  # request: RetreiveCollectionRequest
-        collection = await notdManager.get_collection_stats(address=registryAddress)
-        return RetrieveCollectionStatisticsResponse(collectionStatistics=ApiCollectionStatistics.from_model(model=collection))
+    async def get_collection_stats(registryAddress: str, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None ):  # request: RetreiveCollectionRequest
+        startDate = startDate.replace(tzinfo=None) if startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        endDate = endDate.replace(tzinfo=None) if endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+        collectionStatistics = await notdManager.get_collection_stats(address=registryAddress, startDate=startDate, endDate=endDate)
+        return RetrieveCollectionStatisticsResponse(collectionStatistics=ApiCollectionStatistics.from_model(model=collectionStatistics))
 
     @router.post('/subscribe')
     async def create_newsletter_subscription(request: SubscribeRequest):
