@@ -6,7 +6,7 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from notd.model import Collection
+from notd.model import Collection, CollectionStatistics
 from notd.model import RegistryToken
 from notd.model import TokenMetadata
 from notd.model import UiData
@@ -74,6 +74,25 @@ class ApiUiData(BaseModel):
             randomTokenTransfer=ApiTokenTransfer.from_model(model=model.randomTokenTransfer),
             sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
             transactionCount=model.transactionCount
+        )
+
+class ApiCollectionStatistics(BaseModel):
+    itemCount: int
+    holderCount: int
+    totalTradeVolume: int
+    lowestSaleLast24Hours: Optional[int]
+    highestSaleLast24Hours: Optional[int]
+    tradeVolume24Hours: Optional[str]
+
+    @classmethod
+    def from_model(cls, model: CollectionStatistics):
+        return cls(
+            itemCount=model.itemCount,
+            holderCount=model.holderCount,
+            totalTradeVolume=model.totalTradeVolume,
+            lowestSaleLast24Hours=model.lowestSaleLast24Hours,
+            highestSaleLast24Hours=model.highestSaleLast24Hours,
+            tradeVolume24Hours=model.tradeVolume24Hours,
         )
 
 
@@ -201,3 +220,6 @@ class RetrieveCollectionRequest(BaseModel):
 
 class RetrieveCollectionResponse(BaseModel):
     collection: ApiCollection
+
+class RetrieveCollectionStatisticsResponse(BaseModel):
+    collectionStatistics: ApiCollectionStatistics

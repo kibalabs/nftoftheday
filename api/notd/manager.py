@@ -17,7 +17,7 @@ from core.util import date_util
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
-from notd.model import Collection
+from notd.model import Collection, CollectionStatistics
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -80,6 +80,15 @@ class NotdManager:
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
         )
+    async def get_collection_stats(self, address: str) -> CollectionStatistics:
+        return CollectionStatistics(
+            itemCount=20000,
+            holderCount=1000,
+            totalTradeVolume=12000,
+            lowestSaleLast24Hours=200,
+            highestSaleLast24Hours=400,
+            tradeVolume24Hours=1000,
+            )
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})

@@ -148,6 +148,15 @@ class Collection(RetrievedCollection):
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
 
+@dataclasses.dataclass
+class CollectionStatistics:
+    itemCount: int
+    holderCount: int
+    totalTradeVolume: int
+    lowestSaleLast24Hours: Optional[int]
+    highestSaleLast24Hours: Optional[int]
+    tradeVolume24Hours: Optional[str]
+
 
 @dataclasses.dataclass
 class SponsoredToken:
