@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import json
 import logging
+import re
 from typing import List
 from typing import Sequence
 
@@ -80,6 +81,16 @@ class NotdManager:
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
         )
+
+    async def get_collection_recent_sales(self, registryAddress: str):
+        recent_sales = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            limit=10
+        )
+        return recent_sales
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})

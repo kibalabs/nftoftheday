@@ -162,6 +162,27 @@ class ApiCollection(BaseModel):
             bannerImageUrl=model.bannerImageUrl
         )
 
+class ApiTokenSale(BaseModel):
+    tokenTransferId: int
+    date: datetime.datetime
+    value: int
+    transactionHash: str
+    fromAddress: str
+    toAddress: str
+    collectionToken: ApiCollectionToken
+
+    @classmethod
+    def from_model(cls, model: UiData):
+        return cls(
+            tokenTransferId=model.tokenTransferId,
+            date=model.blockDate,
+            value=model.value,
+            transactionHash=model.transactionHash,
+            fromAddress=model.fromAddress,
+            toAddress=model.toAddress,
+            collectionToken=model.collectionToken
+        )
+
 class RetrieveUiDataRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
@@ -195,6 +216,9 @@ class RetrieveCollectionTokenRequest(BaseModel):
 
 class RetrieveCollectionTokenResponse(BaseModel):
     token: ApiCollectionToken
+
+class RetrievedCollectionRecentSalesResponse(BaseModel):
+    recentSales: List[ApiTokenSale]
 
 class RetrieveCollectionRequest(BaseModel):
     address: str

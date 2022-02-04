@@ -107,6 +107,9 @@ class UiData:
     sponsoredToken: Token
     transactionCount: int
 
+@dataclasses.dataclass
+class CollectionRecentSales:
+    recentSales: List[TokenTransfer]
 
 @dataclasses.dataclass
 class RegistryToken:
