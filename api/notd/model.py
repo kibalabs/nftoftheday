@@ -169,3 +169,13 @@ class SponsoredToken:
             date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
             token=Token.from_dict(sponsoredTokenDict.get('token'))
         )
+
+@dataclasses.dataclass
+class TokenSale:
+    tokenTransferId: int
+    date: datetime.datetime
+    value: int
+    transactionHash: str
+    fromAddress: str
+    toAddress: str
+    collectionToken: Collection

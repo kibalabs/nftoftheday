@@ -6,7 +6,7 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from notd.model import Collection
+from notd.model import Collection, TokenSale
 from notd.model import RegistryToken
 from notd.model import TokenMetadata
 from notd.model import UiData
@@ -169,18 +169,19 @@ class ApiTokenSale(BaseModel):
     transactionHash: str
     fromAddress: str
     toAddress: str
-    collectionToken: ApiCollectionToken
+    collectionToken: Collection
 
     @classmethod
-    def from_model(cls, model: UiData):
+    def from_model(cls, model: TokenSale):
+        print(type(model.collectionToken))
         return cls(
             tokenTransferId=model.tokenTransferId,
-            date=model.blockDate,
+            date=model.date,
             value=model.value,
             transactionHash=model.transactionHash,
             fromAddress=model.fromAddress,
             toAddress=model.toAddress,
-            collectionToken=model.collectionToken
+            collectionToken= model.collectionToken
         )
 
 class RetrieveUiDataRequest(BaseModel):

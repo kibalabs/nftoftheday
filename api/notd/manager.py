@@ -18,7 +18,7 @@ from core.util import date_util
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
-from notd.model import Collection
+from notd.model import Collection, TokenSale
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -82,7 +82,7 @@ class NotdManager:
             transactionCount=transactionCount
         )
 
-    async def get_collection_recent_sales(self, registryAddress: str):
+    async def get_collection_recent_sales(self, registryAddress: str) -> TokenSale:
         recent_sales = await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
@@ -90,6 +90,8 @@ class NotdManager:
             orders=[Order(fieldName=TokenTransfersTable.c.blockDate.key, direction=Direction.DESCENDING)],
             limit=10
         )
+        for index, sale in enumerate(recent_sales):
+            recent_sales[index] = TokenSale(tokenTransferId=sale.tokenTransferId, date=sale.blockDate, value=sale.value, transactionHash=sale.transactionHash, fromAddress=sale.fromAddress, toAddress=sale.toAddress, collectionToken=await self.get_collection_by_address(sale.registryAddress))
         return recent_sales
 
     async def subscribe_email(self, email: str) -> None:
