@@ -1,17 +1,15 @@
 import datetime
-from lib2to3.pgen2.token import OP
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
-from matplotlib import collections
 
-from pydantic import BaseModel
-
-from notd.model import Collection, CollectionStatistics
+from notd.model import Collection
+from notd.model import CollectionStatistics
 from notd.model import RegistryToken
 from notd.model import TokenMetadata
 from notd.model import UiData
+from pydantic import BaseModel
 
 VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
 
@@ -81,9 +79,9 @@ class ApiUiData(BaseModel):
 class ApiCollectionStatistics(BaseModel):
     itemCount: int
     holderCount: int
-    totalTradeVolume: int
-    lowestSaleLast24Hours: Optional[int]
-    highestSaleLast24Hours: Optional[int]
+    totalTradeVolume: str
+    lowestSaleLast24Hours: Optional[str]
+    highestSaleLast24Hours: Optional[str]
     tradeVolume24Hours: Optional[str]
 
     @classmethod

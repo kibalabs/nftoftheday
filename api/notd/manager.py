@@ -13,11 +13,11 @@ from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
-from notd.model import Collection, CollectionStatistics
+from notd.model import Collection
+from notd.model import CollectionStatistics
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -80,7 +80,7 @@ class NotdManager:
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
         )
-    async def get_collection_stats(self, address: str, startDate: datetime.datetime, endDate: datetime.datetime) -> CollectionStatistics:
+    async def get_collection_statistics(self, address: str) -> CollectionStatistics:
         items = await self.retriever.list_token_metadatas(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
@@ -99,7 +99,7 @@ class NotdManager:
             if holderAddress in fromAddresses:
                 toAddresses.remove(holderAddress)
 
-        holderCount = len(holderAddress)
+        holderCount = len(toAddresses)
 
         trades= await self.retriever.list_token_transfers(
             fieldFilters=[
@@ -110,7 +110,7 @@ class NotdManager:
 
         trades24h = trades= await self.retriever.list_token_transfers(
             fieldFilters=[
-                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
+                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=date_util.datetime_from_now(), lt=date_util.datetime_from_now(days=-1)),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
@@ -118,8 +118,6 @@ class NotdManager:
         tradeVolume24Hours = sum([trade.value for trade in trades24h])
         highestSaleLast24Hours = trades24h[0] if len(trades24h) >0 else None
         lowestSaleLast24Hours = trades24h[len(trades24h)] if len(trades24h) >0 else None
-
-    
         return CollectionStatistics(
             itemCount=itemCount,
             holderCount=holderCount,
@@ -127,7 +125,7 @@ class NotdManager:
             lowestSaleLast24Hours=lowestSaleLast24Hours,
             highestSaleLast24Hours=highestSaleLast24Hours,
             tradeVolume24Hours=tradeVolume24Hours,
-            )
+        )
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})

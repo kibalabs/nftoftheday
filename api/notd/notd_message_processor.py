@@ -1,12 +1,12 @@
 import logging
+
 from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
-
 from notd.manager import NotdManager
-from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ProcessBlockMessageContent
+from notd.messages import ProcessBlockRangeMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent

@@ -155,7 +155,7 @@ class CollectionStatistics:
     totalTradeVolume: int
     lowestSaleLast24Hours: Optional[int]
     highestSaleLast24Hours: Optional[int]
-    tradeVolume24Hours: Optional[str]
+    tradeVolume24Hours: Optional[int]
 
 
 @dataclasses.dataclass

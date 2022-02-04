@@ -11,10 +11,9 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
-from web3.main import Web3
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
-
+from web3.main import Web3
 
 IPFS_PROVIDER_PREFIXES = [
     'https://gateway.pinata.cloud/ipfs/',
