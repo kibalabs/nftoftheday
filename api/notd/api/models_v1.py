@@ -173,7 +173,7 @@ class ApiTokenSale(BaseModel):
 
     @classmethod
     def from_model(cls, model: TokenSale):
-        print(type(model.collectionToken))
+        print(type(model.collectionToken.to_dict()))
         return cls(
             tokenTransferId=model.tokenTransferId,
             date=model.date,
@@ -181,7 +181,7 @@ class ApiTokenSale(BaseModel):
             transactionHash=model.transactionHash,
             fromAddress=model.fromAddress,
             toAddress=model.toAddress,
-            collectionToken= model.collectionToken
+            collectionToken= model.collectionToken.to_dict()
         )
 
 class RetrieveUiDataRequest(BaseModel):

@@ -107,9 +107,6 @@ class UiData:
     sponsoredToken: Token
     transactionCount: int
 
-@dataclasses.dataclass
-class CollectionRecentSales:
-    recentSales: List[TokenTransfer]
 
 @dataclasses.dataclass
 class RegistryToken:
@@ -151,6 +148,27 @@ class Collection(RetrievedCollection):
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
 
+    def to_dict(self) -> Dict:
+        return {
+            'collectionId': self.collectionId,
+            'createdDate': self.createdDate,
+            'updatedDate': self.updatedDate,
+            'address': self.address,
+            'name': self.name ,
+            'symbol': self.symbol ,
+            'description': self.description ,
+            'imageUrl': self.imageUrl ,
+            'twitterUsername': self.twitterUsername,
+            'instagramUsername': self.instagramUsername ,
+            'wikiUrl': self.wikiUrl ,
+            'openseaSlug': self.openseaSlug ,
+            'url': self.url ,
+            'discordUrl': self.discordUrl ,
+            'bannerImageUrl': self.bannerImageUrl ,
+            'doesSupportErc721': self.doesSupportErc721,
+            'doesSupportErc1155': self.doesSupportErc1155,
+ 
+        }
 
 @dataclasses.dataclass
 class SponsoredToken:
@@ -171,7 +189,7 @@ class SponsoredToken:
         )
 
 @dataclasses.dataclass
-class TokenSale:
+class TokenSale():
     tokenTransferId: int
     date: datetime.datetime
     value: int
@@ -179,3 +197,14 @@ class TokenSale:
     fromAddress: str
     toAddress: str
     collectionToken: Collection
+
+    #def to_dict(self) -> Dict:
+    #    return {
+    #        'tokenTransferId': self.tokenTransferId,
+    #        'transactionHash': self.transactionHash,
+    #        'fromAddress': self.fromAddress,
+    #        'toAddress': self.toAddress,
+    #        'value': self.value,
+    #        'amount': self.amount,
+    #        'blockDate': self.blockDate.isoformat(),
+    #    }
