@@ -90,7 +90,7 @@ export const HomePage = (): React.ReactElement => {
         </Stack>
         <Spacing variant={PaddingSize.Wide2} />
         { uiData !== null ? (
-          <Text variant='header3'>{`${numberWithCommas(uiData.transactionCount)} transactions in total`}</Text>
+          <Text variant='header3'>{`${numberWithCommas(uiData.transactionCount)} transfers`}</Text>
         ) : (
           <Text variant='header3'>Loading transactions...</Text>
         )}
