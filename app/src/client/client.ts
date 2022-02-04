@@ -32,11 +32,11 @@ export class NotdClient extends ServiceClient {
     return response.collection;
   }
 
-  public retrieveCollectionStatistics = async (address: string): Promise<Resources.CollectionStatistics> => {
+  public getCollectionStatistics = async (address: string): Promise<Resources.CollectionStatistics> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${address}/statistics`;
-    const request = new Endpoints.RetrieveCollectionStatisticsRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveCollectionStatisticsResponse);
+    const request = new Endpoints.GetCollectionStatisticsRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionStatisticsResponse);
     return response.collectionStatistics;
   }
 

@@ -103,7 +103,8 @@ export class RetrieveCollectionResponse extends ResponseData {
     );
   }
 }
-export class RetrieveCollectionStatisticsRequest extends RequestData {
+
+export class GetCollectionStatisticsRequest extends RequestData {
   public toObject = (): Record<string, unknown> => {
     return {
 
@@ -111,7 +112,7 @@ export class RetrieveCollectionStatisticsRequest extends RequestData {
   }
 }
 
-export class RetrieveCollectionStatisticsResponse extends ResponseData {
+export class GetCollectionStatisticsResponse extends ResponseData {
   readonly collectionStatistics: Resources.CollectionStatistics;
 
   public constructor(collectionStatistics: Resources.CollectionStatistics) {
@@ -119,8 +120,8 @@ export class RetrieveCollectionStatisticsResponse extends ResponseData {
     this.collectionStatistics = collectionStatistics;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveCollectionStatisticsResponse => {
-    return new RetrieveCollectionStatisticsResponse(
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionStatisticsResponse => {
+    return new GetCollectionStatisticsResponse(
       Resources.CollectionStatistics.fromObject(obj.collectionStatistics as Record<string, unknown>),
     );
   }
