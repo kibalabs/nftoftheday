@@ -1,4 +1,5 @@
 import { dateFromString } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 export class TokenTransfer {
   readonly tokenTransferId: number;
@@ -160,3 +161,33 @@ export class Collection {
     );
   }
 }
+
+export class CollectionStatistics {
+
+  readonly itemCount: number ;
+  readonly holderCount: number;
+  readonly totalTradeVolume: string;
+  readonly lowestSaleLast24Hours: string;
+  readonly  highestSaleLast24Hours: string;
+  readonly  tradeVolume24Hours: string;
+
+  public constructor(itemCount: number, holderCount: number, totalTradeVolume: string, lowestSaleLast24Hours: string, highestSaleLast24Hours: string, tradeVolume24Hours: string,) {
+    this.itemCount = itemCount;
+    this.holderCount = holderCount;
+    this.totalTradeVolume = totalTradeVolume;
+    this.lowestSaleLast24Hours = lowestSaleLast24Hours;
+    this.highestSaleLast24Hours = highestSaleLast24Hours;
+    this.tradeVolume24Hours = tradeVolume24Hours;
+  }
+  public static fromObject = (obj: Record<string, unknown>): CollectionStatistics => {
+    return new CollectionStatistics(
+      Number(obj.itemCount),
+      Number(obj.holderCount),
+      String(obj.totalTradeVolume),
+      String(obj.lowestSaleLast24Hours),
+      String(obj.highestSaleLast24Hours),
+      String(obj.tradeVolume24Hours),
+    );
+  }
+}
+
