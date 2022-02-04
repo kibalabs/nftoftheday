@@ -103,6 +103,28 @@ export class RetrieveCollectionResponse extends ResponseData {
     );
   }
 }
+export class RetrieveCollectionStatisticsRequest extends RequestData {
+  public toObject = (): Record<string, unknown> => {
+    return {
+
+    };
+  }
+}
+
+export class RetrieveCollectionStatisticsResponse extends ResponseData {
+  readonly collectionStatistics: Resources.CollectionStatistics;
+
+  public constructor(collectionStatistics: Resources.CollectionStatistics) {
+    super();
+    this.collectionStatistics = collectionStatistics;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveCollectionStatisticsResponse => {
+    return new RetrieveCollectionStatisticsResponse(
+      Resources.CollectionStatistics.fromObject(obj.collectionStatistics as Record<string, unknown>),
+    );
+  }
+}
 
 export class SubscribeRequest extends RequestData {
   readonly email: string;

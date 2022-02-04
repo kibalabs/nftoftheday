@@ -163,15 +163,14 @@ export class Collection {
 }
 
 export class CollectionStatistics {
-
-  readonly itemCount: number ;
+  readonly itemCount: number;
   readonly holderCount: number;
-  readonly totalTradeVolume: string;
-  readonly lowestSaleLast24Hours: string;
-  readonly  highestSaleLast24Hours: string;
-  readonly  tradeVolume24Hours: string;
+  readonly totalTradeVolume: BigNumber;
+  readonly lowestSaleLast24Hours: BigNumber | null;
+  readonly highestSaleLast24Hours: BigNumber | null;
+  readonly tradeVolume24Hours: BigNumber | null;
 
-  public constructor(itemCount: number, holderCount: number, totalTradeVolume: string, lowestSaleLast24Hours: string, highestSaleLast24Hours: string, tradeVolume24Hours: string,) {
+  public constructor(itemCount: number, holderCount: number, totalTradeVolume: BigNumber, lowestSaleLast24Hours: BigNumber | null, highestSaleLast24Hours: BigNumber | null, tradeVolume24Hours: BigNumber | null) {
     this.itemCount = itemCount;
     this.holderCount = holderCount;
     this.totalTradeVolume = totalTradeVolume;
@@ -183,11 +182,10 @@ export class CollectionStatistics {
     return new CollectionStatistics(
       Number(obj.itemCount),
       Number(obj.holderCount),
-      String(obj.totalTradeVolume),
-      String(obj.lowestSaleLast24Hours),
-      String(obj.highestSaleLast24Hours),
-      String(obj.tradeVolume24Hours),
+      BigNumber.from(String(obj.totalTradeVolume)),
+      obj.lowestSaleLast24Hours ? BigNumber.from(String(obj.lowestSaleLast24Hours)) : null,
+      obj.highestSaleLast24Hours ? BigNumber.from(String(obj.highestSaleLast24Hours)) : null,
+      obj.tradeVolume24Hours ? BigNumber.from(String(obj.tradeVolume24Hours)) : null,
     );
   }
 }
-
