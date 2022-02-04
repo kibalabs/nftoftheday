@@ -42,7 +42,7 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
                 break
             tokenDict = json.loads(await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}'))
             tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys())))
-            tokenDict['description'] = tokenDict.get('description','[]')[:10] if tokenDict.get('description') is not None else None 
+            tokenDict['description'] = tokenDict["description"][:10] if tokenDict.get('description') else None 
             tokenDict['collection'] = collection.address
             fields.update(tokenDict.keys())
             rows.append(tokenDict)
