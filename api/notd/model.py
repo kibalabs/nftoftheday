@@ -167,7 +167,7 @@ class Collection(RetrievedCollection):
             'bannerImageUrl': self.bannerImageUrl ,
             'doesSupportErc721': self.doesSupportErc721,
             'doesSupportErc1155': self.doesSupportErc1155,
- 
+
         }
 
 @dataclasses.dataclass

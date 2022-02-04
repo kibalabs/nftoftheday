@@ -44,10 +44,9 @@ def create_api(notdManager: NotdManager) -> KibaRouter:
         return RetrieveCollectionTokenResponse(token=ApiCollectionToken.from_model(model=token))
 
     @router.get('/collections/{registryAddress}/recent-sales', response_model=RetrievedCollectionRecentSalesResponse)
-    async def retrieve_collection_token(registryAddress: str):  # request: RetreiveRegistryTokenRequest
+    async def retrieve_collection_recent_sales(registryAddress: str):  # request: RetreiveRegistryTokenRequest
         tokens = await notdManager.get_collection_recent_sales(registryAddress=registryAddress)
-        list = [ApiTokenSale.from_model(model=token) for token in tokens]
-        return RetrievedCollectionRecentSalesResponse(recentSales=list) 
+        return RetrievedCollectionRecentSalesResponse(recentSales= [ApiTokenSale.from_model(model=token) for token in tokens])
 
     @router.post('/subscribe')
     async def create_newsletter_subscription(request: SubscribeRequest):
