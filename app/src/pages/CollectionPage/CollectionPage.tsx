@@ -27,7 +27,6 @@ export const CollectionPage = (): React.ReactElement => {
   const address = routeParams.address as string;
 
   const updateCollection = React.useCallback(async (): Promise<void> => {
-    setCollectionStatistics(undefined);
     const collectionPromise = notdClient.retrieveCollection(address);
     const collectionStatsPromise = notdClient.getCollectionStatistics(address);
     setCollection(await collectionPromise);
@@ -44,9 +43,9 @@ export const CollectionPage = (): React.ReactElement => {
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-      {collection === undefined ? (
+      {collection === null ? (
         <LoadingSpinner />
-      ) : collection === null ? (
+      ) : collection === undefined ? (
         <Text variant='error'>Collection failed to load</Text>
       ) : (
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
