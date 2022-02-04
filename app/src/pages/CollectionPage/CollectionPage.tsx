@@ -27,20 +27,16 @@ export const CollectionPage = (): React.ReactElement => {
   const address = routeParams.address as string;
 
   const updateCollection = React.useCallback(async (): Promise<void> => {
+    setCollectionStatistics(undefined);
     const collectionPromise = notdClient.retrieveCollection(address);
+    const collectionStatsPromise = notdClient.getCollectionStatistics(address);
     setCollection(await collectionPromise);
+    setCollectionStatistics(await collectionStatsPromise);
   }, [notdClient, address]);
 
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
-
-  React.useEffect((): void => {
-    setCollectionStatistics(null);
-    notdClient.getCollectionStatistics(address).then((getCollectionStatistics: CollectionStatistics): void => {
-      setCollectionStatistics(getCollectionStatistics);
-    });
-  }, [address, notdClient]);
 
   // const onConnectWalletClicked = (): void => {
   //    console.log('onConnectWalletClicked');
@@ -48,9 +44,9 @@ export const CollectionPage = (): React.ReactElement => {
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-      {collection === null ? (
+      {collection === undefined ? (
         <LoadingSpinner />
-      ) : collection === undefined ? (
+      ) : collection === null ? (
         <Text variant='error'>Collection failed to load</Text>
       ) : (
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
@@ -111,9 +107,9 @@ export const CollectionPage = (): React.ReactElement => {
                 />
               )}
               <Spacing variant={PaddingSize.Wide2} />
-              {collectionStatistics === null ? (
+              {collectionStatistics === undefined ? (
                 <LoadingSpinner />
-              ) : collectionStatistics === undefined ? (
+              ) : collectionStatistics === null ? (
                 <Text variant='error'>Collection statistics failed to load</Text>
               ) : (
                 <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
