@@ -21,7 +21,7 @@ const COLLECTION_TOKENS = [
 export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null>(null);
-  const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | null>(null);
+  const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined>(undefined);
 
   const routeParams = useRouteParams();
   const address = routeParams.address as string;
