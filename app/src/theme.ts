@@ -3,6 +3,9 @@ import { buildTheme, ITheme } from '@kibalabs/ui-react';
 const defaultTheme = buildTheme();
 export const buildNotdTheme = (): ITheme => {
   const theme = buildTheme({
+    dimensions: {
+      fontSize: '18px',
+    },
     colors: {
       brandPrimary: '#6F0000',
       brandSecondary: '#200122',
@@ -40,7 +43,6 @@ export const buildNotdTheme = (): ITheme => {
     },
     texts: {
       default: {
-        'font-size': '1.2rem',
         'font-family': "'Post No Bills Jaffna', sans-serif",
         'font-weight': '400',
       },
@@ -149,6 +151,15 @@ export const buildNotdTheme = (): ITheme => {
       },
     },
     buttons: {
+      default: {
+        normal: {
+          default: {
+            text: {
+              'font-size': '0.8em',
+            },
+          },
+        },
+      },
       primary: {
         normal: {
           default: {

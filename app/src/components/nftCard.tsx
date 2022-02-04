@@ -53,7 +53,10 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
     imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
 
-  const collectionImageUrl = collection?.imageUrl;
+  let collectionImageUrl = collection?.imageUrl;
+  if (collectionImageUrl && collectionImageUrl.startsWith('ipfs://')) {
+    collectionImageUrl = collectionImageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  }
   const collectionUrl = collection?.url ?? (collection?.openseaSlug ? `https://opensea.io/collections/${collection?.openseaSlug}` : null);
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
@@ -93,7 +96,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
               <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                 {collectionImageUrl && (
                   <Box width='25px' height='25px'>
-                    <Image source={collectionImageUrl} alternativeText={collection.name} fitType='contain' />
+                    <Image source={collectionImageUrl} alternativeText='' fitType='contain' />
                   </Box>
                 )}
                 {collection && collection.name && (
