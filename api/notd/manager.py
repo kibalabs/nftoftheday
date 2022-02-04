@@ -110,7 +110,7 @@ class NotdManager:
         latestProcessedBlockNumber = latestTokenTransfers[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
-        # NOTE(krishan711): we delay to mitigate soft fork problems
+        # NOTE(krishan711): the delay is to mitigate soft fork problems
         for blockNumber in reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1)):
             await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message(), delaySeconds=60)
 
