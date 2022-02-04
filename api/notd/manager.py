@@ -106,7 +106,6 @@ class NotdManager:
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
             ],
         )
-        print(trades[0].value)
         totalTradeVolume = sum([trade.value for trade in trades])
 
         trades24h = trades= await self.retriever.list_token_transfers(
