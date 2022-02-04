@@ -17,17 +17,20 @@ from notd.store.schema_conversions import collection_from_row
 from core.util import date_util
 from core.s3_manager import S3Manager
 
-
+@click.option('-s', '--start-collection-id', 'collectionStartId', required=True, type=int)
+@click.option('-e', '--end-collection-id', 'collectionEndId', required=True, type=int)
 @click.command()
-async def calculate_token_fields():
-    database = Database(f'postgresql://{os.environ["REMOTE_DB_USERNAME"]}:{os.environ["REMOTE_DB_PASSWORD"]}@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
-    #database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
+    #database = Database(f'postgresql://{os.environ["REMOTE_DB_USERNAME"]}:{os.environ["REMOTE_DB_PASSWORD"]}@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
+    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     bucketName = os.environ['S3_BUCKET']
     
     await database.connect()
     query = TokenCollectionsTable.select()
+    query = query.where(TokenCollectionsTable.c.collectionId >= collectionStartId)
+    query = query.where(TokenCollectionsTable.c.collectionId < collectionEndId)
     collections = [collection_from_row(row) async for row in database.iterate(query=query)]
 
     rows = []
@@ -46,7 +49,7 @@ async def calculate_token_fields():
 
     with open('./output.tsv', 'w') as outFile:
         dictWriter = csv.DictWriter(outFile, fields, delimiter='\t')
-        dictWriter.writeheader(fields)
+        dictWriter.writeheader()
         dictWriter.writerows(rows)
         
         
