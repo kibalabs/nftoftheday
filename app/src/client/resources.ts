@@ -132,7 +132,6 @@ export class Collection {
   readonly instagramUsername: string | null;
   readonly twitterUsername: string | null;
 
-
   public constructor(address: string, name: string | null, imageUrl: string | null, description: string | null, url: string | null, openseaSlug: string | null, bannerImageUrl: string | null, discordUrl: string | null, instagramUsername: string | null, twitterUsername: string | null) {
     this.address = address;
     this.name = name;
@@ -178,6 +177,7 @@ export class CollectionStatistics {
     this.highestSaleLast24Hours = highestSaleLast24Hours;
     this.tradeVolume24Hours = tradeVolume24Hours;
   }
+
   public static fromObject = (obj: Record<string, unknown>): CollectionStatistics => {
     return new CollectionStatistics(
       Number(obj.itemCount),

@@ -35,7 +35,6 @@ export class RetrieveUiDataResponse extends ResponseData {
   }
 }
 
-
 export class RetrieveCollectionTokenRequest extends RequestData {
   // NOTE(krishan711): uncomment when ServiceClient implements params filled into the path
   // readonly registryAddress: string;
@@ -107,7 +106,6 @@ export class RetrieveCollectionResponse extends ResponseData {
 export class GetCollectionStatisticsRequest extends RequestData {
   public toObject = (): Record<string, unknown> => {
     return {
-
     };
   }
 }
