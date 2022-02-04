@@ -4,6 +4,7 @@ import os
 import sys
 import asyncio
 import logging
+from typing import List
 import boto3
 import json
 from databases import Database
@@ -21,8 +22,8 @@ from core.s3_manager import S3Manager
 @click.option('-e', '--end-collection-id', 'collectionEndId', required=True, type=int)
 @click.command()
 async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
-    #database = Database(f'postgresql://{os.environ["REMOTE_DB_USERNAME"]}:{os.environ["REMOTE_DB_PASSWORD"]}@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    database = Database(f'postgresql://{os.environ["REMOTE_DB_USERNAME"]}:{os.environ["REMOTE_DB_PASSWORD"]}@{os.environ["REMOTE_DB_HOST"]}:{os.environ["REMOTE_DB_PORT"]}/{os.environ["REMOTE_DB_NAME"]}')
+    #database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
     s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     bucketName = os.environ['S3_BUCKET']
@@ -36,12 +37,13 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
     rows = []
     fields = set()
     for collection in collections:
+        logging.info(f'Working on {collection.collectionId}')
         tokenFiles = await s3manager.list_directory_files(s3Directory=f'{bucketName}/token-metadatas/{collection.address}')
         for index, tokenFile in enumerate(tokenFiles):
             if index > 2:
                 break
             tokenDict = json.loads(await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}'))
-            tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys())))
+            tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys()))) if isinstance(tokenDict.get('attributes', []), List) else [attribute for attribute in tokenDict.get('attributes')]
             tokenDict['description'] = tokenDict["description"][:10] if tokenDict.get('description') else None 
             tokenDict['collection'] = collection.address
             fields.update(tokenDict.keys())
@@ -49,7 +51,6 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
 
     with open('./output.tsv', 'w') as outFile:
         dictWriter = csv.DictWriter(outFile, fields, delimiter='\t')
-        dictWriter.writeheader()
         dictWriter.writerows(rows)
         
         
