@@ -4,7 +4,7 @@ import { dateToString } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Collection, CollectionToken, TokenTransfer } from '../../client/resources';
+import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -21,6 +21,7 @@ const COLLECTION_TOKENS = [
 export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null>(null);
+  const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | null>(null);
   const routeParams = useRouteParams();
   const address = routeParams.address as string;
 
@@ -29,6 +30,12 @@ export const CollectionPage = (): React.ReactElement => {
     setCollection(await collectionPromise);
   }, [notdClient, address]);
 
+  React.useEffect((): void => {
+    setCollectionStatistics(null);
+    notdClient.getCollectionStatistics(address).then((getCollectionStatistics: CollectionStatistics): void => {
+      setCollectionStatistics(getCollectionStatistics);
+    });
+  }, [address, notdClient]);
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
@@ -103,11 +110,17 @@ export const CollectionPage = (): React.ReactElement => {
               )}
               <Spacing variant={PaddingSize.Wide2} />
               <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                  <MetricView name={'Items'} value={'10000'} />
-                  <MetricView name={'Owners'} value={'5432'} />
-                  <MetricView name={'Total Volume'} value={'140Ξ'} />
-                </Stack>
+                {collectionStatistics === null ? (
+                  <LoadingSpinner />
+                ) : collectionStatistics === undefined ? (
+                  <Text variant='error'>Collection statistics failed to load</Text>
+                ) : (
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                    <MetricView name={'Items'} value={'10000'} />
+                    <MetricView name={'Owners'} value={'5432'} />
+                    <MetricView name={'Total Volume'} value={'140Ξ'} />
+                  </Stack>
+                )}
                 <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
                   <Box variant='divider' isFullHeight={true} width='1px' />
                 </ResponsiveHidingView>
