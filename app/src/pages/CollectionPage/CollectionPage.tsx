@@ -4,7 +4,7 @@ import { dateToString } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Collection, CollectionToken, TokenTransfer } from '../../client/resources';
+import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -21,6 +21,8 @@ const COLLECTION_TOKENS = [
 export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null>(null);
+  const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | null>(null);
+
   const routeParams = useRouteParams();
   const address = routeParams.address as string;
 
@@ -32,6 +34,13 @@ export const CollectionPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
+
+  React.useEffect((): void => {
+    setCollectionStatistics(null);
+    notdClient.getCollectionStatistics(address).then((getCollectionStatistics: CollectionStatistics): void => {
+      setCollectionStatistics(getCollectionStatistics);
+    });
+  }, [address, notdClient]);
 
   // const onConnectWalletClicked = (): void => {
   //    console.log('onConnectWalletClicked');
@@ -102,21 +111,27 @@ export const CollectionPage = (): React.ReactElement => {
                 />
               )}
               <Spacing variant={PaddingSize.Wide2} />
-              <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                  <MetricView name={'Items'} value={'10000'} />
-                  <MetricView name={'Owners'} value={'5432'} />
-                  <MetricView name={'Total Volume'} value={'140Ξ'} />
+              {collectionStatistics === null ? (
+                <LoadingSpinner />
+              ) : collectionStatistics === undefined ? (
+                <Text variant='error'>Collection statistics failed to load</Text>
+              ) : (
+                <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                    <MetricView name={'Items'} value={`${collectionStatistics.itemCount}`} />
+                    <MetricView name={'Owners'} value={`${collectionStatistics.holderCount}`} />
+                    <MetricView name={'Total Volume'} value={`${collectionStatistics.totalTradeVolume}`} />
+                  </Stack>
+                  <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                    <Box variant='divider' isFullHeight={true} width='1px' />
+                  </ResponsiveHidingView>
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                    <MetricView name={'24h Low Sale'} value={`Ξ ${collectionStatistics.totalTradeVolume}`} />
+                    <MetricView name={'24h High Sale'} value={`Ξ ${collectionStatistics.highestSaleLast24Hours}`} />
+                    <MetricView name={'24h Volume'} value={`Ξ ${collectionStatistics.tradeVolume24Hours}`} />
+                  </Stack>
                 </Stack>
-                <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                  <Box variant='divider' isFullHeight={true} width='1px' />
-                </ResponsiveHidingView>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                  <MetricView name={'24h Low Sale'} value={'2.5Ξ'} />
-                  <MetricView name={'24h High Sale'} value={'150Ξ'} />
-                  <MetricView name={'24h Volume'} value={'350Ξ'} />
-                </Stack>
-              </Stack>
+              )}
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
                 <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
