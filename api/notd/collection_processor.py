@@ -11,6 +11,7 @@ from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 from httpx import ReadTimeout
+
 from notd.model import RetrievedCollection
 
 _INTERFACE_ID_ERC721 = '0x5b5e139f'
