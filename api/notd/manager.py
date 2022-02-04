@@ -81,10 +81,39 @@ class NotdManager:
             transactionCount=transactionCount
         )
     async def get_collection_stats(self, address: str) -> CollectionStatistics:
+        items = await self.retriever.list_token_metadatas(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
+            ],
+        )
+        itemCount = len(items)
+
+        holders = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
+            ]
+        )
+        toAddresses = [holder.toAddress for holder in holders]
+        fromAddresses = [holder.fromAddress for holder in holders]
+        for address in toAddresses:
+            if address in fromAddresses:
+                toAddresses.remove(address)
+
+        holderCount = len(toAddresses)
+
+        trades= await self.retriever.list_token_metadatas(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
+            ],
+        )
+        print(trades[0].value)
+        totalTradeVolume = sum([trade.value for trade in trades])
+
+
         return CollectionStatistics(
-            itemCount=20000,
-            holderCount=1000,
-            totalTradeVolume=12000,
+            itemCount=itemCount,
+            holderCount=holderCount,
+            totalTradeVolume=totalTradeVolume,
             lowestSaleLast24Hours=200,
             highestSaleLast24Hours=400,
             tradeVolume24Hours=1000,
