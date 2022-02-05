@@ -49,7 +49,7 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
             fields.update(tokenDict.keys())
             rows.append(tokenDict)
 
-    with open('./output.tsv', 'w') as outFile:
+    with open(f'./output{collectionStartId}-{collectionEndId}.tsv', 'w') as outFile:
         dictWriter = csv.DictWriter(outFile, fields, delimiter='\t')
         dictWriter.writerows(rows)
         
