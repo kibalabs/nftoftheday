@@ -11,6 +11,7 @@ import { isProduction } from './envUtil';
 import { GlobalsProvider } from './globalsContext';
 import { CollectionPage } from './pages/CollectionPage';
 import { HomePage } from './pages/HomePage';
+import { TokenPage } from './pages/TokenPage';
 import { buildNotdTheme } from './theme';
 
 declare global {
@@ -41,6 +42,8 @@ export const App = (): React.ReactElement => {
   const routes: IRoute[] = [
     { path: '/', page: HomePage },
     { path: '/collections/:address', page: CollectionPage },
+    { path: '/collections/:address', page: CollectionPage },
+    { path: '/collections/:address/tokens/:tokenId', page: TokenPage },
   ];
 
   return (
