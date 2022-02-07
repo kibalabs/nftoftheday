@@ -16,7 +16,7 @@
     "@kibalabs/core-react": "^0.8.0",
     "@kibalabs/everyview-tracker": "^0.3.1",
     "@kibalabs/everyview-tracker-react": "^0.3.1",
-    "@kibalabs/ui-react": "^0.9.7-next.1",
+    "@kibalabs/ui-react": "^0.9.7-next.4",
     "ethers": "^5.5.4",
     "react": "17.0.2",
     "react-dom": "17.0.2",
