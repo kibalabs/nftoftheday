@@ -54,9 +54,9 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollectionStatistics();
   }, [updateCollectionStatistics]);
 
-  // const onConnectWalletClicked = (): void => {
-  //    console.log('onConnectWalletClicked');
-  // }
+  const onConnectWalletClicked = (): void => {
+     console.log('onConnectWalletClicked');
+  }
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
@@ -157,8 +157,7 @@ export const CollectionPage = (): React.ReactElement => {
                   ))}
                 </Stack>
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                  {/* <Link onClicked={onConnectWalletClicked} text='Connect your wallet' /> */}
-                  <Link target={'/'} text='Connect your wallet' />
+                  <Link onClicked={onConnectWalletClicked} target='/' text='Connect your wallet' />
                   <Text>to show your holdings and watchlist.</Text>
                 </Stack>
               </Stack>
