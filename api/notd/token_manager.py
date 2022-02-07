@@ -60,6 +60,7 @@ class TokenManager:
                     .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_([(1, 10), (2, 20), (3, 30)]))
                     .where(TokenMetadataTable.c.updatedDate > date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
             )
+            print('---')
             print(query)
             recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
             recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
