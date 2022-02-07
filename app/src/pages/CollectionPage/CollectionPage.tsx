@@ -55,7 +55,7 @@ export const CollectionPage = (): React.ReactElement => {
   }, [updateCollectionStatistics]);
 
   const onConnectWalletClicked = (): void => {
-    // TODO(<your username>): hook up to wallet connecting
+    // TODO(<Ajadi-Abiola>): hook up to wallet connecting
   };
 
   return (
