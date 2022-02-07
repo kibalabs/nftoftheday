@@ -56,6 +56,7 @@ export const CollectionPage = (): React.ReactElement => {
 
   const onConnectWalletClicked = (): void => {
      console.log('onConnectWalletClicked');
+
   }
 
   return (
@@ -157,7 +158,7 @@ export const CollectionPage = (): React.ReactElement => {
                   ))}
                 </Stack>
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                  <Link onClicked={onConnectWalletClicked} target='/' text='Connect your wallet' />
+                  <Link onClicked={onConnectWalletClicked} target={'/'} text='Connect your wallet' />
                   <Text>to show your holdings and watchlist.</Text>
                 </Stack>
               </Stack>
