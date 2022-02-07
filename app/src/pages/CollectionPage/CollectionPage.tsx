@@ -60,9 +60,9 @@ export const CollectionPage = (): React.ReactElement => {
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-      {collection === null ? (
+      {collection === undefined ? (
         <LoadingSpinner />
-      ) : collection === undefined ? (
+      ) : collection === null ? (
         <Text variant='error'>Collection failed to load</Text>
       ) : (
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
