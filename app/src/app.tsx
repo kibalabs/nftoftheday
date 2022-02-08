@@ -42,8 +42,7 @@ export const App = (): React.ReactElement => {
   const routes: IRoute[] = [
     { path: '/', page: HomePage },
     { path: '/collections/:address', page: CollectionPage },
-    { path: '/collections/:address', page: CollectionPage },
-    { path: '/collections/:address/tokens/:tokenId', page: TokenPage },
+    { path: '/collections/:registryAddress/tokens/:tokenId', page: TokenPage },
   ];
 
   return (
