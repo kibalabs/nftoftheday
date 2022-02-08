@@ -84,7 +84,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                   <div dangerouslySetInnerHTML={{ __html: imageUrl.slice('data:image/svg+xml;utf8,'.length) }} />
                 ) : imageUrl.startsWith('data:image/svg+xml;base64,') ? (
                   <div dangerouslySetInnerHTML={{ __html: atob(imageUrl.slice('data:image/svg+xml;base64,'.length)) }} />
-                ) : imageUrl.includes('meebit') ? (
+                ) : imageUrl.startsWith('http://meebits.larvalabs.com/') ? (
                   <Image source={imageUrl} alternativeText={`${asset.name} image`} fitType='contain' />
                 ) : (
                   <Media source={imageUrl} alternativeText={`${asset.name} image`} fitType='contain' />
