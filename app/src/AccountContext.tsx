@@ -6,8 +6,6 @@ import { ethers } from 'ethers';
 type AccountsControl = {
   accounts: ethers.Signer[] | undefined | null;
   accountIds: string[] | undefined | null;
-  accountId: string | undefined | null;
-
   onLinkAccountsClicked: () => void;
 }
 
@@ -16,12 +14,11 @@ export const AccountsContext = React.createContext<AccountsControl | undefined |
 interface IAccountControlProviderProps extends IMultiAnyChildProps {
   accounts: ethers.Signer[] | null;
   accountIds: string[] | null;
-  accountId: string | undefined | null;
   onLinkAccountsClicked: () => void;
 }
 
 export const AccountControlProvider = (props: IAccountControlProviderProps): React.ReactElement => (
-  <AccountsContext.Provider value={{ accounts: props.accounts, accountIds: props.accountIds, accountId: props.accountId, onLinkAccountsClicked: props.onLinkAccountsClicked }}>
+  <AccountsContext.Provider value={{ accounts: props.accounts, accountIds: props.accountIds, onLinkAccountsClicked: props.onLinkAccountsClicked }}>
     {props.children}
   </AccountsContext.Provider>
 );
@@ -41,12 +38,15 @@ export const useAccountIds = (): string[] | undefined | null => {
   }
   return accountsControl.accountIds;
 };
-export const useAccountId = (): string | undefined | null => {
+export const useAccountId = (): string | undefined => {
   const accountsControl = React.useContext(AccountsContext);
   if (!accountsControl) {
     throw Error('accountsControl has not been initialized correctly.');
   }
-  return accountsControl?.accountIds?.length ? accountsControl.accountIds[0] : null;
+  if (!accountsControl.accountIds) {
+    return undefined;
+  }
+  return accountsControl.accountIds[0];
 };
 
 export const useOnLinkAccountsClicked = (): (() => void) => {

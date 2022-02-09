@@ -6,8 +6,11 @@ import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { BackgroundView, Direction, KibaApp, Stack } from '@kibalabs/ui-react';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ethers } from 'ethers';
+import { toast } from 'react-toastify';
 
-import { AccountControlProvider } from './accountContext';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { NavBar } from './components/NavBar';
 import { isProduction } from './envUtil';
@@ -41,7 +44,6 @@ const theme = buildNotdTheme();
 export const App = (): React.ReactElement => {
   const [accounts, setAccounts] = React.useState<ethers.Signer[] | undefined | null>(undefined);
   const [accountIds, setAccountIds] = React.useState<string[] | undefined | null>(undefined);
-  const [accountId, setAccountId] = React.useState<string | undefined | null>(undefined);
 
   const [web3, setWeb3] = React.useState<ethers.providers.Web3Provider | null | undefined>(undefined);
 
@@ -50,7 +52,6 @@ export const App = (): React.ReactElement => {
     if (!provider) {
       setAccounts(null);
       setAccountIds(null);
-      setAccountId(null);
 
       return;
     }
@@ -84,12 +85,11 @@ export const App = (): React.ReactElement => {
       web3.provider.request({ method: 'eth_requestAccounts', params: [] }).then(async (): Promise<void> => {
         await loadWeb3();
       }).catch((error: unknown): void => {
-        console.error('here', error);
-        // if (error.message?.includes('wallet_requestPermissions')) {
-        //   toast.error('You already have a MetaMask request window open, please find it!');
-        // } else {
-        //   toast.error('Something went wrong connecting to MetaMask. Please try refresh the page / your browser and try again');
-        // }
+        if (error.message?.includes('wallet_requestPermissions')) {
+          toast.error('You already have a MetaMask request window open, please find it!');
+        } else {
+          toast.error('Something went wrong connecting to MetaMask. Please try refresh the page / your browser and try again');
+        }
       });
     }
   };
@@ -109,7 +109,7 @@ export const App = (): React.ReactElement => {
     <KibaApp theme={theme} isFullPageApp={true}>
       <GlobalsProvider globals={globals}>
         <BackgroundView linearGradient='#200122,#6F0000'>
-          <AccountControlProvider accounts={accounts} accountId={accountId} accountIds={accountIds} onLinkAccountsClicked={onLinkAccountsClicked}>
+          <AccountControlProvider accounts={accounts} accountIds={accountIds} onLinkAccountsClicked={onLinkAccountsClicked}>
             <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
               {!isProduction() && (
                 <NavBar />

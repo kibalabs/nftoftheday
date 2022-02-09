@@ -4,7 +4,7 @@ import { truncateMiddle } from '@kibalabs/core';
 import { Alignment, Box, Direction, Image, Stack, Text } from '@kibalabs/ui-react';
 
 export interface AccountViewProps {
-  accountId: string| null;
+  accountId: string;
 }
 export const Account = (props: AccountViewProps): React.ReactElement => {
   return (

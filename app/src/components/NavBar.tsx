@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 
-import { useAccountId, useOnLinkAccountsClicked } from '../accountContext';
+import { useAccountId, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from './Account';
 
 export const NavBar = (): React.ReactElement => {
@@ -25,8 +25,11 @@ export const NavBar = (): React.ReactElement => {
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <Spacing variant={PaddingSize.Wide2} />
         </Stack.Item>
-        { !accountId ? (<Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />)
-          : (<Account accountId={accountId} />) }
+        { !accountId ? (
+          <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
+        ) : (
+          <Account accountId={accountId} />
+        )}
       </Stack>
     </Box>
   );
