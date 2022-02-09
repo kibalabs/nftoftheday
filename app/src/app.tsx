@@ -44,7 +44,6 @@ const theme = buildNotdTheme();
 export const App = (): React.ReactElement => {
   const [accounts, setAccounts] = React.useState<ethers.Signer[] | undefined | null>(undefined);
   const [accountIds, setAccountIds] = React.useState<string[] | undefined | null>(undefined);
-
   const [web3, setWeb3] = React.useState<ethers.providers.Web3Provider | null | undefined>(undefined);
 
   const loadWeb3 = async (): Promise<void> => {
@@ -52,7 +51,6 @@ export const App = (): React.ReactElement => {
     if (!provider) {
       setAccounts(null);
       setAccountIds(null);
-
       return;
     }
     const web3Connection = new ethers.providers.Web3Provider(provider);

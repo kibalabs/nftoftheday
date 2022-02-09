@@ -39,13 +39,18 @@ export const useAccountIds = (): string[] | undefined | null => {
   return accountsControl.accountIds;
 };
 
-export const useAccountId = (): string | undefined => {
+export const useAccountId = (): string | undefined | null => {
   const accountsControl = React.useContext(AccountsContext);
   if (!accountsControl) {
     throw Error('accountsControl has not been initialized correctly.');
   }
-  if (!accountsControl.accountIds) {
+  if (accountsControl.accountIds === undefined) {
     return undefined;
+  } if (accountsControl.accountIds === null) {
+    return null;
+  }
+  if (accountsControl.accountIds.length === 0) {
+    return null;
   }
   return accountsControl.accountIds[0];
 };
