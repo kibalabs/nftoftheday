@@ -38,6 +38,7 @@ export const useAccountIds = (): string[] | undefined | null => {
   }
   return accountsControl.accountIds;
 };
+
 export const useAccountId = (): string | undefined => {
   const accountsControl = React.useContext(AccountsContext);
   if (!accountsControl) {
