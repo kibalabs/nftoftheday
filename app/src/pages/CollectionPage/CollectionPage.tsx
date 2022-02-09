@@ -4,6 +4,7 @@ import { dateToString } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
+import { useAccountId, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
@@ -54,8 +55,11 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollectionStatistics();
   }, [updateCollectionStatistics]);
 
-  const onConnectWalletClicked = (): void => {
-    // TODO(<Ajadi-Abiola>): hook up to wallet connecting
+  const accountId = useAccountId();
+  const onLinkAccountsClicked = useOnLinkAccountsClicked();
+
+  const onConnectWalletClicked = async (): Promise<void> => {
+    await onLinkAccountsClicked();
   };
 
   return (
@@ -144,23 +148,26 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack>
                 </Stack>
               )}
-              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
-                <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
-                <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                  {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
-                    <TokenCard
-                      key={index}
-                      collectionToken={collectionToken}
-                      subtitle={`Sold at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
-                      target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
-                    />
-                  ))}
+              { accountId ? (
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+                  <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
+                  <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                    {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
+                      <TokenCard
+                        key={index}
+                        collectionToken={collectionToken}
+                        subtitle={`Sold at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
+                        target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
+                      />
+                    ))}
+                  </Stack>
                 </Stack>
+              ) : (
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
                   <Link target={'/'} onClicked={onConnectWalletClicked} text='Connect your wallet' />
                   <Text>to show your holdings and watchlist.</Text>
                 </Stack>
-              </Stack>
+              )}
             </Stack>
           </ContainingView>
         </Stack>
