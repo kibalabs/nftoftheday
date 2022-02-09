@@ -46,7 +46,8 @@ export const useAccountId = (): string | undefined | null => {
   }
   if (accountsControl.accountIds === undefined) {
     return undefined;
-  } if (accountsControl.accountIds === null) {
+  }
+  if (accountsControl.accountIds === null) {
     return null;
   }
   if (accountsControl.accountIds.length === 0) {
