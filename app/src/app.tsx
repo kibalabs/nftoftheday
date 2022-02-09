@@ -41,6 +41,8 @@ const theme = buildNotdTheme();
 export const App = (): React.ReactElement => {
   const [accounts, setAccounts] = React.useState<ethers.Signer[] | undefined | null>(undefined);
   const [accountIds, setAccountIds] = React.useState<string[] | undefined | null>(undefined);
+  const [accountId, setAccountId] = React.useState<string | undefined | null>(undefined);
+
   const [web3, setWeb3] = React.useState<ethers.providers.Web3Provider | null | undefined>(undefined);
 
   const loadWeb3 = async (): Promise<void> => {
@@ -48,6 +50,8 @@ export const App = (): React.ReactElement => {
     if (!provider) {
       setAccounts(null);
       setAccountIds(null);
+      setAccountId(null);
+
       return;
     }
     const web3Connection = new ethers.providers.Web3Provider(provider);
@@ -105,16 +109,16 @@ export const App = (): React.ReactElement => {
     <KibaApp theme={theme} isFullPageApp={true}>
       <GlobalsProvider globals={globals}>
         <BackgroundView linearGradient='#200122,#6F0000'>
-          <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
-            <AccountControlProvider accounts={accounts} accountIds={accountIds} onLinkAccountsClicked={onLinkAccountsClicked}>
+          <AccountControlProvider accounts={accounts} accountId={accountId} accountIds={accountIds} onLinkAccountsClicked={onLinkAccountsClicked}>
+            <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
               {!isProduction() && (
                 <NavBar />
               )}
-            </AccountControlProvider>
-            <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Router routes={routes} />
-            </Stack.Item>
-          </Stack>
+              <Stack.Item growthFactor={1} shrinkFactor={1}>
+                <Router routes={routes} />
+              </Stack.Item>
+            </Stack>
+          </AccountControlProvider>
         </BackgroundView>
       </GlobalsProvider>
     </KibaApp>
