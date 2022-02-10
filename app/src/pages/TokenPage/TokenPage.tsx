@@ -56,7 +56,7 @@ export const TokenPage = (): React.ReactElement => {
         <Text variant='error'>Collection Token failed to load</Text>
       ) : (
         <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true}defaultGutter={PaddingSize.Wide2} padding={PaddingSize.Wide2}>
-          <Box variant='tokenCard' height='20rem' width='20rem' shouldClipContent={true}>
+          <Box height='20rem' width='20rem' shouldClipContent={true}>
             <Image source={collectionToken.imageUrl || defaultImage} alternativeText='image' fitType='contain' />
           </Box>
           <Stack direction={Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
@@ -68,12 +68,13 @@ export const TokenPage = (): React.ReactElement => {
               </Box>
               <Text>barakat.eth</Text>
             </Stack>
-            <Text>{`Last Bought for ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}</Text>
+            <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm:yyyy')}`}</Text>
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-              <Text>{`Part of ${collection?.name}`}</Text>
+              <Text>Part of</Text>
               <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
                 <Image source= {collection?.imageUrl || defaultImage} alternativeText='Avatar' />
               </Box>
+              <Text>{collection?.name}</Text>
             </Stack>
           </Stack>
         </Stack>
