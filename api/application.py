@@ -13,6 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from notd.api.api_v1 import create_api as create_v1_api
+from notd.api.response_builder import ResponseBuilder
 from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
@@ -44,10 +45,11 @@ collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClie
 revueApiKey = os.environ['REVUE_API_KEY']
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
+responseBuilder = ResponseBuilder(retriever=retriever)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=os.environ.get('NAME', 'notd'), version=os.environ.get('VERSION')))
-app.include_router(prefix='/v1', router=create_v1_api(notdManager=notdManager))
+app.include_router(prefix='/v1', router=create_v1_api(notdManager=notdManager, responseBuilder=responseBuilder))
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], allow_headers=['*'], expose_headers=[
     'X-Response-Time',
     'X-Server',

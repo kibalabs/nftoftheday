@@ -12,17 +12,17 @@ from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
+from core.store.retriever import IntegerFieldFilter
 from core.util import date_util
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
-from notd.model import Collection
+from notd.model import Collection, TokenTransfer
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
-from notd.model import TokenSale
 from notd.model import UiData
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -82,17 +82,18 @@ class NotdManager:
             transactionCount=transactionCount
         )
 
-    async def get_collection_recent_sales(self, registryAddress: str) -> TokenSale:
-        recentSales = await self.retriever.list_token_transfers(
+    async def get_collection_recent_sales(self, registryAddress: str) -> List[TokenTransfer]:
+        tokenTransfers = await self.retriever.list_token_transfers(
+            shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.blockDate.key, direction=Direction.DESCENDING)],
-            limit=10
+            limit=10,
         )
-        for index, sale in enumerate(recentSales):
-            recentSales[index] = TokenSale(tokenTransferId=sale.tokenTransferId, date=sale.blockDate, value=sale.value, transactionHash=sale.transactionHash, fromAddress=sale.fromAddress, toAddress=sale.toAddress, collectionToken=await self.get_collection_by_address(sale.registryAddress))
-        return recentSales
+        print('tokenTransfers', tokenTransfers)
+        return tokenTransfers
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
