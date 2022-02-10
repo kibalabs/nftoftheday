@@ -48,9 +48,27 @@ class ApiTokenTransfer(BaseModel):
     blockNumber: int
     blockHash: str
     blockDate: datetime.datetime
-    collection: ApiCollection
-    token: ApiCollectionToken
+    # NOTE(krishan711): make these non-optional once ui-data is fixed
+    collection: Optional[ApiCollection]
+    token: Optional[ApiCollectionToken]
 
+    @classmethod
+    def from_model(cls, model: UiData):
+        return cls(
+            tokenTransferId=model.tokenTransferId,
+            transactionHash=model.transactionHash,
+            registryAddress=model.registryAddress,
+            fromAddress=model.fromAddress,
+            toAddress=model.toAddress,
+            tokenId=model.tokenId,
+            value=model.value,
+            gasLimit=model.gasLimit,
+            gasPrice=model.gasPrice,
+            gasUsed=model.gasUsed,
+            blockNumber=model.blockNumber,
+            blockHash=model.blockHash,
+            blockDate=model.blockDate,
+        )
 
 class ApiToken(BaseModel):
     registryAddress: str
