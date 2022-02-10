@@ -9,6 +9,7 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
+from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
@@ -22,6 +23,7 @@ from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
+from notd.model import TokenTransfer
 from notd.model import UiData
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -80,6 +82,18 @@ class NotdManager:
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=transactionCount
         )
+
+    async def get_collection_recent_sales(self, registryAddress: str) -> List[TokenTransfer]:
+        tokenTransfers = await self.retriever.list_token_transfers(
+            shouldIgnoreRegistryBlacklist=True,
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
+            limit=10,
+        )
+        return tokenTransfers
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
