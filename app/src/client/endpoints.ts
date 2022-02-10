@@ -35,7 +35,6 @@ export class RetrieveUiDataResponse extends ResponseData {
   }
 }
 
-
 export class RetrieveCollectionTokenRequest extends RequestData {
   // NOTE(krishan711): uncomment when ServiceClient implements params filled into the path
   // readonly registryAddress: string;
@@ -100,6 +99,28 @@ export class RetrieveCollectionResponse extends ResponseData {
   public static fromObject = (obj: Record<string, unknown>): RetrieveCollectionResponse => {
     return new RetrieveCollectionResponse(
       Resources.Collection.fromObject(obj.collection as Record<string, unknown>),
+    );
+  }
+}
+
+export class GetCollectionStatisticsRequest extends RequestData {
+  public toObject = (): Record<string, unknown> => {
+    return {
+    };
+  }
+}
+
+export class GetCollectionStatisticsResponse extends ResponseData {
+  readonly collectionStatistics: Resources.CollectionStatistics;
+
+  public constructor(collectionStatistics: Resources.CollectionStatistics) {
+    super();
+    this.collectionStatistics = collectionStatistics;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionStatisticsResponse => {
+    return new GetCollectionStatisticsResponse(
+      Resources.CollectionStatistics.fromObject(obj.collectionStatistics as Record<string, unknown>),
     );
   }
 }

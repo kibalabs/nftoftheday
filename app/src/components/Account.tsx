@@ -1,15 +1,18 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, Stack, Text } from '@kibalabs/ui-react';
+import { truncateMiddle } from '@kibalabs/core';
+import { Alignment, Box, Direction, Image, Stack, Text } from '@kibalabs/ui-react';
 
-export const Account = (): React.ReactElement => {
+export interface AccountViewProps {
+  accountId: string;
+}
+export const Account = (props: AccountViewProps): React.ReactElement => {
   return (
     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-      <Button variant='secondary' text= 'Connect Wallet' />
       <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
-        <Image source='/assets/icon.png' alternativeText='Avatar' />
+        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${props.accountId}/image`} alternativeText='Avatar' />
       </Box>
-      <Text>0x876...988765</Text>
+      <Text>{truncateMiddle(props.accountId, 10)}</Text>
     </Stack>
   );
 };
