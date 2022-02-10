@@ -106,8 +106,8 @@ export const App = (): React.ReactElement => {
   return (
     <KibaApp theme={theme} isFullPageApp={true}>
       <GlobalsProvider globals={globals}>
-        <BackgroundView linearGradient='#200122,#6F0000'>
-          <AccountControlProvider accounts={accounts} accountIds={accountIds} onLinkAccountsClicked={onLinkAccountsClicked}>
+        <AccountControlProvider accounts={accounts} accountIds={accountIds} onLinkAccountsClicked={onLinkAccountsClicked}>
+          <BackgroundView linearGradient='#200122,#6F0000'>
             <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
               {!isProduction() && (
                 <NavBar />
@@ -116,8 +116,8 @@ export const App = (): React.ReactElement => {
                 <Router routes={routes} />
               </Stack.Item>
             </Stack>
-          </AccountControlProvider>
-        </BackgroundView>
+          </BackgroundView>
+        </AccountControlProvider>
       </GlobalsProvider>
     </KibaApp>
   );

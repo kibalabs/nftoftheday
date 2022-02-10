@@ -86,9 +86,11 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
         await slackClient.post(text=f'reprocess_transfers => ✅ completed : {startBlockNumber}-{endBlockNumber}')
     except Exception as exception:
         await slackClient.post(text=f'reprocess_transfers => ❌ error: {startBlockNumber}-{endBlockNumber} ({str(exception)})')
-    await database.disconnect()
-    await requester.close_connections()
-    await awsRequester.close_connections()
+        raise exception
+    finally:
+        await database.disconnect()
+        await requester.close_connections()
+        await awsRequester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
