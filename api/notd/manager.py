@@ -82,19 +82,6 @@ class NotdManager:
             transactionCount=transactionCount
         )
 
-    async def get_collection_recent_sales(self, registryAddress: str) -> List[TokenTransfer]:
-        tokenTransfers = await self.retriever.list_token_transfers(
-            shouldIgnoreRegistryBlacklist=True,
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
-            ],
-            orders=[Order(fieldName=TokenTransfersTable.c.blockDate.key, direction=Direction.DESCENDING)],
-            limit=10,
-        )
-        print('tokenTransfers', tokenTransfers)
-        return tokenTransfers
-
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
 

@@ -46,11 +46,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         tokenMetadata = await notdManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return RetrieveCollectionTokenResponse(token=(await responseBuilder.collection_token_from_model(tokenMetadata=tokenMetadata)))
 
-    @router.get('/collections/{registryAddress}/recent-sales', response_model=GetCollectionRecentSalesResponse)
-    async def get_collection_recent_sales(registryAddress: str):  # request: GetCollectionRecentSalesRequest
-        tokenTransfers = await notdManager.get_collection_recent_sales(registryAddress=registryAddress)
-        return GetCollectionRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
-
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):
         await notdManager.subscribe_email(email=request.email)
