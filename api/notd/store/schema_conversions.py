@@ -39,6 +39,7 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
         tokenId=row[TokenMetadataTable.c.tokenId],
         metadataUrl=row[TokenMetadataTable.c.metadataUrl],
         imageUrl=row[TokenMetadataTable.c.imageUrl],
+        animationUrl=row[TokenMetadataTable.c.animationUrl],
         name=row[TokenMetadataTable.c.name],
         description=row[TokenMetadataTable.c.description],
         attributes=row[TokenMetadataTable.c.attributes],

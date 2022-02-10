@@ -32,6 +32,7 @@ TokenMetadataTable = sqlalchemy.Table(
     sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='metadataUrl', name='metadata_url', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='imageUrl', name='image_url', type_=sqlalchemy.TEXT, nullable=True),
+    sqlalchemy.Column(key='animationUrl', name='animation_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='attributes', name='attributes', type_=sqlalchemy.JSON, nullable=True),

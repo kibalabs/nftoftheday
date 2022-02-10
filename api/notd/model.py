@@ -32,6 +32,7 @@ class RetrievedTokenMetadata:
     tokenId: str
     metadataUrl: str
     imageUrl: Optional[str]
+    animationUrl: Optional[str]
     name: Optional[str]
     description: Optional[str]
     attributes: JSON
@@ -52,6 +53,7 @@ class TokenMetadata(RetrievedTokenMetadata):
             'tokenId': self.tokenId,
             'metadataUrl': self.metadataUrl,
             'imageUrl': self.imageUrl,
+            'animationUrl': self.animationUrl,
             'name': self.name,
             'description': self.description,
             'attributes': self.attributes,
