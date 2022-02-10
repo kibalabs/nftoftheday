@@ -2,6 +2,7 @@
 import asyncio
 from tokenize import Token
 from typing import Sequence
+
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
