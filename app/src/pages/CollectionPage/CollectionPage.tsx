@@ -156,7 +156,7 @@ export const CollectionPage = (): React.ReactElement => {
                       <TokenCard
                         key={index}
                         collectionToken={collectionToken}
-                        subtitle={`Sold at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
+                        subtitle={`Bought at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
                         target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
                       />
                     ))}
@@ -168,6 +168,19 @@ export const CollectionPage = (): React.ReactElement => {
                   <Text>to show your holdings and watchlist.</Text>
                 </Stack>
               )}
+              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+                  <Text variant='header3'>Recent Sales</Text>
+                  <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                    {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
+                      <TokenCard
+                        key={index}
+                        collectionToken={collectionToken}
+                        subtitle={`Sold at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
+                        target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
+                      />
+                    ))}
+                  </Stack>
+                </Stack>
             </Stack>
           </ContainingView>
         </Stack>
