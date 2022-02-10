@@ -164,7 +164,7 @@ export const CollectionPage = (): React.ReactElement => {
                 </Stack>
               ) : (
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                  <Link target={'/'} onClicked={onConnectWalletClicked} text='Connect your wallet' />
+                  <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
                   <Text>to show your holdings and watchlist.</Text>
                 </Stack>
               )}
