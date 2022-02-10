@@ -4,12 +4,14 @@ from typing import Optional
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
-from notd.api.models_v1 import ApiCollection, ApiTokenSale, RetrievedCollectionRecentSalesResponse
+from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiTokenSale
 from notd.api.models_v1 import ApiUiData
 from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.models_v1 import RetrieveCollectionResponse
 from notd.api.models_v1 import RetrieveCollectionTokenResponse
+from notd.api.models_v1 import RetrievedCollectionRecentSalesResponse
 from notd.api.models_v1 import RetrieveUiDataRequest
 from notd.api.models_v1 import RetrieveUiDataResponse
 from notd.api.models_v1 import SubscribeRequest

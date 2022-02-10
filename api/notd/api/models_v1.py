@@ -6,9 +6,10 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from notd.model import Collection, TokenSale
+from notd.model import Collection
 from notd.model import RegistryToken
 from notd.model import TokenMetadata
+from notd.model import TokenSale
 from notd.model import UiData
 
 VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}

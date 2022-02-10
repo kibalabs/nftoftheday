@@ -17,11 +17,12 @@ from core.util import date_util
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
-from notd.model import Collection, TokenSale
+from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
+from notd.model import TokenSale
 from notd.model import UiData
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
