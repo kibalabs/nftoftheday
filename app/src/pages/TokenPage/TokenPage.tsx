@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { dateToString } from '@kibalabs/core';
+import { dateToString, truncateMiddle } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Direction, Image, LoadingSpinner, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { useAccountId } from '../../AccountContext';
 import { Collection, CollectionToken, TokenTransfer } from '../../client/resources';
 import { useGlobals } from '../../globalsContext';
 
@@ -13,7 +12,6 @@ const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af1
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const routeParams = useRouteParams();
-  const accountId = useAccountId();
 
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
@@ -64,18 +62,21 @@ export const TokenPage = (): React.ReactElement => {
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
               <Text>Owned By</Text>
               <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
-                <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${accountId}/image` || defaultImage} alternativeText='Avatar' />
-              </Box>
-              <Text>barakat.eth</Text>
+                <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/0x48e41913F2099300900cfcbB139F121429D38F5d/image` || defaultImage} alternativeText='Avatar' />
+            {/* TODO(Ajad-Abiola): implement Owned By: */}
+              </Box >
+              <Text>{truncateMiddle('0x48e41913F2099300900cfcbB139F121429D38F5d', 10)}</Text>
             </Stack>
             <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm:yyyy')}`}</Text>
+            <Spacing variant={PaddingSize.Wide} />
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
               <Text>Part of</Text>
               <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
                 <Image source= {collection?.imageUrl || defaultImage} alternativeText='Avatar' />
               </Box>
               <Text>{collection?.name}</Text>
-            </Stack>
+            </Stack>             
+            <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection?.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
           </Stack>
         </Stack>
       )}
