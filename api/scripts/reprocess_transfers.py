@@ -4,24 +4,23 @@ import time
 
 from core.store.retriever import IntegerFieldFilter
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
 import logging
 
 import asyncclick as click
+from core.aws_requester import AwsRequester
 from core.http.basic_authentication import BasicAuthentication
 from core.requester import Requester
-from core.aws_requester import AwsRequester
-from core.web3.eth_client import RestEthClient
 from core.slack_client import SlackClient
+from core.web3.eth_client import RestEthClient
 from databases.core import Database
 
-from notd.store.saver import Saver
-from notd.store.schema import  TokenTransfersTable
 from notd.block_processor import BlockProcessor
 from notd.store.retriever import Retriever
+from notd.store.saver import Saver
+from notd.store.schema import TokenTransfersTable
 
 
 async def _reprocess_transfers(startBlockNumber: int, endBlockNumber: int, blockProcessor: BlockProcessor, database: Database, retriever: Retriever, saver: Saver):

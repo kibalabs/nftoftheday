@@ -3,10 +3,10 @@ import logging
 import random
 
 import async_lru
-from core.util import date_util
+from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
-from core.exceptions import NotFoundException
+from core.util import date_util
 
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
