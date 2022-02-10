@@ -40,7 +40,7 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
         logging.info(f'Working on {collection.collectionId}')
         tokenFiles = await s3manager.list_directory_files(s3Directory=f'{bucketName}/token-metadatas/{collection.address}')
         for index, tokenFile in enumerate(tokenFiles):
-            if index > 2:
+            if index >= 2:
                 break
             tokenDict = json.loads(await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}'))
             tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys()))) if isinstance(tokenDict.get('attributes', []), List) else [attribute for attribute in tokenDict.get('attributes')]
