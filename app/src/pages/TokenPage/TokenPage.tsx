@@ -62,9 +62,9 @@ export const TokenPage = (): React.ReactElement => {
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
               <Text>Owned By</Text>
               <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
-                <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/0x48e41913F2099300900cfcbB139F121429D38F5d/image` || defaultImage} alternativeText='Avatar' />
-            {/* TODO(Ajad-Abiola): implement Owned By: */}
-              </Box >
+                <Image source={'https://web3-images-api.kibalabs.com/v1/accounts/0x48e41913F2099300900cfcbB139F121429D38F5d/image' || defaultImage} alternativeText='Avatar' />
+                {/* TODO(Ajad-Abiola): implement Owned By: */}
+              </Box>
               <Text>{truncateMiddle('0x48e41913F2099300900cfcbB139F121429D38F5d', 10)}</Text>
             </Stack>
             <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm:yyyy')}`}</Text>
@@ -75,7 +75,7 @@ export const TokenPage = (): React.ReactElement => {
                 <Image source= {collection?.imageUrl || defaultImage} alternativeText='Avatar' />
               </Box>
               <Text>{collection?.name}</Text>
-            </Stack>             
+            </Stack>
             <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection?.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
           </Stack>
         </Stack>
