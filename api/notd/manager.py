@@ -90,7 +90,7 @@ class NotdManager:
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
             ],
-            orders=[Order(fieldName=TokenTransfersTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
             limit=10,
         )
         return tokenTransfers
