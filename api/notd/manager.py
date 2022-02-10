@@ -93,7 +93,6 @@ class NotdManager:
             orders=[Order(fieldName=TokenTransfersTable.c.blockDate.key, direction=Direction.DESCENDING)],
             limit=10,
         )
-        print('tokenTransfers', tokenTransfers)
         return tokenTransfers
 
     async def subscribe_email(self, email: str) -> None:
