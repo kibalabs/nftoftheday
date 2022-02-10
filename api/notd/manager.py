@@ -9,7 +9,6 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
-from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
@@ -23,7 +22,6 @@ from notd.model import RetrievedTokenTransfer
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
-from notd.model import TokenTransfer
 from notd.model import UiData
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
