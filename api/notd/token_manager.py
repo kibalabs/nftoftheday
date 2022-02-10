@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import random
 
 import async_lru
 from core.util import date_util
@@ -34,18 +36,32 @@ class TokenManager:
         self.tokenMetadataProcessor = tokenMetadataProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
+        return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
+
+    async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = 0) -> Collection:
         try:
             collection = await self.retriever.get_collection_by_address(address=address)
         except NotFoundException:
-            await self.update_collection(address=address, shouldForce=True)
+            if shouldProcessIfNotFound:
+                await asyncio.sleep(sleepSecondsBeforeProcess)
+                await self.update_collection(address=address, shouldForce=True)
+            else:
+                raise
             collection = await self.retriever.get_collection_by_address(address=address)
         return collection
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
+        return await self._get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId, shouldProcessIfNotFound=True)
+
+    async def _get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = 0) -> TokenMetadata:
         try:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         except NotFoundException:
-            await self.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=True)
+            if shouldProcessIfNotFound:
+                await asyncio.sleep(sleepSecondsBeforeProcess)
+                await self.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=True)
+            else:
+                raise
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return tokenMetadata
 
@@ -74,7 +90,7 @@ class TokenManager:
         if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS):
             logging.info('Skipping token because it has been updated recently.')
             return
-        collection = await self.get_collection_by_address(address=registryAddress)
+        collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
         except TokenDoesNotExistException:

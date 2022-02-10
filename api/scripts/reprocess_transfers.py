@@ -80,12 +80,12 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
     blockProcessor = BlockProcessor(ethClient=ethClient)
 
     await database.connect()
-    await slackClient.post(text=f'reprocess_transfers => 🚧 started: {startBlockNumber}-{endBlockNumber}')
+    await slackClient.post(text=f'reprocess_transfers → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         await _reprocess_transfers(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber, blockProcessor=blockProcessor, database=database, retriever=retriever, saver=saver)
-        await slackClient.post(text=f'reprocess_transfers => ✅ completed : {startBlockNumber}-{endBlockNumber}')
+        await slackClient.post(text=f'reprocess_transfers → ✅ completed : {startBlockNumber}-{endBlockNumber}')
     except Exception as exception:
-        await slackClient.post(text=f'reprocess_transfers => ❌ error: {startBlockNumber}-{endBlockNumber} ({str(exception)})')
+        await slackClient.post(text=f'reprocess_transfers → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')
         raise exception
     finally:
         await database.disconnect()
