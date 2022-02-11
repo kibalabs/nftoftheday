@@ -25,7 +25,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         uiData = await notdManager.retrieve_ui_data(startDate=startDate, endDate=endDate)
-        #(await responseBuilder.retrieve_ui_data(uiData=uiData)
         return RetrieveUiDataResponse(uiData=(await responseBuilder.retrieve_ui_data(uiData=uiData)))
 
     @router.post('/receive-new-blocks-deferred', response_model=ReceiveNewBlocksDeferredResponse)
