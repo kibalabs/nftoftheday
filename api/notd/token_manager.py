@@ -69,6 +69,8 @@ class TokenManager:
         return tokenMetadata
 
     async def update_token_metadatas_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
+        if len(collectionTokenIds) == 0:
+            return
         if not shouldForce:
             tokenStatements = []
             for (registryAddress, tokenId) in collectionTokenIds:
@@ -126,6 +128,8 @@ class TokenManager:
             await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
 
     async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
+        if len(addresses) == 0:
+            return
         if not shouldForce:
             recentlyUpdatedCollections = await self.retriever.list_collections(
                 fieldFilters=[
