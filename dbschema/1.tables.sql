@@ -43,7 +43,6 @@ CREATE TABLE tbl_token_metadatas (
     name TEXT,
     description TEXT,
     attributes JSON
-    -- key TEXT GENERATED ALWAYS AS (registry_address || ':' || token_id) STORED
 );
 CREATE UNIQUE INDEX tbl_tokens_metadatas_registry_address_token_id ON tbl_token_metadatas (registry_address, token_id);
 CREATE INDEX tbl_token_metadatas_registry_address ON tbl_token_metadatas (registry_address);
