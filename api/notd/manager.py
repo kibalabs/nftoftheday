@@ -143,9 +143,9 @@ class NotdManager:
         logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
         registryTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers))
         logging.info(f'Found {len(registryTokenIds)} tokens in block #{blockNumber}')
-        # await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
+        await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
         await self.tokenManager.update_token_metadatas_deferred(registryTokenIds=registryTokenIds)
-        # await self._save_block_transfers(blockNumber=blockNumber, retrievedTokenTransfers=retrievedTokenTransfers)
+        await self._save_block_transfers(blockNumber=blockNumber, retrievedTokenTransfers=retrievedTokenTransfers)
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, str, int]:
