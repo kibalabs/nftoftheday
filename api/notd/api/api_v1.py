@@ -3,8 +3,8 @@ from typing import Optional
 
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
-from api.notd.api.endpoints_v1 import GetCollectionStatisticsResponse
-from api.notd.api.models_v1 import ApiCollectionStatistics
+from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
+from notd.api.models_v1 import ApiCollectionStatistics
 
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
@@ -53,7 +53,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
     async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
         collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
-        return GetCollectionStatisticsResponse(collectionStatistics=ApiCollectionStatistics.from_model(model=collectionStatistics))
+        return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

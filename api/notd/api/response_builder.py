@@ -1,6 +1,8 @@
 
 import asyncio
 from typing import Sequence
+from notd.api.models_v1 import ApiCollectionStatistics
+from notd.model import CollectionStatistics
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
@@ -75,3 +77,13 @@ class ResponseBuilder:
 
     async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
+
+    async def get_collection_statistics(self, collectionStatistics: CollectionStatistics) -> ApiCollectionStatistics:
+        return ApiCollectionStatistics(
+            itemCount=collectionStatistics.itemCount,
+            holderCount=collectionStatistics.holderCount,
+            totalTradeVolume=collectionStatistics.totalTradeVolume,
+            lowestSaleLast24Hours=collectionStatistics.lowestSaleLast24Hours,
+            highestSaleLast24Hours=collectionStatistics.highestSaleLast24Hours,
+            tradeVolume24Hours=collectionStatistics.tradeVolume24Hours,
+        )
