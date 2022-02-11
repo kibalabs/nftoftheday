@@ -71,7 +71,15 @@ class Saver(CoreSaver):
             tokenType=retrievedTokenTransfer.tokenType
         )
 
+<<<<<<< HEAD
     async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColour: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
+=======
+    async def delete_token_transfer(self, tokenTransferId: int) -> None:
+        query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId == tokenTransferId)
+        await self._execute(query=query, values=None)
+
+    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
+>>>>>>> main
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
