@@ -202,7 +202,7 @@ class TokenMetadataProcessor():
             imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_data'),
             animationUrl=tokenMetadataDict.get("animation_url"),
             youtubeUrl=tokenMetadataDict.get("youtube_url"),
-            backgroundColour=tokenMetadataDict.get("background_colour"),
+            backgroundColour=tokenMetadataDict.get("background_color"),
             name=name,
             description=description,
             attributes=tokenMetadataDict.get('attributes', []),
