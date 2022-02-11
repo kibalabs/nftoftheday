@@ -77,7 +77,12 @@ export const TokenPage = (): React.ReactElement => {
               </Stack>
               <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm:yyyy')}`}</Text>
               <Spacing variant={PaddingSize.Wide} />
-              <CollectionView collection={collection} />
+              {collection === undefined ? (
+                <LoadingSpinner />
+              ) : collection === null ? (
+                <Text variant='error'>Collection failed to load</Text>
+              ) : (
+                <CollectionView collection={collection} />)}
               <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
                 <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
                 <Button variant='tertiary' text={'Lookrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
