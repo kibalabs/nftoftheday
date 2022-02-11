@@ -2,8 +2,9 @@ import asyncio
 import datetime
 import json
 import logging
-from typing import List, Tuple
+from typing import List
 from typing import Sequence
+from typing import Tuple
 
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -155,10 +156,8 @@ class NotdManager:
             )
             existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())
-            for x in existingTuplesTransferMap.keys(): print(x)
             retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in tokenTransfers}
             retrievedTuples = set(retrievedTupleTransferMaps.keys())
-            for x in retrievedTupleTransferMaps.keys(): print(x)
             deleteOperations = []
             for existingTuple, existingTokenTransfer in existingTuplesTransferMap.items():
                 if existingTuple in retrievedTuples:
