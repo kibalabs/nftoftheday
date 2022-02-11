@@ -94,19 +94,27 @@ export class UiData {
   }
 }
 
+export interface TokenAttribute {
+  trait_type: string;
+  value: string;
+}
+
 export class CollectionToken {
   readonly registryAddress: string;
   readonly tokenId: string;
   readonly name: string;
   readonly imageUrl: string | null;
   readonly description: string | null;
+  readonly attributes: TokenAttribute[];
 
-  public constructor(registryAddress: string, tokenId: string, name: string, imageUrl: string | null, description: string | null) {
+
+  public constructor(registryAddress: string, tokenId: string, name: string, imageUrl: string | null, description: string | null, attributes: TokenAttribute[]) {
     this.registryAddress = registryAddress;
     this.tokenId = tokenId;
     this.name = name;
     this.imageUrl = imageUrl;
     this.description = description;
+    this.attributes = attributes;
   }
 
   public static fromObject = (obj: Record<string, unknown>): CollectionToken => {
@@ -116,6 +124,8 @@ export class CollectionToken {
       String(obj.name),
       obj.imageUrl ? String(obj.imageUrl) : null,
       obj.description ? String(obj.description) : null,
+      obj.attributes ? obj.attributes as TokenAttribute[] : [],
+
     );
   }
 }
