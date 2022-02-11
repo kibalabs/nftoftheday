@@ -174,4 +174,5 @@ class NotdManager:
                     continue
                 saveOperations.append(self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer))
             await asyncio.gather(*saveOperations)
-            logging.info(f'Saving transfers for block {blockNumber}: saved {len(saveOperations)} and deleted {len(deleteOperations)} transfers')
+            logging.info(f'Saving transfers for block {blockNumber}: saved {len(saveOperations)}, deleted {len(deleteOperations)}, kept {len(existingTokenTransfers) - len(deleteOperations)}')
+
