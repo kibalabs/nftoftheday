@@ -43,8 +43,6 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
                 break
             tokenDict = json.loads(await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}'))
             tokenDict['tokenId'] = tokenFile.path.split('/')[2]
-            print(tokenFile.path)
-            print(tokenDict['tokenId'])
             if tokenDict.get('attributes'):
                 tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys()))) if isinstance(tokenDict.get('attributes', []), List) else [attribute for attribute in tokenDict.get('attributes')]
             else:
