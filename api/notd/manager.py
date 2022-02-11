@@ -109,7 +109,6 @@ class NotdManager:
             limit=limit,
             offset=offset,
         )
-        print('tokenTransfers', tokenTransfers)
         return tokenTransfers
 
     async def subscribe_email(self, email: str) -> None:
