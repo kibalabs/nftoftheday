@@ -8,21 +8,18 @@ import logging
 
 import asyncclick as click
 import boto3
-from databases.core import Database
+from core.aws_requester import AwsRequester
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.web3.eth_client import RestEthClient
-from core.aws_requester import AwsRequester
+from databases.core import Database
 
-
-from notd.store.saver import Saver
+from notd.collection_processor import CollectionProcessor
 from notd.store.retriever import Retriever
+from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema_conversions import collection_from_row
-from notd.collection_processor import CollectionProcessor
 from notd.token_manager import TokenManager
-
-
 
 
 @click.command()

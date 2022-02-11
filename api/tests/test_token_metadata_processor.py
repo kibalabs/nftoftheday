@@ -4,17 +4,21 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from async_timeout import asyncio
-import boto3
 import datetime
 
+import boto3
+from async_timeout import asyncio
 from core.aws_requester import AwsRequester
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.web3.eth_client import RestEthClient
+
 from notd.block_processor import BlockProcessor
-from notd.model import Collection, RetrievedCollection, RetrievedTokenMetadata
+from notd.model import Collection
+from notd.model import RetrievedCollection
+from notd.model import RetrievedTokenMetadata
 from notd.token_metadata_processor import TokenMetadataProcessor
+
 
 async def main():
     s3Client = boto3.client(service_name='s3', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])

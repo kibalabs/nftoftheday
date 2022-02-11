@@ -4,6 +4,7 @@ import { dateToString } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
+import { useAccountId, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
@@ -54,15 +55,18 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollectionStatistics();
   }, [updateCollectionStatistics]);
 
-  // const onConnectWalletClicked = (): void => {
-  //    console.log('onConnectWalletClicked');
-  // }
+  const accountId = useAccountId();
+  const onLinkAccountsClicked = useOnLinkAccountsClicked();
+
+  const onConnectWalletClicked = async (): Promise<void> => {
+    await onLinkAccountsClicked();
+  };
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-      {collection === null ? (
+      {collection === undefined ? (
         <LoadingSpinner />
-      ) : collection === undefined ? (
+      ) : collection === null ? (
         <Text variant='error'>Collection failed to load</Text>
       ) : (
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
@@ -144,8 +148,28 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack>
                 </Stack>
               )}
+              { accountId ? (
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+                  <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
+                  <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                    {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
+                      <TokenCard
+                        key={index}
+                        collectionToken={collectionToken}
+                        subtitle={`Bought at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
+                        target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
+                      />
+                    ))}
+                  </Stack>
+                </Stack>
+              ) : (
+                <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                  <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
+                  <Text>to show your holdings and watchlist.</Text>
+                </Stack>
+              )}
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
-                <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
+                <Text variant='header3'>Recent Sales</Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                   {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
                     <TokenCard
@@ -155,11 +179,6 @@ export const CollectionPage = (): React.ReactElement => {
                       target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
                     />
                   ))}
-                </Stack>
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                  {/* <Link onClicked={onConnectWalletClicked} text='Connect your wallet' /> */}
-                  <Link target={'/'} text='Connect your wallet' />
-                  <Text>to show your holdings and watchlist.</Text>
                 </Stack>
               </Stack>
             </Stack>
