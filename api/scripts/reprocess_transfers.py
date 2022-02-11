@@ -2,8 +2,6 @@ import os
 import sys
 import time
 
-from core.store.retriever import IntegerFieldFilter
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
@@ -17,12 +15,12 @@ from core.web3.eth_client import RestEthClient
 from databases.core import Database
 
 from notd.block_processor import BlockProcessor
+from notd.manager import NotdManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenTransfersTable
 
 
-async def _reprocess_transfers(startBlockNumber: int, endBlockNumber: int, blockProcessor: BlockProcessor, database: Database, retriever: Retriever, saver: Saver):
+async def _reprocess_transfers(startBlockNumber: int, endBlockNumber: int, blockProcessor: BlockProcessor, notdManager: NotdManager):
     currentBlockNumber = startBlockNumber
     while currentBlockNumber < endBlockNumber:
         logging.info(f'Working on {currentBlockNumber}')
@@ -33,30 +31,7 @@ async def _reprocess_transfers(startBlockNumber: int, endBlockNumber: int, block
             time.sleep(60)
             currentBlockNumber -= 1
             continue
-        dbTokenTransfers = await retriever.list_token_transfers(fieldFilters=[IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=currentBlockNumber)], shouldIgnoreRegistryBlacklist=True)
-        dbTuples = [(dbTokenTransfer.transactionHash, dbTokenTransfer.registryAddress.lower(), dbTokenTransfer.tokenId, dbTokenTransfer.fromAddress.lower(), dbTokenTransfer.toAddress.lower()) for dbTokenTransfer in dbTokenTransfers]
-        savedTuples = []
-        for retrievedTokenTransfer in retrievedTokenTransfers:
-            tuple = (retrievedTokenTransfer.transactionHash, retrievedTokenTransfer.registryAddress.lower(), retrievedTokenTransfer.tokenId, retrievedTokenTransfer.fromAddress.lower(), retrievedTokenTransfer.toAddress.lower())
-            if tuple in savedTuples:
-                logging.info(f'Ignoring duplicate tuple: {tuple}')
-                continue
-            if tuple not in dbTuples:
-                logging.info('Saving new')
-                await saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
-                savedTuples.append(tuple)
-            else:
-                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == dbTokenTransfers[dbTuples.index(tuple)].tokenTransferId)
-                values = {
-                    TokenTransfersTable.c.toAddress.key: retrievedTokenTransfer.toAddress,
-                    TokenTransfersTable.c.fromAddress.key: retrievedTokenTransfer.fromAddress,
-                    TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
-                    TokenTransfersTable.c.operatorAddress.key: retrievedTokenTransfer.operatorAddress,
-                    TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,
-                    TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
-                }
-                logging.info('Updating old')
-                await database.execute(query=query, values=values)
+        await notdManager._save_block_transfers(blockNumber=currentBlockNumber, retrievedTokenTransfers=retrievedTokenTransfers)
         currentBlockNumber = currentBlockNumber + 1
 
 
@@ -76,11 +51,12 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
+    notdManager = NotdManager(blockProcessor=None, saver=saver, retriever=retriever, workQueue=None, tokenManager=None, requester=requester, revueApiKey=None)
 
     await database.connect()
     await slackClient.post(text=f'reprocess_transfers → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
-        await _reprocess_transfers(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber, blockProcessor=blockProcessor, database=database, retriever=retriever, saver=saver)
+        await _reprocess_transfers(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber, blockProcessor=blockProcessor, notdManager=notdManager)
         await slackClient.post(text=f'reprocess_transfers → ✅ completed : {startBlockNumber}-{endBlockNumber}')
     except Exception as exception:
         await slackClient.post(text=f'reprocess_transfers → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')

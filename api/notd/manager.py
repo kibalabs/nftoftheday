@@ -141,13 +141,13 @@ class NotdManager:
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         await asyncio.gather(*[self.update_token_metadata_deferred(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers])
         await asyncio.gather(*[self.update_collection_deferred(address=address) for address in set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers)])
-        await self._save_block_transfers(blockNumber=blockNumber, tokenTransfers=retrievedTokenTransfers)
+        await self._save_block_transfers(blockNumber=blockNumber, retrievedTokenTransfers=retrievedTokenTransfers)
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, str, int]:
         return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
 
-    async def _save_block_transfers(self, blockNumber: int, tokenTransfers: Sequence[RetrievedTokenTransfer]) -> None:
+    async def _save_block_transfers(self, blockNumber: int, retrievedTokenTransfers: Sequence[RetrievedTokenTransfer]) -> None:
         async with self.saver.create_transaction():
             existingTokenTransfers = await self.retriever.list_token_transfers(
                 fieldFilters=[
@@ -156,7 +156,7 @@ class NotdManager:
             )
             existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())
-            retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in tokenTransfers}
+            retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in retrievedTokenTransfers}
             retrievedTuples = set(retrievedTupleTransferMaps.keys())
             deleteOperations = []
             for existingTuple, existingTokenTransfer in existingTuplesTransferMap.items():
