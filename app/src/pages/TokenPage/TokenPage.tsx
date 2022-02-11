@@ -1,10 +1,11 @@
 import React from 'react';
 
-import { dateToString, truncateMiddle } from '@kibalabs/core';
+import { dateToString } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LoadingSpinner, Media, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { Collection, CollectionToken, TokenTransfer } from '../../client/resources';
+import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';
 import { useGlobals } from '../../globalsContext';
 
@@ -69,11 +70,7 @@ export const TokenPage = (): React.ReactElement => {
               <Text variant='header1'>{collectionToken.name}</Text>
               <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                 <Text>Owned By</Text>
-                <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
-                  <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${owner}/image` || defaultImage} alternativeText='Avatar' />
-                  {/* TODO(Ajad-Abiola): implement Owned By: */}
-                </Box>
-                <Text>{truncateMiddle(owner, 10)}</Text>
+                <Account accountId={owner} />
               </Stack>
               <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm:yyyy')}`}</Text>
               <Spacing variant={PaddingSize.Wide} />
