@@ -3,14 +3,13 @@ import logging
 import os
 import sys
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from async_timeout import asyncio
 import boto3
-
+from async_timeout import asyncio
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.web3.eth_client import RestEthClient
+
 from notd.collection_processor import CollectionProcessor
 from notd.model import RetrievedCollection
 
