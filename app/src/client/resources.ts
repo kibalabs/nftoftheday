@@ -1,4 +1,5 @@
 import { dateFromString } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 export class TokenTransfer {
   readonly tokenTransferId: number;
@@ -131,7 +132,6 @@ export class Collection {
   readonly instagramUsername: string | null;
   readonly twitterUsername: string | null;
 
-
   public constructor(address: string, name: string | null, imageUrl: string | null, description: string | null, url: string | null, openseaSlug: string | null, bannerImageUrl: string | null, discordUrl: string | null, instagramUsername: string | null, twitterUsername: string | null) {
     this.address = address;
     this.name = name;
@@ -157,6 +157,35 @@ export class Collection {
       obj.discordUrl ? String(obj.discordUrl) : null,
       obj.instagramUsername ? String(obj.instagramUsername) : null,
       obj.twitterUsername ? String(obj.twitterUsername) : null,
+    );
+  }
+}
+
+export class CollectionStatistics {
+  readonly itemCount: number;
+  readonly holderCount: number;
+  readonly totalTradeVolume: BigNumber;
+  readonly lowestSaleLast24Hours: BigNumber | null;
+  readonly highestSaleLast24Hours: BigNumber | null;
+  readonly tradeVolume24Hours: BigNumber | null;
+
+  public constructor(itemCount: number, holderCount: number, totalTradeVolume: BigNumber, lowestSaleLast24Hours: BigNumber | null, highestSaleLast24Hours: BigNumber | null, tradeVolume24Hours: BigNumber | null) {
+    this.itemCount = itemCount;
+    this.holderCount = holderCount;
+    this.totalTradeVolume = totalTradeVolume;
+    this.lowestSaleLast24Hours = lowestSaleLast24Hours;
+    this.highestSaleLast24Hours = highestSaleLast24Hours;
+    this.tradeVolume24Hours = tradeVolume24Hours;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): CollectionStatistics => {
+    return new CollectionStatistics(
+      Number(obj.itemCount),
+      Number(obj.holderCount),
+      BigNumber.from(String(obj.totalTradeVolume)),
+      obj.lowestSaleLast24Hours ? BigNumber.from(String(obj.lowestSaleLast24Hours)) : null,
+      obj.highestSaleLast24Hours ? BigNumber.from(String(obj.highestSaleLast24Hours)) : null,
+      obj.tradeVolume24Hours ? BigNumber.from(String(obj.tradeVolume24Hours)) : null,
     );
   }
 }
