@@ -1,18 +1,13 @@
 import asyncio
 import logging
-from typing import List, Tuple
-
-from core.util import date_util
-from core.queues.sqs_message_queue import SqsMessageQueue
-from core.store.retriever import StringFieldFilter
-from core.store.retriever import DateFieldFilter
-from core.exceptions import NotFoundException
-import sqlalchemy
 import random
+from typing import List
+from typing import Tuple
 
-import async_lru
+import sqlalchemy
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
+from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
@@ -74,16 +69,17 @@ class TokenManager:
         return tokenMetadata
 
     async def update_token_metadatas_deferred(self, registryTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
-        print(registryTokenIds[:1])
         if not shouldForce:
-            # NOTE(krishan711): error looks realted to https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4645
+            tokenStatements = []
+            for (registryAddress, tokenId) in registryTokenIds:
+                tokenStatements.append(sqlalchemy.and_(TokenMetadataTable.c.registryAddress == registryAddress, TokenMetadataTable.c.tokenId == tokenId))
+            # TODO(krishan711): this should be able to us in_ as shown below but it doesn't work (probably something in encode/databases)
             query = (
                 TokenMetadataTable.select()
-                    .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_([(1, 10), (2, 20), (3, 30)]))
                     .where(TokenMetadataTable.c.updatedDate > date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
+                    # .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(registryTokenIds))
+                    .where(sqlalchemy.or_(*tokenStatements))
             )
-            print('---')
-            print(query)
             recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
             recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
             logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} registryTokenIds because they have been updated recently.')
