@@ -21,12 +21,13 @@ from notd.manager import NotdManager
 def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> KibaRouter:
     router = KibaRouter()
 
-    @router.post('/retrieve-ui-data', response_model=RetrieveUiDataResponse)
+    @router.post('/retrieve-ui-data')
     async def retrieve_ui_data(request: RetrieveUiDataRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
         startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         uiData = await notdManager.retrieve_ui_data(startDate=startDate, endDate=endDate)
-        return RetrieveUiDataResponse(uiData=ApiUiData.from_model(model=uiData))
+        #(await responseBuilder.retrieve_ui_data(uiData=uiData)
+        return RetrieveUiDataResponse(uiData=(await responseBuilder.retrieve_ui_data(uiData=uiData)))
 
     @router.post('/receive-new-blocks-deferred', response_model=ReceiveNewBlocksDeferredResponse)
     async def receive_new_blocks_deferred():  # request: ReceiveNewBlocksDeferredRequest

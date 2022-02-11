@@ -1,6 +1,8 @@
 
 import asyncio
 from typing import Sequence
+from notd.api.models_v1 import ApiUiData
+from notd.model import UiData
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
@@ -75,3 +77,13 @@ class ResponseBuilder:
 
     async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
+
+    async def retrieve_ui_data(self, uiData: UiData) -> ApiUiData:
+        print(uiData.sponsoredToken.registryAddress)
+        return ApiUiData(
+            highestPricedTokenTransfer=(await self.token_transfer_from_model(tokenTransfer=uiData.highestPricedTokenTransfer)),
+            mostTradedTokenTransfers=(await self.token_transfers_from_models(tokenTransfers=uiData.mostTradedTokenTransfers)),
+            randomTokenTransfer=(await self.token_transfer_from_model(tokenTransfer=uiData.randomTokenTransfer)),
+            sponsoredToken=(await self.collection_token_from_registry_address_token_id(registryAddress=uiData.sponsoredToken.registryAddress, tokenId=uiData.sponsoredToken.tokenId)),
+            transactionCount=uiData.transactionCount,
+        )
