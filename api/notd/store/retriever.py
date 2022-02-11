@@ -70,8 +70,8 @@ class Retriever(CoreRetriever):
 
     async def query_token_metadatas(self, query: Select) -> Sequence[TokenMetadata]:
         rows = await self.database.fetch_all(query=query)
-        tokenMetdatas = [token_metadata_from_row(row) for row in rows]
-        return tokenMetdatas
+        tokenMetadatas = [token_metadata_from_row(row) for row in rows]
+        return tokenMetadatas
 
     async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenMetadata]:
         query = TokenMetadataTable.select()
@@ -102,8 +102,8 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         rows = await self.database.fetch_all(query=query)
-        tokenCollection = [collection_from_row(row) for row in rows]
-        return tokenCollection
+        tokenCollections = [collection_from_row(row) for row in rows]
+        return tokenCollections
 
     async def get_collection_by_address(self, address: str) -> Collection:
         query = TokenCollectionsTable.select() \
