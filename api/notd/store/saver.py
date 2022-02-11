@@ -102,7 +102,6 @@ class Saver(CoreSaver):
             imageUrl=imageUrl,
             animationUrl=animationUrl,
             backgroundColour=backgroundColour,
-            animationUrl=animationUrl,
             name=name,
             description=description,
             attributes=attributes,
