@@ -4,11 +4,7 @@ import random
 from typing import List
 from typing import Tuple
 
-<<<<<<< HEAD
-import async_lru
-=======
 import sqlalchemy
->>>>>>> main
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter

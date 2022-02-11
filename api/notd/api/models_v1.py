@@ -102,3 +102,11 @@ class ApiUiData(BaseModel):
             sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
             transactionCount=model.transactionCount
         )
+
+class ApiCollectionStatistics(BaseModel):
+    itemCount: int
+    holderCount: int
+    totalTradeVolume: int
+    lowestSaleLast24Hours: Optional[int]
+    highestSaleLast24Hours: Optional[int]
+    tradeVolume24Hours: Optional[int]

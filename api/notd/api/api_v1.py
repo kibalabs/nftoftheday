@@ -3,22 +3,9 @@ from typing import Optional
 
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
+from api.notd.api.endpoints_v1 import GetCollectionStatisticsResponse
+from api.notd.api.models_v1 import ApiCollectionStatistics
 
-<<<<<<< HEAD
-from notd.api.models_v1 import ApiCollection
-from notd.api.models_v1 import ApiCollectionStatistics
-from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiUiData
-from notd.api.models_v1 import ReceiveNewBlocksDeferredResponse
-from notd.api.models_v1 import RetrieveCollectionResponse
-from notd.api.models_v1 import RetrieveCollectionStatisticsResponse
-from notd.api.models_v1 import RetrieveCollectionTokenResponse
-from notd.api.models_v1 import RetrieveUiDataRequest
-from notd.api.models_v1 import RetrieveUiDataResponse
-from notd.api.models_v1 import SubscribeRequest
-from notd.api.models_v1 import SubscribeResponse
-from notd.api.models_v1 import datetime
-=======
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrieveCollectionResponse
@@ -30,7 +17,6 @@ from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
 from notd.api.models_v1 import ApiUiData
 from notd.api.response_builder import ResponseBuilder
->>>>>>> main
 from notd.manager import NotdManager
 
 
@@ -64,10 +50,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         tokenTransfers = await notdManager.get_collection_recent_sales(registryAddress=registryAddress)
         return GetCollectionRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
-    @router.get('/collections/{registryAddress}/statistics', response_model=RetrieveCollectionStatisticsResponse)
+    @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
     async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
         collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
-        return RetrieveCollectionStatisticsResponse(collectionStatistics=ApiCollectionStatistics.from_model(model=collectionStatistics))
+        return GetCollectionStatisticsResponse(collectionStatistics=ApiCollectionStatistics.from_model(model=collectionStatistics))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

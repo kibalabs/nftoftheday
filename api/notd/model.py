@@ -102,47 +102,6 @@ class UiData:
 
 
 @dataclasses.dataclass
-<<<<<<< HEAD
-class RegistryToken:
-    registryAddress: str
-    tokenId: str
-    name: str
-    imageUrl: Optional[str]
-    openSeaUrl: Optional[str]
-    externalUrl: Optional[str]
-    lastSaleDate: Optional[datetime.datetime]
-    lastSalePrice: Optional[int]
-    collectionName: str
-    collectionImageUrl: Optional[str]
-    collectionOpenSeaUrl: Optional[str]
-    collectionExternalUrl: Optional[str]
-
-
-@dataclasses.dataclass
-class RetrievedCollection:
-    address: str
-    name: Optional[str]
-    symbol: Optional[str]
-    description: Optional[str]
-    imageUrl: Optional[str]
-    twitterUsername: Optional[str]
-    instagramUsername: Optional[str]
-    wikiUrl: Optional[str]
-    openseaSlug: Optional[str]
-    url: Optional[str]
-    discordUrl: Optional[str]
-    bannerImageUrl: Optional[str]
-    doesSupportErc721: bool
-    doesSupportErc1155: bool
-
-
-@dataclasses.dataclass
-class Collection(RetrievedCollection):
-    collectionId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
-
-@dataclasses.dataclass
 class CollectionStatistics:
     itemCount: int
     holderCount: int
@@ -153,8 +112,6 @@ class CollectionStatistics:
 
 
 @dataclasses.dataclass
-=======
->>>>>>> main
 class SponsoredToken:
     date: datetime.datetime
     token: Token

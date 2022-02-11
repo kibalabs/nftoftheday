@@ -5,6 +5,7 @@ from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
+from notd.api.models_v1 import ApiCollectionStatistics
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
@@ -42,6 +43,12 @@ class GetCollectionRecentSalesRequest(BaseModel):
 
 class GetCollectionRecentSalesResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
+
+class GetCollectionStatisticsRequest(BaseModel):
+    pass
+
+class GetCollectionStatisticsResponse(BaseModel):
+    collectionStatistics: ApiCollectionStatistics
 
 class RetrieveCollectionRequest(BaseModel):
     address: str
