@@ -40,6 +40,8 @@ class RetrievedTokenMetadata:
     metadataUrl: str
     imageUrl: Optional[str]
     animationUrl: Optional[str]
+    youtubeUrl: Optional[str]
+    backgroundColour: Optional[str]
     name: Optional[str]
     description: Optional[str]
     attributes: JSON
@@ -51,22 +53,6 @@ class TokenMetadata(RetrievedTokenMetadata):
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
 
-<<<<<<< HEAD
-    def to_dict(self) -> Dict:
-        return {
-            'tokenMetadataId': self.tokenMetadataId,
-            'createdDate': self.createdDate,
-            'updatedDate': self.updatedDate,
-            'registryAddress': self.registryAddress,
-            'tokenId': self.tokenId,
-            'metadataUrl': self.metadataUrl,
-            'imageUrl': self.imageUrl,
-            'animationUrl': self.animationUrl,
-            'name': self.name,
-            'description': self.description,
-            'attributes': self.attributes,
-        }
-=======
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class RetrievedTokenTransfer:
@@ -85,7 +71,6 @@ class RetrievedTokenTransfer:
     blockHash: str
     blockDate: datetime.datetime
     tokenType: Optional[str]
->>>>>>> main
 
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)

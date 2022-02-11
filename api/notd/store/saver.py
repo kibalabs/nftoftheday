@@ -71,7 +71,7 @@ class Saver(CoreSaver):
             tokenType=retrievedTokenTransfer.tokenType
         )
 
-    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], animationUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
+    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColour: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
@@ -82,6 +82,8 @@ class Saver(CoreSaver):
             TokenMetadataTable.c.metadataUrl.key: metadataUrl,
             TokenMetadataTable.c.imageUrl.key: imageUrl,
             TokenMetadataTable.c.animationUrl.key: animationUrl,
+            TokenMetadataTable.c.youtubeUrl.key: youtubeUrl,
+            TokenMetadataTable.c.backgroundColour.key: backgroundColour,
             TokenMetadataTable.c.name.key: name,
             TokenMetadataTable.c.description.key: description,
             TokenMetadataTable.c.attributes.key: attributes,
@@ -100,7 +102,7 @@ class Saver(CoreSaver):
             attributes=attributes,
         )
 
-    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT) -> None:
+    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColour: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT) -> None:
         query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId)
         values = {}
         if metadataUrl is not None:
@@ -109,6 +111,10 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.imageUrl.key] = imageUrl
         if animationUrl != _EMPTY_STRING:
             values[TokenMetadataTable.c.animationUrl.key] = animationUrl
+        if youtubeUrl != _EMPTY_STRING:
+            values[TokenMetadataTable.c.youtubeUrl.key] = youtubeUrl
+        if backgroundColour != _EMPTY_STRING:
+            values[TokenMetadataTable.c.backgroundColour.key] = backgroundColour
         if description != _EMPTY_STRING:
             values[TokenMetadataTable.c.description.key] = description
         if name != _EMPTY_STRING:
