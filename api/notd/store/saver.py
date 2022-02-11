@@ -101,6 +101,7 @@ class Saver(CoreSaver):
             metadataUrl=metadataUrl,
             imageUrl=imageUrl,
             animationUrl=animationUrl,
+            youtubeUrl=youtubeUrl,
             backgroundColour=backgroundColour,
             name=name,
             description=description,
