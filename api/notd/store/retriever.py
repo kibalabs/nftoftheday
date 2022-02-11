@@ -79,7 +79,7 @@ class Retriever(CoreRetriever):
             query = self._apply_orders(query=query, table=TokenMetadataTable, orders=orders)
         if limit:
             query = query.limit(limit)
-        return self.query_token_metadatas(query=query)
+        return await self.query_token_metadatas(query=query)
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         query = TokenMetadataTable.select() \

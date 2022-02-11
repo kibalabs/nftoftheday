@@ -26,7 +26,7 @@ from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 _TOKEN_UPDATE_MIN_DAYS = 30
-_COLLECTION_UPDATE_MIN_DAYS = 90
+_COLLECTION_UPDATE_MIN_DAYS = 30
 
 
 class TokenManager:
@@ -68,23 +68,23 @@ class TokenManager:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return tokenMetadata
 
-    async def update_token_metadatas_deferred(self, registryTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
+    async def update_token_metadatas_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
         if not shouldForce:
             tokenStatements = []
-            for (registryAddress, tokenId) in registryTokenIds:
+            for (registryAddress, tokenId) in collectionTokenIds:
                 tokenStatements.append(sqlalchemy.and_(TokenMetadataTable.c.registryAddress == registryAddress, TokenMetadataTable.c.tokenId == tokenId))
             # TODO(krishan711): this should be able to us in_ as shown below but it doesn't work (probably something in encode/databases)
             query = (
                 TokenMetadataTable.select()
                     .where(TokenMetadataTable.c.updatedDate > date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
-                    # .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(registryTokenIds))
+                    # .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(collectionTokenIds))
                     .where(sqlalchemy.or_(*tokenStatements))
             )
             recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
             recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
-            logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} registryTokenIds because they have been updated recently.')
-            registryTokenIds = set(registryTokenIds) - recentlyUpdatedTokenIds
-        messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in registryTokenIds]
+            logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
+            collectionTokenIds = set(collectionTokenIds) - recentlyUpdatedTokenIds
+        messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in collectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
