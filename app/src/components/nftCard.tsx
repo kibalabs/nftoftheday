@@ -79,11 +79,11 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
         ) : (
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>
-              <Box width='150px' height='150px'>
+              <Box width='150px' height='150px' shouldClipContent={true}>
                 {imageUrl.startsWith('data:image/svg+xml;utf8,') ? (
                   <div dangerouslySetInnerHTML={{ __html: imageUrl.slice('data:image/svg+xml;utf8,'.length) }} />
                 ) : imageUrl.startsWith('data:image/svg+xml;base64,') ? (
-                  <div dangerouslySetInnerHTML={{ __html: atob(imageUrl.slice('data:image/svg+xml;base64,'.length)) }} />
+                  <Image source={imageUrl}alternativeText={`${asset.name} image`} />
                 ) : imageUrl.startsWith('http://meebits.larvalabs.com/') ? (
                   <Image source={imageUrl} alternativeText={`${asset.name} image`} fitType='contain' />
                 ) : (
