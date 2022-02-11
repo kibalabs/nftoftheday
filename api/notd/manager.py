@@ -84,7 +84,7 @@ class NotdManager:
             transactionCount=transactionCount
         )
 
-    async def get_collection_recent_sales(self, registryAddress: str) -> List[TokenTransfer]:
+    async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
@@ -92,8 +92,24 @@ class NotdManager:
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
-            limit=10,
+            limit=limit,
+            offset=offset,
         )
+        return tokenTransfers
+
+    async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
+        tokenTransfers = await self.retriever.list_token_transfers(
+            shouldIgnoreRegistryBlacklist=True,
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
+            limit=limit,
+            offset=offset,
+        )
+        print('tokenTransfers', tokenTransfers)
         return tokenTransfers
 
     async def subscribe_email(self, email: str) -> None:
@@ -174,4 +190,4 @@ class NotdManager:
                     continue
                 saveOperations.append(self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer))
             await asyncio.gather(*saveOperations)
-            logging.info(f'Saving transfers for block {blockNumber}: saved {len(saveOperations)} and deleted {len(deleteOperations)} transfers')
+            logging.info(f'Saving transfers for block {blockNumber}: saved {len(saveOperations)}, deleted {len(deleteOperations)}, kept {len(existingTokenTransfers) - len(deleteOperations)}')

@@ -30,7 +30,7 @@ _REGISTRY_BLACKLIST = set([
 
 class Retriever(CoreRetriever):
 
-    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False) -> Sequence[TokenTransfer]:
+    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False) -> Sequence[TokenTransfer]:
         query = TokenTransfersTable.select()
         if not shouldIgnoreRegistryBlacklist:
             query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
@@ -41,6 +41,8 @@ class Retriever(CoreRetriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
         rows = await self.database.fetch_all(query=query)
         tokenTransfers = [token_transfer_from_row(row) for row in rows]
         return tokenTransfers
