@@ -33,17 +33,22 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
     query = query.where(TokenCollectionsTable.c.collectionId >= collectionStartId)
     query = query.where(TokenCollectionsTable.c.collectionId < collectionEndId)
     collections = [collection_from_row(row) async for row in database.iterate(query=query)]
-
     rows = []
     fields = set()
     for collection in collections:
         logging.info(f'Working on {collection.collectionId}')
         tokenFiles = await s3manager.list_directory_files(s3Directory=f'{bucketName}/token-metadatas/{collection.address}')
         for index, tokenFile in enumerate(tokenFiles):
-            if index >= 2:
+            if index >= 1:
                 break
             tokenDict = json.loads(await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}'))
-            tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys()))) if isinstance(tokenDict.get('attributes', []), List) else [attribute for attribute in tokenDict.get('attributes')]
+            tokenDict['tokenId'] = tokenFile.path.split('/')[2]
+            print(tokenFile.path)
+            print(tokenDict['tokenId'])
+            if tokenDict.get('attributes'):
+                tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys()))) if isinstance(tokenDict.get('attributes', []), List) else [attribute for attribute in tokenDict.get('attributes')]
+            else:
+                tokenDict['attributes'] = None
             tokenDict['description'] = tokenDict["description"][:10] if tokenDict.get('description') else None 
             tokenDict['collection'] = collection.address
             fields.update(tokenDict.keys())
@@ -51,6 +56,7 @@ async def calculate_token_fields(collectionStartId: int, collectionEndId: int,):
 
     with open(f'./output{collectionStartId}-{collectionEndId}.tsv', 'w') as outFile:
         dictWriter = csv.DictWriter(outFile, fields, delimiter='\t')
+        dictWriter.writeheader()
         dictWriter.writerows(rows)
         
         
