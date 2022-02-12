@@ -8,23 +8,30 @@ from core.util.typing_util import JSON
 from pydantic import dataclasses
 
 
-@dataclasses.dataclass(frozen=True, unsafe_hash=True)
-class RetrievedTokenTransfer:
-    transactionHash: str
-    registryAddress: str
-    fromAddress: str
-    toAddress: str
-    operatorAddress: Optional[str]
-    tokenId: str
-    amount: Optional[int]
-    value: int
-    gasLimit: int
-    gasPrice: int
-    gasUsed: int
-    blockNumber: int
-    blockHash: str
-    blockDate: datetime.datetime
-    tokenType: Optional[str]
+@dataclasses.dataclass
+class RetrievedCollection:
+    address: str
+    name: Optional[str]
+    symbol: Optional[str]
+    description: Optional[str]
+    imageUrl: Optional[str]
+    twitterUsername: Optional[str]
+    instagramUsername: Optional[str]
+    wikiUrl: Optional[str]
+    openseaSlug: Optional[str]
+    url: Optional[str]
+    discordUrl: Optional[str]
+    bannerImageUrl: Optional[str]
+    doesSupportErc721: bool
+    doesSupportErc1155: bool
+
+
+@dataclasses.dataclass
+class Collection(RetrievedCollection):
+    collectionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
 
 @dataclasses.dataclass
 class RetrievedTokenMetadata:
@@ -43,45 +50,31 @@ class TokenMetadata(RetrievedTokenMetadata):
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
 
-    def to_dict(self) -> Dict:
-        return {
-            'tokenMetadataId': self.tokenMetadataId,
-            'createdDate': self.createdDate,
-            'updatedDate': self.updatedDate,
-            'registryAddress': self.registryAddress,
-            'tokenId': self.tokenId,
-            'metadataUrl': self.metadataUrl,
-            'imageUrl': self.imageUrl,
-            'name': self.name,
-            'description': self.description,
-            'attributes': self.attributes,
-        }
+
+@dataclasses.dataclass(frozen=True, unsafe_hash=True)
+class RetrievedTokenTransfer:
+    transactionHash: str
+    registryAddress: str
+    tokenId: str
+    fromAddress: str
+    toAddress: str
+    operatorAddress: Optional[str]
+    amount: Optional[int]
+    value: int
+    gasLimit: int
+    gasPrice: int
+    gasUsed: int
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime
+    tokenType: Optional[str]
 
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
 
-    def to_dict(self) -> Dict:
-        return {
-            'tokenTransferId': self.tokenTransferId,
-            'transactionHash': self.transactionHash,
-            'registryAddress': self.registryAddress,
-            'fromAddress': self.fromAddress,
-            'toAddress': self.toAddress,
-            'operatorAddress': self.operatorAddress,
-            'tokenId': self.tokenId,
-            'value': self.value,
-            'amount': self.amount,
-            'gasLimit': self.gasLimit,
-            'gasPrice': self.gasPrice,
-            'gasUsed': self.gasUsed,
-            'blockNumber': self.blockNumber,
-            'blockHash': self.blockHash,
-            'blockDate': self.blockDate.isoformat(),
-            'tokenType': self.tokenType,
-        }
-
+# TODO(krishan711): everything below this line should be removed!
 
 @dataclasses.dataclass
 class Token:
@@ -106,47 +99,6 @@ class UiData:
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
     transactionCount: int
-
-
-@dataclasses.dataclass
-class RegistryToken:
-    registryAddress: str
-    tokenId: str
-    name: str
-    imageUrl: Optional[str]
-    openSeaUrl: Optional[str]
-    externalUrl: Optional[str]
-    lastSaleDate: Optional[datetime.datetime]
-    lastSalePrice: Optional[int]
-    collectionName: str
-    collectionImageUrl: Optional[str]
-    collectionOpenSeaUrl: Optional[str]
-    collectionExternalUrl: Optional[str]
-
-
-@dataclasses.dataclass
-class RetrievedCollection:
-    address: str
-    name: Optional[str]
-    symbol: Optional[str]
-    description: Optional[str]
-    imageUrl: Optional[str]
-    twitterUsername: Optional[str]
-    instagramUsername: Optional[str]
-    wikiUrl: Optional[str]
-    openseaSlug: Optional[str]
-    url: Optional[str]
-    discordUrl: Optional[str]
-    bannerImageUrl: Optional[str]
-    doesSupportErc721: Optional[bool]
-    doesSupportErc1155: Optional[bool]
-
-
-@dataclasses.dataclass
-class Collection(RetrievedCollection):
-    collectionId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
 
 
 @dataclasses.dataclass

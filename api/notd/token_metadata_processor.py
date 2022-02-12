@@ -13,6 +13,7 @@ from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 from web3.main import Web3
 
+from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
 
 IPFS_PROVIDER_PREFIXES = [
@@ -25,8 +26,6 @@ IPFS_PROVIDER_PREFIXES = [
     'https://robotos.mypinata.cloud/ipfs/',
 ]
 
-_INTERFACE_ID_ERC721 = '0x5b5e139f'
-_INTERFACE_ID_ERC1155 = '0xd9b67a26'
 
 class TokenDoesNotExistException(NotFoundException):
     pass
@@ -104,7 +103,7 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         return tokenMetadataDict
 
-    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
+    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str, collection: Collection) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             # NOTE(krishan711): special case for CryptoPunks
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
@@ -136,28 +135,19 @@ class TokenMetadataProcessor():
             raise TokenDoesNotExistException()
         tokenMetadataUriResponse = None
         badRequestException = None
-        try:
-            doesSupportErc721 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721}))[0]
-        except:  # pylint: disable=bare-except
-            doesSupportErc721 = False
-        if doesSupportErc721:
+        if collection.doesSupportErc721:
             try:
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
-        else:
+        if collection.doesSupportErc1155:
             try:
-                doesSupportErc1155 = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155}))[0]
-            except:  # pylint: disable=bare-except
-                doesSupportErc1155 = False
-            if doesSupportErc1155:
-                try:
-                    tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
-                except BadRequestException as exception:
-                    badRequestException = exception
-            else:
-                logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
-                raise TokenDoesNotExistException()
+                tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
+            except BadRequestException as exception:
+                badRequestException = exception
+        if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
+            logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+            raise TokenDoesNotExistException()
         if badRequestException is not None:
             if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
@@ -165,7 +155,9 @@ class TokenMetadataProcessor():
                 raise TokenDoesNotExistException()
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
-            raise exception
+            if 'stack limit reached' in badRequestException.message:
+                raise TokenDoesNotExistException()
+            raise badRequestException
         tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None

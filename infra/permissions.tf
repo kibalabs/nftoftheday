@@ -107,6 +107,40 @@ resource "aws_iam_policy" "access_ethereum_node" {
   })
 }
 
+resource "aws_iam_policy" "read_from_storage" {
+  name = "read-s3-${aws_s3_bucket.storage.bucket}"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:ListBucket",
+        ],
+        "Resource" : [
+          aws_s3_bucket.storage.arn
+        ],
+        "Condition" : {
+          "StringLike" : {
+            "s3:prefix" : "*"
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetObject",
+          "s3:ListBucket",
+        ],
+        "Resource" : [
+          aws_s3_bucket.storage.arn,
+          "${aws_s3_bucket.storage.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_policy" "write_to_storage" {
   name = "write-s3-${aws_s3_bucket.storage.bucket}"
   policy = jsonencode({

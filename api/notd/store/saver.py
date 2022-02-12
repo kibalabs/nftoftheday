@@ -71,6 +71,10 @@ class Saver(CoreSaver):
             tokenType=retrievedTokenTransfer.tokenType
         )
 
+    async def delete_token_transfer(self, tokenTransferId: int) -> None:
+        query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId == tokenTransferId)
+        await self._execute(query=query, values=None)
+
     async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
@@ -115,7 +119,7 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
         await self.database.execute(query=query, values=values)
 
-    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool]) -> Collection:
+    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool) -> Collection:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         collectionId = await self._execute(query=TokenCollectionsTable.insert(), values={  # pylint: disable=no-value-for-parameter

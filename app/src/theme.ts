@@ -3,6 +3,9 @@ import { buildTheme, ITheme } from '@kibalabs/ui-react';
 const defaultTheme = buildTheme();
 export const buildNotdTheme = (): ITheme => {
   const theme = buildTheme({
+    dimensions: {
+      fontSize: '18px',
+    },
     colors: {
       brandPrimary: '#6F0000',
       brandSecondary: '#200122',
@@ -46,6 +49,7 @@ export const buildNotdTheme = (): ITheme => {
       header3: {
         'font-size': '1.5rem',
         'font-weight': '600',
+        'margin-bottom': '0.25em',
       },
       header4: {
         'font-size': '1.3rem',
@@ -57,6 +61,7 @@ export const buildNotdTheme = (): ITheme => {
       },
       small: {
         'font-size': '0.85rem',
+        'line-height': '1em',
       },
       light: {
         color: 'rgba(255, 255, 255, 0.75)',
@@ -111,6 +116,21 @@ export const buildNotdTheme = (): ITheme => {
         'border-color': '#4B0312',
         'border-width': '7px',
       },
+      divider: {
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+      },
+      metricCard: {
+        padding: '0',
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'border-width': '0',
+        margin: '0',
+      },
+      tokenCard: {
+        padding: '0px',
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'border-width': '0',
+        'border-radius': '10px',
+      },
     },
     images: {
       default: {
@@ -131,6 +151,15 @@ export const buildNotdTheme = (): ITheme => {
       },
     },
     buttons: {
+      default: {
+        normal: {
+          default: {
+            text: {
+              'font-size': '0.8em',
+            },
+          },
+        },
+      },
       primary: {
         normal: {
           default: {
@@ -196,6 +225,34 @@ export const buildNotdTheme = (): ITheme => {
             },
             text: {
               color: '$colors.textOnBrand',
+            },
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.35)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.55)',
+            },
+          },
+          focus: {
+            background: {
+              'border-color': 'rgba(255, 255, 255, 0.75)',
+            },
+          },
+        },
+      },
+      small: {
+        normal: {
+          default: {
+            background: {
+              'border-width': '0',
+            },
+            text: {
+              color: '$colors.textOnBrand',
+              'font-size': '1em',
             },
           },
           hover: {

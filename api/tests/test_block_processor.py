@@ -4,15 +4,14 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import asyncio
+import datetime
 import logging
+
 from core.requester import Requester
 from core.web3.eth_client import RestEthClient
-import datetime
-
 
 from notd.block_processor import BlockProcessor
-from notd.model import  RetrievedTokenTransfer
-
+from notd.model import RetrievedTokenTransfer
 
 
 async def main():

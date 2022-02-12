@@ -53,7 +53,10 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
     imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
 
-  const collectionImageUrl = collection?.imageUrl;
+  let collectionImageUrl = collection?.imageUrl;
+  if (collectionImageUrl && collectionImageUrl.startsWith('ipfs://')) {
+    collectionImageUrl = collectionImageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  }
   const collectionUrl = collection?.url ?? (collection?.openseaSlug ? `https://opensea.io/collections/${collection?.openseaSlug}` : null);
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
@@ -76,11 +79,13 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
         ) : (
           <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide}>
             <Stack.Item gutterAfter={PaddingSize.Wide2}>
-              <Box width='150px' height='150px'>
-                {imageUrl.startsWith('data:image/svg+xml;utf8,') ? (
+              <Box width='150px' height='150px' shouldClipContent={true}>
+                {/* imageUrl.startsWith('data:image/svg+xml;utf8,') ? (
                   <div dangerouslySetInnerHTML={{ __html: imageUrl.slice('data:image/svg+xml;utf8,'.length) }} />
                 ) : imageUrl.startsWith('data:image/svg+xml;base64,') ? (
-                  <div dangerouslySetInnerHTML={{ __html: atob(imageUrl.slice('data:image/svg+xml;base64,'.length)) }} />
+                  <div dangerouslySetInnerHTML={{ __html: atob(imageUrl.slice('data:image/svg+xml;base64,'.length)) }} /> */}
+                { imageUrl.startsWith('http://meebits.larvalabs.com/') ? (
+                  <Image source={imageUrl} alternativeText={`${asset.name} image`} fitType='contain' />
                 ) : (
                   <Media source={imageUrl} alternativeText={`${asset.name} image`} fitType='contain' />
                 )}
@@ -93,7 +98,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
               <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                 {collectionImageUrl && (
                   <Box width='25px' height='25px'>
-                    <Image source={collectionImageUrl} alternativeText={collection.name} fitType='contain' />
+                    <Image source={collectionImageUrl} alternativeText='' fitType='contain' />
                   </Box>
                 )}
                 {collection && collection.name && (
