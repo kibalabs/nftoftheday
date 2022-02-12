@@ -38,8 +38,11 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
         registryAddress=row[TokenMetadataTable.c.registryAddress],
         tokenId=row[TokenMetadataTable.c.tokenId],
         metadataUrl=row[TokenMetadataTable.c.metadataUrl],
-        imageUrl=row[TokenMetadataTable.c.imageUrl],
         name=row[TokenMetadataTable.c.name],
+        imageUrl=row[TokenMetadataTable.c.imageUrl],
+        animationUrl=row[TokenMetadataTable.c.animationUrl],
+        youtubeUrl=row[TokenMetadataTable.c.youtubeUrl],
+        backgroundColor=row[TokenMetadataTable.c.backgroundColor],
         description=row[TokenMetadataTable.c.description],
         attributes=row[TokenMetadataTable.c.attributes],
     )
