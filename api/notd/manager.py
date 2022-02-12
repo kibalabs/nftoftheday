@@ -173,7 +173,6 @@ class NotdManager:
                     StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
                 ], shouldIgnoreRegistryBlacklist=True
             )
-            print('existingTokenTransfers', existingTokenTransfers)
             existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())
             retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in retrievedTokenTransfers}
@@ -189,6 +188,5 @@ class NotdManager:
                 if retrievedTuple in existingTuples:
                     continue
                 retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
-            x = await self.saver.create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfersToSave)
-            print(x)
+            await self.saver.create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfersToSave)
             logging.info(f'Saving transfers for block {blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
