@@ -45,11 +45,10 @@ class TokenManager:
         try:
             collection = await self.retriever.get_collection_by_address(address=address)
         except NotFoundException:
-            if shouldProcessIfNotFound:
-                await asyncio.sleep(sleepSecondsBeforeProcess)
-                await self.update_collection(address=address, shouldForce=True)
-            else:
+            if not shouldProcessIfNotFound:
                 raise
+            await asyncio.sleep(sleepSecondsBeforeProcess)
+            await self.update_collection(address=address, shouldForce=True)
             collection = await self.retriever.get_collection_by_address(address=address)
         return collection
 
@@ -60,11 +59,10 @@ class TokenManager:
         try:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         except NotFoundException:
-            if shouldProcessIfNotFound:
-                await asyncio.sleep(sleepSecondsBeforeProcess)
-                await self.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=True)
-            else:
+            if not shouldProcessIfNotFound:
                 raise
+            await asyncio.sleep(sleepSecondsBeforeProcess)
+            await self.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=True)
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return tokenMetadata
 
@@ -103,16 +101,16 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        savedTokenMetadatas = await self.retriever.list_token_metadatas(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-            ], limit=1,
-        )
-        savedTokenMetadata = savedTokenMetadatas[0] if len(savedTokenMetadatas) > 0 else None
-        if not shouldForce and savedTokenMetadata and savedTokenMetadata.updatedDate >= date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS):
-            logging.info('Skipping token because it has been updated recently.')
-            return
+        if not shouldForce:
+            recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
+                    DateFieldFilter(fieldName=TokenMetadataTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
+                ],
+            )
+            if len(recentlyUpdatedTokens) > 0:
+                logging.info('Skipping token because it has been updated recently.')
         collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
@@ -122,10 +120,15 @@ class TokenManager:
         except TokenHasNoMetadataException:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        if savedTokenMetadata:
-            await self.saver.update_token_metadata(tokenMetadataId=savedTokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
-        else:
-            await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+        async with self.saver.create_transaction():
+            try:
+                tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+            except NotFoundException:
+                tokenMetadata = None
+            if tokenMetadata:
+                await self.saver.update_token_metadata(tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+            else:
+                await self.saver.create_token_metadata(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
 
     async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
         if len(addresses) == 0:
@@ -156,21 +159,26 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
-        collections = await self.retriever.list_collections(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
-            ], limit=1,
-        )
-        collection = collections[0] if len(collections) > 0 else None
-        if not shouldForce and collection and collection.updatedDate >= date_util.datetime_from_now(days=-7):
-            logging.info('Skipping collection because it has been updated recently.')
-            return
+        if not shouldForce:
+            recentlyUpdatedCollections = await self.retriever.list_collections(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, eq=address),
+                    DateFieldFilter(fieldName=TokenCollectionsTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
+                ],
+            )
+            if len(recentlyUpdatedCollections) > 0:
+                logging.info('Skipping collection because it has been updated recently.')
         try:
             retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)
         except CollectionDoesNotExist:
             logging.info(f'Failed to retrieve non-existant collection: {address}')
             return
-        if collection:
-            await self.saver.update_collection(collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
-        else:
-            await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
+        async with self.saver.create_transaction():
+            try:
+                collection = await self.retriever.get_collection_by_address(address=address)
+            except NotFoundException:
+                collection = None
+            if collection:
+                await self.saver.update_collection(collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
+            else:
+                await self.saver.create_collection(address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)

@@ -177,16 +177,16 @@ class NotdManager:
             existingTuples = set(existingTuplesTransferMap.keys())
             retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in retrievedTokenTransfers}
             retrievedTuples = set(retrievedTupleTransferMaps.keys())
-            deleteOperations = []
+            tokenTransferIdsToDelete = []
             for existingTuple, existingTokenTransfer in existingTuplesTransferMap.items():
                 if existingTuple in retrievedTuples:
                     continue
-                deleteOperations.append(self.saver.delete_token_transfer(tokenTransferId=existingTokenTransfer.tokenTransferId))
-            await asyncio.gather(*deleteOperations)
-            saveOperations = []
+                tokenTransferIdsToDelete.append(existingTokenTransfer.tokenTransferId)
+            await self.saver.delete_token_transfers(tokenTransferIds=tokenTransferIdsToDelete)
+            retrievedTokenTransfersToSave = []
             for retrievedTuple, retrievedTokenTransfer in retrievedTupleTransferMaps.items():
                 if retrievedTuple in existingTuples:
                     continue
-                saveOperations.append(self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer))
-            await asyncio.gather(*saveOperations)
-            logging.info(f'Saving transfers for block {blockNumber}: saved {len(saveOperations)}, deleted {len(deleteOperations)}, kept {len(existingTokenTransfers) - len(deleteOperations)}')
+                retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
+            await self.saver.create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfersToSave)
+            logging.info(f'Saving transfers for block {blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
