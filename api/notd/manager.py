@@ -84,7 +84,7 @@ class NotdManager:
             transactionCount=transactionCount
         )
 
-    async def get_collection_recent_sales(self, registryAddress: str) -> List[TokenTransfer]:
+    async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
@@ -92,7 +92,22 @@ class NotdManager:
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
-            limit=10,
+            limit=limit,
+            offset=offset,
+        )
+        return tokenTransfers
+
+    async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
+        tokenTransfers = await self.retriever.list_token_transfers(
+            shouldIgnoreRegistryBlacklist=True,
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
+            limit=limit,
+            offset=offset,
         )
         return tokenTransfers
 
@@ -162,16 +177,16 @@ class NotdManager:
             existingTuples = set(existingTuplesTransferMap.keys())
             retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in retrievedTokenTransfers}
             retrievedTuples = set(retrievedTupleTransferMaps.keys())
-            deleteOperations = []
+            tokenTransferIdsToDelete = []
             for existingTuple, existingTokenTransfer in existingTuplesTransferMap.items():
                 if existingTuple in retrievedTuples:
                     continue
-                deleteOperations.append(self.saver.delete_token_transfer(tokenTransferId=existingTokenTransfer.tokenTransferId))
-            await asyncio.gather(*deleteOperations)
-            saveOperations = []
+                tokenTransferIdsToDelete.append(existingTokenTransfer.tokenTransferId)
+            await self.saver.delete_token_transfers(tokenTransferIds=tokenTransferIdsToDelete)
+            retrievedTokenTransfersToSave = []
             for retrievedTuple, retrievedTokenTransfer in retrievedTupleTransferMaps.items():
                 if retrievedTuple in existingTuples:
                     continue
-                saveOperations.append(self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer))
-            await asyncio.gather(*saveOperations)
-            logging.info(f'Saving transfers for block {blockNumber}: saved {len(saveOperations)} and deleted {len(deleteOperations)} transfers')
+                retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
+            await self.saver.create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfersToSave)
+            logging.info(f'Saving transfers for block {blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
