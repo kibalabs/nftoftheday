@@ -24,7 +24,6 @@ from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
-from notd.model import UiData
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenTransfersTable
@@ -54,12 +53,26 @@ class NotdManager:
             sponsoredToken = allPastTokens[-1]
         return sponsoredToken
 
-    async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
+    async def retrieve_highest_priced_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
         )
+        return highestPricedTokenTransfers[0]
+
+    async def retrieve_random_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
+        randomTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            orders=[RandomOrder()],
+            limit=1
+        )
+        return randomTokenTransfers[0]
+
+    async def get_transaction_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
+        return await self.retriever.get_transaction_count(startDate=startDate, endDate=endDate)
+
+    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
         mostTradedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
@@ -69,19 +82,7 @@ class NotdManager:
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
         )
-        randomTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
-            orders=[RandomOrder()],
-            limit=1
-        )
-        transactionCount = await self.retriever.get_transaction_count(startDate=startDate, endDate=endDate)
-        return UiData(
-            highestPricedTokenTransfer=highestPricedTokenTransfers[0],
-            mostTradedTokenTransfers=mostTradedTokenTransfers,
-            randomTokenTransfer=randomTokenTransfers[0],
-            sponsoredToken=self.get_sponsored_token(),
-            transactionCount=transactionCount
-        )
+        return mostTradedTokenTransfers
 
     async def get_collection_recent_sales(self, registryAddress: str) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(

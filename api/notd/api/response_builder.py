@@ -1,14 +1,12 @@
 
 import asyncio
 from typing import Sequence
-from notd.api.models_v1 import ApiToken
-from notd.api.models_v1 import ApiUiData
-from notd.model import UiData
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.model import Collection
+from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.store.retriever import Retriever
@@ -79,11 +77,14 @@ class ResponseBuilder:
     async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
 
-    async def retrieve_ui_data(self, uiData: UiData) -> ApiUiData:
-        return ApiUiData(
-            highestPricedTokenTransfer=(await self.token_transfer_from_model(tokenTransfer=uiData.highestPricedTokenTransfer)),
-            mostTradedTokenTransfers=(await self.token_transfers_from_models(tokenTransfers=uiData.mostTradedTokenTransfers)),
-            randomTokenTransfer=(await self.token_transfer_from_model(tokenTransfer=uiData.randomTokenTransfer)),
-            sponsoredToken=ApiToken.from_model(model=uiData.sponsoredToken),
-            transactionCount=uiData.transactionCount,
-        )
+    async def retrieve_highest_priced_transfer(self, transfer: TokenTransfer) -> ApiTokenTransfer:
+        return await self.token_transfer_from_model(tokenTransfer=transfer)
+
+    async def retrieve_random_transfer(self, randomTokenTransfer: TokenTransfer) -> ApiTokenTransfer:
+        return await self.token_transfer_from_model(tokenTransfer=randomTokenTransfer)
+
+    async def retrieve_most_traded_token_transfer(self, mostTradedTokenTransfers: TokenTransfer) -> ApiTokenTransfer:
+        return await self.token_transfers_from_models(tokenTransfers=mostTradedTokenTransfers)
+
+    async def retrieve_sponsored_token(self, sponsoredToken: Token) -> ApiCollectionToken:
+        return await self.collection_token_from_registry_address_token_id(registryAddress=sponsoredToken.registryAddress, tokenId=sponsoredToken.tokenId)
