@@ -83,9 +83,9 @@ class ApiToken(BaseModel):
         )
 
 class ApiTradedToken(BaseModel):
-    mostTradedToken: ApiCollectionToken
-    recentTrade: ApiTokenTransfer
-    numberOfTrades: int
+    collectionToken: ApiCollectionToken
+    latestTransfer: ApiTokenTransfer
+    transferCount: int
 
 
 class ApiUiData(BaseModel):

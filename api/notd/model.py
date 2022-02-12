@@ -94,9 +94,9 @@ class Token:
 
 @dataclasses.dataclass
 class TradedToken:
-    mostTradedToken: Token
-    recentTrade: TokenTransfer
-    numberOfTrades: int
+    collectionToken: Token
+    latestTransfer: TokenTransfer
+    transferCount: int
 
 @dataclasses.dataclass
 class UiData:

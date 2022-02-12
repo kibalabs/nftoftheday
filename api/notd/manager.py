@@ -85,9 +85,9 @@ class NotdManager:
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
         )
         return TradedToken(
-            mostTradedToken=mostTradedToken,
-            recentTrade=mostTradedTokenTransfers[0],
-            numberOfTrades=len(mostTradedTokenTransfers)
+            collectionToken=mostTradedToken,
+            latestTransfer=mostTradedTokenTransfers[0],
+            transferCount=len(mostTradedTokenTransfers)
         )
 
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:

@@ -87,9 +87,9 @@ class ResponseBuilder:
 
     async def retrieve_most_traded_token_transfer(self, tradedToken: TradedToken) -> ApiTradedToken:
         return ApiTradedToken(
-            mostTradedToken=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.mostTradedToken.registryAddress, tokenId=tradedToken.mostTradedToken.tokenId),
-            recentTrade=await self.token_transfer_from_model(tokenTransfer=tradedToken.recentTrade),
-            numberOfTrades=tradedToken.numberOfTrades
+            collectionToken=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.collectionToken.registryAddress, tokenId=tradedToken.collectionToken.tokenId),
+            latestTransfer=await self.token_transfer_from_model(tokenTransfer=tradedToken.latestTransfer),
+            transferCount=tradedToken.transferCount
         )
 
     async def retrieve_sponsored_token(self, sponsoredToken: Token) -> ApiCollectionToken:
