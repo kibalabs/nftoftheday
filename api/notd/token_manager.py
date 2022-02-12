@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import random
+from re import I
 from typing import List
 from typing import Tuple
 
@@ -45,11 +46,10 @@ class TokenManager:
         try:
             collection = await self.retriever.get_collection_by_address(address=address)
         except NotFoundException:
-            if shouldProcessIfNotFound:
-                await asyncio.sleep(sleepSecondsBeforeProcess)
-                await self.update_collection(address=address, shouldForce=True)
-            else:
+            if not shouldProcessIfNotFound:
                 raise
+            await asyncio.sleep(sleepSecondsBeforeProcess)
+            await self.update_collection(address=address, shouldForce=True)
             collection = await self.retriever.get_collection_by_address(address=address)
         return collection
 
@@ -60,11 +60,10 @@ class TokenManager:
         try:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         except NotFoundException:
-            if shouldProcessIfNotFound:
-                await asyncio.sleep(sleepSecondsBeforeProcess)
-                await self.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=True)
-            else:
+            if not shouldProcessIfNotFound:
                 raise
+            await asyncio.sleep(sleepSecondsBeforeProcess)
+            await self.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=True)
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return tokenMetadata
 

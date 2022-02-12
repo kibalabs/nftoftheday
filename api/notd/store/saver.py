@@ -9,6 +9,7 @@ from typing import Union
 import asyncpg
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
+from core.util import list_util
 from core.exceptions import DuplicateValueException
 from core.exceptions import InternalServerErrorException
 from sqlalchemy.sql import ClauseElement
@@ -98,9 +99,11 @@ class Saver(CoreSaver):
     async def create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer]) -> List[TokenTransfer]:
         if len(retrievedTokenTransfers) == 0:
             return
-        values = [self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers]
-        rows = await self._execute_many(query=TokenTransfersTable.insert().values(values).returning(TokenTransfersTable.c.tokenTransferId))
-        tokenTransferIds = [row[0] for row in rows]
+        tokenTransferIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenTransfers, chunkSize=100):
+            values = [self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in chunk]
+            rows = await self._execute_many(query=TokenTransfersTable.insert().values(values).returning(TokenTransfersTable.c.tokenTransferId))
+            tokenTransferIds += [row[0] for row in rows]
         return [self._token_transfer_from_retrieved(tokenTransferId=tokenTransferId, retrievedTokenTransfer=retrievedTokenTransfer) for tokenTransferId, retrievedTokenTransfer in zip(tokenTransferIds, retrievedTokenTransfers)]
 
     async def delete_token_transfer(self, tokenTransferId: int) -> None:
