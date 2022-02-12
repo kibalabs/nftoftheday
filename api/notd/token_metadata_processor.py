@@ -195,8 +195,6 @@ class TokenMetadataProcessor():
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
-            if len(description) != 1:
-                raise BadRequestException(f'description is an array with len != 1: {description}')
             description = description[0]
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
