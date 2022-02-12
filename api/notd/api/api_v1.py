@@ -5,6 +5,9 @@ from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
+from notd.api.endpoints_v1 import GetCollectionResponse
+from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
+from notd.api.endpoints_v1 import GetCollectionTokenResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrievedHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrievedHighestPriceTransferResponse
@@ -15,10 +18,6 @@ from notd.api.endpoints_v1 import RetrievedRandomTransferResponse
 from notd.api.endpoints_v1 import RetrievedSponsoredTokenResponse
 from notd.api.endpoints_v1 import RetrievedTransactionCountRequest
 from notd.api.endpoints_v1 import RetrievedTransactionCountResponse
-from notd.api.endpoints_v1 import GetCollectionResponse
-from notd.api.endpoints_v1 import GetCollectionTokenResponse
-from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
-
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
@@ -40,8 +39,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     async def retrieve_most_traded_token_transfer(request: RetrievedMostTradedRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
         startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
-        mostTradedTokenTransfers = await notdManager.retrieve_most_traded_token_transfer(startDate=startDate, endDate=endDate)
-        return RetrievedMostTradedResponse(tokenTransfers=(await responseBuilder.retrieve_most_traded_token_transfer(mostTradedTokenTransfers=mostTradedTokenTransfers)))
+        mostTradedToken = await notdManager.retrieve_most_traded_token_transfer(startDate=startDate, endDate=endDate)
+        return RetrievedMostTradedResponse(tradedToken=(await responseBuilder.retrieve_most_traded_token_transfer(tradedToken=mostTradedToken)))
 
     @router.post('/retrieve-random-token-transfer', response_model=RetrievedRandomTransferResponse)
     async def retrieve_random_transfer(request: RetrievedRandomTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):

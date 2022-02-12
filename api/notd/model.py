@@ -93,13 +93,18 @@ class Token:
 
 
 @dataclasses.dataclass
+class TradedToken:
+    mostTradedToken: Token
+    recentTrade: TokenTransfer
+    numberOfTrades: int
+
+@dataclasses.dataclass
 class UiData:
     highestPricedTokenTransfer: TokenTransfer
     mostTradedTokenTransfers: List[TokenTransfer]
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
     transactionCount: int
-
 
 @dataclasses.dataclass
 class SponsoredToken:

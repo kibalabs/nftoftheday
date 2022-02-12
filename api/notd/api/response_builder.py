@@ -5,10 +5,12 @@ from typing import Sequence
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
+from notd.api.models_v1 import ApiTradedToken
 from notd.model import Collection
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.model import TradedToken
 from notd.store.retriever import Retriever
 
 VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
@@ -83,8 +85,12 @@ class ResponseBuilder:
     async def retrieve_random_transfer(self, randomTokenTransfer: TokenTransfer) -> ApiTokenTransfer:
         return await self.token_transfer_from_model(tokenTransfer=randomTokenTransfer)
 
-    async def retrieve_most_traded_token_transfer(self, mostTradedTokenTransfers: TokenTransfer) -> ApiTokenTransfer:
-        return await self.token_transfers_from_models(tokenTransfers=mostTradedTokenTransfers)
+    async def retrieve_most_traded_token_transfer(self, tradedToken: TradedToken) -> ApiTradedToken:
+        return ApiTradedToken(
+            mostTradedToken=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.mostTradedToken.registryAddress, tokenId=tradedToken.mostTradedToken.tokenId),
+            recentTrade=await self.token_transfer_from_model(tokenTransfer=tradedToken.recentTrade),
+            numberOfTrades=tradedToken.numberOfTrades
+        )
 
     async def retrieve_sponsored_token(self, sponsoredToken: Token) -> ApiCollectionToken:
         return await self.collection_token_from_registry_address_token_id(registryAddress=sponsoredToken.registryAddress, tokenId=sponsoredToken.tokenId)

@@ -25,6 +25,7 @@ from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.model import TradedToken
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenTransfersTable
@@ -83,7 +84,11 @@ class NotdManager:
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
         )
-        return mostTradedTokenTransfers
+        return TradedToken(
+            mostTradedToken=mostTradedToken,
+            recentTrade=mostTradedTokenTransfers[0],
+            numberOfTrades=len(mostTradedTokenTransfers)
+        )
 
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(

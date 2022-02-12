@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
+from notd.api.models_v1 import ApiTradedToken
 
 
 class  RetrievedHighestPriceTransferRequest(BaseModel):
@@ -37,7 +38,7 @@ class  RetrievedMostTradedRequest(BaseModel):
     endDate: Optional[datetime.datetime]
 
 class RetrievedMostTradedResponse(BaseModel):
-    tokenTransfers: List[ApiTokenTransfer]
+    tradedToken: ApiTradedToken
 
 class  RetrievedSponsoredTokenRequest(BaseModel):
     pass

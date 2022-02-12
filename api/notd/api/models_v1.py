@@ -82,6 +82,11 @@ class ApiToken(BaseModel):
             tokenId=model.tokenId,
         )
 
+class ApiTradedToken(BaseModel):
+    mostTradedToken: ApiCollectionToken
+    recentTrade: ApiTokenTransfer
+    numberOfTrades: int
+
 
 class ApiUiData(BaseModel):
     highestPricedTokenTransfer: ApiTokenTransfer
