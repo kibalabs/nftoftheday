@@ -17,8 +17,6 @@ from notd.api.endpoints_v1 import RetrievedSponsoredTokenResponse
 from notd.api.endpoints_v1 import RetrievedTransactionCountRequest
 from notd.api.endpoints_v1 import RetrievedTransactionCountResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
-from notd.api.endpoints_v1 import GetCollectionTokenResponse
-from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse

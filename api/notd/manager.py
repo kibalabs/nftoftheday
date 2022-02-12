@@ -97,6 +97,8 @@ class NotdManager:
             limit=limit,
             offset=offset,
         )
+        return tokenTransfers
+
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
         items = await self.retriever.list_token_metadatas(
             fieldFilters=[
