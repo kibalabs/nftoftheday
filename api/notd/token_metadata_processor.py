@@ -68,12 +68,12 @@ class TokenMetadataProcessor():
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=base64.b64encode('{}'.encode()),
+            name=f'#{tokenId}',
+            description=None,
             imageUrl=None,
             animationUrl=None,
             youtubeUrl=None,
             backgroundColor=None,
-            name=f'#{tokenId}',
-            description=None,
             attributes=[],
         )
 
@@ -110,15 +110,18 @@ class TokenMetadataProcessor():
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             # NOTE(krishan711): special case for CryptoPunks
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
-            attributes = [{"trait_type": "Accessory", "value": attribute.strip()} for attribute in attributesResponse[0].split(',')]
+            attributes = [{'trait_type': 'Accessory', 'value': attribute.strip()} for attribute in attributesResponse[0].split(',')]
             imageSvgResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksImageSvgFunctionAbi, arguments={'index': int(tokenId)})
             return RetrievedTokenMetadata(
                 registryAddress=registryAddress,
                 tokenId=tokenId,
                 metadataUrl=base64.b64encode('{}'.encode()),
-                imageUrl=imageSvgResponse[0],
                 name=f'#{tokenId}',
                 description=None,
+                imageUrl=imageSvgResponse[0],
+                animationUrl=None,
+                youtubeUrl=None,
+                backgroundColor=None,
                 attributes=attributes,
             )
         if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
@@ -189,24 +192,22 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
-        name = str(tokenMetadataDict.get('name', f'#{tokenId}')).replace('\u0000', '')
+        name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
             if len(description) != 1:
                 raise BadRequestException(f'description is an array with len != 1: {description}')
             description = description[0]
-        if description is not None:
-            description = str(description).replace('\u0000', '')
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
-            imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_data'),
-            animationUrl=tokenMetadataDict.get("animation_url"),
-            youtubeUrl=tokenMetadataDict.get("youtube_url"),
-            backgroundColor=tokenMetadataDict.get("background_color"),
-            name=name,
-            description=description,
+            name=name.replace('\u0000', ''),
+            description=description.replace('\u0000', '') if description else None,
+            imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data'),
+            animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
+            youtubeUrl=tokenMetadataDict.get('youtube_url'),
+            backgroundColor=tokenMetadataDict.get('background_color'),
             attributes=tokenMetadataDict.get('attributes', []),
         )
         return retrievedTokenMetadata
