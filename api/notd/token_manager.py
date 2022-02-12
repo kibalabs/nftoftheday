@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import random
-from re import I
 from typing import List
 from typing import Tuple
 
