@@ -46,7 +46,8 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
             query = query.where(sqlalchemy.tuple_(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId).not_in(
                 TokenMetadataTable.select()
                     .with_only_columns([TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId])
-                    .group_by(TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId)))
+                    .group_by(TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId)
+            ))
             tokenTransfersToChange = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
             for tokenTransfer in tokenTransfersToChange:
                 if (tokenTransfer.registryAddress, tokenTransfer.tokenId) in cache:

@@ -57,11 +57,11 @@ class SubscribeRequest(BaseModel):
 class SubscribeResponse(BaseModel):
     pass
 
-class RetrieveCollectionTokenRequest(BaseModel):
-    pass
+class GetCollectionRequest(BaseModel):
+    address: str
 
-class RetrieveCollectionTokenResponse(BaseModel):
-    token: ApiCollectionToken
+class GetCollectionResponse(BaseModel):
+    collection: ApiCollection
 
 class GetCollectionRecentSalesRequest(BaseModel):
     pass
@@ -69,8 +69,14 @@ class GetCollectionRecentSalesRequest(BaseModel):
 class GetCollectionRecentSalesResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
 
-class RetrieveCollectionRequest(BaseModel):
-    address: str
+class GetCollectionTokenRequest(BaseModel):
+    pass
 
-class RetrieveCollectionResponse(BaseModel):
-    collection: ApiCollection
+class GetCollectionTokenResponse(BaseModel):
+    token: ApiCollectionToken
+
+class GetCollectionTokenRecentSalesRequest(BaseModel):
+    pass
+
+class GetCollectionTokenRecentSalesResponse(BaseModel):
+    tokenTransfers: List[ApiTokenTransfer]

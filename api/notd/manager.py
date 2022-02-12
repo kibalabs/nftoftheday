@@ -4,6 +4,7 @@ import json
 import logging
 from typing import List
 from typing import Sequence
+from typing import Tuple
 
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -84,7 +85,7 @@ class NotdManager:
         )
         return mostTradedTokenTransfers
 
-    async def get_collection_recent_sales(self, registryAddress: str) -> List[TokenTransfer]:
+    async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
@@ -92,7 +93,22 @@ class NotdManager:
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
-            limit=10,
+            limit=limit,
+            offset=offset,
+        )
+        return tokenTransfers
+
+    async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
+        tokenTransfers = await self.retriever.list_token_transfers(
+            shouldIgnoreRegistryBlacklist=True,
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
+            limit=limit,
+            offset=offset,
         )
         return tokenTransfers
 
@@ -129,22 +145,6 @@ class NotdManager:
         for blockNumber in reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1)):
             await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message(), delaySeconds=60)
 
-    async def _create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer]) -> None:
-        for retrievedTokenTransfer in retrievedTokenTransfers:
-            tokenTransfers = await self.retriever.list_token_transfers(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.transactionHash.key, eq=retrievedTokenTransfer.transactionHash),
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=retrievedTokenTransfer.registryAddress),
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=retrievedTokenTransfer.tokenId),
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=retrievedTokenTransfer.fromAddress),
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=retrievedTokenTransfer.toAddress),
-                ], limit=1, shouldIgnoreRegistryBlacklist=True
-            )
-            if len(tokenTransfers) > 0:
-                logging.info(f'Skipping saving {retrievedTokenTransfer.transactionHash}:{retrievedTokenTransfer.registryAddress}:{retrievedTokenTransfer.tokenId} as its already saved')
-                continue
-            await self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer)
-
     async def process_block_range(self, startBlockNumber: int, endBlockNumber: int) -> None:
         blockNumbers = list(range(startBlockNumber, endBlockNumber))
         await self.process_blocks(blockNumbers=blockNumbers)
@@ -155,6 +155,39 @@ class NotdManager:
     async def process_block(self, blockNumber: int) -> None:
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
         logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        await asyncio.gather(*[self.update_token_metadata_deferred(registryAddress=retrievedTokenTransfer.registryAddress, tokenId=retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers])
-        await asyncio.gather(*[self.update_collection_deferred(address=address) for address in set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers)])
-        await self._create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfers)
+        collectionAddresses = list(set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers))
+        logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
+        collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers))
+        logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
+        await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
+        await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
+        await self._save_block_transfers(blockNumber=blockNumber, retrievedTokenTransfers=retrievedTokenTransfers)
+
+    @staticmethod
+    def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, str, int]:
+        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
+
+    async def _save_block_transfers(self, blockNumber: int, retrievedTokenTransfers: Sequence[RetrievedTokenTransfer]) -> None:
+        async with self.saver.create_transaction():
+            existingTokenTransfers = await self.retriever.list_token_transfers(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
+                ], shouldIgnoreRegistryBlacklist=True
+            )
+            existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
+            existingTuples = set(existingTuplesTransferMap.keys())
+            retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in retrievedTokenTransfers}
+            retrievedTuples = set(retrievedTupleTransferMaps.keys())
+            deleteOperations = []
+            for existingTuple, existingTokenTransfer in existingTuplesTransferMap.items():
+                if existingTuple in retrievedTuples:
+                    continue
+                deleteOperations.append(self.saver.delete_token_transfer(tokenTransferId=existingTokenTransfer.tokenTransferId))
+            await asyncio.gather(*deleteOperations)
+            saveOperations = []
+            for retrievedTuple, retrievedTokenTransfer in retrievedTupleTransferMaps.items():
+                if retrievedTuple in existingTuples:
+                    continue
+                saveOperations.append(self.saver.create_token_transfer(retrievedTokenTransfer=retrievedTokenTransfer))
+            await asyncio.gather(*saveOperations)
+            logging.info(f'Saving transfers for block {blockNumber}: saved {len(saveOperations)}, deleted {len(deleteOperations)}, kept {len(existingTokenTransfers) - len(deleteOperations)}')

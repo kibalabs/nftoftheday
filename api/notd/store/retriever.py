@@ -7,6 +7,7 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
+from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 from notd.model import Collection
@@ -29,7 +30,7 @@ _REGISTRY_BLACKLIST = set([
 
 class Retriever(CoreRetriever):
 
-    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False) -> Sequence[TokenTransfer]:
+    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False) -> Sequence[TokenTransfer]:
         query = TokenTransfersTable.select()
         if not shouldIgnoreRegistryBlacklist:
             query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
@@ -40,6 +41,8 @@ class Retriever(CoreRetriever):
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
         rows = await self.database.fetch_all(query=query)
         tokenTransfers = [token_transfer_from_row(row) for row in rows]
         return tokenTransfers
@@ -65,6 +68,11 @@ class Retriever(CoreRetriever):
         rows = await self.database.fetch_all(query=query)
         return Token(registryAddress=rows[0][TokenTransfersTable.c.registryAddress], tokenId=rows[0][TokenTransfersTable.c.tokenId])
 
+    async def query_token_metadatas(self, query: Select) -> Sequence[TokenMetadata]:
+        rows = await self.database.fetch_all(query=query)
+        tokenMetadatas = [token_metadata_from_row(row) for row in rows]
+        return tokenMetadatas
+
     async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None) -> Sequence[TokenMetadata]:
         query = TokenMetadataTable.select()
         if fieldFilters:
@@ -73,9 +81,7 @@ class Retriever(CoreRetriever):
             query = self._apply_orders(query=query, table=TokenMetadataTable, orders=orders)
         if limit:
             query = query.limit(limit)
-        rows = await self.database.fetch_all(query=query)
-        tokenMetdata = [token_metadata_from_row(row) for row in rows]
-        return tokenMetdata
+        return await self.query_token_metadatas(query=query)
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         query = TokenMetadataTable.select() \
@@ -96,8 +102,8 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         rows = await self.database.fetch_all(query=query)
-        tokenCollection = [collection_from_row(row) for row in rows]
-        return tokenCollection
+        tokenCollections = [collection_from_row(row) for row in rows]
+        return tokenCollections
 
     async def get_collection_by_address(self, address: str) -> Collection:
         query = TokenCollectionsTable.select() \
