@@ -42,7 +42,7 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
         imageUrl=row[TokenMetadataTable.c.imageUrl],
         animationUrl=row[TokenMetadataTable.c.animationUrl],
         youtubeUrl=row[TokenMetadataTable.c.youtubeUrl],
-        backgroundColour=row[TokenMetadataTable.c.backgroundColour],
+        backgroundColor=row[TokenMetadataTable.c.backgroundColor],
         description=row[TokenMetadataTable.c.description],
         attributes=row[TokenMetadataTable.c.attributes],
     )

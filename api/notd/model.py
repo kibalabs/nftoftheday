@@ -41,7 +41,7 @@ class RetrievedTokenMetadata:
     imageUrl: Optional[str]
     animationUrl: Optional[str]
     youtubeUrl: Optional[str]
-    backgroundColour: Optional[str]
+    backgroundColor: Optional[str]
     name: Optional[str]
     description: Optional[str]
     attributes: JSON
