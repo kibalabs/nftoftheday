@@ -3,10 +3,9 @@ from typing import Optional
 
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
-from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
-from notd.api.models_v1 import ApiCollectionStatistics
 
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
+from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrieveCollectionResponse
 from notd.api.endpoints_v1 import RetrieveCollectionTokenResponse

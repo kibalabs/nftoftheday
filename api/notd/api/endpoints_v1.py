@@ -5,9 +5,9 @@ from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
-from notd.api.models_v1 import ApiCollectionStatistics
 
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiUiData

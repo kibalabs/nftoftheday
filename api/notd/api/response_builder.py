@@ -1,13 +1,13 @@
 
 import asyncio
 from typing import Sequence
-from notd.api.models_v1 import ApiCollectionStatistics
-from notd.model import CollectionStatistics
 
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.model import Collection
+from notd.model import CollectionStatistics
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.store.retriever import Retriever
