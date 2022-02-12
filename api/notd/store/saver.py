@@ -1,12 +1,17 @@
 import contextlib
 import logging
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
 
+import asyncpg
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
+from core.exceptions import DuplicateValueException
+from core.exceptions import InternalServerErrorException
+from sqlalchemy.sql import ClauseElement
 
 from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
@@ -34,8 +39,19 @@ class Saver(CoreSaver):
         else:
             await transaction.commit()
 
-    async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer) -> TokenTransfer:
-        tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={  # pylint: disable=no-value-for-parameter
+    # NOTE(krishan711): this uses fetch_all instead of execute_many because of https://github.com/encode/databases/issues/215
+    async def _execute_many(self, query: ClauseElement) -> List[Any]:
+        try:
+            return await self.database.fetch_all(query=query)
+        except asyncpg.exceptions.UniqueViolationError as exception:
+            raise DuplicateValueException(message=str(exception)) from exception
+        except Exception as exception:
+            logging.error(exception)
+            raise InternalServerErrorException(message='Error running save operation') from exception
+
+    @staticmethod
+    def _get_create_token_transfer_values(retrievedTokenTransfer: RetrievedTokenTransfer) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
             TokenTransfersTable.c.transactionHash.key: retrievedTokenTransfer.transactionHash,
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
             TokenTransfersTable.c.fromAddress.key: retrievedTokenTransfer.fromAddress,
@@ -51,7 +67,10 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.blockHash.key: retrievedTokenTransfer.blockHash,
             TokenTransfersTable.c.blockDate.key: retrievedTokenTransfer.blockDate,
             TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
-        })
+        }
+
+    @staticmethod
+    def _token_transfer_from_retrieved(tokenTransferId: int, retrievedTokenTransfer: RetrievedTokenTransfer) -> TokenTransfer:
         return TokenTransfer(
             tokenTransferId=tokenTransferId,
             transactionHash=retrievedTokenTransfer.transactionHash,
@@ -71,8 +90,27 @@ class Saver(CoreSaver):
             tokenType=retrievedTokenTransfer.tokenType
         )
 
+    async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer) -> TokenTransfer:
+        values = self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer)
+        tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values=values)
+        return self._token_transfer_from_retrieved(tokenTransferId=tokenTransferId, retrievedTokenTransfer=retrievedTokenTransfer)
+
+    async def create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer]) -> List[TokenTransfer]:
+        if len(retrievedTokenTransfers) == 0:
+            return
+        values = [self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in retrievedTokenTransfers]
+        rows = await self._execute_many(query=TokenTransfersTable.insert().values(values).returning(TokenTransfersTable.c.tokenTransferId))
+        tokenTransferIds = [row[0] for row in rows]
+        return [self._token_transfer_from_retrieved(tokenTransferId=tokenTransferId, retrievedTokenTransfer=retrievedTokenTransfer) for tokenTransferId, retrievedTokenTransfer in zip(tokenTransferIds, retrievedTokenTransfers)]
+
     async def delete_token_transfer(self, tokenTransferId: int) -> None:
         query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId == tokenTransferId)
+        await self._execute(query=query, values=None)
+
+    async def delete_token_transfers(self, tokenTransferIds: List[int]) -> None:
+        if len(tokenTransferIds) == 0:
+            return
+        query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId.in_(tokenTransferIds))
         await self._execute(query=query, values=None)
 
     async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
