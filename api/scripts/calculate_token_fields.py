@@ -1,20 +1,22 @@
-from collections import defaultdict
+import asyncio
 import csv
+import json
+import logging
 import os
 import sys
-import asyncio
-import logging
-from typing import List, Optional
-import boto3
-import json
-from databases import Database
+from collections import defaultdict
+from typing import List
+from typing import Optional
 
 import asyncclick as click
+import boto3
 from core.s3_manager import S3Manager
+from databases import Database
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema_conversions import collection_from_row
+
 
 @click.option('-s', '--start-collection-id', 'startCollectionId', required=False, type=int)
 @click.option('-e', '--end-collection-id', 'endCollectionId', required=False, type=int)
