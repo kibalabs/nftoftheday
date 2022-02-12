@@ -49,7 +49,8 @@ class RetrieveMostTradedResponse(BaseModel):
     tradedToken: ApiTradedToken
 
 class  RetrieveSponsoredTokenRequest(BaseModel):
-    pass
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
 
 class RetrieveSponsoredTokenResponse(BaseModel):
     token: ApiCollectionToken
