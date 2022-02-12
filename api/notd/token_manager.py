@@ -120,7 +120,7 @@ class TokenManager:
         except TokenHasNoMetadataException:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        with self.saver.create_transaction():
+        async with self.saver.create_transaction():
             try:
                 tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
             except NotFoundException:
@@ -173,7 +173,7 @@ class TokenManager:
         except CollectionDoesNotExist:
             logging.info(f'Failed to retrieve non-existant collection: {address}')
             return
-        with self.saver.create_transaction():
+        async with self.saver.create_transaction():
             try:
                 collection = await self.retriever.get_collection_by_address(address=address)
             except NotFoundException:
