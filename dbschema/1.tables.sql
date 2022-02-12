@@ -40,6 +40,9 @@ CREATE TABLE tbl_token_metadatas (
     token_id TEXT NOT NULL,
     metadata_url TEXT NOT NULL,
     image_url TEXT,
+    animation_url TEXT,
+    youtube_url TEXT,
+    background_colour TEXT,
     name TEXT,
     description TEXT,
     attributes JSON
