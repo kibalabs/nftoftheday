@@ -158,8 +158,8 @@ class NotdManager:
         logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
         collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers))
         logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
-        # await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
-        # await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
+        await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
+        await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
         await self._save_block_transfers(blockNumber=blockNumber, retrievedTokenTransfers=retrievedTokenTransfers)
 
     @staticmethod
