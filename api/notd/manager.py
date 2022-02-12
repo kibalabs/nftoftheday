@@ -26,6 +26,7 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
+from notd.model import UiData
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenTransfersTable
@@ -71,8 +72,26 @@ class NotdManager:
         )
         return randomTokenTransfers[0]
 
-    async def get_transaction_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
+    async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         return await self.retriever.get_transaction_count(startDate=startDate, endDate=endDate)
+
+    async def retrieve_ui_data(self, startDate: datetime.datetime, endDate: datetime.datetime) -> UiData:
+        mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
+        mostTradedTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
+        )
+        return UiData(
+            highestPricedTokenTransfer=await self.retrieve_highest_priced_transfer(startDate=startDate, endDate=endDate),
+            randomTokenTransfer=await self.retrieve_random_transfer(startDate=startDate, endDate=endDate),
+            mostTradedTokenTransfers = mostTradedTokenTransfers,
+            sponsoredToken=self.get_sponsored_token(),
+            transactionCount=await self.get_transfer_count(startDate=startDate, endDate=endDate)
+        )
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)

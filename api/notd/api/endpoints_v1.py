@@ -10,40 +10,48 @@ from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
+from notd.api.models_v1 import ApiUiData
 
 
-class  RetrievedHighestPriceTransferRequest(BaseModel):
+class RetrieveUiDataRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
 
-class RetrievedHighestPriceTransferResponse(BaseModel):
+class RetrieveUiDataResponse(BaseModel):
+    uiData: ApiUiData
+
+class  RetrieveHighestPriceTransferRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrieveHighestPriceTransferResponse(BaseModel):
     transfer: ApiTokenTransfer
 
-class  RetrievedRandomTransferRequest(BaseModel):
+class  RetrieveRandomTransferRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
 
-class RetrievedRandomTransferResponse(BaseModel):
+class RetrieveRandomTransferResponse(BaseModel):
     transfer: ApiTokenTransfer
 
-class  RetrievedTransactionCountRequest(BaseModel):
+class  RetrieveTransactionCountRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
 
-class RetrievedTransactionCountResponse(BaseModel):
+class RetrieveTransactionCountResponse(BaseModel):
     count: int
 
-class  RetrievedMostTradedRequest(BaseModel):
+class  RetrieveMostTradedRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
 
-class RetrievedMostTradedResponse(BaseModel):
+class RetrieveMostTradedResponse(BaseModel):
     tradedToken: ApiTradedToken
 
-class  RetrievedSponsoredTokenRequest(BaseModel):
+class  RetrieveSponsoredTokenRequest(BaseModel):
     pass
 
-class RetrievedSponsoredTokenResponse(BaseModel):
+class RetrieveSponsoredTokenResponse(BaseModel):
     token: ApiCollectionToken
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
