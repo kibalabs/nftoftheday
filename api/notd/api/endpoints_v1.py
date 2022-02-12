@@ -10,15 +10,41 @@ from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
-from notd.api.models_v1 import ApiUiData
 
 
-class RetrieveUiDataRequest(BaseModel):
+class  RetrievedHighestPriceTransferRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
 
-class RetrieveUiDataResponse(BaseModel):
-    uiData: ApiUiData
+class RetrievedHighestPriceTransferResponse(BaseModel):
+    transfer: ApiTokenTransfer
+
+class  RetrievedRandomTransferRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrievedRandomTransferResponse(BaseModel):
+    transfer: ApiTokenTransfer
+
+class  RetrievedTransactionCountRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrievedTransactionCountResponse(BaseModel):
+    count: int
+
+class  RetrievedMostTradedRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrievedMostTradedResponse(BaseModel):
+    tokenTransfers: List[ApiTokenTransfer]
+
+class  RetrievedSponsoredTokenRequest(BaseModel):
+    pass
+
+class RetrievedSponsoredTokenResponse(BaseModel):
+    token: ApiCollectionToken
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass
@@ -32,11 +58,11 @@ class SubscribeRequest(BaseModel):
 class SubscribeResponse(BaseModel):
     pass
 
-class RetrieveCollectionTokenRequest(BaseModel):
-    pass
+class GetCollectionRequest(BaseModel):
+    address: str
 
-class RetrieveCollectionTokenResponse(BaseModel):
-    token: ApiCollectionToken
+class GetCollectionResponse(BaseModel):
+    collection: ApiCollection
 
 class GetCollectionRecentSalesRequest(BaseModel):
     pass
@@ -53,5 +79,11 @@ class GetCollectionStatisticsResponse(BaseModel):
 class RetrieveCollectionRequest(BaseModel):
     address: str
 
-class RetrieveCollectionResponse(BaseModel):
-    collection: ApiCollection
+class GetCollectionTokenResponse(BaseModel):
+    token: ApiCollectionToken
+
+class GetCollectionTokenRecentSalesRequest(BaseModel):
+    pass
+
+class GetCollectionTokenRecentSalesResponse(BaseModel):
+    tokenTransfers: List[ApiTokenTransfer]

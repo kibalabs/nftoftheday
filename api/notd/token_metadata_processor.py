@@ -155,6 +155,8 @@ class TokenMetadataProcessor():
                 raise TokenDoesNotExistException()
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
+            if 'stack limit reached' in badRequestException.message:
+                raise TokenDoesNotExistException()
             raise badRequestException
         tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
