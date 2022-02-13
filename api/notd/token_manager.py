@@ -98,6 +98,7 @@ class TokenManager:
             )
             if len(recentlyUpdatedTokens) > 0:
                 logging.info('Skipping token because it has been updated recently.')
+                return
         await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
@@ -111,13 +112,11 @@ class TokenManager:
             )
             if len(recentlyUpdatedTokens) > 0:
                 logging.info('Skipping token because it has been updated recently.')
+                return
         collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
-        except TokenDoesNotExistException:
-            logging.info(f'Failed to retrieve non-existant token: {registryAddress}: {tokenId}')
-            retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        except TokenHasNoMetadataException:
+        except (TokenDoesNotExistException, TokenHasNoMetadataException):
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         async with self.saver.create_transaction():
@@ -156,6 +155,7 @@ class TokenManager:
             )
             if len(recentlyUpdatedCollections) > 0:
                 logging.info('Skipping collection because it has been updated recently.')
+                return
         await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
@@ -168,6 +168,7 @@ class TokenManager:
             )
             if len(recentlyUpdatedCollections) > 0:
                 logging.info('Skipping collection because it has been updated recently.')
+                return
         try:
             retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)
         except CollectionDoesNotExist:
