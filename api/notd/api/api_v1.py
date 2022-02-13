@@ -31,7 +31,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     router = KibaRouter()
 
     @router.post('/retrieve-ui-data', response_model=RetrieveUiDataResponse)
-    async def retrieve_ui_data(request: RetrieveUiDataRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
+    async def retrieve_ui_data(request: RetrieveUiDataRequest):
         startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         uiData = await notdManager.retrieve_ui_data(startDate=startDate, endDate=endDate)
