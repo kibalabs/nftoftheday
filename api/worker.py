@@ -10,8 +10,8 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.slack_client import SlackClient
-from core.web3.eth_client import RestEthClient
 from core.store.database import Database
+from core.web3.eth_client import RestEthClient
 
 from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
