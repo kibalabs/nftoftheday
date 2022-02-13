@@ -1,10 +1,12 @@
 import datetime
 import json
 import logging
-from typing import List, Optional
+from typing import List
+from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
+import sqlalchemy
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
@@ -14,10 +16,10 @@ from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-import sqlalchemy
 
 from notd.block_processor import BlockProcessor
-from notd.messages import CheckBadBlocksMessageContent, ProcessBlockMessageContent
+from notd.messages import CheckBadBlocksMessageContent
+from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
