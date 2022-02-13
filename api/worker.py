@@ -11,7 +11,7 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.slack_client import SlackClient
 from core.web3.eth_client import RestEthClient
-from databases import Database
+from core.store.database import Database
 
 from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
@@ -24,7 +24,8 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 
 
 async def main():
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
 

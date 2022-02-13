@@ -167,8 +167,9 @@ class NotdManager:
         return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
 
     async def _save_block_transfers(self, blockNumber: int, retrievedTokenTransfers: Sequence[RetrievedTokenTransfer]) -> None:
-        async with self.saver.create_transaction():
+        async with self.saver.create_transaction() as connection:
             existingTokenTransfers = await self.retriever.list_token_transfers(
+                connection=connection,
                 fieldFilters=[
                     StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
                 ], shouldIgnoreRegistryBlacklist=True
@@ -182,11 +183,11 @@ class NotdManager:
                 if existingTuple in retrievedTuples:
                     continue
                 tokenTransferIdsToDelete.append(existingTokenTransfer.tokenTransferId)
-            await self.saver.delete_token_transfers(tokenTransferIds=tokenTransferIdsToDelete)
+            await self.saver.delete_token_transfers(connection=connection, tokenTransferIds=tokenTransferIdsToDelete)
             retrievedTokenTransfersToSave = []
             for retrievedTuple, retrievedTokenTransfer in retrievedTupleTransferMaps.items():
                 if retrievedTuple in existingTuples:
                     continue
                 retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
-            await self.saver.create_token_transfers(retrievedTokenTransfers=retrievedTokenTransfersToSave)
+            await self.saver.create_token_transfers(connection=connection, retrievedTokenTransfers=retrievedTokenTransfersToSave)
             logging.info(f'Saving transfers for block {blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
