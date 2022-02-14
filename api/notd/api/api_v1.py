@@ -58,7 +58,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         randomTokenTransfer = await notdManager.retrieve_random_transfer(startDate=startDate, endDate=endDate)
         return RetrieveRandomTransferResponse(transfer=(await responseBuilder.token_transfer_from_model(tokenTransfer=randomTokenTransfer)))
 
-    @router.get('/retrieve-sponsored-token', response_model=RetrieveSponsoredTokenResponse)
+    @router.post('/retrieve-sponsored-token', response_model=RetrieveSponsoredTokenResponse)
     async def get_sponsored_token():
         sponsoredToken = notdManager.get_sponsored_token()
         return RetrieveSponsoredTokenResponse(token=(await responseBuilder.collection_token_from_registry_address_token_id(registryAddress=sponsoredToken.registryAddress, tokenId=sponsoredToken.tokenId)))
