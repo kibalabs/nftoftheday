@@ -1,28 +1,21 @@
+import asyncio
 import json
+import logging
 import os
 import sys
 from typing import Optional
 
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-import asyncio
-import logging
-
 import asyncclick as click
 import boto3
-from core.queues.sqs_message_queue import SqsMessageQueue
 from core.s3_manager import S3Manager
-from core.util import date_util
+from core.store.database import Database
 
-from databases.core import Database
-
-# from notd.messages import UpdateTokenMetadataMessageContent
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.retriever import Retriever
-from notd.token_manager import TokenManager 
 from notd.store.saver import Saver
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema_conversions import token_metadata_from_row
+from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 
@@ -30,7 +23,8 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 @click.option('-s', '--start-id-number', 'startId', required=False, type=int)
 @click.option('-e', '--end-id-number', 'endId', required=False, type=int)
 async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
     #sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
@@ -38,14 +32,14 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
     s3manager = S3Manager(s3Client=s3Client)
     tokenMetadataProcessor = TokenMetadataProcessor(requester=None, ethClient=None, s3manager=s3manager, bucketName=None)
     tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=None)
-    
+
     await database.connect()
     query = TokenMetadataTable.select()
     if startId:
         query = query.where(TokenMetadataTable.c.tokenMetadataId >= startId)
     if endId:
-        query = query.where(TokenMetadataTable.c.tokenMetadataId < endId)    
-    tokenMetadatasToChange = [token_metadata_from_row(row) async for row in database.iterate(query=query)]
+        query = query.where(TokenMetadataTable.c.tokenMetadataId < endId)
+    tokenMetadatasToChange = [token_metadata_from_row(row) async for row in database.execute(query=query)]
     logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
     for tokenMetadata in tokenMetadatasToChange:
         tokenDirectory = f'{os.environ["S3_BUCKET"]}/token-metadatas/{tokenMetadata.registryAddress}/{tokenMetadata.tokenId}/'
@@ -60,7 +54,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
             retrievedTokenMetadata = await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)
             logging.info(f'Updating {(tokenMetadata.tokenMetadataId)}')
             await tokenManger.update_token_metadata_from_data(registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, retrievedTokenMetadata=retrievedTokenMetadata)
-           
+
     await database.disconnect()
 
 if __name__ == '__main__':

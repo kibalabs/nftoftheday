@@ -11,7 +11,7 @@ from typing import Optional
 import asyncclick as click
 import boto3
 from core.s3_manager import S3Manager
-from databases import Database
+from core.store.database import Database
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.schema import TokenCollectionsTable
@@ -22,7 +22,8 @@ from notd.store.schema_conversions import collection_from_row
 @click.option('-e', '--end-collection-id', 'endCollectionId', required=False, type=int)
 @click.command()
 async def calculate_token_fields(startCollectionId: Optional[int], endCollectionId: Optional[int]):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     bucketName = os.environ['S3_BUCKET']

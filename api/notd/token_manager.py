@@ -10,13 +10,13 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-from notd.model import RetrievedTokenMetadata
 
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
+from notd.model import RetrievedTokenMetadata
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver

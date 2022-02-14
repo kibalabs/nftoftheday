@@ -1,20 +1,15 @@
-import os
-import sys
-from operator import concat
-
-import boto3
-import sqlalchemy
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 import asyncio
 import logging
+import os
+import sys
 
 import asyncclick as click
+import boto3
+import sqlalchemy
 from core.queues.sqs_message_queue import SqsMessageQueue
-from databases.core import Database
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from core.store.database import Database
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.store.schema import TokenMetadataTable
@@ -27,7 +22,8 @@ from notd.store.schema_conversions import token_transfer_from_row
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
 async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 

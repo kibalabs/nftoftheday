@@ -3,7 +3,8 @@ import json
 import logging
 import urllib.parse
 from json.decoder import JSONDecodeError
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
