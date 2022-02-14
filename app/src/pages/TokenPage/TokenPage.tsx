@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Direction, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Direction, PaddingSize, Stack } from '@kibalabs/ui-react';
+
+import { CollectionToken, TokenAttribute } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
-import { TokenAttribute } from '../../client/resources';
-import { CollectionToken } from '../../client/resources';
 import { useGlobals } from '../../globalsContext';
 
 
@@ -31,10 +31,10 @@ export const TokenPage = (): React.ReactElement => {
     updateCollectionToken();
   }, [updateCollectionToken]);
   return (
-       <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide1} shouldWrapItems={true}>
-            {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
-              <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
-            ))}
-          </Stack>
+    <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide1} shouldWrapItems={true}>
+      {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
+        <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
+      ))}
+    </Stack>
   );
 };
