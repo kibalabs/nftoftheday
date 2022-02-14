@@ -1,6 +1,6 @@
 import datetime
-import logging
-from typing import List, Optional
+from typing import List
+from typing import Optional
 from typing import Sequence
 
 from core.exceptions import NotFoundException
@@ -11,7 +11,6 @@ from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
-from notd.token_metadata_processor import TokenMetadataProcessor
 
 from notd.model import Collection
 from notd.model import Token
@@ -127,13 +126,13 @@ class Retriever(CoreRetriever):
         query = TokenTransfersTable.select()\
             .where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
-        for row in await self.database.execute(query=query):
+        for row in await self.database.execute(query=query, connection=connection):
             tokenTransfer = token_transfer_from_row(row)
             boughtTokens.append(tokenTransfer)
         query = TokenTransfersTable.select()
         query = query.where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
-        for row in await self.database.execute(query=query):
+        for row in await self.database.execute(query=query, connection=connection):
             tokenTransfer = token_transfer_from_row(row)
             soldTokens.append(tokenTransfer)
 

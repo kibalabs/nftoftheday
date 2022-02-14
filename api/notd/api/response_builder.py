@@ -1,7 +1,9 @@
 
 import asyncio
-from typing import List, Sequence
-from notd.token_metadata_processor import TokenMetadataProcessor
+from typing import List
+from typing import Sequence
+from core.exceptions import NotFoundException
+
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
@@ -15,6 +17,7 @@ from notd.model import TokenTransfer
 from notd.model import TradedToken
 from notd.model import UiData
 from notd.store.retriever import Retriever
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
 
@@ -64,7 +67,7 @@ class ResponseBuilder:
         for token in tokens:
             try:
                 tokenMetadatas += [await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=token.registryAddress, tokenId=token.tokenId)]
-            except:
+            except NotFoundException:
                 tokenMetadatas += [TokenMetadataProcessor.get_default_token_metadata(registryAddress=token.registryAddress, tokenId=token.tokenId)]
 
         return await asyncio.gather(*[self.collection_token_from_model(tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatas])
