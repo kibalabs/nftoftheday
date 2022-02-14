@@ -75,7 +75,7 @@ export const CollectionPage = (): React.ReactElement => {
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
-  
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collection === undefined ? (
@@ -189,7 +189,7 @@ export const CollectionPage = (): React.ReactElement => {
                     <TokenCard
                       key={index}
                       collectionToken={recentSale.token}
-                      subtitle={`Bought at ${dateToString(recentSale.blockDate, 'HH:mm')} for Ξ${recentSale.value / 1000000000000000000.0}`}
+                      subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for Ξ${recentSale.value / 1000000000000000000.0}`}
                       target={`/collections/${recentSale.registryAddress}/recent-sales`}
                     />
                   ))}
