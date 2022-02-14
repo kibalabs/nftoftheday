@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import List, Optional
 from typing import Sequence
 
 from core.exceptions import NotFoundException
@@ -118,3 +118,29 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'Collection with registry {address} not found')
         collection = collection_from_row(row)
         return collection
+
+    async def get_collection_holding(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
+        boughtTokens = []
+        soldTokens= []
+        query = TokenTransfersTable.select()\
+            .where(TokenTransfersTable.c.registryAddress == address)
+        query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
+        result = await self.database.execute(query=query, connection=connection)
+        tokens = [token_transfer_from_row(row) for row in result]
+        print(tokens)
+
+        #for row in await self.database.execute(query=query):
+        #    tokenTransfer = token_transfer_from_row(row)
+        #    boughtTokens.append(tokenTransfer)
+        #query = TokenTransfersTable.select()
+        #query = query.where(TokenTransfersTable.c.registryAddress == address)
+        #query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
+        #for row in await self.database.execute(query=query):
+        #    tokenTransfer = token_transfer_from_row(row)
+        #    soldTokens.append(tokenTransfer)
+#
+        #uniqueBoughtTokens = set(boughtTokens)
+        #uniqueSoldTokens = set(soldTokens)
+        #tokensOwned = uniqueBoughtTokens - uniqueSoldTokens
+
+        return tokens

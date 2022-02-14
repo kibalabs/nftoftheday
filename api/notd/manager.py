@@ -17,6 +17,7 @@ from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import list_util
+from notd.api.models_v1 import ApiCollectionToken
 
 from notd.block_processor import BlockProcessor
 from notd.messages import CheckBadBlocksMessageContent
@@ -258,3 +259,8 @@ class NotdManager:
                 retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
             await self.saver.create_token_transfers(connection=connection, retrievedTokenTransfers=retrievedTokenTransfersToSave)
             logging.info(f'Saving transfers for block {blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
+
+    async def get_collection_holding(self, address: str, ownerAddress: str, ) -> List[ApiCollectionToken]:
+        tokens = await self.retriever.get_collection_holding(address=address, ownerAddress=ownerAddress)
+        print(tokens)
+        return tokens

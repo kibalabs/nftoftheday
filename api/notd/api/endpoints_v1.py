@@ -73,6 +73,13 @@ class GetCollectionRequest(BaseModel):
 class GetCollectionResponse(BaseModel):
     collection: ApiCollection
 
+class GetHoldingRequest(BaseModel):
+    registryAddress: str
+    ownerAddress: str
+
+class GetHoldingResponse(BaseModel):
+    tokens: List[ApiCollectionToken]
+
 class GetCollectionRecentSalesRequest(BaseModel):
     pass
 

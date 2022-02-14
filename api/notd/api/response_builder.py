@@ -58,6 +58,8 @@ class ResponseBuilder:
             description=tokenMetadata.description,
             attributes=attributes,
         )
+    async def collection_tokens_from_models(self, tokens: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
+        return await asyncio.gather(*[self.collection_from_model(TokenMetadata=token) for token in tokens])
 
     async def token_transfer_from_model(self, tokenTransfer: TokenTransfer) -> ApiTokenTransfer:
         return ApiTokenTransfer(
