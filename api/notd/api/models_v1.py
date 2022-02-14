@@ -6,6 +6,7 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from notd.model import Token
 from notd.model import UiData
 
 
@@ -75,11 +76,16 @@ class ApiToken(BaseModel):
     tokenId: str
 
     @classmethod
-    def from_model(cls, model: UiData):
+    def from_model(cls, model: Token):
         return cls(
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
         )
+
+class ApiTradedToken(BaseModel):
+    collectionToken: ApiCollectionToken
+    latestTransfer: ApiTokenTransfer
+    transferCount: int
 
 
 class ApiUiData(BaseModel):
