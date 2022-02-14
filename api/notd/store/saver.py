@@ -1,12 +1,12 @@
-import contextlib
-import logging
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
 
+from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
+from core.util import list_util
 
 from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
@@ -21,21 +21,9 @@ _EMPTY_OBJECT = '_EMPTY_OBJECT'
 
 class Saver(CoreSaver):
 
-    @contextlib.asynccontextmanager
-    async def create_transaction(self):
-        transaction = self.database.transaction()
-        try:
-            await transaction.start()
-            yield None
-        except Exception as exception:
-            logging.info(f'Rolling back due to exception: {exception}')
-            await transaction.rollback()
-            raise
-        else:
-            await transaction.commit()
-
-    async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer) -> TokenTransfer:
-        tokenTransferId = await self._execute(query=TokenTransfersTable.insert(), values={  # pylint: disable=no-value-for-parameter
+    @staticmethod
+    def _get_create_token_transfer_values(retrievedTokenTransfer: RetrievedTokenTransfer) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
             TokenTransfersTable.c.transactionHash.key: retrievedTokenTransfer.transactionHash,
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
             TokenTransfersTable.c.fromAddress.key: retrievedTokenTransfer.fromAddress,
@@ -51,7 +39,10 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.blockHash.key: retrievedTokenTransfer.blockHash,
             TokenTransfersTable.c.blockDate.key: retrievedTokenTransfer.blockDate,
             TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
-        })
+        }
+
+    @staticmethod
+    def _token_transfer_from_retrieved(tokenTransferId: int, retrievedTokenTransfer: RetrievedTokenTransfer) -> TokenTransfer:
         return TokenTransfer(
             tokenTransferId=tokenTransferId,
             transactionHash=retrievedTokenTransfer.transactionHash,
@@ -71,24 +62,54 @@ class Saver(CoreSaver):
             tokenType=retrievedTokenTransfer.tokenType
         )
 
-    async def delete_token_transfer(self, tokenTransferId: int) -> None:
-        query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId == tokenTransferId)
-        await self._execute(query=query, values=None)
+    async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer, connection: Optional[DatabaseConnection] = None) -> TokenTransfer:
+        values = self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer)
+        query = TokenTransfersTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenTransferId = result.inserted_primary_key[0]
+        return self._token_transfer_from_retrieved(tokenTransferId=tokenTransferId, retrievedTokenTransfer=retrievedTokenTransfer)
 
-    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List]) -> TokenMetadata:
+    async def create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer], connection: Optional[DatabaseConnection] = None) -> List[TokenTransfer]:
+        if len(retrievedTokenTransfers) == 0:
+            return
+        tokenTransferIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenTransfers, chunkSize=100):
+            values = [self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in chunk]
+            query = TokenTransfersTable.insert().values(values).returning(TokenTransfersTable.c.tokenTransferId)
+            rows = await self._execute(query=query, connection=connection)
+            tokenTransferIds += [row[0] for row in rows]
+        return [self._token_transfer_from_retrieved(tokenTransferId=tokenTransferId, retrievedTokenTransfer=retrievedTokenTransfer) for tokenTransferId, retrievedTokenTransfer in zip(tokenTransferIds, retrievedTokenTransfers)]
+
+    async def delete_token_transfer(self, tokenTransferId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId == tokenTransferId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_token_transfers(self, tokenTransferIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(tokenTransferIds) == 0:
+            return
+        query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId.in_(tokenTransferIds))
+        await self._execute(query=query, connection=connection)
+
+    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
-        tokenMetadataId = await self._execute(query=TokenMetadataTable.insert(), values={  # pylint: disable=no-value-for-parameter
+        values = {
             TokenMetadataTable.c.createdDate.key: createdDate,
             TokenMetadataTable.c.updatedDate.key: updatedDate,
             TokenMetadataTable.c.registryAddress.key: registryAddress,
             TokenMetadataTable.c.tokenId.key: tokenId,
             TokenMetadataTable.c.metadataUrl.key: metadataUrl,
             TokenMetadataTable.c.imageUrl.key: imageUrl,
+            TokenMetadataTable.c.animationUrl.key: animationUrl,
+            TokenMetadataTable.c.youtubeUrl.key: youtubeUrl,
+            TokenMetadataTable.c.backgroundColor.key: backgroundColor,
             TokenMetadataTable.c.name.key: name,
             TokenMetadataTable.c.description.key: description,
             TokenMetadataTable.c.attributes.key: attributes,
-        })
+        }
+        query = TokenMetadataTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenMetadataId = result.inserted_primary_key[0]
         return TokenMetadata(
             tokenMetadataId=tokenMetadataId,
             createdDate=createdDate,
@@ -97,18 +118,26 @@ class Saver(CoreSaver):
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             imageUrl=imageUrl,
+            animationUrl=animationUrl,
+            youtubeUrl=youtubeUrl,
+            backgroundColor=backgroundColor,
             name=name,
             description=description,
             attributes=attributes,
         )
 
-    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT) -> None:
-        query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId)
+    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if metadataUrl is not None:
             values[TokenMetadataTable.c.metadataUrl.key] = metadataUrl
         if imageUrl != _EMPTY_STRING:
             values[TokenMetadataTable.c.imageUrl.key] = imageUrl
+        if animationUrl != _EMPTY_STRING:
+            values[TokenMetadataTable.c.animationUrl.key] = animationUrl
+        if youtubeUrl != _EMPTY_STRING:
+            values[TokenMetadataTable.c.youtubeUrl.key] = youtubeUrl
+        if backgroundColor != _EMPTY_STRING:
+            values[TokenMetadataTable.c.backgroundColor.key] = backgroundColor
         if description != _EMPTY_STRING:
             values[TokenMetadataTable.c.description.key] = description
         if name != _EMPTY_STRING:
@@ -117,12 +146,13 @@ class Saver(CoreSaver):
             values[TokenMetadataTable.c.attributes.key] = attributes
         if len(values) > 0:
             values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
-        await self.database.execute(query=query, values=values)
+        query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId).values(values)
+        await self._execute(query=query, connection=connection)
 
-    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool) -> Collection:
+    async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool, connection: Optional[DatabaseConnection] = None) -> Collection:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
-        collectionId = await self._execute(query=TokenCollectionsTable.insert(), values={  # pylint: disable=no-value-for-parameter
+        values = {
             TokenCollectionsTable.c.createdDate.key: createdDate,
             TokenCollectionsTable.c.updatedDate.key: updatedDate,
             TokenCollectionsTable.c.address.key: address,
@@ -139,7 +169,10 @@ class Saver(CoreSaver):
             TokenCollectionsTable.c.bannerImageUrl.key: bannerImageUrl,
             TokenCollectionsTable.c.doesSupportErc721.key: doesSupportErc721,
             TokenCollectionsTable.c.doesSupportErc1155.key: doesSupportErc1155,
-        })
+        }
+        query = TokenCollectionsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        collectionId = result.inserted_primary_key[0]
         return Collection(
             collectionId=collectionId,
             createdDate=createdDate,
@@ -160,8 +193,7 @@ class Saver(CoreSaver):
             doesSupportErc1155=doesSupportErc1155,
         )
 
-    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool]) -> None:
-        query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId)
+    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool], connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if name != _EMPTY_STRING:
             values[TokenCollectionsTable.c.name.key] = name
@@ -191,4 +223,5 @@ class Saver(CoreSaver):
             values[TokenCollectionsTable.c.doesSupportErc1155.key] = doesSupportErc1155
         if len(values) > 0:
             values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
-        await self.database.execute(query=query, values=values)
+        query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId).values(values)
+        await self._execute(query=query, connection=connection)

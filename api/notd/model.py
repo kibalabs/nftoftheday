@@ -39,6 +39,9 @@ class RetrievedTokenMetadata:
     tokenId: str
     metadataUrl: str
     imageUrl: Optional[str]
+    animationUrl: Optional[str]
+    youtubeUrl: Optional[str]
+    backgroundColor: Optional[str]
     name: Optional[str]
     description: Optional[str]
     attributes: JSON
