@@ -4,10 +4,9 @@ import { dateToString } from '@kibalabs/core';
 import { useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../../client/resources';
+import { Collection, CollectionToken, TokenTransfer } from '../../client/resources';
 import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';
-import { MetricView } from '../../components/MetricView';
 import { useGlobals } from '../../globalsContext';
 
 const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 6, 8999999, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', new Date());
@@ -53,7 +52,6 @@ export const TokenPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
-
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collectionToken === undefined ? (
@@ -80,7 +78,11 @@ export const TokenPage = (): React.ReactElement => {
                 ) : collection === null ? (
                   <Text variant='error'>Collection failed to load</Text>
                 ) : (
-                  <CollectionView collection={collection} />)}
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                    <Text>Part of</Text>
+                    <CollectionView collection={collection} />
+                  </Stack>
+                )}
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
                   <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
                   <Button variant='tertiary' text={'Lookrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
@@ -93,6 +95,7 @@ export const TokenPage = (): React.ReactElement => {
               <Box height='20rem' width='20rem' shouldClipContent={true}>
                 <Media source={imageUrl} alternativeText='image' fitType='contain' />
               </Box>
+              <Spacing variant={PaddingSize.Wide} />
               <Text alignment={TextAlignment.Center} variant='header1'>{collectionToken.name}</Text>
               <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                 <Text>Owned By</Text>
@@ -104,18 +107,17 @@ export const TokenPage = (): React.ReactElement => {
               ) : collection === null ? (
                 <Text variant='error'>Collection failed to load</Text>
               ) : (
-                <CollectionView collection={collection} />)}
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                  <Text>Part of</Text>
+                  <CollectionView collection={collection} />
+                </Stack>
+              )}
               <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
                 <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
                 <Button variant='tertiary' text={'Lookrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
               </Stack>
             </Stack>
           </ResponsiveHidingView>
-          <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide1} shouldWrapItems={true}>
-            {collectionToken.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
-              <MetricView key={index} name={tokenAttribute.trait_type} value={tokenAttribute.value} />
-            ))}
-          </Stack>
         </ContainingView>
       )}
     </Stack>
