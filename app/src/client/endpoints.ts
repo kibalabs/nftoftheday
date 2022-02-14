@@ -133,16 +133,16 @@ export class GetCollectionRecentSalesRequest extends RequestData {
 }
 
 export class GetCollectionRecentSalesResponse extends ResponseData {
-  readonly collectionRecentSales: Resources.CollectionRecentSales;
+  readonly tokenTransfers: Resources.TokenTransfer[];
 
-  public constructor(collectionRecentSales: Resources.CollectionRecentSales) {
+  public constructor(collectionRecentSales: Resources.TokenTransfer[]) {
     super();
-    this.collectionRecentSales = collectionRecentSales;
+    this.tokenTransfers = collectionRecentSales;
   }
 
   public static fromObject = (obj: Record<string, unknown>): GetCollectionRecentSalesResponse => {
     return new GetCollectionRecentSalesResponse(
-      Resources.CollectionRecentSales.fromObject(obj.collectionRecentSales as Record<string, unknown>),
+      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
     );
   }
 }

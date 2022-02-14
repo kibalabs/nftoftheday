@@ -20,12 +20,17 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
     }
   };
 
+  let imageUrl = props.collectionToken?.imageUrl || defaultImage;
+  if (imageUrl?.startsWith('ipfs://')) {
+    imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  }
+
   return (
     <LinkBase onClicked={onClicked} target={props.target}>
       <Box variant='tokenCard' shouldClipContent={true}>
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
           <Box height='11rem' width='11rem'>
-            <Image source={ props.collectionToken.imageUrl || defaultImage} alternativeText='image' fitType='contain' />
+            <Image source={ imageUrl || defaultImage} alternativeText='image' fitType='contain' />
           </Box>
           <Box>
             <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide}>
