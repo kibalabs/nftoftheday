@@ -94,7 +94,6 @@ export class UiData {
   }
 }
 
-
 export class TokenAttribute {
   readonly traitType: string;
   readonly value: string;
