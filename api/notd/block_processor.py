@@ -6,7 +6,6 @@ import textwrap
 from typing import List
 from typing import Optional
 
-import async_lru
 from core.util import list_util
 from core.util.chain_util import normalize_address
 from core.web3.eth_client import EthClientInterface
@@ -64,14 +63,12 @@ class BlockProcessor:
     async def _get_transaction(self, transactionHash: str, blockData: BlockData) -> TxData:
         return next((transaction for transaction in blockData['transactions'] if transaction['hash'].hex() == transactionHash), None)
 
-    @async_lru.alru_cache(maxsize=100000)
-    async def _get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
+    async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
         return await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
 
     async def get_latest_block_number(self) -> int:
         return await self.ethClient.get_latest_block_number()
 
-    @async_lru.alru_cache(maxsize=100000)
     async def get_transfers_in_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
         totalTokenTransferList = []
@@ -111,7 +108,7 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        # ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+        # ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transactionHash)
         # if ethTransactionReceipt['status'] != 1:
         #     logging.debug('Ignoring failed transaction')
         #     return []
@@ -145,7 +142,7 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        # ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+        # ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transactionHash)
         # if ethTransactionReceipt['status'] != 1:
         #     logging.debug('Ignoring failed transaction')
         #     return []
@@ -167,7 +164,7 @@ class BlockProcessor:
             event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['tokenId'])]
         if registryAddress == self.cryptoPunksContract.address:
             # NOTE(krishan711): for CryptoPunks there is a separate PunkBought (and PunkTransfer if its free) event with the punkId
-            ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+            ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transactionHash)
             decodedEventData = self.cryptoPunksBoughtEvent.processReceipt(ethTransactionReceipt)
             if len(decodedEventData) == 1:
                 event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['fromAddress']), HexBytes(decodedEventData[0]['args']['toAddress']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
@@ -186,7 +183,7 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        # ethTransactionReceipt = await self._get_transaction_receipt(transactionHash=transactionHash)
+        # ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transactionHash)
         # if ethTransactionReceipt['status'] != 1:
         #     logging.debug('Ignoring failed transaction')
         #     return []

@@ -10,8 +10,7 @@ import asyncclick as click
 import boto3
 from core.queues.sqs_message_queue import SqsMessageQueue
 
-from notd.messages import ProcessBlockRangeMessageContent
-from notd.messages import ProcessBlocksMessageContent
+from notd.messages import ProcessBlockMessageContent
 
 
 @click.command()
@@ -23,9 +22,10 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 
     if blockNumber:
-        await workQueue.send_message(message=ProcessBlocksMessageContent(blockNumbers=[blockNumber]).to_message())
+        await workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message())
     elif startBlockNumber and endBlockNumber:
-        await workQueue.send_message(message=ProcessBlockRangeMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
+        for blockNumber in range(startBlockNumber, endBlockNumber):
+            await workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message())
     else:
         raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
 
