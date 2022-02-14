@@ -95,11 +95,11 @@ export class UiData {
 }
 
 export class TokenAttribute {
-  readonly trait_type: string;
+  readonly traitType: string;
   readonly value: string;
 
-  public constructor(trait_type: string, value: string) {
-    this.trait_type = trait_type;
+  public constructor(traitType: string, value: string) {
+    this.traitType = traitType;
     this.value = value;
   }
 

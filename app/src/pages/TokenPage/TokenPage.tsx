@@ -32,7 +32,7 @@ export const TokenPage = (): React.ReactElement => {
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide1} shouldWrapItems={true}>
       {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
-        <MetricView key={index} name={tokenAttribute.trait_type} value={tokenAttribute.value} />
+        <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
       ))}
     </Stack>
   );
