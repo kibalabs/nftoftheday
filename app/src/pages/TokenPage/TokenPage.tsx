@@ -56,7 +56,6 @@ export const TokenPage = (): React.ReactElement => {
   }, [updateCollection]);
 
   return (
-
     <Stack direction={ Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collectionToken === undefined ? (
         <LoadingSpinner />
@@ -64,14 +63,14 @@ export const TokenPage = (): React.ReactElement => {
         <Text variant='error'>Collection Token failed to load</Text>
       ) : (
         <ContainingView>
-          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
             <Box height='20rem' width='20rem' shouldClipContent={true}>
               <Media source={imageUrl} alternativeText='image' fitType='contain' />
             </Box>
             <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <Stack direction={Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} padding={PaddingSize.Wide}>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide}>
                 <Text variant='header1'>{collectionToken.name}</Text>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                   <Text>Owned By</Text>
                   <Account accountId={owner} />
                 </Stack>
@@ -94,7 +93,7 @@ export const TokenPage = (): React.ReactElement => {
               </Stack>
             </ResponsiveHidingView>
             <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide1}>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Center} variant='header1'>{collectionToken.name}</Text>
                 <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                   <Text>Owned By</Text>
@@ -117,9 +116,8 @@ export const TokenPage = (): React.ReactElement => {
                 </Stack>
               </Stack>
             </ResponsiveHidingView>
-
           </Stack>
-          <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide1} shouldWrapItems={true}>
+          <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true} padding={PaddingSize.Wide}>
             {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
               <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
             ))}
