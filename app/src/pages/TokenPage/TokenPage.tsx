@@ -26,6 +26,7 @@ export const TokenPage = (): React.ReactElement => {
   if (imageUrl?.startsWith('ipfs://')) {
     imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
+
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
     setCollectionToken(undefined);
     notdClient.retrieveCollectionToken(registryAddress, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
@@ -52,6 +53,7 @@ export const TokenPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collectionToken === undefined ? (
