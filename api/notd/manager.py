@@ -6,6 +6,7 @@ from typing import List
 from typing import Sequence
 from typing import Tuple
 
+import sqlalchemy
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
@@ -15,8 +16,10 @@ from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
+from core.util import list_util
 
 from notd.block_processor import BlockProcessor
+from notd.messages import CheckBadBlocksMessageContent
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.model import Collection
@@ -166,15 +169,54 @@ class NotdManager:
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
         # NOTE(krishan711): the delay is to mitigate soft fork problems
-        for blockNumber in reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1)):
-            await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message(), delaySeconds=60)
+        await self.process_blocks_deferred(blockNumbers=list(reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1))), delaySeconds=60)
 
-    async def process_block_range(self, startBlockNumber: int, endBlockNumber: int) -> None:
-        blockNumbers = list(range(startBlockNumber, endBlockNumber))
-        await self.process_blocks(blockNumbers=blockNumbers)
+    async def check_bad_blocks_deferred(self, startBlockNumber: int, endBlockNumber: int) -> None:
+        await self.workQueue.send_message(message=CheckBadBlocksMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
 
-    async def process_blocks(self, blockNumbers: Sequence[int]) -> None:
-        await asyncio.gather(*[self.process_block(blockNumber=blockNumber) for blockNumber in blockNumbers])
+    async def check_bad_blocks(self, startBlockNumber: int, endBlockNumber: int) -> None:
+        blockNumbers = range(startBlockNumber, endBlockNumber)
+        blockUncleCounts = []
+        for chunk in list_util.generate_chunks(lst=blockNumbers, chunkSize=10):
+            blockUncleCounts += await asyncio.gather(*[self.blockProcessor.ethClient.get_block_uncle_count(blockNumber=blockNumber) for blockNumber in chunk])
+        blocksWithUncles = {blockNumber for (blockNumber, uncleCount) in zip(blockNumbers, blockUncleCounts) if uncleCount > 0}
+        logging.info(f'Found {len(blocksWithUncles)} blocks with uncles')
+        blocksWithDuplicatesQuery = (
+            sqlalchemy.select(TokenTransfersTable.c.blockNumber, sqlalchemy.func.count(sqlalchemy.func.distinct(TokenTransfersTable.c.blockHash)))
+            .where(TokenTransfersTable.c.blockNumber >= startBlockNumber)
+            .where(TokenTransfersTable.c.blockNumber < endBlockNumber)
+            .group_by(TokenTransfersTable.c.blockNumber)
+        )
+        results = await self.retriever.database.execute(query=blocksWithDuplicatesQuery)
+        blocksWithDuplicates = {blockNumber for (blockNumber, blockHashCount) in results if blockHashCount > 1}
+        logging.info(f'Found {len(blocksWithDuplicates)} blocks with multiple blockHashes')
+        badBlockTransactionsQuery = (
+            sqlalchemy.select(TokenTransfersTable.c.transactionHash)
+            .where(TokenTransfersTable.c.blockNumber.in_(blocksWithDuplicates))
+        )
+        results = await self.retriever.database.execute(query=badBlockTransactionsQuery)
+        badBlockTransactions = {transactionHash for (transactionHash, ) in results}
+        logging.info(f'Found {len(badBlockTransactions)} transactions in bad blocks')
+        badBlockTransactionActualBlocks = set()
+        for chunk in list_util.generate_chunks(lst=list(badBlockTransactions), chunkSize=10):
+            transactionReceipts = await asyncio.gather(*[self.blockProcessor.get_transaction_receipt(transactionHash=transactionHash) for transactionHash in chunk])
+            badBlockTransactionActualBlocks.update({transactionReceipt['blockNumber'] for transactionReceipt in transactionReceipts})
+        badBlockTransactionBlocksQuery = (
+            sqlalchemy.select(sqlalchemy.func.distinct(TokenTransfersTable.c.blockNumber))
+            .where(TokenTransfersTable.c.transactionHash.in_(badBlockTransactions))
+        )
+        results = await self.retriever.database.execute(query=badBlockTransactionBlocksQuery)
+        badBlockTransactionBlocks = {blockNumber for (blockNumber, ) in results}
+        allBadBlocks = blocksWithUncles.union(badBlockTransactionActualBlocks).union(blocksWithDuplicates).union(badBlockTransactionBlocks)
+        logging.info(f'Found {len(allBadBlocks)} blocks to reprocess')
+        await self.process_blocks_deferred(blockNumbers=allBadBlocks)
+
+    async def process_blocks_deferred(self, blockNumbers: Sequence[int], delaySeconds: int = 0) -> None:
+        messages = [ProcessBlockMessageContent(blockNumber=blockNumber).to_message() for blockNumber in blockNumbers]
+        await self.workQueue.send_messages(messages=messages, delaySeconds=delaySeconds)
+
+    async def process_block_deferred(self, blockNumber: int, delaySeconds: int = 0) -> None:
+        await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message(), delaySeconds=delaySeconds)
 
     async def process_block(self, blockNumber: int) -> None:
         retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
@@ -189,7 +231,7 @@ class NotdManager:
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, str, int]:
-        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
+        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.blockHash, tokenTransfer.amount)
 
     async def _save_block_transfers(self, blockNumber: int, retrievedTokenTransfers: Sequence[RetrievedTokenTransfer]) -> None:
         async with self.saver.create_transaction() as connection:
