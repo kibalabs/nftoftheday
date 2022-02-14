@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import List, Optional
 from typing import Sequence
 
@@ -10,6 +11,7 @@ from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 from notd.model import Collection
 from notd.model import Token
@@ -125,22 +127,18 @@ class Retriever(CoreRetriever):
         query = TokenTransfersTable.select()\
             .where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
-        result = await self.database.execute(query=query, connection=connection)
-        tokens = [token_transfer_from_row(row) for row in result]
-        print(tokens)
+        for row in await self.database.execute(query=query):
+            tokenTransfer = token_transfer_from_row(row)
+            boughtTokens.append(tokenTransfer)
+        query = TokenTransfersTable.select()
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
+        query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
+        for row in await self.database.execute(query=query):
+            tokenTransfer = token_transfer_from_row(row)
+            soldTokens.append(tokenTransfer)
 
-        #for row in await self.database.execute(query=query):
-        #    tokenTransfer = token_transfer_from_row(row)
-        #    boughtTokens.append(tokenTransfer)
-        #query = TokenTransfersTable.select()
-        #query = query.where(TokenTransfersTable.c.registryAddress == address)
-        #query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
-        #for row in await self.database.execute(query=query):
-        #    tokenTransfer = token_transfer_from_row(row)
-        #    soldTokens.append(tokenTransfer)
-#
-        #uniqueBoughtTokens = set(boughtTokens)
-        #uniqueSoldTokens = set(soldTokens)
-        #tokensOwned = uniqueBoughtTokens - uniqueSoldTokens
+        uniqueBoughtTokens = set(boughtTokens)
+        uniqueSoldTokens = set(soldTokens)
+        tokensOwned = uniqueBoughtTokens - uniqueSoldTokens
 
-        return tokens
+        return list(tokensOwned)

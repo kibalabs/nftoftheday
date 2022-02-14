@@ -1,6 +1,7 @@
 
 import asyncio
-from typing import Sequence
+from typing import List, Sequence
+from notd.token_metadata_processor import TokenMetadataProcessor
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
@@ -58,8 +59,15 @@ class ResponseBuilder:
             description=tokenMetadata.description,
             attributes=attributes,
         )
-    async def collection_tokens_from_models(self, tokens: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
-        return await asyncio.gather(*[self.collection_from_model(TokenMetadata=token) for token in tokens])
+    async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[TokenTransfer]) -> List[ApiCollectionToken]:
+        tokenMetadatas = []
+        for token in tokens:
+            try:
+                tokenMetadatas += [await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=token.registryAddress, tokenId=token.tokenId)]
+            except:
+                tokenMetadatas += [TokenMetadataProcessor.get_default_token_metadata(registryAddress=token.registryAddress, tokenId=token.tokenId)]
+
+        return await asyncio.gather(*[self.collection_token_from_model(tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatas])
 
     async def token_transfer_from_model(self, tokenTransfer: TokenTransfer) -> ApiTokenTransfer:
         return ApiTokenTransfer(

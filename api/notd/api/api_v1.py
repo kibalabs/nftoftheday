@@ -3,7 +3,7 @@ from typing import Optional
 
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
-from api.notd.api.endpoints_v1 import GetHoldingResponse
+from notd.api.endpoints_v1 import GetHoldingResponse
 
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
@@ -84,7 +84,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     @router.get('/collections/{registryAddress}/holdings/{ownerAddress}', response_model=GetHoldingResponse)
     async def get_collection_holdings(registryAddress: str, ownerAddress: str):  # request: GetHoldingRequest
         tokens = await notdManager.get_collection_holding(address=registryAddress, ownerAddress=ownerAddress)
-        return GetHoldingResponse(collection=(await responseBuilder.collection_tokens_from_models(tokens=tokens)))
+        return GetHoldingResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
 
     @router.get('/collections/{registryAddress}/recent-sales', response_model=GetCollectionRecentSalesResponse)
     async def get_collection_recent_sales(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
