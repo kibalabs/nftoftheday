@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 from typing import List
+from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
@@ -149,6 +150,7 @@ class NotdManager:
         await self.workQueue.send_message(message=CheckBadBlocksMessageContent(startBlockNumber=startBlockNumber, endBlockNumber=endBlockNumber).to_message())
 
     async def check_bad_blocks(self, startBlockNumber: int, endBlockNumber: int) -> None:
+        # NOTE(krishan711): perhaps we should check eth_getUncleCountByBlockNumber for all these blocks?
         badBlocksQuery = (
             sqlalchemy.select(TokenTransfersTable.c.blockNumber, sqlalchemy.func.count(sqlalchemy.func.distinct(TokenTransfersTable.c.blockHash)))
             .where(TokenTransfersTable.c.blockNumber >= startBlockNumber)
@@ -172,9 +174,10 @@ class NotdManager:
             .where(TokenTransfersTable.c.transactionHash.in_(badBlockTransactions))
         )
         results = await self.retriever.database.execute(query=badBlockTransactionBlocksQuery)
-        badBlockTransactionBlocks = badBlockTransactionActualBlocks.union({blockNumber for (blockNumber, ) in results})
-        logging.info(f'Found {len(badBlockTransactionBlocks)} blocks to reprocess')
-        await self.process_blocks_deferred(blockNumbers=badBlockTransactionBlocks)
+        badBlockTransactionBlocks = {blockNumber for (blockNumber, ) in results}
+        allBadBlocks = badBlockTransactionActualBlocks.union(badBlocks).union(badBlockTransactionBlocks)
+        logging.info(f'Found {len(allBadBlocks)} blocks to reprocess')
+        await self.process_blocks_deferred(blockNumbers=allBadBlocks)
 
     async def process_blocks_deferred(self, blockNumbers: Sequence[int], delaySeconds: int = 0) -> None:
         messages = [ProcessBlockMessageContent(blockNumber=blockNumber).to_message() for blockNumber in blockNumbers]
