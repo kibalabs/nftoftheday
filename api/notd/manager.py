@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import logging
@@ -165,14 +166,18 @@ class NotdManager:
         results = await self.retriever.database.execute(query=badBlockTransactionsQuery)
         badBlockTransactions = {transactionHash for (transactionHash, ) in results}
         logging.info(f'Found {len(badBlockTransactions)} transactions in bad blocks')
+        transactionReceipts = await asyncio.gather(*[self.blockProcessor.get_transaction_receipt(transactionHash=transactionHash) for transactionHash in badBlockTransactions])
+        badBlockTransactionActualBlocks = {transactionReceipt['blockNumber'] for transactionReceipt in transactionReceipts}
+        print('badBlockTransactionActualBlocks', badBlockTransactionActualBlocks)
         badBlockTransactionBlocksQuery = (
             sqlalchemy.select(sqlalchemy.func.distinct(TokenTransfersTable.c.blockNumber))
             .where(TokenTransfersTable.c.transactionHash.in_(badBlockTransactions))
         )
         results = await self.retriever.database.execute(query=badBlockTransactionBlocksQuery)
-        badBlockTransactionBlocks = {blockNumber for (blockNumber, ) in results}
+        badBlockTransactionBlocks = badBlockTransactionActualBlocks.union({blockNumber for (blockNumber, ) in results})
         logging.info(f'Found {len(badBlockTransactionBlocks)} blocks to reprocess')
-        await self.process_blocks_deferred(blockNumbers=badBlockTransactionBlocks)
+        print(badBlockTransactionBlocks)
+        # await self.process_blocks_deferred(blockNumbers=badBlockTransactionBlocks)
 
     async def process_blocks_deferred(self, blockNumbers: Sequence[int], delaySeconds: int = 0) -> None:
         messages = [ProcessBlockMessageContent(blockNumber=blockNumber).to_message() for blockNumber in blockNumbers]
