@@ -3,7 +3,7 @@ import json
 import logging
 import urllib.parse
 from json.decoder import JSONDecodeError
-from typing import Dict
+from typing import Any, Dict
 
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
@@ -11,6 +11,7 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
+from importlib_metadata import metadata
 from web3.main import Web3
 
 from notd.model import Collection
@@ -106,6 +107,25 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         return tokenMetadataDict
 
+    async def _get_token_metadata_from_data(registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Dict[str, Any]) -> RetrievedTokenMetadata:
+        name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
+        description = tokenMetadataDict.get('description')
+        if isinstance(description, list):
+            description = description[0]
+        retrievedTokenMetadata = RetrievedTokenMetadata(
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            metadataUrl=metadataUrl,
+            name=str(name).replace('\u0000', ''),
+            description=str(description).replace('\u0000', '') if description else None,
+            imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data'),
+            animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
+            youtubeUrl=tokenMetadataDict.get('youtube_url'),
+            backgroundColor=tokenMetadataDict.get('background_color'),
+            attributes=tokenMetadataDict.get('attributes', []),
+        )
+        return retrievedTokenMetadata
+
     async def retrieve_token_metadata(self, registryAddress: str, tokenId: str, collection: Collection) -> RetrievedTokenMetadata:
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             # NOTE(krishan711): special case for CryptoPunks
@@ -139,6 +159,9 @@ class TokenMetadataProcessor():
         if registryAddress == '0xdF5d68D54433661b1e5e90a547237fFB0AdF6EC2':
             # TODO(krishan711): Implement special case for  Arcona Digital Land (it's a really old contract)
             raise TokenDoesNotExistException()
+        if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
+            logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
+            raise TokenDoesNotExistException()
         tokenMetadataUriResponse = None
         badRequestException = None
         if collection.doesSupportErc721:
@@ -151,9 +174,6 @@ class TokenMetadataProcessor():
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
-        if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
-            logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
-            raise TokenDoesNotExistException()
         if badRequestException is not None:
             if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
@@ -192,20 +212,5 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
-        name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
-        description = tokenMetadataDict.get('description')
-        if isinstance(description, list):
-            description = description[0]
-        retrievedTokenMetadata = RetrievedTokenMetadata(
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            metadataUrl=metadataUrl,
-            name=str(name).replace('\u0000', ''),
-            description=str(description).replace('\u0000', '') if description else None,
-            imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data'),
-            animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
-            youtubeUrl=tokenMetadataDict.get('youtube_url'),
-            backgroundColor=tokenMetadataDict.get('background_color'),
-            attributes=tokenMetadataDict.get('attributes', []),
-        )
+        retrievedTokenMetadata = self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         return retrievedTokenMetadata
