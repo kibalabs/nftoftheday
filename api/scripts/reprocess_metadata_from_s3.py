@@ -39,11 +39,10 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
         query = query.where(TokenMetadataTable.c.tokenMetadataId >= startId)
     if endId:
         query = query.where(TokenMetadataTable.c.tokenMetadataId < endId)
-    tokenMetadatasToChange = [token_metadata_from_row(row) async for row in database.execute(query=query)]
+    tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
     logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
     for tokenMetadata in tokenMetadatasToChange:
         tokenDirectory = f'{os.environ["S3_BUCKET"]}/token-metadatas/{tokenMetadata.registryAddress}/{tokenMetadata.tokenId}/'
-        #print(tokenDirectory)
         tokenFile = None
         tokenMetadataFiles = [file async for file in s3manager.generate_directory_files(s3Directory=tokenDirectory)]
         if len(tokenMetadataFiles) > 0:
@@ -53,7 +52,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
             tokenMetadataDict = json.loads(tokenMetadataJson)
             retrievedTokenMetadata = await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)
             logging.info(f'Updating {(tokenMetadata.tokenMetadataId)}')
-            await tokenManger.update_token_metadata_from_data(registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, retrievedTokenMetadata=retrievedTokenMetadata)
+            await tokenManger.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
 
     await database.disconnect()
 
