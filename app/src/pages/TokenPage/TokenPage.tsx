@@ -16,7 +16,6 @@ export const TokenPage = (): React.ReactElement => {
 
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
 
-
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
     setCollectionToken(undefined);
     notdClient.retrieveCollectionToken(registryAddress, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
@@ -33,7 +32,7 @@ export const TokenPage = (): React.ReactElement => {
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide1} shouldWrapItems={true}>
       {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
-        <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
+        <MetricView key={index} name={tokenAttribute.trait_type} value={tokenAttribute.value} />
       ))}
     </Stack>
   );
