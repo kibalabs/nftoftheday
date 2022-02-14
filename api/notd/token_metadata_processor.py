@@ -11,7 +11,6 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
-from importlib_metadata import metadata
 from web3.main import Web3
 
 from notd.model import Collection
@@ -107,6 +106,7 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         return tokenMetadataDict
 
+    @staticmethod
     async def _get_token_metadata_from_data(registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Dict[str, Any]) -> RetrievedTokenMetadata:
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description = tokenMetadataDict.get('description')
@@ -212,5 +212,5 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
-        retrievedTokenMetadata = self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
+        retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         return retrievedTokenMetadata

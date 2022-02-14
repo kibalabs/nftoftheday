@@ -10,6 +10,7 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
+from notd.model import RetrievedTokenMetadata
 
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
@@ -120,6 +121,9 @@ class TokenManager:
         except TokenHasNoMetadataException:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        await self.update_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, retrievedTokenMetadata=retrievedTokenMetadata)
+        
+    async def update_token_metadata_from_data(self, registryAddress: str, tokenId: str, retrievedTokenMetadata: RetrievedTokenMetadata):
         async with self.saver.create_transaction():
             try:
                 tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)

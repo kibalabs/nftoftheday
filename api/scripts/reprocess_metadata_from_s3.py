@@ -1,12 +1,8 @@
-from datetime import datetime
 import json
 import os
 import sys
-import time
 from typing import Optional
-from api.notd.store.retriever import Retriever
 
-from api.notd.token_manager import TokenManager 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -22,6 +18,8 @@ from core.util import date_util
 from databases.core import Database
 
 # from notd.messages import UpdateTokenMetadataMessageContent
+from notd.store.retriever import Retriever
+from notd.token_manager import TokenManager 
 from notd.store.saver import Saver
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema_conversions import token_metadata_from_row
@@ -38,6 +36,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
     #sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=None, ethClient=None, s3manager=s3manager, bucketName=None)
     tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=None)
     
     await database.connect()
@@ -58,10 +57,10 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
         if tokenFile:
             tokenMetadataJson = await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}')
             tokenMetadataDict = json.loads(tokenMetadataJson)
-            logging.info(f'Processed: {tokenMetadata.tokenMetadataId}')
-            await tokenManger.update_token_metadata()
+            retrievedTokenMetadata = await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)
+            logging.info(f'Updating {(tokenMetadata.tokenMetadataId)}')
+            await tokenManger.update_token_metadata_from_data(registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, retrievedTokenMetadata=retrievedTokenMetadata)
            
-                # await workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId).to_message())
     await database.disconnect()
 
 if __name__ == '__main__':
