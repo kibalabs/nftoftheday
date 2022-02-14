@@ -125,6 +125,29 @@ export class GetCollectionStatisticsResponse extends ResponseData {
   }
 }
 
+export class GetCollectionRecentSalesRequest extends RequestData {
+  public toObject = (): Record<string, unknown> => {
+    return {
+    };
+  }
+}
+
+export class GetCollectionRecentSalesResponse extends ResponseData {
+  readonly collectionRecentSales: Resources.CollectionRecentSales;
+
+  public constructor(collectionRecentSales: Resources.CollectionRecentSales) {
+    super();
+    this.collectionRecentSales = collectionRecentSales;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionRecentSalesResponse => {
+    return new GetCollectionRecentSalesResponse(
+      Resources.CollectionRecentSales.fromObject(obj.collectionRecentSales as Record<string, unknown>),
+    );
+  }
+}
+
+
 export class SubscribeRequest extends RequestData {
   readonly email: string;
 

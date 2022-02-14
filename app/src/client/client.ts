@@ -32,6 +32,14 @@ export class NotdClient extends ServiceClient {
     return response.collection;
   }
 
+  public getCollectionRecentSales = async (registryAddress: string): Promise<Resources.CollectionRecentSales> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${registryAddress}/recent-sales`;
+    const request = new Endpoints.GetCollectionRecentSalesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionRecentSalesResponse);
+    return response.collectionRecentSales;
+  }
+
   public getCollectionStatistics = async (address: string): Promise<Resources.CollectionStatistics> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${address}/statistics`;

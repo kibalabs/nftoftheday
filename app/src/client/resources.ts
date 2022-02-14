@@ -94,6 +94,7 @@ export class UiData {
   }
 }
 
+
 export class TokenAttribute {
   readonly traitType: string;
   readonly value: string;
@@ -107,6 +108,20 @@ export class TokenAttribute {
     return new TokenAttribute(
       String(obj.trait_type),
       String(obj.value),
+    );
+  }
+}
+
+export class CollectionRecentSales {
+  readonly recentSales: TokenTransfer[];
+
+  public constructor(recentSales: TokenTransfer[]) {
+    this.recentSales = recentSales;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): CollectionRecentSales => {
+    return new CollectionRecentSales(
+      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenTransfer.fromObject(innerObj)),
     );
   }
 }
