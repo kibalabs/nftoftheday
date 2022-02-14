@@ -1,17 +1,40 @@
 import React from 'react';
 
 import { useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Direction, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Direction, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
+import { MetricView } from '../../components/MetricView';
+import { TokenAttribute } from '../../client/resources';
+import { CollectionToken } from '../../client/resources';
+import { useGlobals } from '../../globalsContext';
 
 
 export const TokenPage = (): React.ReactElement => {
+  const { notdClient } = useGlobals();
   const routeParams = useRouteParams();
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
 
+  const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
+
+
+  const updateCollectionToken = React.useCallback(async (): Promise<void> => {
+    setCollectionToken(undefined);
+    notdClient.retrieveCollectionToken(registryAddress, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
+      setCollectionToken(retrievedCollectionToken);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setCollectionToken(null);
+    });
+  }, [notdClient, registryAddress, tokenId]);
+
+  React.useEffect((): void => {
+    updateCollectionToken();
+  }, [updateCollectionToken]);
   return (
-    <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-      <Text variant='header3'>{`Token Page for ${registryAddress} ${tokenId}`}</Text>
-    </Stack>
+       <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide1} shouldWrapItems={true}>
+            {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
+              <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
+            ))}
+          </Stack>
   );
 };
