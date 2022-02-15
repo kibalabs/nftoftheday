@@ -123,21 +123,21 @@ class Retriever(CoreRetriever):
     async def get_collection_holding(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
         boughtTokens = []
         soldTokens= []
-        query = TokenTransfersTable.select()\
+        query = (
+            TokenTransfersTable.select()
             .where(TokenTransfersTable.c.registryAddress == address)
+        )
         query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
-        for row in await self.database.execute(query=query, connection=connection):
-            tokenTransfer = token_transfer_from_row(row)
-            boughtTokens.append(tokenTransfer)
+        boughtResult = await self.database.execute(query=query, connection=connection)
+        boughtTokens = [token_transfer_from_row(row) for row in boughtResult]
         query = TokenTransfersTable.select()
         query = query.where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
-        for row in await self.database.execute(query=query, connection=connection):
-            tokenTransfer = token_transfer_from_row(row)
-            soldTokens.append(tokenTransfer)
-
+        soldResult = await self.database.execute(query=query, connection=connection)
+        soldTokens = [token_transfer_from_row(row) for row in soldResult]
         uniqueBoughtTokens = set(boughtTokens)
         uniqueSoldTokens = set(soldTokens)
+        print(len(uniqueBoughtTokens), len(uniqueSoldTokens))
         tokensOwned = uniqueBoughtTokens - uniqueSoldTokens
-
+        print(len(tokensOwned))
         return list(tokensOwned)

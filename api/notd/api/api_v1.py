@@ -1,14 +1,16 @@
 import datetime
 from typing import Optional
+from aiohttp import request
 
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
+from notd.api.endpoints_v1 import ListHoldingsForCollectionRequest
+from notd.api.endpoints_v1 import ListHoldingsForCollectionResponse
 
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
-from notd.api.endpoints_v1 import GetHoldingResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
@@ -81,10 +83,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         collection = await notdManager.get_collection_by_address(address=registryAddress)
         return GetCollectionResponse(collection=(await responseBuilder.collection_from_model(collection=collection)))
 
-    @router.get('/collections/{registryAddress}/holdings/{ownerAddress}', response_model=GetHoldingResponse)
-    async def get_collection_holdings(registryAddress: str, ownerAddress: str):  # request: GetHoldingRequest
-        tokens = await notdManager.get_collection_holding(address=registryAddress, ownerAddress=ownerAddress)
-        return GetHoldingResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
+    @router.get('/collections/{registryAddress}/holdings', response_model=ListHoldingsForCollectionResponse)
+    async def list_collection_holdings(registryAddress: str, ownerAddress: str):  # request: ListHoldingsForCollectionRequest
+        tokens = await notdManager.list_collection_holding(address=registryAddress, ownerAddress=ownerAddress)
+        return ListHoldingsForCollectionResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
 
     @router.get('/collections/{registryAddress}/recent-sales', response_model=GetCollectionRecentSalesResponse)
     async def get_collection_recent_sales(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):

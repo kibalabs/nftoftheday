@@ -259,6 +259,9 @@ class NotdManager:
             await self.saver.create_token_transfers(connection=connection, retrievedTokenTransfers=retrievedTokenTransfersToSave)
             logging.info(f'Saving transfers for block {blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
 
-    async def get_collection_holding(self, address: str, ownerAddress: str, ) -> List[TokenTransfer]:
-        tokens = await self.retriever.get_collection_holding(address=address, ownerAddress=ownerAddress)
+    async def list_collection_holding(self, address: str, ownerAddress: str, ) -> List[Token]:
+        tokens = []
+        tokenTransfers = await self.retriever.get_collection_holding(address=address, ownerAddress=ownerAddress)
+        for tokenTransfer in tokenTransfers:
+            tokens += [Token(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId)]
         return tokens
