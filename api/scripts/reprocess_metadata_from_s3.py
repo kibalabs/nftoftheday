@@ -24,13 +24,25 @@ from notd.store.schema_conversions import token_metadata_from_row
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.collection_processor import CollectionProcessor
+from notd.model import TokenMetadata
 
+from core.util import list_util
+
+
+
+async def _reprocess_batch(tokenManger: TokenManager, retrievedTokenMetadata: TokenMetadata): 
+    logging.info(f'Updating Token {(retrievedTokenMetadata.registryAddress)},TokenId {retrievedTokenMetadata.tokenId}')
+    await tokenManger.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
+    #logging.info(f'Saving Token Metadata for {retrievedTokenMetadata.tokenMetadataId}')
+    #await tokenManger.update_token_metadata(registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, shouldForce=True)
 
 
 @click.command()
 @click.option('-s', '--start-id-number', 'startId', required=False, type=int)
 @click.option('-e', '--end-id-number', 'endId', required=False, type=int)
-async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
+
+async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batchSize: Optional[int]):
 
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
@@ -50,28 +62,32 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
     tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
 
     await database.connect()
-    query = TokenMetadataTable.select()
-    if startId:
-        query = query.where(TokenMetadataTable.c.tokenMetadataId >= startId)
-    if endId:
-        query = query.where(TokenMetadataTable.c.tokenMetadataId < endId)
-    query = query.order_by(TokenMetadataTable.c.tokenMetadataId.asc())
-    tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
-    logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
-    for tokenMetadata in tokenMetadatasToChange:
-        tokenDirectory = f'{os.environ["S3_BUCKET"]}/token-metadatas/{tokenMetadata.registryAddress}/{tokenMetadata.tokenId}/'
-        tokenFile = None
-        tokenMetadataFiles = [file async for file in s3manager.generate_directory_files(s3Directory=tokenDirectory)]
-        if len(tokenMetadataFiles) > 0:
-            tokenFile=(tokenMetadataFiles[len(tokenMetadataFiles)-1])
-            tokenMetadataJson = await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}')
-            tokenMetadataDict = json.loads(tokenMetadataJson)
-            retrievedTokenMetadata = await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)
-            logging.info(f'Updating {(tokenMetadata.tokenMetadataId)}')
-            await tokenManger.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
-        else:
-            logging.info(f'Saving Token Metadata for {tokenMetadata.tokenMetadataId}')
-            await tokenManger.update_token_metadata(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, shouldForce=True)
+    currentId = startId
+    while currentId < endId:
+        start = currentId
+        end = min(currentId + batchSize, endId)
+        logging.info(f'Working on {start} to {end}...')
+        query = TokenMetadataTable.select()
+        query = query.where(TokenMetadataTable.c.tokenMetadataId >= start)
+        query = query.where(TokenMetadataTable.c.tokenMetadataId < end)
+        query = query.order_by(TokenMetadataTable.c.tokenMetadataId.asc())
+        tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
+        s3TokenMetadata = []
+        logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
+        for tokenMetadata in tokenMetadatasToChange:
+            tokenDirectory = f'{os.environ["S3_BUCKET"]}/token-metadatas/{tokenMetadata.registryAddress}/{tokenMetadata.tokenId}/'
+            tokenFile = None
+            tokenMetadataFiles = [file async for file in s3manager.generate_directory_files(s3Directory=tokenDirectory)]
+            if len(tokenMetadataFiles) > 0:
+                tokenFile=(tokenMetadataFiles[len(tokenMetadataFiles)-1])
+                tokenMetadataJson = await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}')
+                tokenMetadataDict = json.loads(tokenMetadataJson)
+                s3TokenMetadata += [await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)]
+
+        for batch in list_util.generate_chunks(s3TokenMetadata, chunkSize=10):
+            await asyncio.gather(*[_reprocess_batch(tokenManger=tokenManger, retrievedTokenMetadata=retrievedTokenMetadata) for retrievedTokenMetadata in batch])
+            print("done")
+        currentId = currentId + batchSize
 
     await database.disconnect()
 
