@@ -137,7 +137,5 @@ class Retriever(CoreRetriever):
         soldTokens = [token_transfer_from_row(row) for row in soldResult]
         uniqueBoughtTokens = set(boughtTokens)
         uniqueSoldTokens = set(soldTokens)
-        print(len(uniqueBoughtTokens), len(uniqueSoldTokens))
         tokensOwned = uniqueBoughtTokens - uniqueSoldTokens
-        print(len(tokensOwned))
         return list(tokensOwned)
