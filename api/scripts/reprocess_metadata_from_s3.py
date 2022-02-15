@@ -9,6 +9,11 @@ import asyncclick as click
 import boto3
 from core.s3_manager import S3Manager
 from core.store.database import Database
+from core.requester import Requester
+from core.s3_manager import S3Manager
+from core.aws_requester import AwsRequester
+from core.store.database import Database
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.retriever import Retriever
@@ -28,10 +33,17 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    #sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
+
     s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=None, ethClient=None, s3manager=s3manager, bucketName=None)
+    awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    requester = Requester()
+
+    #ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
+
+    requester = Requester()
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=tokenMetadataProcessor)
 
     await database.connect()
@@ -55,7 +67,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
             await tokenManger.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
         else:
             logging.info(f'Saving Token Metadata for {tokenMetadata.tokenMetadataId}')
-            await tokenManger.update_token_metadata(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId)
+            await tokenManger.update_token_metadata(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, shouldForce=True)
 
     await database.disconnect()
 
