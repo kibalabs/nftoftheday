@@ -10,6 +10,7 @@ import asyncclick as click
 import boto3
 from core.queues.sqs_message_queue import SqsMessageQueue
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.messages import ProcessBlockMessageContent
 
 

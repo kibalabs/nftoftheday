@@ -1,17 +1,15 @@
+import asyncio
+import logging
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-import asyncio
-import logging
-
 import asyncclick as click
+from core.store.database import Database
 from core.util.chain_util import normalize_address
-from databases.core import Database
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 from sqlalchemy.sql.expression import or_
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
@@ -21,7 +19,8 @@ from notd.store.schema_conversions import token_transfer_from_row
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
 async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     await database.connect()
 
     currentBlockNumber = startBlockNumber
