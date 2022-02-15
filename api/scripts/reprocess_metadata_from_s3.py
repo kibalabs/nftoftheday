@@ -32,7 +32,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
     s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     tokenMetadataProcessor = TokenMetadataProcessor(requester=None, ethClient=None, s3manager=s3manager, bucketName=None)
-    tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=None)
+    tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=tokenMetadataProcessor)
 
     await database.connect()
     query = TokenMetadataTable.select()
