@@ -14,6 +14,7 @@ from core.s3_manager import S3Manager
 from core.aws_requester import AwsRequester
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
+from core.queues.sqs_message_queue import SqsMessageQueue
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.retriever import Retriever
@@ -22,6 +23,8 @@ from notd.store.schema import TokenMetadataTable
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.collection_processor import CollectionProcessor
+
 
 
 @click.command()
@@ -33,18 +36,20 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-
     s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
+    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
+    tokenQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     s3manager = S3Manager(s3Client=s3Client)
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     requester = Requester()
-
-    #ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
 
+    #ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     requester = Requester()
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
-    tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=tokenMetadataProcessor)
+    openseaApiKey = os.environ['OPENSEA_API_KEY']
+    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
 
     await database.connect()
     query = TokenMetadataTable.select()
@@ -52,6 +57,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int]):
         query = query.where(TokenMetadataTable.c.tokenMetadataId >= startId)
     if endId:
         query = query.where(TokenMetadataTable.c.tokenMetadataId < endId)
+    query = query.order_by(TokenMetadataTable.c.tokenMetadataId.asc())
     tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
     logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
     for tokenMetadata in tokenMetadatasToChange:
