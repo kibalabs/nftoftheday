@@ -68,7 +68,7 @@ class TokenMetadataProcessor():
         return RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
-            metadataUrl=base64.b64encode('{}'.encode()),
+            metadataUrl=None,
             name=f'#{tokenId}',
             description=None,
             imageUrl=None,
@@ -136,7 +136,7 @@ class TokenMetadataProcessor():
             return RetrievedTokenMetadata(
                 registryAddress=registryAddress,
                 tokenId=tokenId,
-                metadataUrl=base64.b64encode('{}'.encode()),
+                metadataUrl=None,
                 name=f'#{tokenId}',
                 description=None,
                 imageUrl=imageSvgResponse[0],
