@@ -50,7 +50,6 @@ export class TokenTransfer {
       String(obj.blockHash),
       dateFromString(obj.blockDate as string),
       CollectionToken.fromObject(obj.token as Record<string, unknown>),
-
     );
   }
 }
