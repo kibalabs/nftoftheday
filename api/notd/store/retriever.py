@@ -129,12 +129,12 @@ class Retriever(CoreRetriever):
         )
         query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
         boughtResult = await self.database.execute(query=query, connection=connection)
-        boughtTokens = [token_transfer_from_row(row) for row in boughtResult]
+        boughtTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in boughtResult]]
         query = TokenTransfersTable.select()
         query = query.where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
         soldResult = await self.database.execute(query=query, connection=connection)
-        soldTokens = [token_transfer_from_row(row) for row in soldResult]
+        soldTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in soldResult]]
         uniqueBoughtTokens = set(boughtTokens)
         uniqueSoldTokens = set(soldTokens)
         tokensOwned = uniqueBoughtTokens - uniqueSoldTokens

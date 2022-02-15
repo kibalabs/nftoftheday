@@ -263,5 +263,5 @@ class NotdManager:
         tokens = []
         tokenTransfers = await self.retriever.get_collection_holding(address=address, ownerAddress=ownerAddress)
         for tokenTransfer in tokenTransfers:
-            tokens += [Token(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId)]
+            tokens += [Token(registryAddress=tokenTransfer[0], tokenId=tokenTransfer[1])]
         return tokens
