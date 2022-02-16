@@ -146,9 +146,6 @@ export const TokenPage = (): React.ReactElement => {
                   <Account accountId={tokenSale?.fromAddress} />
                 </Box>
                 <Box variant='card' width='10rem' height='3rem'>
-                  <KibaIcon iconId={'ion-arrow-right'} />
-                </Box>
-                <Box variant='card' width='10rem' height='3rem'>
                   <Account accountId={tokenSale?.toAddress} />
                 </Box>
                 <Box variant='card' width='10rem' height='3rem'>
