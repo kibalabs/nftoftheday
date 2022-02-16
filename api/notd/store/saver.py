@@ -1,3 +1,4 @@
+import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -8,10 +9,12 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 
+from notd.model import Block
 from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
@@ -88,6 +91,39 @@ class Saver(CoreSaver):
         if len(tokenTransferIds) == 0:
             return
         query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId.in_(tokenTransferIds))
+        await self._execute(query=query, connection=connection)
+
+    async def create_block(self, blockNumber: int, blockHash: str, blockDate: datetime.datetime, connection: Optional[DatabaseConnection] = None) -> Block:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            BlocksTable.c.createdDate.key: createdDate,
+            BlocksTable.c.updatedDate.key: updatedDate,
+            BlocksTable.c.blockNumber.key: blockNumber,
+            BlocksTable.c.blockHash.key: blockHash,
+            BlocksTable.c.blockDate.key: blockDate,
+        }
+        query = BlocksTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        blockId = result.inserted_primary_key[0]
+        return Block(
+            blockId=blockId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            blockNumber=blockNumber,
+            blockHash=blockHash,
+            blockDate=blockDate,
+        )
+
+    async def update_block(self, blockId: int, blockHash: Optional[str] = None, blockDate: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if blockHash is not None:
+            values[BlocksTable.c.blockHash.key] = blockHash
+        if blockDate is not None:
+            values[BlocksTable.c.blockDate.key] = blockDate
+        if len(values) > 0:
+            values[BlocksTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = BlocksTable.update(BlocksTable.c.blockId == blockId).values(values)
         await self._execute(query=query, connection=connection)
 
     async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:

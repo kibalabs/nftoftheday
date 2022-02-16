@@ -44,7 +44,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
         while currentBlockNumber < endBlockNumber:
             logging.info(f'Working on {currentBlockNumber}')
             try:
-                retrievedTokenTransfers = await blockProcessor.get_transfers_in_block(blockNumber=currentBlockNumber)
+                retrievedTokenTransfers = await blockProcessor.process_block(blockNumber=currentBlockNumber)
             except Exception as exception:
                 logging.info(f'Got exception whilst getting blocks: {str(exception)}. Will retry in 10 secs.')
                 time.sleep(60)

@@ -1,16 +1,17 @@
 import datetime
 from typing import Mapping
 
+from notd.model import Block
 from notd.model import Collection
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 
 
 def token_transfer_from_row(row: Mapping) -> TokenTransfer:
-    # NOTE(krishan711) these should be of the form row.id but https://github.com/encode/databases/issues/101
     return TokenTransfer(
         tokenTransferId=row[TokenTransfersTable.c.tokenTransferId],
         transactionHash=row[TokenTransfersTable.c.transactionHash],
@@ -28,6 +29,16 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         blockHash=row[TokenTransfersTable.c.blockHash],
         blockDate=row[TokenTransfersTable.c.blockDate].replace(tzinfo=datetime.timezone.utc),
         tokenType=row[TokenTransfersTable.c.tokenType],
+    )
+
+def block_from_row(row: Mapping) -> Block:
+    return Block(
+        blockId=row[BlocksTable.c.blockId],
+        createdDate=row[BlocksTable.c.createdDate],
+        updatedDate=row[BlocksTable.c.updatedDate],
+        blockNumber=row[BlocksTable.c.blockNumber],
+        blockHash=row[BlocksTable.c.blockHash],
+        blockDate=row[BlocksTable.c.blockDate],
     )
 
 def token_metadata_from_row(row: Mapping) -> TokenMetadata:

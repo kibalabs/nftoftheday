@@ -7,6 +7,7 @@ from typing import Sequence
 from typing import Tuple
 
 import sqlalchemy
+from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
@@ -23,7 +24,7 @@ from notd.messages import CheckBadBlocksMessageContent
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.model import Collection
-from notd.model import RetrievedTokenTransfer
+from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
@@ -219,31 +220,39 @@ class NotdManager:
         await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message(), delaySeconds=delaySeconds)
 
     async def process_block(self, blockNumber: int) -> None:
-        retrievedTokenTransfers = await self.blockProcessor.get_transfers_in_block(blockNumber=blockNumber)
-        logging.info(f'Found {len(retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        collectionAddresses = list(set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in retrievedTokenTransfers))
+        processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
+        logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
+        collectionAddresses = list(set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
         logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
-        collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in retrievedTokenTransfers))
+        collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
         logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
         await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
         await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
-        await self._save_block_transfers(blockNumber=blockNumber, retrievedTokenTransfers=retrievedTokenTransfers)
+        await self._save_processed_block(processedBlock=processedBlock)
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, str, int]:
         return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.blockHash, tokenTransfer.amount)
 
-    async def _save_block_transfers(self, blockNumber: int, retrievedTokenTransfers: Sequence[RetrievedTokenTransfer]) -> None:
+    async def _save_processed_block(self, processedBlock: ProcessedBlock) -> None:
         async with self.saver.create_transaction() as connection:
+            try:
+                block = await self.retriever.get_block_by_number(blockNumber=processedBlock.blockNumber)
+            except NotFoundException:
+                block = None
+            if block:
+                await self.saver.update_block(connection=connection, blockId=block.blockId, blockHash=processedBlock.blockHash, blockDate=processedBlock.blockDate)
+            else:
+                await self.saver.create_block(connection=connection, blockNumber=processedBlock.blockNumber, blockHash=processedBlock.blockHash, blockDate=processedBlock.blockDate)
             existingTokenTransfers = await self.retriever.list_token_transfers(
                 connection=connection,
                 fieldFilters=[
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=blockNumber),
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber),
                 ], shouldIgnoreRegistryBlacklist=True
             )
             existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())
-            retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in retrievedTokenTransfers}
+            retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in processedBlock.retrievedTokenTransfers}
             retrievedTuples = set(retrievedTupleTransferMaps.keys())
             tokenTransferIdsToDelete = []
             for existingTuple, existingTokenTransfer in existingTuplesTransferMap.items():
@@ -257,4 +266,4 @@ class NotdManager:
                     continue
                 retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
             await self.saver.create_token_transfers(connection=connection, retrievedTokenTransfers=retrievedTokenTransfersToSave)
-            logging.info(f'Saving transfers for block {blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
+            logging.info(f'Saving transfers for block {processedBlock.blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
