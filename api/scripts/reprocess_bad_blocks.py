@@ -99,11 +99,11 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
             await notdManager.process_blocks_deferred(blockNumbers=allBadBlocks)
             insertQuery = BlocksTable.insert().from_select(
                 [BlocksTable.c.createdDate.key, BlocksTable.c.updatedDate.key, BlocksTable.c.blockNumber.key, BlocksTable.c.blockHash.key, BlocksTable.c.blockDate.key],
-                sqlalchemy.select(sqlalchemy.literal(datetime.datetime(2022, 2, 1)), sqlalchemy.literal(datetime.datetime(2022, 2, 1)), TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, TokenTransfersTable.c.blockDate)
+                sqlalchemy.select(sqlalchemy.max(sqlalchemy.literal(datetime.datetime(2022, 2, 1)), sqlalchemy.func.min(TokenTransfersTable.c.blockDate)), sqlalchemy.max(sqlalchemy.literal(datetime.datetime(2022, 2, 1)), sqlalchemy.func.min(TokenTransfersTable.c.blockDate)), TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, sqlalchemy.func.min(TokenTransfersTable.c.blockDate))
                 .where(TokenTransfersTable.c.blockNumber.in_(set(blockNumbers) - allBadBlocks))
                 .where(TokenTransfersTable.c.blockNumber >= start)
                 .where(TokenTransfersTable.c.blockNumber < end)
-                .group_by(TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, TokenTransfersTable.c.blockDate)
+                .group_by(TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash)
             )
             async with database.create_transaction() as connection:
                 await database.execute(connection=connection, query=insertQuery)
