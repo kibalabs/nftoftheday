@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 import json
 import logging
@@ -17,12 +16,11 @@ from core.store.retriever import Order
 from core.store.retriever import RandomOrder
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-from core.util import list_util
 
 from notd.block_processor import BlockProcessor
-from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import ReprocessBlocksMessageContent
 from notd.model import Collection
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
@@ -170,8 +168,7 @@ class NotdManager:
         latestProcessedBlockNumber = latestBlocks[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
         logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
-        # NOTE(krishan711): the delay is to mitigate soft fork problems
-        await self.process_blocks_deferred(blockNumbers=list(reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1))), delaySeconds=60)
+        await self.process_blocks_deferred(blockNumbers=list(reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1))))
 
     async def reprocess_old_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReprocessBlocksMessageContent().to_message())
@@ -184,6 +181,7 @@ class NotdManager:
         )
         result = await self.retriever.database.execute(query=blocksToReprocessQuery)
         blockNumbers = [blockNumber for (blockNumber, ) in result]
+        logging.info(f'Scheduling messages for reprocessing {len(blockNumbers)} blocks')
         await self.process_blocks_deferred(blockNumbers=blockNumbers)
 
     async def process_blocks_deferred(self, blockNumbers: Sequence[int], delaySeconds: int = 0) -> None:
