@@ -101,6 +101,7 @@ class TradedToken:
     latestTransfer: TokenTransfer
     transferCount: int
 
+
 @dataclasses.dataclass
 class UiData:
     highestPricedTokenTransfer: TokenTransfer
@@ -108,6 +109,7 @@ class UiData:
     randomTokenTransfer: TokenTransfer
     sponsoredToken: Token
     transactionCount: int
+
 
 @dataclasses.dataclass
 class SponsoredToken:
@@ -126,3 +128,21 @@ class SponsoredToken:
             date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
             token=Token.from_dict(sponsoredTokenDict.get('token'))
         )
+
+
+@dataclasses.dataclass
+class Block:
+    blockId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class ProcessedBlock:
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime
+    retrievedTokenTransfers: List[RetrievedTokenTransfer]

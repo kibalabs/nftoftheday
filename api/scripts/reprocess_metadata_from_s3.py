@@ -7,11 +7,9 @@ from typing import Optional
 
 import asyncclick as click
 import boto3
-from core.s3_manager import S3Manager
-from core.store.database import Database
+from core.aws_requester import AwsRequester
 from core.requester import Requester
 from core.s3_manager import S3Manager
-from core.aws_requester import AwsRequester
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
 
