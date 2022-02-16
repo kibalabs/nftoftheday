@@ -37,7 +37,7 @@ class Collection(RetrievedCollection):
 class RetrievedTokenMetadata:
     registryAddress: str
     tokenId: str
-    metadataUrl: str
+    metadataUrl: Optional[str]
     imageUrl: Optional[str]
     animationUrl: Optional[str]
     youtubeUrl: Optional[str]

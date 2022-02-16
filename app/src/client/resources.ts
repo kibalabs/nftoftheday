@@ -17,7 +17,7 @@ export class TokenTransfer {
   readonly blockDate: Date;
   readonly token: CollectionToken;
 
-  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date,token: CollectionToken) {
+  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date, token: CollectionToken) {
     this.tokenTransferId = tokenTransferId;
     this.transactionHash = transactionHash;
     this.registryAddress = registryAddress;
