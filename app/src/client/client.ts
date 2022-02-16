@@ -40,6 +40,14 @@ export class NotdClient extends ServiceClient {
     return response.collectionStatistics;
   }
 
+  public getCollectionRecentSales = async (address: string): Promise<Resources.TokenTransfer[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${address}/recent-sales`;
+    const request = new Endpoints.GetTokenRecentSalesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetTokenRecentSalesResponse);
+    return response.tokenTransfers;
+  }
+
   public subscribe = async (email: string): Promise<void> => {
     const method = RestMethod.POST;
     const path = 'v1/subscribe';
