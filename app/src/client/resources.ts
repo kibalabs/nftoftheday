@@ -15,8 +15,9 @@ export class TokenTransfer {
   readonly blockNumber: number;
   readonly blockHash: string;
   readonly blockDate: Date;
+  readonly token: CollectionToken;
 
-  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date) {
+  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date, token: CollectionToken) {
     this.tokenTransferId = tokenTransferId;
     this.transactionHash = transactionHash;
     this.registryAddress = registryAddress;
@@ -30,6 +31,7 @@ export class TokenTransfer {
     this.blockNumber = blockNumber;
     this.blockHash = blockHash;
     this.blockDate = blockDate;
+    this.token = token;
   }
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
@@ -47,6 +49,7 @@ export class TokenTransfer {
       Number(obj.blockNumber),
       String(obj.blockHash),
       dateFromString(obj.blockDate as string),
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
     );
   }
 }
