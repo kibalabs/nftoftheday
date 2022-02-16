@@ -182,9 +182,7 @@ class NotdManager:
         result = await self.retriever.database.execute(query=blocksToReprocessQuery)
         blockNumbers = [blockNumber for (blockNumber, ) in result]
         logging.info(f'Scheduling messages for reprocessing {len(blockNumbers)} blocks')
-
-        # print('blockNumbers', blockNumbers)
-        # await self.process_blocks_deferred(blockNumbers=blockNumbers)
+        await self.process_blocks_deferred(blockNumbers=blockNumbers)
 
     async def process_blocks_deferred(self, blockNumbers: Sequence[int], delaySeconds: int = 0) -> None:
         messages = [ProcessBlockMessageContent(blockNumber=blockNumber).to_message() for blockNumber in blockNumbers]
