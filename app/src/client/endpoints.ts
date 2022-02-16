@@ -135,9 +135,9 @@ export class GetTokenRecentSalesRequest extends RequestData {
 export class GetTokenRecentSalesResponse extends ResponseData {
   readonly tokenTransfers: Resources.TokenTransfer[];
 
-  public constructor(collectionRecentSales: Resources.TokenTransfer[]) {
+  public constructor(TokenRecentSales: Resources.TokenTransfer[]) {
     super();
-    this.tokenTransfers = collectionRecentSales;
+    this.tokenTransfers = TokenRecentSales;
   }
 
   public static fromObject = (obj: Record<string, unknown>): GetTokenRecentSalesResponse => {
