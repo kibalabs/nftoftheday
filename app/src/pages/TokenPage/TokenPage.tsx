@@ -20,6 +20,8 @@ export const TokenPage = (): React.ReactElement => {
 
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
+  const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
   const defaultImage = '/assets/icon.png';
@@ -55,6 +57,19 @@ export const TokenPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
+
+  const updateTokenSales = React.useCallback(async (): Promise<void> => {
+    setTokenSales(undefined);
+    notdClient.getTokenRecentSales(registryAddress, tokenId).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenSales(tokenTransfers);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setTokenSales(null);
+    });
+  }, [notdClient, registryAddress, tokenId]);
+  React.useEffect((): void => {
+    updateTokenSales();
+  }, [updateTokenSales]);
 
   return (
     <Stack direction={ Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} isScrollableVertically={true}>
@@ -121,6 +136,32 @@ export const TokenPage = (): React.ReactElement => {
           <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true} padding={PaddingSize.Wide}>
             {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
               <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
+            ))}
+          </Stack>
+          <Text variant='header3'>Sales history</Text>
+          <Stack direction={Direction.Horizontal} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+            {tokenSales && tokenSales.map((tokenSale: TokenTransfer, index: number) : React.ReactElement => (
+              <Stack direction={Direction.Horizontal} key={index} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                <Box variant='card' width='10rem' height='3rem'>
+                  <Account accountId={tokenSale?.fromAddress} />
+                </Box>
+                <Box variant='card' width='10rem' height='3rem'>
+                  <KibaIcon iconId={'ion-arrow-right'} />
+                </Box>
+                <Box variant='card' width='10rem' height='3rem'>
+                  <Account accountId={tokenSale?.toAddress} />
+                </Box>
+                <Box variant='card' width='10rem' height='3rem'>
+                  <Text alignment={TextAlignment.Center}>
+                    { `Ξ${tokenSale.value / 1000000000000000000.0}`}
+                  </Text>
+                </Box>
+                <Box variant='card' width='10rem' height='3rem'>
+                  <Text alignment={TextAlignment.Center}>
+                    {dateToString(tokenSale.blockDate, 'HH:mm')}
+                  </Text>
+                </Box>
+              </Stack>
             ))}
           </Stack>
         </ContainingView>

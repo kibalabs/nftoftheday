@@ -95,6 +95,7 @@ export const buildNotdTheme = (): ITheme => {
         // 'border-color': 'rgba(255, 255, 255, 0.5)',
         // 'border-style': 'solid',
         margin: '0',
+        'border-radius': '0',
       },
       cardLabelBox: {
         'border-radius': '0.5em 0 0.2em 0',
