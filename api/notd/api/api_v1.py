@@ -73,6 +73,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     @router.post('/receive-new-blocks-deferred', response_model=ReceiveNewBlocksDeferredResponse)
     async def receive_new_blocks_deferred():
         await notdManager.receive_new_blocks_deferred()
+        await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)

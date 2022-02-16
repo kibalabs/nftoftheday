@@ -82,7 +82,8 @@ CREATE TABLE tbl_blocks (
     block_hash TEXT NOT NULL,
     block_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
+CREATE UNIQUE INDEX tbl_blocks_block_number ON tbl_blocks (block_number);
+CREATE INDEX tbl_blocks_created_date ON tbl_blocks (created_date);
 CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
-CREATE INDEX tbl_blocks_block_number ON tbl_blocks (block_number);
 CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
 CREATE INDEX tbl_blocks_block_date ON tbl_blocks (block_date);

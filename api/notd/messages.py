@@ -6,10 +6,8 @@ class ProcessBlockMessageContent(MessageContent):
     blockNumber: int
 
 
-class CheckBadBlocksMessageContent(MessageContent):
-    _COMMAND = 'CHECK_BAD_BLOCKS'
-    startBlockNumber: int
-    endBlockNumber: int
+class ReprocessBlocksMessageContent(MessageContent):
+    _COMMAND = 'REPROCESS_OLD_BLOCKS'
 
 
 class ReceiveNewBlocksMessageContent(MessageContent):

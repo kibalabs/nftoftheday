@@ -6,9 +6,9 @@ from core.queues.model import SqsMessage
 from core.util import date_util
 
 from notd.manager import NotdManager
-from notd.messages import CheckBadBlocksMessageContent
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 
@@ -30,9 +30,9 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
             await self.notdManager.receive_new_blocks()
             return
-        if message.command == CheckBadBlocksMessageContent.get_command():
-            messageContent = CheckBadBlocksMessageContent.parse_obj(message.content)
-            await self.notdManager.check_bad_blocks(startBlockNumber=messageContent.startBlockNumber, endBlockNumber=messageContent.endBlockNumber)
+        if message.command == ReprocessBlocksMessageContent.get_command():
+            messageContent = ReprocessBlocksMessageContent.parse_obj(message.content)
+            await self.notdManager.reprocess_old_blocks()
             return
         if message.command == UpdateTokenMetadataMessageContent.get_command():
             messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)

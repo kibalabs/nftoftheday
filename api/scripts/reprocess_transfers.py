@@ -28,10 +28,6 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int):
     retriever = Retriever(database=database)
     requester = Requester()
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-
-    # infuraAuth = BasicAuthentication(username='', password=os.environ['INFURA_PROJECT_SECRET'])
-    # infuraRequester = Requester(headers={'authorization': f'Basic {infuraAuth.to_string()}'})
-    # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
