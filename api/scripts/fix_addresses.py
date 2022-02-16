@@ -45,7 +45,7 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
                     TokenTransfersTable.c.fromAddress.key: normalize_address(tokenTransfer.fromAddress),
                 }
                 await database.execute(query=query, values=values)
-        currentBlockNumber = currentBlockNumber + batchSize
+        currentBlockNumber = end
     await database.disconnect()
 
 if __name__ == '__main__':

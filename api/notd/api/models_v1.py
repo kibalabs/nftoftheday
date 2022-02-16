@@ -28,7 +28,7 @@ class ApiCollection(BaseModel):
 class ApiCollectionToken(BaseModel):
     registryAddress: str
     tokenId: str
-    metadataUrl: str
+    metadataUrl: Optional[str]
     name: Optional[str]
     imageUrl: Optional[str]
     description: Optional[str]
