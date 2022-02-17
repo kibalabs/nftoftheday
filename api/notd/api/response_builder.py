@@ -64,14 +64,12 @@ class ResponseBuilder:
             attributes=attributes,
         )
     async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> List[ApiCollectionToken]:
-        #return await asyncio.gather(*[self.collection_token_from_registry_address_token_id(registryAddress=token.registryAddress, tokenId=token.tokenId) for token in tokens])
         tokenMetadatas = []
         for token in tokens:
             try:
                 tokenMetadatas += [await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=token.registryAddress, tokenId=token.tokenId)]
             except NotFoundException:
                 tokenMetadatas += [TokenMetadataProcessor.get_default_token_metadata(registryAddress=token.registryAddress, tokenId=token.tokenId)]
-        print(len(tokenMetadatas))
         return await asyncio.gather(*[self.collection_token_from_model(tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatas])
 
     async def token_transfer_from_model(self, tokenTransfer: TokenTransfer) -> ApiTokenTransfer:
