@@ -247,4 +247,3 @@ class NotdManager:
         for tokenTransfer in tokenTransfers:
             tokens += [Token(registryAddress=tokenTransfer[0], tokenId=tokenTransfer[1])]
         return tokens
-
