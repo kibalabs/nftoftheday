@@ -26,8 +26,9 @@ from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
-_TOKEN_UPDATE_MIN_DAYS = 30
-_COLLECTION_UPDATE_MIN_DAYS = 30
+# NOTE(krishan711): this is temporary, undo once backlog is cleared
+_TOKEN_UPDATE_MIN_DAYS = 1000
+_COLLECTION_UPDATE_MIN_DAYS = 1000
 
 
 class TokenManager:
