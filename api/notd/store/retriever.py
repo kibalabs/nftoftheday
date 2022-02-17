@@ -16,9 +16,11 @@ from notd.model import Collection
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
+from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_transfer_from_row
@@ -31,6 +33,31 @@ _REGISTRY_BLACKLIST = set([
 ])
 
 class Retriever(CoreRetriever):
+
+    async def list_blocks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
+        query = BlocksTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=BlocksTable, fieldFilters=fieldFilters)
+        if orders:
+            for order in orders:
+                query = self._apply_order(query=query, table=BlocksTable, order=order)
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
+        result = await self.database.execute(query=query, connection=connection)
+        blocks = [block_from_row(row) for row in result]
+        return blocks
+
+    async def get_block_by_number(self, blockNumber: int, connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
+        query = BlocksTable.select() \
+            .where(BlocksTable.c.blockNumber == blockNumber)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Block with blockNumber {blockNumber} not found')
+        block = block_from_row(row)
+        return block
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
         query = TokenTransfersTable.select()

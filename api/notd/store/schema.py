@@ -22,6 +22,17 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='tokenType', name='token_type', type_=sqlalchemy.Text, nullable=True),
 )
 
+BlocksTable = sqlalchemy.Table(
+    'tbl_blocks',
+    metadata,
+    sqlalchemy.Column(key='blockId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='blockNumber', name='block_number', type_=sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column(key='blockHash', name='block_hash', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='blockDate', name='block_date', type_=sqlalchemy.DateTime, nullable=False),
+)
+
 TokenMetadataTable = sqlalchemy.Table(
     'tbl_token_metadatas',
     metadata,
@@ -30,7 +41,7 @@ TokenMetadataTable = sqlalchemy.Table(
     sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
-    sqlalchemy.Column(key='metadataUrl', name='metadata_url', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='metadataUrl', name='metadata_url', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='imageUrl', name='image_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='animationUrl', name='animation_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='youtubeUrl', name='youtube_url', type_=sqlalchemy.TEXT, nullable=True),

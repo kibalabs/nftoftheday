@@ -16,6 +16,7 @@ from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
+from notd.model import RetrievedTokenMetadata
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -114,15 +115,18 @@ class TokenManager:
         except (TokenDoesNotExistException, TokenHasNoMetadataException):
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        await self.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
+
+    async def save_token_metadata(self, retrievedTokenMetadata: RetrievedTokenMetadata):
         async with self.saver.create_transaction() as connection:
             try:
-                tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
+                tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId)
             except NotFoundException:
                 tokenMetadata = None
             if tokenMetadata:
                 await self.saver.update_token_metadata(connection=connection, tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
             else:
-                await self.saver.create_token_metadata(connection=connection, registryAddress=registryAddress, tokenId=tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+                await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
 
     async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
         if len(addresses) == 0:

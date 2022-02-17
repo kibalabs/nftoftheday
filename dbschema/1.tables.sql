@@ -73,3 +73,17 @@ CREATE TABLE tbl_collections (
 );
 CREATE UNIQUE INDEX tbl_collections_address ON tbl_collections (address);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);
+
+CREATE TABLE tbl_blocks (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    block_number INTEGER NOT NULL,
+    block_hash TEXT NOT NULL,
+    block_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);
+CREATE UNIQUE INDEX tbl_blocks_block_number ON tbl_blocks (block_number);
+CREATE INDEX tbl_blocks_created_date ON tbl_blocks (created_date);
+CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
+CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
+CREATE INDEX tbl_blocks_block_date ON tbl_blocks (block_date);

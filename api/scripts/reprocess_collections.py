@@ -1,19 +1,17 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 import asyncio
 import logging
+import os
+import sys
 
 import asyncclick as click
 import boto3
 from core.aws_requester import AwsRequester
 from core.requester import Requester
 from core.s3_manager import S3Manager
+from core.store.database import Database
 from core.web3.eth_client import RestEthClient
-from databases.core import Database
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_processor import CollectionProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -27,7 +25,8 @@ from notd.token_manager import TokenManager
 @click.option('-e', '--end-id-number', 'endId', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
 async def reprocess_collections(startId: int, endId: int, batchSize: int):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     saver = Saver(database)
     retriever = Retriever(database)
     openseaApiKey = os.environ['OPENSEA_API_KEY']
@@ -61,6 +60,7 @@ async def reprocess_collections(startId: int, endId: int, batchSize: int):
                 except Exception as e:
                     logging.exception(f'Error processing {collection.collectionId}: {e}')
         currentId = currentId + batchSize
+
     await database.disconnect()
     await requester.close_connections()
     await awsRequester.close_connections()
