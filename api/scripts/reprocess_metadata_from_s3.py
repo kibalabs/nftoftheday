@@ -30,17 +30,22 @@ from core.util import list_util
 
 
 
-async def _reprocess_batch(tokenManger: TokenManager, retrievedTokenMetadata: TokenMetadata): 
-    logging.info(f'Updating Token {(retrievedTokenMetadata.registryAddress)},TokenId {retrievedTokenMetadata.tokenId}')
-    await tokenManger.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
-    #logging.info(f'Saving Token Metadata for {retrievedTokenMetadata.tokenMetadataId}')
-    #await tokenManger.update_token_metadata(registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, shouldForce=True)
+async def _reprocess_batch(tokenMetadataProcessor: TokenMetadataProcessor, s3manager: S3Manager, tokenManger: TokenManager, tokenMetadata: TokenMetadata): 
+    tokenDirectory = f'{os.environ["S3_BUCKET"]}/token-metadatas/{tokenMetadata.registryAddress}/{tokenMetadata.tokenId}/'
+    tokenFile = None
+    tokenMetadataFiles = [file async for file in s3manager.generate_directory_files(s3Directory=tokenDirectory)]
+    if len(tokenMetadataFiles) > 0:
+        tokenFile=(tokenMetadataFiles[len(tokenMetadataFiles)-1])
+        tokenMetadataJson = await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}')
+        tokenMetadataDict = json.loads(tokenMetadataJson)
+        s3TokenMetadata = await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)
+        await tokenManger.save_token_metadata(retrievedTokenMetadata=s3TokenMetadata)
 
 
 @click.command()
 @click.option('-s', '--start-id-number', 'startId', required=False, type=int)
 @click.option('-e', '--end-id-number', 'endId', required=False, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=10)
 
 async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batchSize: Optional[int]):
 
@@ -60,7 +65,10 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
     openseaApiKey = os.environ['OPENSEA_API_KEY']
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
-
+    if not startId:
+        startId=0
+    if not endId:
+        endId=float('inf')
     await database.connect()
     currentId = startId
     while currentId < endId:
@@ -72,21 +80,9 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
         query = query.where(TokenMetadataTable.c.tokenMetadataId < end)
         query = query.order_by(TokenMetadataTable.c.tokenMetadataId.asc())
         tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
-        s3TokenMetadata = []
+        logging.info(f'Working on {start} - {end}')
         logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
-        for tokenMetadata in tokenMetadatasToChange:
-            tokenDirectory = f'{os.environ["S3_BUCKET"]}/token-metadatas/{tokenMetadata.registryAddress}/{tokenMetadata.tokenId}/'
-            tokenFile = None
-            tokenMetadataFiles = [file async for file in s3manager.generate_directory_files(s3Directory=tokenDirectory)]
-            if len(tokenMetadataFiles) > 0:
-                tokenFile=(tokenMetadataFiles[len(tokenMetadataFiles)-1])
-                tokenMetadataJson = await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}')
-                tokenMetadataDict = json.loads(tokenMetadataJson)
-                s3TokenMetadata += [await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)]
-
-        for batch in list_util.generate_chunks(s3TokenMetadata, chunkSize=10):
-            await asyncio.gather(*[_reprocess_batch(tokenManger=tokenManger, retrievedTokenMetadata=retrievedTokenMetadata) for retrievedTokenMetadata in batch])
-            print("done")
+        await asyncio.gather(*[_reprocess_batch(tokenMetadataProcessor=tokenMetadataProcessor, s3manager=s3manager, tokenManger=tokenManger, tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatasToChange])
         currentId = currentId + batchSize
 
     await database.disconnect()
