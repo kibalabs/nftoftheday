@@ -23,7 +23,6 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import Collection
 from notd.model import CollectionStatistics
-from notd.model import RetrievedTokenTransfer
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -128,7 +127,7 @@ class NotdManager:
         return tokenTransfers
 
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
-        itemCount = await self.retriever.get_collection_item_count(address=address)         
+        itemCount = await self.retriever.get_collection_item_count(address=address)
         holders = await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),

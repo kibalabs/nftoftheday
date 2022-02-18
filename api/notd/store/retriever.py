@@ -1,5 +1,4 @@
 import datetime
-from itertools import groupby
 from typing import Optional
 from typing import Sequence
 
@@ -147,10 +146,11 @@ class Retriever(CoreRetriever):
         collection = collection_from_row(row)
         return collection
 
-    async def get_collection_item_count(self, address) -> int:
+    async def get_collection_item_count(self, address, connection: Optional[DatabaseConnection] = None) -> int:
         query = TokenTransfersTable.select()\
-            .with_only_columns([TokenTransfersTable.c.tokenId])\
+            .with_only_columns([sqlalchemyfunc.count(TokenTransfersTable.c.tokenId)])\
             .where(TokenTransfersTable.c.registryAddress == address)\
             .group_by(TokenTransfersTable.c.tokenId)
-        rows = await self.database.fetch_all(query=query)
-        return len(rows)
+        rows = await self.database.execute(query=query, connection=connection)
+        count = len(list(rows))
+        return count
