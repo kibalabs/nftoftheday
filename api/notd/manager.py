@@ -100,13 +100,7 @@ class NotdManager:
         return tokenTransfers
 
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
-        items = await self.retriever.list_token_metadatas(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
-            ],
-        )
-        itemCount = len(items)
-
+        itemCount = await self.retriever.get_collection_item_count(address=address)         
         holders = await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
@@ -119,24 +113,17 @@ class NotdManager:
                 toAddresses.remove(holderAddress)
 
         holderCount = len(toAddresses)
-
-        trades= await self.retriever.list_token_transfers(
+        totalTradeVolume = sum([trade.value for trade in holders])
+        trades24h =  await self.retriever.list_token_transfers(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
-            ],
-        )
-        totalTradeVolume = sum([trade.value for trade in trades])
-
-        trades24h = trades= await self.retriever.list_token_transfers(
-            fieldFilters=[
-                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=date_util.datetime_from_now(), lt=date_util.datetime_from_now(days=-1)),
+                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=date_util.start_of_day(dt=datetime.datetime.now()), lte=date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=datetime.datetime.now()), days=1))),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
         )
         tradeVolume24Hours = sum([trade.value for trade in trades24h])
-        highestSaleLast24Hours = trades24h[0] if len(trades24h) >0 else None
-        lowestSaleLast24Hours = trades24h[len(trades24h)] if len(trades24h) >0 else None
+        highestSaleLast24Hours = trades24h[0].value if len(trades24h) >0 else None
+        lowestSaleLast24Hours = trades24h[len(trades24h)-1].value if len(trades24h) >0 else None
         return CollectionStatistics(
             itemCount=itemCount,
             holderCount=holderCount,

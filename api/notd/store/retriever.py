@@ -1,4 +1,5 @@
 import datetime
+from itertools import groupby
 from typing import Optional
 from typing import Sequence
 
@@ -113,3 +114,11 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'Collection with registry {address} not found')
         collection = collection_from_row(row)
         return collection
+
+    async def get_collection_item_count(self, address) -> int:
+        query = TokenTransfersTable.select()\
+            .with_only_columns([TokenTransfersTable.c.tokenId])\
+            .where(TokenTransfersTable.c.registryAddress == address)\
+            .group_by(TokenTransfersTable.c.tokenId)
+        rows = await self.database.fetch_all(query=query)
+        return len(rows)
