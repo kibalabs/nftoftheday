@@ -10,12 +10,16 @@ from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
-<<<<<<< HEAD
-=======
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiUiData
->>>>>>> main
 
+
+class RetrieveUiDataRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrieveUiDataResponse(BaseModel):
+    uiData:  ApiUiData
 
 class  RetrievedHighestPriceTransferRequest(BaseModel):
     startDate: Optional[datetime.datetime]
