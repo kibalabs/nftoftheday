@@ -5,6 +5,7 @@ from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
+<<<<<<< HEAD
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrievedHighestPriceTransferRequest
@@ -18,6 +19,23 @@ from notd.api.endpoints_v1 import RetrievedTransactionCountRequest
 from notd.api.endpoints_v1 import RetrievedTransactionCountResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 
+=======
+from notd.api.endpoints_v1 import GetCollectionResponse
+from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
+from notd.api.endpoints_v1 import GetCollectionTokenResponse
+from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
+from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
+from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
+from notd.api.endpoints_v1 import RetrieveMostTradedRequest
+from notd.api.endpoints_v1 import RetrieveMostTradedResponse
+from notd.api.endpoints_v1 import RetrieveRandomTransferRequest
+from notd.api.endpoints_v1 import RetrieveRandomTransferResponse
+from notd.api.endpoints_v1 import RetrieveSponsoredTokenResponse
+from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
+from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
+from notd.api.endpoints_v1 import RetrieveUiDataRequest
+from notd.api.endpoints_v1 import RetrieveUiDataResponse
+>>>>>>> main
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
@@ -46,6 +64,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     async def retrieve_random_transfer(request: RetrievedRandomTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
         startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+<<<<<<< HEAD
         randomTokenTransfer = await notdManager.retrieve_random_transfer(startDate=startDate, endDate=endDate)
         return RetrievedRandomTransferResponse(transfer=(await responseBuilder.retrieve_random_transfer(randomTokenTransfer=randomTokenTransfer)))
 
@@ -60,10 +79,48 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         count = await notdManager.get_transaction_count(startDate=startDate, endDate=endDate)
         return RetrievedTransactionCountResponse(count=count)
+=======
+        uiData = await notdManager.retrieve_ui_data(startDate=startDate, endDate=endDate)
+        return RetrieveUiDataResponse(uiData=(await responseBuilder.retrieve_ui_data(uiData=uiData)))
+
+    @router.post('/retrieve-highest-price-transfer', response_model=RetrieveHighestPriceTransferResponse)
+    async def retrieve_highest_price_transfer(request: RetrieveHighestPriceTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+        transfer = await notdManager.retrieve_highest_priced_transfer(startDate=startDate, endDate=endDate)
+        return RetrieveHighestPriceTransferResponse(transfer=(await responseBuilder.token_transfer_from_model(tokenTransfer=transfer)))
+
+    @router.post('/retrieve-most-traded-token-transfers', response_model=RetrieveMostTradedResponse)
+    async def retrieve_most_traded_token_transfer(request: RetrieveMostTradedRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+        mostTradedToken = await notdManager.retrieve_most_traded_token_transfer(startDate=startDate, endDate=endDate)
+        return RetrieveMostTradedResponse(tradedToken=(await responseBuilder.retrieve_most_traded_token_transfer(tradedToken=mostTradedToken)))
+
+    @router.post('/retrieve-random-token-transfer', response_model=RetrieveRandomTransferResponse)
+    async def retrieve_random_transfer(request: RetrieveRandomTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+        randomTokenTransfer = await notdManager.retrieve_random_transfer(startDate=startDate, endDate=endDate)
+        return RetrieveRandomTransferResponse(transfer=(await responseBuilder.token_transfer_from_model(tokenTransfer=randomTokenTransfer)))
+
+    @router.post('/retrieve-sponsored-token', response_model=RetrieveSponsoredTokenResponse)
+    async def get_sponsored_token():
+        sponsoredToken = notdManager.get_sponsored_token()
+        return RetrieveSponsoredTokenResponse(token=(await responseBuilder.collection_token_from_registry_address_token_id(registryAddress=sponsoredToken.registryAddress, tokenId=sponsoredToken.tokenId)))
+
+    @router.post('/retrieve-transfer-count', response_model=RetrieveTransactionCountResponse)
+    async def get_transfer_count(request: RetrieveTransactionCountRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+        count = await notdManager.get_transfer_count(startDate=startDate, endDate=endDate)
+        return RetrieveTransactionCountResponse(count=count)
+>>>>>>> main
 
     @router.post('/receive-new-blocks-deferred', response_model=ReceiveNewBlocksDeferredResponse)
     async def receive_new_blocks_deferred():
         await notdManager.receive_new_blocks_deferred()
+        await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)

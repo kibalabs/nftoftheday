@@ -1,15 +1,13 @@
+import asyncio
+import logging
 import os
 import sys
 from typing import Optional
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-import asyncio
-import logging
-
 import asyncclick as click
-from databases.core import Database
+from core.store.database import Database
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
@@ -18,7 +16,8 @@ from notd.store.schema_conversions import token_transfer_from_row
 @click.command()
 @click.option('-o', '--owner-address', 'ownerAddress', required=False, type=str)
 async def owned_tokens(ownerAddress: Optional[str]):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
 
     await database.connect()

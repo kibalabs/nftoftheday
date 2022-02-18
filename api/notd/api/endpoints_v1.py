@@ -10,6 +10,11 @@ from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
+<<<<<<< HEAD
+=======
+from notd.api.models_v1 import ApiTradedToken
+from notd.api.models_v1 import ApiUiData
+>>>>>>> main
 
 
 class  RetrievedHighestPriceTransferRequest(BaseModel):
@@ -44,6 +49,41 @@ class  RetrievedSponsoredTokenRequest(BaseModel):
     pass
 
 class RetrievedSponsoredTokenResponse(BaseModel):
+    token: ApiCollectionToken
+
+class  RetrieveHighestPriceTransferRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrieveHighestPriceTransferResponse(BaseModel):
+    transfer: ApiTokenTransfer
+
+class  RetrieveRandomTransferRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrieveRandomTransferResponse(BaseModel):
+    transfer: ApiTokenTransfer
+
+class  RetrieveTransactionCountRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrieveTransactionCountResponse(BaseModel):
+    count: int
+
+class  RetrieveMostTradedRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrieveMostTradedResponse(BaseModel):
+    tradedToken: ApiTradedToken
+
+class  RetrieveSponsoredTokenRequest(BaseModel):
+    startDate: Optional[datetime.datetime]
+    endDate: Optional[datetime.datetime]
+
+class RetrieveSponsoredTokenResponse(BaseModel):
     token: ApiCollectionToken
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):

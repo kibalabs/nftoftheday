@@ -6,11 +6,8 @@ class ProcessBlockMessageContent(MessageContent):
     blockNumber: int
 
 
-# TODO(krishan711): remove this once everything uses ProcessBlockMessageContent
-class ProcessBlockRangeMessageContent(MessageContent):
-    _COMMAND = 'PROCESS_BLOCK_RANGE'
-    startBlockNumber: int
-    endBlockNumber: int
+class ReprocessBlocksMessageContent(MessageContent):
+    _COMMAND = 'REPROCESS_OLD_BLOCKS'
 
 
 class ReceiveNewBlocksMessageContent(MessageContent):

@@ -37,7 +37,7 @@ class Collection(RetrievedCollection):
 class RetrievedTokenMetadata:
     registryAddress: str
     tokenId: str
-    metadataUrl: str
+    metadataUrl: Optional[str]
     imageUrl: Optional[str]
     animationUrl: Optional[str]
     youtubeUrl: Optional[str]
@@ -96,6 +96,13 @@ class Token:
 
 
 @dataclasses.dataclass
+class TradedToken:
+    collectionToken: Token
+    latestTransfer: TokenTransfer
+    transferCount: int
+
+
+@dataclasses.dataclass
 class UiData:
     highestPricedTokenTransfer: TokenTransfer
     mostTradedTokenTransfers: List[TokenTransfer]
@@ -131,3 +138,21 @@ class SponsoredToken:
             date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
             token=Token.from_dict(sponsoredTokenDict.get('token'))
         )
+
+
+@dataclasses.dataclass
+class Block:
+    blockId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class ProcessedBlock:
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime
+    retrievedTokenTransfers: List[RetrievedTokenTransfer]

@@ -28,7 +28,7 @@ class ApiCollection(BaseModel):
 class ApiCollectionToken(BaseModel):
     registryAddress: str
     tokenId: str
-    metadataUrl: str
+    metadataUrl: Optional[str]
     name: Optional[str]
     imageUrl: Optional[str]
     description: Optional[str]
@@ -81,6 +81,11 @@ class ApiToken(BaseModel):
             registryAddress=model.registryAddress,
             tokenId=model.tokenId,
         )
+
+class ApiTradedToken(BaseModel):
+    collectionToken: ApiCollectionToken
+    latestTransfer: ApiTokenTransfer
+    transferCount: int
 
 
 class ApiUiData(BaseModel):

@@ -1,11 +1,7 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 import asyncio
 import logging
 import os
+import sys
 
 import asyncclick as click
 import boto3
@@ -13,19 +9,18 @@ from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
+from core.store.database import Database
 from core.store.retriever import StringFieldFilter
 from core.web3.eth_client import RestEthClient
-from databases import Database
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
-from notd.opensea_client import OpenseaClient
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
-from notd.token_client import TokenClient
+from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 
@@ -33,25 +28,27 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 @click.option('-a', '--collection-address', 'address', required=True, type=str)
 @click.option('-d', '--defer', 'shouldDefer', default=False, is_flag=True)
 async def process_collection(address: str, shouldDefer: bool):
-    database = Database(f'postgresql://{os.environ["DB_USERNAME"]}:{os.environ["DB_PASSWORD"]}@{os.environ["DB_HOST"]}:{os.environ["DB_PORT"]}/{os.environ["DB_NAME"]}')
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
 
     sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    tokenQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     s3Client = boto3.client(service_name='s3', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
     s3manager = S3Manager(s3Client=s3Client)
     requester = Requester()
+
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
-    requester = Requester()
-    openseaClient = OpenseaClient(requester=requester)
-    tokenClient = TokenClient(requester=requester, ethClient=ethClient)
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
-    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient)
-
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, openseaClient=openseaClient, tokenClient=tokenClient, requester=requester, tokenMetadataProcessor=tokenMetadataProcessor, collectionProcessor=collectionProcessor, revueApiKey=None)
+    openseaApiKey = os.environ['OPENSEA_API_KEY']
+    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    revueApiKey = os.environ['REVUE_API_KEY']
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     await database.connect()
     retrievedCollectionTokenMetadatas = await retriever.list_token_metadatas(
