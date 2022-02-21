@@ -91,11 +91,7 @@ export const buildNotdTheme = (): ITheme => {
         padding: '0',
         'background-color': 'rgba(255, 255, 255, 0.15)',
         'border-width': '0',
-        // 'border-width': '1px',
-        // 'border-color': 'rgba(255, 255, 255, 0.5)',
-        // 'border-style': 'solid',
         margin: '0',
-        'border-radius': '0',
       },
       cardLabelBox: {
         'border-radius': '0.5em 0 0.2em 0',
@@ -131,6 +127,13 @@ export const buildNotdTheme = (): ITheme => {
         'background-color': 'rgba(255, 255, 255, 0.15)',
         'border-width': '0',
         'border-radius': '10px',
+      },
+      tokenTable: {
+        padding: '0',
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'border-width': '0',
+        margin: '0',
+        'border-radius': '0',
       },
     },
     images: {
