@@ -21,6 +21,7 @@ export const TokenPage = (): React.ReactElement => {
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [offset, setOffset] = React.useState<number>(0);
 
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
@@ -60,16 +61,22 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenSales(undefined);
-    notdClient.getTokenRecentSales(registryAddress, tokenId).then((tokenTransfers: TokenTransfer[]): void => {
-      setTokenSales(tokenTransfers);
+    notdClient.getTokenRecentSales(registryAddress, tokenId, offset).then((tokenTransfers: TokenTransfer[]): void => {
+      const prevTokenSales = tokenSales || [];
+      setTokenSales([...prevTokenSales, ...tokenTransfers]);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenSales(null);
     });
-  }, [notdClient, registryAddress, tokenId]);
+  }, [notdClient, registryAddress, tokenId, tokenSales, offset]);
   React.useEffect((): void => {
     updateTokenSales();
   }, [updateTokenSales]);
+
+  const onLoadClick = (): void => {
+    const tokenLength = tokenSales ? tokenSales.length : 0;
+    setOffset(tokenLength);
+  };
 
   return (
     <Stack direction={ Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} isScrollableVertically={true}>
@@ -175,14 +182,13 @@ export const TokenPage = (): React.ReactElement => {
                 <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
                   <Stack direction={Direction.Vertical}isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingLeft={PaddingSize.Wide} paddingRight={PaddingSize.Wide}>
                     <Box variant='tokenTable' isFullWidth={true}>
-                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Default}>
-                        <Stack.Item alignment={Alignment.End}>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Narrow}>
+                        <Stack.Item alignment={Alignment.Center}>
                           <Text alignment={TextAlignment.Right}>
                             { `Ξ${tokenSale.value / 1000000000000000000.0}`}
                           </Text>
                         </Stack.Item>
                         <Spacing variant={PaddingSize.Wide2} />
-
                         <Stack.Item alignment={Alignment.Center}>
                           <Text alignment={TextAlignment.Left}>
                             {dateToString(tokenSale.blockDate, 'HH:mm')}
@@ -192,13 +198,13 @@ export const TokenPage = (): React.ReactElement => {
                     </Box>
                     <Box variant='tokenTable'>
                       <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
-                        <Stack.Item baseSize='10rem' alignment={Alignment.Center}>
+                        <Stack.Item baseSize='5rem' alignment={Alignment.Center}>
                           <Account accountId={tokenSale?.fromAddress} />
                         </Stack.Item>
-                        <Stack.Item baseSize='4rem' alignment={Alignment.Center}>
+                        <Stack.Item baseSize='3rem' alignment={Alignment.Center}>
                           <KibaIcon iconId='ion-arrow-forward' />
                         </Stack.Item>
-                        <Stack.Item baseSize='10rem' alignment={Alignment.Center}>
+                        <Stack.Item baseSize='5rem' alignment={Alignment.Center}>
                           <Account accountId={tokenSale?.toAddress} />
                         </Stack.Item>
                       </Stack>
@@ -207,6 +213,7 @@ export const TokenPage = (): React.ReactElement => {
                 </ResponsiveHidingView>
               </Stack>
             ))}
+            <Button variant='small' text={'load more'} onClicked={onLoadClick} />
           </Stack>
         </ContainingView>
       )}
