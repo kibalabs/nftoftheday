@@ -141,58 +141,68 @@ export const TokenPage = (): React.ReactElement => {
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
             <Text variant='header3'>Sales history</Text>
             {tokenSales && tokenSales.map((tokenSale: TokenTransfer, index: number) : React.ReactElement => (
-              <Stack direction={Direction.Horizontal} key={index} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+              <Stack direction={Direction.Vertical} shouldWrapItems={true} key={index} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                 <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                  <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                    <Box variant='tokenTable' width='12rem' height='3rem'>
-                      <Account accountId={tokenSale?.fromAddress} />
-                    </Box>
-                    <Stack.Item alignment={Alignment.Center}>
-                      <Box variant='tokenTable' width='6rem' height='3rem'>
-                        <KibaIcon iconId='ion-arrow-forward' />
-                      </Box>
-                    </Stack.Item>
-                    <Box variant='tokenTable' width='12rem' height='3rem'>
-                      <Account accountId={tokenSale?.toAddress} />
-                    </Box>
-                    <Box variant='tokenTable' width='12rem' height='3rem' />
-                    <Box variant='tokenTable' width='12rem' height='3rem'>
-                      <Text alignment={TextAlignment.Center}>
-                        { `Ξ${tokenSale.value / 1000000000000000000.0}`}
-                      </Text>
-                    </Box>
-                    <Box variant='tokenTable' width='12rem' height='3rem'>
-                      <Text alignment={TextAlignment.Center}>
-                        {dateToString(tokenSale.blockDate, 'HH:mm')}
-                      </Text>
+                  <Stack direction={Direction.Horizontal} isFullWidth={true} isFullHeight={true}childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                    <Box variant='tokenTable'>
+                      <Stack direction={Direction.Horizontal} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
+                          <Account accountId={tokenSale?.fromAddress} />
+                        </Stack.Item>
+                        <Stack.Item baseSize='6rem' alignment={Alignment.Center}>
+                          <KibaIcon iconId='ion-arrow-forward' />
+                        </Stack.Item>
+                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
+                          <Account accountId={tokenSale?.toAddress} />
+                        </Stack.Item>
+                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
+                          <Spacing variant={PaddingSize.Wide2} />
+                        </Stack.Item>
+                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
+                          <Text alignment={TextAlignment.Center}>
+                            { `Ξ${tokenSale.value / 1000000000000000000.0}`}
+                          </Text>
+                        </Stack.Item>
+                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
+                          <Text alignment={TextAlignment.Center}>
+                            {dateToString(tokenSale.blockDate, 'HH:mm')}
+                          </Text>
+                        </Stack.Item>
+                      </Stack>
                     </Box>
                   </Stack>
                 </ResponsiveHidingView>
                 <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
-                      <Box variant='tokenTable' width='14rem' height='3rem'>
-                        <Text alignment={TextAlignment.Center}>
-                          { `Ξ${tokenSale.value / 1000000000000000000.0}`}
-                        </Text>
-                      </Box>
-                      <Box variant='tokenTable' width='14rem' height='3rem'>
-                        <Text alignment={TextAlignment.Center}>
-                          {dateToString(tokenSale.blockDate, 'HH:mm')}
-                        </Text>
-                      </Box>
-                    </Stack>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                      <Box variant='tokenTable' width='12rem' height='3rem'>
-                        <Account accountId={tokenSale?.fromAddress} />
-                      </Box>
-                      <Box variant='tokenTable' width='4rem' height='3rem'>
-                        <KibaIcon iconId='ion-arrow-forward' />
-                      </Box>
-                      <Box variant='tokenTable' width='12rem' height='3rem'>
-                        <Account accountId={tokenSale?.toAddress} />
-                      </Box>
-                    </Stack>
+                  <Stack direction={Direction.Vertical}isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingLeft={PaddingSize.Wide} paddingRight={PaddingSize.Wide}>
+                    <Box variant='tokenTable' isFullWidth={true}>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Default}>
+                        <Stack.Item alignment={Alignment.End}>
+                          <Text alignment={TextAlignment.Right}>
+                            { `Ξ${tokenSale.value / 1000000000000000000.0}`}
+                          </Text>
+                        </Stack.Item>
+                        <Spacing variant={PaddingSize.Wide2} />
+
+                        <Stack.Item alignment={Alignment.Center}>
+                          <Text alignment={TextAlignment.Left}>
+                            {dateToString(tokenSale.blockDate, 'HH:mm')}
+                          </Text>
+                        </Stack.Item>
+                      </Stack>
+                    </Box>
+                    <Box variant='tokenTable'>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
+                        <Stack.Item baseSize='10rem' alignment={Alignment.Center}>
+                          <Account accountId={tokenSale?.fromAddress} />
+                        </Stack.Item>
+                        <Stack.Item baseSize='4rem' alignment={Alignment.Center}>
+                          <KibaIcon iconId='ion-arrow-forward' />
+                        </Stack.Item>
+                        <Stack.Item baseSize='10rem' alignment={Alignment.Center}>
+                          <Account accountId={tokenSale?.toAddress} />
+                        </Stack.Item>
+                      </Stack>
+                    </Box>
                   </Stack>
                 </ResponsiveHidingView>
               </Stack>
