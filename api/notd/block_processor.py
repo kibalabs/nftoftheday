@@ -172,5 +172,5 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=0, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, tokenType='erc721')]
+        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=None, blockNumber=blockNumber, blockHash=None, blockDate=None, tokenType='erc721')]
         return transactions

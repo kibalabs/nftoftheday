@@ -14,8 +14,8 @@ CREATE TABLE tbl_token_transfers (
     gas_price NUMERIC(256, 0) NOT NULL,
     gas_used NUMERIC(256, 0),
     block_number INTEGER NOT NULL,
-    block_hash,
-    block_date,
+    block_hash TEXT,
+    block_date TIMESTAMP,
     -- NOTE(krishan711): token_type should be NOT NULL once filled
     token_type TEXT
 );
