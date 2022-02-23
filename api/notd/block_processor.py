@@ -89,8 +89,6 @@ class BlockProcessor:
 
     async def _process_erc1155_single_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
-        blockHash = blockData['hash'].hex()
-        blockDate = datetime.datetime.fromtimestamp(blockData['timestamp'])
         transactionHash = event['transactionHash'].hex()
         registryAddress = normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
@@ -114,8 +112,6 @@ class BlockProcessor:
 
     async def _process_erc1155_batch_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
-        blockHash = blockData['hash'].hex()
-        blockDate = datetime.datetime.fromtimestamp(blockData['timestamp'])
         transactionHash = event['transactionHash'].hex()
         registryAddress = normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
@@ -142,8 +138,6 @@ class BlockProcessor:
 
     async def _process_erc721_single_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
-        blockHash = blockData['hash'].hex()
-        blockDate = datetime.datetime.fromtimestamp(blockData['timestamp'])
         transactionHash = event['transactionHash'].hex()
         registryAddress = normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')

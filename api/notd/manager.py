@@ -4,7 +4,6 @@ import logging
 from typing import List
 from typing import Sequence
 from typing import Tuple
-from asyncpg import PrivilegeNotGranted
 
 import sqlalchemy
 from core.exceptions import NotFoundException
