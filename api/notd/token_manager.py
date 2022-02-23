@@ -49,6 +49,7 @@ class TokenManager:
             if not shouldProcessIfNotFound:
                 raise
             await asyncio.sleep(sleepSecondsBeforeProcess)
+            print('updating collection')
             await self.update_collection(address=address, shouldForce=True)
             collection = await self.retriever.get_collection_by_address(address=address)
         return collection
