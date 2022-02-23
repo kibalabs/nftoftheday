@@ -8,8 +8,10 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
+from core.store.retriever import DateFieldFilter
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql.expression import select
 
 from notd.model import Collection
 from notd.model import Token
@@ -59,10 +61,16 @@ class Retriever(CoreRetriever):
         return block
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
-        query = TokenTransfersTable.select().join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
+        query = select([TokenTransfersTable, BlocksTable.c.blockDate, BlocksTable.c.blockNumber])\
+            .select_from(TokenTransfersTable
+            .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber,))
         if not shouldIgnoreRegistryBlacklist:
             query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if fieldFilters:
+            for fieldFilter in fieldFilters:
+                if isinstance(fieldFilter, DateFieldFilter):
+                    query = self._apply_date_field_filter(query=query, table=BlocksTable, fieldFilter=fieldFilter)
+                    fieldFilters.remove(fieldFilter)
             query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
         if orders:
             for order in orders:

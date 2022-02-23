@@ -1,5 +1,6 @@
 import datetime
 from typing import Mapping
+from core.util import date_util
 
 from notd.model import Block
 from notd.model import Collection
@@ -27,7 +28,7 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         gasUsed=row[TokenTransfersTable.c.gasUsed],
         blockNumber=row[TokenTransfersTable.c.blockNumber],
         blockHash=row[TokenTransfersTable.c.blockHash],
-        blockDate=row[TokenTransfersTable.c.blockDate],
+        blockDate=row[BlocksTable.c.blockDate],
         tokenType=row[TokenTransfersTable.c.tokenType],
     )
 
