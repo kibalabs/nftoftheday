@@ -66,10 +66,7 @@ class RetrievedTokenTransfer:
     value: int
     gasLimit: int
     gasPrice: int
-    gasUsed: Optional[int]
     blockNumber: int
-    blockHash: Optional[str]
-    blockDate: Optional[datetime.datetime]
     tokenType: Optional[str]
 
 
