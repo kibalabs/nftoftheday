@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import json
 import logging
 import os
@@ -47,16 +48,14 @@ async def _reprocess_metadata(tokenMetadataProcessor: TokenMetadataProcessor, s3
 @click.command()
 @click.option('-s', '--start-id-number', 'startId', required=False, type=int)
 @click.option('-e', '--end-id-number', 'endId', required=False, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=50)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
 async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batchSize: Optional[int]):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    tokenQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
-    s3manager = S3Manager(s3Client=s3Client)
+    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     requester = Requester()
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
@@ -65,6 +64,8 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     tokenManger = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
 
+    await s3manager.connect()
+    await tokenQueue.connect()
     await database.connect()
     if not startId:
         startId = 0
@@ -79,6 +80,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
         query = TokenMetadataTable.select()
         query = query.where(TokenMetadataTable.c.tokenMetadataId >= start)
         query = query.where(TokenMetadataTable.c.tokenMetadataId < end)
+        query = query.where(TokenMetadataTable.c.updatedDate < datetime.datetime(2022, 2, 13))
         query = query.order_by(TokenMetadataTable.c.tokenMetadataId.asc())
         tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
         logging.info(f'Working on {start} - {end}')
@@ -86,6 +88,8 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
         await asyncio.gather(*[_reprocess_metadata(tokenMetadataProcessor=tokenMetadataProcessor, s3manager=s3manager, tokenManger=tokenManger, tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatasToChange])
         currentId = currentId + batchSize
 
+    await s3manager.disconnect()
+    await tokenQueue.disconnect()
     await awsRequester.close_connections()
     await requester.close_connections()
     await database.disconnect()
