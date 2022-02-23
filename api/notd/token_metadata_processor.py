@@ -9,6 +9,7 @@ from typing import Dict
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
+from core.requester import ResponseException
 from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
@@ -209,8 +210,12 @@ class TokenMetadataProcessor():
                     raise Exception('Empty response')
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
+            except ResponseException as exception:
+                errorMessage = '' if exception.message.startswith('<!DOCTYPE html') or exception.message.startswith('<html') else exception.message
+                logging.info(f'Response error while pulling metadata from {metadataUrl}: {exception.statusCode} {errorMessage}')
+                tokenMetadataDict = {}
             except Exception as exception:  # pylint: disable=broad-except
-                logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
+                logging.info(f'Failed to process metadata from {metadataUrl}: {type(exception)} {str(exception)}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
