@@ -61,9 +61,8 @@ class Retriever(CoreRetriever):
         return block
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
-        query = select([TokenTransfersTable, BlocksTable.c.blockDate, BlocksTable.c.blockNumber])\
-            .select_from(TokenTransfersTable
-            .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber,))
+        joinedTable = TokenTransfersTable.join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
+        query = select([TokenTransfersTable,BlocksTable.c.blockDate]).select_from(joinedTable)
         if not shouldIgnoreRegistryBlacklist:
             query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if fieldFilters:
