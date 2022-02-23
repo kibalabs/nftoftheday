@@ -165,7 +165,6 @@ class Retriever(CoreRetriever):
         )
         soldResult = await self.database.execute(query=query, connection=connection)
         soldTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in soldResult]]
-        uniqueBoughtTokens = set(boughtTokens)
-        uniqueSoldTokens = set(soldTokens)
-        tokensOwned = uniqueBoughtTokens - uniqueSoldTokens
-        return list(tokensOwned)
+        for token in soldTokens:
+            boughtTokens.remove(token) 
+        return list(boughtTokens)
