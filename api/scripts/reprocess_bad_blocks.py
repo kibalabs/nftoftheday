@@ -69,13 +69,13 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
             blocksWithUncles = set()
             logging.info(f'Found {len(blocksWithUncles)} blocks with uncles')
             blocksWithDuplicatesQuery = (
-                sqlalchemy.select(TokenTransfersTable.c.blockNumber, sqlalchemy.func.count(sqlalchemy.func.distinct(TokenTransfersTable.c.blockHash)), sqlalchemy.func.count(sqlalchemy.func.distinct(TokenTransfersTable.c.blockDate)))
+                sqlalchemy.select(TokenTransfersTable.c.blockNumber, sqlalchemy.func.count(sqlalchemy.func.distinct(TokenTransfersTable.c.blockHash)))
                 .where(TokenTransfersTable.c.blockNumber >= start)
                 .where(TokenTransfersTable.c.blockNumber < end)
                 .group_by(TokenTransfersTable.c.blockNumber)
             )
             results = await database.execute(query=blocksWithDuplicatesQuery)
-            blocksWithDuplicates = {blockNumber for (blockNumber, blockHashCount, blockDateCount) in results if blockHashCount > 1 or blockDateCount > 1}
+            blocksWithDuplicates = {blockNumber for (blockNumber, blockHashCount) in results if blockHashCount > 1}
             logging.info(f'Found {len(blocksWithDuplicates)} blocks with multiple blockHashes')
             badBlockTransactionsQuery = (
                 sqlalchemy.select(TokenTransfersTable.c.transactionHash)
@@ -87,7 +87,7 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
             badBlockTransactionActualBlocks = set()
             for chunk in list_util.generate_chunks(lst=list(badBlockTransactions), chunkSize=10):
                 transactionReceipts = await asyncio.gather(*[blockProcessor.get_transaction_receipt(transactionHash=transactionHash) for transactionHash in chunk])
-                badBlockTransactionActualBlocks.update({transactionReceipt['blockNumber'] for transactionReceipt in transactionReceipts})
+                badBlockTransactionActualBlocks.update({transactionReceipt['blockNumber'] for transactionReceipt in transactionReceipts if transactionReceipt is not None})
             badBlockTransactionBlocksQuery = (
                 sqlalchemy.select(sqlalchemy.func.distinct(TokenTransfersTable.c.blockNumber))
                 .where(TokenTransfersTable.c.transactionHash.in_(badBlockTransactions))
@@ -99,11 +99,11 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
             await notdManager.process_blocks_deferred(blockNumbers=allBadBlocks)
             insertQuery = BlocksTable.insert().from_select(
                 [BlocksTable.c.createdDate.key, BlocksTable.c.updatedDate.key, BlocksTable.c.blockNumber.key, BlocksTable.c.blockHash.key, BlocksTable.c.blockDate.key],
-                sqlalchemy.select(sqlalchemy.literal(datetime.datetime(2022, 2, 1)), sqlalchemy.literal(datetime.datetime(2022, 2, 1)), TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, TokenTransfersTable.c.blockDate)
+                sqlalchemy.select(sqlalchemy.func.min(TokenTransfersTable.c.blockDate) + datetime.timedelta(minutes=15), sqlalchemy.func.min(TokenTransfersTable.c.blockDate) + datetime.timedelta(minutes=15), TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, sqlalchemy.func.min(TokenTransfersTable.c.blockDate))
                 .where(TokenTransfersTable.c.blockNumber.in_(set(blockNumbers) - allBadBlocks))
                 .where(TokenTransfersTable.c.blockNumber >= start)
                 .where(TokenTransfersTable.c.blockNumber < end)
-                .group_by(TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, TokenTransfersTable.c.blockDate)
+                .group_by(TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash)
             )
             async with database.create_transaction() as connection:
                 await database.execute(connection=connection, query=insertQuery)

@@ -61,7 +61,7 @@ class NotdManager:
 
     async def retrieve_highest_priced_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
         )
@@ -69,7 +69,7 @@ class NotdManager:
 
     async def retrieve_random_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         randomTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[RandomOrder()],
             limit=1
         )
@@ -82,7 +82,7 @@ class NotdManager:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
         mostTradedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
-                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
+                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId),
             ],
@@ -91,7 +91,7 @@ class NotdManager:
         return UiData(
             highestPricedTokenTransfer=await self.retrieve_highest_priced_transfer(startDate=startDate, endDate=endDate),
             randomTokenTransfer=await self.retrieve_random_transfer(startDate=startDate, endDate=endDate),
-            mostTradedTokenTransfers = mostTradedTokenTransfers,
+            mostTradedTokenTransfers=mostTradedTokenTransfers,
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=await self.get_transfer_count(startDate=startDate, endDate=endDate)
         )

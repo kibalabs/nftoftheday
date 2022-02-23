@@ -26,7 +26,7 @@ from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
-_TOKEN_UPDATE_MIN_DAYS = 30
+_TOKEN_UPDATE_MIN_DAYS = 10
 _COLLECTION_UPDATE_MIN_DAYS = 30
 
 

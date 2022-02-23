@@ -12,10 +12,10 @@ CREATE TABLE tbl_token_transfers (
     amount_2 NUMERIC(256, 0),
     gas_limit NUMERIC(256, 0) NOT NULL,
     gas_price NUMERIC(256, 0) NOT NULL,
-    gas_used NUMERIC(256, 0) NOT NULL,
+    gas_used NUMERIC(256, 0),
     block_number INTEGER NOT NULL,
-    block_hash TEXT NOT NULL,
-    block_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    block_hash TEXT,
+    block_date TIMESTAMP,
     -- NOTE(krishan711): token_type should be NOT NULL once filled
     token_type TEXT
 );
