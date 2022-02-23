@@ -155,19 +155,14 @@ class Retriever(CoreRetriever):
     async def get_collection_holding(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
         boughtTokens = []
         soldTokens= []
-        query = (
-            TokenTransfersTable.select()
-            .where(TokenTransfersTable.c.registryAddress == address)
-            .where(TokenTransfersTable.c.toAddress == ownerAddress)
-        )
+        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
         boughtResult = await self.database.execute(query=query, connection=connection)
         boughtTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in boughtResult]]
-        query = (
-            TokenTransfersTable.select()
-            .where(TokenTransfersTable.c.registryAddress == address)
-            .where(TokenTransfersTable.c.fromAddress == ownerAddress)
-        )
+        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
+        query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
         soldResult = await self.database.execute(query=query, connection=connection)
         soldTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in soldResult]]
         for token in soldTokens:

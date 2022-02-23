@@ -73,6 +73,7 @@ class RetrievedTokenTransfer:
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
+    blockDate: datetime.datetime
 
 # TODO(krishan711): everything below this line should be removed!
 

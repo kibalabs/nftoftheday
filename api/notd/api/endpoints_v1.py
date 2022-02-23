@@ -74,8 +74,7 @@ class GetCollectionResponse(BaseModel):
     collection: ApiCollection
 
 class ListHoldingsForCollectionRequest(BaseModel):
-    registryAddress: str
-    ownerAddress: str
+    pass
 
 class ListHoldingsForCollectionResponse(BaseModel):
     tokens: List[ApiCollectionToken]

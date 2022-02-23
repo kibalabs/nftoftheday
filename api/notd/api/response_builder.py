@@ -63,6 +63,7 @@ class ResponseBuilder:
             description=tokenMetadata.description,
             attributes=attributes,
         )
+
     async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> List[ApiCollectionToken]:
         tokenMetadatas = []
         for token in tokens:
