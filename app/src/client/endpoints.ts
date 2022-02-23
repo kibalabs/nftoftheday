@@ -126,13 +126,13 @@ export class GetCollectionStatisticsResponse extends ResponseData {
 }
 export class GetTokenRecentSalesRequest extends RequestData {
   readonly offset: number;
-  constructor(offset: number) {
+  constructor(offset?: number) {
     super();
-    this.offset = offset;
+    this.offset = offset || 0;
   }
   public toObject = (): Record<string, unknown> => {
     return {
-      offset: this.offset ? this.offset : 0,
+      offset: this.offset,
     };
   }
 }

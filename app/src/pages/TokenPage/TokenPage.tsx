@@ -8,6 +8,7 @@ import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../.
 import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';
 import { MetricView } from '../../components/MetricView';
+import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
 const COLLECTIONTOKEN = new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []);
@@ -21,7 +22,6 @@ export const TokenPage = (): React.ReactElement => {
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
-  const [offset, setOffset] = React.useState<number>(0);
 
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
@@ -61,21 +61,24 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenSales(undefined);
-    notdClient.getTokenRecentSales(registryAddress, tokenId, offset).then((tokenTransfers: TokenTransfer[]): void => {
-      const prevTokenSales = tokenSales || [];
-      setTokenSales([...prevTokenSales, ...tokenTransfers]);
+    notdClient.getTokenRecentSales(registryAddress, tokenId).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenSales(tokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenSales(null);
     });
-  }, [notdClient, registryAddress, tokenId, tokenSales, offset]);
+  }, [notdClient, registryAddress, tokenId]);
   React.useEffect((): void => {
     updateTokenSales();
   }, [updateTokenSales]);
 
   const onLoadClick = (): void => {
     const tokenLength = tokenSales ? tokenSales.length : 0;
-    setOffset(tokenLength);
+    notdClient.getTokenRecentSales(registryAddress, tokenId, tokenLength).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
+    }).catch((error: unknown): void => {
+      console.error(error);
+    });
   };
 
   return (
@@ -148,70 +151,10 @@ export const TokenPage = (): React.ReactElement => {
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
             <Text variant='header3'>Sales history</Text>
             {tokenSales && tokenSales.map((tokenSale: TokenTransfer, index: number) : React.ReactElement => (
-              <Stack direction={Direction.Vertical} shouldWrapItems={true} key={index} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                  <Stack direction={Direction.Horizontal} isFullWidth={true} isFullHeight={true}childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                    <Box variant='tokenTable'>
-                      <Stack direction={Direction.Horizontal} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
-                          <Account accountId={tokenSale?.fromAddress} />
-                        </Stack.Item>
-                        <Stack.Item baseSize='6rem' alignment={Alignment.Center}>
-                          <KibaIcon iconId='ion-arrow-forward' />
-                        </Stack.Item>
-                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
-                          <Account accountId={tokenSale?.toAddress} />
-                        </Stack.Item>
-                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
-                          <Spacing variant={PaddingSize.Wide2} />
-                        </Stack.Item>
-                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
-                          <Text alignment={TextAlignment.Center}>
-                            { `Ξ${tokenSale.value / 1000000000000000000.0}`}
-                          </Text>
-                        </Stack.Item>
-                        <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
-                          <Text alignment={TextAlignment.Center}>
-                            {dateToString(tokenSale.blockDate, 'HH:mm')}
-                          </Text>
-                        </Stack.Item>
-                      </Stack>
-                    </Box>
-                  </Stack>
-                </ResponsiveHidingView>
-                <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                  <Stack direction={Direction.Vertical}isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingLeft={PaddingSize.Wide} paddingRight={PaddingSize.Wide}>
-                    <Box variant='tokenTable' isFullWidth={true}>
-                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Narrow}>
-                        <Stack.Item alignment={Alignment.Center}>
-                          <Text alignment={TextAlignment.Right}>
-                            { `Ξ${tokenSale.value / 1000000000000000000.0}`}
-                          </Text>
-                        </Stack.Item>
-                        <Spacing variant={PaddingSize.Wide2} />
-                        <Stack.Item alignment={Alignment.Center}>
-                          <Text alignment={TextAlignment.Left}>
-                            {dateToString(tokenSale.blockDate, 'HH:mm')}
-                          </Text>
-                        </Stack.Item>
-                      </Stack>
-                    </Box>
-                    <Box variant='tokenTable'>
-                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
-                        <Stack.Item baseSize='5rem' alignment={Alignment.Center}>
-                          <Account accountId={tokenSale?.fromAddress} />
-                        </Stack.Item>
-                        <Stack.Item baseSize='3rem' alignment={Alignment.Center}>
-                          <KibaIcon iconId='ion-arrow-forward' />
-                        </Stack.Item>
-                        <Stack.Item baseSize='5rem' alignment={Alignment.Center}>
-                          <Account accountId={tokenSale?.toAddress} />
-                        </Stack.Item>
-                      </Stack>
-                    </Box>
-                  </Stack>
-                </ResponsiveHidingView>
-              </Stack>
+              <TokenSaleRow
+                tokenSale={tokenSale}
+                key={index}
+              />
             ))}
             <Button variant='small' text={'load more'} onClicked={onLoadClick} />
           </Stack>
