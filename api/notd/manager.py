@@ -91,7 +91,7 @@ class NotdManager:
         return UiData(
             highestPricedTokenTransfer=await self.retrieve_highest_priced_transfer(startDate=startDate, endDate=endDate),
             randomTokenTransfer=await self.retrieve_random_transfer(startDate=startDate, endDate=endDate),
-            mostTradedTokenTransfers = mostTradedTokenTransfers,
+            mostTradedTokenTransfers=mostTradedTokenTransfers,
             sponsoredToken=self.get_sponsored_token(),
             transactionCount=await self.get_transfer_count(startDate=startDate, endDate=endDate)
         )

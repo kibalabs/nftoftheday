@@ -61,16 +61,15 @@ class Retriever(CoreRetriever):
         return block
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
-        joinedTable = TokenTransfersTable.join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
-        query = select([TokenTransfersTable,BlocksTable.c.blockDate]).select_from(joinedTable)
+        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         if not shouldIgnoreRegistryBlacklist:
             query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if fieldFilters:
             for fieldFilter in fieldFilters:
-                if isinstance(fieldFilter, DateFieldFilter):
+                if fieldFilter.fieldName == BlocksTable.c.blockDate.key:
                     query = self._apply_date_field_filter(query=query, table=BlocksTable, fieldFilter=fieldFilter)
-                    fieldFilters.remove(fieldFilter)
-            query = self._apply_field_filters(query=query, table=TokenTransfersTable, fieldFilters=fieldFilters)
+                else:
+                    query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=fieldFilter)
         if orders:
             for order in orders:
                 query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
@@ -83,7 +82,7 @@ class Retriever(CoreRetriever):
         return tokenTransfers
 
     async def get_transaction_count(self, startDate: datetime.datetime, endDate: datetime.datetime, connection: Optional[DatabaseConnection] = None) -> int:
-        query = TokenTransfersTable.select().join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
+        query = TokenTransfersTable.select().join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         query = query.with_only_columns([sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId)])
         query = query.where(BlocksTable.c.blockDate >= startDate)
         query = query.where(BlocksTable.c.blockDate < endDate)
@@ -93,7 +92,7 @@ class Retriever(CoreRetriever):
         return count
 
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime, connection: Optional[DatabaseConnection] = None) -> Token:
-        query = TokenTransfersTable.select().join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
+        query = TokenTransfersTable.select().join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         query = query.with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId)])
         query = query.group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
         query = query.where(BlocksTable.c.blockDate >= startDate)
