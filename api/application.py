@@ -1,7 +1,6 @@
 import logging
 import os
 
-import boto3
 from core.api.health import create_api as create_health_api
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
