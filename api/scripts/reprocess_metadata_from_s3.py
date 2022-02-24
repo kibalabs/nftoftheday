@@ -9,23 +9,23 @@ from typing import Optional
 import asyncclick as click
 import boto3
 from core.aws_requester import AwsRequester
+from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
-from core.web3.eth_client import RestEthClient
 from core.store.retriever import Direction
 from core.store.retriever import Order
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from notd.collection_processor import CollectionProcessor
+from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
-from notd.collection_processor import CollectionProcessor
-from notd.model import TokenMetadata
 
 
 async def _reprocess_metadata(tokenMetadataProcessor: TokenMetadataProcessor, s3manager: S3Manager, tokenManger: TokenManager, tokenMetadata: TokenMetadata):

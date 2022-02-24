@@ -45,9 +45,7 @@ class ApiTokenTransfer(BaseModel):
     value: int
     gasLimit: int
     gasPrice: int
-    gasUsed: Optional[int]
     blockNumber: int
-    blockHash: Optional[str]
     blockDate: datetime.datetime
     # NOTE(krishan711): make these non-optional once ui-data is fixed
     collection: Optional[ApiCollection]

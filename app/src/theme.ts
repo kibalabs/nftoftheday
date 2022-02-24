@@ -91,9 +91,6 @@ export const buildNotdTheme = (): ITheme => {
         padding: '0',
         'background-color': 'rgba(255, 255, 255, 0.15)',
         'border-width': '0',
-        // 'border-width': '1px',
-        // 'border-color': 'rgba(255, 255, 255, 0.5)',
-        // 'border-style': 'solid',
         margin: '0',
       },
       cardLabelBox: {
@@ -130,6 +127,13 @@ export const buildNotdTheme = (): ITheme => {
         'background-color': 'rgba(255, 255, 255, 0.15)',
         'border-width': '0',
         'border-radius': '10px',
+      },
+      tokenSaleRow: {
+        padding: '0',
+        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'border-width': '0',
+        margin: '0',
+        'border-radius': '0',
       },
     },
     images: {

@@ -1,4 +1,5 @@
 from typing import Optional
+
 from core.queues.model import MessageContent
 
 

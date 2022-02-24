@@ -1,7 +1,8 @@
 import datetime
 import json
 import logging
-from typing import List, Optional
+from typing import List
+from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
@@ -204,8 +205,8 @@ class NotdManager:
         await self._save_processed_block(processedBlock=processedBlock)
 
     @staticmethod
-    def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, str, int]:
-        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.blockHash, tokenTransfer.amount)
+    def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, int]:
+        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
 
     async def _save_processed_block(self, processedBlock: ProcessedBlock) -> None:
         async with self.saver.create_transaction() as connection:
