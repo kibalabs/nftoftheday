@@ -68,6 +68,8 @@ class BlockProcessor:
         return await self.ethClient.get_latest_block_number()
 
     async def process_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
+        # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
+        # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
         retrievedTokenTransfers = []
         erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
