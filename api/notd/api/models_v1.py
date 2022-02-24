@@ -63,9 +63,7 @@ class ApiTokenTransfer(BaseModel):
             value=model.value,
             gasLimit=model.gasLimit,
             gasPrice=model.gasPrice,
-            gasUsed=model.gasUsed,
             blockNumber=model.blockNumber,
-            blockHash=model.blockHash,
             blockDate=model.blockDate,
         )
 
