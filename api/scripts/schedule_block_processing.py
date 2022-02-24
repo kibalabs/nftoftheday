@@ -30,7 +30,6 @@ async def run(blockNumber: Optional[int], startBlockNumber: Optional[int], endBl
         raise Exception('Either blockNumber or startBlockNumber and endBlockNumber must be passed in.')
     await workQueue.disconnect()
 
-
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     run(_anyio_backend='asyncio')

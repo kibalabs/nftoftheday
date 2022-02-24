@@ -45,7 +45,6 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
     await database.connect()
     await workQueue.connect()
     await tokenQueue.connect()
-
     await slackClient.post(text=f'reprocess_bad_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         currentBlockNumber = startBlockNumber

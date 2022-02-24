@@ -16,7 +16,6 @@ async def run():
     await workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
     await workQueue.disconnect()
 
-
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     run(_anyio_backend='asyncio')
