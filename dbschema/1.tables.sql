@@ -12,8 +12,6 @@ CREATE TABLE tbl_token_transfers (
     gas_price NUMERIC(256, 0) NOT NULL,
     gas_used NUMERIC(256, 0),
     block_number INTEGER NOT NULL,
-    block_hash TEXT,
-    block_date TIMESTAMP,
     token_type TEXT NOT NULL
 );
 CREATE UNIQUE INDEX tbl_token_transfers_transaction_hash_registry_address_token_id_from_address_to_address_block_number_amount ON tbl_token_transfers (transaction_hash, registry_address, token_id, from_address, to_address, block_number, amount_2);
@@ -21,9 +19,7 @@ CREATE INDEX tbl_token_transfers_registry_address_token_id ON tbl_token_transfer
 CREATE INDEX tbl_token_transfers_registry_address ON tbl_token_transfers (registry_address);
 CREATE INDEX tbl_token_transfers_token_id ON tbl_token_transfers (token_id);
 CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
-CREATE INDEX tbl_token_transfers_block_date ON tbl_token_transfers (block_date);
 CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_number);
-CREATE INDEX tbl_token_transfers_block_hash ON tbl_token_transfers (block_hash);
 CREATE INDEX tbl_token_transfers_to_address ON tbl_token_transfers (to_address);
 CREATE INDEX tbl_token_transfers_from_address ON tbl_token_transfers (from_address);
 CREATE INDEX tbl_token_transfers_operator_address ON tbl_token_transfers (operator_address);
