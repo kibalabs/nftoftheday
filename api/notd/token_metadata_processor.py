@@ -26,6 +26,7 @@ IPFS_PROVIDER_PREFIXES = [
     'https://niftylabs.mypinata.cloud/ipfs/',
     'https://time.mypinata.cloud/ipfs/',
     'https://robotos.mypinata.cloud/ipfs/',
+    'https://cloudflare-ipfs.com/ipfs/',
 ]
 
 
@@ -84,7 +85,7 @@ class TokenMetadataProcessor():
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
-            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8') + b'==').decode('utf-8')
+            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8') + b'==').decode('utf-8', errors='ignore')
         elif dataString.startswith('data:application/json;utf8,'):
             tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
         elif dataString.startswith('data:application/json;ascii,'):
@@ -99,7 +100,7 @@ class TokenMetadataProcessor():
             logging.info(f'Failed to process data string: {dataString}')
             tokenMetadataDict = {}
         if tokenMetadataJson:
-            # NOTE(krishan711): it's safe to decode something that'd either encoded or not encoded
+            # NOTE(krishan711): it's safe to decode something that's either encoded or not encoded
             tokenMetadataJson = urllib.parse.unquote(tokenMetadataJson)
             try:
                 tokenMetadataDict = json.loads(tokenMetadataJson)
@@ -177,6 +178,7 @@ class TokenMetadataProcessor():
             except BadRequestException as exception:
                 badRequestException = exception
         if badRequestException is not None:
+            print('badRequestException', badRequestException.message)
             if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
             if 'execution reverted' in badRequestException.message:
@@ -184,6 +186,10 @@ class TokenMetadataProcessor():
             if 'out of gas' in badRequestException.message:
                 raise TokenDoesNotExistException()
             if 'stack limit reached' in badRequestException.message:
+                raise TokenDoesNotExistException()
+            if 'Maybe the method does not exist on this contract' in badRequestException.message:
+                raise TokenDoesNotExistException()
+            if 'value could not be decoded as valid UTF8' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise badRequestException
         tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
@@ -208,6 +214,8 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = tokenMetadataResponse.json()
                 if tokenMetadataDict is None:
                     raise Exception('Empty response')
+                if isinstance(tokenMetadataDict, (bool, int, float)):
+                    raise Exception(f'Invalid response: {tokenMetadataDict}')
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
             except ResponseException as exception:
