@@ -152,7 +152,7 @@ class Retriever(CoreRetriever):
         collection = collection_from_row(row)
         return collection
 
-    async def get_collection_holding(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
+    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
         boughtTokens = []
         soldTokens= []
         query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
