@@ -37,10 +37,7 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,
             TokenTransfersTable.c.gasLimit.key: retrievedTokenTransfer.gasLimit,
             TokenTransfersTable.c.gasPrice.key: retrievedTokenTransfer.gasPrice,
-            TokenTransfersTable.c.gasUsed.key: retrievedTokenTransfer.gasUsed,
             TokenTransfersTable.c.blockNumber.key: retrievedTokenTransfer.blockNumber,
-            TokenTransfersTable.c.blockHash.key: retrievedTokenTransfer.blockHash,
-            TokenTransfersTable.c.blockDate.key: retrievedTokenTransfer.blockDate,
             TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
         }
 
@@ -58,10 +55,7 @@ class Saver(CoreSaver):
             amount=retrievedTokenTransfer.amount,
             gasLimit=retrievedTokenTransfer.gasLimit,
             gasPrice=retrievedTokenTransfer.gasPrice,
-            gasUsed=retrievedTokenTransfer.gasUsed,
             blockNumber=retrievedTokenTransfer.blockNumber,
-            blockHash=retrievedTokenTransfer.blockHash,
-            blockDate=retrievedTokenTransfer.blockDate,
             tokenType=retrievedTokenTransfer.tokenType
         )
 

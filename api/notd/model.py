@@ -66,16 +66,14 @@ class RetrievedTokenTransfer:
     value: int
     gasLimit: int
     gasPrice: int
-    gasUsed: Optional[int]
     blockNumber: int
-    blockHash: Optional[str]
-    blockDate: Optional[datetime.datetime]
     tokenType: Optional[str]
 
 
 @dataclasses.dataclass(frozen=True, unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
+    blockDate: datetime.datetime
 
 # TODO(krishan711): everything below this line should be removed!
 
