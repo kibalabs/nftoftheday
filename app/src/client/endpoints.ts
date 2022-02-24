@@ -126,7 +126,7 @@ export class GetCollectionStatisticsResponse extends ResponseData {
 }
 
 export class GetTokenRecentSalesRequest extends RequestData {
-  readonly offset: number;
+  readonly offset?: number;
 
   constructor(offset?: number) {
     super();
