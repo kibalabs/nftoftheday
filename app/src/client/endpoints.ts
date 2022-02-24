@@ -125,6 +125,36 @@ export class GetCollectionStatisticsResponse extends ResponseData {
   }
 }
 
+export class GetTokenRecentSalesRequest extends RequestData {
+  readonly offset?: number;
+
+  constructor(offset?: number) {
+    super();
+    this.offset = offset || 0;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      offset: this.offset,
+    };
+  }
+}
+
+export class GetTokenRecentSalesResponse extends ResponseData {
+  readonly tokenTransfers: Resources.TokenTransfer[];
+
+  public constructor(TokenRecentSales: Resources.TokenTransfer[]) {
+    super();
+    this.tokenTransfers = TokenRecentSales;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetTokenRecentSalesResponse => {
+    return new GetTokenRecentSalesResponse(
+      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+    );
+  }
+}
+
 export class GetCollectionRecentSalesRequest extends RequestData {
   public toObject = (): Record<string, unknown> => {
     return {
@@ -146,7 +176,6 @@ export class GetCollectionRecentSalesResponse extends ResponseData {
     );
   }
 }
-
 
 export class SubscribeRequest extends RequestData {
   readonly email: string;

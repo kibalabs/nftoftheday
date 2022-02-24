@@ -1,9 +1,12 @@
+from typing import Optional
+
 from core.queues.model import MessageContent
 
 
 class ProcessBlockMessageContent(MessageContent):
     _COMMAND = 'PROCESS_BLOCK'
     blockNumber: int
+    shouldSkipProcessingTokens: Optional[bool]
 
 
 class ReprocessBlocksMessageContent(MessageContent):

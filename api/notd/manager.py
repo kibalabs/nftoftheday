@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 from typing import List
+from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
@@ -182,29 +183,30 @@ class NotdManager:
         result = await self.retriever.database.execute(query=blocksToReprocessQuery)
         blockNumbers = [blockNumber for (blockNumber, ) in result]
         logging.info(f'Scheduling messages for reprocessing {len(blockNumbers)} blocks')
-        await self.process_blocks_deferred(blockNumbers=blockNumbers)
+        await self.process_blocks_deferred(blockNumbers=blockNumbers, shouldSkipProcessingTokens=True)
 
-    async def process_blocks_deferred(self, blockNumbers: Sequence[int], delaySeconds: int = 0) -> None:
-        messages = [ProcessBlockMessageContent(blockNumber=blockNumber).to_message() for blockNumber in blockNumbers]
+    async def process_blocks_deferred(self, blockNumbers: Sequence[int], shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
+        messages = [ProcessBlockMessageContent(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens).to_message() for blockNumber in blockNumbers]
         await self.workQueue.send_messages(messages=messages, delaySeconds=delaySeconds)
 
-    async def process_block_deferred(self, blockNumber: int, delaySeconds: int = 0) -> None:
-        await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber).to_message(), delaySeconds=delaySeconds)
+    async def process_block_deferred(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
+        await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens).to_message(), delaySeconds=delaySeconds)
 
-    async def process_block(self, blockNumber: int) -> None:
+    async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None) -> None:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
-        logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        collectionAddresses = list(set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
-        logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
-        collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
-        logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
-        await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
-        await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
+        if not shouldSkipProcessingTokens:
+            logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
+            collectionAddresses = list(set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
+            logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
+            collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
+            logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
+            await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
+            await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
         await self._save_processed_block(processedBlock=processedBlock)
 
     @staticmethod
-    def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, str, int]:
-        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.blockHash, tokenTransfer.amount)
+    def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, int]:
+        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
 
     async def _save_processed_block(self, processedBlock: ProcessedBlock) -> None:
         async with self.saver.create_transaction() as connection:
