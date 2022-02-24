@@ -128,7 +128,7 @@ export const buildNotdTheme = (): ITheme => {
         'border-width': '0',
         'border-radius': '10px',
       },
-      tokenTable: {
+      tokenSaleRow: {
         padding: '0',
         'background-color': 'rgba(255, 255, 255, 0.15)',
         'border-width': '0',

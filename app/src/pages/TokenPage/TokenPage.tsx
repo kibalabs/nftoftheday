@@ -68,13 +68,14 @@ export const TokenPage = (): React.ReactElement => {
       setTokenSales(null);
     });
   }, [notdClient, registryAddress, tokenId]);
+
   React.useEffect((): void => {
     updateTokenSales();
   }, [updateTokenSales]);
 
-  const onLoadClick = (): void => {
-    const tokenLength = tokenSales ? tokenSales.length : 0;
-    notdClient.getTokenRecentSales(registryAddress, tokenId, tokenLength).then((tokenTransfers: TokenTransfer[]): void => {
+  const onLoadMoreClicked = (): void => {
+    const tokenSalesCount = tokenSales ? tokenSales.length : 0;
+    notdClient.getTokenRecentSales(registryAddress, tokenId, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
     }).catch((error: unknown): void => {
       console.error(error);
@@ -150,13 +151,13 @@ export const TokenPage = (): React.ReactElement => {
           </Stack>
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
             <Text variant='header3'>Sales history</Text>
-            {tokenSales && tokenSales.map((tokenSale: TokenTransfer, index: number) : React.ReactElement => (
+            {tokenSales && tokenSales.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
               <TokenSaleRow
-                tokenSale={tokenSale}
+                tokenTransfer={tokenTransfer}
                 key={index}
               />
             ))}
-            <Button variant='small' text={'load more'} onClicked={onLoadClick} />
+            <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
           </Stack>
         </ContainingView>
       )}
