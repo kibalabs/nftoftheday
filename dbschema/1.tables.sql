@@ -10,7 +10,6 @@ CREATE TABLE tbl_token_transfers (
     amount_2 NUMERIC(256, 0) NOT NULL,
     gas_limit NUMERIC(256, 0) NOT NULL,
     gas_price NUMERIC(256, 0) NOT NULL,
-    gas_used NUMERIC(256, 0),
     block_number INTEGER NOT NULL,
     token_type TEXT NOT NULL
 );
