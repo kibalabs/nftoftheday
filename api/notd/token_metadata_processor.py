@@ -211,7 +211,7 @@ class TokenMetadataProcessor():
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
             except ResponseException as exception:
-                errorMessage = '' if exception.message.startswith('<!DOCTYPE html') or exception.message.startswith('<html') else exception.message
+                errorMessage = '' if exception.message.strip().startswith('<!DOCTYPE html') or exception.message.strip().startswith('<html') else exception.message
                 logging.info(f'Response error while pulling metadata from {metadataUrl}: {exception.statusCode} {errorMessage}')
                 tokenMetadataDict = {}
             except Exception as exception:  # pylint: disable=broad-except
