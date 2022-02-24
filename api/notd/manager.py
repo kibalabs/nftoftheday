@@ -245,7 +245,7 @@ class NotdManager:
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str, ) -> List[Token]:
         tokens = []
-        tokenTransfers = await self.retriever.get_collection_holding(address=address, ownerAddress=ownerAddress)
+        tokenTransfers = await self.retriever.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress)
         for tokenTransfer in tokenTransfers:
             tokens += [Token(registryAddress=tokenTransfer[0], tokenId=tokenTransfer[1])]
         return tokens

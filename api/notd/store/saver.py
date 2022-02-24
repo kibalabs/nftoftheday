@@ -8,6 +8,7 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
+from notd.model import TokenTransfer
 
 from notd.model import Block
 from notd.model import Collection
