@@ -178,7 +178,6 @@ class TokenMetadataProcessor():
             except BadRequestException as exception:
                 badRequestException = exception
         if badRequestException is not None:
-            print('badRequestException', badRequestException.message)
             if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
             if 'execution reverted' in badRequestException.message:
