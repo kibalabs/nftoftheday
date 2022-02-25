@@ -11,7 +11,7 @@ import asyncclick as click
 from core.queues.sqs_message_queue import SqsMessageQueue
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from api.notd.messages import UpdateCollectionTokensMessageContent
+from notd.messages import UpdateCollectionTokensMessageContent
 
 
 
