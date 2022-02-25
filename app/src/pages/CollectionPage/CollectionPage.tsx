@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
-import { useRouteParams } from '@kibalabs/core-react';
+import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { ethers } from 'ethers';
 
 import { useAccountId, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
@@ -26,7 +27,16 @@ export const CollectionPage = (): React.ReactElement => {
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const routeParams = useRouteParams();
+  const navigator = useNavigator();
+
   const address = routeParams.address as string;
+
+  useInitialization((): void => {
+    const checksumAddress = ethers.utils.getAddress(address);
+    if (address !== checksumAddress) {
+      navigator.navigateTo(`/collections/${checksumAddress}`);
+    }
+  });
 
   const updateCollection = React.useCallback(async (): Promise<void> => {
     setCollection(undefined);

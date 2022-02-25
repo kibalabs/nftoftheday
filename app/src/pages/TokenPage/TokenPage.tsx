@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
-import { useRouteParams } from '@kibalabs/core-react';
+import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { ethers } from 'ethers';
 
 import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../../client/resources';
 import { Account } from '../../components/Account';
@@ -18,6 +19,7 @@ const owner = '0x48e41913F2099300900cfcbB139F121429D38F5d';
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const routeParams = useRouteParams();
+  const navigator = useNavigator();
 
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
@@ -31,6 +33,13 @@ export const TokenPage = (): React.ReactElement => {
   if (imageUrl?.startsWith('ipfs://')) {
     imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
+
+  useInitialization((): void => {
+    const checksumAddress = ethers.utils.getAddress(registryAddress);
+    if (registryAddress !== checksumAddress) {
+      navigator.navigateTo(`/collections/${checksumAddress}/tokens/${tokenId}`);
+    }
+  });
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
     setCollectionToken(undefined);
