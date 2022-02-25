@@ -158,6 +158,10 @@ class NotdManager:
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
         return await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
+    async def update_collections_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
+        return await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
+
+
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)
 

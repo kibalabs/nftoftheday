@@ -14,6 +14,7 @@ from core.util import date_util
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
+from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
@@ -187,3 +188,6 @@ class TokenManager:
         collectionTokenIds = await self.retriever.list_tokens_by_collection(address=address)
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
+
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
+        await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
