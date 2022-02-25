@@ -108,6 +108,12 @@ class GetCollectionRequest(BaseModel):
 class GetCollectionResponse(BaseModel):
     collection: ApiCollection
 
+class ListCollectionTokensByOwnerRequest(BaseModel):
+    pass
+
+class ListCollectionTokensByOwnerResponse(BaseModel):
+    tokens: List[ApiCollectionToken]
+
 class GetCollectionRecentSalesRequest(BaseModel):
     pass
 

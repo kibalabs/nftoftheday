@@ -13,7 +13,6 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
-from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
@@ -37,42 +36,18 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,
             TokenTransfersTable.c.gasLimit.key: retrievedTokenTransfer.gasLimit,
             TokenTransfersTable.c.gasPrice.key: retrievedTokenTransfer.gasPrice,
-            TokenTransfersTable.c.gasUsed.key: retrievedTokenTransfer.gasUsed,
             TokenTransfersTable.c.blockNumber.key: retrievedTokenTransfer.blockNumber,
-            TokenTransfersTable.c.blockHash.key: retrievedTokenTransfer.blockHash,
-            TokenTransfersTable.c.blockDate.key: retrievedTokenTransfer.blockDate,
             TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
         }
 
-    @staticmethod
-    def _token_transfer_from_retrieved(tokenTransferId: int, retrievedTokenTransfer: RetrievedTokenTransfer) -> TokenTransfer:
-        return TokenTransfer(
-            tokenTransferId=tokenTransferId,
-            transactionHash=retrievedTokenTransfer.transactionHash,
-            registryAddress=retrievedTokenTransfer.registryAddress,
-            fromAddress=retrievedTokenTransfer.fromAddress,
-            toAddress=retrievedTokenTransfer.toAddress,
-            operatorAddress=retrievedTokenTransfer.operatorAddress,
-            tokenId=retrievedTokenTransfer.tokenId,
-            value=retrievedTokenTransfer.value,
-            amount=retrievedTokenTransfer.amount,
-            gasLimit=retrievedTokenTransfer.gasLimit,
-            gasPrice=retrievedTokenTransfer.gasPrice,
-            gasUsed=retrievedTokenTransfer.gasUsed,
-            blockNumber=retrievedTokenTransfer.blockNumber,
-            blockHash=retrievedTokenTransfer.blockHash,
-            blockDate=retrievedTokenTransfer.blockDate,
-            tokenType=retrievedTokenTransfer.tokenType
-        )
-
-    async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer, connection: Optional[DatabaseConnection] = None) -> TokenTransfer:
+    async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer, connection: Optional[DatabaseConnection] = None) -> int:
         values = self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer)
         query = TokenTransfersTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
         tokenTransferId = result.inserted_primary_key[0]
-        return self._token_transfer_from_retrieved(tokenTransferId=tokenTransferId, retrievedTokenTransfer=retrievedTokenTransfer)
+        return tokenTransferId
 
-    async def create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer], connection: Optional[DatabaseConnection] = None) -> List[TokenTransfer]:
+    async def create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenTransfers) == 0:
             return
         tokenTransferIds = []
@@ -81,7 +56,7 @@ class Saver(CoreSaver):
             query = TokenTransfersTable.insert().values(values).returning(TokenTransfersTable.c.tokenTransferId)
             rows = await self._execute(query=query, connection=connection)
             tokenTransferIds += [row[0] for row in rows]
-        return [self._token_transfer_from_retrieved(tokenTransferId=tokenTransferId, retrievedTokenTransfer=retrievedTokenTransfer) for tokenTransferId, retrievedTokenTransfer in zip(tokenTransferIds, retrievedTokenTransfers)]
+        return tokenTransferIds
 
     async def delete_token_transfer(self, tokenTransferId: int, connection: Optional[DatabaseConnection] = None) -> None:
         query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId == tokenTransferId)

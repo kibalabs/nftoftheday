@@ -68,6 +68,8 @@ class BlockProcessor:
         return await self.ethClient.get_latest_block_number()
 
     async def process_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
+        # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
+        # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
         retrievedTokenTransfers = []
         erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
@@ -89,8 +91,6 @@ class BlockProcessor:
 
     async def _process_erc1155_single_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
-        blockHash = blockData['hash'].hex()
-        blockDate = datetime.datetime.fromtimestamp(blockData['timestamp'])
         transactionHash = event['transactionHash'].hex()
         registryAddress = normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
@@ -109,13 +109,11 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=0, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, tokenType='erc1155single')]
+        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155single')]
         return transactions
 
     async def _process_erc1155_batch_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
-        blockHash = blockData['hash'].hex()
-        blockDate = datetime.datetime.fromtimestamp(blockData['timestamp'])
         transactionHash = event['transactionHash'].hex()
         registryAddress = normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
@@ -137,13 +135,11 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=0, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
+        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
         return transactions
 
     async def _process_erc721_single_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
-        blockHash = blockData['hash'].hex()
-        blockDate = datetime.datetime.fromtimestamp(blockData['timestamp'])
         transactionHash = event['transactionHash'].hex()
         registryAddress = normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
@@ -172,5 +168,5 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']
-        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, gasUsed=0, blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, tokenType='erc721')]
+        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc721')]
         return transactions

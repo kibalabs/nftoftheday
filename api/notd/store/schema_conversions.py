@@ -1,4 +1,3 @@
-import datetime
 from typing import Mapping
 
 from notd.model import Block
@@ -24,10 +23,8 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         amount=row[TokenTransfersTable.c.amount],
         gasLimit=row[TokenTransfersTable.c.gasLimit],
         gasPrice=row[TokenTransfersTable.c.gasPrice],
-        gasUsed=row[TokenTransfersTable.c.gasUsed],
         blockNumber=row[TokenTransfersTable.c.blockNumber],
-        blockHash=row[TokenTransfersTable.c.blockHash],
-        blockDate=row[TokenTransfersTable.c.blockDate].replace(tzinfo=datetime.timezone.utc),
+        blockDate=row[BlocksTable.c.blockDate],
         tokenType=row[TokenTransfersTable.c.tokenType],
     )
 

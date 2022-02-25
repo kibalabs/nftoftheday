@@ -7,6 +7,9 @@ from core.util import date_util
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
+from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
+from notd.api.endpoints_v1 import GetCollectionTokenResponse
+from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
@@ -79,6 +82,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     async def get_collection_by_address(registryAddress: str):  # request: RetreiveCollectionRequest
         collection = await notdManager.get_collection_by_address(address=registryAddress)
         return GetCollectionResponse(collection=(await responseBuilder.collection_from_model(collection=collection)))
+
+    @router.get('/collections/{registryAddress}/tokens/owner/{ownerAddress}', response_model=ListCollectionTokensByOwnerResponse)
+    async def list_collection_tokens_by_owner(registryAddress: str, ownerAddress: str):  # request: ListHoldingsForCollectionRequest
+        tokens = await notdManager.list_collection_tokens_by_owner(address=registryAddress, ownerAddress=ownerAddress)
+        return ListCollectionTokensByOwnerResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
 
     @router.get('/collections/{registryAddress}/recent-sales', response_model=GetCollectionRecentSalesResponse)
     async def get_collection_recent_sales(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):

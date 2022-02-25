@@ -1,13 +1,15 @@
 import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
-import { useRouteParams } from '@kibalabs/core-react';
+import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { ethers } from 'ethers';
 
 import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../../client/resources';
 import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';
 import { MetricView } from '../../components/MetricView';
+import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
 const COLLECTIONTOKEN = new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []);
@@ -17,9 +19,12 @@ const owner = '0x48e41913F2099300900cfcbB139F121429D38F5d';
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const routeParams = useRouteParams();
+  const navigator = useNavigator();
 
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
+  const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
   const defaultImage = '/assets/icon.png';
@@ -28,6 +33,13 @@ export const TokenPage = (): React.ReactElement => {
   if (imageUrl?.startsWith('ipfs://')) {
     imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
+
+  useInitialization((): void => {
+    const checksumAddress = ethers.utils.getAddress(registryAddress);
+    if (registryAddress !== checksumAddress) {
+      navigator.navigateTo(`/collections/${checksumAddress}/tokens/${tokenId}`);
+    }
+  });
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
     setCollectionToken(undefined);
@@ -55,6 +67,29 @@ export const TokenPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollection();
   }, [updateCollection]);
+
+  const updateTokenSales = React.useCallback(async (): Promise<void> => {
+    setTokenSales(undefined);
+    notdClient.getTokenRecentSales(registryAddress, tokenId).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenSales(tokenTransfers);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setTokenSales(null);
+    });
+  }, [notdClient, registryAddress, tokenId]);
+
+  React.useEffect((): void => {
+    updateTokenSales();
+  }, [updateTokenSales]);
+
+  const onLoadMoreClicked = (): void => {
+    const tokenSalesCount = tokenSales ? tokenSales.length : 0;
+    notdClient.getTokenRecentSales(registryAddress, tokenId, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
+    }).catch((error: unknown): void => {
+      console.error(error);
+    });
+  };
 
   return (
     <Stack direction={ Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} isScrollableVertically={true}>
@@ -122,6 +157,16 @@ export const TokenPage = (): React.ReactElement => {
             {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
               <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
             ))}
+          </Stack>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+            <Text variant='header3'>Sales history</Text>
+            {tokenSales && tokenSales.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
+              <TokenSaleRow
+                tokenTransfer={tokenTransfer}
+                key={index}
+              />
+            ))}
+            <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
           </Stack>
         </ContainingView>
       )}

@@ -1,9 +1,12 @@
+from typing import Optional
+
 from core.queues.model import MessageContent
 
 
 class ProcessBlockMessageContent(MessageContent):
     _COMMAND = 'PROCESS_BLOCK'
     blockNumber: int
+    shouldSkipProcessingTokens: Optional[bool]
 
 
 class ReprocessBlocksMessageContent(MessageContent):
@@ -18,8 +21,14 @@ class UpdateTokenMetadataMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_METADATA'
     registryAddress: str
     tokenId: str
-
+    shouldForce: Optional[bool]
 
 class UpdateCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION'
     address: str
+    shouldForce: Optional[bool]
+
+class UpdateCollectionTokensMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_TOKENS'
+    address: str
+    shouldForce: Optional[bool]

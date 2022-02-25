@@ -9,6 +9,7 @@ from typing import Dict
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
+from core.requester import ResponseException
 from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
@@ -25,6 +26,7 @@ IPFS_PROVIDER_PREFIXES = [
     'https://niftylabs.mypinata.cloud/ipfs/',
     'https://time.mypinata.cloud/ipfs/',
     'https://robotos.mypinata.cloud/ipfs/',
+    'https://cloudflare-ipfs.com/ipfs/',
 ]
 
 
@@ -83,7 +85,7 @@ class TokenMetadataProcessor():
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
-            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8') + b'==').decode('utf-8')
+            tokenMetadataJson = base64.b64decode(bse64String.encode('utf-8') + b'==').decode('utf-8', errors='ignore')
         elif dataString.startswith('data:application/json;utf8,'):
             tokenMetadataJson = dataString.replace('data:application/json;utf8,', '', 1)
         elif dataString.startswith('data:application/json;ascii,'):
@@ -98,7 +100,7 @@ class TokenMetadataProcessor():
             logging.info(f'Failed to process data string: {dataString}')
             tokenMetadataDict = {}
         if tokenMetadataJson:
-            # NOTE(krishan711): it's safe to decode something that'd either encoded or not encoded
+            # NOTE(krishan711): it's safe to decode something that's either encoded or not encoded
             tokenMetadataJson = urllib.parse.unquote(tokenMetadataJson)
             try:
                 tokenMetadataDict = json.loads(tokenMetadataJson)
@@ -184,6 +186,10 @@ class TokenMetadataProcessor():
                 raise TokenDoesNotExistException()
             if 'stack limit reached' in badRequestException.message:
                 raise TokenDoesNotExistException()
+            if 'Maybe the method does not exist on this contract' in badRequestException.message:
+                raise TokenDoesNotExistException()
+            if 'value could not be decoded as valid UTF8' in badRequestException.message:
+                raise TokenDoesNotExistException()
             raise badRequestException
         tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
@@ -207,10 +213,16 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = tokenMetadataResponse.json()
                 if tokenMetadataDict is None:
                     raise Exception('Empty response')
+                if isinstance(tokenMetadataDict, (bool, int, float)):
+                    raise Exception(f'Invalid response: {tokenMetadataDict}')
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
+            except ResponseException as exception:
+                errorMessage = '' if exception.message.strip().startswith('<!DOCTYPE html') or exception.message.strip().startswith('<html') else exception.message
+                logging.info(f'Response error while pulling metadata from {metadataUrl}: {exception.statusCode} {errorMessage}')
+                tokenMetadataDict = {}
             except Exception as exception:  # pylint: disable=broad-except
-                logging.info(f'Failed to pull metadata from {metadataUrl}: {exception}')
+                logging.info(f'Failed to process metadata from {metadataUrl}: {type(exception)} {str(exception)}')
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)

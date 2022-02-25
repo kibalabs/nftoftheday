@@ -10,6 +10,7 @@ from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
+from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 
 
@@ -21,26 +22,32 @@ class NotdMessageProcessor(MessageProcessor):
     async def process_message(self, message: SqsMessage) -> None:
         if message.command == ProcessBlockMessageContent.get_command():
             messageContent = ProcessBlockMessageContent.parse_obj(message.content)
-            await self.notdManager.process_block(blockNumber=messageContent.blockNumber)
+            await self.notdManager.process_block(blockNumber=messageContent.blockNumber, shouldSkipProcessingTokens=messageContent.shouldSkipProcessingTokens)
             return
         if message.command == ReceiveNewBlocksMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
-                logging.info(f'Skipping received new blocks from more than 5 minutes ago')
+                logging.info(f'Skipping RECEIVE_NEW_BLOCKS from more than 5 minutes ago')
                 return
             messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
             await self.notdManager.receive_new_blocks()
             return
         if message.command == ReprocessBlocksMessageContent.get_command():
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
+                logging.info(f'Skipping REPROCESS_OLD_BLOCKS from more than 5 minutes ago')
+                return
             messageContent = ReprocessBlocksMessageContent.parse_obj(message.content)
             await self.notdManager.reprocess_old_blocks()
             return
         if message.command == UpdateTokenMetadataMessageContent.get_command():
             messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
-            await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+            await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId, shouldForce=messageContent.shouldForce)
             return
         if message.command == UpdateCollectionMessageContent.get_command():
             messageContent = UpdateCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection(address=messageContent.address)
+            await self.notdManager.update_collection(address=messageContent.address, shouldForce=messageContent.shouldForce)
             return
+        if message.command == UpdateCollectionTokensMessageContent.get_command():
+            messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection_tokens(address=messageContent.address, shouldForce=messageContent.shouldForce)
 
         raise KibaException(message='Message was unhandled')

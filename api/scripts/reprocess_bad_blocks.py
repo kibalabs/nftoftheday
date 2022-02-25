@@ -5,7 +5,6 @@ import os
 import sys
 
 import asyncclick as click
-import boto3
 import sqlalchemy
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -33,9 +32,8 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
-    tokenQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
+    workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     requester = Requester()
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
@@ -45,6 +43,8 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
     notdManager = NotdManager(blockProcessor=None, saver=saver, retriever=retriever, workQueue=tokenQueue, tokenManager=None, requester=requester, revueApiKey=None)
 
     await database.connect()
+    await workQueue.connect()
+    await tokenQueue.connect()
     await slackClient.post(text=f'reprocess_bad_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         currentBlockNumber = startBlockNumber
@@ -114,6 +114,8 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
         raise exception
     finally:
         await database.disconnect()
+        await workQueue.disconnect()
+        await tokenQueue.disconnect()
         await requester.close_connections()
         await awsRequester.close_connections()
 

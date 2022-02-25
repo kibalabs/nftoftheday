@@ -4,7 +4,6 @@ import os
 import sys
 
 import asyncclick as click
-import boto3
 from core.aws_requester import AwsRequester
 from core.requester import Requester
 from core.s3_manager import S3Manager
@@ -34,14 +33,13 @@ async def reprocess_collections(startId: int, endId: int, batchSize: int):
     requester = Requester()
     # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
-    s3Client = boto3.client(service_name='s3', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    s3manager = S3Manager(s3Client=s3Client)
+    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     requester = Requester()
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=collectionProcessor, tokenMetadataProcessor=None)
 
     await database.connect()
-
+    await s3manager.connect()
     currentId = startId
     while currentId < endId:
         start = currentId
@@ -62,6 +60,7 @@ async def reprocess_collections(startId: int, endId: int, batchSize: int):
         currentId = currentId + batchSize
 
     await database.disconnect()
+    await s3manager.disconnect()
     await requester.close_connections()
     await awsRequester.close_connections()
 
