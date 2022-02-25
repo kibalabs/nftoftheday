@@ -102,7 +102,7 @@ class NotdManager:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
         mostTradedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
-                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
+                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId),
             ],
@@ -144,7 +144,7 @@ class NotdManager:
         totalTradeVolume = sum([trade.value for trade in holders])
         trades24h =  await self.retriever.list_token_transfers(
             fieldFilters=[
-                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=date_util.start_of_day(dt=datetime.datetime.now()), lte=date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=datetime.datetime.now()), days=1))),
+                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=date_util.start_of_day(dt=datetime.datetime.now()), lte=date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=datetime.datetime.now()), days=1))),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
