@@ -9,7 +9,6 @@ from typing import List
 from typing import Optional
 
 import asyncclick as click
-import boto3
 from core.s3_manager import S3Manager
 from core.store.database import Database
 
@@ -24,11 +23,11 @@ from notd.store.schema_conversions import collection_from_row
 async def calculate_token_fields(startCollectionId: Optional[int], endCollectionId: Optional[int]):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
-    s3Client = boto3.client(service_name='s3', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    s3manager = S3Manager(s3Client=s3Client)
+    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     bucketName = os.environ['S3_BUCKET']
 
     await database.connect()
+    await s3manager.connect()
     query = TokenCollectionsTable.select()
     if startCollectionId:
         query = query.where(TokenCollectionsTable.c.collectionId >= startCollectionId)
@@ -74,6 +73,7 @@ async def calculate_token_fields(startCollectionId: Optional[int], endCollection
 
 
     await database.disconnect()
+    await s3manager.disconnect()
 
 
 if __name__ == '__main__':
