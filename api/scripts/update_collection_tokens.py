@@ -14,10 +14,10 @@ from notd.messages import UpdateCollectionTokensMessageContent
 @click.option('-a', '--collection-address', 'address', required=True, type=str)
 @click.option('-d', '--should-force', 'shouldForce', default=False, is_flag=True)
 async def run(address: str, shouldForce: Optional[bool]):
-    workQueue = SqsMessageQueue(region='us-east-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.us-east-1.amazonaws.com/113848722427/test1')
-    await workQueue.connect()
-    await workQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
-    await workQueue.disconnect()
+    tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    await tokenQueue.connect()
+    await tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
+    await tokenQueue.disconnect()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
