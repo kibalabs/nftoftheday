@@ -44,7 +44,7 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == UpdateCollectionMessageContent.get_command():
             messageContent = UpdateCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection(address=messageContent.address)
+            await self.notdManager.update_collection(address=messageContent.address, shouldForce=messageContent.shouldForce)
             return
         if message.command == UpdateCollectionTokensMessageContent.get_command():
             messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
