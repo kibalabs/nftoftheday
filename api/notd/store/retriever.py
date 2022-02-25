@@ -104,6 +104,13 @@ class Retriever(CoreRetriever):
         row = result.first()
         return Token(registryAddress=row[TokenTransfersTable.c.registryAddress], tokenId=row[TokenTransfersTable.c.tokenId])
 
+    async def list_tokens_by_collection(self, address: str, connection: Optional[DatabaseConnection] = None) -> List:
+        query = TokenTransfersTable.select().distinct(TokenTransfersTable.c.tokenId)
+        query = query.with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId])
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
+        result = await self.database.execute(query=query, connection=connection)
+        return list(result)
+
     async def query_token_metadatas(self, query: Select, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenMetadata]:
         result = await self.database.execute(query=query, connection=connection)
         tokenMetadatas = [token_metadata_from_row(row) for row in result]

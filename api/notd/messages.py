@@ -21,8 +21,14 @@ class UpdateTokenMetadataMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_METADATA'
     registryAddress: str
     tokenId: str
-
+    shouldForce: Optional[bool]
 
 class UpdateCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION'
     address: str
+    shouldForce: Optional[bool]
+
+class UpdateCollectionTokensMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_TOKENS'
+    address: str
+    shouldForce: Optional[bool]

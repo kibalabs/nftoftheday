@@ -14,6 +14,7 @@ from core.util import date_util
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
+from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
@@ -80,7 +81,7 @@ class TokenManager:
             recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
             logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
             collectionTokenIds = set(collectionTokenIds) - recentlyUpdatedTokenIds
-        messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in collectionTokenIds]
+        messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
@@ -182,3 +183,11 @@ class TokenManager:
                 await self.saver.update_collection(connection=connection, collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
             else:
                 await self.saver.create_collection(connection=connection, address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
+
+    async def update_collection_tokens(self, address: str, shouldForce: bool = False):
+        collectionTokenIds = await self.retriever.list_tokens_by_collection(address=address)
+        await self.update_collection_deferred(address=address, shouldForce=shouldForce)
+        await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
+
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
+        await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())

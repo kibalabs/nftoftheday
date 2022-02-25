@@ -10,6 +10,7 @@ from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
+from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 
 
@@ -39,11 +40,14 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == UpdateTokenMetadataMessageContent.get_command():
             messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
-            await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+            await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId, shouldForce=messageContent.shouldForce)
             return
         if message.command == UpdateCollectionMessageContent.get_command():
             messageContent = UpdateCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection(address=messageContent.address)
+            await self.notdManager.update_collection(address=messageContent.address, shouldForce=messageContent.shouldForce)
             return
+        if message.command == UpdateCollectionTokensMessageContent.get_command():
+            messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection_tokens(address=messageContent.address, shouldForce=messageContent.shouldForce)
 
         raise KibaException(message='Message was unhandled')
