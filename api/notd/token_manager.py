@@ -189,5 +189,5 @@ class TokenManager:
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
-    async def update_collection_tokens_deferred (self, address: str, shouldForce: bool = False):
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
