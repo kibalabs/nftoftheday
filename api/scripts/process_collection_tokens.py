@@ -4,7 +4,6 @@ import os
 import sys
 
 import asyncclick as click
-import boto3
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -33,11 +32,9 @@ async def process_collection(address: str, shouldDefer: bool):
     saver = Saver(database=database)
     retriever = Retriever(database=database)
 
-    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
-    tokenQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
-    s3Client = boto3.client(service_name='s3', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    s3manager = S3Manager(s3Client=s3Client)
+    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     requester = Requester()
 
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
@@ -51,6 +48,9 @@ async def process_collection(address: str, shouldDefer: bool):
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     await database.connect()
+    await s3manager.connect()
+    await workQueue.connect()
+    await tokenQueue.connect()
     retrievedCollectionTokenMetadatas = await retriever.list_token_metadatas(
         fieldFilters=[
             StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
@@ -62,6 +62,9 @@ async def process_collection(address: str, shouldDefer: bool):
         else:
             await notdManager.update_token_metadata(registryAddress=address, tokenId=tokenMetadata.tokenId, shouldForce=True)
     await database.disconnect()
+    await s3manager.disconnect()
+    await workQueue.disconnect()
+    await tokenQueue.disconnect()
     await requester.close_connections()
 
 if __name__ == '__main__':

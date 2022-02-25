@@ -4,7 +4,6 @@ import os
 import sys
 
 import asyncclick as click
-import boto3
 import sqlalchemy
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.database import Database
@@ -24,10 +23,10 @@ from notd.store.schema_conversions import token_transfer_from_row
 async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
-    sqsClient = boto3.client(service_name='sqs', region_name='eu-west-1', aws_access_key_id=os.environ['AWS_KEY'], aws_secret_access_key=os.environ['AWS_SECRET'])
-    workQueue = SqsMessageQueue(sqsClient=sqsClient, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 
     await database.connect()
+    await workQueue.connect()
     cache = set()
     registryCache = set()
     currentBlockNumber = startBlockNumber
@@ -56,6 +55,7 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
                 await workQueue.send_message(message=UpdateCollectionMessageContent(address=tokenTransfer.registryAddress).to_message())
         currentBlockNumber = currentBlockNumber + batchSize
     await database.disconnect()
+    await workQueue.disconnect()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
