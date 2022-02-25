@@ -183,6 +183,7 @@ class TokenManager:
             else:
                 await self.saver.create_collection(connection=connection, address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
 
-    async def refresh_collection(self, address: str):
+    async def refresh_collection(self, address: str, shouldForce: bool = False):
         collectionTokenIds = await self.retriever.list_tokens_by_collection(address=address)
-        await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=True)
+        await self.update_collection_deferred(address=address, shouldForce=shouldForce)
+        await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)

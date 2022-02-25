@@ -155,6 +155,9 @@ class NotdManager:
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
         return await self.tokenManager.update_collection(address=address, shouldForce=shouldForce)
 
+    async def refresh_collection(self, address: str, shouldForce: bool = False) -> None:
+        return await self.tokenManager.refresh_collection(address=address, shouldForce=shouldForce)
+
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)
 

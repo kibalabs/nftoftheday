@@ -23,7 +23,12 @@ class UpdateTokenMetadataMessageContent(MessageContent):
     tokenId: str
     shouldForce: Optional[bool]
 
-
 class UpdateCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION'
     address: str
+    shouldForce: Optional[bool]
+
+class UpdateCollectionTokensMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_TOKENS'
+    address: str
+    shouldForce: Optional[bool]
