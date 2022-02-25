@@ -174,7 +174,7 @@ export const CollectionPage = (): React.ReactElement => {
                 </Stack>
               )}
               { accountId ? (
-                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
                   <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
                   <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                     {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
@@ -193,17 +193,19 @@ export const CollectionPage = (): React.ReactElement => {
                   <Text>to show your holdings and watchlist.</Text>
                 </Stack>
               )}
-              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
                 <Text variant='header3'>Recent Sales</Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                  {recentSales && recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
+                  {recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
                     <TokenCard
                       key={index}
                       collectionToken={recentSale.token}
                       subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for Ξ${recentSale.value / 1000000000000000000.0}`}
-                      target={`/collections/${recentSale.registryAddress}/recent-sales`}
+                      target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
                     />
-                  ))}
+                  ))
+                    : <Text>No recent sales</Text>
+                  }
                 </Stack>
               </Stack>
             </Stack>
