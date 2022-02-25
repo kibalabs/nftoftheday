@@ -16,9 +16,8 @@ from api.notd.messages import UpdateCollectionTokensMessageContent
 
 
 @click.command()
-@click.option('-b', '--block-number', 'blockNumber', required=False, type=int)
-@click.option('-s', '--start-block-number', 'startBlockNumber', required=False, type=int, default=0)
-@click.option('-e', '--end-block-number', 'endBlockNumber', required=False, type=int)
+@click.option('-a', '--address', 'address', required=True, type=str)
+@click.option('-f', 'should-force', 'shouldForce', required=False, type=bool )
 async def run(address: str, shouldForce: Optional[bool]):
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
 
