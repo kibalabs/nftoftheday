@@ -194,7 +194,7 @@ export const CollectionPage = (): React.ReactElement => {
                       target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
                     />
                   ))
-                    : <Text>No recent sale</Text>
+                    : <Text>No recent sales</Text>
                   }
                 </Stack>
               </Stack>
