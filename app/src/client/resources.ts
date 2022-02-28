@@ -113,7 +113,35 @@ export class TokenAttribute {
     );
   }
 }
+export class HighestPriceTransfer {
+ 
+  readonly transfer: TokenTransfer;
 
+  public constructor(transfer: TokenTransfer) {
+    this.transfer = transfer;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): HighestPriceTransfer => {
+    return new HighestPriceTransfer(
+      TokenTransfer.fromObject(obj.transfer as Record<string, unknown>),
+    );
+  }
+}
+
+export class MostTradedTokenTransfer {
+ 
+  readonly tradedToken: TokenTransfer[];
+
+  public constructor(tradedToken: TokenTransfer[]) {
+    this.tradedToken = tradedToken;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): MostTradedTokenTransfer => {
+    return new MostTradedTokenTransfer(
+      (obj.mostTradedTokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenTransfer.fromObject(innerObj)),
+    );
+  }
+}
 export class CollectionToken {
   readonly registryAddress: string;
   readonly tokenId: string;

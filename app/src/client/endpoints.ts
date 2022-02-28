@@ -2,7 +2,40 @@ import { dateToString, RequestData, ResponseData } from '@kibalabs/core';
 
 import * as Resources from './resources';
 
-export class RetrieveUiDataRequest extends RequestData {
+// export class RetrieveUiDataRequest extends RequestData {
+//   readonly startDate?: Date;
+//   readonly endDate?: Date;
+
+//   public constructor(startDate?: Date, endDate?: Date) {
+//     super();
+//     this.startDate = startDate;
+//     this.endDate = endDate;
+//   }
+
+//   public toObject = (): Record<string, unknown> => {
+//     return {
+//       startDate: this.startDate ? dateToString(this.startDate) : null,
+//       endDate: this.endDate ? dateToString(this.endDate) : null,
+//     };
+//   }
+// }
+
+// export class RetrieveUiDataResponse extends ResponseData {
+//   readonly uiData: Resources.UiData;
+
+//   public constructor(uiData: Resources.UiData) {
+//     super();
+//     this.uiData = uiData;
+//   }
+
+//   public static fromObject = (obj: Record<string, unknown>): RetrieveUiDataResponse => {
+//     return new RetrieveUiDataResponse(
+//       Resources.UiData.fromObject(obj.uiData as Record<string, unknown>),
+//     );
+//   }
+// }
+
+export class RetrieveHighestPriceTransferRequest extends RequestData {
   readonly startDate?: Date;
   readonly endDate?: Date;
 
@@ -20,17 +53,115 @@ export class RetrieveUiDataRequest extends RequestData {
   }
 }
 
-export class RetrieveUiDataResponse extends ResponseData {
-  readonly uiData: Resources.UiData;
+export class RetrieveHighestPriceTransferResponse extends ResponseData {
+  readonly transfer: Resources.TokenTransfer;
 
-  public constructor(uiData: Resources.UiData) {
+  public constructor(transfer: Resources.TokenTransfer) {
     super();
-    this.uiData = uiData;
+    this.transfer = transfer;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveUiDataResponse => {
-    return new RetrieveUiDataResponse(
-      Resources.UiData.fromObject(obj.uiData as Record<string, unknown>),
+  public static fromObject = (obj: Record<string, unknown>): RetrieveHighestPriceTransferResponse => {
+    return new RetrieveHighestPriceTransferResponse(
+      Resources.TokenTransfer.fromObject(obj.transfer as Record<string, unknown>),
+    );
+  }
+}
+export class RetrieveMostTradedTokenTransferRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
+    };
+  }
+}
+
+export class RetrieveMostTradedTokenTransferResponse extends ResponseData {
+  readonly tradedToken: Resources.TokenTransfer[];
+
+  public constructor(tradedToken: Resources.TokenTransfer[]) {
+    super();
+    this.tradedToken = tradedToken;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveMostTradedTokenTransferResponse => {
+    return new RetrieveMostTradedTokenTransferResponse(
+      (obj.tradedToken as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+    );
+  }
+}
+
+export class RetrieveRandomTokenTransferRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
+    };
+  }
+}
+
+export class RetrieveRandomTokenTransferResponse extends ResponseData {
+  readonly transfer: Resources.TokenTransfer;
+
+  public constructor(transfer: Resources.TokenTransfer) {
+    super();
+    this.transfer = transfer;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveRandomTokenTransferResponse => {
+    return new RetrieveRandomTokenTransferResponse(
+      Resources.TokenTransfer.fromObject(obj.transfer as Record<string, unknown>),
+    );
+  }
+}
+
+export class RetrieveSponsoredTokenRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
+    };
+  }
+}
+
+export class RetrieveSponsoredTokenResponse extends ResponseData {
+  readonly token : Resources.Token
+
+  public constructor(token: Resources.Token) {
+    super();
+    this.token = token;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveSponsoredTokenResponse => {
+    return new RetrieveSponsoredTokenResponse(
+      Resources.Token.fromObject(obj.token as Record<string, unknown>),
     );
   }
 }
