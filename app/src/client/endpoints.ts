@@ -177,6 +177,28 @@ export class GetCollectionRecentSalesResponse extends ResponseData {
   }
 }
 
+export class GetCollectionHoldingRequest extends RequestData {
+  public toObject = (): Record<string, unknown> => {
+    return {
+    };
+  }
+}
+
+export class GetCollectionHoldingResponse extends ResponseData {
+  readonly tokenTransfers: Resources.TokenTransfer[];
+
+  public constructor(collectionHoldings: Resources.TokenTransfer[]) {
+    super();
+    this.tokenTransfers = collectionHoldings;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionHoldingResponse => {
+    return new GetCollectionHoldingResponse(
+      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+    );
+  }
+}
+
 export class SubscribeRequest extends RequestData {
   readonly email: string;
 
