@@ -6,7 +6,7 @@ import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, Lay
 import { ethers } from 'ethers';
 
 import { useAccountId, useOnLinkAccountsClicked } from '../../AccountContext';
-import { Collection, CollectionStatistics, TokenTransfer } from '../../client/resources';
+import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -17,7 +17,7 @@ export const CollectionPage = (): React.ReactElement => {
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
-  const [holdings, setHoldings] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
 
   const routeParams = useRouteParams();
   const navigator = useNavigator();
@@ -76,8 +76,9 @@ export const CollectionPage = (): React.ReactElement => {
 
   const getCollectionHoldings = React.useCallback(async (): Promise<void> => {
     setHoldings(undefined);
-    notdClient.getCollectionHoldings(address, ownerAddress).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.getCollectionHoldings(address, ownerAddress).then((tokenTransfers: CollectionToken[]): void => {
       setHoldings(tokenTransfers);
+      console.log('we are', tokenTransfers)
     }).catch((error: unknown): void => {
       console.error(error);
       setHoldings(null);
@@ -184,11 +185,11 @@ export const CollectionPage = (): React.ReactElement => {
                 <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
                   <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
                   <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                    {holdings && holdings.length !== 0 ? holdings.map((holding: TokenTransfer, index: number) : React.ReactElement => (
+                    {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
                       <TokenCard
                         key={index}
-                        collectionToken={holding.token}
-                        subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
+                        collectionToken={holding}
+                        // subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
                         target={`/collections/${holding.registryAddress}/tokens/${holding.tokenId}`}
                       />
                     ))

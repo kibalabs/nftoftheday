@@ -177,27 +177,29 @@ export class GetCollectionRecentSalesResponse extends ResponseData {
   }
 }
 
-export class GetCollectionHoldingRequest extends RequestData {
+export class GetCollectionHoldingsRequest extends RequestData {
   public toObject = (): Record<string, unknown> => {
     return {
     };
   }
 }
 
-export class GetCollectionHoldingResponse extends ResponseData {
-  readonly tokenTransfers: Resources.TokenTransfer[];
+export class GetCollectionHoldingsResponse extends ResponseData {
+  readonly tokens: Resources.CollectionToken[];
 
-  public constructor(collectionHoldings: Resources.TokenTransfer[]) {
+  public constructor(collectionHoldings: Resources.CollectionToken[]) {
     super();
-    this.tokenTransfers = collectionHoldings;
+    this.tokens = collectionHoldings;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): GetCollectionHoldingResponse => {
-    return new GetCollectionHoldingResponse(
-      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionHoldingsResponse => {
+    return new GetCollectionHoldingsResponse(
+      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionToken.fromObject(innerObj)),
     );
   }
 }
+
+
 
 export class SubscribeRequest extends RequestData {
   readonly email: string;
