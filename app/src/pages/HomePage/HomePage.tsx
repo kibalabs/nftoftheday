@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
+import { dateToString, isToday, isYesterday } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { HighestPriceTransfer, MostTradedTokenTransfer, Token, TokenTransfer, UiData } from '../../client/resources';
+import { Token, TokenTransfer } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
 import { HighestPricedTokenTransferCard } from '../../components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from '../../components/mostTradedTokenTransferCard';
@@ -32,13 +32,12 @@ const getDateString = (startDate: Date): string => {
 export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
-  // const [uiData, setUiData] = React.useState<UiData | null>(null);
-  const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| undefined | null>(undefined);
-  const [mostTradedTokenTransfer, setMostTradedTokenTransfer] = React.useState<TokenTransfer[] | undefined | null>(undefined);
-  const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | undefined | null>(undefined);
-  const [sponsoredToken, setSponsoredToken] = React.useState<Token | undefined | null>(undefined);
+  const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| null>(null);
+  const [mostTradedTokenTransfer, setMostTradedTokenTransfer] = React.useState<TokenTransfer[] | null>(null);
+  const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
+  const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
 
-  const [error, setError] = React.useState<boolean>(false);
+  // const [error, setError] = React.useState<boolean>(false);
   const [startDate_, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
   const startDate = startDate_ as Date;
 
@@ -53,39 +52,26 @@ export const HomePage = (): React.ReactElement => {
   };
 
   React.useEffect((): void => {
-    // setUiData(null);
-    // notdClient.retrieveUiData(startDate).then((retrievedUiData: UiData): void => {
-    //   setUiData(retrievedUiData);
-    // }).catch(() => {
-    //   setError(true);
-    // });
     notdClient.retrieveHighestPriceTransfer(startDate).then((transfers: TokenTransfer): void => {
       setHighestPricedTokenTransfer(transfers);
     }).catch((error: unknown): void => {
       console.error(error);
-      setError(true);
-      setHighestPricedTokenTransfer(null);
     });
     notdClient.retrieveMostTradedTokenTransfer(startDate).then((tradedToken: TokenTransfer[]): void => {
       setMostTradedTokenTransfer(tradedToken);
     }).catch((error: unknown): void => {
       console.error(error);
-      setError(true);
-      setMostTradedTokenTransfer(null);
     });
     notdClient.retrieveRandomTokenTransfer(startDate).then((tokenTransfers: TokenTransfer): void => {
       setRandomTokenTransfer(tokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
-      setError(true);
-      setRandomTokenTransfer(null);
     });
     notdClient.retrieveSponsoredTokenTransfer(startDate).then((token: Token): void => {
       setSponsoredToken(token);
     }).catch((error: unknown): void => {
       console.error(error);
-      setError(true);
-      setSponsoredToken(null);
+      setSponsoredToken(null)
     });
   }, [startDate, notdClient]);
 
@@ -132,19 +118,19 @@ export const HomePage = (): React.ReactElement => {
           <Spacing variant={PaddingSize.Wide2} />
         </Stack.Item>
         <ContainingView>
-     
-            {/* <Box isFullWidth={false}>
+
+          {/* <Box isFullWidth={false}>
               <Text variant='header3'>Sorry, something went wrong. Please Refresh the page</Text>
             </Box>
             <LoadingSpinner variant='light' /> */}
-            <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-              <React.Fragment>
-                <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
-                <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-                <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfer} />
-                <SponsoredTokenCard token={sponsoredToken} />
-              </React.Fragment>
-            </EqualGrid>
+          <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+            <React.Fragment>
+              <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
+              <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
+              <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfer} />
+              <SponsoredTokenCard token={sponsoredToken} />
+            </React.Fragment>
+          </EqualGrid>
         </ContainingView>
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <Spacing variant={PaddingSize.Wide2} />

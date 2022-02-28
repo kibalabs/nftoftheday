@@ -114,7 +114,6 @@ export class TokenAttribute {
   }
 }
 export class HighestPriceTransfer {
- 
   readonly transfer: TokenTransfer;
 
   public constructor(transfer: TokenTransfer) {
@@ -129,7 +128,6 @@ export class HighestPriceTransfer {
 }
 
 export class MostTradedTokenTransfer {
- 
   readonly tradedToken: TokenTransfer[];
 
   public constructor(tradedToken: TokenTransfer[]) {
