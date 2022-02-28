@@ -42,7 +42,7 @@ export class NotdClient extends ServiceClient {
 
   public getCollectionHoldings = async (address: string, ownerAddress: string): Promise<Resources.TokenTransfer[]> => {
     const method = RestMethod.GET;
-    const path = `v1/collections/${address}//tokens/owner/${ownerAddress}`;
+    const path = `v1/collections/${address}/tokens/owner/${ownerAddress}`;
     const request = new Endpoints.GetCollectionRecentSalesRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionRecentSalesResponse);
     return response.tokenTransfers;
