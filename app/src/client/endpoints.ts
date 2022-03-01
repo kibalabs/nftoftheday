@@ -199,8 +199,6 @@ export class GetCollectionHoldingsResponse extends ResponseData {
   }
 }
 
-
-
 export class SubscribeRequest extends RequestData {
   readonly email: string;
 
