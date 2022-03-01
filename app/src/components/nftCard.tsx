@@ -2,8 +2,7 @@ import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, LoadingSpinner, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { Collection, CollectionToken } from '../client/resources';
-import { useGlobals } from '../globalsContext';
+import { TokenTransfer } from '../client/resources';
 import { truncateTitle } from '../titleUtil';
 
 export interface NftCardProps {
@@ -18,35 +17,12 @@ export interface NftCardProps {
   extraLabelVariants?: string[];
   extraLabelBoxVariants?: string[];
   error?: Error;
+  tokenTransfer?: TokenTransfer;
 }
 
 export const NftCard = (props: NftCardProps): React.ReactElement => {
-  const { notdClient } = useGlobals();
-  const [asset, setAsset] = React.useState<CollectionToken | null>(null);
-  const [collection, setCollection] = React.useState<Collection | null>(null);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<Error | null>(null);
-
-  const updateAsset = React.useCallback(async (): Promise<void> => {
-    if (!props.collectionAddress || !props.tokenId) {
-      setAsset(null);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const tokenPromise = notdClient.retrieveCollectionToken(props.collectionAddress, props.tokenId);
-      const collectionPromise = notdClient.retrieveCollection(props.collectionAddress);
-      setAsset(await tokenPromise);
-      setCollection(await collectionPromise);
-    } catch (apiError: unknown) {
-      setError(apiError as Error);
-    }
-    setIsLoading(false);
-  }, [notdClient, props.collectionAddress, props.tokenId]);
-
-  React.useEffect((): void => {
-    updateAsset();
-  }, [updateAsset]);
+  const asset = props.tokenTransfer?.token;
+  const collection = props.tokenTransfer?.collection;
 
   let imageUrl = asset?.imageUrl ?? collection?.imageUrl ?? 'assets/icon.png';
   if (imageUrl.startsWith('ipfs://')) {
@@ -70,9 +46,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           </Box>
           <Spacing variant={PaddingSize.Wide} />
         </Stack.Item>
-        {error ? (
-          <Text>{error.message}</Text>
-        ) : !props.collectionAddress || !props.tokenId || isLoading || !asset || !collection ? (
+        { !props.collectionAddress || !props.tokenId || !asset || !collection ? (
           <Stack padding={PaddingSize.Wide3}>
             <LoadingSpinner variant='light' />
           </Stack>

@@ -4,7 +4,7 @@ import { dateToString, isToday, isYesterday } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
 import { Alignment, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Token, TokenTransfer } from '../../client/resources';
+import { CollectionToken, TokenTransfer } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
 import { HighestPricedTokenTransferCard } from '../../components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from '../../components/mostTradedTokenTransferCard';
@@ -35,9 +35,7 @@ export const HomePage = (): React.ReactElement => {
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| null>(null);
   const [mostTradedTokenTransfer, setMostTradedTokenTransfer] = React.useState<TokenTransfer[] | null>(null);
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
-  const [sponsoredToken, setSponsoredToken] = React.useState<Token | null>(null);
-
-  // const [error, setError] = React.useState<boolean>(false);
+  const [sponsoredToken, setSponsoredToken] = React.useState<CollectionToken | null>(null);
   const [startDate_, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
   const startDate = startDate_ as Date;
 
@@ -57,21 +55,23 @@ export const HomePage = (): React.ReactElement => {
     }).catch((error: unknown): void => {
       console.error(error);
     });
+
     notdClient.retrieveMostTradedTokenTransfer(startDate).then((tradedToken: TokenTransfer[]): void => {
       setMostTradedTokenTransfer(tradedToken);
     }).catch((error: unknown): void => {
       console.error(error);
     });
+
     notdClient.retrieveRandomTokenTransfer(startDate).then((tokenTransfers: TokenTransfer): void => {
       setRandomTokenTransfer(tokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
     });
-    notdClient.retrieveSponsoredTokenTransfer(startDate).then((token: Token): void => {
+
+    notdClient.retrieveSponsoredTokenTransfer().then((token: CollectionToken): void => {
       setSponsoredToken(token);
     }).catch((error: unknown): void => {
       console.error(error);
-      setSponsoredToken(null)
     });
   }, [startDate, notdClient]);
 
@@ -108,27 +108,28 @@ export const HomePage = (): React.ReactElement => {
           <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
         </Stack>
         <Spacing variant={PaddingSize.Wide2} />
-        {/* { uiData !== null ? (
-          <Text variant='header3'>{`${numberWithCommas(uiData.transactionCount)} transfers`}</Text>
-        ) : (
-          <Text variant='header3'>Loading transactions...</Text>
-        )} */}
+        {/* <Text variant='header3'>{`${numberWithCommas(uiData.transactionCount)} transfers`}</Text>
+        ) : ( */}
+        <Text variant='header3'>Loading transactions...</Text>
         <Spacing variant={PaddingSize.Default} />
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <Spacing variant={PaddingSize.Wide2} />
         </Stack.Item>
         <ContainingView>
-
-          {/* <Box isFullWidth={false}>
-              <Text variant='header3'>Sorry, something went wrong. Please Refresh the page</Text>
-            </Box>
-            <LoadingSpinner variant='light' /> */}
           <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
             <React.Fragment>
-              <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
-              <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-              <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfer} />
-              <SponsoredTokenCard token={sponsoredToken} />
+              {randomTokenTransfer
+              && <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
+              }
+              {highestPricedTokenTransfer
+              && <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
+              }
+              {mostTradedTokenTransfer
+              && <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfer} />
+              }
+              {sponsoredToken
+              && <SponsoredTokenCard token={sponsoredToken} />
+              }
             </React.Fragment>
           </EqualGrid>
         </ContainingView>

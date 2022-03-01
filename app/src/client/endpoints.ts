@@ -134,6 +134,27 @@ export class RetrieveRandomTokenTransferResponse extends ResponseData {
 }
 
 export class RetrieveSponsoredTokenRequest extends RequestData {
+  public toObject = (): Record<string, unknown> => {
+    return {
+    };
+  }
+}
+export class RetrieveSponsoredTokenResponse extends ResponseData {
+  readonly token : Resources.CollectionToken
+
+  public constructor(token: Resources.CollectionToken) {
+    super();
+    this.token = token;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveSponsoredTokenResponse => {
+    return new RetrieveSponsoredTokenResponse(
+      Resources.CollectionToken.fromObject(obj.token as Record<string, unknown>),
+    );
+  }
+}
+
+export class RetrieveTransferCountRequest extends RequestData {
   readonly startDate?: Date;
   readonly endDate?: Date;
 
@@ -151,17 +172,17 @@ export class RetrieveSponsoredTokenRequest extends RequestData {
   }
 }
 
-export class RetrieveSponsoredTokenResponse extends ResponseData {
-  readonly token : Resources.Token
+export class RetrieveTransferCountResponse extends ResponseData {
+  readonly count : Resources.TransferCount
 
-  public constructor(token: Resources.Token) {
+  public constructor(count: Resources.TransferCount) {
     super();
-    this.token = token;
+    this.count = count;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveSponsoredTokenResponse => {
-    return new RetrieveSponsoredTokenResponse(
-      Resources.Token.fromObject(obj.token as Record<string, unknown>),
+  public static fromObject = (obj: Record<string, unknown>): RetrieveTransferCountResponse => {
+    return new RetrieveTransferCountResponse(
+      Resources.TransferCount.fromObject(obj.count as Record<string, unknown>),
     );
   }
 }

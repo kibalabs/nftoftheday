@@ -15,6 +15,7 @@ export class NotdClient extends ServiceClient {
   //   const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUiDataResponse);
   //   return response.uiData;
   // }
+  
   public retrieveHighestPriceTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-highest-price-transfer';
@@ -38,12 +39,20 @@ export class NotdClient extends ServiceClient {
     return response.transfer;
   }
 
-  public retrieveSponsoredTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.Token> => {
+  public retrieveSponsoredTokenTransfer = async (): Promise<Resources.CollectionToken> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-sponsored-token';
-    const request = new Endpoints.RetrieveSponsoredTokenRequest(startDate, endDate);
+    const request = new Endpoints.RetrieveSponsoredTokenRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveSponsoredTokenResponse);
     return response.token;
+  }
+
+  public retrieveTransferCount = async (startDate?: Date, endDate?: Date): Promise<Resources.TransferCount> => {
+    const method = RestMethod.POST;
+    const path = 'v1/retrieve-transfer-count';
+    const request = new Endpoints.RetrieveTransferCountRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveTransferCountResponse);
+    return response.count;
   }
 
   public retrieveCollectionToken = async (registryAddress: string, tokenId: string): Promise<Resources.CollectionToken> => {
