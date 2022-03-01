@@ -15,7 +15,7 @@ export class NotdClient extends ServiceClient {
   //   const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUiDataResponse);
   //   return response.uiData;
   // }
-  
+
   public retrieveHighestPriceTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-highest-price-transfer';
