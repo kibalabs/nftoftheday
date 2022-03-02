@@ -79,3 +79,22 @@ CREATE INDEX tbl_blocks_created_date ON tbl_blocks (created_date);
 CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
 CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
 CREATE INDEX tbl_blocks_block_date ON tbl_blocks (block_date);
+
+CREATE TABLE tbl_token_owners (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    owner_address TEXT NOT NULL,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    purchased_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    purchased_value NUMERIC(256, 0) NOT NULL,
+);
+CREATE UNIQUE INDEX tbl_token_owners_owner_address_registry_address_token_id ON tbl_token_transfers (owner_address, registry_address, token_id);
+CREATE INDEX tbl_token_owners_created_date ON tbl_token_owners (created_date);
+CREATE INDEX tbl_token_owners_updated_date ON tbl_token_owners (updated_date);
+CREATE INDEX tbl_token_owners_owner_address ON tbl_token_owners (owner_address);
+CREATE INDEX tbl_token_owners_regsitry_address ON tbl_token_owners (registry_address);
+CREATE INDEX tbl_token_owners_token_id ON tbl_token_owners (token_id);
+CREATE INDEX tbl_token_owners_purchase_date ON tbl_token_owners (purchased_date);
+CREATE INDEX tbl_token_owners_purchase_value ON tbl_token_owners (purchased_value);

@@ -1,4 +1,6 @@
 from typing import Mapping
+from api.notd.model import TokenOwner
+from api.notd.store.schema import TokenOwnerTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -74,4 +76,16 @@ def collection_from_row(row: Mapping) -> Collection:
         bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl],
         doesSupportErc721=row[TokenCollectionsTable.c.doesSupportErc721],
         doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
+    )
+
+def token_owner_from_row(row: Mapping) -> TokenOwner:
+    return TokenOwner(
+        ownerId=row[TokenOwnerTable.c.ownerId],
+        createdDate=row[TokenOwnerTable.c.createdDate],
+        updatedDate=row[TokenOwnerTable.c.updatedDate],
+        ownerAddress=row[TokenOwnerTable.c.ownerAddress],
+        registryAddress=row[TokenOwnerTable.c.registryAddress],
+        tokenId=row[TokenOwnerTable.c.tokenId],
+        purchasedDate=row[TokenOwnerTable.c.purchasedDate],
+        purchasedValue=row[TokenOwnerTable.c.purchasedValue],
     )

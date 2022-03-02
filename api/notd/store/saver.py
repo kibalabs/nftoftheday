@@ -8,6 +8,8 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
+from api.notd.model import TokenOwner
+from api.notd.store.schema import TokenOwnerTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -236,3 +238,29 @@ class Saver(CoreSaver):
             values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId).values(values)
         await self._execute(query=query, connection=connection)
+
+    async def create_token_owner(self, ownerAddress: str, registryAddress: str, tokenId: str, purchasedDate: datetime.datetime, purchasedValue: int, connection: Optional[DatabaseConnection] = None) -> TokenOwner:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TokenOwnerTable.c.createdDate.key: createdDate,
+            TokenOwnerTable.c.updatedDate.key: updatedDate,
+            TokenOwnerTable.c.ownerAddress.key: ownerAddress,
+            TokenOwnerTable.c.registryAddress.key: registryAddress,
+            TokenOwnerTable.c.tokenId.key: tokenId,
+            TokenOwnerTable.c.purchasedDate.key: purchasedDate,
+            TokenOwnerTable.c.purchasedValue.key: purchasedValue,
+        }
+        query = TokenCollectionsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        ownerId = result.inserted_primary_key[0]
+        return TokenOwner(
+            ownerId=ownerId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            ownerAddress=ownerAddress,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            purchasedDate=purchasedDate,
+            purchasedValue=purchasedValue,
+        )
