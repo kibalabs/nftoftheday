@@ -1,14 +1,14 @@
 from typing import Mapping
-from api.notd.model import TokenOwner
-from api.notd.store.schema import TokenOwnerTable
 
 from notd.model import Block
 from notd.model import Collection
 from notd.model import TokenMetadata
+from notd.model import TokenOwner
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenOwnerTable
 from notd.store.schema import TokenTransfersTable
 
 

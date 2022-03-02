@@ -8,16 +8,16 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
-from api.notd.model import TokenOwner
-from api.notd.store.schema import TokenOwnerTable
 
 from notd.model import Block
 from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
+from notd.model import TokenOwner
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenOwnerTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
