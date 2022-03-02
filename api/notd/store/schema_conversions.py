@@ -1,4 +1,5 @@
 from typing import Mapping
+from notd.model import TokenOwnership
 
 from notd.model import Block
 from notd.model import Collection
@@ -78,8 +79,8 @@ def collection_from_row(row: Mapping) -> Collection:
         doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
     )
 
-def token_owner_from_row(row: Mapping) -> TokenOwner:
-    return TokenOwner(
+def token_ownership_from_row(row: Mapping) -> TokenOwnership:
+    return TokenOwnership(
         ownerId=row[TokenOwnerTable.c.ownerId],
         createdDate=row[TokenOwnerTable.c.createdDate],
         updatedDate=row[TokenOwnerTable.c.updatedDate],

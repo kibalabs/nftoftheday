@@ -110,16 +110,6 @@ class UiData:
 
 
 @dataclasses.dataclass
-class CollectionStatistics:
-    itemCount: int
-    holderCount: int
-    totalTradeVolume: int
-    lowestSaleLast24Hours: Optional[int]
-    highestSaleLast24Hours: Optional[int]
-    tradeVolume24Hours: Optional[int]
-
-
-@dataclasses.dataclass
 class SponsoredToken:
     date: datetime.datetime
     token: Token
@@ -148,7 +138,7 @@ class Block:
     blockDate: datetime.datetime
 
 @dataclasses.dataclass
-class TokenOwner:
+class TokenOwnership:
     ownerId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime

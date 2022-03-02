@@ -8,6 +8,7 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
+from api.notd.model import TokenOwnership
 
 from notd.model import Block
 from notd.model import Collection
@@ -239,7 +240,7 @@ class Saver(CoreSaver):
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_owner(self, ownerAddress: str, registryAddress: str, tokenId: str, purchasedDate: datetime.datetime, purchasedValue: int, connection: Optional[DatabaseConnection] = None) -> TokenOwner:
+    async def create_token_ownership(self, ownerAddress: str, registryAddress: str, tokenId: str, purchasedDate: datetime.datetime, purchasedValue: int, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -254,7 +255,7 @@ class Saver(CoreSaver):
         query = TokenCollectionsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
         ownerId = result.inserted_primary_key[0]
-        return TokenOwner(
+        return TokenOwnership(
             ownerId=ownerId,
             createdDate=createdDate,
             updatedDate=updatedDate,

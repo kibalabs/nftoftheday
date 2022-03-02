@@ -31,7 +31,7 @@ BlocksTable = sqlalchemy.Table(
 )
 
 TokenOwnerTable = sqlalchemy.Table(
-    'tbl_token_owner',
+    'tbl_token_ownership',
     metadata,
     sqlalchemy.Column(key='ownerId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
