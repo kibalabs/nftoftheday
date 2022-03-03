@@ -78,10 +78,19 @@ class ApiToken(BaseModel):
             tokenId=model.tokenId,
         )
 
+
 class ApiTradedToken(BaseModel):
-    collectionToken: ApiCollectionToken
+    token: ApiCollectionToken
+    collection: ApiCollection
     latestTransfer: ApiTokenTransfer
     transferCount: int
+
+
+class ApiSponsoredToken(BaseModel):
+    token: ApiCollectionToken
+    collection: ApiCollection
+    date: datetime.datetime
+    latestTransfer: Optional[ApiTokenTransfer]
 
 
 class ApiUiData(BaseModel):

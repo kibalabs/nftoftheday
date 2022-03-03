@@ -24,13 +24,14 @@ export class NotdClient extends ServiceClient {
     return response.transfer;
   }
 
-  public retrieveMostTradedTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer[]> => {
+  public retrieveMostTradedToken = async (startDate?: Date, endDate?: Date): Promise<Resources.TradedToken> => {
     const method = RestMethod.POST;
-    const path = 'v1/retrieve-most-traded-token-transfers';
-    const request = new Endpoints.RetrieveMostTradedTokenTransferRequest(startDate, endDate);
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMostTradedTokenTransferResponse);
+    const path = 'v1/retrieve-most-traded-token';
+    const request = new Endpoints.RetrieveMostTradedTokenRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMostTradedTokenResponse);
     return response.tradedToken;
   }
+
   public retrieveRandomTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-random-token-transfer';
@@ -39,15 +40,15 @@ export class NotdClient extends ServiceClient {
     return response.transfer;
   }
 
-  public retrieveSponsoredTokenTransfer = async (): Promise<Resources.CollectionToken> => {
+  public retrieveSponsoredTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.SponsoredToken> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-sponsored-token';
-    const request = new Endpoints.RetrieveSponsoredTokenRequest();
+    const request = new Endpoints.RetrieveSponsoredTokenRequest(startDate, endDate);
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveSponsoredTokenResponse);
-    return response.token;
+    return response.sponsoredToken;
   }
 
-  public retrieveTransferCount = async (startDate?: Date, endDate?: Date): Promise<Resources.TransferCount> => {
+  public retrieveTransferCount = async (startDate?: Date, endDate?: Date): Promise<number> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-transfer-count';
     const request = new Endpoints.RetrieveTransferCountRequest(startDate, endDate);

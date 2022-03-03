@@ -5,13 +5,13 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
-from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollection, ApiSponsoredToken
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiUiData
-from notd.model import Collection
+from notd.model import Collection, SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
@@ -102,9 +102,18 @@ class ResponseBuilder:
             transactionCount=uiData.transactionCount,
          )
 
-    async def retrieve_most_traded_token_transfer(self, tradedToken: TradedToken) -> ApiTradedToken:
+    async def traded_token_from_model(self, tradedToken: TradedToken) -> ApiTradedToken:
         return ApiTradedToken(
-            collectionToken=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.collectionToken.registryAddress, tokenId=tradedToken.collectionToken.tokenId),
+            token=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.latestTransfer.registryAddress, tokenId=tradedToken.latestTransfer.tokenId),
+            collection=await self.collection_from_address(address=tradedToken.latestTransfer.registryAddress),
             latestTransfer=await self.token_transfer_from_model(tokenTransfer=tradedToken.latestTransfer),
-            transferCount=tradedToken.transferCount
+            transferCount=tradedToken.transferCount,
+        )
+
+    async def sponsored_token_from_model(self, sponsoredToken: SponsoredToken) -> ApiSponsoredToken:
+        return ApiSponsoredToken(
+            token=await self.collection_token_from_registry_address_token_id(registryAddress=sponsoredToken.token.registryAddress, tokenId=sponsoredToken.token.tokenId),
+            collection=await self.collection_from_address(address=sponsoredToken.token.registryAddress),
+            latestTransfer=await self.token_transfer_from_model(tokenTransfer=sponsoredToken.latestTransfer) if sponsoredToken.latestTransfer else None,
+            date=sponsoredToken.date,
         )

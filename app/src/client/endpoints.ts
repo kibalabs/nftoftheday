@@ -67,7 +67,7 @@ export class RetrieveHighestPriceTransferResponse extends ResponseData {
     );
   }
 }
-export class RetrieveMostTradedTokenTransferRequest extends RequestData {
+export class RetrieveMostTradedTokenRequest extends RequestData {
   readonly startDate?: Date;
   readonly endDate?: Date;
 
@@ -85,17 +85,17 @@ export class RetrieveMostTradedTokenTransferRequest extends RequestData {
   }
 }
 
-export class RetrieveMostTradedTokenTransferResponse extends ResponseData {
-  readonly tradedToken: Resources.TokenTransfer[];
+export class RetrieveMostTradedTokenResponse extends ResponseData {
+  readonly tradedToken: Resources.TradedToken;
 
-  public constructor(tradedToken: Resources.TokenTransfer[]) {
+  public constructor(tradedToken: Resources.TradedToken) {
     super();
     this.tradedToken = tradedToken;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveMostTradedTokenTransferResponse => {
-    return new RetrieveMostTradedTokenTransferResponse(
-      (obj.tradedToken as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+  public static fromObject = (obj: Record<string, unknown>): RetrieveMostTradedTokenResponse => {
+    return new RetrieveMostTradedTokenResponse(
+      Resources.TradedToken.fromObject(obj.tradedToken as Record<string, unknown>),
     );
   }
 }
@@ -134,22 +134,33 @@ export class RetrieveRandomTokenTransferResponse extends ResponseData {
 }
 
 export class RetrieveSponsoredTokenRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
   public toObject = (): Record<string, unknown> => {
     return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
     };
   }
 }
 export class RetrieveSponsoredTokenResponse extends ResponseData {
-  readonly token : Resources.CollectionToken
+  readonly sponsoredToken: Resources.SponsoredToken
 
-  public constructor(token: Resources.CollectionToken) {
+  public constructor(sponsoredToken: Resources.SponsoredToken) {
     super();
-    this.token = token;
+    this.sponsoredToken = sponsoredToken;
   }
 
   public static fromObject = (obj: Record<string, unknown>): RetrieveSponsoredTokenResponse => {
     return new RetrieveSponsoredTokenResponse(
-      Resources.CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      Resources.SponsoredToken.fromObject(obj.sponsoredToken as Record<string, unknown>),
     );
   }
 }
@@ -173,16 +184,16 @@ export class RetrieveTransferCountRequest extends RequestData {
 }
 
 export class RetrieveTransferCountResponse extends ResponseData {
-  readonly count : Resources.TransferCount
+  readonly count: number
 
-  public constructor(count: Resources.TransferCount) {
+  public constructor(count: number) {
     super();
     this.count = count;
   }
 
   public static fromObject = (obj: Record<string, unknown>): RetrieveTransferCountResponse => {
     return new RetrieveTransferCountResponse(
-      Resources.TransferCount.fromObject(obj.count as Record<string, unknown>),
+      Number(obj.count),
     );
   }
 }

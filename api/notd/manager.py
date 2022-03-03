@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import random
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -22,7 +23,7 @@ from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
-from notd.model import Collection
+from notd.model import BaseSponsoredToken, Collection
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -34,6 +35,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
 
 
@@ -50,15 +52,23 @@ class NotdManager:
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
-        self.sponsoredTokens = [SponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
+        self.sponsoredTokens = [BaseSponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
 
-    def get_sponsored_token(self) -> Token:
-        sponsoredToken = self.sponsoredTokens[0].token
+    async def get_sponsored_token(self) -> SponsoredToken:
+        baseSponsoredToken = self.sponsoredTokens[0]
         currentDate = date_util.datetime_from_now()
-        allPastTokens = [sponsoredToken.token for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
+        allPastTokens = [sponsoredToken for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
         if allPastTokens:
-            sponsoredToken = allPastTokens[-1]
-        return sponsoredToken
+            baseSponsoredToken = allPastTokens[-1]
+        latestTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=baseSponsoredToken.token.registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=baseSponsoredToken.token.tokenId),
+            ],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            limit=1
+        )
+        return SponsoredToken(date=baseSponsoredToken.date, token=baseSponsoredToken.token, latestTransfer=latestTransfers[0] if len(latestTransfers) > 0 else None)
 
     async def retrieve_highest_priced_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
@@ -69,10 +79,12 @@ class NotdManager:
         return highestPricedTokenTransfers[0]
 
     async def retrieve_random_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
+        # NOTE(krishan711): this is no longer actually random, it's just the latest (random is too slow)
         randomTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
-            orders=[RandomOrder()],
-            limit=1
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            offset=random.randint(1000, 10000),
+            limit=1,
         )
         return randomTokenTransfers[0]
 
@@ -99,18 +111,21 @@ class NotdManager:
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
-        mostTradedTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                DateFieldFilter(fieldName=TokenTransfersTable.c.blockDate.key, gte=startDate, lt=endDate),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=mostTradedToken.registryAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=mostTradedToken.tokenId),
-            ],
-            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)]
+        query = (
+            sqlalchemy.select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(BlocksTable.c.blockDate >= startDate)
+            .where(BlocksTable.c.blockDate < endDate)
+            .where(TokenTransfersTable.c.registryAddress == mostTradedToken.registryAddress)
+            .where(TokenTransfersTable.c.tokenId == mostTradedToken.tokenId)
+            .order_by(TokenTransfersTable.c.value.desc())
         )
+        result = await self.retriever.database.execute(query=query, connection=None)
+        latestTransferRow = result.first()
+        countResult = await self.retriever.database.execute(query=sqlalchemy.func.count().select_from(query), connection=None)
+        transferCount = countResult.scalar()
         return TradedToken(
-            collectionToken=mostTradedToken,
-            latestTransfer=mostTradedTokenTransfers[0],
-            transferCount=len(mostTradedTokenTransfers)
+            latestTransfer=token_transfer_from_row(latestTransferRow),
+            transferCount=transferCount,
         )
 
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:

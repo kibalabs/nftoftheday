@@ -74,6 +74,52 @@ export class Token {
   }
 }
 
+export class TradedToken {
+  readonly token: CollectionToken;
+  readonly collection: Collection;
+  readonly latestTransfer: TokenTransfer;
+  readonly transferCount: number;
+
+  public constructor(token: CollectionToken, collection: Collection, latestTransfer: TokenTransfer, transferCount: number) {
+    this.token = token;
+    this.collection = collection;
+    this.latestTransfer = latestTransfer;
+    this.transferCount = transferCount;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): TradedToken => {
+    return new TradedToken(
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>),
+      Number(obj.transferCount),
+    );
+  }
+}
+
+export class SponsoredToken {
+  readonly token: CollectionToken;
+  readonly collection: Collection;
+  readonly date: Date;
+  readonly latestTransfer: TokenTransfer | null;
+
+  public constructor(token: CollectionToken, collection: Collection, date: Date, latestTransfer: TokenTransfer) {
+    this.token = token;
+    this.collection = collection;
+    this.date = date;
+    this.latestTransfer = latestTransfer;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): SponsoredToken => {
+    return new SponsoredToken(
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      dateFromString(obj.date as string),
+      obj.latestTransfer ? TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>) : null,
+    );
+  }
+}
+
 export class UiData {
   readonly highestPricedTokenTransfer: TokenTransfer;
   readonly mostTradedTokenTransfers: TokenTransfer[];
@@ -212,20 +258,6 @@ export class CollectionStatistics {
       obj.lowestSaleLast24Hours ? BigNumber.from(String(obj.lowestSaleLast24Hours)) : null,
       obj.highestSaleLast24Hours ? BigNumber.from(String(obj.highestSaleLast24Hours)) : null,
       obj.tradeVolume24Hours ? BigNumber.from(String(obj.tradeVolume24Hours)) : null,
-    );
-  }
-}
-
-export class TransferCount {
-  readonly count: number;
-
-  public constructor(count: number) {
-    this.count = count;
-  }
-
-  public static fromObject = (obj: Record<string, unknown>): TransferCount => {
-    return new TransferCount(
-      Number(obj.count),
     );
   }
 }

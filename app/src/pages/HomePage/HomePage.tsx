@@ -2,9 +2,9 @@ import React from 'react';
 
 import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { CollectionToken, TokenTransfer, TransferCount } from '../../client/resources';
+import { SponsoredToken, TokenTransfer, TradedToken } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
 import { HighestPricedTokenTransferCard } from '../../components/highestPricedTokenTransferCard';
 import { MostTradedTokenTransferCard } from '../../components/mostTradedTokenTransferCard';
@@ -33,11 +33,10 @@ export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| null>(null);
-  const [mostTradedTokenTransfer, setMostTradedTokenTransfer] = React.useState<TokenTransfer[] | null>(null);
+  const [mostTradedToken, setMostTradedToken] = React.useState<TradedToken | null>(null);
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
-  const [sponsoredToken, setSponsoredToken] = React.useState<CollectionToken | null>(null);
-  const [transferCount, setTransferCount] = React.useState<TransferCount | null>(null);
-
+  const [sponsoredToken, setSponsoredToken] = React.useState<SponsoredToken | null>(null);
+  const [transferCount, setTransferCount] = React.useState<number | null>(null);
   const [startDate_, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
   const startDate = startDate_ as Date;
 
@@ -52,31 +51,31 @@ export const HomePage = (): React.ReactElement => {
   };
 
   React.useEffect((): void => {
-    notdClient.retrieveHighestPriceTransfer(startDate).then((transfers: TokenTransfer): void => {
-      setHighestPricedTokenTransfer(transfers);
+    notdClient.retrieveHighestPriceTransfer(startDate).then((transfer: TokenTransfer): void => {
+      setHighestPricedTokenTransfer(transfer);
     }).catch((error: unknown): void => {
       console.error(error);
     });
 
-    notdClient.retrieveMostTradedTokenTransfer(startDate).then((tradedToken: TokenTransfer[]): void => {
-      setMostTradedTokenTransfer(tradedToken);
+    notdClient.retrieveMostTradedToken(startDate).then((tradedToken: TradedToken): void => {
+      setMostTradedToken(tradedToken);
     }).catch((error: unknown): void => {
       console.error(error);
     });
 
-    notdClient.retrieveRandomTokenTransfer(startDate).then((tokenTransfers: TokenTransfer): void => {
-      setRandomTokenTransfer(tokenTransfers);
+    notdClient.retrieveRandomTokenTransfer(startDate).then((transfer: TokenTransfer): void => {
+      setRandomTokenTransfer(transfer);
     }).catch((error: unknown): void => {
       console.error(error);
     });
 
-    notdClient.retrieveSponsoredTokenTransfer().then((token: CollectionToken): void => {
+    notdClient.retrieveSponsoredTokenTransfer(startDate).then((token: SponsoredToken): void => {
       setSponsoredToken(token);
     }).catch((error: unknown): void => {
       console.error(error);
     });
 
-    notdClient.retrieveTransferCount(startDate).then((count: TransferCount): void => {
+    notdClient.retrieveTransferCount(startDate).then((count: number): void => {
       setTransferCount(count);
     }).catch((error: unknown): void => {
       console.error(error);
@@ -100,7 +99,7 @@ export const HomePage = (): React.ReactElement => {
   const onEmailClicked = (): void => {
     setIsEmailPopopShowing(true);
   };
-  const count = Number(transferCount);
+
   return (
     <React.Fragment>
       <Head headId='home'>
@@ -116,8 +115,11 @@ export const HomePage = (): React.ReactElement => {
           <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
         </Stack>
         <Spacing variant={PaddingSize.Wide2} />
-        <Text variant='header3'>{`${numberWithCommas(count)} transfers`}</Text>
-        <Text variant='header3'>Loading transactions...</Text>
+        {!transferCount ? (
+          <Text variant='header3'>Loading transfers...</Text>
+        ) : (
+          <Text variant='header3'>{`${numberWithCommas(transferCount)} transfers`}</Text>
+        )}
         <Spacing variant={PaddingSize.Default} />
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <Spacing variant={PaddingSize.Wide2} />
@@ -125,18 +127,26 @@ export const HomePage = (): React.ReactElement => {
         <ContainingView>
           <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
             <React.Fragment>
-              {randomTokenTransfer
-              && <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
-              }
-              {highestPricedTokenTransfer
-              && <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-              }
-              {mostTradedTokenTransfer
-              && <MostTradedTokenTransferCard tokenTransfers={mostTradedTokenTransfer} />
-              }
-              {sponsoredToken
-              && <SponsoredTokenCard token={sponsoredToken} />
-              }
+              {randomTokenTransfer ? (
+                <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
+              ) : (
+                <LoadingSpinner />
+              )}
+              {highestPricedTokenTransfer ? (
+                <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
+              ) : (
+                <LoadingSpinner />
+              )}
+              {mostTradedToken ? (
+                <MostTradedTokenTransferCard tradedToken={mostTradedToken} />
+              ) : (
+                <LoadingSpinner />
+              )}
+              {sponsoredToken ? (
+                <SponsoredTokenCard token={sponsoredToken.token} collection={sponsoredToken.collection} latestTransfer={sponsoredToken.latestTransfer} />
+              ) : (
+                <LoadingSpinner />
+              )}
             </React.Fragment>
           </EqualGrid>
         </ContainingView>

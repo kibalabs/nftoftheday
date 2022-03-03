@@ -2,6 +2,7 @@ import logging
 import os
 
 from core.api.health import create_api as create_health_api
+from core.api.database_connection_middleware import DatabaseConnectionMiddleware
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -45,6 +46,7 @@ responseBuilder = ResponseBuilder(retriever=retriever)
 app = FastAPI()
 app.include_router(router=create_health_api(name=os.environ.get('NAME', 'notd'), version=os.environ.get('VERSION')))
 app.include_router(prefix='/v1', router=create_v1_api(notdManager=notdManager, responseBuilder=responseBuilder))
+app.add_middleware(DatabaseConnectionMiddleware, database=database)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], allow_headers=['*'], expose_headers=[
     'X-Response-Time',
     'X-Server',

@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollection, ApiSponsoredToken
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
@@ -53,7 +53,7 @@ class  RetrieveSponsoredTokenRequest(BaseModel):
     endDate: Optional[datetime.datetime]
 
 class RetrieveSponsoredTokenResponse(BaseModel):
-    token: ApiCollectionToken
+    sponsoredToken: ApiSponsoredToken
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass

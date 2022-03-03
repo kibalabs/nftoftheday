@@ -95,7 +95,6 @@ class Token:
 
 @dataclasses.dataclass
 class TradedToken:
-    collectionToken: Token
     latestTransfer: TokenTransfer
     transferCount: int
 
@@ -110,7 +109,7 @@ class UiData:
 
 
 @dataclasses.dataclass
-class SponsoredToken:
+class BaseSponsoredToken:
     date: datetime.datetime
     token: Token
 
@@ -126,6 +125,11 @@ class SponsoredToken:
             date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
             token=Token.from_dict(sponsoredTokenDict.get('token'))
         )
+
+
+@dataclasses.dataclass
+class SponsoredToken(BaseSponsoredToken):
+    latestTransfer: Optional[TokenTransfer]
 
 
 @dataclasses.dataclass
