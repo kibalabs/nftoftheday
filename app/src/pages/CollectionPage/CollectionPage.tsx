@@ -157,6 +157,10 @@ export const CollectionPage = (): React.ReactElement => {
       amt: 2100,
     },
   ];
+  const renderColorfulLegendText = (value: string) => {
+    return <span style={{ color: '#FFFFFF' }}>{value}</span>;
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collection === undefined ? (
@@ -287,7 +291,7 @@ export const CollectionPage = (): React.ReactElement => {
                         <stop stopColor={colors.brandPrimaryClear50} />
                       </linearGradient>
                     </defs>
-                    <Legend />
+                    <Legend formatter={renderColorfulLegendText} iconType='circle' align='right' />
                     <CartesianGrid stroke='#691019' strokeDasharray='3 3' />
                     <XAxis dataKey='name' />
                     <YAxis />
@@ -301,7 +305,6 @@ export const CollectionPage = (): React.ReactElement => {
           </ContainingView>
         </Stack>
       )}
-
     </Stack>
   );
 };
