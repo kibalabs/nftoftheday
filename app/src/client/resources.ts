@@ -57,23 +57,6 @@ export class TokenTransfer {
   }
 }
 
-export class Token {
-  readonly registryAddress: string;
-  readonly tokenId: string;
-
-  public constructor(registryAddress: string, tokenId: string) {
-    this.registryAddress = registryAddress;
-    this.tokenId = tokenId;
-  }
-
-  public static fromObject = (obj: Record<string, unknown>): Token => {
-    return new Token(
-      String(obj.registryAddress),
-      String(obj.tokenId),
-    );
-  }
-}
-
 export class TradedToken {
   readonly token: CollectionToken;
   readonly collection: Collection;

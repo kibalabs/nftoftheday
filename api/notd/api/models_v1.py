@@ -6,8 +6,6 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from notd.model import Token
-
 
 class ApiCollection(BaseModel):
     address: str
@@ -48,17 +46,6 @@ class ApiTokenTransfer(BaseModel):
     blockDate: datetime.datetime
     collection: ApiCollection
     token: ApiCollectionToken
-
-class ApiToken(BaseModel):
-    registryAddress: str
-    tokenId: str
-
-    @classmethod
-    def from_model(cls, model: Token):
-        return cls(
-            registryAddress=model.registryAddress,
-            tokenId=model.tokenId,
-        )
 
 
 class ApiTradedToken(BaseModel):

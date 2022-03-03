@@ -75,8 +75,6 @@ class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
     blockDate: datetime.datetime
 
-# TODO(krishan711): everything below this line should be removed!
-
 @dataclasses.dataclass
 class Token:
     registryAddress: str
