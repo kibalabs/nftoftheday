@@ -75,7 +75,7 @@ export const HomePage = (): React.ReactElement => {
     }).catch((error: unknown): void => {
       console.error(error);
     });
-    
+
     notdClient.retrieveTransferCount(startDate).then((count: TransferCount): void => {
       setTransferCount(count);
     }).catch((error: unknown): void => {
