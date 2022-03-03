@@ -2,8 +2,9 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { useAccountId, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
@@ -86,7 +87,76 @@ export const CollectionPage = (): React.ReactElement => {
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
+  const colors = useColors();
 
+  const data = [
+    {
+      name: 'Text',
+      price: 4000,
+      volume: 2400,
+      amt: 2400,
+    },
+    {
+      name: 'Text',
+      price: 3000,
+      volume: 1398,
+      amt: 2210,
+    },
+    {
+      name: 'Text',
+      price: 2000,
+      volume: 9800,
+      amt: 2290,
+    },
+    {
+      name: 'Text',
+      price: 2780,
+      volume: 3908,
+      amt: 2000,
+    },
+    {
+      name: 'Text',
+      price: 1890,
+      volume: 4800,
+      amt: 2181,
+    },
+    {
+      name: 'Text',
+      price: 2390,
+      volume: 3800,
+      amt: 2500,
+    },
+    {
+      name: 'Text',
+      price: 3490,
+      volume: 4300,
+      amt: 2100,
+    },
+    {
+      name: 'Text',
+      price: 5090,
+      volume: 4300,
+      amt: 2100,
+    },
+    {
+      name: 'Text',
+      price: 3090,
+      volume: 2300,
+      amt: 5100,
+    },
+    {
+      name: 'Text',
+      price: 5090,
+      volume: 4300,
+      amt: 2100,
+    },
+    {
+      name: 'Text',
+      price: 5090,
+      volume: 4300,
+      amt: 2100,
+    },
+  ];
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collection === undefined ? (
@@ -208,10 +278,30 @@ export const CollectionPage = (): React.ReactElement => {
                   }
                 </Stack>
               </Stack>
+              <Box height='350px'>
+                <Text variant='header3'>Recent Activity</Text>
+                <RechartsContainer width='100%' height='100%'>
+                  <AreaChart data={data}>
+                    <defs>
+                      <linearGradient id='gradient-color' x1='0%' y1='0%' x2='100%' y2='0%'>
+                        <stop stopColor={colors.brandPrimaryClear50} />
+                      </linearGradient>
+                    </defs>
+                    <Legend />
+                    <CartesianGrid stroke='#691019' strokeDasharray='3 3' />
+                    <XAxis dataKey='name' />
+                    <YAxis />
+                    <Tooltip />
+                    <Area isAnimationActive={false} type='monotone' dataKey='price' stroke='#732B31' strokeWidth={2} fill='#ffffff' fillOpacity={0.15} />
+                    <Area isAnimationActive={false} type='monotone' dataKey='volume' stroke='#F0F0F0' strokeWidth={2} fill='#ffffff' fillOpacity={0} />
+                  </AreaChart>
+                </RechartsContainer>
+              </Box>
             </Stack>
           </ContainingView>
         </Stack>
       )}
+
     </Stack>
   );
 };
