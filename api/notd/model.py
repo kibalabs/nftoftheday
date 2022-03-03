@@ -100,15 +100,6 @@ class TradedToken:
 
 
 @dataclasses.dataclass
-class UiData:
-    highestPricedTokenTransfer: TokenTransfer
-    mostTradedTokenTransfers: List[TokenTransfer]
-    randomTokenTransfer: TokenTransfer
-    sponsoredToken: Token
-    transactionCount: int
-
-
-@dataclasses.dataclass
 class BaseSponsoredToken:
     date: datetime.datetime
     token: Token

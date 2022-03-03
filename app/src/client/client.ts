@@ -8,14 +8,6 @@ export class NotdClient extends ServiceClient {
     super(requester, baseUrl || 'https://notd-api.kibalabs.com');
   }
 
-  // public retrieveUiData = async (startDate?: Date, endDate?: Date): Promise<Resources.UiData> => {
-  //   const method = RestMethod.POST;
-  //   const path = 'v1/retrieve-ui-data';
-  //   const request = new Endpoints.RetrieveUiDataRequest(startDate, endDate);
-  //   const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUiDataResponse);
-  //   return response.uiData;
-  // }
-
   public retrieveHighestPriceTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
     const method = RestMethod.POST;
     const path = 'v1/retrieve-highest-price-transfer';

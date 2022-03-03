@@ -7,7 +7,6 @@ from typing import Union
 from pydantic import BaseModel
 
 from notd.model import Token
-from notd.model import UiData
 
 
 class ApiCollection(BaseModel):
@@ -47,25 +46,8 @@ class ApiTokenTransfer(BaseModel):
     gasPrice: int
     blockNumber: int
     blockDate: datetime.datetime
-    # NOTE(krishan711): make these non-optional once ui-data is fixed
-    collection: Optional[ApiCollection]
-    token: Optional[ApiCollectionToken]
-
-    @classmethod
-    def from_model(cls, model: UiData):
-        return cls(
-            tokenTransferId=model.tokenTransferId,
-            transactionHash=model.transactionHash,
-            registryAddress=model.registryAddress,
-            fromAddress=model.fromAddress,
-            toAddress=model.toAddress,
-            tokenId=model.tokenId,
-            value=model.value,
-            gasLimit=model.gasLimit,
-            gasPrice=model.gasPrice,
-            blockNumber=model.blockNumber,
-            blockDate=model.blockDate,
-        )
+    collection: ApiCollection
+    token: ApiCollectionToken
 
 class ApiToken(BaseModel):
     registryAddress: str
@@ -91,21 +73,3 @@ class ApiSponsoredToken(BaseModel):
     collection: ApiCollection
     date: datetime.datetime
     latestTransfer: Optional[ApiTokenTransfer]
-
-
-class ApiUiData(BaseModel):
-    highestPricedTokenTransfer: ApiTokenTransfer
-    mostTradedTokenTransfers: List[ApiTokenTransfer]
-    randomTokenTransfer: ApiTokenTransfer
-    sponsoredToken: ApiToken
-    transactionCount: int
-
-    @classmethod
-    def from_model(cls, model: UiData):
-        return cls(
-            highestPricedTokenTransfer=ApiTokenTransfer.from_model(model=model.highestPricedTokenTransfer),
-            mostTradedTokenTransfers=[ApiTokenTransfer.from_model(model=transfer) for transfer in model.mostTradedTokenTransfers],
-            randomTokenTransfer=ApiTokenTransfer.from_model(model=model.randomTokenTransfer),
-            sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
-            transactionCount=model.transactionCount
-        )

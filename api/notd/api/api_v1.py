@@ -19,8 +19,6 @@ from notd.api.endpoints_v1 import RetrieveRandomTransferResponse
 from notd.api.endpoints_v1 import RetrieveSponsoredTokenResponse
 from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
-from notd.api.endpoints_v1 import RetrieveUiDataRequest
-from notd.api.endpoints_v1 import RetrieveUiDataResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
@@ -30,13 +28,6 @@ from notd.manager import NotdManager
 
 def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> KibaRouter:
     router = KibaRouter()
-
-    @router.post('/retrieve-ui-data', response_model=RetrieveUiDataResponse)
-    async def retrieve_ui_data(request: RetrieveUiDataRequest):
-        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
-        endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
-        uiData = await notdManager.retrieve_ui_data(startDate=startDate, endDate=endDate)
-        return RetrieveUiDataResponse(uiData=(await responseBuilder.retrieve_ui_data(uiData=uiData)))
 
     @router.post('/retrieve-highest-price-transfer', response_model=RetrieveHighestPriceTransferResponse)
     async def retrieve_highest_price_transfer(request: RetrieveHighestPriceTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
