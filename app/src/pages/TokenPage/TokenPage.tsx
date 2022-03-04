@@ -120,7 +120,10 @@ export const TokenPage = (): React.ReactElement => {
                 ) : (
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                     <Text>Part of</Text>
-                    <CollectionView collection={collection} />
+                    <CollectionView
+                      collection={collection}
+                      target= {`/collections/${collection.address}`}
+                    />
                   </Stack>
                 )}
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
@@ -144,7 +147,10 @@ export const TokenPage = (): React.ReactElement => {
                 ) : (
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                     <Text>Part of</Text>
-                    <CollectionView collection={collection} />
+                    <CollectionView
+                      collection={collection}
+                      target= {`/collections/${collection.address}`}
+                    />
                   </Stack>
                 )}
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
