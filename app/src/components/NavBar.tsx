@@ -27,7 +27,7 @@ export const NavBar = (): React.ReactElement => {
         { !accountId ? (
           <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
         ) : (
-          <Account accountId={accountIdStr} />
+          <Account accountId={accountId} />
         )}
       </Stack>
     </Box>
