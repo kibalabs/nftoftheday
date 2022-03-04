@@ -8,12 +8,44 @@ export class NotdClient extends ServiceClient {
     super(requester, baseUrl || 'https://notd-api.kibalabs.com');
   }
 
-  public retrieveUiData = async (startDate?: Date, endDate?: Date): Promise<Resources.UiData> => {
+  public retrieveHighestPriceTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
     const method = RestMethod.POST;
-    const path = 'v1/retrieve-ui-data';
-    const request = new Endpoints.RetrieveUiDataRequest(startDate, endDate);
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUiDataResponse);
-    return response.uiData;
+    const path = 'v1/retrieve-highest-price-transfer';
+    const request = new Endpoints.RetrieveHighestPriceTransferRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveHighestPriceTransferResponse);
+    return response.transfer;
+  }
+
+  public retrieveMostTradedToken = async (startDate?: Date, endDate?: Date): Promise<Resources.TradedToken> => {
+    const method = RestMethod.POST;
+    const path = 'v1/retrieve-most-traded-token';
+    const request = new Endpoints.RetrieveMostTradedTokenRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMostTradedTokenResponse);
+    return response.tradedToken;
+  }
+
+  public retrieveRandomTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
+    const method = RestMethod.POST;
+    const path = 'v1/retrieve-random-token-transfer';
+    const request = new Endpoints.RetrieveRandomTokenTransferRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveRandomTokenTransferResponse);
+    return response.transfer;
+  }
+
+  public retrieveSponsoredTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.SponsoredToken> => {
+    const method = RestMethod.POST;
+    const path = 'v1/retrieve-sponsored-token';
+    const request = new Endpoints.RetrieveSponsoredTokenRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveSponsoredTokenResponse);
+    return response.sponsoredToken;
+  }
+
+  public retrieveTransferCount = async (startDate?: Date, endDate?: Date): Promise<number> => {
+    const method = RestMethod.POST;
+    const path = 'v1/retrieve-transfer-count';
+    const request = new Endpoints.RetrieveTransferCountRequest(startDate, endDate);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveTransferCountResponse);
+    return response.count;
   }
 
   public retrieveCollectionToken = async (registryAddress: string, tokenId: string): Promise<Resources.CollectionToken> => {

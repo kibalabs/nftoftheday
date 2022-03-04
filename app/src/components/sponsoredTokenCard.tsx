@@ -1,17 +1,17 @@
 import React from 'react';
 
-import { Token } from '../client/resources';
+import { Collection, CollectionToken, TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
 
 export type SponsoredTokenCardProps = {
-  token: Token;
+  token: CollectionToken;
+  collection: Collection;
+  latestTransfer: TokenTransfer | null;
 }
 
 export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactElement => {
   return (
     <NftCard
-      tokenId={props.token.tokenId}
-      collectionAddress={props.token.registryAddress}
       label='Sponsored'
       // subtitle={asset.lastSalePrice ? `Last sold for Ξ${asset.lastSalePrice / 21000000000000000000.0}` : 'Up for grabs!'}
       subtitle={'Up for grabs!'}
@@ -21,6 +21,8 @@ export const SponsoredTokenCard = (props: SponsoredTokenCardProps): React.ReactE
       // secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfers[0].transactionHash}`}
       extraLabelVariants={['cardLabelSponsored']}
       extraLabelBoxVariants={['cardLabelBoxSponsored']}
+      token={props.token}
+      collection={props.collection}
     />
   );
 };
