@@ -86,7 +86,7 @@ export class SponsoredToken {
   readonly date: Date;
   readonly latestTransfer: TokenTransfer | null;
 
-  public constructor(token: CollectionToken, collection: Collection, date: Date, latestTransfer: TokenTransfer) {
+  public constructor(token: CollectionToken, collection: Collection, date: Date, latestTransfer: TokenTransfer | null) {
     this.token = token;
     this.collection = collection;
     this.date = date;
