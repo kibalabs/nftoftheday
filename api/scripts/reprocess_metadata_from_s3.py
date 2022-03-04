@@ -27,6 +27,7 @@ from notd.store.schema_conversions import token_metadata_from_row
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 
+
 async def _reprocess_metadata(tokenMetadataProcessor: TokenMetadataProcessor, s3manager: S3Manager, tokenManger: TokenManager, tokenMetadata: TokenMetadata):
     logging.info(f'Re-processing tokenMetadata: {tokenMetadata.tokenMetadataId}')
     await tokenManger.update_token_metadata(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, shouldForce=True)

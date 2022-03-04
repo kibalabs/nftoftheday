@@ -5,11 +5,13 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
-from notd.api.models_v1 import ApiCollection, ApiSponsoredToken
+from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
-from notd.model import Collection, SponsoredToken
+from notd.model import Collection
+from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer

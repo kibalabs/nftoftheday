@@ -1,8 +1,9 @@
 import logging
 import os
 
+from core.api.database_connection_middleware import \
+    DatabaseConnectionMiddleware
 from core.api.health import create_api as create_health_api
-from core.api.database_connection_middleware import DatabaseConnectionMiddleware
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester

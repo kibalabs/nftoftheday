@@ -22,7 +22,8 @@ from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
-from notd.model import BaseSponsoredToken, Collection
+from notd.model import BaseSponsoredToken
+from notd.model import Collection
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
