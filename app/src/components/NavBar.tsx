@@ -2,17 +2,16 @@ import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 
-import { useAccountId, useOnLinkAccountsClicked } from '../AccountContext';
+import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from './Account';
 
 export const NavBar = (): React.ReactElement => {
-  const accountId = useAccountId();
+  const accountId = useAccount();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
-
   return (
     <Box height='64px' isFullWidth={true}>
       <Stack direction={Direction.Horizontal} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} padding={PaddingSize.Wide1}>
@@ -28,7 +27,7 @@ export const NavBar = (): React.ReactElement => {
         { !accountId ? (
           <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
         ) : (
-          <Account accountId={accountId} />
+          <Account accountId={accountIdStr} />
         )}
       </Stack>
     </Box>
