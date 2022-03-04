@@ -75,6 +75,13 @@ class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
     blockDate: datetime.datetime
 
+
+@dataclasses.dataclass
+class TradedToken:
+    latestTransfer: TokenTransfer
+    transferCount: int
+
+
 @dataclasses.dataclass
 class Token:
     registryAddress: str
@@ -89,12 +96,6 @@ class Token:
     @classmethod
     def from_dict(cls, tokenDict: Dict):
         return cls(registryAddress=tokenDict['registryAddress'], tokenId=tokenDict['tokenId'])
-
-
-@dataclasses.dataclass
-class TradedToken:
-    latestTransfer: TokenTransfer
-    transferCount: int
 
 
 @dataclasses.dataclass

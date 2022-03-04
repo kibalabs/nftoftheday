@@ -99,9 +99,11 @@ class NotdManager:
             .where(TokenTransfersTable.c.tokenId == mostTradedToken.tokenId)
             .order_by(TokenTransfersTable.c.value.desc())
         )
+        print('query', query)
+        print('sqlalchemy.select(sqlalchemy.func.count()).select_from(query)', sqlalchemy.select(sqlalchemy.func.count()).select_from(query))
         result = await self.retriever.database.execute(query=query, connection=None)
         latestTransferRow = result.first()
-        countResult = await self.retriever.database.execute(query=sqlalchemy.func.count().select_from(query), connection=None)
+        countResult = await self.retriever.database.execute(query=sqlalchemy.select(sqlalchemy.func.count()).select_from(query), connection=None)
         transferCount = countResult.scalar()
         return TradedToken(
             latestTransfer=token_transfer_from_row(latestTransferRow),
