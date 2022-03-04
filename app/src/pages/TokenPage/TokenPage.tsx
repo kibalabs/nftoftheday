@@ -25,6 +25,7 @@ export const TokenPage = (): React.ReactElement => {
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [showLoadMore, setShowLoadMore] = React.useState<boolean>(true);
 
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
@@ -90,6 +91,9 @@ export const TokenPage = (): React.ReactElement => {
     }).catch((error: unknown): void => {
       console.error(error);
     });
+    if (tokenSalesCount < 10) {
+      setShowLoadMore(false);
+    }
   };
 
   return (
@@ -167,7 +171,9 @@ export const TokenPage = (): React.ReactElement => {
                 key={index}
               />
             ))}
-            <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
+            { showLoadMore
+            && <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
+            }
           </Stack>
         </ContainingView>
       )}
