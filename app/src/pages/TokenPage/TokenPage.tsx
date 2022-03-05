@@ -74,6 +74,9 @@ export const TokenPage = (): React.ReactElement => {
     setTokenSales(undefined);
     notdClient.getTokenRecentSales(registryAddress, tokenId).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales(tokenTransfers);
+      if (tokenTransfers.length < 10) {
+        setShowLoadMore(false);
+      }
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenSales(null);
@@ -88,12 +91,12 @@ export const TokenPage = (): React.ReactElement => {
     const tokenSalesCount = tokenSales ? tokenSales.length : 0;
     notdClient.getTokenRecentSales(registryAddress, tokenId, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
+      if (tokenTransfers.length < 10) {
+        setShowLoadMore(false);
+      }
     }).catch((error: unknown): void => {
       console.error(error);
     });
-    if (tokenSalesCount < 10) {
-      setShowLoadMore(false);
-    }
   };
 
   return (
