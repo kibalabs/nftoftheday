@@ -5,7 +5,7 @@ import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 
-import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
+import { useAccountId, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
@@ -80,7 +80,7 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollectionStatistics();
   }, [updateCollectionStatistics]);
 
-  const accountId = useAccount();
+  const accountId = useAccountId();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {

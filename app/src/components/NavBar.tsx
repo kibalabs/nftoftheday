@@ -2,11 +2,11 @@ import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
+import { useAccountId, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from './Account';
 
 export const NavBar = (): React.ReactElement => {
-  const accountId = useAccount();
+  const accountId = useAccountId();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {
