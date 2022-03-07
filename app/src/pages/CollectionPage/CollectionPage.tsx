@@ -76,6 +76,9 @@ export const CollectionPage = (): React.ReactElement => {
 
   const getCollectionHoldings = React.useCallback(async (): Promise<void> => {
     setHoldings(undefined);
+    if (!ownerAddress) {
+      return;
+    }
     notdClient.getCollectionHoldings(address, ownerAddress).then((tokenTransfers: CollectionToken[]): void => {
       setHoldings(tokenTransfers);
     }).catch((error: unknown): void => {
