@@ -100,11 +100,9 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
     @router.get('/collections/{registryAddress}/graph', response_model=GetCollectionValueGraphResponse)
-    async def get_collection_value_graph(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        limit = limit if limit is not None else 10
-        offset = offset if offset is not None else 0
-        collectionGraph = await notdManager.get_collection_graph(registryAddress=registryAddress, limit=limit, offset=offset)
-        return GetCollectionValueGraphResponse(collectionValueGraph=[ApiCollectionGraph(date=collectionGraph.date, value=collectionGraph.value, amount=collectionGraph.amount) for collectionGraph in collectionGraph])
+    async def get_collection_value_graph(registryAddress: str):
+        collectionGraph = await notdManager.get_collection_graph(registryAddress=registryAddress)
+        return GetCollectionValueGraphResponse(collectionValueGraph=[ApiCollectionGraph(date=collectionGraph.date, value=collectionGraph.tradedValue, amount=collectionGraph.tradedAmount) for collectionGraph in collectionGraph])
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

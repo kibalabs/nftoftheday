@@ -9,11 +9,13 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
+from core.util import date_util
 from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
 from notd.model import Collection
+from notd.model import CollectionGraph
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
@@ -23,6 +25,7 @@ from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import collection_graph_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 
@@ -177,3 +180,15 @@ class Retriever(CoreRetriever):
         for token in soldTokens:
             boughtTokens.remove(token)
         return list(boughtTokens)
+
+    async def get_collection_history(self, address: str, connection: Optional[DatabaseConnection] = None) -> List[CollectionGraph]:
+        startDate =  date_util.start_of_day(dt=datetime.datetime.now())
+        endDate =  date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=-90))
+        query = select([TokenTransfersTable.c.registryAddress, sqlalchemyfunc.sum(TokenTransfersTable.c.amount), sqlalchemyfunc.sum(TokenTransfersTable.c.value), sqlalchemyfunc.date(BlocksTable.c.blockDate)]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
+        query = query.where(BlocksTable.c.blockDate < startDate)
+        query = query.where(BlocksTable.c.blockDate >= endDate)
+        query = query.group_by(sqlalchemyfunc.date(BlocksTable.c.blockDate),TokenTransfersTable.c.registryAddress)
+        result = await self.database.execute(query=query, connection=connection)
+        collectionGraph = [collection_graph_from_row(row) for row in result]
+        return collectionGraph

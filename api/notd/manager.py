@@ -123,9 +123,8 @@ class NotdManager:
         )
         return tokenTransfers
 
-    async def get_collection_graph(self, registryAddress: str, limit: int, offset: int) -> List[CollectionGraph]:
-        tokenTransfers = await self.get_collection_recent_sales(registryAddress=registryAddress, limit=limit, offset=offset)
-        collectionGraph = [CollectionGraph(date=tokenTransfer.blockDate, value=tokenTransfer.value, amount=tokenTransfer.amount) for tokenTransfer in tokenTransfers ]
+    async def get_collection_graph(self, registryAddress: str) -> List[CollectionGraph]:
+        collectionGraph = await self.retriever.get_collection_history(address=registryAddress)
         return collectionGraph
 
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:

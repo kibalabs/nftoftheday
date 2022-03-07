@@ -141,6 +141,6 @@ class ProcessedBlock:
 
 @dataclasses.dataclass
 class CollectionGraph:
-    date: datetime.datetime
-    value: int
-    amount: int
+    date: datetime.date
+    tradedValue: int
+    tradedAmount: int
