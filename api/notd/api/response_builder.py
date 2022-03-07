@@ -4,6 +4,8 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
+from notd.api.models_v1 import ApiCollectionActivity
+from notd.model import CollectionActivity
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
@@ -107,3 +109,6 @@ class ResponseBuilder:
             latestTransfer=await self.token_transfer_from_model(tokenTransfer=sponsoredToken.latestTransfer) if sponsoredToken.latestTransfer else None,
             date=sponsoredToken.date,
         )
+
+    async def collection_activity_from_model(self, collectionActivities: Sequence[CollectionActivity]) -> Sequence[ApiCollectionActivity]:
+        return [ApiCollectionActivity(date=collectionActivity.date, value=collectionActivity.tradedValue, amount=collectionActivity.tradedAmount) for collectionActivity in collectionActivities]

@@ -23,7 +23,6 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
-from notd.api.models_v1 import ApiCollectionActivity
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
 
@@ -102,7 +101,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     @router.get('/collections/{registryAddress}/activity', response_model=GetCollectionActivityResponse)
     async def get_collection_activity(registryAddress: str):
         collectionActivities = await notdManager.get_collection_activity(registryAddress=registryAddress)
-        return GetCollectionActivityResponse(collectionActivity=[ApiCollectionActivity(date=collectionActivity.date, value=collectionActivity.tradedValue, amount=collectionActivity.tradedAmount) for collectionActivity in collectionActivities])
+        return GetCollectionActivityResponse(collectionActivity= await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):
