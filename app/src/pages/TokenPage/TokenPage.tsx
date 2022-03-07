@@ -26,7 +26,7 @@ export const TokenPage = (): React.ReactElement => {
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [showLoadMore, setShowLoadMore] = React.useState<boolean>(true);
-
+  const limit = 10;
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
   const defaultImage = '/assets/icon.png';
@@ -72,9 +72,9 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenSales(undefined);
-    notdClient.getTokenRecentSales(registryAddress, tokenId).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.getTokenRecentSales(registryAddress, tokenId, limit).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales(tokenTransfers);
-      if (tokenTransfers.length < 10) {
+      if (tokenTransfers.length < limit) {
         setShowLoadMore(false);
       }
     }).catch((error: unknown): void => {
@@ -89,9 +89,9 @@ export const TokenPage = (): React.ReactElement => {
 
   const onLoadMoreClicked = (): void => {
     const tokenSalesCount = tokenSales ? tokenSales.length : 0;
-    notdClient.getTokenRecentSales(registryAddress, tokenId, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.getTokenRecentSales(registryAddress, tokenId, limit, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
-      if (tokenTransfers.length < 10) {
+      if (tokenTransfers.length < limit) {
         setShowLoadMore(false);
       }
     }).catch((error: unknown): void => {

@@ -257,19 +257,19 @@ export class GetCollectionStatisticsResponse extends ResponseData {
 
 export class GetTokenRecentSalesRequest extends RequestData {
   readonly offset?: number;
-  readonly limit?: number;
+  readonly limit: number;
 
-  constructor(offset?: number, limit?: number) {
+
+  constructor(limit: number, offset?: number) {
     super();
     this.offset = offset || 0;
-    this.limit = limit || 10;
+    this.limit = limit;
   }
 
   public toObject = (): Record<string, unknown> => {
     return {
       offset: this.offset,
       limit: this.limit,
-
     };
   }
 }
