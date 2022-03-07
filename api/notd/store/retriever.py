@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.sql import Select
 
 from notd.model import Collection
-from notd.model import CollectionGraph
+from notd.model import CollectionActivity
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
@@ -181,7 +181,7 @@ class Retriever(CoreRetriever):
             boughtTokens.remove(token)
         return list(boughtTokens)
 
-    async def get_collection_history(self, address: str, connection: Optional[DatabaseConnection] = None) -> List[CollectionGraph]:
+    async def get_collection_activity(self, address: str, connection: Optional[DatabaseConnection] = None) -> List[CollectionActivity]:
         startDate =  date_util.start_of_day(dt=datetime.datetime.now())
         endDate =  date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=-90))
         query = select([TokenTransfersTable.c.registryAddress, sqlalchemyfunc.sum(TokenTransfersTable.c.amount), sqlalchemyfunc.sum(TokenTransfersTable.c.value), sqlalchemyfunc.date(BlocksTable.c.blockDate)]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)

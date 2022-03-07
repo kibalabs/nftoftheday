@@ -61,7 +61,7 @@ class ApiSponsoredToken(BaseModel):
     date: datetime.datetime
     latestTransfer: Optional[ApiTokenTransfer]
 
-class ApiCollectionGraph(BaseModel):
+class ApiCollectionActivity(BaseModel):
     date: datetime.date
     value: str
     amount: str

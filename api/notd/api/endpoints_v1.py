@@ -7,7 +7,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from notd.api.models_v1 import ApiCollection
-from notd.api.models_v1 import ApiCollectionGraph
+from notd.api.models_v1 import ApiCollectionActivity
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
@@ -91,8 +91,8 @@ class GetCollectionTokenRecentSalesRequest(BaseModel):
 class GetCollectionTokenRecentSalesResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
 
-class GetCollectionValueGraphRequest(BaseModel):
+class GetCollectionActivityRequest(BaseModel):
     pass
 
-class GetCollectionValueGraphResponse(BaseModel):
-    collectionValueGraph: List[ApiCollectionGraph]
+class GetCollectionActivityResponse(BaseModel):
+    collectionActivity: List[ApiCollectionActivity]

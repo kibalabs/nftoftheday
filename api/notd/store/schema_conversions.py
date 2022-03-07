@@ -2,7 +2,7 @@ from typing import Mapping
 
 from notd.model import Block
 from notd.model import Collection
-from notd.model import CollectionGraph
+from notd.model import CollectionActivity
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
@@ -77,8 +77,8 @@ def collection_from_row(row: Mapping) -> Collection:
         doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
     )
 
-def collection_graph_from_row(row: Mapping) -> CollectionGraph:
-    return CollectionGraph(
+def collection_graph_from_row(row: Mapping) -> CollectionActivity:
+    return CollectionActivity(
         date = row[3],
         tradedValue = row[2],
         tradedAmount = row[1],

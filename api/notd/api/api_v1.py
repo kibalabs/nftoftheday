@@ -4,11 +4,11 @@ from typing import Optional
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
+from notd.api.endpoints_v1 import GetCollectionActivityResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
-from notd.api.endpoints_v1 import GetCollectionValueGraphResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
@@ -23,7 +23,7 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
-from notd.api.models_v1 import ApiCollectionGraph
+from notd.api.models_v1 import ApiCollectionActivity
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
 
@@ -99,10 +99,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
-    @router.get('/collections/{registryAddress}/graph', response_model=GetCollectionValueGraphResponse)
-    async def get_collection_value_graph(registryAddress: str):
-        collectionGraph = await notdManager.get_collection_graph(registryAddress=registryAddress)
-        return GetCollectionValueGraphResponse(collectionValueGraph=[ApiCollectionGraph(date=collectionGraph.date, value=collectionGraph.tradedValue, amount=collectionGraph.tradedAmount) for collectionGraph in collectionGraph])
+    @router.get('/collections/{registryAddress}/activity', response_model=GetCollectionActivityResponse)
+    async def get_collection_activity(registryAddress: str):
+        collectionActivities = await notdManager.get_collection_activity(registryAddress=registryAddress)
+        return GetCollectionActivityResponse(collectionActivity=[ApiCollectionActivity(date=collectionActivity.date, value=collectionActivity.tradedValue, amount=collectionActivity.tradedAmount) for collectionActivity in collectionActivities])
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

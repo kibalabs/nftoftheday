@@ -24,7 +24,7 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
-from notd.model import CollectionGraph
+from notd.model import CollectionActivity
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -123,8 +123,8 @@ class NotdManager:
         )
         return tokenTransfers
 
-    async def get_collection_graph(self, registryAddress: str) -> List[CollectionGraph]:
-        collectionGraph = await self.retriever.get_collection_history(address=registryAddress)
+    async def get_collection_activity(self, registryAddress: str) -> List[CollectionActivity]:
+        collectionGraph = await self.retriever.get_collection_activity(address=registryAddress)
         return collectionGraph
 
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:

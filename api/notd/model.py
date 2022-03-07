@@ -140,7 +140,7 @@ class ProcessedBlock:
     retrievedTokenTransfers: List[RetrievedTokenTransfer]
 
 @dataclasses.dataclass
-class CollectionGraph:
+class CollectionActivity:
     date: datetime.date
     tradedValue: int
     tradedAmount: int
