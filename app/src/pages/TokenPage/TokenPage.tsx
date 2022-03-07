@@ -174,8 +174,8 @@ export const TokenPage = (): React.ReactElement => {
                 key={index}
               />
             ))}
-            { showLoadMore
-            && (<Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
+            { showLoadMore && (
+              <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
             )}
           </Stack>
         </ContainingView>
