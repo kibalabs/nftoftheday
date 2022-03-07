@@ -7,8 +7,8 @@ from typing import Optional
 from pydantic import BaseModel
 
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionGraph
 from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiDateValuePair
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
@@ -95,4 +95,4 @@ class GetCollectionValueGraphRequest(BaseModel):
     pass
 
 class GetCollectionValueGraphResponse(BaseModel):
-    collectionValueGraph: List[ApiDateValuePair]
+    collectionValueGraph: List[ApiCollectionGraph]

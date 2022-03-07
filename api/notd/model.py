@@ -140,6 +140,7 @@ class ProcessedBlock:
     retrievedTokenTransfers: List[RetrievedTokenTransfer]
 
 @dataclasses.dataclass
-class DateValuePair:
+class CollectionGraph:
     date: datetime.datetime
     value: int
+    amount: int
