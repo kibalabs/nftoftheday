@@ -175,8 +175,8 @@ export const TokenPage = (): React.ReactElement => {
               />
             ))}
             { showLoadMore
-            && <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
-            }
+            && (<Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
+            )}
           </Stack>
         </ContainingView>
       )}
