@@ -122,7 +122,7 @@ export const TokenPage = (): React.ReactElement => {
                     <Text>Part of</Text>
                     <CollectionView
                       collection={collection}
-                      target= {`/collections/${collection.address}`}
+                      target={`/collections/${collection.address}`}
                     />
                   </Stack>
                 )}
@@ -149,7 +149,7 @@ export const TokenPage = (): React.ReactElement => {
                     <Text>Part of</Text>
                     <CollectionView
                       collection={collection}
-                      target= {`/collections/${collection.address}`}
+                      target={`/collections/${collection.address}`}
                     />
                   </Stack>
                 )}
