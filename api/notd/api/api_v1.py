@@ -8,6 +8,7 @@ from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
+from notd.api.endpoints_v1 import GetCollectionValueGraphResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
@@ -22,6 +23,7 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
+from notd.api.models_v1 import ApiDateValuePair
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
 
@@ -96,6 +98,13 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
+
+    @router.get('/collections/{registryAddress}/value-graph', response_model=GetCollectionValueGraphResponse)
+    async def get_collection_value_graph(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
+        limit = limit if limit is not None else 10
+        offset = offset if offset is not None else 0
+        collectionValueGraph = await notdManager.get_collection_value_graph(registryAddress=registryAddress, limit=limit, offset=offset)
+        return GetCollectionValueGraphResponse(collectionValueGraph=[ApiDateValuePair(date=collectionDateValuePair.date, value=collectionDateValuePair.value) for collectionDateValuePair in collectionValueGraph])
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

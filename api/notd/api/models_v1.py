@@ -60,3 +60,7 @@ class ApiSponsoredToken(BaseModel):
     collection: ApiCollection
     date: datetime.datetime
     latestTransfer: Optional[ApiTokenTransfer]
+
+class ApiDateValuePair(BaseModel):
+    date: datetime.datetime
+    value: str

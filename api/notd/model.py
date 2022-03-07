@@ -138,3 +138,8 @@ class ProcessedBlock:
     blockHash: str
     blockDate: datetime.datetime
     retrievedTokenTransfers: List[RetrievedTokenTransfer]
+
+@dataclasses.dataclass
+class DateValuePair:
+    date: datetime.datetime
+    value: int
