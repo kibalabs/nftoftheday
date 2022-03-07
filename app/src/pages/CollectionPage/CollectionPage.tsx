@@ -96,7 +96,6 @@ export const CollectionPage = (): React.ReactElement => {
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
-
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collection === undefined ? (
@@ -140,17 +139,17 @@ export const CollectionPage = (): React.ReactElement => {
                 )}
                 {collection.twitterUsername && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text={'Twitter'} target={`https://instagram.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
+                    <Button variant='tertiary' text={'Twitter'} target={`https://twitter.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
                   </Stack.Item>
                 )}
                 {collection.openseaSlug && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
+                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
                   </Stack.Item>
                 )}
                 {collection.url && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text={'Website'} target={`https://opensea.io/collection/${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                    <Button variant='tertiary' text={'Website'} target={`${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
                   </Stack.Item>
                 )}
               </Stack>
