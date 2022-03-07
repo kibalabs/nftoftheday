@@ -8,17 +8,10 @@ from pydantic import BaseModel
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
-from notd.api.models_v1 import ApiUiData
 
-
-class RetrieveUiDataRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveUiDataResponse(BaseModel):
-    uiData: ApiUiData
 
 class  RetrieveHighestPriceTransferRequest(BaseModel):
     startDate: Optional[datetime.datetime]
@@ -53,7 +46,7 @@ class  RetrieveSponsoredTokenRequest(BaseModel):
     endDate: Optional[datetime.datetime]
 
 class RetrieveSponsoredTokenResponse(BaseModel):
-    token: ApiCollectionToken
+    sponsoredToken: ApiSponsoredToken
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass

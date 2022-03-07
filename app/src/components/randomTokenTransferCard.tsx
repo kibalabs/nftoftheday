@@ -12,8 +12,6 @@ export type RandomTokenTransferCardProps = {
 export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): React.ReactElement => {
   return (
     <NftCard
-      tokenId={props.tokenTransfer.tokenId}
-      collectionAddress={props.tokenTransfer.registryAddress}
       label='Random'
       subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
       primaryButtonText='View on OpenSea'
@@ -22,6 +20,8 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
       secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
       extraLabelVariants={['cardLabelRandom']}
       extraLabelBoxVariants={['cardLabelBoxRandom']}
+      token={props.tokenTransfer.token}
+      collection={props.tokenTransfer.collection}
     />
   );
 };
