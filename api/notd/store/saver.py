@@ -17,7 +17,7 @@ from notd.model import TokenMetadata
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
-from notd.store.schema import TokenOwnerTable
+from notd.store.schema import TokenOwnershipTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
@@ -239,17 +239,19 @@ class Saver(CoreSaver):
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_ownership(self, ownerAddress: str, registryAddress: str, tokenId: str, purchasedDate: datetime.datetime, purchasedValue: int, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
+    async def create_token_ownership(self, ownerAddress: str, registryAddress: str, tokenId: str, purchasedDate: datetime.datetime, purchasedValue: int, transferId: int, transactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
-            TokenOwnerTable.c.createdDate.key: createdDate,
-            TokenOwnerTable.c.updatedDate.key: updatedDate,
-            TokenOwnerTable.c.ownerAddress.key: ownerAddress,
-            TokenOwnerTable.c.registryAddress.key: registryAddress,
-            TokenOwnerTable.c.tokenId.key: tokenId,
-            TokenOwnerTable.c.purchasedDate.key: purchasedDate,
-            TokenOwnerTable.c.purchasedValue.key: purchasedValue,
+            TokenOwnershipTable.c.createdDate.key: createdDate,
+            TokenOwnershipTable.c.updatedDate.key: updatedDate,
+            TokenOwnershipTable.c.ownerAddress.key: ownerAddress,
+            TokenOwnershipTable.c.registryAddress.key: registryAddress,
+            TokenOwnershipTable.c.tokenId.key: tokenId,
+            TokenOwnershipTable.c.purchasedDate.key: purchasedDate,
+            TokenOwnershipTable.c.purchasedValue.key: purchasedValue,
+            TokenOwnershipTable.c.transferId.key: transferId,
+            TokenOwnershipTable.c.transactionHash.key: transactionHash,
         }
         query = TokenCollectionsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
@@ -263,4 +265,6 @@ class Saver(CoreSaver):
             tokenId=tokenId,
             purchasedDate=purchasedDate,
             purchasedValue=purchasedValue,
+            transferId=transferId,
+            transactionHash=transactionHash,
         )

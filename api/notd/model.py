@@ -147,6 +147,8 @@ class TokenOwnership:
     tokenId: str
     purchasedDate: datetime.datetime
     purchasedValue: int
+    transferId: int
+    transactionHash: str
 
 @dataclasses.dataclass
 class ProcessedBlock:
