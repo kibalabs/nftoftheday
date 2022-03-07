@@ -12,25 +12,18 @@ import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
 
-const COLLECTION = new Collection('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', '', '', '', '', '');
-const COLLECTIONTOKEN = new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []);
-const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 6, 8999999, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', new Date(), COLLECTIONTOKEN, COLLECTION);
-
-const COLLECTION_TOKENS = [
-  new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []),
-  new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []),
-  new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []),
-];
-
 export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
+
   const routeParams = useRouteParams();
   const navigator = useNavigator();
 
   const address = routeParams.address as string;
+  const ownerAddress = useAccountId();
 
   useInitialization((): void => {
     const checksumAddress = ethers.utils.getAddress(address);
@@ -81,7 +74,23 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollectionStatistics();
   }, [updateCollectionStatistics]);
 
-  const accountId = useAccountId();
+  const getCollectionHoldings = React.useCallback(async (): Promise<void> => {
+    setHoldings(undefined);
+    if (!ownerAddress) {
+      return;
+    }
+    notdClient.getCollectionHoldings(address, ownerAddress).then((tokenTransfers: CollectionToken[]): void => {
+      setHoldings(tokenTransfers);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setHoldings(null);
+    });
+  }, [notdClient, address, ownerAddress]);
+
+  React.useEffect((): void => {
+    getCollectionHoldings();
+  }, [getCollectionHoldings]);
+
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {
@@ -174,18 +183,20 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack>
                 </Stack>
               )}
-              { accountId ? (
+              { ownerAddress ? (
                 <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
-                  <Text variant='header3'>{`Your Holdings (${COLLECTION_TOKENS.length})`}</Text>
+                  <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
                   <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                    {COLLECTION_TOKENS.map((collectionToken: CollectionToken, index: number) : React.ReactElement => (
+                    {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
                       <TokenCard
                         key={index}
-                        collectionToken={collectionToken}
-                        subtitle={`Bought at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm')} for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0}`}
-                        target={`/collections/${collectionToken.registryAddress}/tokens/${collectionToken.tokenId}`}
+                        collectionToken={holding}
+                        // subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
+                        target={`/collections/${holding.registryAddress}/tokens/${holding.tokenId}`}
                       />
-                    ))}
+                    ))
+                      : <Text>No Holdings</Text>
+                    }
                   </Stack>
                 </Stack>
               ) : (
