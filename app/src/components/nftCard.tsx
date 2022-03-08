@@ -58,7 +58,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Text variant='header3-singleLine' alignment={TextAlignment.Center}>{truncateTitle(props.token.name)}</Text>
           <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
           <Spacing variant={PaddingSize.Wide} />
-          <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+          <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
             <Text>Part of</Text>
             <CollectionView
               collection={props.collection}
