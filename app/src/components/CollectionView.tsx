@@ -24,7 +24,7 @@ export const CollectionView = (props: CollectionViewProps): React.ReactElement =
         <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
           <Image source= {props.collection.imageUrl || defaultImage} alternativeText='Avatar' />
         </Box>
-        <Text>{props.collection.name}</Text>
+        <Text lineLimit={1}>{props.collection.name}</Text>
       </Stack>
     </LinkBase>
 

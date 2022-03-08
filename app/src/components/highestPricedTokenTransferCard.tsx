@@ -14,9 +14,8 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
     <NftCard
       label='Highest Priced'
       subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-      primaryButtonText='View on OpenSea'
-      primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfer.registryAddress}/${props.tokenTransfer.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
-      secondaryButtonText='View Tx'
+      primaryButtonText='View Token'
+      secondaryButtonText='View tx'
       secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
       token={props.tokenTransfer.token}
       collection={props.tokenTransfer.collection}
