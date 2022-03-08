@@ -140,7 +140,7 @@ export const CollectionPage = (): React.ReactElement => {
                 )}
                 {collection.twitterUsername && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text={'Twitter'} target={`https://instagram.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
+                    <Button variant='tertiary' text={'Twitter'} target={`https://twitter.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
                   </Stack.Item>
                 )}
                 {collection.openseaSlug && (
@@ -150,7 +150,7 @@ export const CollectionPage = (): React.ReactElement => {
                 )}
                 {collection.url && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text={'Website'} target={`https://opensea.io/collection/${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                    <Button variant='tertiary' text={'Website'} target={collection.url} iconLeft={<KibaIcon iconId='ion-globe' />} />
                   </Stack.Item>
                 )}
               </Stack>
