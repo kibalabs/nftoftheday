@@ -256,20 +256,20 @@ export class GetCollectionStatisticsResponse extends ResponseData {
 }
 
 export class GetTokenRecentSalesRequest extends RequestData {
+  readonly limit?: number;
   readonly offset?: number;
-  readonly limit: number;
 
 
-  constructor(limit: number, offset?: number) {
+  constructor(limit?: number, offset?: number) {
     super();
-    this.offset = offset || 0;
     this.limit = limit;
+    this.offset = offset;
   }
 
   public toObject = (): Record<string, unknown> => {
     return {
-      offset: this.offset,
       limit: this.limit,
+      offset: this.offset,
     };
   }
 }
