@@ -26,7 +26,7 @@ export const TokenPage = (): React.ReactElement => {
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
-  const [showLoadMore, setShowLoadMore] = React.useState<boolean>(true);
+  const [showLoadMore, setShowLoadMore] = React.useState<boolean>(false);
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
   const defaultImage = '/assets/icon.png';
@@ -74,7 +74,9 @@ export const TokenPage = (): React.ReactElement => {
     setTokenSales(undefined);
     notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales(tokenTransfers);
-      if (tokenTransfers.length < RECENT_SALES_PAGE_SIZE) {
+      if (tokenTransfers.length === RECENT_SALES_PAGE_SIZE) {
+        setShowLoadMore(true);
+      } else {
         setShowLoadMore(false);
       }
     }).catch((error: unknown): void => {
@@ -91,7 +93,9 @@ export const TokenPage = (): React.ReactElement => {
     const tokenSalesCount = tokenSales ? tokenSales.length : 0;
     notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
-      if (tokenTransfers.length < RECENT_SALES_PAGE_SIZE) {
+      if (tokenTransfers.length === RECENT_SALES_PAGE_SIZE) {
+        setShowLoadMore(true);
+      } else {
         setShowLoadMore(false);
       }
     }).catch((error: unknown): void => {
