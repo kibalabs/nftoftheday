@@ -25,7 +25,6 @@ from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_from_row
-from notd.store.schema_conversions import collection_graph_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 
@@ -190,5 +189,5 @@ class Retriever(CoreRetriever):
         query = query.where(BlocksTable.c.blockDate < endDate)
         query = query.group_by(sqlalchemyfunc.date(BlocksTable.c.blockDate),TokenTransfersTable.c.registryAddress)
         result = await self.database.execute(query=query, connection=connection)
-        collectionGraph = [CollectionActivity(date = row[3], tradedValue = row[2], tradedAmount = row[1],) (row) for row in result]
+        collectionGraph = [CollectionActivity(date = row[3], tradedValue = row[2], tradedAmount = row[1]) for row in result]
         return collectionGraph
