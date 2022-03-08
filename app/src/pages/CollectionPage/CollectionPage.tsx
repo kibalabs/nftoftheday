@@ -96,6 +96,7 @@ export const CollectionPage = (): React.ReactElement => {
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
       {collection === undefined ? (
