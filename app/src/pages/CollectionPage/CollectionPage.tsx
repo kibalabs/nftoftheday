@@ -144,12 +144,12 @@ export const CollectionPage = (): React.ReactElement => {
                 )}
                 {collection.openseaSlug && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
+                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
                   </Stack.Item>
                 )}
                 {collection.url && (
                   <Stack.Item baseSize='10em'>
-                    <Button variant='tertiary' text={'Website'} target={`${collection.url}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                    <Button variant='tertiary' text={'Website'} target={collection.url} iconLeft={<KibaIcon iconId='ion-globe' />} />
                   </Stack.Item>
                 )}
               </Stack>
