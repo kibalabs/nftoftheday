@@ -76,10 +76,3 @@ def collection_from_row(row: Mapping) -> Collection:
         doesSupportErc721=row[TokenCollectionsTable.c.doesSupportErc721],
         doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
     )
-
-def collection_graph_from_row(row: Mapping) -> CollectionActivity:
-    return CollectionActivity(
-        date = row[3],
-        tradedValue = row[2],
-        tradedAmount = row[1],
-    )

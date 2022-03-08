@@ -182,13 +182,13 @@ class Retriever(CoreRetriever):
         return list(boughtTokens)
 
     async def get_collection_activity(self, address: str, connection: Optional[DatabaseConnection] = None) -> List[CollectionActivity]:
-        startDate =  date_util.start_of_day(dt=datetime.datetime.now())
-        endDate =  date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=-90))
+        endDate =  date_util.start_of_day(dt=datetime.datetime.now())
+        startDate =  date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-90))
         query = select([TokenTransfersTable.c.registryAddress, sqlalchemyfunc.sum(TokenTransfersTable.c.amount), sqlalchemyfunc.sum(TokenTransfersTable.c.value), sqlalchemyfunc.date(BlocksTable.c.blockDate)]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         query = query.where(TokenTransfersTable.c.registryAddress == address)
-        query = query.where(BlocksTable.c.blockDate < startDate)
-        query = query.where(BlocksTable.c.blockDate >= endDate)
+        query = query.where(BlocksTable.c.blockDate >= startDate)
+        query = query.where(BlocksTable.c.blockDate < endDate)
         query = query.group_by(sqlalchemyfunc.date(BlocksTable.c.blockDate),TokenTransfersTable.c.registryAddress)
         result = await self.database.execute(query=query, connection=connection)
-        collectionGraph = [collection_graph_from_row(row) for row in result]
+        collectionGraph = [CollectionActivity(date = row[3], tradedValue = row[2], tradedAmount = row[1],) (row) for row in result]
         return collectionGraph
