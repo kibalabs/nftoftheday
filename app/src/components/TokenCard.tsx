@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { truncateStart } from '@kibalabs/core';
 import { Alignment, Box, Direction, Image, LinkBase, PaddingSize, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { CollectionToken } from '../client/resources';
@@ -34,7 +35,7 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
           </Box>
           <Box>
             <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide}>
-              <Text variant='bold' lineLimit={2} alignment={TextAlignment.Center}>{props.collectionToken.name}</Text>
+              <Text variant='bold' alignment={TextAlignment.Center}>{truncateStart(props.collectionToken.name, 15)}</Text>
               { props.subtitle && (
                 <Text variant='small' lineLimit={2} alignment={TextAlignment.Center}>{props.subtitle}</Text>
               )}
