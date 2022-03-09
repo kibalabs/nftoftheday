@@ -14,8 +14,7 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
     <NftCard
       label='Random'
       subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
-      primaryButtonText='View on OpenSea'
-      primaryButtonTarget={`https://opensea.io/assets/${props.tokenTransfer.registryAddress}/${props.tokenTransfer.tokenId}?ref=0x18090cda49b21deaffc21b4f886aed3eb787d032`}
+      primaryButtonText='View Token'
       secondaryButtonText='View Tx'
       secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
       extraLabelVariants={['cardLabelRandom']}

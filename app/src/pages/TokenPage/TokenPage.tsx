@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { dateToString } from '@kibalabs/core';
+import { dateToString, isToday } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
@@ -12,11 +12,23 @@ import { MetricView } from '../../components/MetricView';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
+const TOKEN_DATE = new Date('2022-03-08T03:23:35');
 const COLLECTION = new Collection('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', '', '', '', '', '');
 const COLLECTIONTOKEN = new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []);
-const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 6, 8999999, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', new Date(), COLLECTIONTOKEN, COLLECTION);
+const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 650000000000000000000, 6500000, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', TOKEN_DATE, COLLECTIONTOKEN, COLLECTION);
 const owner = '0x48e41913F2099300900cfcbB139F121429D38F5d';
 const RECENT_SALES_PAGE_SIZE = 10;
+const tokenDate = TOKEN_TRANSFER.blockDate;
+
+const getTokenDateString = (): string => {
+  if (tokenDate !== null) {
+    if (isToday(tokenDate)) {
+      return dateToString(tokenDate, 'HH:mm');
+    }
+    return dateToString(tokenDate, 'dd-MMM-yyyy');
+  }
+  return '';
+};
 
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
@@ -114,7 +126,7 @@ export const TokenPage = (): React.ReactElement => {
                   <Text>Owned By</Text>
                   <Account accountId={owner} />
                 </Stack>
-                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm:yyyy')}`}</Text>
+                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} on ${getTokenDateString()}`}</Text>
                 <Spacing variant={PaddingSize.Wide} />
                 {collection === undefined ? (
                   <LoadingSpinner />
@@ -123,12 +135,15 @@ export const TokenPage = (): React.ReactElement => {
                 ) : (
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                     <Text>Part of</Text>
-                    <CollectionView collection={collection} />
+                    <CollectionView
+                      collection={collection}
+                      target={`/collections/${collection.address}`}
+                    />
                   </Stack>
                 )}
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-                  <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                  <Button variant='tertiary' text={'Lookrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
+                  <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                  <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
                 </Stack>
               </Stack>
             </ResponsiveHidingView>
@@ -139,7 +154,7 @@ export const TokenPage = (): React.ReactElement => {
                   <Text>Owned By</Text>
                   <Account accountId={owner} />
                 </Stack>
-                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} at ${dateToString(TOKEN_TRANSFER.blockDate, 'HH:mm:yyyy')}`}</Text>
+                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} on ${getTokenDateString()}`}</Text>
                 {collection === undefined ? (
                   <LoadingSpinner />
                 ) : collection === null ? (
@@ -147,12 +162,15 @@ export const TokenPage = (): React.ReactElement => {
                 ) : (
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                     <Text>Part of</Text>
-                    <CollectionView collection={collection} />
+                    <CollectionView
+                      collection={collection}
+                      target={`/collections/${collection.address}`}
+                    />
                   </Stack>
                 )}
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
                   <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                  <Button variant='tertiary' text={'Lookrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
+                  <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
                 </Stack>
               </Stack>
             </ResponsiveHidingView>

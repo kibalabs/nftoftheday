@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, MarkdownText, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { Collection, CollectionToken } from '../client/resources';
 import { truncateTitle } from '../titleUtil';
+import { CollectionView } from './CollectionView';
 
 export interface NftCardProps {
   token: CollectionToken;
@@ -12,7 +13,6 @@ export interface NftCardProps {
   subtitle: string;
   secondaryButtonTarget?: string;
   secondaryButtonText?: string
-  primaryButtonTarget?: string;
   primaryButtonText?: string;
   extraLabelVariants?: string[];
   extraLabelBoxVariants?: string[];
@@ -29,7 +29,6 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
   if (collectionImageUrl && collectionImageUrl.startsWith('ipfs://')) {
     collectionImageUrl = collectionImageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
-  const collectionUrl = props.collection.url ?? (props.collection.openseaSlug ? `https://opensea.io/collections/${props.collection.openseaSlug}` : null);
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
 
@@ -59,22 +58,13 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
           <Text variant='header3-singleLine' alignment={TextAlignment.Center}>{truncateTitle(props.token.name)}</Text>
           <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
           <Spacing variant={PaddingSize.Wide} />
-          {props.collection.name && (
-            <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-              {collectionImageUrl && (
-                <Box width='25px' height='25px'>
-                  <Image source={collectionImageUrl} alternativeText='' fitType='contain' />
-                </Box>
-              )}
-              <Stack.Item growthFactor={1} shrinkFactor={1}>
-                {collectionUrl ? (
-                  <MarkdownText textVariant='small' source={`Part of [${props.collection.name}](${collectionUrl})`} />
-                ) : (
-                  <Text variant='small'>{`Part of ${props.collection.name}`}</Text>
-                )}
-              </Stack.Item>
-            </Stack>
-          )}
+          <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+            <Text>Part of</Text>
+            <CollectionView
+              collection={props.collection}
+              target={`/collections/${props.collection.address}`}
+            />
+          </Stack>
           <Spacing variant={PaddingSize.Wide2} />
           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
             {props.secondaryButtonText && props.secondaryButtonTarget && (
@@ -82,9 +72,12 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
                 <Button variant='secondary' text={props.secondaryButtonText} target={props.secondaryButtonTarget} />
               </Stack.Item>
             )}
-            {props.primaryButtonText && props.primaryButtonTarget && (
+            {props.primaryButtonText && (
               <Stack.Item growthFactor={1} shrinkFactor={1}>
-                <Button variant='primary' text={props.primaryButtonText} target={props.primaryButtonTarget} />
+                <Button
+                  variant='primary' text={props.primaryButtonText}
+                  target={`/collections/${props.token.registryAddress}/tokens/${props.token.tokenId}`}
+                />
               </Stack.Item>
             )}
           </Stack>
