@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { truncateStart } from '@kibalabs/core';
 import { Alignment, Box, Direction, Image, LinkBase, Stack, Text } from '@kibalabs/ui-react';
 
 import { Collection } from '../client/resources';
@@ -24,7 +25,9 @@ export const CollectionView = (props: CollectionViewProps): React.ReactElement =
         <Box variant='rounded-borderColored' shouldClipContent={true} height='20px' width='20px'>
           <Image source= {props.collection.imageUrl || defaultImage} alternativeText='Avatar' />
         </Box>
-        <Text lineLimit={1}>{props.collection.name}</Text>
+        {props.collection.name && (
+          <Text lineLimit={1}>{truncateStart(props.collection.name, 25)}</Text>
+        )}
       </Stack>
     </LinkBase>
 

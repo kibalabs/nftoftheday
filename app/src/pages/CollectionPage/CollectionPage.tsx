@@ -21,9 +21,13 @@ export const CollectionPage = (): React.ReactElement => {
 
   const routeParams = useRouteParams();
   const navigator = useNavigator();
-
+  const defaultBanner = '/assets/black_banner.png';
+  const defaultImage = '/assets/icon.png';
   const address = routeParams.address as string;
   const ownerAddress = useAccountId();
+  const bannerImageUrl = collection?.bannerImageUrl || defaultBanner;
+  const imageUrl = collection?.imageUrl || defaultImage;
+
 
   useInitialization((): void => {
     const checksumAddress = ethers.utils.getAddress(address);
@@ -108,16 +112,16 @@ export const CollectionPage = (): React.ReactElement => {
           <Box height='300px'>
             <LayerContainer>
               <LayerContainer.Layer isFullHeight={false} alignmentVertical={Alignment.Start}>
-                {collection.bannerImageUrl && (
+                {bannerImageUrl && (
                   <Box height='230px' isFullWidth={true}>
-                    <Image source={collection.bannerImageUrl} alternativeText='image' isFullWidth={true} fitType='cover' isFullHeight={true} />
+                    <Image source={bannerImageUrl} alternativeText='image' isFullWidth={true} fitType='cover' isFullHeight={true} />
                   </Box>
                 )}
               </LayerContainer.Layer>
               <LayerContainer.Layer isFullHeight={false} isFullWidth={false} alignmentVertical={Alignment.End} alignmentHorizontal={Alignment.Center}>
-                {collection.imageUrl && (
+                {imageUrl && (
                   <Box variant='rounded-wideBorder' shouldClipContent={true} width='130px' height='130px'>
-                    <Image source={collection.imageUrl} alternativeText='image' fitType='contain' />
+                    <Image source={imageUrl} alternativeText='image' fitType='contain' />
                   </Box>
                 )}
               </LayerContainer.Layer>
