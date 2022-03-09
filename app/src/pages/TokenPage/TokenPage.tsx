@@ -17,6 +17,7 @@ const COLLECTION = new Collection('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', 
 const COLLECTIONTOKEN = new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []);
 const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 650000000000000000000, 6500000, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', TOKEN_DATE, COLLECTIONTOKEN, COLLECTION);
 const owner = '0x48e41913F2099300900cfcbB139F121429D38F5d';
+const RECENT_SALES_PAGE_SIZE = 10;
 const tokenDate = TOKEN_TRANSFER.blockDate;
 
 const getTokenDateString = (): string => {
@@ -37,7 +38,7 @@ export const TokenPage = (): React.ReactElement => {
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
-
+  const [showLoadMore, setShowLoadMore] = React.useState<boolean>(false);
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
   const defaultImage = '/assets/icon.png';
@@ -83,8 +84,9 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenSales(undefined);
-    notdClient.getTokenRecentSales(registryAddress, tokenId).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales(tokenTransfers);
+      setShowLoadMore(tokenTransfers.length === RECENT_SALES_PAGE_SIZE);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenSales(null);
@@ -97,8 +99,9 @@ export const TokenPage = (): React.ReactElement => {
 
   const onLoadMoreClicked = (): void => {
     const tokenSalesCount = tokenSales ? tokenSales.length : 0;
-    notdClient.getTokenRecentSales(registryAddress, tokenId, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
+      setShowLoadMore(tokenTransfers.length === RECENT_SALES_PAGE_SIZE);
     }).catch((error: unknown): void => {
       console.error(error);
     });
@@ -185,7 +188,9 @@ export const TokenPage = (): React.ReactElement => {
                 key={index}
               />
             ))}
-            <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
+            { showLoadMore && (
+              <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
+            )}
           </Stack>
         </ContainingView>
       )}
