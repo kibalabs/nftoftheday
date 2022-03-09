@@ -115,7 +115,7 @@ export const TokenPage = (): React.ReactElement => {
         <Text variant='error'>Collection Token failed to load</Text>
       ) : (
         <ContainingView>
-          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide2}>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} padding={PaddingSize.Wide2}>
             <Box height='20rem' width='20rem' shouldClipContent={true}>
               <Media source={imageUrl} alternativeText='image' fitType='contain' />
             </Box>
@@ -183,14 +183,15 @@ export const TokenPage = (): React.ReactElement => {
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
             <Text variant='header3'>Sales history</Text>
             <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-              {tokenSales && tokenSales.length !== 0 ? tokenSales.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
-                <TokenSaleRow
-                  tokenTransfer={tokenTransfer}
-                  key={index}
-                />
-              ))
-                : <Text>No recent sales</Text>
-              }
+              {tokenSales && tokenSales.length !== 0 ? (
+                tokenSales.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
+                  <TokenSaleRow
+                    tokenTransfer={tokenTransfer}
+                    key={index}
+                  />
+                ))) : (
+                <Text>No recent sales</Text>
+              )}
             </Stack>
             { showLoadMore && (
               <Button variant='small' text={'load more'} onClicked={onLoadMoreClicked} />
