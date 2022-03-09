@@ -3,15 +3,21 @@ import logging
 import os
 import sys
 
-import asyncclick as click
 import sqlalchemy
+import asyncclick as click
 from core.queues.sqs_message_queue import SqsMessageQueue
+from core.aws_requester import AwsRequester
+from core.requester import Requester
+from core.s3_manager import S3Manager
 from core.store.database import Database
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.messages import UpdateCollectionMessageContent
-from notd.messages import UpdateTokenMetadataMessageContent
-from notd.store.schema import TokenMetadataTable
+from notd.collection_processor import CollectionProcessor
+from notd.store.retriever import Retriever
+from notd.store.saver import Saver
+from notd.token_manager import TokenManager
+from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
@@ -23,10 +29,22 @@ from notd.store.schema_conversions import token_transfer_from_row
 async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
+    saver = Saver(database=database)
+    retriever = Retriever(database=database)
+    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
+    tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
+    awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    requester = Requester()
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    openseaApiKey = os.environ['OPENSEA_API_KEY']
+    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
 
     await database.connect()
     await workQueue.connect()
+    await tokenQueue.connect()
     cache = set()
     registryCache = set()
     currentBlockNumber = startBlockNumber
@@ -34,26 +52,29 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
         start = currentBlockNumber
         end = min(currentBlockNumber + batchSize, endBlockNumber)
         logging.info(f'Working on {start} to {end}...')
-        async with database.transaction():
-            query = TokenTransfersTable.select()
-            query = query.where(TokenTransfersTable.c.blockNumber >= start)
-            query = query.where(TokenTransfersTable.c.blockNumber < end)
-            query = query.where(sqlalchemy.tuple_(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId).not_in(
-                TokenMetadataTable.select()
-                    .with_only_columns([TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId])
-                    .group_by(TokenMetadataTable.c.registryAddress,TokenMetadataTable.c.tokenId)
-            ))
-            tokenTransfersToChange = [token_transfer_from_row(row) async for row in database.iterate(query=query)]
-            for tokenTransfer in tokenTransfersToChange:
-                if (tokenTransfer.registryAddress, tokenTransfer.tokenId) in cache:
-                    continue
-                cache.add((tokenTransfer.registryAddress, tokenTransfer.tokenId))
-                await workQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId).to_message())
-                if tokenTransfer.registryAddress in registryCache:
-                    continue
-                registryCache.add(tokenTransfer.registryAddress)
-                await workQueue.send_message(message=UpdateCollectionMessageContent(address=tokenTransfer.registryAddress).to_message())
-        currentBlockNumber = currentBlockNumber + batchSize
+        query = (
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .where(TokenTransfersTable.c.blockNumber >= start)
+            .where(TokenTransfersTable.c.blockNumber < end)
+        )
+        result = await database.execute(query=query,)
+        tokensToProcess = set()
+        collectionsToProcess = set()
+        for (registryAddress, tokenId) in result:
+            if (registryAddress, tokenId) in cache:
+                continue
+            cache.add((registryAddress, tokenId))
+            tokensToProcess.add((registryAddress, tokenId))
+            if registryAddress in registryCache:
+                continue
+            registryCache.add(registryAddress)
+            collectionsToProcess.add(registryAddress)
+        print('len(tokensToProcess)', len(tokensToProcess))
+        print('len(collectionsToProcess)', len(collectionsToProcess))
+        await tokenManager.update_token_metadatas_deferred(collectionTokenIds=list(tokensToProcess))
+        await tokenManager.update_collections_deferred(addresses=list(collectionsToProcess))
+        currentBlockNumber = end
+        return
     await database.disconnect()
     await workQueue.disconnect()
 

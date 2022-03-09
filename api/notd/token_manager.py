@@ -27,8 +27,8 @@ from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
-_TOKEN_UPDATE_MIN_DAYS = 10
-_COLLECTION_UPDATE_MIN_DAYS = 30
+_TOKEN_UPDATE_MIN_DAYS = 100
+_COLLECTION_UPDATE_MIN_DAYS = 300
 
 
 class TokenManager:
@@ -81,6 +81,7 @@ class TokenManager:
             recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
             logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
             collectionTokenIds = set(collectionTokenIds) - recentlyUpdatedTokenIds
+        print('len(collectionTokenIds)', len(collectionTokenIds))
         messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
 
@@ -142,6 +143,7 @@ class TokenManager:
             recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
             logging.info(f'Skipping {len(recentlyUpdatedAddresses)} collections because they have been updated recently.')
             addresses = set(addresses) - recentlyUpdatedAddresses
+        print('len(addresses)', len(addresses))
         messages = [UpdateCollectionMessageContent(address=address).to_message() for address in addresses]
         await self.tokenQueue.send_messages(messages=messages)
 
