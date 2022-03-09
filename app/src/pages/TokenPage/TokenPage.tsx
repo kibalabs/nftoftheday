@@ -24,7 +24,7 @@ const getTokenDateString = (): string => {
     if (isToday(tokenDate)) {
       return dateToString(tokenDate, 'HH:mm');
     }
-    return dateToString(tokenDate, 'dd MMMM yyyy');
+    return dateToString(tokenDate, 'dd-MMM-yyyy');
   }
   return '';
 };
