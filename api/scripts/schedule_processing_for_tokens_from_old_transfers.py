@@ -21,6 +21,19 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
+async def _add_messages(pair: tuple, tokensToProcess: set, collectionsToProcess: set, tokenManager: TokenManager, cache: set, registryCache: set):
+    if pair in cache:
+        pass
+    cache.add(pair)
+    tokensToProcess.add(pair)
+    if pair[0] in registryCache:
+        pass
+    registryCache.add(pair[0])
+    collectionsToProcess.add(pair[0])
+    print('len(tokensToProcess)', len(tokensToProcess))
+    print('len(collectionsToProcess)', len(collectionsToProcess))
+    await tokenManager.update_token_metadata(registryAddress=pair[0], tokenId=pair[1])
+    await tokenManager.update_collections_deferred(addresses=list(collectionsToProcess))
 
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
@@ -60,23 +73,12 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
         result = await database.execute(query=query,)
         tokensToProcess = set()
         collectionsToProcess = set()
-        for (registryAddress, tokenId) in result:
-            if (registryAddress, tokenId) in cache:
-                continue
-            cache.add((registryAddress, tokenId))
-            tokensToProcess.add((registryAddress, tokenId))
-            if registryAddress in registryCache:
-                continue
-            registryCache.add(registryAddress)
-            collectionsToProcess.add(registryAddress)
-        print('len(tokensToProcess)', len(tokensToProcess))
-        print('len(collectionsToProcess)', len(collectionsToProcess))
-        await tokenManager.update_token_metadatas_deferred(collectionTokenIds=list(tokensToProcess))
-        await tokenManager.update_collections_deferred(addresses=list(collectionsToProcess))
+        await asyncio.gather(*[_add_messages(pair=(registryAddress, tokenId),tokenManager=tokenManager, tokensToProcess=tokensToProcess, collectionsToProcess=collectionsToProcess ,cache=cache, registryCache=registryCache) for (registryAddress,tokenId) in result])
         currentBlockNumber = end
-        return
+        
     await database.disconnect()
     await workQueue.disconnect()
+    await tokenQueue.disconnect()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
