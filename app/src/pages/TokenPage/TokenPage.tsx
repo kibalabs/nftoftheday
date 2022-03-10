@@ -189,7 +189,8 @@ export const TokenPage = (): React.ReactElement => {
                     tokenTransfer={tokenTransfer}
                     key={index}
                   />
-                ))) : (
+                ))
+              ) : (
                 <Text>No recent sales</Text>
               )}
             </Stack>
