@@ -21,19 +21,12 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 
-async def _add_messages(pair: tuple, tokensToProcess: set, collectionsToProcess: set, tokenManager: TokenManager, cache: set, registryCache: set):
-    if pair in cache:
-        pass
-    cache.add(pair)
-    tokensToProcess.add(pair)
-    if pair[0] in registryCache:
-        pass
-    registryCache.add(pair[0])
-    collectionsToProcess.add(pair[0])
-    print('len(tokensToProcess)', len(tokensToProcess))
-    print('len(collectionsToProcess)', len(collectionsToProcess))
-    await tokenManager.update_token_metadata(registryAddress=pair[0], tokenId=pair[1])
-    await tokenManager.update_collections_deferred(addresses=list(collectionsToProcess))
+async def _update_token_metadata(registryAddress: str, tokenId: str, tokenManager: TokenManager):
+    await tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+
+async def _update_collection(address: str,  tokenManager: TokenManager):
+    await tokenManager.update_collection(address=address)
+
 
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
@@ -57,6 +50,7 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
 
     await database.connect()
     await workQueue.connect()
+    await s3manager.connect()
     await tokenQueue.connect()
     cache = set()
     registryCache = set()
@@ -66,19 +60,33 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
         end = min(currentBlockNumber + batchSize, endBlockNumber)
         logging.info(f'Working on {start} to {end}...')
         query = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .where(TokenTransfersTable.c.blockNumber >= start)
-            .where(TokenTransfersTable.c.blockNumber < end)
-        )
+             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+             .where(TokenTransfersTable.c.blockNumber >= start)
+             .where(TokenTransfersTable.c.blockNumber < end)
+         )
         result = await database.execute(query=query,)
         tokensToProcess = set()
         collectionsToProcess = set()
-        await asyncio.gather(*[_add_messages(pair=(registryAddress, tokenId),tokenManager=tokenManager, tokensToProcess=tokensToProcess, collectionsToProcess=collectionsToProcess ,cache=cache, registryCache=registryCache) for (registryAddress,tokenId) in result])
+        for (registryAddress, tokenId) in result:
+            if (registryAddress, tokenId) in cache:
+                continue
+            cache.add((registryAddress, tokenId))
+            tokensToProcess.add((registryAddress, tokenId))
+            if registryAddress in registryCache:
+                continue
+            registryCache.add(registryAddress)
+            collectionsToProcess.add(registryAddress)
+        print('len(tokensToProcess)', len(tokensToProcess))
+        print('len(collectionsToProcess)', len(collectionsToProcess))
+        await asyncio.gather(*[_update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, tokenManager=tokenManager) for registryAddress,tokenId in tokensToProcess])
+        await asyncio.gather(*[_update_collection(address=address, tokenManager=tokenManager)for address in list(collectionsToProcess)])
         currentBlockNumber = end
+        return
         
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
+    await s3manager.disconnect()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
