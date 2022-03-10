@@ -5,7 +5,7 @@ import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 
-import { useAccountId, useOnLinkAccountsClicked } from '../../AccountContext';
+import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
@@ -18,16 +18,14 @@ export const CollectionPage = (): React.ReactElement => {
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
-
   const routeParams = useRouteParams();
   const navigator = useNavigator();
-  const defaultBanner = '/assets/black_banner.png';
-  const defaultImage = '/assets/icon.png';
-  const address = routeParams.address as string;
-  const ownerAddress = useAccountId();
-  const bannerImageUrl = collection?.bannerImageUrl || defaultBanner;
-  const imageUrl = collection?.imageUrl || defaultImage;
+  const account = useAccount();
+  const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
+  const address = routeParams.address as string;
+  const bannerImageUrl = collection?.bannerImageUrl || '/assets/black_banner.png';
+  const imageUrl = collection?.imageUrl || '/assets/icon.png';
 
   useInitialization((): void => {
     const checksumAddress = ethers.utils.getAddress(address);
@@ -80,22 +78,20 @@ export const CollectionPage = (): React.ReactElement => {
 
   const getCollectionHoldings = React.useCallback(async (): Promise<void> => {
     setHoldings(undefined);
-    if (!ownerAddress) {
+    if (!account) {
       return;
     }
-    notdClient.getCollectionHoldings(address, ownerAddress).then((tokenTransfers: CollectionToken[]): void => {
+    notdClient.getCollectionHoldings(address, account.address).then((tokenTransfers: CollectionToken[]): void => {
       setHoldings(tokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
       setHoldings(null);
     });
-  }, [notdClient, address, ownerAddress]);
+  }, [notdClient, address, account]);
 
   React.useEffect((): void => {
     getCollectionHoldings();
   }, [getCollectionHoldings]);
-
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
@@ -187,7 +183,7 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack>
                 </Stack>
               )}
-              { ownerAddress ? (
+              { account ? (
                 <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
                   <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
                   <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>

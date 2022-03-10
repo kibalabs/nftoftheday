@@ -54,7 +54,7 @@ export class TokenTransfer {
       CollectionToken.fromObject(obj.token as Record<string, unknown>),
       Collection.fromObject(obj.collection as Record<string, unknown>),
     );
-  }
+  };
 }
 
 export class TradedToken {
@@ -77,7 +77,7 @@ export class TradedToken {
       TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>),
       Number(obj.transferCount),
     );
-  }
+  };
 }
 
 export class SponsoredToken {
@@ -100,7 +100,7 @@ export class SponsoredToken {
       dateFromString(obj.date as string),
       obj.latestTransfer ? TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>) : null,
     );
-  }
+  };
 }
 
 export class TokenAttribute {
@@ -117,7 +117,7 @@ export class TokenAttribute {
       String(obj.trait_type),
       String(obj.value),
     );
-  }
+  };
 }
 
 export class CollectionToken {
@@ -146,7 +146,7 @@ export class CollectionToken {
       obj.description ? String(obj.description) : null,
       (obj.attributes as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenAttribute.fromObject(innerObj)),
     );
-  }
+  };
 }
 
 export class Collection {
@@ -187,7 +187,7 @@ export class Collection {
       obj.instagramUsername ? String(obj.instagramUsername) : null,
       obj.twitterUsername ? String(obj.twitterUsername) : null,
     );
-  }
+  };
 }
 
 export class CollectionStatistics {
@@ -216,5 +216,5 @@ export class CollectionStatistics {
       obj.highestSaleLast24Hours ? BigNumber.from(String(obj.highestSaleLast24Hours)) : null,
       obj.tradeVolume24Hours ? BigNumber.from(String(obj.tradeVolume24Hours)) : null,
     );
-  }
+  };
 }
