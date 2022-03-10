@@ -75,7 +75,12 @@ class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
     blockDate: datetime.datetime
 
-# TODO(krishan711): everything below this line should be removed!
+
+@dataclasses.dataclass
+class TradedToken:
+    latestTransfer: TokenTransfer
+    transferCount: int
+
 
 @dataclasses.dataclass
 class Token:
@@ -94,23 +99,7 @@ class Token:
 
 
 @dataclasses.dataclass
-class TradedToken:
-    collectionToken: Token
-    latestTransfer: TokenTransfer
-    transferCount: int
-
-
-@dataclasses.dataclass
-class UiData:
-    highestPricedTokenTransfer: TokenTransfer
-    mostTradedTokenTransfers: List[TokenTransfer]
-    randomTokenTransfer: TokenTransfer
-    sponsoredToken: Token
-    transactionCount: int
-
-
-@dataclasses.dataclass
-class SponsoredToken:
+class BaseSponsoredToken:
     date: datetime.datetime
     token: Token
 
@@ -126,6 +115,11 @@ class SponsoredToken:
             date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
             token=Token.from_dict(sponsoredTokenDict.get('token'))
         )
+
+
+@dataclasses.dataclass
+class SponsoredToken(BaseSponsoredToken):
+    latestTransfer: Optional[TokenTransfer]
 
 
 @dataclasses.dataclass

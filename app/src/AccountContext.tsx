@@ -64,7 +64,7 @@ export const AccountControlProvider = (props: IAccountControlProviderProps): Rea
 
   const onLinkAccountsClicked = async (): Promise<void> => {
     if (!web3) {
-      return
+      return;
     }
     // @ts-expect-error
     web3.provider.request({ method: 'eth_requestAccounts', params: [] }).then(async (): Promise<void> => {

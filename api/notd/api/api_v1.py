@@ -19,8 +19,6 @@ from notd.api.endpoints_v1 import RetrieveRandomTransferResponse
 from notd.api.endpoints_v1 import RetrieveSponsoredTokenResponse
 from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
-from notd.api.endpoints_v1 import RetrieveUiDataRequest
-from notd.api.endpoints_v1 import RetrieveUiDataResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import datetime
@@ -31,13 +29,6 @@ from notd.manager import NotdManager
 def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> KibaRouter:
     router = KibaRouter()
 
-    @router.post('/retrieve-ui-data', response_model=RetrieveUiDataResponse)
-    async def retrieve_ui_data(request: RetrieveUiDataRequest):
-        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
-        endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
-        uiData = await notdManager.retrieve_ui_data(startDate=startDate, endDate=endDate)
-        return RetrieveUiDataResponse(uiData=(await responseBuilder.retrieve_ui_data(uiData=uiData)))
-
     @router.post('/retrieve-highest-price-transfer', response_model=RetrieveHighestPriceTransferResponse)
     async def retrieve_highest_price_transfer(request: RetrieveHighestPriceTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
         startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
@@ -45,12 +36,12 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         transfer = await notdManager.retrieve_highest_priced_transfer(startDate=startDate, endDate=endDate)
         return RetrieveHighestPriceTransferResponse(transfer=(await responseBuilder.token_transfer_from_model(tokenTransfer=transfer)))
 
-    @router.post('/retrieve-most-traded-token-transfers', response_model=RetrieveMostTradedResponse)
+    @router.post('/retrieve-most-traded-token', response_model=RetrieveMostTradedResponse)
     async def retrieve_most_traded_token_transfer(request: RetrieveMostTradedRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
         startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         mostTradedToken = await notdManager.retrieve_most_traded_token_transfer(startDate=startDate, endDate=endDate)
-        return RetrieveMostTradedResponse(tradedToken=(await responseBuilder.retrieve_most_traded_token_transfer(tradedToken=mostTradedToken)))
+        return RetrieveMostTradedResponse(tradedToken=(await responseBuilder.traded_token_from_model(tradedToken=mostTradedToken)))
 
     @router.post('/retrieve-random-token-transfer', response_model=RetrieveRandomTransferResponse)
     async def retrieve_random_transfer(request: RetrieveRandomTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
@@ -61,8 +52,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
 
     @router.post('/retrieve-sponsored-token', response_model=RetrieveSponsoredTokenResponse)
     async def get_sponsored_token():
-        sponsoredToken = notdManager.get_sponsored_token()
-        return RetrieveSponsoredTokenResponse(token=(await responseBuilder.collection_token_from_registry_address_token_id(registryAddress=sponsoredToken.registryAddress, tokenId=sponsoredToken.tokenId)))
+        sponsoredToken = await notdManager.get_sponsored_token()
+        return RetrieveSponsoredTokenResponse(sponsoredToken=(await responseBuilder.sponsored_token_from_model(sponsoredToken=sponsoredToken)))
 
     @router.post('/retrieve-transfer-count', response_model=RetrieveTransactionCountResponse)
     async def get_transfer_count(request: RetrieveTransactionCountRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
