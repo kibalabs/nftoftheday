@@ -27,16 +27,16 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 
 
 async def _update_token_metadatas(tokensToProcess: Sequence[tuple], tokenManager: TokenManager, retriever: Retriever):
-    for tokensToProcessChunk in list_util.generate_chunks(lst=list(tokensToProcess), chunkSize=50):
-        query = (
-            TokenMetadataTable.select()
-                .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(tokensToProcessChunk))
-        )
-        recentlyUpdatedTokenMetadatas = await retriever.query_token_metadatas(query=query)
-        recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
-        tokensToUpdate = set(tokensToProcessChunk) - recentlyUpdatedTokenIds
-        print('len(tokensToUpdate)', len(tokensToUpdate))
-        tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToUpdate], return_exceptions=True)
+    query = (
+        TokenMetadataTable.select()
+            .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(tokensToProcess))
+    )
+    recentlyUpdatedTokenMetadatas = await retriever.query_token_metadatas(query=query)
+    recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
+    tokensToUpdate = set(tokensToProcess) - recentlyUpdatedTokenIds
+    print('len(tokensToUpdate)', len(tokensToUpdate))
+    for tokensToUpdateChunk in list_util.generate_chunks(lst=list(tokensToUpdate), chunkSize=50):
+        tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToUpdateChunk], return_exceptions=True)
         tokenProcessSuccessCount = tokenProcessResults.count(None)
         if tokenProcessSuccessCount:
             print(f'{tokenProcessSuccessCount} / {len(tokenProcessResults)} token updates succeeded')
@@ -46,15 +46,16 @@ async def _update_token_metadatas(tokensToProcess: Sequence[tuple], tokenManager
 
 
 async def _update_collections(collectionsToProcess: Sequence[str], tokenManager: TokenManager, retriever: Retriever):
-    for collectionsToProcessChunk in list_util.generate_chunks(lst=list(collectionsToProcess), chunkSize=50):
-        recentlyUpdatedCollections = await retriever.list_collections(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=collectionsToProcessChunk),
-            ],
-        )
-        recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
-        collectionsToUpdate = set(collectionsToProcessChunk) - recentlyUpdatedAddresses
-        collectionProcessResults = await asyncio.gather(*[tokenManager.update_collection(address=address) for address in collectionsToUpdate], return_exceptions=True)
+    recentlyUpdatedCollections = await retriever.list_collections(
+        fieldFilters=[
+            StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=collectionsToProcess),
+        ],
+    )
+    recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
+    collectionsToUpdate = set(collectionsToProcess) - recentlyUpdatedAddresses
+    print('len(collectionsToUpdate)', len(collectionsToUpdate))
+    for collectionsToUpdateChunk in list_util.generate_chunks(lst=list(collectionsToUpdate), chunkSize=50):
+        collectionProcessResults = await asyncio.gather(*[tokenManager.update_collection(address=address) for address in collectionsToUpdateChunk], return_exceptions=True)
         collectionProcessSuccessCount = collectionProcessResults.count(None)
         if collectionProcessSuccessCount:
             print(f'{collectionProcessSuccessCount} / {len(collectionProcessResults)} collection updates succeeded')
@@ -93,7 +94,7 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
     while currentBlockNumber < endBlockNumber:
         start = currentBlockNumber
         end = min(currentBlockNumber + batchSize, endBlockNumber)
-        logging.info(f'Working on {start} to {end}...')
+        logging.info(f'Working on {start}-{end}...')
         query = (
              sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
              .where(TokenTransfersTable.c.blockNumber >= start)
@@ -113,8 +114,12 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
             collectionsToProcess.add(registryAddress)
         print('len(tokensToProcess)', len(tokensToProcess))
         print('len(collectionsToProcess)', len(collectionsToProcess))
-        await _update_token_metadatas(tokensToProcess=tokensToProcess, tokenManager=tokenManager, retriever=retriever)
-        await _update_collections(collectionsToProcess=collectionsToProcess, tokenManager=tokenManager, retriever=retriever)
+        try:
+            await _update_token_metadatas(tokensToProcess=tokensToProcess, tokenManager=tokenManager, retriever=retriever)
+            await _update_collections(collectionsToProcess=collectionsToProcess, tokenManager=tokenManager, retriever=retriever)
+        except:
+            logging.error(f'Failed during: {start}-{end}')
+            raise
         currentBlockNumber = end
     await database.disconnect()
     await workQueue.disconnect()
