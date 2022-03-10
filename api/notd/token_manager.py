@@ -27,8 +27,8 @@ from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
 
-_TOKEN_UPDATE_MIN_DAYS = 100
-_COLLECTION_UPDATE_MIN_DAYS = 300
+_TOKEN_UPDATE_MIN_DAYS = 10
+_COLLECTION_UPDATE_MIN_DAYS = 30
 
 
 class TokenManager:
@@ -79,7 +79,7 @@ class TokenManager:
             )
             recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
             recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
-            # logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
+            logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
             collectionTokenIds = set(collectionTokenIds) - recentlyUpdatedTokenIds
         messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
@@ -94,7 +94,7 @@ class TokenManager:
                 ],
             )
             if len(recentlyUpdatedTokens) > 0:
-                # logging.info('Skipping token because it has been updated recently.')
+                logging.info('Skipping token because it has been updated recently.')
                 return
         await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
@@ -108,7 +108,7 @@ class TokenManager:
                 ],
             )
             if len(recentlyUpdatedTokens) > 0:
-                # logging.info('Skipping token because it has been updated recently.')
+                logging.info('Skipping token because it has been updated recently.')
                 return
         collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
         try:
@@ -140,7 +140,7 @@ class TokenManager:
                 ],
             )
             recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
-            # logging.info(f'Skipping {len(recentlyUpdatedAddresses)} collections because they have been updated recently.')
+            logging.info(f'Skipping {len(recentlyUpdatedAddresses)} collections because they have been updated recently.')
             addresses = set(addresses) - recentlyUpdatedAddresses
         messages = [UpdateCollectionMessageContent(address=address).to_message() for address in addresses]
         await self.tokenQueue.send_messages(messages=messages)
@@ -154,7 +154,7 @@ class TokenManager:
                 ],
             )
             if len(recentlyUpdatedCollections) > 0:
-                # logging.info('Skipping collection because it has been updated recently.')
+                logging.info('Skipping collection because it has been updated recently.')
                 return
         await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
@@ -167,7 +167,7 @@ class TokenManager:
                 ],
             )
             if len(recentlyUpdatedCollections) > 0:
-                # logging.info('Skipping collection because it has been updated recently.')
+                logging.info('Skipping collection because it has been updated recently.')
                 return
         try:
             retrievedCollection = await self.collectionProcessor.retrieve_collection(address=address)

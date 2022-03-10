@@ -13,6 +13,7 @@ from core.s3_manager import S3Manager
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
 from core.util import list_util
+from core.store.retriever import StringFieldFilter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_processor import CollectionProcessor
@@ -20,28 +21,43 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
-from notd.store.schema import TokenTransfersTable
+from notd.store.schema import TokenCollectionsTable, TokenMetadataTable, TokenTransfersTable
 
-async def _update_token_metadata(tokensToProcess: Sequence[tuple], tokenManager: TokenManager):
-    tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToProcess], return_exceptions=True)
-    tokenProcessSuccessCount = tokenProcessResults.count(None)
-    if tokenProcessSuccessCount:
-        print(f'{tokenProcessSuccessCount} / {len(tokenProcessResults)} token updates succeeded')
-    # NOTE(krishan711): if less than 90% of things succeed, bail out
-    if len(tokenProcessResults) >= 100 and tokenProcessSuccessCount / len(tokenProcessResults) < 0.9:
-        raise Exception('Less than 90% of token updates failed!')
-    return
-    
+async def _update_token_metadatas(tokensToProcess: Sequence[tuple], tokenManager: TokenManager, retriever: Retriever):
+    for tokensToProcessChunk in list_util.generate_chunks(lst=list(tokensToProcess), chunkSize=50):
+        query = (
+            TokenMetadataTable.select()
+                .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(tokensToProcessChunk))
+        )
+        recentlyUpdatedTokenMetadatas = await retriever.query_token_metadatas(query=query)
+        recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
+        tokensToUpdate = set(tokensToProcessChunk) - recentlyUpdatedTokenIds
+        print('len(tokensToUpdate)', len(tokensToUpdate))
+        tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToUpdate], return_exceptions=True)
+        tokenProcessSuccessCount = tokenProcessResults.count(None)
+        if tokenProcessSuccessCount:
+            print(f'{tokenProcessSuccessCount} / {len(tokenProcessResults)} token updates succeeded')
+        # NOTE(krishan711): if less than 90% of things succeed, bail out
+        if len(tokenProcessResults) >= 100 and tokenProcessSuccessCount / len(tokenProcessResults) < 0.9:
+            raise Exception('Less than 90% of token updates failed!')
 
-async def _update_collection(collectionsToProcess: Sequence[str], tokenManager: TokenManager):
-    collectionProcessResults = await asyncio.gather(*[tokenManager.update_collection(address=address) for address in collectionsToProcess], return_exceptions=True)
-    collectionProcessSuccessCount = collectionProcessResults.count(None)
-    if collectionProcessSuccessCount:
-        print(f'{collectionProcessSuccessCount} / {len(collectionProcessResults)} collection updates succeeded')
-    # NOTE(krishan711): if less than 90% of things succeed, bail out
-    if len(collectionProcessResults) >= 100 and collectionProcessSuccessCount / len(collectionProcessResults) < 0.9:
-        raise Exception('Less than 90% of collection updates failed!')
-    return
+
+async def _update_collections(collectionsToProcess: Sequence[str], tokenManager: TokenManager, retriever: Retriever):
+    for collectionsToProcessChunk in list_util.generate_chunks(lst=list(collectionsToProcess), chunkSize=50):
+        recentlyUpdatedCollections = await retriever.list_collections(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=collectionsToProcessChunk),
+            ],
+        )
+        recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
+        collectionsToUpdate = set(collectionsToProcessChunk) - recentlyUpdatedAddresses
+        collectionProcessResults = await asyncio.gather(*[tokenManager.update_collection(address=address) for address in collectionsToUpdate], return_exceptions=True)
+        collectionProcessSuccessCount = collectionProcessResults.count(None)
+        if collectionProcessSuccessCount:
+            print(f'{collectionProcessSuccessCount} / {len(collectionProcessResults)} collection updates succeeded')
+        # NOTE(krishan711): if less than 90% of things succeed, bail out
+        if len(collectionProcessResults) >= 100 and collectionProcessSuccessCount / len(collectionProcessResults) < 0.9:
+            raise Exception('Less than 90% of collection updates failed!')
 
 
 @click.command()
@@ -94,10 +110,8 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
             collectionsToProcess.add(registryAddress)
         print('len(tokensToProcess)', len(tokensToProcess))
         print('len(collectionsToProcess)', len(collectionsToProcess))
-        for tokensToProcess in list_util.generate_chunks(lst=list(tokensToProcess), chunkSize= 50):
-            await asyncio.gather(*[_update_token_metadata(tokensToProcess=tokensToProcess, tokenManager=tokenManager)])
-        for collectionsToProcess  in list_util.generate_chunks(lst=list(collectionsToProcess), chunkSize= 50):
-            await asyncio.gather(*[_update_collection(collectionsToProcess=collectionsToProcess, tokenManager=tokenManager)])
+        await _update_token_metadatas(tokensToProcess=tokensToProcess, tokenManager=tokenManager, retriever=retriever)
+        await _update_collections(collectionsToProcess=collectionsToProcess, tokenManager=tokenManager, retriever=retriever)
         currentBlockNumber = end
     await database.disconnect()
     await workQueue.disconnect()
