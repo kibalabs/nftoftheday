@@ -23,24 +23,26 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.store.schema import TokenTransfersTable
 
 async def _update_token_metadata(tokensToProcess: Sequence[tuple], tokenManager: TokenManager):
-    tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToProcess], return_exceptions=True)
-    tokenProcessSuccessCount = tokenProcessResults.count(None)
-    if tokenProcessSuccessCount:
-        print(f'{tokenProcessSuccessCount} / {len(tokenProcessResults)} token updates succeeded')
-    # NOTE(krishan711): if less than 90% of things succeed, bail out
-    if len(tokenProcessResults) >= 100 and tokenProcessSuccessCount / len(tokenProcessResults) < 0.9:
-        raise Exception('Less than 90% of token updates failed!')
+    for tokensToProcessChunk in list_util.generate_chunks(lst=list(tokensToProcess), chunkSize= 50):
+        tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToProcessChunk], return_exceptions=True)
+        tokenProcessSuccessCount = tokenProcessResults.count(None)
+        if tokenProcessSuccessCount:
+            print(f'{tokenProcessSuccessCount} / {len(tokenProcessResults)} token updates succeeded')
+        # NOTE(krishan711): if less than 90% of things succeed, bail out
+        if len(tokenProcessResults) >= 100 and tokenProcessSuccessCount / len(tokenProcessResults) < 0.9:
+            raise Exception('Less than 90% of token updates failed!')
     return
     
 
 async def _update_collection(collectionsToProcess: Sequence[str], tokenManager: TokenManager):
-    collectionProcessResults = await asyncio.gather(*[tokenManager.update_collection(address=address) for address in collectionsToProcess], return_exceptions=True)
-    collectionProcessSuccessCount = collectionProcessResults.count(None)
-    if collectionProcessSuccessCount:
-        print(f'{collectionProcessSuccessCount} / {len(collectionProcessResults)} collection updates succeeded')
-    # NOTE(krishan711): if less than 90% of things succeed, bail out
-    if len(collectionProcessResults) >= 100 and collectionProcessSuccessCount / len(collectionProcessResults) < 0.9:
-        raise Exception('Less than 90% of collection updates failed!')
+    for collectionsToProcessChunk  in list_util.generate_chunks(lst=list(collectionsToProcess), chunkSize= 50):
+        collectionProcessResults = await asyncio.gather(*[tokenManager.update_collection(address=address) for address in collectionsToProcessChunk], return_exceptions=True)
+        collectionProcessSuccessCount = collectionProcessResults.count(None)
+        if collectionProcessSuccessCount:
+            print(f'{collectionProcessSuccessCount} / {len(collectionProcessResults)} collection updates succeeded')
+        # NOTE(krishan711): if less than 90% of things succeed, bail out
+        if len(collectionProcessResults) >= 100 and collectionProcessSuccessCount / len(collectionProcessResults) < 0.9:
+            raise Exception('Less than 90% of collection updates failed!')
     return
 
 
@@ -94,10 +96,8 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
             collectionsToProcess.add(registryAddress)
         print('len(tokensToProcess)', len(tokensToProcess))
         print('len(collectionsToProcess)', len(collectionsToProcess))
-        for tokensToProcess in list_util.generate_chunks(lst=list(tokensToProcess), chunkSize= 50):
-            await asyncio.gather(*[_update_token_metadata(tokensToProcess=tokensToProcess, tokenManager=tokenManager)])
-        for collectionsToProcess  in list_util.generate_chunks(lst=list(collectionsToProcess), chunkSize= 50):
-            await asyncio.gather(*[_update_collection(collectionsToProcess=collectionsToProcess, tokenManager=tokenManager)])
+        await asyncio.gather(*[_update_token_metadata(tokensToProcess=tokensToProcess, tokenManager=tokenManager)])
+        await asyncio.gather(*[_update_collection(collectionsToProcess=collectionsToProcess, tokenManager=tokenManager)])
         currentBlockNumber = end
     await database.disconnect()
     await workQueue.disconnect()
