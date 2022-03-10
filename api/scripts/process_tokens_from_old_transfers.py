@@ -4,24 +4,27 @@ import os
 import sys
 from typing import Sequence
 
-import sqlalchemy
 import asyncclick as click
-from core.queues.sqs_message_queue import SqsMessageQueue
+import sqlalchemy
 from core.aws_requester import AwsRequester
+from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
-from core.web3.eth_client import RestEthClient
-from core.util import list_util
 from core.store.retriever import StringFieldFilter
+from core.util import list_util
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_processor import CollectionProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenTransfersTable
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
-from notd.store.schema import TokenCollectionsTable, TokenMetadataTable, TokenTransfersTable
+
 
 async def _update_token_metadatas(tokensToProcess: Sequence[tuple], tokenManager: TokenManager, retriever: Retriever):
     for tokensToProcessChunk in list_util.generate_chunks(lst=list(tokensToProcess), chunkSize=50):
