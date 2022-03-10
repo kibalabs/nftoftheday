@@ -19,13 +19,6 @@ from notd.store.saver import Saver
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.store.schema import TokenTransfersTable
-from notd.store.schema_conversions import token_transfer_from_row
-
-async def _update_token_metadata(registryAddress: str, tokenId: str, tokenManager: TokenManager):
-    await tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-
-async def _update_collection(address: str,  tokenManager: TokenManager):
-    await tokenManager.update_collection(address=address)
 
 
 @click.command()
@@ -78,11 +71,11 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
             collectionsToProcess.add(registryAddress)
         print('len(tokensToProcess)', len(tokensToProcess))
         print('len(collectionsToProcess)', len(collectionsToProcess))
-        await asyncio.gather(*[_update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, tokenManager=tokenManager) for registryAddress,tokenId in tokensToProcess])
-        await asyncio.gather(*[_update_collection(address=address, tokenManager=tokenManager)for address in list(collectionsToProcess)])
+        await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToProcess])
+        await asyncio.gather(*[tokenManager.update_collection(address=address) for address in list(collectionsToProcess)])
         currentBlockNumber = end
         return
-        
+
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
