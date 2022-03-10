@@ -32,11 +32,11 @@ const getDateString = (startDate: Date): string => {
 export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
-  const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| null| undefined>(null);
-  const [mostTradedToken, setMostTradedToken] = React.useState<TradedToken | null | undefined>(null);
-  const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null| undefined>(null);
-  const [sponsoredToken, setSponsoredToken] = React.useState<SponsoredToken | null| undefined>(null);
-  const [transferCount, setTransferCount] = React.useState<number | null | undefined>(null);
+  const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| null>(null);
+  const [mostTradedToken, setMostTradedToken] = React.useState<TradedToken | null >(null);
+  const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
+  const [sponsoredToken, setSponsoredToken] = React.useState<SponsoredToken | null>(null);
+  const [transferCount, setTransferCount] = React.useState<number | null >(null);
   const [startDate_, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
   const startDate = startDate_ as Date;
 
@@ -87,11 +87,11 @@ export const HomePage = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    setRandomTokenTransfer(undefined);
-    setHighestPricedTokenTransfer(undefined);
-    setMostTradedToken(undefined);
-    setSponsoredToken(undefined);
-    setTransferCount(undefined);
+    setRandomTokenTransfer(null);
+    setHighestPricedTokenTransfer(null);
+    setMostTradedToken(null);
+    setSponsoredToken(null);
+    setTransferCount(null);
   };
 
   const onForwardClicked = (): void => {
@@ -99,11 +99,11 @@ export const HomePage = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
-    setRandomTokenTransfer(undefined);
-    setHighestPricedTokenTransfer(undefined);
-    setMostTradedToken(undefined);
-    setSponsoredToken(undefined);
-    setTransferCount(undefined);
+    setRandomTokenTransfer(null);
+    setHighestPricedTokenTransfer(null);
+    setMostTradedToken(null);
+    setSponsoredToken(null);
+    setTransferCount(null);
   };
 
   const onEmailClicked = (): void => {
