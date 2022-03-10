@@ -2,11 +2,11 @@ import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 
-import { useAccountId, useOnLinkAccountsClicked } from '../AccountContext';
+import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from './Account';
 
 export const NavBar = (): React.ReactElement => {
-  const accountId = useAccountId();
+  const account = useAccount();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {
@@ -24,10 +24,10 @@ export const NavBar = (): React.ReactElement => {
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <Spacing variant={PaddingSize.Wide2} />
         </Stack.Item>
-        { !accountId ? (
+        { !account ? (
           <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
         ) : (
-          <Account accountId={accountId} />
+          <Account accountId={account.address} />
         )}
       </Stack>
     </Box>
