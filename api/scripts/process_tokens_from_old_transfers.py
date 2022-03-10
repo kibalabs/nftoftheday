@@ -71,11 +71,21 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
             collectionsToProcess.add(registryAddress)
         print('len(tokensToProcess)', len(tokensToProcess))
         print('len(collectionsToProcess)', len(collectionsToProcess))
-        await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToProcess])
-        await asyncio.gather(*[tokenManager.update_collection(address=address) for address in list(collectionsToProcess)])
+        tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToProcess], return_exceptions=True)
+        tokenProcessSuccessCount = tokenProcessResults.count(None)
+        if tokenProcessSuccessCount:
+            print(f'{tokenProcessSuccessCount} / {len(tokenProcessResults)} token updates succeeded')
+        # NOTE(krishan711): if less than 90% of things succeed, bail out
+        if len(tokenProcessResults) >= 100 and tokenProcessSuccessCount / len(tokenProcessResults) < 0.9:
+            raise Exception('Less than 90% of token updates failed!')
+        collectionProcessResults = await asyncio.gather(*[tokenManager.update_collection(address=address) for address in collectionsToProcess], return_exceptions=True)
+        collectionProcessSuccessCount = collectionProcessResults.count(None)
+        if collectionProcessSuccessCount:
+            print(f'{collectionProcessSuccessCount} / {len(collectionProcessResults)} collection updates succeeded')
+        # NOTE(krishan711): if less than 90% of things succeed, bail out
+        if len(collectionProcessResults) >= 100 and collectionProcessSuccessCount / len(collectionProcessResults) < 0.9:
+            raise Exception('Less than 90% of collection updates failed!')
         currentBlockNumber = end
-        return
-
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
