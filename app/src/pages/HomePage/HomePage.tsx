@@ -33,10 +33,10 @@ export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
   const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| null>(null);
-  const [mostTradedToken, setMostTradedToken] = React.useState<TradedToken | null >(null);
+  const [mostTradedToken, setMostTradedToken] = React.useState<TradedToken | null>(null);
   const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
   const [sponsoredToken, setSponsoredToken] = React.useState<SponsoredToken | null>(null);
-  const [transferCount, setTransferCount] = React.useState<number | null >(null);
+  const [transferCount, setTransferCount] = React.useState<number | null>(null);
   const [startDate_, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
   const startDate = startDate_ as Date;
 
