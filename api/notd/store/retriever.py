@@ -191,11 +191,10 @@ class Retriever(CoreRetriever):
         query = query.group_by(sqlalchemyfunc.date(BlocksTable.c.blockDate),TokenTransfersTable.c.registryAddress)
         result = await self.database.execute(query=query, connection=connection)
         collectionGraph = {row[3]:(row[2], row[1]) for row in result}
-        for d in range(duration.days + 1):
-            day = startDate + datetime.timedelta(days=d)
+        for delta in range(duration.days + 1):
+            day = startDate + datetime.timedelta(days=delta)
             if  day.date() in collectionGraph.keys():
                 continue
-            else:
-                collectionGraph[day.date()]=(0,0)
+            collectionGraph[day.date()]=(0,0)
         collectionGraph= [CollectionActivity(date=date, tradedValue=tradedValue, tradedAmount=tradedAmount) for date, (tradedValue, tradedAmount) in collectionGraph.items()]
         return collectionGraph
