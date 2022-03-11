@@ -87,6 +87,11 @@ export const HomePage = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() - 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
+    setRandomTokenTransfer(null);
+    setHighestPricedTokenTransfer(null);
+    setMostTradedToken(null);
+    setSponsoredToken(null);
+    setTransferCount(null);
   };
 
   const onForwardClicked = (): void => {
@@ -94,6 +99,11 @@ export const HomePage = (): React.ReactElement => {
     newDate.setDate(newDate.getDate() + 1);
     newDate.setHours(0, 0, 0, 0);
     setStartDate(newDate);
+    setRandomTokenTransfer(null);
+    setHighestPricedTokenTransfer(null);
+    setMostTradedToken(null);
+    setSponsoredToken(null);
+    setTransferCount(null);
   };
 
   const onEmailClicked = (): void => {
