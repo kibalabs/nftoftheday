@@ -88,7 +88,7 @@ CREATE TABLE tbl_token_ownership (
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
     purchased_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    purchased_value NUMERIC(256, 0) NOT NULL,
+    value NUMERIC(256, 0) NOT NULL,
     transaction_hash TEXT NOT NULL
 );
 CREATE UNIQUE INDEX tbl_token_ownership_registry_address_token_id ON tbl_token_ownership (registry_address, token_id);
@@ -98,4 +98,4 @@ CREATE INDEX tbl_token_ownership_owner_address ON tbl_token_ownership (owner_add
 CREATE INDEX tbl_token_ownership_regsitry_address ON tbl_token_ownership (registry_address);
 CREATE INDEX tbl_token_ownership_token_id ON tbl_token_ownership (token_id);
 CREATE INDEX tbl_token_ownership_purchase_date ON tbl_token_ownership (purchased_date);
-CREATE INDEX tbl_token_ownership_purchase_value ON tbl_token_ownership (purchased_value);
+CREATE INDEX tbl_token_ownership_value ON tbl_token_ownership (value);

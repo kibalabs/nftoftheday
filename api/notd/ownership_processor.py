@@ -37,6 +37,6 @@ class OwnershipProcessor:
             registryAddress=registryAddress,
             tokenId=tokenId,
             purchasedDate=tokenTransfer.blockDate,
-            purchasedValue=tokenTransfer.value,
+            value=tokenTransfer.value,
             transactionHash=tokenTransfer.transactionHash,
         )
