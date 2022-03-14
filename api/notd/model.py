@@ -143,4 +143,8 @@ class ProcessedBlock:
 class CollectionActivity:
     date: datetime.date
     tradedValue: int
-    tradedAmount: int
+    transferCount: int
+    totalVolume: int
+    minPrice: int
+    maxPrice: int
+    averagePrice: int

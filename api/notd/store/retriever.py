@@ -184,17 +184,27 @@ class Retriever(CoreRetriever):
         endDate =  date_util.start_of_day(dt=datetime.datetime.now())
         startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-90))
         duration = datetime.timedelta(days=90)
-        query = select([TokenTransfersTable.c.registryAddress, sqlalchemyfunc.sum(TokenTransfersTable.c.amount), sqlalchemyfunc.sum(TokenTransfersTable.c.value), sqlalchemyfunc.date(BlocksTable.c.blockDate)]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = select(
+            [
+            TokenTransfersTable.c.registryAddress, 
+            sqlalchemyfunc.sum(TokenTransfersTable.c.amount), 
+            sqlalchemyfunc.sum(TokenTransfersTable.c.value), 
+            sqlalchemyfunc.min(TokenTransfersTable.c.value), 
+            sqlalchemyfunc.max(TokenTransfersTable.c.value), 
+            sqlalchemyfunc.avg(TokenTransfersTable.c.value),
+            sqlalchemyfunc.date(BlocksTable.c.blockDate)
+            ]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         query = query.where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(BlocksTable.c.blockDate >= startDate)
         query = query.where(BlocksTable.c.blockDate < endDate)
         query = query.group_by(sqlalchemyfunc.date(BlocksTable.c.blockDate),TokenTransfersTable.c.registryAddress)
         result = await self.database.execute(query=query, connection=connection)
-        collectionGraph = {row[3]:(row[2], row[1]) for row in result}
+        collectionGraph = {row[6]:(row[1], row[2], row[3], row[4], row[5]) for row in result}
+        print(collectionGraph)
         for delta in range(duration.days + 1):
             day = startDate + datetime.timedelta(days=delta)
             if  day.date() in collectionGraph.keys():
                 continue
             collectionGraph[day.date()]=(0,0)
-        collectionGraph= [CollectionActivity(date=date, tradedValue=tradedValue, tradedAmount=tradedAmount) for date, (tradedValue, tradedAmount) in collectionGraph.items()]
+        #collectionGraph= [CollectionActivity(date=date, tradedValue=tradedValue, tradedAmount=tradedAmount) for date, (tradedValue, tradedAmount) in collectionGraph.items()]
         return collectionGraph
