@@ -138,10 +138,7 @@ class Block:
     blockDate: datetime.datetime
 
 @dataclasses.dataclass
-class TokenOwnership:
-    ownerId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
+class RetrievedTokenOwnership:
     ownerAddress: str
     registryAddress: str
     tokenId: str
@@ -149,6 +146,13 @@ class TokenOwnership:
     purchasedValue: int
     transferId: int
     transactionHash: str
+
+@dataclasses.dataclass
+class TokenOwnership(RetrievedTokenOwnership):
+    ownerId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    
 
 @dataclasses.dataclass
 class ProcessedBlock:

@@ -90,7 +90,7 @@ CREATE TABLE tbl_token_ownership (
     purchased_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     purchased_value NUMERIC(256, 0) NOT NULL,
     transfer_id NUMERIC(256, 0) NOT NULL,
-    transaction_hash TEXT NOT NULL,
+    transaction_hash TEXT NOT NULL
 );
 CREATE UNIQUE INDEX tbl_token_ownership_registry_address_token_id ON tbl_token_ownership (registry_address, token_id);
 CREATE INDEX tbl_token_ownership_created_date ON tbl_token_ownership (created_date);

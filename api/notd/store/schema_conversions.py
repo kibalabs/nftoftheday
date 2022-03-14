@@ -8,7 +8,7 @@ from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
-from notd.store.schema import TokenOwnerTable
+from notd.store.schema import TokenOwnershipTable
 from notd.store.schema import TokenTransfersTable
 
 
@@ -80,12 +80,12 @@ def collection_from_row(row: Mapping) -> Collection:
 
 def token_ownership_from_row(row: Mapping) -> TokenOwnership:
     return TokenOwnership(
-        ownerId=row[TokenOwnerTable.c.ownerId],
-        createdDate=row[TokenOwnerTable.c.createdDate],
-        updatedDate=row[TokenOwnerTable.c.updatedDate],
-        ownerAddress=row[TokenOwnerTable.c.ownerAddress],
-        registryAddress=row[TokenOwnerTable.c.registryAddress],
-        tokenId=row[TokenOwnerTable.c.tokenId],
-        purchasedDate=row[TokenOwnerTable.c.purchasedDate],
-        purchasedValue=row[TokenOwnerTable.c.purchasedValue],
+        ownerId=row[TokenOwnershipTable.c.ownerId],
+        createdDate=row[TokenOwnershipTable.c.createdDate],
+        updatedDate=row[TokenOwnershipTable.c.updatedDate],
+        ownerAddress=row[TokenOwnershipTable.c.ownerAddress],
+        registryAddress=row[TokenOwnershipTable.c.registryAddress],
+        tokenId=row[TokenOwnershipTable.c.tokenId],
+        purchasedDate=row[TokenOwnershipTable.c.purchasedDate],
+        purchasedValue=row[TokenOwnershipTable.c.purchasedValue],
     )

@@ -10,6 +10,7 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
+from notd.model import RetrievedTokenOwnership
 
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
@@ -191,3 +192,14 @@ class TokenManager:
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
+
+    async def save_token_ownership(self, retrievedTokenOwnership: RetrievedTokenOwnership):
+        async with self.saver.create_transaction() as connection:
+            try:
+                tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId)
+            except NotFoundException:
+                tokenOwnership = None
+            if tokenOwnership:
+                await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transferId=retrievedTokenOwnership.transferId, transactionHash=retrievedTokenOwnership.transactionHash)
+            else:
+                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transferId=retrievedTokenOwnership.transferId, transactionHash=retrievedTokenOwnership.transactionHash)

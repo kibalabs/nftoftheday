@@ -12,6 +12,8 @@ from core.store.retriever import StringFieldFilter
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 from sqlalchemy.sql.expression import select
+from notd.store.schema import TokenOwnershipTable
+from notd.store.schema_conversions import token_ownership_from_row
 
 from notd.model import Collection
 from notd.model import Token
@@ -136,6 +138,17 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'TokenMetadata with registry {registryAddress} tokenId {tokenId} not found')
         tokenMetdata = token_metadata_from_row(row)
         return tokenMetdata
+
+    async def get_token_ownership_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
+        query = TokenOwnershipTable.select() \
+            .where(TokenOwnershipTable.c.registryAddress == registryAddress) \
+            .where(TokenOwnershipTable.c.tokenId == tokenId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TokenMetadata with registry {registryAddress} tokenId {tokenId} not found')
+        tokenOwnership = token_ownership_from_row(row)
+        return tokenOwnership
 
     async def list_collections(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Collection]:
         query = TokenCollectionsTable.select()
