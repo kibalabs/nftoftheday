@@ -266,6 +266,7 @@ class Saver(CoreSaver):
             value=value,
             transactionHash=transactionHash,
         )
+
     async def update_token_ownership(self, ownerId: int, ownerAddress: Optional[str], purchasedDate: Optional[str], value: Optional[str], transactionHash: Optional[str],  connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if ownerAddress != _EMPTY_STRING:
