@@ -124,8 +124,8 @@ class NotdManager:
         return tokenTransfers
 
     async def get_collection_activity(self, registryAddress: str) -> List[CollectionActivity]:
-        collectionGraph = await self.retriever.get_collection_activity(address=registryAddress)
-        return collectionGraph
+        collectionActivity = await self.retriever.get_collection_activity(address=registryAddress)
+        return collectionActivity
 
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(
