@@ -250,7 +250,6 @@ class Saver(CoreSaver):
             TokenOwnershipTable.c.tokenId.key: tokenId,
             TokenOwnershipTable.c.purchasedDate.key: purchasedDate,
             TokenOwnershipTable.c.purchasedValue.key: purchasedValue,
-            TokenOwnershipTable.c.transferId.key: transferId,
             TokenOwnershipTable.c.transactionHash.key: transactionHash,
         }
         query = TokenOwnershipTable.insert().values(values)
@@ -265,10 +264,9 @@ class Saver(CoreSaver):
             tokenId=tokenId,
             purchasedDate=purchasedDate,
             purchasedValue=purchasedValue,
-            transferId=transferId,
             transactionHash=transactionHash,
         )
-    async def update_token_ownership(self, ownerId: int, ownerAddress: Optional[str], purchasedDate: Optional[str], purchasedValue: Optional[str], transferId: Optional[str] , transactionHash: Optional[str],  connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_ownership(self, ownerId: int, ownerAddress: Optional[str], purchasedDate: Optional[str], purchasedValue: Optional[str], transactionHash: Optional[str],  connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if ownerAddress != _EMPTY_STRING:
             values[TokenOwnershipTable.c.ownerAddress.key] = ownerAddress
@@ -276,8 +274,6 @@ class Saver(CoreSaver):
             values[TokenOwnershipTable.c.purchasedDate.key] = purchasedDate
         if purchasedValue != _EMPTY_STRING:
             values[TokenOwnershipTable.c.purchasedValue.key] = purchasedValue
-        if transferId != _EMPTY_STRING:
-            values[TokenOwnershipTable.c.transferId.key] = transferId
         if transactionHash != _EMPTY_STRING:
             values[TokenOwnershipTable.c.transactionHash.key] = transactionHash
         if len(values) > 0:

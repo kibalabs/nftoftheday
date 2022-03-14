@@ -38,6 +38,5 @@ class OwnershipProcessor:
             tokenId=tokenId,
             purchasedDate=tokenTransfer.blockDate,
             purchasedValue=tokenTransfer.value,
-            transferId=tokenTransfer.tokenTransferId,
             transactionHash=tokenTransfer.transactionHash,
         )

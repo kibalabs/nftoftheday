@@ -200,6 +200,6 @@ class TokenManager:
             except NotFoundException:
                 tokenOwnership = None
             if tokenOwnership:
-                await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transferId=retrievedTokenOwnership.transferId, transactionHash=retrievedTokenOwnership.transactionHash)
+                await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transactionHash=retrievedTokenOwnership.transactionHash)
             else:
-                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transferId=retrievedTokenOwnership.transferId, transactionHash=retrievedTokenOwnership.transactionHash)
+                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transactionHash=retrievedTokenOwnership.transactionHash)

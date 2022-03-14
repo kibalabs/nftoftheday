@@ -88,4 +88,5 @@ def token_ownership_from_row(row: Mapping) -> TokenOwnership:
         tokenId=row[TokenOwnershipTable.c.tokenId],
         purchasedDate=row[TokenOwnershipTable.c.purchasedDate],
         purchasedValue=row[TokenOwnershipTable.c.purchasedValue],
+        transactionHash=row[TokenOwnershipTable.c.transactionHash],
     )
