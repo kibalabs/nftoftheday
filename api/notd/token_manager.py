@@ -16,14 +16,17 @@ from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
+from notd.messages import UpdateTokenOwnershipMessageContent
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
 from notd.model import RetrievedTokenOwnership
 from notd.model import TokenMetadata
+from notd.ownership_processor import TokenOwnershipProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenOwnershipTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -34,12 +37,13 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
         self.tokenMetadataProcessor = tokenMetadataProcessor
+        self.tokenOwnershipProcessor = tokenOwnershipProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
@@ -193,7 +197,21 @@ class TokenManager:
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 
-    async def save_token_ownership(self, retrievedTokenOwnership: RetrievedTokenOwnership):
+    async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+        if not shouldForce:
+            recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenOwnershipTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenOwnershipTable.c.tokenId.key, eq=tokenId),
+                    DateFieldFilter(fieldName=TokenOwnershipTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
+                ],
+            )
+            if len(recentlyUpdatedTokens) > 0:
+                logging.info('Skipping token because it has been updated recently.')
+                return
+        await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
+
+    async def update_token_ownership(self, retrievedTokenOwnership: RetrievedTokenOwnership):
         async with self.saver.create_transaction() as connection:
             try:
                 tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId)

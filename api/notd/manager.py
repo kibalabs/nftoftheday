@@ -145,6 +145,12 @@ class NotdManager:
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         return await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
+    async def update_token_ownership(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+        return await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+
+    async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+        return await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
         return await self.tokenManager.update_collection_deferred(address=address, shouldForce=shouldForce)
 
@@ -156,7 +162,6 @@ class NotdManager:
 
     async def update_collections_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
         return await self.tokenManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
-
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)

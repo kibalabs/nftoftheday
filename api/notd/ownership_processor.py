@@ -7,12 +7,12 @@ from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 
 
-class OwnershipProcessor:
+class TokenOwnershipProcessor:
 
     def __init__(self,retriever: Retriever):
         self.retriever = retriever
 
-    async def get_ownership(self, registryAddress: str, tokenId: str):
+    async def retrieve_token_ownership(self, registryAddress: str, tokenId: str):
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
