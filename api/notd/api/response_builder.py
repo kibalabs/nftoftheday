@@ -111,4 +111,4 @@ class ResponseBuilder:
         )
 
     async def collection_activity_from_model(self, collectionActivities: Sequence[CollectionActivity]) -> Sequence[ApiCollectionActivity]:
-        return [ApiCollectionActivity(date=collectionActivity.date, value=collectionActivity.tradedValue, amount=collectionActivity.tradedAmount) for collectionActivity in collectionActivities]
+        return [ApiCollectionActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, minPrice=collectionActivity.minPrice, maxPrice=collectionActivity.maxPrice, averagePrice=collectionActivity.averagePrice)  for collectionActivity in collectionActivities]

@@ -63,5 +63,8 @@ class ApiSponsoredToken(BaseModel):
 
 class ApiCollectionActivity(BaseModel):
     date: datetime.date
-    value: str
-    amount: str
+    totalVolume: int
+    transferCount: int
+    minPrice: int
+    maxPrice: int
+    averagePrice: int

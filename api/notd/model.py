@@ -142,9 +142,8 @@ class ProcessedBlock:
 @dataclasses.dataclass
 class CollectionActivity:
     date: datetime.date
-    tradedValue: int
-    transferCount: int
     totalVolume: int
+    transferCount: int
     minPrice: int
     maxPrice: int
     averagePrice: int

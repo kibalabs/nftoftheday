@@ -184,16 +184,7 @@ class Retriever(CoreRetriever):
         endDate =  date_util.start_of_day(dt=datetime.datetime.now())
         startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-90))
         duration = datetime.timedelta(days=90)
-        query = select(
-            [
-            TokenTransfersTable.c.registryAddress, 
-            sqlalchemyfunc.sum(TokenTransfersTable.c.amount), 
-            sqlalchemyfunc.sum(TokenTransfersTable.c.value), 
-            sqlalchemyfunc.min(TokenTransfersTable.c.value), 
-            sqlalchemyfunc.max(TokenTransfersTable.c.value), 
-            sqlalchemyfunc.avg(TokenTransfersTable.c.value),
-            sqlalchemyfunc.date(BlocksTable.c.blockDate)
-            ]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = select([TokenTransfersTable.c.registryAddress, sqlalchemyfunc.sum(TokenTransfersTable.c.amount), sqlalchemyfunc.sum(TokenTransfersTable.c.value), sqlalchemyfunc.min(TokenTransfersTable.c.value), sqlalchemyfunc.max(TokenTransfersTable.c.value), sqlalchemyfunc.avg(TokenTransfersTable.c.value),sqlalchemyfunc.date(BlocksTable.c.blockDate)]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         query = query.where(TokenTransfersTable.c.registryAddress == address)
         query = query.where(BlocksTable.c.blockDate >= startDate)
         query = query.where(BlocksTable.c.blockDate < endDate)
@@ -206,5 +197,5 @@ class Retriever(CoreRetriever):
             if  day.date() in collectionGraph.keys():
                 continue
             collectionGraph[day.date()]=(0,0,0,0,0)
-        collectionGraph= [CollectionActivity(date=date, tradedValue=tradedValue, tradedAmount=tradedAmount) for date, (tradedAmount, tradedValue, minValue, maxValue, avgValue) in collectionGraph.items()]
+        collectionGraph= [CollectionActivity(date=date, totalVolume=totalVolume, transferCount=transferCount, minPrice=minPrice, maxPrice=maxPrice, averagePrice=averagePrice) for date, (transferCount, totalVolume, minPrice, maxPrice, averagePrice) in collectionGraph.items()]
         return collectionGraph
