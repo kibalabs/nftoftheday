@@ -145,7 +145,7 @@ class TokenOwnership(RetrievedTokenOwnership):
     ownerId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
-    
+
 
 @dataclasses.dataclass
 class ProcessedBlock:

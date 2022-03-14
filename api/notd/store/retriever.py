@@ -13,9 +13,6 @@ from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
-from sqlalchemy.sql.expression import select
-from notd.store.schema import TokenOwnershipTable
-from notd.store.schema_conversions import token_ownership_from_row
 
 from notd.model import Collection
 from notd.model import Token
@@ -24,10 +21,12 @@ from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenOwnershipTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import token_metadata_from_row
+from notd.store.schema_conversions import token_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 
 _REGISTRY_BLACKLIST = set([

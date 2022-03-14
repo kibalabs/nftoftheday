@@ -1,26 +1,17 @@
-import sqlalchemy
-from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
-from core.requester import Requester
-from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
-from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
-from core.store.retriever import RandomOrder
-from core.store.retriever import StringFieldFilter
-from core.util import date_util
-from notd.model import RetrievedTokenOwnership, TokenOwnership
 from core.store.retriever import StringFieldFilter
 
-from notd.store.schema import BlocksTable, TokenMetadataTable, TokenTransfersTable
+from notd.model import RetrievedTokenOwnership
 from notd.store.retriever import Retriever
+from notd.store.schema import TokenTransfersTable
 
 
 class OwnershipProcessor:
 
     def __init__(self,retriever: Retriever):
         self.retriever = retriever
-    
+
     async def get_ownership(self, registryAddress: str, tokenId: str):
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
