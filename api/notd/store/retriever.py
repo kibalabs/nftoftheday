@@ -205,6 +205,6 @@ class Retriever(CoreRetriever):
             day = startDate + datetime.timedelta(days=delta)
             if  day.date() in collectionGraph.keys():
                 continue
-            collectionGraph[day.date()]=(0,0)
-        #collectionGraph= [CollectionActivity(date=date, tradedValue=tradedValue, tradedAmount=tradedAmount) for date, (tradedValue, tradedAmount) in collectionGraph.items()]
+            collectionGraph[day.date()]=(0,0,0,0,0)
+        collectionGraph= [CollectionActivity(date=date, tradedValue=tradedValue, tradedAmount=tradedAmount) for date, (tradedAmount, tradedValue, minValue, maxValue, avgValue) in collectionGraph.items()]
         return collectionGraph
