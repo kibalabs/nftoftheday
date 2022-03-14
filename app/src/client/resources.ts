@@ -16,8 +16,9 @@ export class TokenTransfer {
   readonly blockHash: string;
   readonly blockDate: Date;
   readonly token: CollectionToken;
+  readonly collection: Collection;
 
-  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date, token: CollectionToken) {
+  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date, token: CollectionToken, collection: Collection) {
     this.tokenTransferId = tokenTransferId;
     this.transactionHash = transactionHash;
     this.registryAddress = registryAddress;
@@ -32,6 +33,7 @@ export class TokenTransfer {
     this.blockHash = blockHash;
     this.blockDate = blockDate;
     this.token = token;
+    this.collection = collection;
   }
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
@@ -50,51 +52,55 @@ export class TokenTransfer {
       String(obj.blockHash),
       dateFromString(obj.blockDate as string),
       CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      Collection.fromObject(obj.collection as Record<string, unknown>),
     );
-  }
+  };
 }
 
-export class Token {
-  readonly registryAddress: string;
-  readonly tokenId: string;
+export class TradedToken {
+  readonly token: CollectionToken;
+  readonly collection: Collection;
+  readonly latestTransfer: TokenTransfer;
+  readonly transferCount: number;
 
-  public constructor(registryAddress: string, tokenId: string) {
-    this.registryAddress = registryAddress;
-    this.tokenId = tokenId;
+  public constructor(token: CollectionToken, collection: Collection, latestTransfer: TokenTransfer, transferCount: number) {
+    this.token = token;
+    this.collection = collection;
+    this.latestTransfer = latestTransfer;
+    this.transferCount = transferCount;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): Token => {
-    return new Token(
-      String(obj.registryAddress),
-      String(obj.tokenId),
+  public static fromObject = (obj: Record<string, unknown>): TradedToken => {
+    return new TradedToken(
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>),
+      Number(obj.transferCount),
     );
-  }
+  };
 }
 
-export class UiData {
-  readonly highestPricedTokenTransfer: TokenTransfer;
-  readonly mostTradedTokenTransfers: TokenTransfer[];
-  readonly randomTokenTransfer: TokenTransfer;
-  readonly sponsoredToken: Token;
-  readonly transactionCount: number;
+export class SponsoredToken {
+  readonly token: CollectionToken;
+  readonly collection: Collection;
+  readonly date: Date;
+  readonly latestTransfer: TokenTransfer | null;
 
-  public constructor(highestPricedTokenTransfer: TokenTransfer, mostTradedTokenTransfers: TokenTransfer[], randomTokenTransfer: TokenTransfer, sponsoredToken: Token, transactionCount: number) {
-    this.highestPricedTokenTransfer = highestPricedTokenTransfer;
-    this.mostTradedTokenTransfers = mostTradedTokenTransfers;
-    this.randomTokenTransfer = randomTokenTransfer;
-    this.sponsoredToken = sponsoredToken;
-    this.transactionCount = transactionCount;
+  public constructor(token: CollectionToken, collection: Collection, date: Date, latestTransfer: TokenTransfer | null) {
+    this.token = token;
+    this.collection = collection;
+    this.date = date;
+    this.latestTransfer = latestTransfer;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): UiData => {
-    return new UiData(
-      TokenTransfer.fromObject(obj.highestPricedTokenTransfer as Record<string, unknown>),
-      (obj.mostTradedTokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenTransfer.fromObject(innerObj)),
-      TokenTransfer.fromObject(obj.randomTokenTransfer as Record<string, unknown>),
-      Token.fromObject(obj.sponsoredToken as Record<string, unknown>),
-      Number(obj.transactionCount as Record<string, unknown>),
+  public static fromObject = (obj: Record<string, unknown>): SponsoredToken => {
+    return new SponsoredToken(
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      dateFromString(obj.date as string),
+      obj.latestTransfer ? TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>) : null,
     );
-  }
+  };
 }
 
 export class TokenAttribute {
@@ -111,7 +117,7 @@ export class TokenAttribute {
       String(obj.trait_type),
       String(obj.value),
     );
-  }
+  };
 }
 
 export class CollectionToken {
@@ -140,7 +146,7 @@ export class CollectionToken {
       obj.description ? String(obj.description) : null,
       (obj.attributes as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenAttribute.fromObject(innerObj)),
     );
-  }
+  };
 }
 
 export class Collection {
@@ -181,7 +187,7 @@ export class Collection {
       obj.instagramUsername ? String(obj.instagramUsername) : null,
       obj.twitterUsername ? String(obj.twitterUsername) : null,
     );
-  }
+  };
 }
 
 export class CollectionStatistics {
@@ -210,5 +216,5 @@ export class CollectionStatistics {
       obj.highestSaleLast24Hours ? BigNumber.from(String(obj.highestSaleLast24Hours)) : null,
       obj.tradeVolume24Hours ? BigNumber.from(String(obj.tradeVolume24Hours)) : null,
     );
-  }
+  };
 }

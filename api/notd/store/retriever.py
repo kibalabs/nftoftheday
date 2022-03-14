@@ -9,6 +9,8 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
+from sqlalchemy import func as sqlalchemyfunc
+from sqlalchemy import select
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 from sqlalchemy.sql.expression import select
@@ -74,7 +76,10 @@ class Retriever(CoreRetriever):
                     query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=fieldFilter)
         if orders:
             for order in orders:
-                query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
+                if order.fieldName == BlocksTable.c.blockDate.key:
+                    query = self._apply_order(query=query, table=BlocksTable, order=order)
+                else:
+                    query = self._apply_order(query=query, table=TokenTransfersTable, order=order)
         if limit:
             query = query.limit(limit)
         if offset:
@@ -88,9 +93,8 @@ class Retriever(CoreRetriever):
         query = query.with_only_columns([sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId)])
         query = query.where(BlocksTable.c.blockDate >= startDate)
         query = query.where(BlocksTable.c.blockDate < endDate)
-        query = query.where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
         result = await self.database.execute(query=query, connection=connection)
-        count = result.first()[0]
+        count = result.scalar()
         return count
 
     async def get_most_traded_token(self, startDate: datetime.datetime, endDate: datetime.datetime, connection: Optional[DatabaseConnection] = None) -> Token:

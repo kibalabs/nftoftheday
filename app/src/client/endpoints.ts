@@ -2,7 +2,7 @@ import { dateToString, RequestData, ResponseData } from '@kibalabs/core';
 
 import * as Resources from './resources';
 
-export class RetrieveUiDataRequest extends RequestData {
+export class RetrieveHighestPriceTransferRequest extends RequestData {
   readonly startDate?: Date;
   readonly endDate?: Date;
 
@@ -17,22 +17,152 @@ export class RetrieveUiDataRequest extends RequestData {
       startDate: this.startDate ? dateToString(this.startDate) : null,
       endDate: this.endDate ? dateToString(this.endDate) : null,
     };
-  }
+  };
 }
 
-export class RetrieveUiDataResponse extends ResponseData {
-  readonly uiData: Resources.UiData;
+export class RetrieveHighestPriceTransferResponse extends ResponseData {
+  readonly transfer: Resources.TokenTransfer;
 
-  public constructor(uiData: Resources.UiData) {
+  public constructor(transfer: Resources.TokenTransfer) {
     super();
-    this.uiData = uiData;
+    this.transfer = transfer;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveUiDataResponse => {
-    return new RetrieveUiDataResponse(
-      Resources.UiData.fromObject(obj.uiData as Record<string, unknown>),
+  public static fromObject = (obj: Record<string, unknown>): RetrieveHighestPriceTransferResponse => {
+    return new RetrieveHighestPriceTransferResponse(
+      Resources.TokenTransfer.fromObject(obj.transfer as Record<string, unknown>),
     );
+  };
+}
+export class RetrieveMostTradedTokenRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
   }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
+    };
+  };
+}
+
+export class RetrieveMostTradedTokenResponse extends ResponseData {
+  readonly tradedToken: Resources.TradedToken;
+
+  public constructor(tradedToken: Resources.TradedToken) {
+    super();
+    this.tradedToken = tradedToken;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveMostTradedTokenResponse => {
+    return new RetrieveMostTradedTokenResponse(
+      Resources.TradedToken.fromObject(obj.tradedToken as Record<string, unknown>),
+    );
+  };
+}
+
+export class RetrieveRandomTokenTransferRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
+    };
+  };
+}
+
+export class RetrieveRandomTokenTransferResponse extends ResponseData {
+  readonly transfer: Resources.TokenTransfer;
+
+  public constructor(transfer: Resources.TokenTransfer) {
+    super();
+    this.transfer = transfer;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveRandomTokenTransferResponse => {
+    return new RetrieveRandomTokenTransferResponse(
+      Resources.TokenTransfer.fromObject(obj.transfer as Record<string, unknown>),
+    );
+  };
+}
+
+export class RetrieveSponsoredTokenRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
+    };
+  };
+}
+export class RetrieveSponsoredTokenResponse extends ResponseData {
+  readonly sponsoredToken: Resources.SponsoredToken;
+
+  public constructor(sponsoredToken: Resources.SponsoredToken) {
+    super();
+    this.sponsoredToken = sponsoredToken;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveSponsoredTokenResponse => {
+    return new RetrieveSponsoredTokenResponse(
+      Resources.SponsoredToken.fromObject(obj.sponsoredToken as Record<string, unknown>),
+    );
+  };
+}
+
+export class RetrieveTransferCountRequest extends RequestData {
+  readonly startDate?: Date;
+  readonly endDate?: Date;
+
+  public constructor(startDate?: Date, endDate?: Date) {
+    super();
+    this.startDate = startDate;
+    this.endDate = endDate;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      startDate: this.startDate ? dateToString(this.startDate) : null,
+      endDate: this.endDate ? dateToString(this.endDate) : null,
+    };
+  };
+}
+
+export class RetrieveTransferCountResponse extends ResponseData {
+  readonly count: number;
+
+  public constructor(count: number) {
+    super();
+    this.count = count;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveTransferCountResponse => {
+    return new RetrieveTransferCountResponse(
+      Number(obj.count),
+    );
+  };
 }
 
 export class RetrieveCollectionTokenRequest extends RequestData {
@@ -46,12 +176,12 @@ export class RetrieveCollectionTokenRequest extends RequestData {
   //   this.tokenId = tokenId;
   // }
 
-  public toObject = (): Record<string, unknown> => {
-    return {
-      //     registryAddress: this.registryAddress,
-      //     tokenId: this.tokenId,
-    };
-  }
+  // public toObject = (): Record<string, unknown> => {
+  //   return {
+  //         registryAddress: this.registryAddress,
+  //         tokenId: this.tokenId,
+  //   };
+  // };
 }
 
 export class RetrieveCollectionTokenResponse extends ResponseData {
@@ -66,7 +196,7 @@ export class RetrieveCollectionTokenResponse extends ResponseData {
     return new RetrieveCollectionTokenResponse(
       Resources.CollectionToken.fromObject(obj.token as Record<string, unknown>),
     );
-  }
+  };
 }
 
 export class RetrieveCollectionRequest extends RequestData {
@@ -80,12 +210,12 @@ export class RetrieveCollectionRequest extends RequestData {
   //   this.tokenId = tokenId;
   // }
 
-  public toObject = (): Record<string, unknown> => {
-    return {
-      //     registryAddress: this.registryAddress,
-      //     tokenId: this.tokenId,
-    };
-  }
+  // public toObject = (): Record<string, unknown> => {
+  //   return {
+  //         registryAddress: this.registryAddress,
+  //         tokenId: this.tokenId,
+  //   };
+  // };
 }
 
 export class RetrieveCollectionResponse extends ResponseData {
@@ -100,14 +230,10 @@ export class RetrieveCollectionResponse extends ResponseData {
     return new RetrieveCollectionResponse(
       Resources.Collection.fromObject(obj.collection as Record<string, unknown>),
     );
-  }
+  };
 }
 
 export class GetCollectionStatisticsRequest extends RequestData {
-  public toObject = (): Record<string, unknown> => {
-    return {
-    };
-  }
 }
 
 export class GetCollectionStatisticsResponse extends ResponseData {
@@ -122,22 +248,26 @@ export class GetCollectionStatisticsResponse extends ResponseData {
     return new GetCollectionStatisticsResponse(
       Resources.CollectionStatistics.fromObject(obj.collectionStatistics as Record<string, unknown>),
     );
-  }
+  };
 }
 
 export class GetTokenRecentSalesRequest extends RequestData {
+  readonly limit?: number;
   readonly offset?: number;
 
-  constructor(offset?: number) {
+
+  constructor(limit?: number, offset?: number) {
     super();
-    this.offset = offset || 0;
+    this.limit = limit;
+    this.offset = offset;
   }
 
   public toObject = (): Record<string, unknown> => {
     return {
+      limit: this.limit,
       offset: this.offset,
     };
-  }
+  };
 }
 
 export class GetTokenRecentSalesResponse extends ResponseData {
@@ -152,14 +282,10 @@ export class GetTokenRecentSalesResponse extends ResponseData {
     return new GetTokenRecentSalesResponse(
       (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
     );
-  }
+  };
 }
 
 export class GetCollectionRecentSalesRequest extends RequestData {
-  public toObject = (): Record<string, unknown> => {
-    return {
-    };
-  }
 }
 
 export class GetCollectionRecentSalesResponse extends ResponseData {
@@ -174,7 +300,25 @@ export class GetCollectionRecentSalesResponse extends ResponseData {
     return new GetCollectionRecentSalesResponse(
       (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
     );
+  };
+}
+
+export class GetCollectionHoldingsRequest extends RequestData {
+}
+
+export class GetCollectionHoldingsResponse extends ResponseData {
+  readonly tokens: Resources.CollectionToken[];
+
+  public constructor(collectionHoldings: Resources.CollectionToken[]) {
+    super();
+    this.tokens = collectionHoldings;
   }
+
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionHoldingsResponse => {
+    return new GetCollectionHoldingsResponse(
+      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionToken.fromObject(innerObj)),
+    );
+  };
 }
 
 export class SubscribeRequest extends RequestData {
@@ -189,11 +333,11 @@ export class SubscribeRequest extends RequestData {
     return {
       email: this.email,
     };
-  }
+  };
 }
 
 export class SubscribeResponse extends ResponseData {
   public static fromObject = (): SubscribeResponse => {
     return new SubscribeResponse();
-  }
+  };
 }

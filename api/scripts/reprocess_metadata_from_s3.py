@@ -29,21 +29,27 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 
 
 async def _reprocess_metadata(tokenMetadataProcessor: TokenMetadataProcessor, s3manager: S3Manager, tokenManger: TokenManager, tokenMetadata: TokenMetadata):
+    logging.info(f'Re-processing tokenMetadata: {tokenMetadata.tokenMetadataId}')
+    await tokenManger.update_token_metadata(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, shouldForce=True)
+    logging.info(f'Re-processed tokenMetadata: {tokenMetadata.tokenMetadataId}')
+
+async def _reprocess_metadata_from_s3(tokenMetadataProcessor: TokenMetadataProcessor, s3manager: S3Manager, tokenManger: TokenManager, tokenMetadata: TokenMetadata):
     tokenDirectory = f'{os.environ["S3_BUCKET"]}/token-metadatas/{tokenMetadata.registryAddress}/{tokenMetadata.tokenId}/'
     tokenFile = None
     tokenMetadataFiles = [file async for file in s3manager.generate_directory_files(s3Directory=tokenDirectory)]
     if len(tokenMetadataFiles) > 0:
-        logging.info(f'Updating tokenMetadata: {tokenMetadata.tokenMetadataId}')
         tokenFile = tokenMetadataFiles[-1]
         tokenMetadataJson = await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}')
         tokenMetadataDict = json.loads(tokenMetadataJson)
+        if not tokenMetadataDict:
+            await _reprocess_metadata(tokenMetadataProcessor=tokenMetadataProcessor, s3manager=s3manager, tokenManger=tokenManger, tokenMetadata=tokenMetadata)
+            return
+        logging.info(f'Updating tokenMetadata: {tokenMetadata.tokenMetadataId}')
         s3TokenMetadata = await tokenMetadataProcessor._get_token_metadata_from_data(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, metadataUrl=tokenMetadata.metadataUrl, tokenMetadataDict=tokenMetadataDict)
         await tokenManger.save_token_metadata(retrievedTokenMetadata=s3TokenMetadata)
         logging.info(f'Updated tokenMetadata: {tokenMetadata.tokenMetadataId}')
     else:
-        logging.info(f'Re-processing tokenMetadata: {tokenMetadata.tokenMetadataId}')
-        await tokenManger.update_token_metadata(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, shouldForce=True)
-        logging.info(f'Re-processed tokenMetadata: {tokenMetadata.tokenMetadataId}')
+        await _reprocess_metadata(tokenMetadataProcessor=tokenMetadataProcessor, s3manager=s3manager, tokenManger=tokenManger, tokenMetadata=tokenMetadata)
 
 @click.command()
 @click.option('-s', '--start-id-number', 'startId', required=False, type=int)
@@ -85,7 +91,7 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
         tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
         logging.info(f'Working on {start} - {end}')
         logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
-        await asyncio.gather(*[_reprocess_metadata(tokenMetadataProcessor=tokenMetadataProcessor, s3manager=s3manager, tokenManger=tokenManger, tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatasToChange])
+        await asyncio.gather(*[_reprocess_metadata_from_s3(tokenMetadataProcessor=tokenMetadataProcessor, s3manager=s3manager, tokenManger=tokenManger, tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatasToChange])
         currentId = currentId + batchSize
 
     await s3manager.disconnect()

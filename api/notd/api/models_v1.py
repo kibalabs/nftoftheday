@@ -6,9 +6,6 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from notd.model import Token
-from notd.model import UiData
-
 
 class ApiCollection(BaseModel):
     address: str
@@ -47,56 +44,19 @@ class ApiTokenTransfer(BaseModel):
     gasPrice: int
     blockNumber: int
     blockDate: datetime.datetime
-    # NOTE(krishan711): make these non-optional once ui-data is fixed
-    collection: Optional[ApiCollection]
-    token: Optional[ApiCollectionToken]
+    collection: ApiCollection
+    token: ApiCollectionToken
 
-    @classmethod
-    def from_model(cls, model: UiData):
-        return cls(
-            tokenTransferId=model.tokenTransferId,
-            transactionHash=model.transactionHash,
-            registryAddress=model.registryAddress,
-            fromAddress=model.fromAddress,
-            toAddress=model.toAddress,
-            tokenId=model.tokenId,
-            value=model.value,
-            gasLimit=model.gasLimit,
-            gasPrice=model.gasPrice,
-            blockNumber=model.blockNumber,
-            blockDate=model.blockDate,
-        )
-
-class ApiToken(BaseModel):
-    registryAddress: str
-    tokenId: str
-
-    @classmethod
-    def from_model(cls, model: Token):
-        return cls(
-            registryAddress=model.registryAddress,
-            tokenId=model.tokenId,
-        )
 
 class ApiTradedToken(BaseModel):
-    collectionToken: ApiCollectionToken
+    token: ApiCollectionToken
+    collection: ApiCollection
     latestTransfer: ApiTokenTransfer
     transferCount: int
 
 
-class ApiUiData(BaseModel):
-    highestPricedTokenTransfer: ApiTokenTransfer
-    mostTradedTokenTransfers: List[ApiTokenTransfer]
-    randomTokenTransfer: ApiTokenTransfer
-    sponsoredToken: ApiToken
-    transactionCount: int
-
-    @classmethod
-    def from_model(cls, model: UiData):
-        return cls(
-            highestPricedTokenTransfer=ApiTokenTransfer.from_model(model=model.highestPricedTokenTransfer),
-            mostTradedTokenTransfers=[ApiTokenTransfer.from_model(model=transfer) for transfer in model.mostTradedTokenTransfers],
-            randomTokenTransfer=ApiTokenTransfer.from_model(model=model.randomTokenTransfer),
-            sponsoredToken=ApiToken.from_model(model=model.sponsoredToken),
-            transactionCount=model.transactionCount
-        )
+class ApiSponsoredToken(BaseModel):
+    token: ApiCollectionToken
+    collection: ApiCollection
+    date: datetime.datetime
+    latestTransfer: Optional[ApiTokenTransfer]
