@@ -19,7 +19,6 @@ from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
-from notd.model import RetrievedTokenOwnership
 from notd.model import TokenMetadata
 from notd.ownership_processor import TokenOwnershipProcessor
 from notd.store.retriever import Retriever
@@ -197,15 +196,10 @@ class TokenManager:
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 
-    async def update_token_ownerships_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
+    async def update_token_ownerships_deferred(self, collectionTokenIds: List[Tuple[str, str]]) -> None:
         if len(collectionTokenIds) == 0:
             return
-        if not shouldForce:
-            query = (
-                TokenOwnershipTable.select()
-                    .where(sqlalchemy.tuple_(TokenOwnershipTable.c.registryAddress, TokenOwnershipTable.c.tokenId).in_(collectionTokenIds))
-            )
-            collectionTokenIds = set(collectionTokenIds)
+        collectionTokenIds = set(collectionTokenIds)
         messages = [UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in collectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
 
