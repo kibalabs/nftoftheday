@@ -137,7 +137,7 @@ class RetrievedTokenOwnership:
     registryAddress: str
     tokenId: str
     purchasedDate: datetime.datetime
-    value: int
+    purchasedValue: int
     transactionHash: str
 
 @dataclasses.dataclass

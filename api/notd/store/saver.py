@@ -239,7 +239,7 @@ class Saver(CoreSaver):
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_ownership(self, ownerAddress: str, registryAddress: str, tokenId: str, purchasedDate: datetime.datetime, value: int, transactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
+    async def create_token_ownership(self, ownerAddress: str, registryAddress: str, tokenId: str, purchasedDate: datetime.datetime, purchasedValue: int, transactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -249,7 +249,7 @@ class Saver(CoreSaver):
             TokenOwnershipTable.c.registryAddress.key: registryAddress,
             TokenOwnershipTable.c.tokenId.key: tokenId,
             TokenOwnershipTable.c.purchasedDate.key: purchasedDate,
-            TokenOwnershipTable.c.value.key: value,
+            TokenOwnershipTable.c.purchasedValue.key: purchasedValue,
             TokenOwnershipTable.c.transactionHash.key: transactionHash,
         }
         query = TokenOwnershipTable.insert().values(values)
@@ -263,18 +263,18 @@ class Saver(CoreSaver):
             registryAddress=registryAddress,
             tokenId=tokenId,
             purchasedDate=purchasedDate,
-            value=value,
+            purchasedValue=purchasedValue,
             transactionHash=transactionHash,
         )
 
-    async def update_token_ownership(self, ownerId: int, ownerAddress: Optional[str], purchasedDate: Optional[str], value: Optional[str], transactionHash: Optional[str],  connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_ownership(self, ownerId: int, ownerAddress: Optional[str], purchasedDate: Optional[str], purchasedValue: Optional[str], transactionHash: Optional[str],  connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if ownerAddress != _EMPTY_STRING:
             values[TokenOwnershipTable.c.ownerAddress.key] = ownerAddress
         if purchasedDate != _EMPTY_STRING:
             values[TokenOwnershipTable.c.purchasedDate.key] = purchasedDate
-        if value != _EMPTY_STRING:
-            values[TokenOwnershipTable.c.value.key] = value
+        if purchasedValue != _EMPTY_STRING:
+            values[TokenOwnershipTable.c.purchasedValue.key] = purchasedValue
         if transactionHash != _EMPTY_STRING:
             values[TokenOwnershipTable.c.transactionHash.key] = transactionHash
         if len(values) > 0:

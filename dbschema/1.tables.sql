@@ -80,7 +80,7 @@ CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
 CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
 CREATE INDEX tbl_blocks_block_date ON tbl_blocks (block_date);
 
-CREATE TABLE tbl_token_ownership (
+CREATE TABLE tbl_token_ownerships (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -88,14 +88,14 @@ CREATE TABLE tbl_token_ownership (
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
     purchased_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    value NUMERIC(256, 0) NOT NULL,
+    purchased_value NUMERIC(256, 0) NOT NULL,
     transaction_hash TEXT NOT NULL
 );
-CREATE UNIQUE INDEX tbl_token_ownership_registry_address_token_id ON tbl_token_ownership (registry_address, token_id);
-CREATE INDEX tbl_token_ownership_created_date ON tbl_token_ownership (created_date);
-CREATE INDEX tbl_token_ownership_updated_date ON tbl_token_ownership (updated_date);
-CREATE INDEX tbl_token_ownership_owner_address ON tbl_token_ownership (owner_address);
-CREATE INDEX tbl_token_ownership_regsitry_address ON tbl_token_ownership (registry_address);
-CREATE INDEX tbl_token_ownership_token_id ON tbl_token_ownership (token_id);
-CREATE INDEX tbl_token_ownership_purchase_date ON tbl_token_ownership (purchased_date);
-CREATE INDEX tbl_token_ownership_value ON tbl_token_ownership (value);
+CREATE UNIQUE INDEX tbl_token_ownerships_registry_address_token_id ON tbl_token_ownerships (registry_address, token_id);
+CREATE INDEX tbl_token_ownerships_created_date ON tbl_token_ownerships (created_date);
+CREATE INDEX tbl_token_ownerships_updated_date ON tbl_token_ownerships (updated_date);
+CREATE INDEX tbl_token_ownerships_owner_address ON tbl_token_ownerships (owner_address);
+CREATE INDEX tbl_token_ownerships_regsitry_address ON tbl_token_ownerships (registry_address);
+CREATE INDEX tbl_token_ownerships_token_id ON tbl_token_ownerships (token_id);
+CREATE INDEX tbl_token_ownerships_purchase_date ON tbl_token_ownerships (purchased_date);
+CREATE INDEX tbl_token_ownerships_purchased_value ON tbl_token_ownerships (purchased_value);

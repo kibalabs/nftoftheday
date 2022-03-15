@@ -132,12 +132,7 @@ class Retriever(CoreRetriever):
             query = query.limit(limit)
         return await self.query_token_metadatas(query=query, connection=connection)
 
-    async def query_token_ownership(self, query: Select, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenMetadata]:
-        result = await self.database.execute(query=query, connection=connection)
-        tokenOwnerships = [token_ownership_from_row(row) for row in result]
-        return tokenOwnerships
-
-    async def list_token_ownership(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenOwnership]:
+    async def list_token_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenOwnership]:
         query = TokenOwnershipTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenOwnershipTable, fieldFilters=fieldFilters)
@@ -145,7 +140,9 @@ class Retriever(CoreRetriever):
             query = self._apply_orders(query=query, table=TokenOwnershipTable, orders=orders)
         if limit:
             query = query.limit(limit)
-        return await self.query_token_ownership(query=query, connection=connection)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenOwnerships = [token_ownership_from_row(row) for row in result]
+        return tokenOwnerships
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
         query = TokenMetadataTable.select() \

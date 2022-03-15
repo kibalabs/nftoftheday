@@ -145,8 +145,8 @@ class NotdManager:
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         return await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
-    async def update_token_ownership(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+    async def update_token_ownership(self, registryAddress: str, tokenId: str) -> None:
+        return await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         return await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
@@ -210,6 +210,7 @@ class NotdManager:
             logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
             await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
             await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
+            await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         await self._save_processed_block(processedBlock=processedBlock)
 
     @staticmethod

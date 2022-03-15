@@ -11,6 +11,7 @@ from core.s3_manager import S3Manager
 from core.slack_client import SlackClient
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
+from api.notd.ownership_processor import TokenOwnershipProcessor
 
 from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
@@ -37,8 +38,9 @@ async def main():
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     openseaApiKey = os.environ['OPENSEA_API_KEY']
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    ownershipProcessor = TokenOwnershipProcessor(retriever=retriever)
     revueApiKey = os.environ['REVUE_API_KEY']
-    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, ownershipProcessor=ownershipProcessor)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)

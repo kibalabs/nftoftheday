@@ -37,13 +37,13 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, ownershipProcessor: TokenOwnershipProcessor):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
         self.tokenMetadataProcessor = tokenMetadataProcessor
-        self.tokenOwnershipProcessor = tokenOwnershipProcessor
+        self.ownershipProcessor = ownershipProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
@@ -197,9 +197,21 @@ class TokenManager:
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 
+    async def update_token_ownerships_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
+        if len(collectionTokenIds) == 0:
+            return
+        if not shouldForce:
+            query = (
+                TokenOwnershipTable.select()
+                    .where(sqlalchemy.tuple_(TokenOwnershipTable.c.registryAddress, TokenOwnershipTable.c.tokenId).in_(collectionTokenIds))
+            )
+            collectionTokenIds = set(collectionTokenIds)
+        messages = [UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in collectionTokenIds]
+        await self.tokenQueue.send_messages(messages=messages)
+
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         if not shouldForce:
-            recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
+            recentlyUpdatedTokens = await self.retriever.list_token_ownerships(
                 fieldFilters=[
                     StringFieldFilter(fieldName=TokenOwnershipTable.c.registryAddress.key, eq=registryAddress),
                     StringFieldFilter(fieldName=TokenOwnershipTable.c.tokenId.key, eq=tokenId),
@@ -211,13 +223,14 @@ class TokenManager:
                 return
         await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
-    async def update_token_ownership(self, retrievedTokenOwnership: RetrievedTokenOwnership):
+    async def update_token_ownership(self, registryAddress: str, tokenId: str):
         async with self.saver.create_transaction() as connection:
             try:
-                tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId)
+                tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
             except NotFoundException:
                 tokenOwnership = None
+            retrievedTokenOwnership = await self.ownershipProcessor.retrieve_erc721_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
             if tokenOwnership:
-                await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, value=retrievedTokenOwnership.value, transactionHash=retrievedTokenOwnership.transactionHash)
+                await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transactionHash=retrievedTokenOwnership.transactionHash)
             else:
-                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, value=retrievedTokenOwnership.value, transactionHash=retrievedTokenOwnership.transactionHash)
+                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transactionHash=retrievedTokenOwnership.transactionHash)

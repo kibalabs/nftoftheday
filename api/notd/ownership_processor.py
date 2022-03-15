@@ -12,12 +12,13 @@ class TokenOwnershipProcessor:
     def __init__(self,retriever: Retriever):
         self.retriever = retriever
 
-    async def retrieve_token_ownership(self, registryAddress: str, tokenId: str):
+    async def retrieve_erc721_token_ownership(self, registryAddress: str, tokenId: str):
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenType.key, eq='erc721'),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
             limit=1
@@ -28,6 +29,6 @@ class TokenOwnershipProcessor:
             registryAddress=registryAddress,
             tokenId=tokenId,
             purchasedDate=tokenTransfer.blockDate,
-            value=tokenTransfer.value,
+            purchasedValue=tokenTransfer.value,
             transactionHash=tokenTransfer.transactionHash,
         )
