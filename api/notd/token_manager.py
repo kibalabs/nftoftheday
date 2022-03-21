@@ -36,13 +36,13 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, ownershipProcessor: TokenOwnershipProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
         self.tokenMetadataProcessor = tokenMetadataProcessor
-        self.ownershipProcessor = ownershipProcessor
+        self.tokenOwnershipProcessor = tokenOwnershipProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
@@ -223,7 +223,7 @@ class TokenManager:
                 tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
             except NotFoundException:
                 tokenOwnership = None
-            retrievedTokenOwnership = await self.ownershipProcessor.retrieve_erc721_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
+            retrievedTokenOwnership = await self.tokenOwnershipProcessor.retrieve_erc721_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
             if tokenOwnership:
                 await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transactionHash=retrievedTokenOwnership.transactionHash)
             else:
