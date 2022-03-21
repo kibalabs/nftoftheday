@@ -131,6 +131,7 @@ class Block:
     blockHash: str
     blockDate: datetime.datetime
 
+
 @dataclasses.dataclass
 class RetrievedTokenOwnership:
     ownerAddress: str
@@ -140,9 +141,10 @@ class RetrievedTokenOwnership:
     transferValue: int
     transferTransactionHash: str
 
+
 @dataclasses.dataclass
 class TokenOwnership(RetrievedTokenOwnership):
-    ownerId: int
+    tokenOwnershipId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
 
