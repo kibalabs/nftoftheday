@@ -86,7 +86,7 @@ def token_ownership_from_row(row: Mapping) -> TokenOwnership:
         ownerAddress=row[TokenOwnershipTable.c.ownerAddress],
         registryAddress=row[TokenOwnershipTable.c.registryAddress],
         tokenId=row[TokenOwnershipTable.c.tokenId],
-        purchasedDate=row[TokenOwnershipTable.c.purchasedDate],
-        purchasedValue=row[TokenOwnershipTable.c.purchasedValue],
+        transferDate=row[TokenOwnershipTable.c.transferDate],
+        transferValue=row[TokenOwnershipTable.c.transferValue],
         transactionHash=row[TokenOwnershipTable.c.transactionHash],
     )

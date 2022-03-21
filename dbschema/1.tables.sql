@@ -84,18 +84,19 @@ CREATE TABLE tbl_token_ownerships (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    owner_address TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
-    purchased_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    purchased_value NUMERIC(256, 0) NOT NULL,
-    transaction_hash TEXT NOT NULL
+    owner_address TEXT NOT NULL,
+    transfer_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    transfer_value NUMERIC(256, 0) NOT NULL,
+    transfer_transaction_hash TEXT NOT NULL
 );
 CREATE UNIQUE INDEX tbl_token_ownerships_registry_address_token_id ON tbl_token_ownerships (registry_address, token_id);
 CREATE INDEX tbl_token_ownerships_created_date ON tbl_token_ownerships (created_date);
 CREATE INDEX tbl_token_ownerships_updated_date ON tbl_token_ownerships (updated_date);
-CREATE INDEX tbl_token_ownerships_owner_address ON tbl_token_ownerships (owner_address);
 CREATE INDEX tbl_token_ownerships_regsitry_address ON tbl_token_ownerships (registry_address);
 CREATE INDEX tbl_token_ownerships_token_id ON tbl_token_ownerships (token_id);
-CREATE INDEX tbl_token_ownerships_purchase_date ON tbl_token_ownerships (purchased_date);
-CREATE INDEX tbl_token_ownerships_purchased_value ON tbl_token_ownerships (purchased_value);
+CREATE INDEX tbl_token_ownerships_owner_address ON tbl_token_ownerships (owner_address);
+CREATE INDEX tbl_token_ownerships_transfer_date ON tbl_token_ownerships (transfer_date);
+CREATE INDEX tbl_token_ownerships_transfer_value ON tbl_token_ownerships (transfer_value);
+CREATE INDEX tbl_token_ownerships_transfer_transaction_hash ON tbl_token_ownerships (transfer_transaction_hash);

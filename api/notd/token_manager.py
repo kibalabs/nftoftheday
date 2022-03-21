@@ -225,6 +225,6 @@ class TokenManager:
                 tokenOwnership = None
             retrievedTokenOwnership = await self.ownershipProcessor.retrieve_erc721_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
             if tokenOwnership:
-                await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transactionHash=retrievedTokenOwnership.transactionHash)
+                await self.saver.update_token_ownership(connection=connection, ownerId=tokenOwnership.ownerId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transactionHash=retrievedTokenOwnership.transactionHash)
             else:
-                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, purchasedDate=retrievedTokenOwnership.purchasedDate, purchasedValue=retrievedTokenOwnership.purchasedValue, transactionHash=retrievedTokenOwnership.transactionHash)
+                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transactionHash=retrievedTokenOwnership.transactionHash)

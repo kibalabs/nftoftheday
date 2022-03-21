@@ -28,7 +28,7 @@ class TokenOwnershipProcessor:
             ownerAddress=tokenTransfer.toAddress,
             registryAddress=registryAddress,
             tokenId=tokenId,
-            purchasedDate=tokenTransfer.blockDate,
-            purchasedValue=tokenTransfer.value,
+            transferDate=tokenTransfer.blockDate,
+            transferValue=tokenTransfer.value,
             transactionHash=tokenTransfer.transactionHash,
         )
