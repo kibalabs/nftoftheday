@@ -80,7 +80,7 @@ def collection_from_row(row: Mapping) -> Collection:
 
 def token_ownership_from_row(row: Mapping) -> TokenOwnership:
     return TokenOwnership(
-        ownerId=row[TokenOwnershipTable.c.ownerId],
+        tokenOwnershipId=row[TokenOwnershipTable.c.tokenOwnershipId],
         createdDate=row[TokenOwnershipTable.c.createdDate],
         updatedDate=row[TokenOwnershipTable.c.updatedDate],
         ownerAddress=row[TokenOwnershipTable.c.ownerAddress],
