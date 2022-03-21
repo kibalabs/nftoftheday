@@ -138,7 +138,7 @@ class RetrievedTokenOwnership:
     tokenId: str
     transferDate: datetime.datetime
     transferValue: int
-    transactionHash: str
+    transferTransactionHash: str
 
 @dataclasses.dataclass
 class TokenOwnership(RetrievedTokenOwnership):
