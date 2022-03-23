@@ -95,7 +95,7 @@ def token_ownership_from_row(row: Mapping) -> TokenOwnership:
 
 def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
     return TokenMultiOwnership(
-        tokenOwnershipId=row[TokenMultiOwnershipsTable.c.tokenOwnershipId],
+        tokenMultiOwnershipId=row[TokenMultiOwnershipsTable.c.tokenMultiOwnershipId],
         createdDate=row[TokenMultiOwnershipsTable.c.createdDate],
         updatedDate=row[TokenMultiOwnershipsTable.c.updatedDate],
         registryAddress=row[TokenMultiOwnershipsTable.c.registryAddress],
