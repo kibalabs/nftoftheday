@@ -25,7 +25,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
-from notd.store.schema import TokenOwnershipTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -207,9 +207,9 @@ class TokenManager:
         if not shouldForce:
             recentlyUpdatedTokens = await self.retriever.list_token_ownerships(
                 fieldFilters=[
-                    StringFieldFilter(fieldName=TokenOwnershipTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenOwnershipTable.c.tokenId.key, eq=tokenId),
-                    DateFieldFilter(fieldName=TokenOwnershipTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
+                    StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenOwnershipsTable.c.tokenId.key, eq=tokenId),
+                    DateFieldFilter(fieldName=TokenOwnershipsTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
                 ],
             )
             if len(recentlyUpdatedTokens) > 0:

@@ -87,8 +87,8 @@ CREATE TABLE tbl_token_ownerships (
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
     owner_address TEXT NOT NULL,
-    transfer_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     transfer_value NUMERIC(256, 0) NOT NULL,
+    transfer_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     transfer_transaction_hash TEXT NOT NULL
 );
 CREATE UNIQUE INDEX tbl_token_ownerships_registry_address_token_id ON tbl_token_ownerships (registry_address, token_id);
@@ -100,3 +100,26 @@ CREATE INDEX tbl_token_ownerships_owner_address ON tbl_token_ownerships (owner_a
 CREATE INDEX tbl_token_ownerships_transfer_date ON tbl_token_ownerships (transfer_date);
 CREATE INDEX tbl_token_ownerships_transfer_value ON tbl_token_ownerships (transfer_value);
 CREATE INDEX tbl_token_ownerships_transfer_transaction_hash ON tbl_token_ownerships (transfer_transaction_hash);
+
+CREATE TABLE tbl_token_multi_ownerships (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    owner_address TEXT NOT NULL,
+    quantity NUMERIC(256, 0) NOT NULL,
+    average_value NUMERIC(256, 0) NOT NULL,
+    latest_transfer_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    latest_transfer_transaction_hash TEXT NOT NULL
+);
+CREATE UNIQUE INDEX tbl_token_multi_ownerships_registry_address_token_id_owner_address ON tbl_token_multi_ownerships (registry_address, token_id, owner_address);
+CREATE INDEX tbl_token_multi_ownerships_registry_address_token_id ON tbl_token_multi_ownerships (registry_address, token_id);
+CREATE INDEX tbl_token_multi_ownerships_created_date ON tbl_token_multi_ownerships (created_date);
+CREATE INDEX tbl_token_multi_ownerships_updated_date ON tbl_token_multi_ownerships (updated_date);
+CREATE INDEX tbl_token_multi_ownerships_regsitry_address ON tbl_token_multi_ownerships (registry_address);
+CREATE INDEX tbl_token_multi_ownerships_token_id ON tbl_token_multi_ownerships (token_id);
+CREATE INDEX tbl_token_multi_ownerships_owner_address ON tbl_token_multi_ownerships (owner_address);
+CREATE INDEX tbl_token_multi_ownerships_latest_transfer_date ON tbl_token_multi_ownerships (latest_transfer_date);
+CREATE INDEX tbl_token_multi_ownerships_latest_transfer_value ON tbl_token_multi_ownerships (latest_transfer_value);
+CREATE INDEX tbl_token_multi_ownerships_latest_transfer_transaction_hash ON tbl_token_multi_ownerships (latest_transfer_transaction_hash);

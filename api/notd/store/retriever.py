@@ -22,7 +22,7 @@ from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
-from notd.store.schema import TokenOwnershipTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_from_row
@@ -133,11 +133,11 @@ class Retriever(CoreRetriever):
         return await self.query_token_metadatas(query=query, connection=connection)
 
     async def list_token_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenOwnership]:
-        query = TokenOwnershipTable.select()
+        query = TokenOwnershipsTable.select()
         if fieldFilters:
-            query = self._apply_field_filters(query=query, table=TokenOwnershipTable, fieldFilters=fieldFilters)
+            query = self._apply_field_filters(query=query, table=TokenOwnershipsTable, fieldFilters=fieldFilters)
         if orders:
-            query = self._apply_orders(query=query, table=TokenOwnershipTable, orders=orders)
+            query = self._apply_orders(query=query, table=TokenOwnershipsTable, orders=orders)
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
@@ -156,9 +156,9 @@ class Retriever(CoreRetriever):
         return tokenMetdata
 
     async def get_token_ownership_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
-        query = TokenOwnershipTable.select() \
-            .where(TokenOwnershipTable.c.registryAddress == registryAddress) \
-            .where(TokenOwnershipTable.c.tokenId == tokenId)
+        query = TokenOwnershipsTable.select() \
+            .where(TokenOwnershipsTable.c.registryAddress == registryAddress) \
+            .where(TokenOwnershipsTable.c.tokenId == tokenId)
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:

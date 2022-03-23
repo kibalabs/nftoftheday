@@ -8,3 +8,7 @@ GRANT INSERT, SELECT, UPDATE ON tbl_collections TO notd_api;
 GRANT ALL ON SEQUENCE tbl_collections_id_seq TO notd_api;
 GRANT INSERT, SELECT, UPDATE ON tbl_blocks TO notd_api;
 GRANT ALL ON SEQUENCE tbl_blocks_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE ON tbl_token_ownerships TO notd_api;
+GRANT ALL ON SEQUENCE tbl_token_ownerships_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE ON tbl_token_multi_ownerships TO notd_api;
+GRANT ALL ON SEQUENCE tbl_token_multi_ownerships_id_seq TO notd_api;

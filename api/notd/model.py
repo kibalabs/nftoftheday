@@ -133,12 +133,20 @@ class Block:
 
 
 @dataclasses.dataclass
+class ProcessedBlock:
+    blockNumber: int
+    blockHash: str
+    blockDate: datetime.datetime
+    retrievedTokenTransfers: List[RetrievedTokenTransfer]
+
+
+@dataclasses.dataclass
 class RetrievedTokenOwnership:
-    ownerAddress: str
     registryAddress: str
     tokenId: str
-    transferDate: datetime.datetime
+    ownerAddress: str
     transferValue: int
+    transferDate: datetime.datetime
     transferTransactionHash: str
 
 
@@ -150,8 +158,18 @@ class TokenOwnership(RetrievedTokenOwnership):
 
 
 @dataclasses.dataclass
-class ProcessedBlock:
-    blockNumber: int
-    blockHash: str
-    blockDate: datetime.datetime
-    retrievedTokenTransfers: List[RetrievedTokenTransfer]
+class RetrievedTokenMultiOwnership:
+    registryAddress: str
+    tokenId: str
+    ownerAddress: str
+    quantity: int
+    averageValue: int
+    latestTransferDate: datetime.datetime
+    latestTransferTransactionHash: str
+
+
+@dataclasses.dataclass
+class TokenMultiOwnership(RetrievedTokenMultiOwnership):
+    tokenMultiOwnershipId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime

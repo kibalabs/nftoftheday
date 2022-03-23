@@ -17,7 +17,7 @@ from notd.model import TokenOwnership
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
-from notd.store.schema import TokenOwnershipTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
@@ -243,16 +243,16 @@ class Saver(CoreSaver):
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
-            TokenOwnershipTable.c.createdDate.key: createdDate,
-            TokenOwnershipTable.c.updatedDate.key: updatedDate,
-            TokenOwnershipTable.c.ownerAddress.key: ownerAddress,
-            TokenOwnershipTable.c.registryAddress.key: registryAddress,
-            TokenOwnershipTable.c.tokenId.key: tokenId,
-            TokenOwnershipTable.c.transferDate.key: transferDate,
-            TokenOwnershipTable.c.transferValue.key: transferValue,
-            TokenOwnershipTable.c.transactionHash.key: transactionHash,
+            TokenOwnershipsTable.c.createdDate.key: createdDate,
+            TokenOwnershipsTable.c.updatedDate.key: updatedDate,
+            TokenOwnershipsTable.c.ownerAddress.key: ownerAddress,
+            TokenOwnershipsTable.c.registryAddress.key: registryAddress,
+            TokenOwnershipsTable.c.tokenId.key: tokenId,
+            TokenOwnershipsTable.c.transferDate.key: transferDate,
+            TokenOwnershipsTable.c.transferValue.key: transferValue,
+            TokenOwnershipsTable.c.transactionHash.key: transactionHash,
         }
-        query = TokenOwnershipTable.insert().values(values)
+        query = TokenOwnershipsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
         ownerId = result.inserted_primary_key[0]
         return TokenOwnership(
@@ -270,14 +270,14 @@ class Saver(CoreSaver):
     async def update_token_ownership(self, ownerId: int, ownerAddress: Optional[str], transferDate: Optional[str], transferValue: Optional[str], transactionHash: Optional[str],  connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if ownerAddress != _EMPTY_STRING:
-            values[TokenOwnershipTable.c.ownerAddress.key] = ownerAddress
+            values[TokenOwnershipsTable.c.ownerAddress.key] = ownerAddress
         if transferDate != _EMPTY_STRING:
-            values[TokenOwnershipTable.c.transferDate.key] = transferDate
+            values[TokenOwnershipsTable.c.transferDate.key] = transferDate
         if transferValue != _EMPTY_STRING:
-            values[TokenOwnershipTable.c.transferValue.key] = transferValue
+            values[TokenOwnershipsTable.c.transferValue.key] = transferValue
         if transactionHash != _EMPTY_STRING:
-            values[TokenOwnershipTable.c.transactionHash.key] = transactionHash
+            values[TokenOwnershipsTable.c.transactionHash.key] = transactionHash
         if len(values) > 0:
-            values[TokenOwnershipTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = TokenOwnershipTable.update(TokenOwnershipTable.c.ownerId == ownerId).values(values)
+            values[TokenOwnershipsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TokenOwnershipsTable.update(TokenOwnershipsTable.c.ownerId == ownerId).values(values)
         await self._execute(query=query, connection=connection)
