@@ -204,17 +204,6 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        if not shouldForce:
-            recentlyUpdatedTokens = await self.retriever.list_token_ownerships(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenOwnershipsTable.c.tokenId.key, eq=tokenId),
-                    DateFieldFilter(fieldName=TokenOwnershipsTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
-                ],
-            )
-            if len(recentlyUpdatedTokens) > 0:
-                logging.info('Skipping token because it has been updated recently.')
-                return
         await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str):
