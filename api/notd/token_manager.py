@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 import random
 from typing import List
@@ -17,7 +18,7 @@ from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
-from notd.model import Collection
+from notd.model import Collection, RetrievedTokenMultiOwnership, TokenMultiOwnership
 from notd.model import RetrievedTokenMetadata
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
@@ -226,6 +227,10 @@ class TokenManager:
             else:
                 await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
 
+    @staticmethod
+    def _uniqueness_tuple_from_token_multi_ownership(retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> Tuple[str, str, str, int, int, datetime.datetime, str]:
+        return (retrievedTokenMultiOwnership.registryAddress, retrievedTokenMultiOwnership.tokenId, retrievedTokenMultiOwnership.ownerAddress, retrievedTokenMultiOwnership.quantity, retrievedTokenMultiOwnership.averageTransferValue, retrievedTokenMultiOwnership.latestTransferDate, retrievedTokenMultiOwnership.latestTransferTransactionHash)
+
     async def _update_token_multi_ownership(self, registryAddress: str, tokenId: str) -> None:
         retrievedTokenMultiOwnerships = await self.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
         async with self.saver.create_transaction() as connection:
@@ -233,6 +238,20 @@ class TokenManager:
                 StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
             ])
-            await self.saver.delete_token_multi_ownerships(tokenMultiOwnershipIds=[tokenMultiOwnership.tokenMultiOwnershipId for tokenMultiOwnership in currentTokenMultiOwnerships])
-            for retrievedTokenMultiOwnership in retrievedTokenMultiOwnerships:
+            existingOwnershipTuplesMap = {self._uniqueness_tuple_from_token_multi_ownership(retrievedTokenMultiOwnership=tokenMultiOwnership): tokenMultiOwnership for tokenMultiOwnership in currentTokenMultiOwnerships}
+            existingOwnershipTuples = set(existingOwnershipTuplesMap.keys())
+            retrievedOwnershipTuplesMaps = {self._uniqueness_tuple_from_token_multi_ownership(retrievedTokenMultiOwnership=retrievedTokenMultiOwnership): retrievedTokenMultiOwnership for retrievedTokenMultiOwnership in retrievedTokenMultiOwnerships}
+            retrievedOwnershipTuples = set(retrievedOwnershipTuplesMaps.keys())
+            tokenMultiOwnershipIdsToDelete = []
+            for existingTuple, existingTokenMultiOwnership in existingOwnershipTuplesMap.items():
+                if existingTuple in retrievedOwnershipTuples:
+                    continue
+                tokenMultiOwnershipIdsToDelete.append(existingTokenMultiOwnership.tokenMultiOwnershipId)
+            await self.saver.delete_token_multi_ownerships(connection=connection, tokenMultiOwnershipIds=tokenMultiOwnershipIdsToDelete)
+            retrievedTokenMultiOwnershipsToSave = []
+            for retrievedTuple, retrievedTokenMultiOwnership in retrievedOwnershipTuplesMaps.items():
+                if retrievedTuple in existingOwnershipTuples:
+                    continue
+                retrievedTokenMultiOwnershipsToSave.append(retrievedTokenMultiOwnership)
+            for retrievedTokenMultiOwnership in retrievedTokenMultiOwnershipsToSave:
                 await self.saver.create_token_multi_ownership(connection=connection, registryAddress=retrievedTokenMultiOwnership.registryAddress, tokenId=retrievedTokenMultiOwnership.tokenId, ownerAddress=retrievedTokenMultiOwnership.ownerAddress, quantity=retrievedTokenMultiOwnership.quantity, latestTransferDate=retrievedTokenMultiOwnership.latestTransferDate, averageTransferValue=retrievedTokenMultiOwnership.averageTransferValue, latestTransferTransactionHash=retrievedTokenMultiOwnership.latestTransferTransactionHash)

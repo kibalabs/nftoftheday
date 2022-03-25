@@ -63,7 +63,7 @@ class TokenOwnershipProcessor:
                     ownerships[tokenTransfer.toAddress] = receiverOwnership
                 currentTotalValue = (receiverOwnership.averageTransferValue * receiverOwnership.quantity) + tokenTransfer.value
                 receiverOwnership.quantity += tokenTransfer.amount
-                receiverOwnership.averageTransferValue = (currentTotalValue / receiverOwnership.quantity) if receiverOwnership.quantity > 0 else 0
+                receiverOwnership.averageTransferValue = int(currentTotalValue / receiverOwnership.quantity) if receiverOwnership.quantity > 0 else 0
                 receiverOwnership.latestTransferDate = tokenTransfer.blockDate
                 receiverOwnership.latestTransferTransactionHash = tokenTransfer.transactionHash
             if tokenTransfer.fromAddress != chain_util.BURN_ADDRESS:
@@ -81,7 +81,7 @@ class TokenOwnershipProcessor:
                     ownerships[tokenTransfer.fromAddress] = senderOwnership
                 currentTotalValue = (senderOwnership.averageTransferValue * senderOwnership.quantity) - tokenTransfer.value
                 senderOwnership.quantity -= tokenTransfer.amount
-                senderOwnership.averageTransferValue = (currentTotalValue / senderOwnership.quantity) if senderOwnership.quantity > 0 else 0
+                senderOwnership.averageTransferValue = int(currentTotalValue / senderOwnership.quantity) if senderOwnership.quantity > 0 else 0
                 senderOwnership.latestTransferDate = tokenTransfer.blockDate
                 senderOwnership.latestTransferTransactionHash = tokenTransfer.transactionHash
         return list(ownerships.values())
