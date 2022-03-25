@@ -168,23 +168,6 @@ class Retriever(CoreRetriever):
         collection = collection_from_row(row)
         return collection
 
-    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
-        boughtTokens = []
-        soldTokens= []
-        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-        query = query.where(TokenTransfersTable.c.registryAddress == address)
-        query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
-        boughtResult = await self.database.execute(query=query, connection=connection)
-        boughtTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in boughtResult]]
-        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-        query = query.where(TokenTransfersTable.c.registryAddress == address)
-        query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
-        soldResult = await self.database.execute(query=query, connection=connection)
-        soldTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in soldResult]]
-        for token in soldTokens:
-            boughtTokens.remove(token)
-        return list(boughtTokens)
-
     async def list_token_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenOwnership]:
         query = TokenOwnershipsTable.select()
         if fieldFilters:

@@ -18,14 +18,17 @@ from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
-from notd.model import Collection, RetrievedTokenMultiOwnership
+from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
+from notd.model import RetrievedTokenMultiOwnership
+from notd.model import Token
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenMultiOwnershipsTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -254,3 +257,21 @@ class TokenManager:
                 retrievedTokenMultiOwnershipsToSave.append(retrievedTokenMultiOwnership)
             for retrievedTokenMultiOwnership in retrievedTokenMultiOwnershipsToSave:
                 await self.saver.create_token_multi_ownership(connection=connection, registryAddress=retrievedTokenMultiOwnership.registryAddress, tokenId=retrievedTokenMultiOwnership.tokenId, ownerAddress=retrievedTokenMultiOwnership.ownerAddress, quantity=retrievedTokenMultiOwnership.quantity, latestTransferDate=retrievedTokenMultiOwnership.latestTransferDate, averageTransferValue=retrievedTokenMultiOwnership.averageTransferValue, latestTransferTransactionHash=retrievedTokenMultiOwnership.latestTransferTransactionHash)
+
+    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
+        collection = await self.get_collection_by_address(address=address)
+        tokens = []
+        if collection.doesSupportErc721:
+            tokenOwnerships = await self.retriever.list_token_ownerships(fieldFilters=[
+                StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address),
+                StringFieldFilter(fieldName=TokenOwnershipsTable.c.ownerAddress.key, eq=ownerAddress),
+            ])
+            tokens += [Token(registryAddress=tokenOwnership.registryAddress, tokenId=tokenOwnership.tokenId) for tokenOwnership in tokenOwnerships]
+        elif collection.doesSupportErc1155:
+            tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=address),
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=ownerAddress),
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, eq=0),
+            ])
+            tokens += [Token(registryAddress=tokenMultiOwnership.registryAddress, tokenId=tokenMultiOwnership.tokenId) for tokenMultiOwnership in tokenMultiOwnerships]
+        return tokens
