@@ -255,8 +255,7 @@ class TokenManager:
                 if retrievedTuple in existingOwnershipTuples:
                     continue
                 retrievedTokenMultiOwnershipsToSave.append(retrievedTokenMultiOwnership)
-            for retrievedTokenMultiOwnership in retrievedTokenMultiOwnershipsToSave:
-                await self.saver.create_token_multi_ownership(connection=connection, registryAddress=retrievedTokenMultiOwnership.registryAddress, tokenId=retrievedTokenMultiOwnership.tokenId, ownerAddress=retrievedTokenMultiOwnership.ownerAddress, quantity=retrievedTokenMultiOwnership.quantity, latestTransferDate=retrievedTokenMultiOwnership.latestTransferDate, averageTransferValue=retrievedTokenMultiOwnership.averageTransferValue, latestTransferTransactionHash=retrievedTokenMultiOwnership.latestTransferTransactionHash)
+            await self.saver.create_token_multi_ownerships(connection=connection, retrievedTokenMultiOwnerships=retrievedTokenMultiOwnershipsToSave)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
         collection = await self.get_collection_by_address(address=address)

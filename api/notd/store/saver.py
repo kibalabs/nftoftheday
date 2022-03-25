@@ -9,7 +9,7 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 
-from notd.model import Block
+from notd.model import Block, RetrievedTokenMultiOwnership
 from notd.model import Collection
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
@@ -284,35 +284,40 @@ class Saver(CoreSaver):
         query = TokenOwnershipsTable.update(TokenOwnershipsTable.c.tokenOwnershipId == tokenOwnershipId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_multi_ownership(self, registryAddress: str, tokenId: str, ownerAddress: str, quantity: int, averageTransferValue: int, latestTransferDate: datetime.datetime, latestTransferTransactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenMultiOwnership:
-        createdDate = date_util.datetime_from_now()
-        updatedDate = createdDate
-        values = {
-            TokenMultiOwnershipsTable.c.createdDate.key: createdDate,
-            TokenMultiOwnershipsTable.c.updatedDate.key: updatedDate,
-            TokenMultiOwnershipsTable.c.registryAddress.key: registryAddress,
-            TokenMultiOwnershipsTable.c.tokenId.key: tokenId,
-            TokenMultiOwnershipsTable.c.ownerAddress.key: ownerAddress,
-            TokenMultiOwnershipsTable.c.quantity.key: quantity,
-            TokenMultiOwnershipsTable.c.averageTransferValue.key: averageTransferValue,
-            TokenMultiOwnershipsTable.c.latestTransferDate.key: latestTransferDate,
-            TokenMultiOwnershipsTable.c.latestTransferTransactionHash.key: latestTransferTransactionHash,
+    @staticmethod
+    def _get_create_token_multi_ownership(creationDate: datetime.datetime, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> Dict[str, Union[str, int, float, None, bool, datetime.datetime]]:
+        return {
+            TokenMultiOwnershipsTable.c.createdDate.key: creationDate,
+            TokenMultiOwnershipsTable.c.updatedDate.key: creationDate,
+            TokenMultiOwnershipsTable.c.registryAddress.key: retrievedTokenMultiOwnership.registryAddress,
+            TokenMultiOwnershipsTable.c.tokenId.key: retrievedTokenMultiOwnership.tokenId,
+            TokenMultiOwnershipsTable.c.ownerAddress.key: retrievedTokenMultiOwnership.ownerAddress,
+            TokenMultiOwnershipsTable.c.quantity.key: retrievedTokenMultiOwnership.quantity,
+            TokenMultiOwnershipsTable.c.averageTransferValue.key: retrievedTokenMultiOwnership.averageTransferValue,
+            TokenMultiOwnershipsTable.c.latestTransferDate.key: retrievedTokenMultiOwnership.latestTransferDate,
+            TokenMultiOwnershipsTable.c.latestTransferTransactionHash.key: retrievedTokenMultiOwnership.latestTransferTransactionHash,
         }
+
+    async def create_token_multi_ownership(self, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership, connection: Optional[DatabaseConnection] = None) -> int:
+        creationDate = date_util.datetime_from_now()
+        values = self._get_create_token_multi_ownership(creationDate=creationDate, retrievedTokenMultiOwnership=retrievedTokenMultiOwnership)
         query = TokenMultiOwnershipsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenMultiOwnershipId = result.inserted_primary_key[0]
-        return TokenMultiOwnership(
-            tokenMultiOwnershipId=tokenMultiOwnershipId,
-            createdDate=createdDate,
-            updatedDate=updatedDate,
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            ownerAddress=ownerAddress,
-            quantity=quantity,
-            averageTransferValue=averageTransferValue,
-            latestTransferDate=latestTransferDate,
-            latestTransferTransactionHash=latestTransferTransactionHash,
-        )
+        tokenTransferId = result.inserted_primary_key[0]
+        return tokenTransferId
+
+
+    async def create_token_multi_ownerships(self, retrievedTokenMultiOwnerships: List[RetrievedTokenMultiOwnership], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedTokenMultiOwnerships) == 0:
+            return
+        creationDate = date_util.datetime_from_now()
+        tokenMultiOwnershipIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenMultiOwnerships, chunkSize=100):
+            values = [self._get_create_token_multi_ownership(creationDate=creationDate, retrievedTokenMultiOwnership=retrievedTokenMultiOwnership) for retrievedTokenMultiOwnership in chunk]
+            query = TokenMultiOwnershipsTable.insert().values(values).returning(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId)
+            rows = await self._execute(query=query, connection=connection)
+            tokenMultiOwnershipIds += [row[0] for row in rows]
+        return tokenMultiOwnershipIds
 
     async def update_token_multi_ownership(self, tokenMultiOwnershipId: int, ownerAddress: Optional[str] = None, quantity: Optional[int] = None, averageTransferValue: Optional[int] = None, latestTransferDate: Optional[str] = None, latestTransferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
