@@ -12,7 +12,7 @@ from core.web3.eth_client import RestEthClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.notd.ownership_processor import TokenOwnershipProcessor
+from notd.token_ownership_processor import TokenOwnershipProcessor
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.block_processor import BlockProcessor

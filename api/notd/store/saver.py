@@ -241,18 +241,18 @@ class Saver(CoreSaver):
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_ownership(self, ownerAddress: str, registryAddress: str, tokenId: str, transferValue: int, transferDate: datetime.datetime, transactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
+    async def create_token_ownership(self, registryAddress: str, tokenId: str, ownerAddress: str, transferValue: int, transferDate: datetime.datetime, transferTransactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
             TokenOwnershipsTable.c.createdDate.key: createdDate,
             TokenOwnershipsTable.c.updatedDate.key: updatedDate,
-            TokenOwnershipsTable.c.ownerAddress.key: ownerAddress,
             TokenOwnershipsTable.c.registryAddress.key: registryAddress,
             TokenOwnershipsTable.c.tokenId.key: tokenId,
+            TokenOwnershipsTable.c.ownerAddress.key: ownerAddress,
             TokenOwnershipsTable.c.transferValue.key: transferValue,
             TokenOwnershipsTable.c.transferDate.key: transferDate,
-            TokenOwnershipsTable.c.transactionHash.key: transactionHash,
+            TokenOwnershipsTable.c.transferTransactionHash.key: transferTransactionHash,
         }
         query = TokenOwnershipsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
@@ -261,15 +261,15 @@ class Saver(CoreSaver):
             tokenOwnershipId=tokenOwnershipId,
             createdDate=createdDate,
             updatedDate=updatedDate,
-            ownerAddress=ownerAddress,
             registryAddress=registryAddress,
             tokenId=tokenId,
+            ownerAddress=ownerAddress,
             transferValue=transferValue,
             transferDate=transferDate,
-            transactionHash=transactionHash,
+            transferTransactionHash=transferTransactionHash,
         )
 
-    async def update_token_ownership(self, tokenOwnershipId: int, ownerAddress: Optional[str] = None, transferDate: Optional[str] = None, transferValue: Optional[int] = None, transactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_ownership(self, tokenOwnershipId: int, ownerAddress: Optional[str] = None, transferDate: Optional[str] = None, transferValue: Optional[int] = None, transferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if ownerAddress is not None:
             values[TokenOwnershipsTable.c.ownerAddress.key] = ownerAddress
@@ -277,22 +277,22 @@ class Saver(CoreSaver):
             values[TokenOwnershipsTable.c.transferValue.key] = transferValue
         if transferDate is not None:
             values[TokenOwnershipsTable.c.transferDate.key] = transferDate
-        if transactionHash is not None:
-            values[TokenOwnershipsTable.c.transactionHash.key] = transactionHash
+        if transferTransactionHash is not None:
+            values[TokenOwnershipsTable.c.transferTransactionHash.key] = transferTransactionHash
         if len(values) > 0:
             values[TokenOwnershipsTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = TokenOwnershipsTable.update(TokenOwnershipsTable.c.tokenOwnershipId == tokenOwnershipId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_multi_ownership(self, ownerAddress: str, registryAddress: str, tokenId: str, quantity: int, averageValue: int, latestTransferDate: datetime.datetime, latestTransactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenMultiOwnership:
+    async def create_token_multi_ownership(self, registryAddress: str, tokenId: str, ownerAddress: str, quantity: int, averageValue: int, latestTransferDate: datetime.datetime, latestTransactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenMultiOwnership:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
             TokenMultiOwnershipsTable.c.createdDate.key: createdDate,
             TokenMultiOwnershipsTable.c.updatedDate.key: updatedDate,
-            TokenMultiOwnershipsTable.c.ownerAddress.key: ownerAddress,
             TokenMultiOwnershipsTable.c.registryAddress.key: registryAddress,
             TokenMultiOwnershipsTable.c.tokenId.key: tokenId,
+            TokenMultiOwnershipsTable.c.ownerAddress.key: ownerAddress,
             TokenMultiOwnershipsTable.c.quantity.key: quantity,
             TokenMultiOwnershipsTable.c.averageValue.key: averageValue,
             TokenMultiOwnershipsTable.c.latestTransferDate.key: latestTransferDate,
@@ -305,9 +305,9 @@ class Saver(CoreSaver):
             tokenMultiOwnershipId=tokenMultiOwnershipId,
             createdDate=createdDate,
             updatedDate=updatedDate,
-            ownerAddress=ownerAddress,
             registryAddress=registryAddress,
             tokenId=tokenId,
+            ownerAddress=ownerAddress,
             quantity=quantity,
             averageValue=averageValue,
             latestTransferDate=latestTransferDate,

@@ -12,7 +12,7 @@ from core.slack_client import SlackClient
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
 
-from api.notd.ownership_processor import TokenOwnershipProcessor
+from notd.token_ownership_processor import TokenOwnershipProcessor
 from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
