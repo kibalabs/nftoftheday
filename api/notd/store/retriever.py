@@ -220,7 +220,7 @@ class Retriever(CoreRetriever):
         tokenOwnerships = [token_multi_ownership_from_row(row) for row in result]
         return tokenOwnerships
 
-    async def get_token_multi_ownership_by_registry_address_token_id_owner_address(self, registryAddress: str, tokenId: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> TokenMultiOwnership:
+    async def get_token_multi_ownership_by_registry_address_token_id_owner_address(self, registryAddress: str, tokenId: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> TokenMultiOwnership:  # pylint: disable=invalid-name
         query = TokenMultiOwnershipsTable.select() \
             .where(TokenMultiOwnershipsTable.c.registryAddress == registryAddress) \
             .where(TokenMultiOwnershipsTable.c.tokenId == tokenId) \

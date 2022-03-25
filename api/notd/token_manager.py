@@ -18,7 +18,7 @@ from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
-from notd.model import Collection, RetrievedTokenMultiOwnership, TokenMultiOwnership
+from notd.model import Collection, RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenMetadata
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
@@ -26,7 +26,6 @@ from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenMultiOwnershipsTable
-from notd.store.schema import TokenOwnershipsTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -205,7 +204,7 @@ class TokenManager:
         messages = [UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in collectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
 
-    async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+    async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str):

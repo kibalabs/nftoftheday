@@ -27,7 +27,6 @@ class UpdateTokenOwnershipMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_OWNERSHIP'
     registryAddress: str
     tokenId: str
-    shouldForce: Optional[bool]
 
 class UpdateCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION'

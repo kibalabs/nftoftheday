@@ -72,7 +72,7 @@ class TokenOwnershipProcessor:
                     senderOwnership = RetrievedTokenMultiOwnership(
                         registryAddress=registryAddress,
                         tokenId=tokenId,
-                        ownerAddress=tokenTransfer.toAddress,
+                        ownerAddress=tokenTransfer.fromAddress,
                         quantity=0,
                         averageTransferValue=0,
                         latestTransferDate=tokenTransfer.blockDate,
