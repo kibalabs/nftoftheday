@@ -30,6 +30,7 @@ BlocksTable = sqlalchemy.Table(
     sqlalchemy.Column(key='blockDate', name='block_date', type_=sqlalchemy.DateTime, nullable=False),
 )
 
+# TODO(krishan711): fix this to be TokenMetadatasTable
 TokenMetadataTable = sqlalchemy.Table(
     'tbl_token_metadatas',
     metadata,
@@ -68,4 +69,33 @@ TokenCollectionsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='bannerImageUrl', name='banner_image_url', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='doesSupportErc721', name='does_support_erc721', type_=sqlalchemy.Boolean, nullable=False),
     sqlalchemy.Column(key='doesSupportErc1155', name='does_support_erc1155', type_=sqlalchemy.Boolean, nullable=False),
+)
+
+TokenOwnershipsTable = sqlalchemy.Table(
+    'tbl_token_ownerships',
+    metadata,
+    sqlalchemy.Column(key='tokenOwnershipId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='transferValue', name='transfer_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='transferDate', name='transfer_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='transferTransactionHash', name='transfer_transaction_hash', type_=sqlalchemy.Text, nullable=False),
+)
+
+TokenMultiOwnershipsTable = sqlalchemy.Table(
+    'tbl_token_multi_ownerships',
+    metadata,
+    sqlalchemy.Column(key='tokenMultiOwnershipId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='quantity', name='quantity', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='averageTransferValue', name='average_transfer_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='latestTransferDate', name='latest_transfer_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='latestTransferTransactionHash', name='latest_transfer_transaction_hash', type_=sqlalchemy.Text, nullable=False),
 )

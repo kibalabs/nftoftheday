@@ -152,9 +152,9 @@ class CollectionProcessor:
             bannerImageUrl = bannerImageUrl or openseaCollection.get('banner_image_url')
         retrievedCollection = RetrievedCollection(
             address=address,
-            name=name,
-            symbol=symbol,
-            description=description,
+            name=name.replace('\u0000', '').strip() if name else None,
+            symbol=symbol.replace('\u0000', '').strip() if symbol else None,
+            description=description.replace('\u0000', '').strip() if description else None,
             imageUrl=imageUrl,
             twitterUsername=twitterUsername,
             instagramUsername=instagramUsername,

@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 import random
 from typing import List
@@ -16,16 +17,22 @@ from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
+from notd.messages import UpdateTokenOwnershipMessageContent
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
+from notd.model import RetrievedTokenMultiOwnership
+from notd.model import Token
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMultiOwnershipsTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.token_ownership_processor import TokenOwnershipProcessor
 
 _TOKEN_UPDATE_MIN_DAYS = 10
 _COLLECTION_UPDATE_MIN_DAYS = 30
@@ -33,12 +40,13 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
         self.tokenMetadataProcessor = tokenMetadataProcessor
+        self.tokenOwnershipProcessor = tokenOwnershipProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
@@ -184,10 +192,85 @@ class TokenManager:
             else:
                 await self.saver.create_collection(connection=connection, address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
 
-    async def update_collection_tokens(self, address: str, shouldForce: bool = False):
+    async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
         collectionTokenIds = await self.retriever.list_tokens_by_collection(address=address)
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
+
+    async def update_token_ownerships_deferred(self, collectionTokenIds: List[Tuple[str, str]]) -> None:
+        if len(collectionTokenIds) == 0:
+            return
+        collectionTokenIds = set(collectionTokenIds)
+        messages = [UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in collectionTokenIds]
+        await self.tokenQueue.send_messages(messages=messages)
+
+    async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
+        await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
+
+    async def update_token_ownership(self, registryAddress: str, tokenId: str):
+        collection = await self.get_collection_by_address(address=registryAddress)
+        if collection.doesSupportErc721:
+            await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
+        elif collection.doesSupportErc1155:
+            await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
+        async with self.saver.create_transaction() as connection:
+            try:
+                tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
+            except NotFoundException:
+                tokenOwnership = None
+            retrievedTokenOwnership = await self.tokenOwnershipProcessor.calculate_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
+            if tokenOwnership:
+                await self.saver.update_token_ownership(connection=connection, tokenOwnershipId=tokenOwnership.tokenOwnershipId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
+            else:
+                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
+
+    @staticmethod
+    def _uniqueness_tuple_from_token_multi_ownership(retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> Tuple[str, str, str, int, int, datetime.datetime, str]:
+        return (retrievedTokenMultiOwnership.registryAddress, retrievedTokenMultiOwnership.tokenId, retrievedTokenMultiOwnership.ownerAddress, retrievedTokenMultiOwnership.quantity, retrievedTokenMultiOwnership.averageTransferValue, retrievedTokenMultiOwnership.latestTransferDate, retrievedTokenMultiOwnership.latestTransferTransactionHash)
+
+    async def _update_token_multi_ownership(self, registryAddress: str, tokenId: str) -> None:
+        retrievedTokenMultiOwnerships = await self.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
+        async with self.saver.create_transaction() as connection:
+            currentTokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(connection=connection, fieldFilters=[
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
+            ])
+            existingOwnershipTuplesMap = {self._uniqueness_tuple_from_token_multi_ownership(retrievedTokenMultiOwnership=tokenMultiOwnership): tokenMultiOwnership for tokenMultiOwnership in currentTokenMultiOwnerships}
+            existingOwnershipTuples = set(existingOwnershipTuplesMap.keys())
+            retrievedOwnershipTuplesMaps = {self._uniqueness_tuple_from_token_multi_ownership(retrievedTokenMultiOwnership=retrievedTokenMultiOwnership): retrievedTokenMultiOwnership for retrievedTokenMultiOwnership in retrievedTokenMultiOwnerships}
+            retrievedOwnershipTuples = set(retrievedOwnershipTuplesMaps.keys())
+            tokenMultiOwnershipIdsToDelete = []
+            for existingTuple, existingTokenMultiOwnership in existingOwnershipTuplesMap.items():
+                if existingTuple in retrievedOwnershipTuples:
+                    continue
+                tokenMultiOwnershipIdsToDelete.append(existingTokenMultiOwnership.tokenMultiOwnershipId)
+            await self.saver.delete_token_multi_ownerships(connection=connection, tokenMultiOwnershipIds=tokenMultiOwnershipIdsToDelete)
+            retrievedTokenMultiOwnershipsToSave = []
+            for retrievedTuple, retrievedTokenMultiOwnership in retrievedOwnershipTuplesMaps.items():
+                if retrievedTuple in existingOwnershipTuples:
+                    continue
+                retrievedTokenMultiOwnershipsToSave.append(retrievedTokenMultiOwnership)
+            await self.saver.create_token_multi_ownerships(connection=connection, retrievedTokenMultiOwnerships=retrievedTokenMultiOwnershipsToSave)
+
+    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
+        collection = await self.get_collection_by_address(address=address)
+        tokens = []
+        if collection.doesSupportErc721:
+            tokenOwnerships = await self.retriever.list_token_ownerships(fieldFilters=[
+                StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address),
+                StringFieldFilter(fieldName=TokenOwnershipsTable.c.ownerAddress.key, eq=ownerAddress),
+            ])
+            tokens += [Token(registryAddress=tokenOwnership.registryAddress, tokenId=tokenOwnership.tokenId) for tokenOwnership in tokenOwnerships]
+        elif collection.doesSupportErc1155:
+            tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=address),
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=ownerAddress),
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, eq=0),
+            ])
+            tokens += [Token(registryAddress=tokenMultiOwnership.registryAddress, tokenId=tokenMultiOwnership.tokenId) for tokenMultiOwnership in tokenMultiOwnerships]
+        return tokens

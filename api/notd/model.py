@@ -138,3 +138,38 @@ class ProcessedBlock:
     blockHash: str
     blockDate: datetime.datetime
     retrievedTokenTransfers: List[RetrievedTokenTransfer]
+
+
+@dataclasses.dataclass
+class RetrievedTokenOwnership:
+    registryAddress: str
+    tokenId: str
+    ownerAddress: str
+    transferValue: int
+    transferDate: datetime.datetime
+    transferTransactionHash: str
+
+
+@dataclasses.dataclass
+class TokenOwnership(RetrievedTokenOwnership):
+    tokenOwnershipId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class RetrievedTokenMultiOwnership:
+    registryAddress: str
+    tokenId: str
+    ownerAddress: str
+    quantity: int
+    averageTransferValue: int
+    latestTransferDate: datetime.datetime
+    latestTransferTransactionHash: str
+
+
+@dataclasses.dataclass
+class TokenMultiOwnership(RetrievedTokenMultiOwnership):
+    tokenMultiOwnershipId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime

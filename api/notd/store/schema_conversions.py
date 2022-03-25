@@ -3,10 +3,14 @@ from typing import Mapping
 from notd.model import Block
 from notd.model import Collection
 from notd.model import TokenMetadata
+from notd.model import TokenMultiOwnership
+from notd.model import TokenOwnership
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMultiOwnershipsTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 
 
@@ -74,4 +78,31 @@ def collection_from_row(row: Mapping) -> Collection:
         bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl],
         doesSupportErc721=row[TokenCollectionsTable.c.doesSupportErc721],
         doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
+    )
+
+def token_ownership_from_row(row: Mapping) -> TokenOwnership:
+    return TokenOwnership(
+        tokenOwnershipId=row[TokenOwnershipsTable.c.tokenOwnershipId],
+        createdDate=row[TokenOwnershipsTable.c.createdDate],
+        updatedDate=row[TokenOwnershipsTable.c.updatedDate],
+        registryAddress=row[TokenOwnershipsTable.c.registryAddress],
+        tokenId=row[TokenOwnershipsTable.c.tokenId],
+        ownerAddress=row[TokenOwnershipsTable.c.ownerAddress],
+        transferValue=row[TokenOwnershipsTable.c.transferValue],
+        transferDate=row[TokenOwnershipsTable.c.transferDate],
+        transferTransactionHash=row[TokenOwnershipsTable.c.transferTransactionHash],
+    )
+
+def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
+    return TokenMultiOwnership(
+        tokenMultiOwnershipId=row[TokenMultiOwnershipsTable.c.tokenMultiOwnershipId],
+        createdDate=row[TokenMultiOwnershipsTable.c.createdDate],
+        updatedDate=row[TokenMultiOwnershipsTable.c.updatedDate],
+        registryAddress=row[TokenMultiOwnershipsTable.c.registryAddress],
+        tokenId=row[TokenMultiOwnershipsTable.c.tokenId],
+        ownerAddress=row[TokenMultiOwnershipsTable.c.ownerAddress],
+        quantity=row[TokenMultiOwnershipsTable.c.quantity],
+        averageTransferValue=row[TokenMultiOwnershipsTable.c.averageTransferValue],
+        latestTransferDate=row[TokenMultiOwnershipsTable.c.latestTransferDate],
+        latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
     )

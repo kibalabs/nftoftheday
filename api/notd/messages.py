@@ -23,6 +23,11 @@ class UpdateTokenMetadataMessageContent(MessageContent):
     tokenId: str
     shouldForce: Optional[bool]
 
+class UpdateTokenOwnershipMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_OWNERSHIP'
+    registryAddress: str
+    tokenId: str
+
 class UpdateCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION'
     address: str

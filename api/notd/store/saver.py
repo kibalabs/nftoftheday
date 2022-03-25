@@ -11,11 +11,15 @@ from core.util import list_util
 
 from notd.model import Block
 from notd.model import Collection
+from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
+from notd.model import TokenOwnership
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMultiOwnershipsTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
@@ -204,7 +208,7 @@ class Saver(CoreSaver):
             doesSupportErc1155=doesSupportErc1155,
         )
 
-    async def update_collection(self, collectionId: int, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: Optional[bool], doesSupportErc1155: Optional[bool], connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection(self, collectionId: int, name: Optional[str] = _EMPTY_STRING, symbol: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, twitterUsername: Optional[str] = _EMPTY_STRING, instagramUsername: Optional[str] = _EMPTY_STRING, wikiUrl: Optional[str] = _EMPTY_STRING, openseaSlug: Optional[str] = _EMPTY_STRING, url: Optional[str] = _EMPTY_STRING, discordUrl: Optional[str] = _EMPTY_STRING, bannerImageUrl: Optional[str] = _EMPTY_STRING, doesSupportErc721: Optional[bool] = None, doesSupportErc1155: Optional[bool] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if name != _EMPTY_STRING:
             values[TokenCollectionsTable.c.name.key] = name
@@ -235,4 +239,105 @@ class Saver(CoreSaver):
         if len(values) > 0:
             values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = TokenCollectionsTable.update(TokenCollectionsTable.c.collectionId == collectionId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    async def create_token_ownership(self, registryAddress: str, tokenId: str, ownerAddress: str, transferValue: int, transferDate: datetime.datetime, transferTransactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TokenOwnershipsTable.c.createdDate.key: createdDate,
+            TokenOwnershipsTable.c.updatedDate.key: updatedDate,
+            TokenOwnershipsTable.c.registryAddress.key: registryAddress,
+            TokenOwnershipsTable.c.tokenId.key: tokenId,
+            TokenOwnershipsTable.c.ownerAddress.key: ownerAddress,
+            TokenOwnershipsTable.c.transferValue.key: transferValue,
+            TokenOwnershipsTable.c.transferDate.key: transferDate,
+            TokenOwnershipsTable.c.transferTransactionHash.key: transferTransactionHash,
+        }
+        query = TokenOwnershipsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenOwnershipId = result.inserted_primary_key[0]
+        return TokenOwnership(
+            tokenOwnershipId=tokenOwnershipId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            ownerAddress=ownerAddress,
+            transferValue=transferValue,
+            transferDate=transferDate,
+            transferTransactionHash=transferTransactionHash,
+        )
+
+    async def update_token_ownership(self, tokenOwnershipId: int, ownerAddress: Optional[str] = None, transferDate: Optional[str] = None, transferValue: Optional[int] = None, transferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if ownerAddress is not None:
+            values[TokenOwnershipsTable.c.ownerAddress.key] = ownerAddress
+        if transferValue is not None:
+            values[TokenOwnershipsTable.c.transferValue.key] = transferValue
+        if transferDate is not None:
+            values[TokenOwnershipsTable.c.transferDate.key] = transferDate
+        if transferTransactionHash is not None:
+            values[TokenOwnershipsTable.c.transferTransactionHash.key] = transferTransactionHash
+        if len(values) > 0:
+            values[TokenOwnershipsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TokenOwnershipsTable.update(TokenOwnershipsTable.c.tokenOwnershipId == tokenOwnershipId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    @staticmethod
+    def _get_create_token_multi_ownership(creationDate: datetime.datetime, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> Dict[str, Union[str, int, float, None, bool, datetime.datetime]]:
+        return {
+            TokenMultiOwnershipsTable.c.createdDate.key: creationDate,
+            TokenMultiOwnershipsTable.c.updatedDate.key: creationDate,
+            TokenMultiOwnershipsTable.c.registryAddress.key: retrievedTokenMultiOwnership.registryAddress,
+            TokenMultiOwnershipsTable.c.tokenId.key: retrievedTokenMultiOwnership.tokenId,
+            TokenMultiOwnershipsTable.c.ownerAddress.key: retrievedTokenMultiOwnership.ownerAddress,
+            TokenMultiOwnershipsTable.c.quantity.key: retrievedTokenMultiOwnership.quantity,
+            TokenMultiOwnershipsTable.c.averageTransferValue.key: retrievedTokenMultiOwnership.averageTransferValue,
+            TokenMultiOwnershipsTable.c.latestTransferDate.key: retrievedTokenMultiOwnership.latestTransferDate,
+            TokenMultiOwnershipsTable.c.latestTransferTransactionHash.key: retrievedTokenMultiOwnership.latestTransferTransactionHash,
+        }
+
+    async def create_token_multi_ownership(self, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership, connection: Optional[DatabaseConnection] = None) -> int:
+        creationDate = date_util.datetime_from_now()
+        values = self._get_create_token_multi_ownership(creationDate=creationDate, retrievedTokenMultiOwnership=retrievedTokenMultiOwnership)
+        query = TokenMultiOwnershipsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenTransferId = result.inserted_primary_key[0]
+        return tokenTransferId
+
+
+    async def create_token_multi_ownerships(self, retrievedTokenMultiOwnerships: List[RetrievedTokenMultiOwnership], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedTokenMultiOwnerships) == 0:
+            return
+        creationDate = date_util.datetime_from_now()
+        tokenMultiOwnershipIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenMultiOwnerships, chunkSize=100):
+            values = [self._get_create_token_multi_ownership(creationDate=creationDate, retrievedTokenMultiOwnership=retrievedTokenMultiOwnership) for retrievedTokenMultiOwnership in chunk]
+            query = TokenMultiOwnershipsTable.insert().values(values).returning(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId)
+            rows = await self._execute(query=query, connection=connection)
+            tokenMultiOwnershipIds += [row[0] for row in rows]
+        return tokenMultiOwnershipIds
+
+    async def update_token_multi_ownership(self, tokenMultiOwnershipId: int, ownerAddress: Optional[str] = None, quantity: Optional[int] = None, averageTransferValue: Optional[int] = None, latestTransferDate: Optional[str] = None, latestTransferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if ownerAddress is not None:
+            values[TokenMultiOwnershipsTable.c.ownerAddress.key] = ownerAddress
+        if quantity is not None:
+            values[TokenMultiOwnershipsTable.c.quantity.key] = quantity
+        if averageTransferValue is not None:
+            values[TokenMultiOwnershipsTable.c.averageTransferValue.key] = averageTransferValue
+        if latestTransferDate is not None:
+            values[TokenMultiOwnershipsTable.c.latestTransferDate.key] = latestTransferDate
+        if latestTransferTransactionHash is not None:
+            values[TokenMultiOwnershipsTable.c.latestTransferTransactionHash.key] = latestTransferTransactionHash
+        if len(values) > 0:
+            values[TokenMultiOwnershipsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TokenMultiOwnershipsTable.update(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId == tokenMultiOwnershipId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_token_multi_ownerships(self, tokenMultiOwnershipIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(tokenMultiOwnershipIds) == 0:
+            return
+        query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds))
         await self._execute(query=query, connection=connection)

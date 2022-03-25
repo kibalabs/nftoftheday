@@ -12,18 +12,25 @@ from core.store.retriever import StringFieldFilter
 from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
+from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 from notd.model import Collection
 from notd.model import Token
 from notd.model import TokenMetadata
+from notd.model import TokenMultiOwnership
+from notd.model import TokenOwnership
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMultiOwnershipsTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import token_metadata_from_row
+from notd.store.schema_conversions import token_multi_ownership_from_row
+from notd.store.schema_conversions import token_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 
 _REGISTRY_BLACKLIST = set([
@@ -56,7 +63,7 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
-            raise NotFoundException(message=f'Block with blockNumber {blockNumber} not found')
+            raise NotFoundException(message=f'Block with blockNumber:{blockNumber} not found')
         block = block_from_row(row)
         return block
 
@@ -135,7 +142,7 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
-            raise NotFoundException(message=f'TokenMetadata with registry {registryAddress} tokenId {tokenId} not found')
+            raise NotFoundException(message=f'TokenMetadata with registry:{registryAddress} tokenId:{tokenId} not found')
         tokenMetdata = token_metadata_from_row(row)
         return tokenMetdata
 
@@ -157,23 +164,53 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
-            raise NotFoundException(message=f'Collection with registry {address} not found')
+            raise NotFoundException(message=f'Collection with registry:{address} not found')
         collection = collection_from_row(row)
         return collection
 
-    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
-        boughtTokens = []
-        soldTokens= []
-        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-        query = query.where(TokenTransfersTable.c.registryAddress == address)
-        query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
-        boughtResult = await self.database.execute(query=query, connection=connection)
-        boughtTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in boughtResult]]
-        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-        query = query.where(TokenTransfersTable.c.registryAddress == address)
-        query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
-        soldResult = await self.database.execute(query=query, connection=connection)
-        soldTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in soldResult]]
-        for token in soldTokens:
-            boughtTokens.remove(token)
-        return list(boughtTokens)
+    async def list_token_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenOwnership]:
+        query = TokenOwnershipsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenOwnershipsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenOwnershipsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenOwnerships = [token_ownership_from_row(row) for row in result]
+        return tokenOwnerships
+
+    async def get_token_ownership_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
+        query = TokenOwnershipsTable.select() \
+            .where(TokenOwnershipsTable.c.registryAddress == registryAddress) \
+            .where(TokenOwnershipsTable.c.tokenId == tokenId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TokenOwnership with registry:{registryAddress} tokenId:{tokenId} not found')
+        tokenOwnership = token_ownership_from_row(row)
+        return tokenOwnership
+
+    async def list_token_multi_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenMultiOwnership]:
+        query = TokenMultiOwnershipsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenMultiOwnershipsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenMultiOwnershipsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenOwnerships = [token_multi_ownership_from_row(row) for row in result]
+        return tokenOwnerships
+
+    async def get_token_multi_ownership_by_registry_address_token_id_owner_address(self, registryAddress: str, tokenId: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> TokenMultiOwnership:  # pylint: disable=invalid-name
+        query = TokenMultiOwnershipsTable.select() \
+            .where(TokenMultiOwnershipsTable.c.registryAddress == registryAddress) \
+            .where(TokenMultiOwnershipsTable.c.tokenId == tokenId) \
+            .where(TokenMultiOwnershipsTable.c.ownerAddress == ownerAddress)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TokenMultiOwnership with registry:{registryAddress} tokenId:{tokenId} ownerAddress:{ownerAddress} not found')
+        tokenOwnership = token_multi_ownership_from_row(row)
+        return tokenOwnership

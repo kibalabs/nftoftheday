@@ -12,6 +12,7 @@ from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
+from notd.messages import UpdateTokenOwnershipMessageContent
 
 
 class NotdMessageProcessor(MessageProcessor):
@@ -41,6 +42,10 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateTokenMetadataMessageContent.get_command():
             messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
             await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId, shouldForce=messageContent.shouldForce)
+            return
+        if message.command == UpdateTokenOwnershipMessageContent.get_command():
+            messageContent = UpdateTokenOwnershipMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_ownership(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
             return
         if message.command == UpdateCollectionMessageContent.get_command():
             messageContent = UpdateCollectionMessageContent.parse_obj(message.content)
