@@ -163,7 +163,7 @@ class RetrievedTokenMultiOwnership:
     tokenId: str
     ownerAddress: str
     quantity: int
-    averageValue: int
+    averageTransferValue: int
     latestTransferDate: datetime.datetime
     latestTransferTransactionHash: str
 

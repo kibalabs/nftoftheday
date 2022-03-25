@@ -102,7 +102,7 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
         tokenId=row[TokenMultiOwnershipsTable.c.tokenId],
         ownerAddress=row[TokenMultiOwnershipsTable.c.ownerAddress],
         quantity=row[TokenMultiOwnershipsTable.c.quantity],
-        averageValue=row[TokenMultiOwnershipsTable.c.averageValue],
+        averageTransferValue=row[TokenMultiOwnershipsTable.c.averageTransferValue],
         latestTransferDate=row[TokenMultiOwnershipsTable.c.latestTransferDate],
         latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
     )

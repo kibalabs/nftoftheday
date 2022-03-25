@@ -109,7 +109,7 @@ CREATE TABLE tbl_token_multi_ownerships (
     token_id TEXT NOT NULL,
     owner_address TEXT NOT NULL,
     quantity NUMERIC(256, 0) NOT NULL,
-    average_value NUMERIC(256, 0) NOT NULL,
+    average_transfer_value NUMERIC(256, 0) NOT NULL,
     latest_transfer_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     latest_transfer_transaction_hash TEXT NOT NULL
 );

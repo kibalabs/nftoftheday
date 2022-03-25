@@ -1,11 +1,13 @@
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 
-from notd.model import RetrievedTokenMultiOwnership, RetrievedTokenOwnership
+from notd.model import RetrievedTokenMultiOwnership
+from notd.model import RetrievedTokenOwnership
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 
@@ -46,7 +48,6 @@ class TokenOwnershipProcessor:
         )
         ownerships: Dict[str, RetrievedTokenMultiOwnership] = dict()
         for tokenTransfer in tokenTransfers:
-            print('tokenTransfer', tokenTransfer)
             if tokenTransfer.toAddress != chain_util.BURN_ADDRESS:
                 receiverOwnership = ownerships.get(tokenTransfer.toAddress)
                 if not receiverOwnership:
@@ -55,12 +56,14 @@ class TokenOwnershipProcessor:
                         tokenId=tokenId,
                         ownerAddress=tokenTransfer.toAddress,
                         quantity=0,
-                        averageValue=0,
+                        averageTransferValue=0,
                         latestTransferDate=tokenTransfer.blockDate,
                         latestTransferTransactionHash=tokenTransfer.transactionHash,
                     )
                     ownerships[tokenTransfer.toAddress] = receiverOwnership
-                    receiverOwnership.quantity += tokenTransfer.amount
+                currentTotalValue = (receiverOwnership.averageTransferValue * receiverOwnership.quantity) + tokenTransfer.value
+                receiverOwnership.quantity += tokenTransfer.amount
+                receiverOwnership.averageTransferValue = (currentTotalValue / receiverOwnership.quantity) if receiverOwnership.quantity > 0 else 0
                 receiverOwnership.latestTransferDate = tokenTransfer.blockDate
                 receiverOwnership.latestTransferTransactionHash = tokenTransfer.transactionHash
             if tokenTransfer.fromAddress != chain_util.BURN_ADDRESS:
@@ -71,13 +74,14 @@ class TokenOwnershipProcessor:
                         tokenId=tokenId,
                         ownerAddress=tokenTransfer.toAddress,
                         quantity=0,
-                        averageValue=0,
+                        averageTransferValue=0,
                         latestTransferDate=tokenTransfer.blockDate,
                         latestTransferTransactionHash=tokenTransfer.transactionHash,
                     )
                     ownerships[tokenTransfer.fromAddress] = senderOwnership
+                currentTotalValue = (senderOwnership.averageTransferValue * senderOwnership.quantity) - tokenTransfer.value
                 senderOwnership.quantity -= tokenTransfer.amount
+                senderOwnership.averageTransferValue = (currentTotalValue / senderOwnership.quantity) if senderOwnership.quantity > 0 else 0
                 senderOwnership.latestTransferDate = tokenTransfer.blockDate
                 senderOwnership.latestTransferTransactionHash = tokenTransfer.transactionHash
-        print('list(ownerships.values())', list(ownerships.values()))
         return list(ownerships.values())

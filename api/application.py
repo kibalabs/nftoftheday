@@ -12,7 +12,6 @@ from core.web3.eth_client import RestEthClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from notd.token_ownership_processor import TokenOwnershipProcessor
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.block_processor import BlockProcessor
@@ -22,6 +21,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.token_ownership_processor import TokenOwnershipProcessor
 
 logging.basicConfig(level=logging.INFO)
 

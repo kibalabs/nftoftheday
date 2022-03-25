@@ -24,6 +24,7 @@ from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.token_ownership_processor import TokenOwnershipProcessor
 
 
 async def _update_token_metadatas(tokensToProcess: Sequence[tuple], tokenManager: TokenManager, retriever: Retriever):
@@ -81,8 +82,10 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
     requester = Requester()
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
     openseaApiKey = os.environ['OPENSEA_API_KEY']
+    tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
-    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor)
+    revueApiKey = os.environ['REVUE_API_KEY']
 
     await database.connect()
     await workQueue.connect()
