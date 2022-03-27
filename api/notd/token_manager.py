@@ -9,9 +9,9 @@ import sqlalchemy
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter
-from core.store.retriever import StringFieldFilter
-from core.store.retriever import Order
 from core.store.retriever import Direction
+from core.store.retriever import Order
+from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
 from notd.collection_processor import CollectionDoesNotExist
@@ -27,10 +27,12 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import BlocksTable, TokenCollectionsTable, TokenTransfersTable
+from notd.store.schema import BlocksTable
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import TokenTransfersTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
