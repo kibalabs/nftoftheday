@@ -10,6 +10,8 @@ from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
+from core.store.retriever import Order
+from core.store.retriever import Direction
 from core.util import date_util
 
 from notd.collection_processor import CollectionDoesNotExist
@@ -25,7 +27,7 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import BlocksTable, TokenCollectionsTable, TokenTransfersTable
 from notd.store.schema import TokenMetadataTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
@@ -234,6 +236,22 @@ class TokenManager:
         return (retrievedTokenMultiOwnership.registryAddress, retrievedTokenMultiOwnership.tokenId, retrievedTokenMultiOwnership.ownerAddress, retrievedTokenMultiOwnership.quantity, retrievedTokenMultiOwnership.averageTransferValue, retrievedTokenMultiOwnership.latestTransferDate, retrievedTokenMultiOwnership.latestTransferTransactionHash)
 
     async def _update_token_multi_ownership(self, registryAddress: str, tokenId: str) -> None:
+        # NOTE(krishan711): need to add updatedDate to TokenTransfersTable derived from BlocksTable
+        latestTransfers = await self.retriever.list_token_transfers(fieldFilters=[
+            StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+            StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+        ], orders=[Order(fieldName=BlocksTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
+        if len(latestTransfers) == 0:
+            return
+        latestTransfer = latestTransfers[0]
+        latestOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
+            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
+            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
+        ], orders=[Order(fieldName=TokenMultiOwnershipsTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
+        latestOwnership = latestOwnerships[0] if len(latestOwnerships) > 0 else None
+        if latestOwnership is None or latestOwnership.updatedDate > latestTransfer.updatedDate:
+            logging.info(f'Skipping updating token_multi_ownership because last record ({latestOwnership.updatedDate}) is newer that last transfer update ({latestTransfer.updatedDate})')
+            return
         retrievedTokenMultiOwnerships = await self.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
         async with self.saver.create_transaction() as connection:
             currentTokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(connection=connection, fieldFilters=[
@@ -256,7 +274,11 @@ class TokenManager:
                     continue
                 retrievedTokenMultiOwnershipsToSave.append(retrievedTokenMultiOwnership)
             await self.saver.create_token_multi_ownerships(connection=connection, retrievedTokenMultiOwnerships=retrievedTokenMultiOwnershipsToSave)
-            logging.info(f'Saving multi ownerships: saved {len(retrievedTokenMultiOwnershipsToSave)}, deleted {len(tokenMultiOwnershipIdsToDelete)}, kept {len(existingOwnershipTuples) - len(retrievedOwnershipTuples)}')
+            logging.info(f'Saving multi ownerships: saved {len(retrievedTokenMultiOwnershipsToSave)}, deleted {len(tokenMultiOwnershipIdsToDelete)}, kept {len(existingOwnershipTuples - retrievedOwnershipTuples) - len(tokenMultiOwnershipIdsToDelete)}')
+            # NOTE(krishan711): if nothing changed, force update one so that it doesn't update again
+            if len(retrievedTokenMultiOwnershipsToSave) == 0 and len(tokenMultiOwnershipIdsToDelete) == 0:
+                firstOwnership = list(existingOwnershipTuplesMap.values())[0]
+                await self.saver.update_token_multi_ownership(connection=connection, tokenMultiOwnershipId=firstOwnership.tokenMultiOwnershipId, ownerAddress=firstOwnership.ownerAddress)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
         collection = await self.get_collection_by_address(address=address)

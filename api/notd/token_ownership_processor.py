@@ -42,6 +42,7 @@ class TokenOwnershipProcessor:
         offset = 0
         limit = 500
         while True:
+            print('offset', offset)
             tokenTransfers = await self.retriever.list_token_transfers(
                 shouldIgnoreRegistryBlacklist=True,
                 fieldFilters=[

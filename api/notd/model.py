@@ -74,6 +74,7 @@ class RetrievedTokenTransfer:
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
     blockDate: datetime.datetime
+    updatedDate: datetime.datetime
 
 
 @dataclasses.dataclass
