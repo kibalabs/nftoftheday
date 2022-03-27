@@ -250,7 +250,7 @@ class TokenManager:
             StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
         ], orders=[Order(fieldName=TokenMultiOwnershipsTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
         latestOwnership = latestOwnerships[0] if len(latestOwnerships) > 0 else None
-        if latestOwnership is None or latestOwnership.updatedDate > latestTransfer.updatedDate:
+        if latestOwnership is not None and latestOwnership.updatedDate > latestTransfer.updatedDate:
             logging.info(f'Skipping updating token_multi_ownership because last record ({latestOwnership.updatedDate}) is newer that last transfer update ({latestTransfer.updatedDate})')
             return
         retrievedTokenMultiOwnerships = await self.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
