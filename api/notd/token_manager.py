@@ -238,7 +238,6 @@ class TokenManager:
         return (retrievedTokenMultiOwnership.registryAddress, retrievedTokenMultiOwnership.tokenId, retrievedTokenMultiOwnership.ownerAddress, retrievedTokenMultiOwnership.quantity, retrievedTokenMultiOwnership.averageTransferValue, retrievedTokenMultiOwnership.latestTransferDate, retrievedTokenMultiOwnership.latestTransferTransactionHash)
 
     async def _update_token_multi_ownership(self, registryAddress: str, tokenId: str) -> None:
-        # NOTE(krishan711): need to add updatedDate to TokenTransfersTable derived from BlocksTable
         latestTransfers = await self.retriever.list_token_transfers(fieldFilters=[
             StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
             StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
