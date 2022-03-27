@@ -15,6 +15,7 @@ CREATE TABLE tbl_token_transfers (
 );
 CREATE UNIQUE INDEX tbl_token_transfers_transaction_hash_registry_address_token_id_from_address_to_address_block_number_amount ON tbl_token_transfers (transaction_hash, registry_address, token_id, from_address, to_address, block_number, amount_2);
 CREATE INDEX tbl_token_transfers_registry_address_token_id ON tbl_token_transfers (registry_address, token_id);
+CREATE INDEX tbl_token_transfers_registry_address_token_id_block_number ON tbl_token_transfers (registry_address, token_id, block_number);
 CREATE INDEX tbl_token_transfers_registry_address ON tbl_token_transfers (registry_address);
 CREATE INDEX tbl_token_transfers_token_id ON tbl_token_transfers (token_id);
 CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
@@ -39,9 +40,11 @@ CREATE TABLE tbl_token_metadatas (
     description TEXT,
     attributes JSON
 );
-CREATE UNIQUE INDEX tbl_tokens_metadatas_registry_address_token_id ON tbl_token_metadatas (registry_address, token_id);
+CREATE UNIQUE INDEX tbl_token_metadatas_registry_address_token_id ON tbl_token_metadatas (registry_address, token_id);
+CREATE INDEX tbl_token_metadatas_registry_address_token_id_updated_date ON tbl_token_metadatas (registry_address, token_id, updated_date);
 CREATE INDEX tbl_token_metadatas_registry_address ON tbl_token_metadatas (registry_address);
 CREATE INDEX tbl_token_metadatas_token_id ON tbl_token_metadatas (token_id);
+CREATE INDEX tbl_token_metadatas_updated_date ON tbl_token_metadatas (updated_date);
 CREATE INDEX tbl_token_metadatas_name ON tbl_token_metadatas (name);
 
 CREATE TABLE tbl_collections (
@@ -64,6 +67,8 @@ CREATE TABLE tbl_collections (
     does_support_erc1155 BOOLEAN NOT NULL
 );
 CREATE UNIQUE INDEX tbl_collections_address ON tbl_collections (address);
+CREATE INDEX tbl_collections_address_updated_date ON tbl_collections (address, updated_date);
+CREATE INDEX tbl_collections_updated_date ON tbl_collections (updated_date);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);
 
 CREATE TABLE tbl_blocks (
@@ -75,6 +80,7 @@ CREATE TABLE tbl_blocks (
     block_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 CREATE UNIQUE INDEX tbl_blocks_block_number ON tbl_blocks (block_number);
+CREATE INDEX tbl_blocks_block_number_updated_date ON tbl_blocks (block_number, updated_date);
 CREATE INDEX tbl_blocks_created_date ON tbl_blocks (created_date);
 CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
 CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
@@ -92,6 +98,7 @@ CREATE TABLE tbl_token_ownerships (
     transfer_transaction_hash TEXT NOT NULL
 );
 CREATE UNIQUE INDEX tbl_token_ownerships_registry_address_token_id ON tbl_token_ownerships (registry_address, token_id);
+CREATE INDEX tbl_token_ownerships_registry_address_token_id_updated_date ON tbl_token_ownerships (registry_address, token_id, updated_date);
 CREATE INDEX tbl_token_ownerships_created_date ON tbl_token_ownerships (created_date);
 CREATE INDEX tbl_token_ownerships_updated_date ON tbl_token_ownerships (updated_date);
 CREATE INDEX tbl_token_ownerships_regsitry_address ON tbl_token_ownerships (registry_address);
@@ -114,6 +121,7 @@ CREATE TABLE tbl_token_multi_ownerships (
     latest_transfer_transaction_hash TEXT NOT NULL
 );
 CREATE UNIQUE INDEX tbl_token_multi_ownerships_registry_address_token_id_owner_address ON tbl_token_multi_ownerships (registry_address, token_id, owner_address);
+CREATE INDEX tbl_token_multi_ownerships_registry_address_token_id_updated_date ON tbl_token_multi_ownerships (registry_address, token_id, updated_date);
 CREATE INDEX tbl_token_multi_ownerships_registry_address_token_id ON tbl_token_multi_ownerships (registry_address, token_id);
 CREATE INDEX tbl_token_multi_ownerships_created_date ON tbl_token_multi_ownerships (created_date);
 CREATE INDEX tbl_token_multi_ownerships_updated_date ON tbl_token_multi_ownerships (updated_date);

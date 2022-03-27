@@ -94,7 +94,7 @@ class NotdManager:
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
         query = (
-            sqlalchemy.select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            sqlalchemy.select([TokenTransfersTable, BlocksTable]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
             .where(TokenTransfersTable.c.registryAddress == mostTradedToken.registryAddress)
@@ -205,9 +205,9 @@ class NotdManager:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
         logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
-        logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
+        logging.info(f'Found {len(collectionTokenIds)} changed tokens in block #{blockNumber}')
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
-        logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
+        logging.info(f'Found {len(collectionAddresses)} changed collections in block #{blockNumber}')
         await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
             await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)

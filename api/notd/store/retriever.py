@@ -68,18 +68,18 @@ class Retriever(CoreRetriever):
         return block
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, shouldIgnoreRegistryBlacklist: bool = False, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
-        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = select([TokenTransfersTable, BlocksTable]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         if not shouldIgnoreRegistryBlacklist:
             query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST))
         if fieldFilters:
             for fieldFilter in fieldFilters:
-                if fieldFilter.fieldName == BlocksTable.c.blockDate.key:
+                if fieldFilter.fieldName in {BlocksTable.c.blockDate.key, BlocksTable.c.updatedDate.key}:
                     query = self._apply_date_field_filter(query=query, table=BlocksTable, fieldFilter=fieldFilter)
                 else:
                     query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=fieldFilter)
         if orders:
             for order in orders:
-                if order.fieldName == BlocksTable.c.blockDate.key:
+                if order.fieldName in {BlocksTable.c.blockDate.key, BlocksTable.c.updatedDate.key}:
                     query = self._apply_order(query=query, table=BlocksTable, order=order)
                 else:
                     query = self._apply_order(query=query, table=TokenTransfersTable, order=order)

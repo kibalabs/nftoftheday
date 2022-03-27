@@ -28,8 +28,9 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         gasLimit=row[TokenTransfersTable.c.gasLimit],
         gasPrice=row[TokenTransfersTable.c.gasPrice],
         blockNumber=row[TokenTransfersTable.c.blockNumber],
-        blockDate=row[BlocksTable.c.blockDate],
         tokenType=row[TokenTransfersTable.c.tokenType],
+        blockDate=row[BlocksTable.c.blockDate],
+        updatedDate=row[BlocksTable.c.updatedDate],
     )
 
 def block_from_row(row: Mapping) -> Block:
