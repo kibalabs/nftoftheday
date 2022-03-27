@@ -5,6 +5,7 @@ import random
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Set
 from typing import Tuple
 
 import sqlalchemy
@@ -203,21 +204,21 @@ class NotdManager:
     async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None) -> None:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
         logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        collectionAddresses = list(set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
-        logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
-        collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
+        collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
         logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
+        collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
+        logging.info(f'Found {len(collectionAddresses)} collections in block #{blockNumber}')
         await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
             await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
             await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
-        await self._save_processed_block(processedBlock=processedBlock)
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, int]:
         return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
 
-    async def _save_processed_block(self, processedBlock: ProcessedBlock) -> None:
+    async def _save_processed_block(self, processedBlock: ProcessedBlock) -> Sequence[Tuple[str, str]]:
+        changedTokens: Set[Tuple[str, str]] = set()
         async with self.saver.create_transaction() as connection:
             try:
                 block = await self.retriever.get_block_by_number(connection=connection, blockNumber=processedBlock.blockNumber)
@@ -242,15 +243,17 @@ class NotdManager:
                 if existingTuple in retrievedTuples:
                     continue
                 tokenTransferIdsToDelete.append(existingTokenTransfer.tokenTransferId)
+                changedTokens.add((existingTokenTransfer.registryAddress, existingTokenTransfer.tokenId))
             await self.saver.delete_token_transfers(connection=connection, tokenTransferIds=tokenTransferIdsToDelete)
             retrievedTokenTransfersToSave = []
             for retrievedTuple, retrievedTokenTransfer in retrievedTupleTransferMaps.items():
                 if retrievedTuple in existingTuples:
                     continue
                 retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
+                changedTokens.add((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId))
             await self.saver.create_token_transfers(connection=connection, retrievedTokenTransfers=retrievedTokenTransfersToSave)
-
             logging.info(f'Saving transfers for block {processedBlock.blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
+        return list(changedTokens)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
         return await self.tokenManager.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress)

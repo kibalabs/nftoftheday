@@ -249,15 +249,14 @@ class TokenManager:
                 if existingTuple in retrievedOwnershipTuples:
                     continue
                 tokenMultiOwnershipIdsToDelete.append(existingTokenMultiOwnership.tokenMultiOwnershipId)
-            logging.info(f'Deleting {len(tokenMultiOwnershipIdsToDelete)} old multi ownerships')
             await self.saver.delete_token_multi_ownerships(connection=connection, tokenMultiOwnershipIds=tokenMultiOwnershipIdsToDelete)
             retrievedTokenMultiOwnershipsToSave = []
             for retrievedTuple, retrievedTokenMultiOwnership in retrievedOwnershipTuplesMaps.items():
                 if retrievedTuple in existingOwnershipTuples:
                     continue
                 retrievedTokenMultiOwnershipsToSave.append(retrievedTokenMultiOwnership)
-            logging.info(f'Saving {len(retrievedTokenMultiOwnershipsToSave)} new multi ownerships')
             await self.saver.create_token_multi_ownerships(connection=connection, retrievedTokenMultiOwnerships=retrievedTokenMultiOwnershipsToSave)
+            logging.info(f'Saving multi ownerships: saved {len(retrievedTokenMultiOwnershipsToSave)}, deleted {len(tokenMultiOwnershipIdsToDelete)}, kept {len(existingOwnershipTuples) - len(retrievedOwnershipTuples)}')
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
         collection = await self.get_collection_by_address(address=address)
