@@ -2,9 +2,10 @@ import datetime
 import json
 import logging
 import random
-from typing import List, Set
+from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Set
 from typing import Tuple
 
 import sqlalchemy
@@ -203,16 +204,6 @@ class NotdManager:
     async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None) -> None:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
         logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
-        # collectionAddresses = list(set(retrievedTokenTransfer.registryAddress for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
-        # logging.info(f'Old Found {len(collectionAddresses)} collections in block #{blockNumber}')
-        # collectionTokenIds = list(set((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId) for retrievedTokenTransfer in processedBlock.retrievedTokenTransfers))
-        # logging.info(f'Old Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
-        # await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
-        # if not shouldSkipProcessingTokens:
-        #     await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
-        #     await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
-        # processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
-        # logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
         logging.info(f'Found {len(collectionTokenIds)} tokens in block #{blockNumber}')
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
@@ -221,7 +212,6 @@ class NotdManager:
         if not shouldSkipProcessingTokens:
             await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
             await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
-
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, int]:
