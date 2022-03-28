@@ -34,6 +34,8 @@ from notd.model import TradedToken
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
+from notd.store.schema import TokenMultiOwnershipsTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
@@ -136,6 +138,27 @@ class NotdManager:
             offset=offset,
         )
         return tokenTransfers
+
+    async def list_account_tokens(self, accountAddress: str, limit: int, offset: int) -> List[Token]:
+        tokenSingleOwnerships = await self.retriever.list_token_ownerships(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
+            ],
+            orders=[Order(fieldName=TokenOwnershipsTable.c.transferDate.key, direction=Direction.DESCENDING)],
+            limit=limit+offset,
+        )
+        tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
+                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, ne=0),
+            ],
+            orders=[Order(fieldName=TokenMultiOwnershipsTable.c.latestTransferDate.key, direction=Direction.DESCENDING)],
+            limit=limit+offset,
+        )
+        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId, ownership.transferDate) for ownership in tokenSingleOwnerships]
+        tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
+        sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
+        return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})

@@ -86,7 +86,7 @@ class BlockProcessor:
             retrievedTokenTransfers += await self._process_erc1155_batch_event(event=dict(event), blockData=blockData)
         blockNumber = blockData['number']
         blockHash = blockData['hash'].hex()
-        blockDate = datetime.datetime.fromtimestamp(blockData['timestamp'])
+        blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
 
     async def _process_erc1155_single_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:

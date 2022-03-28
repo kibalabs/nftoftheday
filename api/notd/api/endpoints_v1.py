@@ -89,3 +89,9 @@ class GetCollectionTokenRecentSalesRequest(BaseModel):
 
 class GetCollectionTokenRecentSalesResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
+
+class GetAccountTokensRequest(BaseModel):
+    pass
+
+class GetAccountTokensResponse(BaseModel):
+    tokens: List[ApiCollectionToken]

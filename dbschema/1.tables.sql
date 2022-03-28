@@ -99,6 +99,7 @@ CREATE TABLE tbl_token_ownerships (
 );
 CREATE UNIQUE INDEX tbl_token_ownerships_registry_address_token_id ON tbl_token_ownerships (registry_address, token_id);
 CREATE INDEX tbl_token_ownerships_registry_address_token_id_updated_date ON tbl_token_ownerships (registry_address, token_id, updated_date);
+CREATE INDEX tbl_token_ownerships_owner_address_transfer_date ON tbl_token_ownerships (owner_address, transfer_date);
 CREATE INDEX tbl_token_ownerships_created_date ON tbl_token_ownerships (created_date);
 CREATE INDEX tbl_token_ownerships_updated_date ON tbl_token_ownerships (updated_date);
 CREATE INDEX tbl_token_ownerships_regsitry_address ON tbl_token_ownerships (registry_address);
@@ -122,6 +123,8 @@ CREATE TABLE tbl_token_multi_ownerships (
 );
 CREATE UNIQUE INDEX tbl_token_multi_ownerships_registry_address_token_id_owner_address ON tbl_token_multi_ownerships (registry_address, token_id, owner_address);
 CREATE INDEX tbl_token_multi_ownerships_registry_address_token_id_updated_date ON tbl_token_multi_ownerships (registry_address, token_id, updated_date);
+CREATE INDEX tbl_token_multi_ownerships_owner_address_quantity_latest_transfer_date ON tbl_token_multi_ownerships (owner_address, quantity, latest_transfer_date);
+CREATE INDEX tbl_token_multi_ownerships_owner_address_latest_transfer_date ON tbl_token_multi_ownerships (owner_address, latest_transfer_date);
 CREATE INDEX tbl_token_multi_ownerships_registry_address_token_id ON tbl_token_multi_ownerships (registry_address, token_id);
 CREATE INDEX tbl_token_multi_ownerships_created_date ON tbl_token_multi_ownerships (created_date);
 CREATE INDEX tbl_token_multi_ownerships_updated_date ON tbl_token_multi_ownerships (updated_date);
