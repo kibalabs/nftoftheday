@@ -4,7 +4,8 @@ from typing import Optional
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
-from notd.api.endpoints_v1 import GetAccountTokensResponse, GetCollectionRecentSalesResponse
+from notd.api.endpoints_v1 import GetAccountTokensResponse
+from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse

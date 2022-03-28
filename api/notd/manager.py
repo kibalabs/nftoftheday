@@ -1,8 +1,8 @@
-from audioop import reverse
 import datetime
 import json
 import logging
 import random
+from audioop import reverse
 from typing import List
 from typing import Optional
 from typing import Sequence
