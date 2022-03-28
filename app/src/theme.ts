@@ -106,9 +106,6 @@ export const buildNotdTheme = (): ITheme => {
       unrounded: {
         'border-radius': '0',
       },
-      borderColored: {
-        'background-color': 'rgba(255, 255, 255, 1)',
-      },
       wideBorder: {
         'border-color': '#4B0312',
         'border-width': '7px',
