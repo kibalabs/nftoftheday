@@ -4,7 +4,7 @@ from typing import Optional
 from core.api.kiba_router import KibaRouter
 from core.util import date_util
 
-from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
+from notd.api.endpoints_v1 import GetAccountTokensResponse, GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
@@ -31,21 +31,21 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
 
     @router.post('/retrieve-highest-price-transfer', response_model=RetrieveHighestPriceTransferResponse)
     async def retrieve_highest_price_transfer(request: RetrieveHighestPriceTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
-        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day()
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         transfer = await notdManager.retrieve_highest_priced_transfer(startDate=startDate, endDate=endDate)
         return RetrieveHighestPriceTransferResponse(transfer=(await responseBuilder.token_transfer_from_model(tokenTransfer=transfer)))
 
     @router.post('/retrieve-most-traded-token', response_model=RetrieveMostTradedResponse)
     async def retrieve_most_traded_token_transfer(request: RetrieveMostTradedRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
-        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day()
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         mostTradedToken = await notdManager.retrieve_most_traded_token_transfer(startDate=startDate, endDate=endDate)
         return RetrieveMostTradedResponse(tradedToken=(await responseBuilder.traded_token_from_model(tradedToken=mostTradedToken)))
 
     @router.post('/retrieve-random-token-transfer', response_model=RetrieveRandomTransferResponse)
     async def retrieve_random_transfer(request: RetrieveRandomTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
-        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day()
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         randomTokenTransfer = await notdManager.retrieve_random_transfer(startDate=startDate, endDate=endDate)
         return RetrieveRandomTransferResponse(transfer=(await responseBuilder.token_transfer_from_model(tokenTransfer=randomTokenTransfer)))
@@ -57,7 +57,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
 
     @router.post('/retrieve-transfer-count', response_model=RetrieveTransactionCountResponse)
     async def get_transfer_count(request: RetrieveTransactionCountRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):
-        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day(dt=datetime.datetime.now())
+        startDate = request.startDate.replace(tzinfo=None) if request.startDate else date_util.start_of_day()
         endDate = request.endDate.replace(tzinfo=None) if request.endDate else date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         count = await notdManager.get_transfer_count(startDate=startDate, endDate=endDate)
         return RetrieveTransactionCountResponse(count=count)
@@ -80,7 +80,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
 
     @router.get('/collections/{registryAddress}/recent-sales', response_model=GetCollectionRecentSalesResponse)
     async def get_collection_recent_sales(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        limit = limit if limit is not None else 10
+        limit = limit if limit is not None else 20
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_recent_sales(registryAddress=registryAddress, limit=limit, offset=offset)
         return GetCollectionRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
@@ -92,10 +92,17 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}/recent-sales', response_model=GetCollectionTokenRecentSalesResponse)
     async def get_collection_token_recent_sales(registryAddress: str, tokenId: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        limit = limit if limit is not None else 10
+        limit = limit if limit is not None else 20
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
+
+    @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)
+    async def list_account_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
+        limit = limit if limit is not None else 50
+        offset = offset if offset is not None else 0
+        tokenKeys = await notdManager.list_account_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
+        return GetAccountTokensResponse(tokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokenKeys)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

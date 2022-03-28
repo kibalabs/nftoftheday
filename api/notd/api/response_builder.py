@@ -51,6 +51,9 @@ class ResponseBuilder:
         tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return await self.collection_token_from_model(tokenMetadata=tokenMetadata)
 
+    async def collection_token_from_token_key(self, tokenKey: Token) -> ApiCollectionToken:
+        return await self.collection_token_from_registry_address_token_id(registryAddress=tokenKey.registryAddress, tokenId=tokenKey.tokenId)
+
     async def collection_token_from_model(self, tokenMetadata: TokenMetadata) -> ApiCollectionToken:
         attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in tokenMetadata.attributes]
         return ApiCollectionToken(
@@ -63,6 +66,12 @@ class ResponseBuilder:
             attributes=attributes,
         )
 
+    async def collection_tokens_from_models(self, tokenMetadatas: Sequence[TokenMetadata]) -> Sequence[ApiCollectionToken]:
+        return await asyncio.gather(*[self.collection_token_from_model(tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatas])
+
+    async def collection_tokens_from_token_keys(self, tokenKeys: Sequence[Token]) -> Sequence[ApiCollectionToken]:
+        return await asyncio.gather(*[self.collection_token_from_token_key(tokenKey=tokenKey) for tokenKey in tokenKeys])
+
     async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> List[ApiCollectionToken]:
         tokenMetadatas = []
         for token in tokens:
@@ -70,7 +79,7 @@ class ResponseBuilder:
                 tokenMetadatas += [await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=token.registryAddress, tokenId=token.tokenId)]
             except NotFoundException:
                 tokenMetadatas += [TokenMetadataProcessor.get_default_token_metadata(registryAddress=token.registryAddress, tokenId=token.tokenId)]
-        return await asyncio.gather(*[self.collection_token_from_model(tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatas])
+        return await self.collection_tokens_from_models(tokenMetadatas=tokenMetadatas)
 
     async def token_transfer_from_model(self, tokenTransfer: TokenTransfer) -> ApiTokenTransfer:
         return ApiTokenTransfer(
@@ -102,7 +111,7 @@ class ResponseBuilder:
 
     async def sponsored_token_from_model(self, sponsoredToken: SponsoredToken) -> ApiSponsoredToken:
         return ApiSponsoredToken(
-            token=await self.collection_token_from_registry_address_token_id(registryAddress=sponsoredToken.token.registryAddress, tokenId=sponsoredToken.token.tokenId),
+            token=await self.collection_token_from_token_key(tokenKey=sponsoredToken.token),
             collection=await self.collection_from_address(address=sponsoredToken.token.registryAddress),
             latestTransfer=await self.token_transfer_from_model(tokenTransfer=sponsoredToken.latestTransfer) if sponsoredToken.latestTransfer else None,
             date=sponsoredToken.date,

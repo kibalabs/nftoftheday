@@ -36,7 +36,7 @@ async def _update_token_metadatas(tokensToProcess: Sequence[tuple], tokenManager
     recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
     tokensToUpdate = set(tokensToProcess) - recentlyUpdatedTokenIds
     print('len(tokensToUpdate)', len(tokensToUpdate))
-    for tokensToUpdateChunk in list_util.generate_chunks(lst=list(tokensToUpdate), chunkSize=50):
+    for tokensToUpdateChunk in list_util.generate_chunks(lst=list(tokensToUpdate), chunkSize=10):
         tokenProcessResults = await asyncio.gather(*[tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in tokensToUpdateChunk], return_exceptions=True)
         tokenProcessSuccessCount = tokenProcessResults.count(None)
         if tokenProcessSuccessCount:

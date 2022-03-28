@@ -277,7 +277,7 @@ class TokenManager:
             await self.saver.create_token_multi_ownerships(connection=connection, retrievedTokenMultiOwnerships=retrievedTokenMultiOwnershipsToSave)
             logging.info(f'Saving multi ownerships: saved {len(retrievedTokenMultiOwnershipsToSave)}, deleted {len(tokenMultiOwnershipIdsToDelete)}, kept {len(existingOwnershipTuples - retrievedOwnershipTuples) - len(tokenMultiOwnershipIdsToDelete)}')
             # NOTE(krishan711): if nothing changed, force update one so that it doesn't update again
-            if len(retrievedTokenMultiOwnershipsToSave) == 0 and len(tokenMultiOwnershipIdsToDelete) == 0:
+            if len(existingOwnershipTuplesMap) > 0 and len(retrievedTokenMultiOwnershipsToSave) == 0 and len(tokenMultiOwnershipIdsToDelete) == 0:
                 firstOwnership = list(existingOwnershipTuplesMap.values())[0]
                 await self.saver.update_token_multi_ownership(connection=connection, tokenMultiOwnershipId=firstOwnership.tokenMultiOwnershipId, ownerAddress=firstOwnership.ownerAddress)
 
