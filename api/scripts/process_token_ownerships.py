@@ -56,7 +56,7 @@ async def process_token_ownerships(startTokenId: int, endTokenId: int, batchSize
     await tokenQueue.connect()
 
     await database.connect()
-    # await slackClient.post(text=f'process_token_ownerships → 🚧 started: {startTokenId}-{endTokenId}')
+    await slackClient.post(text=f'process_token_ownerships → 🚧 started: {startTokenId}-{endTokenId}')
     try:
         currentTokenId = startTokenId
         while currentTokenId < endTokenId:
@@ -69,9 +69,9 @@ async def process_token_ownerships(startTokenId: int, endTokenId: int, batchSize
                 .where(TokenMetadataTable.c.tokenMetadataId < end)
             tokenMetadatas = await retriever.query_token_metadatas(query=query)
             await asyncio.gather(*[process_token_ownership(tokenManager=tokenManager, registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas])
-        # await slackClient.post(text=f'process_token_ownerships → ✅ completed : {startTokenId}-{endTokenId}')
+        await slackClient.post(text=f'process_token_ownerships → ✅ completed : {startTokenId}-{endTokenId}')
     except Exception as exception:
-        # await slackClient.post(text=f'process_token_ownerships → ❌ error: {startTokenId}-{endTokenId}\n```{str(exception)}```')
+        await slackClient.post(text=f'process_token_ownerships → ❌ error: {startTokenId}-{endTokenId}\n```{str(exception)}```')
         raise exception
     finally:
         await database.disconnect()
