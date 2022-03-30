@@ -56,6 +56,9 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'X-Kiba-Token',
 ], allow_origins=[
     'https://nft.tokenhunt.io',
+    'https://pfpkit.kibalabs.com',
+    'https://pfpkit.xyz',
+    'https://pfpkit.com',
     'http://localhost:3000',
 ])
 

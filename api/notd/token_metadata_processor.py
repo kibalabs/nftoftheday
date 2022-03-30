@@ -150,6 +150,9 @@ class TokenMetadataProcessor():
         if registryAddress == '0xd65c5D035A35F41f31570887E3ddF8c3289EB920':
             # TODO(krishan711): Implement special case for ETHTerrestrials
             raise TokenDoesNotExistException()
+        if registryAddress == '0xAA6612F03443517ceD2Bdcf27958c22353ceeAb9':
+            # TODO(krishan711): Implement special case for Bamboozlers
+            raise TokenDoesNotExistException()
         if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
             # TODO(krishan711): Implement special case for ENS
             raise TokenDoesNotExistException()

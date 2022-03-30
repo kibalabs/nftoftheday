@@ -69,7 +69,7 @@ async def _update_collections(collectionsToProcess: Sequence[str], tokenManager:
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=100)
-async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int):
+async def process_tokens_from_old_transfers(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
@@ -97,6 +97,7 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
     while currentBlockNumber < endBlockNumber:
         start = currentBlockNumber
         end = min(currentBlockNumber + batchSize, endBlockNumber)
+        currentBlockNumber = end
         logging.info(f'Working on {start}-{end}...')
         query = (
              sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
@@ -123,7 +124,6 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
         except:
             logging.error(f'Failed during: {start}-{end}')
             raise
-        currentBlockNumber = end
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
@@ -131,4 +131,4 @@ async def add_message(startBlockNumber: int, endBlockNumber: int, batchSize: int
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(add_message())
+    asyncio.run(process_tokens_from_old_transfers())
