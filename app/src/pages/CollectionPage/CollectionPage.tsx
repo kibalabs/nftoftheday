@@ -98,7 +98,7 @@ export const CollectionPage = (): React.ReactElement => {
   };
 
   return (
-    <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
+    <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
       {collection === undefined ? (
         <LoadingSpinner />
       ) : collection === null ? (

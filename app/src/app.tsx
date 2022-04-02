@@ -3,7 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { BackgroundView, Direction, KibaApp, Stack } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Direction, KibaApp, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { AccountControlProvider } from './AccountContext';
@@ -58,7 +58,9 @@ export const App = (): React.ReactElement => {
                 <NavBar />
               )}
               <Stack.Item growthFactor={1} shrinkFactor={1}>
-                <Router routes={routes} />
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
+                  <Router routes={routes} />
+                </Stack>
               </Stack.Item>
             </Stack>
           </BackgroundView>

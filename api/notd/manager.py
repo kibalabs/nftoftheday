@@ -56,7 +56,7 @@ class NotdManager:
         self.revueApiKey = revueApiKey
         self.sponsoredTokens = [BaseSponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
 
-    async def get_sponsorged_token(self) -> SponsoredToken:
+    async def get_sponsored_token(self) -> SponsoredToken:
         baseSponsoredToken = self.sponsoredTokens[0]
         currentDate = date_util.datetime_from_now()
         allPastTokens = [sponsoredToken for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
