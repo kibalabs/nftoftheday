@@ -9,18 +9,19 @@ from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
+from core.slack_client import SlackClient
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
-from core.slack_client import SlackClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_processor import CollectionProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenMetadataTable
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
-from notd.store.schema import TokenMetadataTable
+
 
 # Initial run from -s 0 -e 50000000 -b 100
 async def process_token_ownership(tokenManager: TokenManager, registryAddress: str, tokenId: str) -> None:

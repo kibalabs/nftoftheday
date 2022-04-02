@@ -13,6 +13,7 @@ from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
+from core.util import list_util
 
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
@@ -36,6 +37,7 @@ from notd.store.schema import TokenTransfersTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.token_ownership_processor import NoOwnershipException
 from notd.token_ownership_processor import TokenOwnershipProcessor
 
 _TOKEN_UPDATE_MIN_DAYS = 10
@@ -227,7 +229,11 @@ class TokenManager:
                 tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
             except NotFoundException:
                 tokenOwnership = None
-            retrievedTokenOwnership = await self.tokenOwnershipProcessor.calculate_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
+            try:
+                retrievedTokenOwnership = await self.tokenOwnershipProcessor.calculate_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
+            except NoOwnershipException:
+                logging.error(f'No ownership found for {registryAddress}:{tokenId}')
+                return
             if tokenOwnership:
                 await self.saver.update_token_ownership(connection=connection, tokenOwnershipId=tokenOwnership.tokenOwnershipId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
             else:
@@ -298,3 +304,10 @@ class TokenManager:
             ])
             tokens += [Token(registryAddress=tokenMultiOwnership.registryAddress, tokenId=tokenMultiOwnership.tokenId) for tokenMultiOwnership in tokenMultiOwnerships]
         return tokens
+
+    async def reprocess_owner_token_ownerships(self, ownerAddress: str) -> None:
+        tokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=ownerAddress)])
+        collectionTokenIds = list({(transfer.registryAddress, transfer.tokenId) for transfer in tokenTransfers})
+        logging.info(f'Refreshing {len(collectionTokenIds)} ownerships')
+        for collectionTokenIdChunk in list_util.generate_chunks(lst=collectionTokenIds, chunkSize=10):
+            await asyncio.gather(*[self.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in collectionTokenIdChunk])

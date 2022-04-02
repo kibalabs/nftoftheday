@@ -11,6 +11,7 @@ from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
+from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
 from notd.api.endpoints_v1 import RetrieveMostTradedRequest
@@ -100,10 +101,15 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
 
     @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)
     async def list_account_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        limit = limit if limit is not None else 50
+        limit = limit if limit is not None else 100
         offset = offset if offset is not None else 0
         tokenKeys = await notdManager.list_account_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
         return GetAccountTokensResponse(tokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokenKeys)))
+
+    @router.post('/accounts/{accountAddress}/refresh-token-ownerships', response_model=RefreshAccountTokenOwnershipsResponse)
+    async def list_account_tokens(accountAddress: str):
+        await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
+        return RefreshAccountTokenOwnershipsResponse()
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):
