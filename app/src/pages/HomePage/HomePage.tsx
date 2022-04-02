@@ -115,7 +115,7 @@ export const HomePage = (): React.ReactElement => {
       <Head headId='home'>
         <title>{`Token Hunt ${getTitleDateString()}`}</title>
       </Head>
-      <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
+      <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
         <Spacing variant={PaddingSize.Wide2} />
         <Text variant='header1'>NFT of the day</Text>
         <Spacing variant={PaddingSize.Default} />

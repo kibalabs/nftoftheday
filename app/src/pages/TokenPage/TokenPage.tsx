@@ -108,7 +108,7 @@ export const TokenPage = (): React.ReactElement => {
   };
 
   return (
-    <Stack direction={ Direction.Vertical} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} isScrollableVertically={true}>
+    <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
       {collectionToken === undefined ? (
         <LoadingSpinner />
       ) : collectionToken === null ? (
