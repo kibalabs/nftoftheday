@@ -197,7 +197,8 @@ class TokenMetadataProcessor():
             if 'value could not be decoded as valid UTF8' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise badRequestException
-        tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hex(int(tokenId))).replace('{id}', hex(int(tokenId))).replace('\x00', '')
+        hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
+        tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
