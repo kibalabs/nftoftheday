@@ -311,3 +311,4 @@ class TokenManager:
         logging.info(f'Refreshing {len(collectionTokenIds)} ownerships')
         for collectionTokenIdChunk in list_util.generate_chunks(lst=collectionTokenIds, chunkSize=10):
             await asyncio.gather(*[self.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in collectionTokenIdChunk])
+        await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
