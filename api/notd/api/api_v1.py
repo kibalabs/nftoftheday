@@ -107,7 +107,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         return GetAccountTokensResponse(tokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokenKeys)))
 
     @router.post('/accounts/{accountAddress}/refresh-token-ownerships', response_model=RefreshAccountTokenOwnershipsResponse)
-    async def list_account_tokens(accountAddress: str):
+    async def refresh_owner_token_ownerships(accountAddress: str):
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
 
