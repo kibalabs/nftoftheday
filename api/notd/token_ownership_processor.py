@@ -1,6 +1,7 @@
 from typing import Dict
 from typing import List
 
+from core.exceptions import KibaException
 from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
@@ -11,6 +12,10 @@ from notd.model import RetrievedTokenOwnership
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenTransfersTable
 
+
+class NoOwnershipException(KibaException):
+    def __init__(self) -> None:
+        super().__init__(message='No ownership')
 
 class TokenOwnershipProcessor:
 
@@ -27,6 +32,8 @@ class TokenOwnershipProcessor:
             orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
             limit=1,
         )
+        if len(tokenTransfers) == 0:
+            raise NoOwnershipException()
         latestTokenTransfer = tokenTransfers[0]
         return RetrievedTokenOwnership(
             registryAddress=registryAddress,

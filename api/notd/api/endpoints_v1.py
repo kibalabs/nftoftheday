@@ -95,3 +95,9 @@ class GetAccountTokensRequest(BaseModel):
 
 class GetAccountTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
+
+class RefreshAccountTokenOwnershipsRequest(BaseModel):
+    pass
+
+class RefreshAccountTokenOwnershipsResponse(BaseModel):
+    pass
