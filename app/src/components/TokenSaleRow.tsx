@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
-import { Alignment, Box, Direction, KibaIcon, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, IconButton, KibaIcon, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { TokenTransfer } from '../client/resources';
 import { Account } from './Account';
@@ -39,6 +39,9 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
                   {dateToString(props.tokenTransfer.blockDate, 'HH:mm')}
                 </Text>
               </Stack.Item>
+              <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
+                <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`} />
+              </Stack.Item>
             </Stack>
           </Box>
         </Stack>
@@ -57,6 +60,9 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
                 <Text alignment={TextAlignment.Left}>
                   {dateToString(props.tokenTransfer.blockDate, 'HH:mm')}
                 </Text>
+              </Stack.Item>
+              <Stack.Item alignment={Alignment.Center}>
+                <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`} />
               </Stack.Item>
             </Stack>
           </Box>
