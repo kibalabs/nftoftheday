@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_processor import CollectionProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
@@ -65,9 +65,9 @@ async def process_token_ownerships(startTokenId: int, endTokenId: int, batchSize
             end = min(currentTokenId + batchSize, endTokenId)
             currentTokenId = end
             logging.info(f'Working on {start}-{end}')
-            query = TokenMetadataTable.select() \
-                .where(TokenMetadataTable.c.tokenMetadataId >= start) \
-                .where(TokenMetadataTable.c.tokenMetadataId < end)
+            query = TokenMetadatasTable.select() \
+                .where(TokenMetadatasTable.c.tokenMetadataId >= start) \
+                .where(TokenMetadatasTable.c.tokenMetadataId < end)
             tokenMetadatas = await retriever.query_token_metadatas(query=query)
             await asyncio.gather(*[process_token_ownership(tokenManager=tokenManager, registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas])
         await slackClient.post(text=f'process_token_ownerships → ✅ completed : {startTokenId}-{endTokenId}')

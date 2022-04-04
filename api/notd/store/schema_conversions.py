@@ -8,7 +8,7 @@ from notd.model import TokenOwnership
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -45,19 +45,20 @@ def block_from_row(row: Mapping) -> Block:
 
 def token_metadata_from_row(row: Mapping) -> TokenMetadata:
     return TokenMetadata(
-        tokenMetadataId=row[TokenMetadataTable.c.tokenMetadataId],
-        createdDate=row[TokenMetadataTable.c.createdDate],
-        updatedDate=row[TokenMetadataTable.c.updatedDate],
-        registryAddress=row[TokenMetadataTable.c.registryAddress],
-        tokenId=row[TokenMetadataTable.c.tokenId],
-        metadataUrl=row[TokenMetadataTable.c.metadataUrl],
-        name=row[TokenMetadataTable.c.name],
-        imageUrl=row[TokenMetadataTable.c.imageUrl],
-        animationUrl=row[TokenMetadataTable.c.animationUrl],
-        youtubeUrl=row[TokenMetadataTable.c.youtubeUrl],
-        backgroundColor=row[TokenMetadataTable.c.backgroundColor],
-        description=row[TokenMetadataTable.c.description],
-        attributes=row[TokenMetadataTable.c.attributes],
+        tokenMetadataId=row[TokenMetadatasTable.c.tokenMetadataId],
+        createdDate=row[TokenMetadatasTable.c.createdDate],
+        updatedDate=row[TokenMetadatasTable.c.updatedDate],
+        registryAddress=row[TokenMetadatasTable.c.registryAddress],
+        tokenId=row[TokenMetadatasTable.c.tokenId],
+        metadataUrl=row[TokenMetadatasTable.c.metadataUrl],
+        name=row[TokenMetadatasTable.c.name],
+        imageUrl=row[TokenMetadatasTable.c.imageUrl],
+        animationUrl=row[TokenMetadatasTable.c.animationUrl],
+        youtubeUrl=row[TokenMetadatasTable.c.youtubeUrl],
+        backgroundColor=row[TokenMetadatasTable.c.backgroundColor],
+        frameImageUrl=row[TokenMetadatasTable.c.frameImageUrl],
+        description=row[TokenMetadatasTable.c.description],
+        attributes=row[TokenMetadatasTable.c.attributes],
     )
 
 def collection_from_row(row: Mapping) -> Collection:

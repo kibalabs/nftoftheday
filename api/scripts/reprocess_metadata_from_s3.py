@@ -22,7 +22,7 @@ from notd.collection_processor import CollectionProcessor
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -76,18 +76,18 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
     if not startId:
         startId = 0
     if not endId:
-        maxTokenMetadata = await retriever.list_token_metadatas(limit=1, orders=[Order(fieldName=TokenMetadataTable.c.tokenMetadataId.key, direction=Direction.DESCENDING)])
+        maxTokenMetadata = await retriever.list_token_metadatas(limit=1, orders=[Order(fieldName=TokenMetadatasTable.c.tokenMetadataId.key, direction=Direction.DESCENDING)])
         print(maxTokenMetadata)
         endId = maxTokenMetadata[0].tokenMetadataId + 1
     currentId = startId
     while currentId < endId:
         start = currentId
         end = min(currentId + batchSize, endId)
-        query = TokenMetadataTable.select()
-        query = query.where(TokenMetadataTable.c.tokenMetadataId >= start)
-        query = query.where(TokenMetadataTable.c.tokenMetadataId < end)
-        query = query.where(TokenMetadataTable.c.updatedDate < datetime.datetime(2022, 2, 13))
-        query = query.order_by(TokenMetadataTable.c.tokenMetadataId.asc())
+        query = TokenMetadatasTable.select()
+        query = query.where(TokenMetadatasTable.c.tokenMetadataId >= start)
+        query = query.where(TokenMetadatasTable.c.tokenMetadataId < end)
+        query = query.where(TokenMetadatasTable.c.updatedDate < datetime.datetime(2022, 2, 13))
+        query = query.order_by(TokenMetadatasTable.c.tokenMetadataId.asc())
         tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
         logging.info(f'Working on {start} - {end}')
         logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
