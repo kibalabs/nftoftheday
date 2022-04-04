@@ -61,7 +61,7 @@ class NotdManager:
         currentDate = date_util.datetime_from_now()
         allPastTokens = [sponsoredToken for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
         if allPastTokens:
-            baseSponsoredToken = allPastTokens[-1]
+            baseSponsoredToken = max(allPastTokens, key=lambda sponsoredToken: sponsoredToken.date)
         latestTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=baseSponsoredToken.token.registryAddress),
