@@ -164,28 +164,36 @@ class NotdManager:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str) -> None:
-        return await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
+        await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def update_token_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+        await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+
+    async def update_token(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+        await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_collection_deferred(address=address, shouldForce=shouldForce)
+        await self.tokenManager.update_collection_deferred(address=address, shouldForce=shouldForce)
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_collection(address=address, shouldForce=shouldForce)
+        await self.tokenManager.update_collection(address=address, shouldForce=shouldForce)
 
     async def update_collections_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
+        await self.tokenManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
-        return await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
+        await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)

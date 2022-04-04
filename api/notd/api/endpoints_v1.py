@@ -66,6 +66,18 @@ class GetCollectionRequest(BaseModel):
 class GetCollectionResponse(BaseModel):
     collection: ApiCollection
 
+class UpdateCollectionRequest(BaseModel):
+    userAddress: str
+
+class UpdateCollectionResponse(BaseModel):
+    pass
+
+class UpdateCollectionTokensRequest(BaseModel):
+    userAddress: str
+
+class UpdateCollectionTokensResponse(BaseModel):
+    pass
+
 class ListCollectionTokensByOwnerRequest(BaseModel):
     pass
 
@@ -83,6 +95,12 @@ class GetCollectionTokenRequest(BaseModel):
 
 class GetCollectionTokenResponse(BaseModel):
     token: ApiCollectionToken
+
+class UpdateCollectionTokenRequest(BaseModel):
+    userAddress: str
+
+class UpdateCollectionTokenResponse(BaseModel):
+    pass
 
 class GetCollectionTokenRecentSalesRequest(BaseModel):
     pass

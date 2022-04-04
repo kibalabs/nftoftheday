@@ -23,6 +23,12 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
+from notd.api.endpoints_v1 import UpdateCollectionRequest
+from notd.api.endpoints_v1 import UpdateCollectionResponse
+from notd.api.endpoints_v1 import UpdateCollectionTokenRequest
+from notd.api.endpoints_v1 import UpdateCollectionTokenResponse
+from notd.api.endpoints_v1 import UpdateCollectionTokensRequest
+from notd.api.endpoints_v1 import UpdateCollectionTokensResponse
 from notd.api.endpoints_v1 import datetime
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
@@ -71,12 +77,22 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         return ReceiveNewBlocksDeferredResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
-    async def get_collection_by_address(registryAddress: str):  # request: RetreiveCollectionRequest
+    async def get_collection_by_address(registryAddress: str):
         collection = await notdManager.get_collection_by_address(address=registryAddress)
         return GetCollectionResponse(collection=(await responseBuilder.collection_from_model(collection=collection)))
 
+    @router.post('/collections/{registryAddress}/update', response_model=UpdateCollectionResponse)
+    async def update_collection(registryAddress: str, request: UpdateCollectionRequest):  # pylint: disable=unused-argument
+        await notdManager.update_collection_deferred(address=registryAddress)
+        return UpdateCollectionResponse()
+
+    @router.post('/collections/{registryAddress}/update-tokens', response_model=UpdateCollectionTokensResponse)
+    async def update_collections_tokens(registryAddress: str, request: UpdateCollectionTokensRequest):  # pylint: disable=unused-argument
+        await notdManager.update_collections_tokens_deferred(address=registryAddress)
+        return UpdateCollectionTokensResponse()
+
     @router.get('/collections/{registryAddress}/tokens/owner/{ownerAddress}', response_model=ListCollectionTokensByOwnerResponse)
-    async def list_collection_tokens_by_owner(registryAddress: str, ownerAddress: str):  # request: ListHoldingsForCollectionRequest
+    async def list_collection_tokens_by_owner(registryAddress: str, ownerAddress: str):
         tokens = await notdManager.list_collection_tokens_by_owner(address=registryAddress, ownerAddress=ownerAddress)
         return ListCollectionTokensByOwnerResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
 
@@ -91,6 +107,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
     async def get_token_metadata_by_registry_address_token_id(registryAddress: str, tokenId: str):
         tokenMetadata = await notdManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return GetCollectionTokenResponse(token=(await responseBuilder.collection_token_from_model(tokenMetadata=tokenMetadata)))
+
+    @router.post('/collections/{registryAddress}tokens/{tokenId}/update', response_model=UpdateCollectionTokenResponse)
+    async def update_token(registryAddress: str, request: UpdateCollectionTokenRequest):  # pylint: disable=unused-argument
+        await notdManager.update_token_deferred(address=registryAddress)
+        return UpdateCollectionTokenResponse()
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}/recent-sales', response_model=GetCollectionTokenRecentSalesResponse)
     async def get_collection_token_recent_sales(registryAddress: str, tokenId: str, limit: Optional[int] = None, offset: Optional[int] = None):

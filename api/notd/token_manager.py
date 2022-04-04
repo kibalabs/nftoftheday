@@ -40,7 +40,7 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import NoOwnershipException
 from notd.token_ownership_processor import TokenOwnershipProcessor
 
-_TOKEN_UPDATE_MIN_DAYS = 10
+_TOKEN_UPDATE_MIN_DAYS = 7
 _COLLECTION_UPDATE_MIN_DAYS = 30
 
 
