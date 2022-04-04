@@ -60,9 +60,10 @@ class ResponseBuilder:
             registryAddress=tokenMetadata.registryAddress,
             tokenId=tokenMetadata.tokenId,
             metadataUrl=tokenMetadata.metadataUrl,
-            imageUrl=tokenMetadata.imageUrl,
             name=tokenMetadata.name,
             description=tokenMetadata.description,
+            imageUrl=tokenMetadata.imageUrl,
+            frameImageUrl=tokenMetadata.frameImageUrl,
             attributes=attributes,
         )
 

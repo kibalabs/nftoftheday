@@ -27,8 +27,9 @@ class ApiCollectionToken(BaseModel):
     tokenId: str
     metadataUrl: Optional[str]
     name: Optional[str]
-    imageUrl: Optional[str]
     description: Optional[str]
+    imageUrl: Optional[str]
+    frameImageUrl: Optional[str]
     attributes: Optional[List[Dict[str, Union[str, int, float]]]]
 
 

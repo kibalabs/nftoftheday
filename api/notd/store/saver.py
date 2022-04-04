@@ -17,7 +17,7 @@ from notd.model import TokenMetadata
 from notd.model import TokenOwnership
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -105,24 +105,25 @@ class Saver(CoreSaver):
         query = BlocksTable.update(BlocksTable.c.blockId == blockId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, imageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], name: Optional[str], description: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
+    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, name: Optional[str], description: Optional[str], imageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], frameImageUrl: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
-            TokenMetadataTable.c.createdDate.key: createdDate,
-            TokenMetadataTable.c.updatedDate.key: updatedDate,
-            TokenMetadataTable.c.registryAddress.key: registryAddress,
-            TokenMetadataTable.c.tokenId.key: tokenId,
-            TokenMetadataTable.c.metadataUrl.key: metadataUrl,
-            TokenMetadataTable.c.imageUrl.key: imageUrl,
-            TokenMetadataTable.c.animationUrl.key: animationUrl,
-            TokenMetadataTable.c.youtubeUrl.key: youtubeUrl,
-            TokenMetadataTable.c.backgroundColor.key: backgroundColor,
-            TokenMetadataTable.c.name.key: name,
-            TokenMetadataTable.c.description.key: description,
-            TokenMetadataTable.c.attributes.key: attributes,
+            TokenMetadatasTable.c.createdDate.key: createdDate,
+            TokenMetadatasTable.c.updatedDate.key: updatedDate,
+            TokenMetadatasTable.c.registryAddress.key: registryAddress,
+            TokenMetadatasTable.c.tokenId.key: tokenId,
+            TokenMetadatasTable.c.metadataUrl.key: metadataUrl,
+            TokenMetadatasTable.c.name.key: name,
+            TokenMetadatasTable.c.description.key: description,
+            TokenMetadatasTable.c.imageUrl.key: imageUrl,
+            TokenMetadatasTable.c.animationUrl.key: animationUrl,
+            TokenMetadatasTable.c.youtubeUrl.key: youtubeUrl,
+            TokenMetadatasTable.c.backgroundColor.key: backgroundColor,
+            TokenMetadatasTable.c.frameImageUrl.key: frameImageUrl,
+            TokenMetadatasTable.c.attributes.key: attributes,
         }
-        query = TokenMetadataTable.insert().values(values)
+        query = TokenMetadatasTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
         tokenMetadataId = result.inserted_primary_key[0]
         return TokenMetadata(
@@ -132,36 +133,39 @@ class Saver(CoreSaver):
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
+            name=name,
+            description=description,
             imageUrl=imageUrl,
             animationUrl=animationUrl,
             youtubeUrl=youtubeUrl,
             backgroundColor=backgroundColor,
-            name=name,
-            description=description,
+            frameImageUrl=frameImageUrl,
             attributes=attributes,
         )
 
-    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, name: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, frameImageUrl: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if metadataUrl is not None:
-            values[TokenMetadataTable.c.metadataUrl.key] = metadataUrl
-        if imageUrl != _EMPTY_STRING:
-            values[TokenMetadataTable.c.imageUrl.key] = imageUrl
-        if animationUrl != _EMPTY_STRING:
-            values[TokenMetadataTable.c.animationUrl.key] = animationUrl
-        if youtubeUrl != _EMPTY_STRING:
-            values[TokenMetadataTable.c.youtubeUrl.key] = youtubeUrl
-        if backgroundColor != _EMPTY_STRING:
-            values[TokenMetadataTable.c.backgroundColor.key] = backgroundColor
-        if description != _EMPTY_STRING:
-            values[TokenMetadataTable.c.description.key] = description
+            values[TokenMetadatasTable.c.metadataUrl.key] = metadataUrl
         if name != _EMPTY_STRING:
-            values[TokenMetadataTable.c.name.key] = name
+            values[TokenMetadatasTable.c.name.key] = name
+        if description != _EMPTY_STRING:
+            values[TokenMetadatasTable.c.description.key] = description
+        if imageUrl != _EMPTY_STRING:
+            values[TokenMetadatasTable.c.imageUrl.key] = imageUrl
+        if animationUrl != _EMPTY_STRING:
+            values[TokenMetadatasTable.c.animationUrl.key] = animationUrl
+        if youtubeUrl != _EMPTY_STRING:
+            values[TokenMetadatasTable.c.youtubeUrl.key] = youtubeUrl
+        if backgroundColor != _EMPTY_STRING:
+            values[TokenMetadatasTable.c.backgroundColor.key] = backgroundColor
+        if frameImageUrl != _EMPTY_STRING:
+            values[TokenMetadatasTable.c.frameImageUrl.key] = frameImageUrl
         if attributes != _EMPTY_OBJECT:
-            values[TokenMetadataTable.c.attributes.key] = attributes
+            values[TokenMetadatasTable.c.attributes.key] = attributes
         if len(values) > 0:
-            values[TokenMetadataTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = TokenMetadataTable.update(TokenMetadataTable.c.tokenMetadataId == tokenMetadataId).values(values)
+            values[TokenMetadatasTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TokenMetadatasTable.update(TokenMetadatasTable.c.tokenMetadataId == tokenMetadataId).values(values)
         await self._execute(query=query, connection=connection)
 
     async def create_collection(self, address: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool, connection: Optional[DatabaseConnection] = None) -> Collection:

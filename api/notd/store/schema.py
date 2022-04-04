@@ -30,8 +30,7 @@ BlocksTable = sqlalchemy.Table(
     sqlalchemy.Column(key='blockDate', name='block_date', type_=sqlalchemy.DateTime, nullable=False),
 )
 
-# TODO(krishan711): fix this to be TokenMetadatasTable
-TokenMetadataTable = sqlalchemy.Table(
+TokenMetadatasTable = sqlalchemy.Table(
     'tbl_token_metadatas',
     metadata,
     sqlalchemy.Column(key='tokenMetadataId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
@@ -44,6 +43,7 @@ TokenMetadataTable = sqlalchemy.Table(
     sqlalchemy.Column(key='animationUrl', name='animation_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='youtubeUrl', name='youtube_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='backgroundColor', name='background_color', type_=sqlalchemy.TEXT, nullable=True),
+    sqlalchemy.Column(key='frameImageUrl', name='frame_image_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='attributes', name='attributes', type_=sqlalchemy.JSON, nullable=True),

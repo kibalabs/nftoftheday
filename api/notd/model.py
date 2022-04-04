@@ -38,12 +38,13 @@ class RetrievedTokenMetadata:
     registryAddress: str
     tokenId: str
     metadataUrl: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
     imageUrl: Optional[str]
     animationUrl: Optional[str]
     youtubeUrl: Optional[str]
     backgroundColor: Optional[str]
-    name: Optional[str]
-    description: Optional[str]
+    frameImageUrl: Optional[str]
     attributes: JSON
 
 

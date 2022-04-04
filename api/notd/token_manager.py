@@ -30,7 +30,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -87,9 +87,9 @@ class TokenManager:
             return
         if not shouldForce:
             query = (
-                TokenMetadataTable.select()
-                    .where(TokenMetadataTable.c.updatedDate > date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
-                    .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(collectionTokenIds))
+                TokenMetadatasTable.select()
+                    .where(TokenMetadatasTable.c.updatedDate > date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
+                    .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(collectionTokenIds))
             )
             recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
             recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
@@ -102,9 +102,9 @@ class TokenManager:
         if not shouldForce:
             recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
                 fieldFilters=[
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-                    DateFieldFilter(fieldName=TokenMetadataTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
+                    StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenMetadatasTable.c.tokenId.key, eq=tokenId),
+                    DateFieldFilter(fieldName=TokenMetadatasTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
                 ],
             )
             if len(recentlyUpdatedTokens) > 0:
@@ -116,9 +116,9 @@ class TokenManager:
         if not shouldForce:
             recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
                 fieldFilters=[
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenMetadataTable.c.tokenId.key, eq=tokenId),
-                    DateFieldFilter(fieldName=TokenMetadataTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
+                    StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenMetadatasTable.c.tokenId.key, eq=tokenId),
+                    DateFieldFilter(fieldName=TokenMetadatasTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
                 ],
             )
             if len(recentlyUpdatedTokens) > 0:
@@ -139,9 +139,9 @@ class TokenManager:
             except NotFoundException:
                 tokenMetadata = None
             if tokenMetadata:
-                await self.saver.update_token_metadata(connection=connection, tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+                await self.saver.update_token_metadata(connection=connection, tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
             else:
-                await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, attributes=retrievedTokenMetadata.attributes)
+                await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
 
     async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
         if len(addresses) == 0:

@@ -8,7 +8,7 @@ from core.store.database import Database
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.token_metadata_processor import TokenMetadataProcessor
 
@@ -31,11 +31,11 @@ async def reprocess_metadata(startId: int, endId: int, batchSize: int):
         end = min(currentId + batchSize, endId)
         logging.info(f'Working on {start} to {end}...')
         async with database.transaction():
-            query = TokenMetadataTable.select()
-            query = query.where(TokenMetadataTable.c.tokenMetadataId >= start)
-            query = query.where(TokenMetadataTable.c.tokenMetadataId < end)
-            query = query.where(TokenMetadataTable.c.metadataUrl.startswith('data:'))
-            query = query.where(TokenMetadataTable.c.name == None)
+            query = TokenMetadatasTable.select()
+            query = query.where(TokenMetadatasTable.c.tokenMetadataId >= start)
+            query = query.where(TokenMetadatasTable.c.tokenMetadataId < end)
+            query = query.where(TokenMetadatasTable.c.metadataUrl.startswith('data:'))
+            query = query.where(TokenMetadatasTable.c.name == None)
             tokenMetadatasToChange = [token_metadata_from_row(row) async for row in database.execute(query=query)]
             logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
             for tokenMetadata in tokenMetadatasToChange:

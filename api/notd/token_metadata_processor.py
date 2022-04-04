@@ -77,6 +77,7 @@ class TokenMetadataProcessor():
             animationUrl=None,
             youtubeUrl=None,
             backgroundColor=None,
+            frameImageUrl=None,
             attributes=[],
         )
 
@@ -125,6 +126,7 @@ class TokenMetadataProcessor():
             animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
             youtubeUrl=tokenMetadataDict.get('youtube_url'),
             backgroundColor=tokenMetadataDict.get('background_color'),
+            frameImageUrl=tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url'),
             attributes=tokenMetadataDict.get('attributes', []),
         )
         return retrievedTokenMetadata
@@ -145,6 +147,7 @@ class TokenMetadataProcessor():
                 animationUrl=None,
                 youtubeUrl=None,
                 backgroundColor=None,
+                frameImageUrl=None,
                 attributes=attributes,
             )
         if registryAddress == '0xd65c5D035A35F41f31570887E3ddF8c3289EB920':

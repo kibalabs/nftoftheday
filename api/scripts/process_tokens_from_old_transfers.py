@@ -20,7 +20,7 @@ from notd.collection_processor import CollectionProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -29,8 +29,8 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 
 async def _update_token_metadatas(tokensToProcess: Sequence[tuple], tokenManager: TokenManager, retriever: Retriever):
     query = (
-        TokenMetadataTable.select()
-            .where(sqlalchemy.tuple_(TokenMetadataTable.c.registryAddress, TokenMetadataTable.c.tokenId).in_(tokensToProcess))
+        TokenMetadatasTable.select()
+            .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(tokensToProcess))
     )
     recentlyUpdatedTokenMetadatas = await retriever.query_token_metadatas(query=query)
     recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)

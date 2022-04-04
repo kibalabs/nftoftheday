@@ -22,7 +22,7 @@ from notd.model import TokenOwnership
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
-from notd.store.schema import TokenMetadataTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -126,19 +126,19 @@ class Retriever(CoreRetriever):
         return tokenMetadatas
 
     async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenMetadata]:
-        query = TokenMetadataTable.select()
+        query = TokenMetadatasTable.select()
         if fieldFilters:
-            query = self._apply_field_filters(query=query, table=TokenMetadataTable, fieldFilters=fieldFilters)
+            query = self._apply_field_filters(query=query, table=TokenMetadatasTable, fieldFilters=fieldFilters)
         if orders:
-            query = self._apply_orders(query=query, table=TokenMetadataTable, orders=orders)
+            query = self._apply_orders(query=query, table=TokenMetadatasTable, orders=orders)
         if limit:
             query = query.limit(limit)
         return await self.query_token_metadatas(query=query, connection=connection)
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
-        query = TokenMetadataTable.select() \
-            .where(TokenMetadataTable.c.registryAddress == registryAddress) \
-            .where(TokenMetadataTable.c.tokenId == tokenId)
+        query = TokenMetadatasTable.select() \
+            .where(TokenMetadatasTable.c.registryAddress == registryAddress) \
+            .where(TokenMetadatasTable.c.tokenId == tokenId)
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
