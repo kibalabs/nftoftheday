@@ -99,7 +99,10 @@ export const CollectionPage = (): React.ReactElement => {
   };
 
   const collectionUpdate = (): void => {
-    notdClient.updateCollection(address).then((): void => {
+    if (!account) {
+      return;
+    }
+    notdClient.updateCollection(address, account.address).then((): void => {
       toast('We\'ve queued your request');
     }).catch((error: unknown): void => {
       console.error(error);
