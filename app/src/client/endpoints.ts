@@ -343,9 +343,9 @@ export class SubscribeResponse extends ResponseData {
 }
 
 export class UpdateCollectionRequest extends RequestData {
-  readonly userAddress?: string;
+  readonly userAddress: string;
 
-  constructor(userAddress?: string) {
+  constructor(userAddress: string) {
     super();
     this.userAddress = userAddress;
   }
