@@ -98,8 +98,8 @@ export const CollectionPage = (): React.ReactElement => {
     await onLinkAccountsClicked();
   };
 
-  const retrieveCollectionUpdate = React.useCallback(async (): Promise<void> => {
-    notdClient.retrieveCollectionUpdate(address).then((): void => {
+  const collectionUpdate = React.useCallback(async (): Promise<void> => {
+    notdClient.updateCollection(address).then((): void => {
       toast('Refresh Successful');
     }).catch((error: unknown): void => {
       console.error(error);
@@ -107,7 +107,7 @@ export const CollectionPage = (): React.ReactElement => {
   }, [notdClient, address]);
 
   const onRefreshMetadataClicked = (): void => {
-    retrieveCollectionUpdate();
+    collectionUpdate();
     setIsRefreshClicked(true);
   };
 
