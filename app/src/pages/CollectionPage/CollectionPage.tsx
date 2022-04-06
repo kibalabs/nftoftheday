@@ -4,6 +4,7 @@ import { dateToString } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
+import { toast } from 'react-toastify';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
@@ -99,7 +100,7 @@ export const CollectionPage = (): React.ReactElement => {
 
   const retrieveCollectionUpdate = React.useCallback(async (): Promise<void> => {
     notdClient.retrieveCollectionUpdate(address).then((): void => {
-      setIsRefreshClicked(true);
+      toast('Refresh Successful');
     }).catch((error: unknown): void => {
       console.error(error);
     });
@@ -107,6 +108,7 @@ export const CollectionPage = (): React.ReactElement => {
 
   const onRefreshMetadataClicked = (): void => {
     retrieveCollectionUpdate();
+    setIsRefreshClicked(true);
   };
 
   return (

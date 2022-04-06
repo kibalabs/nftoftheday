@@ -5,6 +5,7 @@ import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-r
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Direction, KibaApp, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
@@ -15,7 +16,6 @@ import { CollectionPage } from './pages/CollectionPage';
 import { HomePage } from './pages/HomePage';
 import { TokenPage } from './pages/TokenPage';
 import { buildNotdTheme } from './theme';
-
 
 declare global {
   export interface Window {
@@ -66,6 +66,7 @@ export const App = (): React.ReactElement => {
           </BackgroundView>
         </AccountControlProvider>
       </GlobalsProvider>
+      <ToastContainer />
     </KibaApp>
   );
 };
