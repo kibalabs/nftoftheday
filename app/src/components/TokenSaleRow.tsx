@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { dateToString } from '@kibalabs/core';
 import { Alignment, Box, Direction, IconButton, KibaIcon, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { TokenTransfer } from '../client/resources';
@@ -11,6 +10,33 @@ export interface ITokenSaleRowProps {
 }
 
 export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
+  const timeSince = (date: Date): string => {
+    const seconds = Math.floor((new Date().valueOf() - date.valueOf()) / 1000);
+
+    let interval = seconds / 31536000;
+
+    if (interval > 1) {
+      return `${Math.floor(interval)} year(s)`;
+    }
+    interval = seconds / 2592000;
+    if (interval > 1) {
+      return `${Math.floor(interval)} month(s)`;
+    }
+    interval = seconds / 86400;
+    if (interval > 1) {
+      return `${Math.floor(interval)} day(s)`;
+    }
+    interval = seconds / 3600;
+    if (interval > 1) {
+      return `${Math.floor(interval)} hour(s)`;
+    }
+    interval = seconds / 60;
+    if (interval > 1) {
+      return `${Math.floor(interval)} minute(s)`;
+    }
+    return `${Math.floor(seconds)} second(s)`;
+  };
+
   return (
     <Stack direction={Direction.Vertical} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
       <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
@@ -36,7 +62,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
               </Stack.Item>
               <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Center}>
-                  {dateToString(props.tokenTransfer.blockDate, 'HH:mm')}
+                  {`${timeSince(props.tokenTransfer.blockDate)} ago`}
                 </Text>
               </Stack.Item>
               <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
@@ -58,7 +84,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
               <Spacing variant={PaddingSize.Wide2} />
               <Stack.Item alignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Left}>
-                  {dateToString(props.tokenTransfer.blockDate, 'HH:mm')}
+                  {`${timeSince(props.tokenTransfer.blockDate)} ago`}
                 </Text>
               </Stack.Item>
               <Stack.Item alignment={Alignment.Center}>
@@ -67,7 +93,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
             </Stack>
           </Box>
           <Box variant='tokenSaleRow'>
-            <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
+            <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
               <Stack.Item baseSize='5rem' alignment={Alignment.Center}>
                 <Account accountId={props.tokenTransfer?.fromAddress} />
               </Stack.Item>
