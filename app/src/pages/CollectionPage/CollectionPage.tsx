@@ -98,13 +98,13 @@ export const CollectionPage = (): React.ReactElement => {
     await onLinkAccountsClicked();
   };
 
-  const collectionUpdate = React.useCallback(async (): Promise<void> => {
+  const collectionUpdate = (): void => {
     notdClient.updateCollection(address).then((): void => {
-      toast('Refresh Successful');
+      toast('We\'ve queued your request');
     }).catch((error: unknown): void => {
       console.error(error);
     });
-  }, [notdClient, address]);
+  };
 
   const onRefreshMetadataClicked = (): void => {
     collectionUpdate();
