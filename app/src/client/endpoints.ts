@@ -342,7 +342,7 @@ export class SubscribeResponse extends ResponseData {
   };
 }
 
-export class RetrieveTokenUpdateRequest extends RequestData {
+export class UpdateTokenRequest extends RequestData {
   readonly userAddress?: string;
 
   constructor(userAddress?: string) {
@@ -357,8 +357,8 @@ export class RetrieveTokenUpdateRequest extends RequestData {
   };
 }
 
-export class RetrieveTokenUpdateResponse extends ResponseData {
-  public static fromObject = (): RetrieveTokenUpdateResponse => {
-    return new RetrieveTokenUpdateResponse();
+export class UpdateTokenResponse extends ResponseData {
+  public static fromObject = (): UpdateTokenResponse => {
+    return new UpdateTokenResponse();
   };
 }

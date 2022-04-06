@@ -110,8 +110,8 @@ export const TokenPage = (): React.ReactElement => {
     });
   };
 
-  const retrieveTokenUpdate = React.useCallback(async (): Promise<void> => {
-    notdClient.retrieveTokenUpdate(registryAddress, tokenId).then((): void => {
+  const updateToken = React.useCallback(async (): Promise<void> => {
+    notdClient.updateToken(registryAddress, tokenId).then((): void => {
       toast('Refresh Successful');
     }).catch((error: unknown): void => {
       console.error(error);
@@ -119,7 +119,7 @@ export const TokenPage = (): React.ReactElement => {
   }, [notdClient, registryAddress, tokenId]);
 
   const onRefreshMetadataClicked = (): void => {
-    retrieveTokenUpdate();
+    updateToken();
     setIsRefreshClicked(true);
   };
 
