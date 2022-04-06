@@ -108,7 +108,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         tokenMetadata = await notdManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return GetCollectionTokenResponse(token=(await responseBuilder.collection_token_from_model(tokenMetadata=tokenMetadata)))
 
-    @router.post('/collections/{registryAddress}tokens/{tokenId}/update', response_model=UpdateCollectionTokenResponse)
+    @router.post('/collections/{registryAddress}/tokens/{tokenId}/update', response_model=UpdateCollectionTokenResponse)
     async def update_token(registryAddress: str, request: UpdateCollectionTokenRequest):  # pylint: disable=unused-argument
         await notdManager.update_token_deferred(address=registryAddress)
         return UpdateCollectionTokenResponse()
