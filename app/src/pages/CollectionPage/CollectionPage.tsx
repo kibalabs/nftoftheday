@@ -17,12 +17,12 @@ export const CollectionPage = (): React.ReactElement => {
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
   const routeParams = useRouteParams();
   const navigator = useNavigator();
   const account = useAccount();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
-
   const address = routeParams.address as string;
   const bannerImageUrl = collection?.bannerImageUrl || '/assets/black_banner.png';
   const imageUrl = collection?.imageUrl || '/assets/icon.png';
@@ -97,6 +97,18 @@ export const CollectionPage = (): React.ReactElement => {
     await onLinkAccountsClicked();
   };
 
+  const retrieveCollectionUpdate = React.useCallback(async (): Promise<void> => {
+    notdClient.retrieveCollectionUpdate(address).then((): void => {
+      setIsRefreshClicked(true);
+    }).catch((error: unknown): void => {
+      console.error(error);
+    });
+  }, [notdClient, address]);
+
+  const onRefreshMetadataClicked = (): void => {
+    retrieveCollectionUpdate();
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
       {collection === undefined ? (
@@ -154,6 +166,9 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack.Item>
                 )}
               </Stack>
+              {account?.address && !isRefreshClicked && (
+                <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+              )}
               <Spacing variant={PaddingSize.Wide2} />
               {collection.description && (
                 <TruncateText

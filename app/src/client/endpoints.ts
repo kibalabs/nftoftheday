@@ -341,3 +341,24 @@ export class SubscribeResponse extends ResponseData {
     return new SubscribeResponse();
   };
 }
+
+export class RetrieveCollectionUpdateRequest extends RequestData {
+  readonly userAddress?: string;
+
+  constructor(userAddress?: string) {
+    super();
+    this.userAddress = userAddress;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      userAddress: this.userAddress,
+    };
+  };
+}
+
+export class RetrieveCollectionUpdateResponse extends ResponseData {
+  public static fromObject = (): RetrieveCollectionUpdateResponse => {
+    return new RetrieveCollectionUpdateResponse();
+  };
+}
