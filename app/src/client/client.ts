@@ -103,10 +103,10 @@ export class NotdClient extends ServiceClient {
     await this.makeRequest(method, path, request, Endpoints.SubscribeResponse);
   };
 
-  public updateToken = async (registryAddress: string, tokenId: string): Promise<void> => {
+  public updateToken = async (registryAddress: string, tokenId: string, userAddress: string): Promise<void> => {
     const method = RestMethod.POST;
     const path = `v1/collections/${registryAddress}/tokens/${tokenId}/update`;
-    const request = new Endpoints.UpdateTokenRequest(registryAddress);
+    const request = new Endpoints.UpdateTokenRequest(userAddress);
     await this.makeRequest(method, path, request, Endpoints.UpdateTokenResponse);
   };
 }

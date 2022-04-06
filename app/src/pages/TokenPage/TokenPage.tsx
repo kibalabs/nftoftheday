@@ -110,13 +110,16 @@ export const TokenPage = (): React.ReactElement => {
     });
   };
 
-  const updateToken = React.useCallback(async (): Promise<void> => {
-    notdClient.updateToken(registryAddress, tokenId).then((): void => {
-      toast('Refresh Successful');
+  const updateToken = (): void => {
+    if (!account) {
+      return;
+    }
+    notdClient.updateToken(registryAddress, tokenId, account.address).then((): void => {
+      toast('We\'ve queued your request');
     }).catch((error: unknown): void => {
       console.error(error);
     });
-  }, [notdClient, registryAddress, tokenId]);
+  };
 
   const onRefreshMetadataClicked = (): void => {
     updateToken();
