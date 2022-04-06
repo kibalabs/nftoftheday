@@ -5,6 +5,7 @@ import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-r
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Direction, KibaApp, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
@@ -65,6 +66,7 @@ export const App = (): React.ReactElement => {
             </Stack>
           </BackgroundView>
         </AccountControlProvider>
+        <ToastContainer />
       </GlobalsProvider>
     </KibaApp>
   );

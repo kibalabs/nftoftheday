@@ -4,7 +4,9 @@ import { dateToString, isToday } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
+import { toast } from 'react-toastify';
 
+import { useAccount } from '../../AccountContext';
 import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../../client/resources';
 import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';
@@ -32,9 +34,10 @@ const getTokenDateString = (): string => {
 
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
+  const account = useAccount();
   const routeParams = useRouteParams();
   const navigator = useNavigator();
-
+  const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
@@ -107,6 +110,19 @@ export const TokenPage = (): React.ReactElement => {
     });
   };
 
+  const retrieveTokenUpdate = React.useCallback(async (): Promise<void> => {
+    notdClient.retrieveTokenUpdate(registryAddress, tokenId).then((): void => {
+      toast('Refresh Successful');
+    }).catch((error: unknown): void => {
+      console.error(error);
+    });
+  }, [notdClient, registryAddress, tokenId]);
+
+  const onRefreshMetadataClicked = (): void => {
+    retrieveTokenUpdate();
+    setIsRefreshClicked(true);
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
       {collectionToken === undefined ? (
@@ -145,6 +161,9 @@ export const TokenPage = (): React.ReactElement => {
                   <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
                   <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
                 </Stack>
+                {account?.address && !isRefreshClicked && (
+                  <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+                )}
               </Stack>
             </ResponsiveHidingView>
             <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
@@ -172,6 +191,9 @@ export const TokenPage = (): React.ReactElement => {
                   <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
                   <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
                 </Stack>
+                {account?.address && !isRefreshClicked && (
+                  <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+                )}
               </Stack>
             </ResponsiveHidingView>
           </Stack>
