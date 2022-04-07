@@ -150,6 +150,11 @@ class CollectionProcessor:
             url = url or openseaCollection.get('external_url')
             discordUrl = discordUrl or openseaCollection.get('discord_url')
             bannerImageUrl = bannerImageUrl or openseaCollection.get('banner_image_url')
+        if imageUrl and isinstance(imageUrl, dict):
+            imageDict = imageUrl
+            imageUrl = imageDict.get('src')
+            if not imageUrl:
+                logging.error(f'Failed to extract imageUrl from {imageDict}')
         retrievedCollection = RetrievedCollection(
             address=address,
             name=name.replace('\u0000', '').strip() if name else None,
