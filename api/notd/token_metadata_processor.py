@@ -200,13 +200,11 @@ class TokenMetadataProcessor():
             if 'value could not be decoded as valid UTF8' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise badRequestException
-        print('tokenMetadataUriResponse', tokenMetadataUriResponse)
         if tokenMetadataUriResponse.startswith('https://api.opensea.io/api/v1/metadata/'):
             tokenMetadataUri = f'https://api.opensea.io/api/v1/metadata/{registryAddress}/{tokenId}'
         else:
             hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
             tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
-        print('tokenMetadataUri', tokenMetadataUri)
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
