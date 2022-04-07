@@ -177,7 +177,7 @@ class NotdManager:
 
     async def update_token_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
-        await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
