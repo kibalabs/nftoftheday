@@ -78,12 +78,15 @@ class BlockProcessor:
             retrievedTokenTransfers += await self._process_erc721_single_event(event=dict(event), blockData=blockData)
         erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
         logging.info(f'Found {len(erc1155events)} erc1155Single events in block #{blockNumber}')
+        erc1155Transfers = []
         for event in erc1155events:
-            retrievedTokenTransfers += await self._process_erc1155_single_event(event=dict(event), blockData=blockData)
+            erc1155Transfers += await self._process_erc1155_single_event(event=dict(event), blockData=blockData)
         erc1155Batchevents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
         logging.info(f'Found {len(erc1155Batchevents)} erc1155Batch events in block #{blockNumber}')
         for event in erc1155Batchevents:
-            retrievedTokenTransfers += await self._process_erc1155_batch_event(event=dict(event), blockData=blockData)
+            erc1155Transfers += await self._process_erc1155_batch_event(event=dict(event), blockData=blockData)
+        # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
+        retrievedTokenTransfers += await self._merge_erc1155_transfers(erc1155Transfers=erc1155Transfers)
         blockNumber = blockData['number']
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
@@ -111,6 +114,17 @@ class BlockProcessor:
         value = ethTransaction['value']
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155single')]
         return transactions
+
+    async def _merge_erc1155_transfers(self, erc1155Transfers: List[RetrievedTokenTransfer]) -> List[RetrievedTokenTransfer]:
+        firstTransfers = dict()
+        for transfer in erc1155Transfers:
+            transferKer = (transfer.registryAddress, transfer.tokenId, transfer.fromAddress, transfer.toAddress, transfer.tokenType)
+            firstTransfer = firstTransfers.get(transferKer)
+            if firstTransfer:
+                firstTransfer.amount += transfer.amount
+            else:
+                firstTransfers[transferKer] = transfer
+        return list(firstTransfers.values())
 
     async def _process_erc1155_batch_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']

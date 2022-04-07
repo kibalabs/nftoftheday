@@ -55,7 +55,7 @@ class TokenMetadata(RetrievedTokenMetadata):
     updatedDate: datetime.datetime
 
 
-@dataclasses.dataclass(frozen=True, unsafe_hash=True)
+@dataclasses.dataclass(unsafe_hash=True)
 class RetrievedTokenTransfer:
     transactionHash: str
     registryAddress: str
@@ -71,7 +71,7 @@ class RetrievedTokenTransfer:
     tokenType: Optional[str]
 
 
-@dataclasses.dataclass(frozen=True, unsafe_hash=True)
+@dataclasses.dataclass(unsafe_hash=True)
 class TokenTransfer(RetrievedTokenTransfer):
     tokenTransferId: int
     blockDate: datetime.datetime
