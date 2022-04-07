@@ -17,7 +17,6 @@ import { HomePage } from './pages/HomePage';
 import { TokenPage } from './pages/TokenPage';
 import { buildNotdTheme } from './theme';
 
-
 declare global {
   export interface Window {
     KRT_API_URL?: string;
@@ -68,6 +67,7 @@ export const App = (): React.ReactElement => {
         </AccountControlProvider>
         <ToastContainer />
       </GlobalsProvider>
+      <ToastContainer />
     </KibaApp>
   );
 };

@@ -342,6 +342,27 @@ export class SubscribeResponse extends ResponseData {
   };
 }
 
+export class UpdateCollectionRequest extends RequestData {
+  readonly userAddress: string;
+
+  constructor(userAddress: string) {
+    super();
+    this.userAddress = userAddress;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      userAddress: this.userAddress,
+    };
+  };
+}
+
+export class UpdateCollectionResponse extends ResponseData {
+  public static fromObject = (): UpdateCollectionResponse => {
+    return new UpdateCollectionResponse();
+  };
+}
+
 export class UpdateTokenRequest extends RequestData {
   readonly userAddress: string;
 

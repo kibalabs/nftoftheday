@@ -4,6 +4,7 @@ import { dateToString } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
+import { toast } from 'react-toastify';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
@@ -17,12 +18,12 @@ export const CollectionPage = (): React.ReactElement => {
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
   const routeParams = useRouteParams();
   const navigator = useNavigator();
   const account = useAccount();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
-
   const address = routeParams.address as string;
   const bannerImageUrl = collection?.bannerImageUrl || '/assets/black_banner.png';
   const imageUrl = collection?.imageUrl || '/assets/icon.png';
@@ -97,6 +98,22 @@ export const CollectionPage = (): React.ReactElement => {
     await onLinkAccountsClicked();
   };
 
+  const collectionUpdate = (): void => {
+    if (!account) {
+      return;
+    }
+    notdClient.updateCollection(address, account.address).then((): void => {
+      toast('We\'ve queued your request');
+    }).catch((error: unknown): void => {
+      console.error(error);
+    });
+  };
+
+  const onRefreshMetadataClicked = (): void => {
+    collectionUpdate();
+    setIsRefreshClicked(true);
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
       {collection === undefined ? (
@@ -154,6 +171,9 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack.Item>
                 )}
               </Stack>
+              {account?.address && !isRefreshClicked && (
+                <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+              )}
               <Spacing variant={PaddingSize.Wide2} />
               {collection.description && (
                 <TruncateText
