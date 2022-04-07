@@ -54,5 +54,5 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateCollectionTokensMessageContent.get_command():
             messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
             await self.notdManager.update_collection_tokens(address=messageContent.address, shouldForce=messageContent.shouldForce)
-
+            return
         raise KibaException(message='Message was unhandled')

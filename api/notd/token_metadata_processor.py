@@ -116,13 +116,19 @@ class TokenMetadataProcessor():
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
             description = description[0]
+        imageUrl = tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data')
+        if isinstance(imageUrl, dict):
+            imageDict = imageUrl
+            imageUrl = imageDict.get('src')
+            if not imageUrl:
+                logging.error(f'Failed to extract imageUrl from {imageDict}')
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             name=str(name).replace('\u0000', ''),
             description=str(description).replace('\u0000', '') if description else None,
-            imageUrl=tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data'),
+            imageUrl=imageUrl,
             animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
             youtubeUrl=tokenMetadataDict.get('youtube_url'),
             backgroundColor=tokenMetadataDict.get('background_color'),
@@ -239,5 +245,4 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
-        print('retrievedTokenMetadata', retrievedTokenMetadata)
         return retrievedTokenMetadata
