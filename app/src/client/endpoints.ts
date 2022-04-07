@@ -362,3 +362,24 @@ export class UpdateCollectionResponse extends ResponseData {
     return new UpdateCollectionResponse();
   };
 }
+
+export class UpdateTokenRequest extends RequestData {
+  readonly userAddress: string;
+
+  constructor(userAddress: string) {
+    super();
+    this.userAddress = userAddress;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      userAddress: this.userAddress,
+    };
+  };
+}
+
+export class UpdateTokenResponse extends ResponseData {
+  public static fromObject = (): UpdateTokenResponse => {
+    return new UpdateTokenResponse();
+  };
+}

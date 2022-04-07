@@ -65,6 +65,7 @@ export const App = (): React.ReactElement => {
             </Stack>
           </BackgroundView>
         </AccountControlProvider>
+        <ToastContainer />
       </GlobalsProvider>
       <ToastContainer />
     </KibaApp>
