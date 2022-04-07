@@ -60,6 +60,7 @@ async def run(collectionId: str):
     results = await database.execute(query=query)
     blockNumbers = [blockNumber for (blockNumber, ) in results]
     print(f'Processing {len(blockNumbers)} blocks')
+    # await notdManager.process_blocks_deferred(blockNumbers=blockNumbers)
     for blockNumber in blockNumbers:
         await notdManager.process_block(blockNumber=blockNumber)
     await database.disconnect()
