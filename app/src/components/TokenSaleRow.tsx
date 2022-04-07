@@ -10,31 +10,42 @@ export interface ITokenSaleRowProps {
 }
 
 export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
-  const timeSince = (date: Date): string => {
+  const formatDate = (date: Date): string => {
     const seconds = Math.floor((new Date().valueOf() - date.valueOf()) / 1000);
+    let intervalType: string;
 
-    let interval = seconds / 31536000;
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) {
+      intervalType = 'year';
+    } else {
+      interval = Math.floor(seconds / 2592000);
+      if (interval >= 1) {
+        intervalType = 'month';
+      } else {
+        interval = Math.floor(seconds / 86400);
+        if (interval >= 1) {
+          intervalType = 'day';
+        } else {
+          interval = Math.floor(seconds / 3600);
+          if (interval >= 1) {
+            intervalType = 'hour';
+          } else {
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) {
+              intervalType = 'minute';
+            } else {
+              interval = seconds;
+              intervalType = 'second';
+            }
+          }
+        }
+      }
+    }
 
-    if (interval > 1) {
-      return `${Math.floor(interval)} year(s)`;
+    if (interval > 1 || interval === 0) {
+      intervalType += 's';
     }
-    interval = seconds / 2592000;
-    if (interval > 1) {
-      return `${Math.floor(interval)} month(s)`;
-    }
-    interval = seconds / 86400;
-    if (interval > 1) {
-      return `${Math.floor(interval)} day(s)`;
-    }
-    interval = seconds / 3600;
-    if (interval > 1) {
-      return `${Math.floor(interval)} hour(s)`;
-    }
-    interval = seconds / 60;
-    if (interval > 1) {
-      return `${Math.floor(interval)} minute(s)`;
-    }
-    return `${Math.floor(seconds)} second(s)`;
+    return `${interval} ${intervalType}`;
   };
 
   return (
@@ -62,7 +73,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
               </Stack.Item>
               <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Center}>
-                  {`${timeSince(props.tokenTransfer.blockDate)} ago`}
+                  {`${formatDate(props.tokenTransfer.blockDate)} ago`}
                 </Text>
               </Stack.Item>
               <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
@@ -84,7 +95,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
               <Spacing variant={PaddingSize.Wide2} />
               <Stack.Item alignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Left}>
-                  {`${timeSince(props.tokenTransfer.blockDate)} ago`}
+                  {`${formatDate(props.tokenTransfer.blockDate)} ago`}
                 </Text>
               </Stack.Item>
               <Stack.Item alignment={Alignment.Center}>
