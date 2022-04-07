@@ -200,8 +200,13 @@ class TokenMetadataProcessor():
             if 'value could not be decoded as valid UTF8' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise badRequestException
-        hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
-        tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
+        print('tokenMetadataUriResponse', tokenMetadataUriResponse)
+        if tokenMetadataUriResponse.startswith('https://api.opensea.io/api/v1/metadata/'):
+            tokenMetadataUri = f'https://api.opensea.io/api/v1/metadata/{registryAddress}/{tokenId}'
+        else:
+            hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
+            tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
+        print('tokenMetadataUri', tokenMetadataUri)
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -236,4 +241,5 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
+        print('retrievedTokenMetadata', retrievedTokenMetadata)
         return retrievedTokenMetadata

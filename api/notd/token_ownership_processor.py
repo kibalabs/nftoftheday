@@ -96,8 +96,6 @@ class TokenOwnershipProcessor:
                     senderOwnership.averageTransferValue = int(currentTotalValue / senderOwnership.quantity) if senderOwnership.quantity > 0 else 0
                     senderOwnership.latestTransferDate = tokenTransfer.blockDate
                     senderOwnership.latestTransferTransactionHash = tokenTransfer.transactionHash
-                    if senderOwnership.quantity < 0:
-                        raise Exception()
             if len(tokenTransfers) < limit:
                 break
             offset += limit
