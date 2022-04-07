@@ -58,7 +58,7 @@ async def run(collectionId: str):
         .filter(BlocksTable.c.updatedDate < minDate)
     )
     results = await database.execute(query=query)
-    blockNumbers = [blockNumber for (blockNumber, ) in results]
+    blockNumbers = set(blockNumber for (blockNumber, ) in results)
     print(f'Processing {len(blockNumbers)} blocks')
     # await notdManager.process_blocks_deferred(blockNumbers=blockNumbers)
     for blockNumber in blockNumbers:
