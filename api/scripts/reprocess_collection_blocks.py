@@ -5,6 +5,7 @@ import os
 import sys
 
 import asyncclick as click
+from eth_typing import BlockNumber
 import sqlalchemy
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -49,7 +50,7 @@ async def run(collectionId: str):
     await tokenQueue.connect()
     # await slackClient.post(text=f'reprocess_collection_blocks → 🚧 started: {collectionId}')
 
-    print(f'Reprocessing collection blocks: {collectionId}')
+    print(f'Reprocessing blocks for collection: {collectionId}')
     minDate = datetime.datetime(2022, 4, 7)
     query = (
         sqlalchemy.select(BlocksTable.c.blockNumber) \
@@ -61,8 +62,8 @@ async def run(collectionId: str):
     blockNumbers = set(blockNumber for (blockNumber, ) in results)
     print(f'Processing {len(blockNumbers)} blocks')
     # await notdManager.process_blocks_deferred(blockNumbers=blockNumbers)
-    for blockNumber in blockNumbers:
-        await notdManager.process_block(blockNumber=blockNumber)
+    for blockNumberChunk in list_util.generate_chunks(lst=list(blockNumbers), chunkSize=5):
+        await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber) for blockNumber in blockNumberChunk])
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
