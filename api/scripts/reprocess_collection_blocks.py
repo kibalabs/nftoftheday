@@ -78,7 +78,7 @@ async def run(registryAddress: Optional[str]):
         )
         results = await database.execute(query=query)
         collectionTokenIds = [(registryAddress, tokenId) for (tokenId, ) in results]
-        await tokenManager.update_token_ownerships_deferred(collectionTokenIds=[collectionTokenIds])
+        await tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
