@@ -76,7 +76,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
                   {`${formatDate(props.tokenTransfer.blockDate)} ago`}
                 </Text>
               </Stack.Item>
-              <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
+              <Stack.Item alignment={Alignment.Center}>
                 <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`} />
               </Stack.Item>
             </Stack>
