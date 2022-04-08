@@ -69,6 +69,8 @@ async def run(registryAddress: Optional[str]):
         results = await database.execute(query=query)
         blockNumbers = set(blockNumber for (blockNumber, ) in results)
         print(f'Processing {len(blockNumbers)} blocks')
+        if len(blockNumbers) == 0:
+            continue
         # await notdManager.process_blocks_deferred(blockNumbers=blockNumbers)
         for blockNumberChunk in list_util.generate_chunks(lst=list(blockNumbers), chunkSize=5):
             await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber) for blockNumber in blockNumberChunk])
