@@ -117,6 +117,7 @@ class BlockProcessor:
 
     async def _merge_erc1155_transfers(self, erc1155Transfers: List[RetrievedTokenTransfer]) -> List[RetrievedTokenTransfer]:
         firstTransfers = dict()
+        print(erc1155Transfers)
         for transfer in erc1155Transfers:
             transferKer = (transfer.transactionHash, transfer.registryAddress, transfer.tokenId, transfer.fromAddress, transfer.toAddress, transfer.tokenType)
             firstTransfer = firstTransfers.get(transferKer)
@@ -124,6 +125,7 @@ class BlockProcessor:
                 firstTransfer.amount += transfer.amount
             else:
                 firstTransfers[transferKer] = transfer
+        print(list(firstTransfers.values()))
         return list(firstTransfers.values())
 
     async def _process_erc1155_batch_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
