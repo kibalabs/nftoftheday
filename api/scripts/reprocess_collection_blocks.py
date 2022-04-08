@@ -36,7 +36,6 @@ async def run(collectionId: str):
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     requester = Requester()
-    slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
@@ -47,10 +46,9 @@ async def run(collectionId: str):
     await database.connect()
     await workQueue.connect()
     await tokenQueue.connect()
-    # await slackClient.post(text=f'reprocess_collection_blocks → 🚧 started: {collectionId}')
 
-    print(f'Reprocessing collection blocks: {collectionId}')
-    minDate = datetime.datetime(2022, 4, 7)
+    print(f'Reprocessing blocks for collection: {collectionId}')
+    minDate = datetime.datetime(2022, 4, 8, 9, 0)
     query = (
         sqlalchemy.select(BlocksTable.c.blockNumber) \
         .join(TokenTransfersTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber) \
@@ -61,8 +59,8 @@ async def run(collectionId: str):
     blockNumbers = set(blockNumber for (blockNumber, ) in results)
     print(f'Processing {len(blockNumbers)} blocks')
     # await notdManager.process_blocks_deferred(blockNumbers=blockNumbers)
-    for blockNumber in blockNumbers:
-        await notdManager.process_block(blockNumber=blockNumber)
+    for blockNumberChunk in list_util.generate_chunks(lst=list(blockNumbers), chunkSize=5):
+        await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber) for blockNumber in blockNumberChunk])
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
