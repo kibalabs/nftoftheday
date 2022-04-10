@@ -64,7 +64,6 @@ async def run(registryAddress: Optional[str]):
             sqlalchemy.select(sqlalchemy.distinct(BlocksTable.c.blockNumber)) \
             .join(TokenTransfersTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber) \
             .filter(TokenTransfersTable.c.registryAddress == registryAddress)
-            .filter(TokenTransfersTable.c.tokenType != 'erc721')
             .filter(BlocksTable.c.updatedDate < minDate)
         )
         results = await database.execute(query=query)
