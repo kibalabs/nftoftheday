@@ -52,7 +52,7 @@ async def run(registryAddress: Optional[str]):
     if registryAddress:
         registryAddresses = [registryAddress]
     else:
-        query = sqlalchemy.select(TokenCollectionsTable.c.address).filter(TokenCollectionsTable.c.doesSupportErc1155 == True).order_by(TokenCollectionsTable.c.collectionId.desc)
+        query = sqlalchemy.select(TokenCollectionsTable.c.address).filter(TokenCollectionsTable.c.doesSupportErc1155 == True).order_by(TokenCollectionsTable.c.collectionId.desc())
         results = await database.execute(query=query)
         registryAddresses = [registryAddress for (registryAddress, ) in results]
     print(f'Starting to reprocess blocks for {len(registryAddresses)} collections')
