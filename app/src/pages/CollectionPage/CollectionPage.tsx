@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
-import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
+import { useInitialization, useIntegerUrlQueryState, useNavigator, useRouteParams } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
@@ -19,6 +19,7 @@ export const CollectionPage = (): React.ReactElement => {
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
+  const [shouldRefreshAllTokens, _] = useIntegerUrlQueryState('shouldRefreshAllTokens');
   const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
   const routeParams = useRouteParams();
   const navigator = useNavigator();
@@ -113,6 +114,19 @@ export const CollectionPage = (): React.ReactElement => {
     collectionUpdate();
     setIsRefreshClicked(true);
   };
+
+  React.useEffect((): void => {
+    if (shouldRefreshAllTokens) {
+      if (!account) {
+        return;
+      }
+      notdClient.updateCollectionToken(address, account.address).then((): void => {
+        toast('We\'ve queued your request');
+      }).catch((error: unknown): void => {
+        console.error(error);
+      });
+    }
+  }, [notdClient, account, address, shouldRefreshAllTokens]);
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
