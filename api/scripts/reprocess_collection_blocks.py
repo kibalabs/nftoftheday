@@ -57,8 +57,8 @@ async def run(registryAddress: Optional[str]):
         registryAddresses = [registryAddress for (registryAddress, ) in results]
     print(f'Starting to reprocess blocks for {len(registryAddresses)} collections')
 
-    for registryAddress in registryAddresses:
-        print(f'Reprocessing blocks for collection: {registryAddress}')
+    for index, registryAddress in enumerate(registryAddresses):
+        print(f'Reprocessing blocks for collection: {registryAddress} (index: {index})')
         minDate = datetime.datetime(2022, 4, 8, 9, 0)
         query = (
             sqlalchemy.select(sqlalchemy.distinct(BlocksTable.c.blockNumber)) \
