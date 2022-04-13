@@ -383,3 +383,24 @@ export class UpdateTokenResponse extends ResponseData {
     return new UpdateTokenResponse();
   };
 }
+
+export class UpdateCollectionTokenRequest extends RequestData {
+  readonly userAddress: string;
+
+  constructor(userAddress: string) {
+    super();
+    this.userAddress = userAddress;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      userAddress: this.userAddress,
+    };
+  };
+}
+
+export class UpdateCollectionTokenResponse extends ResponseData {
+  public static fromObject = (): UpdateCollectionTokenResponse => {
+    return new UpdateCollectionTokenResponse();
+  };
+}
