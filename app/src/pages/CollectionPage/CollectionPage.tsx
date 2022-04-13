@@ -120,7 +120,7 @@ export const CollectionPage = (): React.ReactElement => {
       if (!account) {
         return;
       }
-      notdClient.updateCollectionToken(address, account.address).then((): void => {
+      notdClient.updateCollectionTokens(address, account.address).then((): void => {
         toast('We\'ve queued your request');
       }).catch((error: unknown): void => {
         console.error(error);
