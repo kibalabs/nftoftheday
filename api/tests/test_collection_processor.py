@@ -1,7 +1,8 @@
 import base64
-from core import logging
 import os
 import sys
+
+from core import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import boto3

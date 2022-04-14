@@ -1,18 +1,17 @@
 import asyncio
 import datetime
-from core import logging
 import os
 import sys
 
+from core import logging
 from core.aws_requester import AwsRequester
-from core.web3.eth_client import RestEthClient
 from core.requester import Requester
-
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
 from notd.model import ProcessedBlock
-from notd.model import  RetrievedTokenTransfer
+from notd.model import RetrievedTokenTransfer
 
 
 async def main():

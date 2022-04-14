@@ -1,20 +1,20 @@
-from core import logging
 import os
 
+from core import logging
+from core.api.health import create_api as create_health_api
 from core.api.middleware.database_connection_middleware import DatabaseConnectionMiddleware
 from core.api.middleware.exception_handling_middleware import ExceptionHandlingMiddleware
 from core.api.middleware.logging_middleware import LoggingMiddleware
 from core.api.middleware.server_headers_middleware import ServerHeadersMiddleware
-from core.api.health import create_api as create_health_api
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
+from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from core.util.value_holder import RequestIdHolder
 
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.response_builder import ResponseBuilder

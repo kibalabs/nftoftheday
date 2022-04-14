@@ -1,11 +1,11 @@
 import base64
 import json
-from core import logging
 import urllib.parse
 from json.decoder import JSONDecodeError
 from typing import Any
 from typing import Dict
 
+from core import logging
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester

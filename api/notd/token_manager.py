@@ -1,11 +1,11 @@
 import asyncio
 import datetime
-from core import logging
 import random
 from typing import List
 from typing import Tuple
 
 import sqlalchemy
+from core import logging
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter

@@ -1,8 +1,8 @@
 import base64
-from core import logging
 import os
 import sys
 
+from core import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import datetime
@@ -11,14 +11,14 @@ from async_timeout import asyncio
 from core.aws_requester import AwsRequester
 from core.requester import Requester
 from core.s3_manager import S3Manager
-from core.web3.eth_client import RestEthClient
 from core.store.database import Database
+from core.web3.eth_client import RestEthClient
 
-from notd.store.retriever import Retriever
 from notd.block_processor import BlockProcessor
 from notd.model import Collection
 from notd.model import RetrievedCollection
 from notd.model import RetrievedTokenMetadata
+from notd.store.retriever import Retriever
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 

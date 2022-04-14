@@ -1,10 +1,10 @@
 import asyncio
 import json
-from core import logging
 import os
 import sys
 
 import asyncclick as click
+from core import logging
 from core.aws_requester import AwsRequester
 from core.exceptions import BadRequestException
 from core.requester import Requester

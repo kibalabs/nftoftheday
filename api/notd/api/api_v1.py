@@ -1,8 +1,8 @@
 import datetime
 from typing import Optional
 
-from fastapi import APIRouter
 from core.util import date_util
+from fastapi import APIRouter
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse

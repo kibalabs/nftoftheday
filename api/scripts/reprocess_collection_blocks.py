@@ -1,12 +1,12 @@
 import asyncio
 import datetime
-from core import logging
 import os
 import sys
 from typing import Optional
 
 import asyncclick as click
 import sqlalchemy
+from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester

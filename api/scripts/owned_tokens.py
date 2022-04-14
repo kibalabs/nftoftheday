@@ -1,10 +1,10 @@
 import asyncio
-from core import logging
 import os
 import sys
 from typing import Optional
 
 import asyncclick as click
+from core import logging
 from core.store.database import Database
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))

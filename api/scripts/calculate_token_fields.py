@@ -1,7 +1,6 @@
 import asyncio
 import csv
 import json
-from core import logging
 import os
 import sys
 from collections import defaultdict
@@ -9,6 +8,7 @@ from typing import List
 from typing import Optional
 
 import asyncclick as click
+from core import logging
 from core.s3_manager import S3Manager
 from core.store.database import Database
 
