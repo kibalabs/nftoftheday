@@ -87,8 +87,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> Ki
         return UpdateCollectionResponse()
 
     @router.post('/collections/{registryAddress}/update-tokens', response_model=UpdateCollectionTokensResponse)
-    async def update_collections_tokens(registryAddress: str, request: UpdateCollectionTokensRequest):  # pylint: disable=unused-argument
-        await notdManager.update_collections_tokens_deferred(address=registryAddress)
+    async def update_collection_tokens(registryAddress: str, request: UpdateCollectionTokensRequest):  # pylint: disable=unused-argument
+        await notdManager.update_collection_tokens_deferred(address=registryAddress)
         return UpdateCollectionTokensResponse()
 
     @router.get('/collections/{registryAddress}/tokens/owner/{ownerAddress}', response_model=ListCollectionTokensByOwnerResponse)

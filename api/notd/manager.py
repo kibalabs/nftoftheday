@@ -189,7 +189,7 @@ class NotdManager:
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_collection(address=address, shouldForce=shouldForce)
 
-    async def update_collections_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
@@ -200,6 +200,12 @@ class NotdManager:
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         return await self.tokenManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
+        return await self.tokenManager.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress)
+
+    async def reprocess_owner_token_ownerships(self, accountAddress: str) -> None:
+        await self.tokenManager.reprocess_owner_token_ownerships(ownerAddress=accountAddress)
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
@@ -285,9 +291,3 @@ class NotdManager:
             await self.saver.create_token_transfers(connection=connection, retrievedTokenTransfers=retrievedTokenTransfersToSave)
             logging.info(f'Saving transfers for block {processedBlock.blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
         return list(changedTokens)
-
-    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
-        return await self.tokenManager.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress)
-
-    async def reprocess_owner_token_ownerships(self, accountAddress: str) -> None:
-        return await self.tokenManager.reprocess_owner_token_ownerships(ownerAddress=accountAddress)
