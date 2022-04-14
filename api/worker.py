@@ -1,8 +1,8 @@
 import asyncio
-import logging
 import os
 import time
 
+from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -10,6 +10,7 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.slack_client import SlackClient
 from core.store.database import Database
+from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 
 from notd.block_processor import BlockProcessor
@@ -24,6 +25,17 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 
 
 async def main():
+    requestIdHolder = RequestIdHolder()
+    name = os.environ.get('NAME', 'notd-api')
+    version = os.environ.get('VERSION', 'local')
+    environment = os.environ.get('ENV', 'dev')
+    isRunningDebugMode = environment == 'dev'
+
+    if isRunningDebugMode:
+        logging.init_basic_logging()
+    else:
+        logging.init_logging(name=name, version=version, environment=environment, requestIdHolder=requestIdHolder)
+
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
@@ -45,8 +57,8 @@ async def main():
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient)
-    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, slackClient=slackClient)
+    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
+    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
 
     await database.connect()
     await s3manager.connect()
@@ -70,5 +82,4 @@ async def main():
         await requester.close_connections()
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
     asyncio.run(main())

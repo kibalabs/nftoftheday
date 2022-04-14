@@ -1,13 +1,13 @@
 import asyncio
 import datetime
 import json
-import logging
 import os
 import sys
 from typing import Optional
 
 import asyncclick as click
 import boto3
+from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester

@@ -1,7 +1,8 @@
 import base64
-import logging
 import os
 import sys
+
+from core import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import boto3
@@ -22,7 +23,7 @@ async def main():
     requester = Requester()
     openseaApiKey = os.environ['OPENSEA_API_KEY']
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, openseaApiKey=openseaApiKey, bucketName=os.environ['S3_BUCKET'])
-    
+
     #HAs No contractURI
     result = await collectionProcessor.retrieve_collection('0xE3f92992BB4F0f0D173623A52b2922d65172601d')
     expected = RetrievedCollection(address='0xE3f92992BB4F0f0D173623A52b2922d65172601d', name='Knights of Degen', symbol='KNIGHTS', description='8,888 NFT Degens who love sports, betting, alpha and nfts ⚔️', imageUrl='https://lh3.googleusercontent.com/yxdb_995UrIS6W9YIHMfMCRsdYRqcITlBvO5w7OoUx35rkClUeq9rPCvTMXdtw_zION07O_qRZSuNfZu6R6o8bI_KmbrfThhFtA4SBc=s120', twitterUsername='knightsofdegen', instagramUsername=None, wikiUrl=None, openseaSlug='knights-of-degen-official', url='https://www.knightsofdegen.io/', discordUrl='https://discord.gg/knightsofdegen', bannerImageUrl='https://lh3.googleusercontent.com/328JHSQ2nPpzfTxpZjV5xiiBp6R17GgUdjHJ7BF0mU-SH0Ou1LiiYmcET0WeHt26LD4tVXenIvYZD7VC8jV__bqRCiA_CzmWfwg7=s2500', doesSupportErc721=True, doesSupportErc1155=False)
@@ -43,7 +44,7 @@ async def main():
 
     # Has no Name or Symbol
     result = await collectionProcessor.retrieve_collection('0x12F01AF7FBEAFB088E1d3384BFf67390f41E8404')
-    expected = RetrievedCollection(address='0x12F01AF7FBEAFB088E1d3384BFf67390f41E8404', name='FVCK_BAEIGE//', symbol=None, description='Collaborative contract between Baeige and Fvckrender', imageUrl='https://lh3.googleusercontent.com/BJECOBeDJqpaVLWgxza8DYaP9SQGq6h7kLFsOUAlTk3G7naycl4GsjjALsnCPayhHTlctEkvChvpxhGWfDh0hiH2-xd9eUU_yBqmYQ=s120', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug='unidentified-contract-b46angemew', url=None, discordUrl=None, bannerImageUrl='https://lh3.googleusercontent.com/BJECOBeDJqpaVLWgxza8DYaP9SQGq6h7kLFsOUAlTk3G7naycl4GsjjALsnCPayhHTlctEkvChvpxhGWfDh0hiH2-xd9eUU_yBqmYQ=s2500', doesSupportErc721=False, doesSupportErc1155=True) 
+    expected = RetrievedCollection(address='0x12F01AF7FBEAFB088E1d3384BFf67390f41E8404', name='FVCK_BAEIGE//', symbol=None, description='Collaborative contract between Baeige and Fvckrender', imageUrl='https://lh3.googleusercontent.com/BJECOBeDJqpaVLWgxza8DYaP9SQGq6h7kLFsOUAlTk3G7naycl4GsjjALsnCPayhHTlctEkvChvpxhGWfDh0hiH2-xd9eUU_yBqmYQ=s120', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug='unidentified-contract-b46angemew', url=None, discordUrl=None, bannerImageUrl='https://lh3.googleusercontent.com/BJECOBeDJqpaVLWgxza8DYaP9SQGq6h7kLFsOUAlTk3G7naycl4GsjjALsnCPayhHTlctEkvChvpxhGWfDh0hiH2-xd9eUU_yBqmYQ=s2500', doesSupportErc721=False, doesSupportErc1155=True)
     assert (result == expected)
 
     result = await collectionProcessor.retrieve_collection('0x236E7Af5FcAb94770E621c97a1E58b4d0143E95B')
