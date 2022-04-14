@@ -29,7 +29,7 @@ async def main():
     name = os.environ.get('NAME', 'notd-api')
     version = os.environ.get('VERSION', 'local')
     environment = os.environ.get('ENV', 'dev')
-    isRunningDebugMode = False #environment == 'dev'
+    isRunningDebugMode = environment == 'dev'
 
     if isRunningDebugMode:
         logging.init_basic_logging()
