@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from core.api.kiba_router import KibaRouter
+from fastapi import APIRouter
 from core.util import date_util
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
@@ -34,8 +34,8 @@ from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
 
 
-def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> KibaRouter:
-    router = KibaRouter()
+def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> APIRouter:
+    router = APIRouter()
 
     @router.post('/retrieve-highest-price-transfer', response_model=RetrieveHighestPriceTransferResponse)
     async def retrieve_highest_price_transfer(request: RetrieveHighestPriceTransferRequest, startDate: Optional[datetime.datetime] = None, endDate: Optional[datetime.datetime] = None):

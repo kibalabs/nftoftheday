@@ -1,6 +1,6 @@
 import asyncio
 import json
-import logging
+from core import logging
 
 from core.exceptions import BadRequestException
 from core.exceptions import InternalServerErrorException

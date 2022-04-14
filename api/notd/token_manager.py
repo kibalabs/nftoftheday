@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-import logging
+from core import logging
 import random
 from typing import List
 from typing import Tuple

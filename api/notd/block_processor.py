@@ -1,6 +1,6 @@
 import datetime
 import json
-import logging
+from core import logging
 import textwrap
 from typing import List
 

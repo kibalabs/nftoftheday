@@ -1,7 +1,7 @@
 import asyncio
 import csv
 import json
-import logging
+from core import logging
 import os
 import sys
 from collections import defaultdict

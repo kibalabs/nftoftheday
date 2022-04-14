@@ -1,5 +1,5 @@
 import asyncio
-import logging
+from core import logging
 import os
 import sys
 from typing import Sequence

@@ -1,4 +1,4 @@
-import logging
+from core import logging
 
 from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor

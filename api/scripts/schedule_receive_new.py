@@ -1,4 +1,4 @@
-import logging
+from core import logging
 import os
 import sys
 

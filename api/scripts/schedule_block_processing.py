@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import logging
+from core import logging
 from typing import Optional
 
 import asyncclick as click

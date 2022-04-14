@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-import logging
+from core import logging
 import os
 import sys
 from typing import Optional

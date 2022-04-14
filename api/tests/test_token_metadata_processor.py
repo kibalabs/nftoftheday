@@ -1,5 +1,5 @@
 import base64
-import logging
+from core import logging
 import os
 import sys
 
@@ -51,7 +51,7 @@ async def main():
     collection = Collection(
         address='0x93317e87a3a47821803caadc54ae418af80603da', name='Cameo Pass', symbol='CAMEOPASS', description='Cameo Pass is a collection of NFTs granting access to Cameo in the metaverse,...', imageUrl='https://openseauserdata.com/files/7572aef06110b4e365817f60d37eff0d.svg', twitterUsername=None, instagramUsername=None, wikiUrl=None, openseaSlug='cameo-pass', url='http://pass.cameo.com', discordUrl='https://discord.gg/ssZeP6WBYg', bannerImageUrl='https://lh3.googleusercontent.com/HiSZHoavhCSzrmc2Un2y6QzSWk_wAWLz4sBr9G1Wjz6bGH8mDce_8rNlH-vRvM1xwbqS-_pSCsK99rrr8P-Es4FCkjvxETij8lojNw=s2500', doesSupportErc721=False, doesSupportErc1155=True, collectionId=64040, createdDate=datetime.datetime(2022, 4, 2, 21, 37, 1, 727907), updatedDate=datetime.datetime(2022, 4, 2, 21, 37, 1, 727907)
     )
-    
+
     result = await tokenMetadataProcessor.retrieve_token_metadata(
         registryAddress='0x93317e87a3a47821803caadc54ae418af80603da', tokenId='2', collection=collection
     )

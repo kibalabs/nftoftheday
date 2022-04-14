@@ -1,6 +1,6 @@
 import datetime
 import json
-import logging
+from core import logging
 import random
 from typing import List
 from typing import Optional
