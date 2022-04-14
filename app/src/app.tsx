@@ -15,6 +15,7 @@ import { GlobalsProvider } from './globalsContext';
 import { CollectionPage } from './pages/CollectionPage';
 import { HomePage } from './pages/HomePage';
 import { TokenPage } from './pages/TokenPage';
+import { UserPage } from './pages/UserPage';
 import { buildNotdTheme } from './theme';
 
 declare global {
@@ -46,6 +47,7 @@ export const App = (): React.ReactElement => {
     { path: '/', page: HomePage },
     { path: '/collections/:address', page: CollectionPage },
     { path: '/collections/:registryAddress/tokens/:tokenId', page: TokenPage },
+    { path: '/accounts/:accountAddress', page: UserPage },
   ];
 
   return (
