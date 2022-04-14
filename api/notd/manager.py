@@ -245,7 +245,7 @@ class NotdManager:
         logging.info(f'Found {len(collectionTokenIds)} changed tokens in block #{blockNumber}')
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
         logging.info(f'Found {len(collectionAddresses)} changed collections in block #{blockNumber}')
-        # await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
+        await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
             await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
             await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
