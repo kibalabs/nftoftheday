@@ -15,17 +15,16 @@ from core.store.database import Database
 from core.util import list_util
 from core.web3.eth_client import RestEthClient
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
-from notd.token_manager import TokenManager
 from notd.store.saver import Saver
-from notd.store.schema import BlocksTable, TokenMetadatasTable
-from notd.store.schema import TokenTransfersTable
+from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
-
+from notd.store.schema import TokenMetadatasTable
+from notd.store.schema import TokenTransfersTable
+from notd.token_manager import TokenManager
 
 
 @click.command()
