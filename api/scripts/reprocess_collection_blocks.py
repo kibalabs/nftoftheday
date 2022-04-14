@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import sys
+from typing import Optional
 
 import asyncclick as click
 import sqlalchemy
@@ -14,21 +15,21 @@ from core.store.database import Database
 from core.util import list_util
 from core.web3.eth_client import RestEthClient
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
-from notd.token_manager import TokenManager
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
+from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenTransfersTable
-
+from notd.token_manager import TokenManager
 
 
 @click.command()
-@click.option('-c', '--collection-id', 'collectionId', required=True, type=str)
-async def run(collectionId: str):
+@click.option('-r', '--registry-addess', 'registryAddress', required=False, type=str)
+async def run(registryAddress: Optional[str]):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
@@ -47,20 +48,38 @@ async def run(collectionId: str):
     await workQueue.connect()
     await tokenQueue.connect()
 
-    print(f'Reprocessing blocks for collection: {collectionId}')
-    minDate = datetime.datetime(2022, 4, 8, 9, 0)
-    query = (
-        sqlalchemy.select(BlocksTable.c.blockNumber) \
-        .join(TokenTransfersTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber) \
-        .filter(TokenTransfersTable.c.registryAddress == collectionId)
-        .filter(BlocksTable.c.updatedDate < minDate)
-    )
-    results = await database.execute(query=query)
-    blockNumbers = set(blockNumber for (blockNumber, ) in results)
-    print(f'Processing {len(blockNumbers)} blocks')
-    # await notdManager.process_blocks_deferred(blockNumbers=blockNumbers)
-    for blockNumberChunk in list_util.generate_chunks(lst=list(blockNumbers), chunkSize=5):
-        await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber) for blockNumber in blockNumberChunk])
+    if registryAddress:
+        registryAddresses = [registryAddress]
+    else:
+        query = sqlalchemy.select(TokenCollectionsTable.c.address).filter(TokenCollectionsTable.c.doesSupportErc1155 == True).order_by(TokenCollectionsTable.c.collectionId.desc())
+        results = await database.execute(query=query)
+        registryAddresses = [registryAddress for (registryAddress, ) in results]
+    print(f'Starting to reprocess blocks for {len(registryAddresses)} collections')
+
+    for index, registryAddress in enumerate(registryAddresses):
+        print(f'Reprocessing blocks for collection: {registryAddress} (index: {index})')
+        minDate = datetime.datetime(2022, 4, 8, 9, 0)
+        query = (
+            sqlalchemy.select(sqlalchemy.distinct(BlocksTable.c.blockNumber)) \
+            .join(TokenTransfersTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber) \
+            .filter(TokenTransfersTable.c.registryAddress == registryAddress)
+            .filter(BlocksTable.c.updatedDate < minDate)
+        )
+        results = await database.execute(query=query)
+        blockNumbers = set(blockNumber for (blockNumber, ) in results)
+        print(f'Processing {len(blockNumbers)} blocks')
+        if len(blockNumbers) == 0:
+            continue
+        # await notdManager.process_blocks_deferred(blockNumbers=blockNumbers)
+        for blockNumberChunk in list_util.generate_chunks(lst=list(blockNumbers), chunkSize=5):
+            await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber) for blockNumber in blockNumberChunk])
+        query = (
+            sqlalchemy.select(TokenMetadatasTable.c.tokenId) \
+            .filter(TokenMetadatasTable.c.registryAddress == registryAddress)
+        )
+        results = await database.execute(query=query)
+        collectionTokenIds = [(registryAddress, tokenId) for (tokenId, ) in results]
+        await tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
     await database.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()

@@ -88,7 +88,7 @@ class TokenManager:
         if not shouldForce:
             query = (
                 TokenMetadatasTable.select()
-                    .where(TokenMetadatasTable.c.updatedDate > date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
+                    .where(TokenMetadatasTable.c.updatedDate > date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
                     .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(collectionTokenIds))
             )
             recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
@@ -199,7 +199,10 @@ class TokenManager:
                 await self.saver.create_collection(connection=connection, address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
-        collectionTokenIds = await self.retriever.list_tokens_by_collection(address=address)
+        tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
+            StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
+        ])
+        collectionTokenIds = [(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas]
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
