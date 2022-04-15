@@ -8,6 +8,8 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
+from api.notd.model import TokenStatistics
+from api.notd.store.schema import TokenStatisticsTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -345,3 +347,55 @@ class Saver(CoreSaver):
             return
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds))
         await self._execute(query=query, connection=connection)
+
+    async def create_token_statistics(self, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> TokenStatistics:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TokenStatisticsTable.c.createdDate.key: createdDate,
+            TokenStatisticsTable.c.updatedDate.key: updatedDate,
+            TokenStatisticsTable.c.address.key: address,
+            TokenStatisticsTable.c.date.key: date,
+            TokenStatisticsTable.c.transferCount.key: transferCount,
+            TokenStatisticsTable.c.totalVolume.key: totalVolume,
+            TokenStatisticsTable.c.minimumValue.key: minimumValue,
+            TokenStatisticsTable.c.maximumValue.key:  maximumValue,
+            TokenStatisticsTable.c.averageValue.key:  averageValue,
+        }
+        query = TokenStatisticsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenStatisticsId = result.inserted_primary_key[0]
+        return TokenStatistics(
+            tokenStatisticsId=tokenStatisticsId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            address=address,
+            date=date,
+            transferCount=transferCount,
+            totalVolume=totalVolume,
+            minimumValue=minimumValue,
+            maximumValue=maximumValue,
+            averageValue=averageValue,
+        )
+
+    async def update_token_ownership(self, tokenStatisticsId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if address is not None:
+            values[TokenStatisticsTable.c.address.key] = address
+        if date is not None:
+            values[TokenStatisticsTable.c.date.key] = date
+        if transferCount is not None:
+            values[TokenStatisticsTable.c.transferCount.key] = transferCount
+        if totalVolume is not None:
+            values[TokenStatisticsTable.c.totalVolume.key] = totalVolume
+        if minimumValue is not None:
+            values[TokenStatisticsTable.c.minimumValue.key] = minimumValue
+        if maximumValue is not None:
+            values[TokenStatisticsTable.c.maximumValue.key] = maximumValue
+        if averageValue is not None:
+            values[TokenStatisticsTable.c.averageValue.key] = averageValue
+        if len(values) > 0:
+            values[TokenStatisticsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TokenStatisticsTable.update(TokenStatisticsTable.c.tokenStatisticsId == tokenStatisticsId).values(values)
+        await self._execute(query=query, connection=connection)
+    

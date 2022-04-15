@@ -1,4 +1,6 @@
 from typing import Mapping
+from api.notd.model import TokenStatistics
+from api.notd.store.schema import TokenStatisticsTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -107,4 +109,18 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
         averageTransferValue=row[TokenMultiOwnershipsTable.c.averageTransferValue],
         latestTransferDate=row[TokenMultiOwnershipsTable.c.latestTransferDate],
         latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
+    )
+
+def token_statistics_from_row(row: Mapping) -> TokenStatistics:
+    return TokenStatistics(
+        tokenStatisticsId=row[TokenStatisticsTable.tokenStatisticsId],
+        createdDate=row[TokenStatisticsTable.c.createdDate],
+        updatedDate=row[TokenStatisticsTable.c.updatedDate],
+        address=row[TokenStatisticsTable.address],
+        date=row[TokenStatisticsTable.date],
+        transferCount=row[TokenStatisticsTable.transferCount],
+        totalVolume=row[TokenStatisticsTable.totalVolume],
+        minimumValue=row[TokenStatisticsTable.minimumValue],
+        maximumValue=row[TokenStatisticsTable.maximumValue],
+        averageValue=row[TokenStatisticsTable.averageValue],
     )

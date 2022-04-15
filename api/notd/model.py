@@ -175,3 +175,17 @@ class TokenMultiOwnership(RetrievedTokenMultiOwnership):
     tokenMultiOwnershipId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
+class RetrievedTokenStatistics:
+    address: str
+    date: datetime.datetime
+    transfer_count: int
+    total_volume: int
+    minimum_value: int
+    maximum_value: int
+    average_value: int
+
+class TokenStatistics(RetrievedTokenStatistics):
+    tokenStatisticsId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
