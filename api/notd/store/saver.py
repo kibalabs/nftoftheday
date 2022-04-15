@@ -8,20 +8,20 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
-from api.notd.model import TokenStatistics
-from api.notd.store.schema import TokenStatisticsTable
 
 from notd.model import Block
 from notd.model import Collection
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
+from notd.model import TokenStatistics
 from notd.model import TokenOwnership
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import TokenStatisticsTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
@@ -378,7 +378,7 @@ class Saver(CoreSaver):
             averageValue=averageValue,
         )
 
-    async def update_token_ownership(self, tokenStatisticsId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_statistics(self, tokenStatisticsId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if address is not None:
             values[TokenStatisticsTable.c.address.key] = address
