@@ -135,3 +135,25 @@ CREATE INDEX tbl_token_multi_ownerships_owner_address ON tbl_token_multi_ownersh
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_date ON tbl_token_multi_ownerships (latest_transfer_date);
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_value ON tbl_token_multi_ownerships (latest_transfer_value);
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_transaction_hash ON tbl_token_multi_ownerships (latest_transfer_transaction_hash);
+
+CREATE TABLE tbl_collection_hourly_activity (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    address TEXT NOT NULL,
+    date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    transfer_count NUMERIC(256, 0) NOT NULL,
+    total_volume NUMERIC(256, 0) NOT NULL,
+    minimum_value NUMERIC(256, 0) NOT NULL,
+    maximum_value NUMERIC(256, 0) NOT NULL,
+    average_value NUMERIC(256, 0) NOT NULL
+);
+CREATE INDEX tbl_collection_hourly_activity_created_date ON tbl_collection_hourly_activity (created_date);
+CREATE INDEX tbl_collection_hourly_activity_updated_date ON tbl_collection_hourly_activity (updated_date);
+CREATE INDEX tbl_collection_hourly_activity_address ON tbl_collection_hourly_activity (address);
+CREATE INDEX tbl_collection_hourly_activity_date ON tbl_collection_hourly_activity (date);
+CREATE INDEX tbl_collection_hourly_activity_transfer_count ON tbl_collection_hourly_activity (transfer_count);
+CREATE INDEX tbl_collection_hourly_activity_total_volume ON tbl_collection_hourly_activity (total_volume);
+CREATE INDEX tbl_collection_hourly_activity_minimum_value ON tbl_collection_hourly_activity (minimum_value);
+CREATE INDEX tbl_collection_hourly_activity_maximum_value ON tbl_collection_hourly_activity (maximum_value);
+CREATE INDEX tbl_collection_hourly_activity_average_value ON tbl_collection_hourly_activity (average_value);
