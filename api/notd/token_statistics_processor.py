@@ -1,14 +1,16 @@
 import datetime
-from core.store.retriever import StringFieldFilter ,DateFieldFilter
-from core.store.retriever import Order
-from core.store.retriever import Direction
-from core.util import date_util
-from notd.model import RetrievedTokenStatistics
 
+from core.store.retriever import DateFieldFilter
+from core.store.retriever import Direction
+from core.store.retriever import Order
+from core.store.retriever import StringFieldFilter
+from core.util import date_util
+
+from notd.model import RetrievedTokenStatistics
+from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
 
-from notd.store.retriever import Retriever
 
 class TokenStatisticsProcessor:
 

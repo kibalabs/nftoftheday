@@ -14,8 +14,8 @@ from notd.model import Collection
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
-from notd.model import TokenStatistics
 from notd.model import TokenOwnership
+from notd.model import TokenStatistics
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
