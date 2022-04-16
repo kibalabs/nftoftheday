@@ -2,17 +2,17 @@ from typing import Mapping
 
 from notd.model import Block
 from notd.model import Collection
+from notd.model import CollectionStatistics
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
-from notd.model import TokenStatistics
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionStatisticsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema import TokenStatisticsTable
 from notd.store.schema import TokenTransfersTable
 
 
@@ -111,16 +111,16 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
         latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
     )
 
-def token_statistics_from_row(row: Mapping) -> TokenStatistics:
-    return TokenStatistics(
-        tokenStatisticsId=row[TokenStatisticsTable.tokenStatisticsId],
-        createdDate=row[TokenStatisticsTable.c.createdDate],
-        updatedDate=row[TokenStatisticsTable.c.updatedDate],
-        address=row[TokenStatisticsTable.address],
-        date=row[TokenStatisticsTable.date],
-        transferCount=row[TokenStatisticsTable.transferCount],
-        totalVolume=row[TokenStatisticsTable.totalVolume],
-        minimumValue=row[TokenStatisticsTable.minimumValue],
-        maximumValue=row[TokenStatisticsTable.maximumValue],
-        averageValue=row[TokenStatisticsTable.averageValue],
+def token_statistics_from_row(row: Mapping) -> CollectionStatistics:
+    return CollectionStatistics(
+        tokenStatisticsId=row[CollectionStatisticsTable.tokenStatisticsId],
+        createdDate=row[CollectionStatisticsTable.c.createdDate],
+        updatedDate=row[CollectionStatisticsTable.c.updatedDate],
+        address=row[CollectionStatisticsTable.address],
+        date=row[CollectionStatisticsTable.date],
+        transferCount=row[CollectionStatisticsTable.transferCount],
+        totalVolume=row[CollectionStatisticsTable.totalVolume],
+        minimumValue=row[CollectionStatisticsTable.minimumValue],
+        maximumValue=row[CollectionStatisticsTable.maximumValue],
+        averageValue=row[CollectionStatisticsTable.averageValue],
     )

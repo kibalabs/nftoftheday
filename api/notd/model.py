@@ -177,7 +177,7 @@ class TokenMultiOwnership(RetrievedTokenMultiOwnership):
     updatedDate: datetime.datetime
 
 @dataclasses.dataclass
-class RetrievedTokenStatistics:
+class RetrievedCollectionStatistics:
     address: str
     date: datetime.datetime
     transferCount: int
@@ -187,7 +187,7 @@ class RetrievedTokenStatistics:
     averageValue: int
 
 @dataclasses.dataclass
-class TokenStatistics(RetrievedTokenStatistics):
-    tokenStatisticsId: int
+class CollectionStatistics(RetrievedCollectionStatistics):
+    collectionStatisticsId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime

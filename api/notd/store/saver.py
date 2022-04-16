@@ -11,17 +11,17 @@ from core.util import list_util
 
 from notd.model import Block
 from notd.model import Collection
+from notd.model import CollectionStatistics
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
-from notd.model import TokenStatistics
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionStatisticsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema import TokenStatisticsTable
 from notd.store.schema import TokenTransfersTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
@@ -348,25 +348,25 @@ class Saver(CoreSaver):
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds))
         await self._execute(query=query, connection=connection)
 
-    async def create_token_statistics(self, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> TokenStatistics:
+    async def create_collection_statistics(self, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionStatistics:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
-            TokenStatisticsTable.c.createdDate.key: createdDate,
-            TokenStatisticsTable.c.updatedDate.key: updatedDate,
-            TokenStatisticsTable.c.address.key: address,
-            TokenStatisticsTable.c.date.key: date,
-            TokenStatisticsTable.c.transferCount.key: transferCount,
-            TokenStatisticsTable.c.totalVolume.key: totalVolume,
-            TokenStatisticsTable.c.minimumValue.key: minimumValue,
-            TokenStatisticsTable.c.maximumValue.key:  maximumValue,
-            TokenStatisticsTable.c.averageValue.key:  averageValue,
+            CollectionStatisticsTable.c.createdDate.key: createdDate,
+            CollectionStatisticsTable.c.updatedDate.key: updatedDate,
+            CollectionStatisticsTable.c.address.key: address,
+            CollectionStatisticsTable.c.date.key: date,
+            CollectionStatisticsTable.c.transferCount.key: transferCount,
+            CollectionStatisticsTable.c.totalVolume.key: totalVolume,
+            CollectionStatisticsTable.c.minimumValue.key: minimumValue,
+            CollectionStatisticsTable.c.maximumValue.key:  maximumValue,
+            CollectionStatisticsTable.c.averageValue.key:  averageValue,
         }
-        query = TokenStatisticsTable.insert().values(values)
+        query = CollectionStatisticsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenStatisticsId = result.inserted_primary_key[0]
-        return TokenStatistics(
-            tokenStatisticsId=tokenStatisticsId,
+        collectionStatisticsId = result.inserted_primary_key[0]
+        return CollectionStatistics(
+            collectionStatisticsId=collectionStatisticsId,
             createdDate=createdDate,
             updatedDate=updatedDate,
             address=address,
@@ -378,24 +378,24 @@ class Saver(CoreSaver):
             averageValue=averageValue,
         )
 
-    async def update_token_statistics(self, tokenStatisticsId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_statistics(self, collectionStatisticsId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if address is not None:
-            values[TokenStatisticsTable.c.address.key] = address
+            values[CollectionStatisticsTable.c.address.key] = address
         if date is not None:
-            values[TokenStatisticsTable.c.date.key] = date
+            values[CollectionStatisticsTable.c.date.key] = date
         if transferCount is not None:
-            values[TokenStatisticsTable.c.transferCount.key] = transferCount
+            values[CollectionStatisticsTable.c.transferCount.key] = transferCount
         if totalVolume is not None:
-            values[TokenStatisticsTable.c.totalVolume.key] = totalVolume
+            values[CollectionStatisticsTable.c.totalVolume.key] = totalVolume
         if minimumValue is not None:
-            values[TokenStatisticsTable.c.minimumValue.key] = minimumValue
+            values[CollectionStatisticsTable.c.minimumValue.key] = minimumValue
         if maximumValue is not None:
-            values[TokenStatisticsTable.c.maximumValue.key] = maximumValue
+            values[CollectionStatisticsTable.c.maximumValue.key] = maximumValue
         if averageValue is not None:
-            values[TokenStatisticsTable.c.averageValue.key] = averageValue
+            values[CollectionStatisticsTable.c.averageValue.key] = averageValue
         if len(values) > 0:
-            values[TokenStatisticsTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = TokenStatisticsTable.update(TokenStatisticsTable.c.tokenStatisticsId == tokenStatisticsId).values(values)
+            values[CollectionStatisticsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = CollectionStatisticsTable.update(CollectionStatisticsTable.c.collectionStatisticsId == collectionStatisticsId).values(values)
         await self._execute(query=query, connection=connection)
     

@@ -100,7 +100,7 @@ TokenMultiOwnershipsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='latestTransferTransactionHash', name='latest_transfer_transaction_hash', type_=sqlalchemy.Text, nullable=False),
 )
 
-TokenStatisticsTable = sqlalchemy.Table(
+CollectionStatisticsTable = sqlalchemy.Table(
     'tbl_collection_hourly_activity',
     metadata,
     sqlalchemy.Column(key='tokenStatisticsId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),

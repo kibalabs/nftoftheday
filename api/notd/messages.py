@@ -37,3 +37,8 @@ class UpdateCollectionTokensMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION_TOKENS'
     address: str
     shouldForce: Optional[bool]
+
+class UpdateCollectionStatistics(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_STATISTICS'
+    address: str
+    shouldForce: Optional[bool]
