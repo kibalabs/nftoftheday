@@ -34,4 +34,3 @@ class TokenStatisticsProcessor:
 
         maximumValue = tokenTransfers[0].value
         return RetrievedTokenStatistics(address=registryAddress, date=date, transferCount=transferCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
-        
