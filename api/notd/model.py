@@ -176,6 +176,7 @@ class TokenMultiOwnership(RetrievedTokenMultiOwnership):
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
 
+@dataclasses.dataclass
 class RetrievedTokenStatistics:
     address: str
     date: datetime.datetime
@@ -185,6 +186,7 @@ class RetrievedTokenStatistics:
     maximumValue: int
     averageValue: int
 
+@dataclasses.dataclass
 class TokenStatistics(RetrievedTokenStatistics):
     tokenStatisticsId: int
     createdDate: datetime.datetime
