@@ -12,7 +12,7 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
 
 
-class TokenStatisticsProcessor:
+class CollectionStatisticsProcessor:
 
     def __init__(self,retriever: Retriever) -> None:
         self.retriever = retriever
@@ -27,12 +27,15 @@ class TokenStatisticsProcessor:
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
         )
         transferCount = totalVolume = averageValue = minimumValue = 0
-        for tokenTransfer in tokenTransfers:
-            if tokenTransfer.value != 0:
-                minimumValue = min(float('inf'),tokenTransfer.value)
-            transferCount += tokenTransfer.amount
-            totalVolume += tokenTransfer.value
-            averageValue += totalVolume/transferCount
+        if len(tokenTransfers) > 0:
+            for tokenTransfer in tokenTransfers:
+                if tokenTransfer.value != 0:
+                    minimumValue = min(float('inf'),tokenTransfer.value)
+                transferCount += tokenTransfer.amount
+                totalVolume += tokenTransfer.value
+                averageValue += totalVolume/transferCount
 
-        maximumValue = tokenTransfers[0].value
+            maximumValue = tokenTransfers[0].value
+        else:
+            maximumValue = 0
         return RetrievedCollectionStatistics(address=registryAddress, date=date, transferCount=transferCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)

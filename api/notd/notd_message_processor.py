@@ -3,6 +3,7 @@ from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
+from notd.messages import  SaveCollectionStatisticsMessageContent
 
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
@@ -53,5 +54,9 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateCollectionTokensMessageContent.get_command():
             messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
             await self.notdManager.update_collection_tokens(address=messageContent.address, shouldForce=messageContent.shouldForce)
+            return
+        if message.command == SaveCollectionStatisticsMessageContent.get_command():
+            messageContent = SaveCollectionStatisticsMessageContent.parse_obj(message.content)
+            await self.notdManager.save_collection_statistics(address=messageContent.address, date=messageContent.date, shouldForce=messageContent.shouldForce)
             return
         raise KibaException(message='Message was unhandled')

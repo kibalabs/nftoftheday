@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from core.queues.model import MessageContent
@@ -38,7 +39,8 @@ class UpdateCollectionTokensMessageContent(MessageContent):
     address: str
     shouldForce: Optional[bool]
 
-class UpdateCollectionStatistics(MessageContent):
-    _COMMAND = 'UPDATE_COLLECTION_STATISTICS'
+class SaveCollectionStatisticsMessageContent(MessageContent):
+    _COMMAND = 'SAVE_COLLECTION_STATISTICS'
     address: str
+    date: datetime.datetime
     shouldForce: Optional[bool]
