@@ -39,7 +39,7 @@ export const UserPage = (): React.ReactElement => {
         </Stack>
       )}
       <Spacing variant={PaddingSize.Wide} />
-      <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
+      <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
         {ownerTokens && ownerTokens.map((ownerToken: CollectionToken, index: number) : React.ReactElement => (
           <TokenCard
             key={index}

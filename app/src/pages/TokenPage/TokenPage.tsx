@@ -174,7 +174,7 @@ export const TokenPage = (): React.ReactElement => {
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Center} variant='header1'>{collectionToken.name}</Text>
                 {tokenSales && tokenSales.length > 0 && (
-                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                  <React.Fragment>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Text>Owned By</Text>
                       <Account
@@ -183,7 +183,7 @@ export const TokenPage = (): React.ReactElement => {
                       />
                     </Stack>
                     <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
-                  </Stack>
+                  </React.Fragment>
                 )}
                 {collection === undefined ? (
                   <LoadingSpinner />
