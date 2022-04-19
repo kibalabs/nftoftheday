@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 import random
 from typing import List
 from typing import Optional
@@ -9,6 +8,7 @@ from typing import Set
 from typing import Tuple
 
 import sqlalchemy
+from core import logging
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester

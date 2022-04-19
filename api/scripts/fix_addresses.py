@@ -1,9 +1,9 @@
 import asyncio
-import logging
 import os
 import sys
 
 import asyncclick as click
+from core import logging
 from core.store.database import Database
 from core.util.chain_util import normalize_address
 from sqlalchemy.sql.expression import func as sqlalchemyfunc

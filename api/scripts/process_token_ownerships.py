@@ -1,10 +1,10 @@
 import asyncio
-import logging
 import os
 import sys
 import time
 
 import asyncclick as click
+from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester

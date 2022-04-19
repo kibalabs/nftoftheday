@@ -1,9 +1,9 @@
 import asyncio
-import logging
 import os
 import sys
 
 import asyncclick as click
+from core import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.database import Database
 

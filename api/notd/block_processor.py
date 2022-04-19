@@ -1,9 +1,9 @@
 import datetime
 import json
-import logging
 import textwrap
 from typing import List
 
+from core import logging
 from core.util.chain_util import normalize_address
 from core.web3.eth_client import EthClientInterface
 from web3 import Web3

@@ -1,9 +1,9 @@
 import asyncio
-import logging
 import os
 import sys
 
 import asyncclick as click
+from core import logging
 from core.aws_requester import AwsRequester
 from core.requester import Requester
 from core.s3_manager import S3Manager

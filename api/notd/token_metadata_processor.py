@@ -1,11 +1,11 @@
 import base64
 import json
-import logging
 import urllib.parse
 from json.decoder import JSONDecodeError
 from typing import Any
 from typing import Dict
 
+from core import logging
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -175,7 +175,7 @@ class TokenMetadataProcessor():
             # TODO(krishan711): Implement special case for Everdragons, DISTXR (their contract is unverified)
             raise TokenDoesNotExistException()
         if registryAddress == '0xdF5d68D54433661b1e5e90a547237fFB0AdF6EC2':
-            # TODO(krishan711): Implement special case for  Arcona Digital Land (it's a really old contract)
+            # TODO(krishan711): Implement special case for Arcona Digital Land (it's a really old contract)
             raise TokenDoesNotExistException()
         if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
             logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')

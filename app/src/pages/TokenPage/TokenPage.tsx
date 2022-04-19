@@ -14,23 +14,8 @@ import { MetricView } from '../../components/MetricView';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
-const TOKEN_DATE = new Date('2022-03-08T03:23:35');
-const COLLECTION = new Collection('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', '', '', '', '', '');
-const COLLECTIONTOKEN = new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []);
-const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 650000000000000000000, 6500000, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', TOKEN_DATE, COLLECTIONTOKEN, COLLECTION);
 const owner = '0x48e41913F2099300900cfcbB139F121429D38F5d';
 const RECENT_SALES_PAGE_SIZE = 10;
-const tokenDate = TOKEN_TRANSFER.blockDate;
-
-const getTokenDateString = (): string => {
-  if (tokenDate !== null) {
-    if (isToday(tokenDate)) {
-      return dateToString(tokenDate, 'HH:mm');
-    }
-    return dateToString(tokenDate, 'dd-MMM-yyyy');
-  }
-  return '';
-};
 
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
@@ -126,6 +111,16 @@ export const TokenPage = (): React.ReactElement => {
     setIsRefreshClicked(true);
   };
 
+  const getTokenDateString = (tokenDate: Date): string => {
+    if (tokenDate !== null) {
+      if (isToday(tokenDate)) {
+        return dateToString(tokenDate, 'HH:mm');
+      }
+      return dateToString(tokenDate, 'dd-MMM-yyyy');
+    }
+    return '';
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
       {collectionToken === undefined ? (
@@ -145,7 +140,9 @@ export const TokenPage = (): React.ReactElement => {
                   <Text>Owned By</Text>
                   <Account accountId={owner} />
                 </Stack>
-                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} on ${getTokenDateString()}`}</Text>
+                {tokenSales && tokenSales.length > 0 && (
+                  <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                )}
                 <Spacing variant={PaddingSize.Wide} />
                 {collection === undefined ? (
                   <LoadingSpinner />
@@ -176,7 +173,9 @@ export const TokenPage = (): React.ReactElement => {
                   <Text>Owned By</Text>
                   <Account accountId={owner} />
                 </Stack>
-                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} on ${getTokenDateString()}`}</Text>
+                {tokenSales && tokenSales.length > 0 && (
+                  <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                )}
                 {collection === undefined ? (
                   <LoadingSpinner />
                 ) : collection === null ? (
