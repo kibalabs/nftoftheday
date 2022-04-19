@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LinkBase, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -14,7 +14,6 @@ import { MetricView } from '../../components/MetricView';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
-const owner = '0x48e41913F2099300900cfcbB139F121429D38F5d';
 const RECENT_SALES_PAGE_SIZE = 10;
 
 export const TokenPage = (): React.ReactElement => {
@@ -136,12 +135,16 @@ export const TokenPage = (): React.ReactElement => {
             <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide}>
                 <Text variant='header1'>{collectionToken.name}</Text>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                  <Text>Owned By</Text>
-                  <Account accountId={owner} />
-                </Stack>
                 {tokenSales && tokenSales.length > 0 && (
-                  <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                      <Text>Owned By</Text>
+                      <LinkBase target={`/accounts/${tokenSales[0].toAddress}`}>
+                        <Account accountId={tokenSales[0].toAddress} />
+                      </LinkBase>
+                    </Stack>
+                    <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                  </Stack>
                 )}
                 <Spacing variant={PaddingSize.Wide} />
                 {collection === undefined ? (
@@ -169,12 +172,16 @@ export const TokenPage = (): React.ReactElement => {
             <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Center} variant='header1'>{collectionToken.name}</Text>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                  <Text>Owned By</Text>
-                  <Account accountId={owner} />
-                </Stack>
                 {tokenSales && tokenSales.length > 0 && (
-                  <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                      <Text>Owned By</Text>
+                      <LinkBase target={`/accounts/${tokenSales[0].toAddress}/`}>
+                        <Account accountId={tokenSales[0].toAddress} />
+                      </LinkBase>
+                    </Stack>
+                    <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                  </Stack>
                 )}
                 {collection === undefined ? (
                   <LoadingSpinner />
