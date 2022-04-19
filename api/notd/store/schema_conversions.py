@@ -2,13 +2,13 @@ from typing import Mapping
 
 from notd.model import Block
 from notd.model import Collection
-from notd.model import CollectionStatistics
+from notd.model import CollectionHourlyActivity
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionStatisticsTable
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -111,16 +111,16 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
         latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
     )
 
-def token_statistics_from_row(row: Mapping) -> CollectionStatistics:
-    return CollectionStatistics(
-        tokenStatisticsId=row[CollectionStatisticsTable.tokenStatisticsId],
-        createdDate=row[CollectionStatisticsTable.c.createdDate],
-        updatedDate=row[CollectionStatisticsTable.c.updatedDate],
-        address=row[CollectionStatisticsTable.address],
-        date=row[CollectionStatisticsTable.date],
-        transferCount=row[CollectionStatisticsTable.transferCount],
-        totalVolume=row[CollectionStatisticsTable.totalVolume],
-        minimumValue=row[CollectionStatisticsTable.minimumValue],
-        maximumValue=row[CollectionStatisticsTable.maximumValue],
-        averageValue=row[CollectionStatisticsTable.averageValue],
+def token_statistics_from_row(row: Mapping) -> CollectionHourlyActivity:
+    return CollectionHourlyActivity(
+        tokenStatisticsId=row[CollectionHourlyActivityTable.tokenStatisticsId],
+        createdDate=row[CollectionHourlyActivityTable.c.createdDate],
+        updatedDate=row[CollectionHourlyActivityTable.c.updatedDate],
+        address=row[CollectionHourlyActivityTable.address],
+        date=row[CollectionHourlyActivityTable.date],
+        transferCount=row[CollectionHourlyActivityTable.transferCount],
+        totalVolume=row[CollectionHourlyActivityTable.totalVolume],
+        minimumValue=row[CollectionHourlyActivityTable.minimumValue],
+        maximumValue=row[CollectionHourlyActivityTable.maximumValue],
+        averageValue=row[CollectionHourlyActivityTable.averageValue],
     )

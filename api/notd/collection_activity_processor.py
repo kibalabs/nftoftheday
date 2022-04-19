@@ -6,18 +6,18 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
-from notd.model import RetrievedCollectionStatistics
+from notd.model import RetrievedCollectionHourlyActivity
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
 
 
-class CollectionStatisticsProcessor:
+class CollectionActivityProcessor:
 
     def __init__(self,retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def calculate_collection_statistics(self, registryAddress: str, date: datetime.datetime) -> RetrievedCollectionStatistics:
+    async def calculate_collection_hourly_activity(self, registryAddress: str, date: datetime.datetime) -> RetrievedCollectionHourlyActivity:
         tokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
@@ -38,4 +38,4 @@ class CollectionStatisticsProcessor:
             maximumValue = tokenTransfers[0].value
         else:
             maximumValue = 0
-        return RetrievedCollectionStatistics(address=registryAddress, date=date, transferCount=transferCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
+        return RetrievedCollectionHourlyActivity(address=registryAddress, date=date, transferCount=transferCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)

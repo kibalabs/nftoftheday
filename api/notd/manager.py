@@ -195,8 +195,8 @@ class NotdManager:
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
-    async def save_collection_statistics(self, address:str, date=datetime.datetime, shouldForce: bool = False) -> None:
-        await self.tokenManager.save_collection_statistics(address=address, date=date, shouldForce=shouldForce)
+    async def save_collection_hourly_activity(self, address:str, date=datetime.datetime, shouldForce: bool = False) -> None:
+        await self.tokenManager.save_collection_hourly_activity(address=address, date=date, shouldForce=shouldForce)
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)

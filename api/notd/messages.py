@@ -39,7 +39,7 @@ class UpdateCollectionTokensMessageContent(MessageContent):
     address: str
     shouldForce: Optional[bool]
 
-class SaveCollectionStatisticsMessageContent(MessageContent):
+class SaveCollectionHourlyActivityMessageContent(MessageContent):
     _COMMAND = 'SAVE_COLLECTION_STATISTICS'
     address: str
     date: datetime.datetime

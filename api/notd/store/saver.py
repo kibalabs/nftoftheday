@@ -11,13 +11,13 @@ from core.util import list_util
 
 from notd.model import Block
 from notd.model import Collection
-from notd.model import CollectionStatistics
+from notd.model import CollectionHourlyActivity
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionStatisticsTable
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -348,25 +348,25 @@ class Saver(CoreSaver):
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds))
         await self._execute(query=query, connection=connection)
 
-    async def create_collection_statistics(self, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionStatistics:
+    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
-            CollectionStatisticsTable.c.createdDate.key: createdDate,
-            CollectionStatisticsTable.c.updatedDate.key: updatedDate,
-            CollectionStatisticsTable.c.address.key: address,
-            CollectionStatisticsTable.c.date.key: date,
-            CollectionStatisticsTable.c.transferCount.key: transferCount,
-            CollectionStatisticsTable.c.totalVolume.key: totalVolume,
-            CollectionStatisticsTable.c.minimumValue.key: minimumValue,
-            CollectionStatisticsTable.c.maximumValue.key:  maximumValue,
-            CollectionStatisticsTable.c.averageValue.key:  averageValue,
+            CollectionHourlyActivityTable.c.createdDate.key: createdDate,
+            CollectionHourlyActivityTable.c.updatedDate.key: updatedDate,
+            CollectionHourlyActivityTable.c.address.key: address,
+            CollectionHourlyActivityTable.c.date.key: date,
+            CollectionHourlyActivityTable.c.transferCount.key: transferCount,
+            CollectionHourlyActivityTable.c.totalVolume.key: totalVolume,
+            CollectionHourlyActivityTable.c.minimumValue.key: minimumValue,
+            CollectionHourlyActivityTable.c.maximumValue.key:  maximumValue,
+            CollectionHourlyActivityTable.c.averageValue.key:  averageValue,
         }
-        query = CollectionStatisticsTable.insert().values(values)
+        query = CollectionHourlyActivityTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        collectionStatisticsId = result.inserted_primary_key[0]
-        return CollectionStatistics(
-            collectionStatisticsId=collectionStatisticsId,
+        collectionHourlyActivityId = result.inserted_primary_key[0]
+        return CollectionHourlyActivity(
+            collectionHourlyActivityId=collectionHourlyActivityId,
             createdDate=createdDate,
             updatedDate=updatedDate,
             address=address,
@@ -378,24 +378,24 @@ class Saver(CoreSaver):
             averageValue=averageValue,
         )
 
-    async def update_collection_statistics(self, collectionStatisticsId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_hourly_activity(self, collectionHourlyActivityId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if address is not None:
-            values[CollectionStatisticsTable.c.address.key] = address
+            values[CollectionHourlyActivityTable.c.address.key] = address
         if date is not None:
-            values[CollectionStatisticsTable.c.date.key] = date
+            values[CollectionHourlyActivityTable.c.date.key] = date
         if transferCount is not None:
-            values[CollectionStatisticsTable.c.transferCount.key] = transferCount
+            values[CollectionHourlyActivityTable.c.transferCount.key] = transferCount
         if totalVolume is not None:
-            values[CollectionStatisticsTable.c.totalVolume.key] = totalVolume
+            values[CollectionHourlyActivityTable.c.totalVolume.key] = totalVolume
         if minimumValue is not None:
-            values[CollectionStatisticsTable.c.minimumValue.key] = minimumValue
+            values[CollectionHourlyActivityTable.c.minimumValue.key] = minimumValue
         if maximumValue is not None:
-            values[CollectionStatisticsTable.c.maximumValue.key] = maximumValue
+            values[CollectionHourlyActivityTable.c.maximumValue.key] = maximumValue
         if averageValue is not None:
-            values[CollectionStatisticsTable.c.averageValue.key] = averageValue
+            values[CollectionHourlyActivityTable.c.averageValue.key] = averageValue
         if len(values) > 0:
-            values[CollectionStatisticsTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = CollectionStatisticsTable.update(CollectionStatisticsTable.c.collectionStatisticsId == collectionStatisticsId).values(values)
+            values[CollectionHourlyActivityTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = CollectionHourlyActivityTable.update(CollectionHourlyActivityTable.c.collectionHourlyActivityId == collectionHourlyActivityId).values(values)
         await self._execute(query=query, connection=connection)
     

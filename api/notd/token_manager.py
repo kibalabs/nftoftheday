@@ -14,7 +14,7 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import list_util
-from notd.collection_statistics_processor import CollectionStatisticsProcessor
+from notd.collection_activity_processor import CollectionActivityProcessor
 
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
@@ -47,14 +47,14 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionStatisticsProcessor: CollectionStatisticsProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
-        self.collectionStatisticsProcessor = collectionStatisticsProcessor
+        self.collectionActivityProcessor = collectionActivityProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
@@ -208,10 +208,10 @@ class TokenManager:
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
-    async def save_collection_statistics(self, address:str, date=datetime.datetime, shouldForce: bool = False):
+    async def save_collection_hourly_activity(self, address:str, date=datetime.datetime, shouldForce: bool = False):
         async with self.saver.create_transaction() as connection:
-            retrievedCollectionStats = await self.collectionStatisticsProcessor.calculate_collection_statistics(registryAddress=address, date=date)
-            await self.saver.create_collection_statistics(connection=connection, address=address, date=retrievedCollectionStats.date, transferCount=retrievedCollectionStats.transferCount, totalVolume=retrievedCollectionStats.totalVolume, minimumValue=retrievedCollectionStats.minimumValue, maximumValue=retrievedCollectionStats.maximumValue, averageValue=retrievedCollectionStats.averageValue)
+            retrievedCollectionStats = await self.collectionActivityProcessor.calculate_collection_hourly_activity(registryAddress=address, date=date)
+            await self.saver.create_collection_hourly_activity(connection=connection, address=address, date=retrievedCollectionStats.date, transferCount=retrievedCollectionStats.transferCount, totalVolume=retrievedCollectionStats.totalVolume, minimumValue=retrievedCollectionStats.minimumValue, maximumValue=retrievedCollectionStats.maximumValue, averageValue=retrievedCollectionStats.averageValue)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
