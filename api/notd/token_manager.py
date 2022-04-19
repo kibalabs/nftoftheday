@@ -14,8 +14,8 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import list_util
-from notd.collection_activity_processor import CollectionActivityProcessor
 
+from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
@@ -208,7 +208,7 @@ class TokenManager:
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
-    async def save_collection_hourly_activity(self, address:str, date=datetime.datetime, shouldForce: bool = False):
+    async def save_collection_hourly_activity(self, address:str, date=datetime.datetime):
         async with self.saver.create_transaction() as connection:
             retrievedCollectionStats = await self.collectionActivityProcessor.calculate_collection_hourly_activity(registryAddress=address, date=date)
             await self.saver.create_collection_hourly_activity(connection=connection, address=address, date=retrievedCollectionStats.date, transferCount=retrievedCollectionStats.transferCount, totalVolume=retrievedCollectionStats.totalVolume, minimumValue=retrievedCollectionStats.minimumValue, maximumValue=retrievedCollectionStats.maximumValue, averageValue=retrievedCollectionStats.averageValue)

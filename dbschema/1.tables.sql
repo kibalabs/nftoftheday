@@ -148,6 +148,7 @@ CREATE TABLE tbl_collection_hourly_activity (
     maximum_value NUMERIC(256, 0) NOT NULL,
     average_value NUMERIC(256, 0) NOT NULL
 );
+CREATE UNIQUE INDEX tbl_collection_hourly_activity_date_address ON tbl_collection_hourly_activity (date, address);
 CREATE INDEX tbl_collection_hourly_activity_created_date ON tbl_collection_hourly_activity (created_date);
 CREATE INDEX tbl_collection_hourly_activity_updated_date ON tbl_collection_hourly_activity (updated_date);
 CREATE INDEX tbl_collection_hourly_activity_address ON tbl_collection_hourly_activity (address);
