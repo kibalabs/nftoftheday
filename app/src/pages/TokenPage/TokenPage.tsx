@@ -136,10 +136,10 @@ export const TokenPage = (): React.ReactElement => {
             <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide}>
                 <Text variant='header1'>{collectionToken.name}</Text>
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                    <Text>Owned By</Text>
-                    <Account accountId={owner} />
-                  </Stack>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                  <Text>Owned By</Text>
+                  <Account accountId={owner} />
+                </Stack>
                 {tokenSales && tokenSales.length > 0 && (
                   <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
                 )}
