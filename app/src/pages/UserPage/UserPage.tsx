@@ -39,7 +39,6 @@ export const UserPage = (): React.ReactElement => {
         </Stack>
       )}
       <Spacing variant={PaddingSize.Wide} />
-      <Text variant='header3'>Your Tokens</Text>
       <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
         {ownerTokens && ownerTokens.map((ownerToken: CollectionToken, index: number) : React.ReactElement => (
           <TokenCard
