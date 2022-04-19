@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LinkBase, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -139,9 +139,10 @@ export const TokenPage = (): React.ReactElement => {
                   <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Text>Owned By</Text>
-                      <LinkBase target={`/accounts/${tokenSales[0].toAddress}`}>
-                        <Account accountId={tokenSales[0].toAddress} />
-                      </LinkBase>
+                      <Account
+                        accountId={tokenSales[0].toAddress}
+                        target={`/accounts/${tokenSales[0].toAddress}`}
+                      />
                     </Stack>
                     <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
                   </Stack>
@@ -176,9 +177,10 @@ export const TokenPage = (): React.ReactElement => {
                   <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Text>Owned By</Text>
-                      <LinkBase target={`/accounts/${tokenSales[0].toAddress}/`}>
-                        <Account accountId={tokenSales[0].toAddress} />
-                      </LinkBase>
+                      <Account
+                        accountId={tokenSales[0].toAddress}
+                        target={`/accounts/${tokenSales[0].toAddress}`}
+                      />
                     </Stack>
                     <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
                   </Stack>
