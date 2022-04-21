@@ -211,6 +211,7 @@ class TokenMetadataProcessor():
         else:
             hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
             tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
+        print(tokenMetadataUri)
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
