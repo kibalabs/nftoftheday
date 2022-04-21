@@ -38,4 +38,4 @@ class CollectionActivityProcessor:
             maximumValue = tokenTransfers[0].value
         else:
             maximumValue = 0
-        return RetrievedCollectionHourlyActivity(address=registryAddress, date=date, transferCount=transferCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
+        return RetrievedCollectionHourlyActivity(address=registryAddress, date=date.replace(minute=0, second=0, microsecond=0), transferCount=transferCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)

@@ -3,6 +3,7 @@ from typing import Optional
 
 from core.util import date_util
 from fastapi import APIRouter
+from notd.api.endpoints_v1 import  UpdateCollectionActivityResponse
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
@@ -75,6 +76,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.receive_new_blocks_deferred()
         await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
+
+    @router.post('/collections/update-activity-deferred', response_model=UpdateCollectionActivityResponse)
+    async def update_activity_for_all_collections_deferred():
+        await notdManager.update_activity_for_all_collections_deferred()
+        return UpdateCollectionActivityResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
     async def get_collection_by_address(registryAddress: str):

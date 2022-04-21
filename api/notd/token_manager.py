@@ -14,6 +14,7 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import list_util
+from notd.messages import UpdateActivityForCollectionMessageContent
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -208,10 +209,20 @@ class TokenManager:
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
-    async def save_collection_hourly_activity(self, address:str, date=datetime.datetime):
+    async def update_activity_for_collection(self, address: str, date: datetime.datetime):
         async with self.saver.create_transaction() as connection:
             retrievedCollectionStats = await self.collectionActivityProcessor.calculate_collection_hourly_activity(registryAddress=address, date=date)
             await self.saver.create_collection_hourly_activity(connection=connection, address=address, date=retrievedCollectionStats.date, transferCount=retrievedCollectionStats.transferCount, totalVolume=retrievedCollectionStats.totalVolume, minimumValue=retrievedCollectionStats.minimumValue, maximumValue=retrievedCollectionStats.maximumValue, averageValue=retrievedCollectionStats.averageValue)
+
+    async def save_collection_hourly_activity_deferred(self, address: str, date: datetime.datetime, shouldForce: bool=False):
+        await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, date=date, shouldForce=shouldForce))
+
+    async def save_collections_hourly_activity_deferred(self, collections: List[Tuple[str,str]]) -> None:
+        if len(collections) == 0:
+            return
+        collections = set(collections)
+        messages = [UpdateActivityForCollectionMessageContent(address=address,date=date).to_message() for (address,date) in collections]
+        await self.tokenQueue.send_messages(messages=messages)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())

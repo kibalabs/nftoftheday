@@ -103,7 +103,7 @@ TokenMultiOwnershipsTable = sqlalchemy.Table(
 CollectionHourlyActivityTable = sqlalchemy.Table(
     'tbl_collection_hourly_activity',
     metadata,
-    sqlalchemy.Column(key='tokenStatisticsId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='collectionActivityId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='address', name='address', type_=sqlalchemy.Text, nullable=False),

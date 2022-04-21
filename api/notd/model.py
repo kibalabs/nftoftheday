@@ -188,6 +188,6 @@ class RetrievedCollectionHourlyActivity:
 
 @dataclasses.dataclass
 class CollectionHourlyActivity(RetrievedCollectionHourlyActivity):
-    collectionHourlyActivityId: int
+    collectionActivityId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime

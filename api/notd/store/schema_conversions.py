@@ -111,16 +111,16 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
         latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
     )
 
-def token_statistics_from_row(row: Mapping) -> CollectionHourlyActivity:
+def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
     return CollectionHourlyActivity(
-        tokenStatisticsId=row[CollectionHourlyActivityTable.tokenStatisticsId],
+        collectionActivityId=row[CollectionHourlyActivityTable.c.collectionActivityId],
         createdDate=row[CollectionHourlyActivityTable.c.createdDate],
         updatedDate=row[CollectionHourlyActivityTable.c.updatedDate],
-        address=row[CollectionHourlyActivityTable.address],
-        date=row[CollectionHourlyActivityTable.date],
-        transferCount=row[CollectionHourlyActivityTable.transferCount],
-        totalVolume=row[CollectionHourlyActivityTable.totalVolume],
-        minimumValue=row[CollectionHourlyActivityTable.minimumValue],
-        maximumValue=row[CollectionHourlyActivityTable.maximumValue],
-        averageValue=row[CollectionHourlyActivityTable.averageValue],
+        address=row[CollectionHourlyActivityTable.c.address],
+        date=row[CollectionHourlyActivityTable.c.date],
+        transferCount=row[CollectionHourlyActivityTable.c.transferCount],
+        totalVolume=row[CollectionHourlyActivityTable.c.totalVolume],
+        minimumValue=row[CollectionHourlyActivityTable.c.minimumValue],
+        maximumValue=row[CollectionHourlyActivityTable.c.maximumValue],
+        averageValue=row[CollectionHourlyActivityTable.c.averageValue],
     )

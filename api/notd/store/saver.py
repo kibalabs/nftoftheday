@@ -364,9 +364,9 @@ class Saver(CoreSaver):
         }
         query = CollectionHourlyActivityTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        collectionHourlyActivityId = result.inserted_primary_key[0]
+        collectionActivityId = result.inserted_primary_key[0]
         return CollectionHourlyActivity(
-            collectionHourlyActivityId=collectionHourlyActivityId,
+            collectionActivityId=collectionActivityId,
             createdDate=createdDate,
             updatedDate=updatedDate,
             address=address,
@@ -378,7 +378,7 @@ class Saver(CoreSaver):
             averageValue=averageValue,
         )
 
-    async def update_collection_hourly_activity(self, collectionHourlyActivityId: int, address: str, date: datetime.datetime, transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_hourly_activity(self, collectionActivityId: int, address: Optional[str], date: Optional[datetime.datetime], transferCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if address is not None:
             values[CollectionHourlyActivityTable.c.address.key] = address
@@ -396,6 +396,6 @@ class Saver(CoreSaver):
             values[CollectionHourlyActivityTable.c.averageValue.key] = averageValue
         if len(values) > 0:
             values[CollectionHourlyActivityTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = CollectionHourlyActivityTable.update(CollectionHourlyActivityTable.c.collectionHourlyActivityId == collectionHourlyActivityId).values(values)
+        query = CollectionHourlyActivityTable.update(CollectionHourlyActivityTable.c.collectionActivityId == collectionActivityId).values(values)
         await self._execute(query=query, connection=connection)
     

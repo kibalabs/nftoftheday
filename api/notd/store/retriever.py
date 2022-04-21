@@ -12,6 +12,9 @@ from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from notd.model import CollectionHourlyActivity
+from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema_conversions import collection_activity_from_row
 
 from notd.model import Collection
 from notd.model import Token
@@ -214,3 +217,15 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'TokenMultiOwnership with registry:{registryAddress} tokenId:{tokenId} ownerAddress:{ownerAddress} not found')
         tokenOwnership = token_multi_ownership_from_row(row)
         return tokenOwnership
+
+    async def list_collections_activity(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
+        query = CollectionHourlyActivityTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=CollectionHourlyActivityTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=CollectionHourlyActivityTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenCollections = [collection_activity_from_row(row) for row in result]
+        return tokenCollections

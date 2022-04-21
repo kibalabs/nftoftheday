@@ -18,6 +18,9 @@ from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
+from notd.collection_activity_processor import CollectionActivityProcessor
+from notd.store.schema import CollectionHourlyActivityTable
+from notd.messages import UpdateActivityForAllCollectionsMessageContent, UpdateActivityForCollectionMessageContent
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -43,7 +46,7 @@ from notd.token_manager import TokenManager
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, requester: Requester, revueApiKey: str):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, requester: Requester, revueApiKey: str, collectionActivityProcessor: CollectionActivityProcessor):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -51,6 +54,7 @@ class NotdManager:
         self.tokenManager = tokenManager
         self.requester = requester
         self._tokenCache = dict()
+        self.collectionActivityProcessor = collectionActivityProcessor
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
@@ -195,8 +199,49 @@ class NotdManager:
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
-    async def save_collection_hourly_activity(self, address:str, date=datetime.datetime, shouldForce: bool = False) -> None:
-        await self.tokenManager.save_collection_hourly_activity(address=address, date=date, shouldForce=shouldForce)
+    async def update_activity_for_all_collections_deferred(self) -> None:
+        await self.workQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
+
+    @staticmethod
+    def datehour_from_datetime(dt: Optional[datetime.datetime] = None) -> datetime.datetime:
+        dt = dt if dt is not None else datetime.datetime.utcnow()
+        return dt.replace(minute=0, second=0, microsecond=0)
+
+    async def update_activity_for_all_collections(self) -> None:
+        #NOTE Account for deleted Transactions
+        #TODO since the last update activity, get all token transfer that have been updated
+        #Update collection,hour that appear in the list of transfers
+        #for each of this add a message to the queue
+        collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
+        if len(collectionActivity) > 0:
+            lastDate = collectionActivity[0].date
+        else:
+            lastDate = (date_util.datetime_from_now(days=-90)).replace(minute=0, second=0, microsecond=0)
+        newTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=lastDate)],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+        )
+        pairs = [(tokenTransfer.registryAddress, date_util.datetime_from_datetime(tokenTransfer.blockDate.replace(minute=0, second=0, microsecond=0),hours=1)) for tokenTransfer in newTokenTransfers]
+        messages = [UpdateActivityForCollectionMessageContent(registryAddress=pair[0], startDate=pair[1]).to_message() for pair in pairs]
+        await self.workQueue.send_messages(messages=messages)
+
+    async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:
+        await self.workQueue.send_message(message=UpdateActivityForCollectionMessageContent(registryAddress=registryAddress, startDate=startDate).to_message())
+
+    async def update_activity_for_collection(self, registryAddress: str, startDate: datetime.datetime) -> None:
+        async with self.saver.create_transaction() as connection:
+            collectionActivity = await self.retriever.list_collections_activity(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=registryAddress),
+                    DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
+                ]
+            )
+            retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(registryAddress=registryAddress, date=startDate)
+            if len(collectionActivity) > 0:
+                await self.saver.update_collection_hourly_activity(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=registryAddress, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+            else:
+                await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)

@@ -54,6 +54,12 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
+class UpdateCollectionActivityRequest(BaseModel):
+    pass
+
+class UpdateCollectionActivityResponse(BaseModel):
+    pass
+
 class SubscribeRequest(BaseModel):
     email: str
 

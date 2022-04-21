@@ -3,12 +3,13 @@ from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
+from notd.messages import UpdateActivityForCollectionMessageContent
+from notd.messages import UpdateActivityForAllCollectionsMessageContent
 
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
-from notd.messages import SaveCollectionHourlyActivityMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
@@ -55,8 +56,12 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
             await self.notdManager.update_collection_tokens(address=messageContent.address, shouldForce=messageContent.shouldForce)
             return
-        if message.command == SaveCollectionHourlyActivityMessageContent.get_command():
-            messageContent = SaveCollectionHourlyActivityMessageContent.parse_obj(message.content)
-            await self.notdManager.save_collection_statistics(address=messageContent.address, date=messageContent.date, shouldForce=messageContent.shouldForce)
+        if message.command == UpdateActivityForAllCollectionsMessageContent.get_command():
+            messageContent = UpdateActivityForAllCollectionsMessageContent.parse_obj(message.content)
+            await self.notdManager.update_activity_for_all_collections()
+            return
+        if message.command == UpdateActivityForCollectionMessageContent.get_command():
+            messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_activity_for_collection(registryAddress=messageContent.registryAddress, startDate=messageContent.startDate)
             return
         raise KibaException(message='Message was unhandled')

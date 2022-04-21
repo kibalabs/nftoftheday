@@ -39,8 +39,10 @@ class UpdateCollectionTokensMessageContent(MessageContent):
     address: str
     shouldForce: Optional[bool]
 
-class SaveCollectionHourlyActivityMessageContent(MessageContent):
-    _COMMAND = 'SAVE_COLLECTION_STATISTICS'
-    address: str
-    date: datetime.datetime
-    shouldForce: Optional[bool]
+class UpdateActivityForAllCollectionsMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_ACTIVITY_FOR_ALL_COLLECTIONS'
+
+class UpdateActivityForCollectionMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_ACTIVITY'
+    registryAddress: str
+    startDate: datetime.datetime
