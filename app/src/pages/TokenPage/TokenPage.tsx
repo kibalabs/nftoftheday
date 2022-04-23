@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ResponsiveTextAlignmentView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -128,85 +128,50 @@ export const TokenPage = (): React.ReactElement => {
         <Text variant='error'>Collection Token failed to load</Text>
       ) : (
         <ContainingView>
-          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} padding={PaddingSize.Wide2}>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} padding={PaddingSize.Wide2}>
             <Box height='20rem' width='20rem' shouldClipContent={true}>
               <Media source={imageUrl} alternativeText='image' fitType='contain' />
             </Box>
-            <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide}>
-                <Text variant='header1'>{collectionToken.name}</Text>
-                {tokenSales && tokenSales.length > 0 && (
-                  <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                      <Text>Owned By</Text>
-                      <Account
-                        accountId={tokenSales[0].toAddress}
-                        target={`/accounts/${tokenSales[0].toAddress}`}
-                      />
+            <Stack.Item growthFactor={1} shrinkFactor={1}>
+              <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left}}>
+                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start}} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start}} padding={PaddingSize.Wide}>
+                  <Text variant='header1'>{collectionToken.name}</Text>
+                  {tokenSales && tokenSales.length > 0 && (
+                    <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                        <Text>Owned By</Text>
+                        <Account
+                          accountId={tokenSales[0].toAddress}
+                          target={`/accounts/${tokenSales[0].toAddress}`}
+                        />
+                      </Stack>
+                      <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
                     </Stack>
-                    <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
-                  </Stack>
-                )}
-                <Spacing variant={PaddingSize.Wide} />
-                {collection === undefined ? (
-                  <LoadingSpinner />
-                ) : collection === null ? (
-                  <Text variant='error'>Collection failed to load</Text>
-                ) : (
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                    <Text>Part of</Text>
-                    <CollectionView
-                      collection={collection}
-                      target={`/collections/${collection.address}`}
-                    />
-                  </Stack>
-                )}
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-                  <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                  <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
-                </Stack>
-                {account?.address && !isRefreshClicked && (
-                  <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
-                )}
-              </Stack>
-            </ResponsiveHidingView>
-            <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                <Text alignment={TextAlignment.Center} variant='header1'>{collectionToken.name}</Text>
-                {tokenSales && tokenSales.length > 0 && (
-                  <React.Fragment>
+                  )}
+                  <Spacing variant={PaddingSize.Wide} />
+                  {collection === undefined ? (
+                    <LoadingSpinner />
+                  ) : collection === null ? (
+                    <Text variant='error'>Collection failed to load</Text>
+                  ) : (
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                      <Text>Owned By</Text>
-                      <Account
-                        accountId={tokenSales[0].toAddress}
-                        target={`/accounts/${tokenSales[0].toAddress}`}
+                      <Text>Part of</Text>
+                      <CollectionView
+                        collection={collection}
+                        target={`/collections/${collection.address}`}
                       />
                     </Stack>
-                    <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
-                  </React.Fragment>
-                )}
-                {collection === undefined ? (
-                  <LoadingSpinner />
-                ) : collection === null ? (
-                  <Text variant='error'>Collection failed to load</Text>
-                ) : (
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                    <Text>Part of</Text>
-                    <CollectionView
-                      collection={collection}
-                      target={`/collections/${collection.address}`}
-                    />
+                  )}
+                  <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
+                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                    <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
                   </Stack>
-                )}
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-                  <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                  <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
+                  {account?.address && !isRefreshClicked && (
+                    <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+                  )}
                 </Stack>
-                {account?.address && !isRefreshClicked && (
-                  <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
-                )}
-              </Stack>
-            </ResponsiveHidingView>
+              </ResponsiveTextAlignmentView>
+            </Stack.Item>
           </Stack>
           <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true} padding={PaddingSize.Wide}>
             {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (

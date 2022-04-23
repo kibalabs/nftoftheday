@@ -10,7 +10,6 @@ import { ToastContainer } from 'react-toastify';
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { NavBar } from './components/NavBar';
-import { isProduction } from './envUtil';
 import { GlobalsProvider } from './globalsContext';
 import { CollectionPage } from './pages/CollectionPage';
 import { HomePage } from './pages/HomePage';
@@ -56,9 +55,7 @@ export const App = (): React.ReactElement => {
         <AccountControlProvider>
           <BackgroundView linearGradient='#200122,#6F0000'>
             <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
-              {!isProduction() && (
-                <NavBar />
-              )}
+              <NavBar />
               <Stack.Item growthFactor={1} shrinkFactor={1}>
                 <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
                   <Router routes={routes} />
