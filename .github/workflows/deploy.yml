@@ -118,8 +118,32 @@ jobs:
                 --name ${NAME} \
                 --detach \
                 --restart unless-stopped \
-                --memory=768m \
-                --cpus=$(echo "scale=2 ; $(grep -c ^processor /proc/cpuinfo) / 1.5" | bc) \
+                --env NAME=${NAME} \
+                --env-file ~/.${NAME}.vars \
+                ${DOCKER_IMAGE} './start-worker.sh'
+  run-worker-2:
+    needs: deploy-api
+    runs-on: ubuntu-latest
+    env:
+      NAME: nftoftheday-worker
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
+    steps:
+      - name: executing remote ssh commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.APIBOX_URL }}
+          username: ${{ secrets.APIBOX_USER }}
+          key: ${{ secrets.APIBOX_SSH_KEY }}
+          port: ${{ secrets.APIBOX_PORT }}
+          envs: DOCKER_IMAGE,NAME
+          script_stop: true
+          script: |
+            docker pull ${DOCKER_IMAGE}
+            docker stop ${NAME} && docker rm ${NAME} || true
+            docker run \
+                --name ${NAME} \
+                --detach \
+                --restart unless-stopped \
                 --env NAME=${NAME} \
                 --env-file ~/.${NAME}.vars \
                 ${DOCKER_IMAGE} './start-worker.sh'
