@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ResponsiveTextAlignmentView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -133,8 +133,8 @@ export const TokenPage = (): React.ReactElement => {
               <Media source={imageUrl} alternativeText='image' fitType='contain' />
             </Box>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left}}>
-                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start}} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start}} padding={PaddingSize.Wide}>
+              <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
+                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} padding={PaddingSize.Wide}>
                   <Text variant='header1'>{collectionToken.name}</Text>
                   {tokenSales && tokenSales.length > 0 && (
                     <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
