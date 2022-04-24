@@ -14,7 +14,12 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import list_util
-from notd.messages import UpdateActivityForCollectionMessageContent
+from notd.messages import UpdateActivityForAllCollectionsMessageContent
+from notd.messages import  UpdateActivityForCollectionMessageContent
+
+from notd.store.schema import CollectionHourlyActivityTable
+
+from notd.date_util import date_hour_from_datetime
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -209,21 +214,6 @@ class TokenManager:
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
-    async def update_activity_for_collection(self, address: str, date: datetime.datetime):
-        async with self.saver.create_transaction() as connection:
-            retrievedCollectionStats = await self.collectionActivityProcessor.calculate_collection_hourly_activity(registryAddress=address, date=date)
-            await self.saver.create_collection_hourly_activity(connection=connection, address=address, date=retrievedCollectionStats.date, transferCount=retrievedCollectionStats.transferCount, totalVolume=retrievedCollectionStats.totalVolume, minimumValue=retrievedCollectionStats.minimumValue, maximumValue=retrievedCollectionStats.maximumValue, averageValue=retrievedCollectionStats.averageValue)
-
-    async def save_collection_hourly_activity_deferred(self, address: str, date: datetime.datetime, shouldForce: bool=False):
-        await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, date=date, shouldForce=shouldForce))
-
-    async def save_collections_hourly_activity_deferred(self, collections: List[Tuple[str,str]]) -> None:
-        if len(collections) == 0:
-            return
-        collections = set(collections)
-        messages = [UpdateActivityForCollectionMessageContent(address=address,date=date).to_message() for (address,date) in collections]
-        await self.tokenQueue.send_messages(messages=messages)
-
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 
@@ -333,3 +323,38 @@ class TokenManager:
         for collectionTokenIdChunk in list_util.generate_chunks(lst=collectionTokenIds, chunkSize=10):
             await asyncio.gather(*[self.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId) in collectionTokenIdChunk])
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
+
+    async def update_activity_for_all_collections_deferred(self) -> None:
+        await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
+
+    async def update_activity_for_all_collections(self) -> None:
+        #NOTE Account for deleted Transactions
+        collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
+        if len(collectionActivity) > 0:
+            lastDate = collectionActivity[0].date
+        else:
+            lastDate = (date_util.datetime_from_now(days=-7)).replace(minute=0, second=0, microsecond=0)
+        newTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=lastDate)],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+        )
+        pairs = [(tokenTransfer.registryAddress, date_util.datetime_from_datetime(date_hour_from_datetime(tokenTransfer.blockDate),hours=1)) for tokenTransfer in newTokenTransfers]
+        messages = [UpdateActivityForCollectionMessageContent(address=pair[0], startDate=pair[1]).to_message() for pair in pairs]
+        await self.tokenQueue.send_messages(messages=messages)
+
+    async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:
+        await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=registryAddress, startDate=startDate).to_message())
+
+    async def update_activity_for_collection(self, registryAddress: str, startDate: datetime.datetime) -> None:
+        async with self.saver.create_transaction() as connection:
+            collectionActivity = await self.retriever.list_collections_activity(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=registryAddress),
+                    DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
+                ]
+            )
+            retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(registryAddress=registryAddress, date=startDate)
+            if len(collectionActivity) > 0:
+                await self.saver.update_collection_hourly_activity(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=registryAddress, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+            else:
+                await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)

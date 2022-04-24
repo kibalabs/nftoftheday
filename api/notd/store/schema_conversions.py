@@ -119,6 +119,7 @@ def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
         address=row[CollectionHourlyActivityTable.c.address],
         date=row[CollectionHourlyActivityTable.c.date],
         transferCount=row[CollectionHourlyActivityTable.c.transferCount],
+        saleCount=row[CollectionHourlyActivityTable.c.saleCount],
         totalVolume=row[CollectionHourlyActivityTable.c.totalVolume],
         minimumValue=row[CollectionHourlyActivityTable.c.minimumValue],
         maximumValue=row[CollectionHourlyActivityTable.c.maximumValue],

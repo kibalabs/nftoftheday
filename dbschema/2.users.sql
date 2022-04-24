@@ -12,3 +12,5 @@ GRANT INSERT, SELECT, UPDATE ON tbl_token_ownerships TO notd_api;
 GRANT ALL ON SEQUENCE tbl_token_ownerships_id_seq TO notd_api;
 GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_token_multi_ownerships TO notd_api;
 GRANT ALL ON SEQUENCE tbl_token_multi_ownerships_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_collection_hourly_activity TO notd_api;
+GRANT ALL ON SEQUENCE tbl_collection_hourly_activity_id_seq TO notd_api;

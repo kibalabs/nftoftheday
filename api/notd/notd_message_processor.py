@@ -62,6 +62,6 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == UpdateActivityForCollectionMessageContent.get_command():
             messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_activity_for_collection(registryAddress=messageContent.registryAddress, startDate=messageContent.startDate)
+            await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
             return
         raise KibaException(message='Message was unhandled')

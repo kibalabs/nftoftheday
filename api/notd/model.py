@@ -181,6 +181,7 @@ class RetrievedCollectionHourlyActivity:
     address: str
     date: datetime.datetime
     transferCount: int
+    saleCount: int
     totalVolume: int
     minimumValue: int
     maximumValue: int

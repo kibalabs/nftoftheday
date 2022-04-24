@@ -44,5 +44,5 @@ class UpdateActivityForAllCollectionsMessageContent(MessageContent):
 
 class UpdateActivityForCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION_ACTIVITY'
-    registryAddress: str
+    address: str
     startDate: datetime.datetime
