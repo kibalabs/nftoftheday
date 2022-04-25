@@ -8,11 +8,13 @@ from notd.model import CollectionActivity
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionStatistics
+from notd.api.models_v1 import ApiCollectionActivity
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Collection
+from notd.model import CollectionActivity
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
@@ -130,3 +132,6 @@ class ResponseBuilder:
             latestTransfer=await self.token_transfer_from_model(tokenTransfer=sponsoredToken.latestTransfer) if sponsoredToken.latestTransfer else None,
             date=sponsoredToken.date,
         )
+
+    async def collection_activity_from_model(self, collectionActivities: Sequence[CollectionActivity]) -> Sequence[ApiCollectionActivity]:
+        return [ApiCollectionActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, minPrice=collectionActivity.minPrice, maxPrice=collectionActivity.maxPrice, averagePrice=collectionActivity.averagePrice)  for collectionActivity in collectionActivities]

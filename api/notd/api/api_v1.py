@@ -7,6 +7,7 @@ from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse, GetColl
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
+from notd.api.endpoints_v1 import GetCollectionActivityResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
@@ -141,6 +142,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_owner_token_ownerships(accountAddress: str):
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
+
+    @router.get('/collections/{registryAddress}/activity', response_model=GetCollectionActivityResponse)
+    async def get_collection_activity(registryAddress: str):
+        collectionActivities = await notdManager.get_collection_activity(registryAddress=registryAddress)
+        return GetCollectionActivityResponse(collectionActivity= await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

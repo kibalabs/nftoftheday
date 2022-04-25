@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionStatistics
+from notd.api.models_v1 import ApiCollectionActivity
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
@@ -168,3 +169,8 @@ class RefreshAccountTokenOwnershipsRequest(BaseModel):
 
 class RefreshAccountTokenOwnershipsResponse(BaseModel):
     pass
+class GetCollectionActivityRequest(BaseModel):
+    pass
+
+class GetCollectionActivityResponse(BaseModel):
+    collectionActivity: List[ApiCollectionActivity]

@@ -9,6 +9,7 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.util import date_util
 from core.store.retriever import StringFieldFilter
+from core.util import date_util
 from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
@@ -16,6 +17,7 @@ from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionActivity
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
@@ -273,3 +275,30 @@ class Retriever(CoreRetriever):
         query = query.group_by(sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date),CollectionHourlyActivityTable.c.address)
         plays = await self.database.execute(query=query, connection=None)
         return [(play[0],play[1],play[2],play[3],play[4],play[5],play[6]) for play in plays]
+
+    async def get_collection_activity(self, address: str, connection: Optional[DatabaseConnection] = None) -> List[CollectionActivity]:
+        endDate =  date_util.start_of_day(dt=datetime.datetime.now())
+        startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-90))
+        duration = datetime.timedelta(days=90)
+        query = select([
+            TokenTransfersTable.c.registryAddress, 
+            sqlalchemyfunc.sum(TokenTransfersTable.c.amount), 
+            sqlalchemyfunc.sum(TokenTransfersTable.c.value), 
+            sqlalchemyfunc.min(sqlalchemyfunc.nullif(TokenTransfersTable.c.value,0)), 
+            sqlalchemyfunc.max(TokenTransfersTable.c.value), 
+            sqlalchemyfunc.avg(sqlalchemyfunc.nullif(TokenTransfersTable.c.value,0)),
+            sqlalchemyfunc.date(BlocksTable.c.blockDate)]).join(BlocksTable, 
+            BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
+        query = query.where(BlocksTable.c.blockDate >= startDate)
+        query = query.where(BlocksTable.c.blockDate < endDate)
+        query = query.group_by(sqlalchemyfunc.date(BlocksTable.c.blockDate),TokenTransfersTable.c.registryAddress)
+        result = await self.database.execute(query=query, connection=connection)
+        collectionGraph = {row[6]:(row[1], row[2], row[3], row[4], row[5]) for row in result}
+        for delta in range(duration.days + 1):
+            day = startDate + datetime.timedelta(days=delta)
+            if  day.date() in collectionGraph.keys():
+                continue
+            collectionGraph[day.date()]=(0,0,0,0,0)
+        collectionGraph= [CollectionActivity(date=date, totalVolume=totalVolume, transferCount=transferCount, minPrice=minPrice, maxPrice=maxPrice, averagePrice=averagePrice) for date, (transferCount, totalVolume, minPrice, maxPrice, averagePrice) in collectionGraph.items()]
+        return collectionGraph

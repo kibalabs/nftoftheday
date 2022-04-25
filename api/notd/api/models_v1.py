@@ -70,3 +70,11 @@ class ApiCollectionStatistics(BaseModel):
     lowestSaleLast24Hours: Optional[int]
     highestSaleLast24Hours: Optional[int]
     tradeVolume24Hours: Optional[int]
+
+class ApiCollectionActivity(BaseModel):
+    date: datetime.date
+    totalVolume: int
+    transferCount: int
+    minPrice: int
+    maxPrice: int
+    averagePrice: int
