@@ -15,11 +15,11 @@ from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from notd.collection_activity_processor import CollectionActivityProcessor
 
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.block_processor import BlockProcessor
+from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever

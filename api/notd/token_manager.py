@@ -14,16 +14,13 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import list_util
-from notd.messages import UpdateActivityForAllCollectionsMessageContent
-from notd.messages import  UpdateActivityForCollectionMessageContent
-
-from notd.store.schema import CollectionHourlyActivityTable
-
-from notd.date_util import date_hour_from_datetime
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
+from notd.date_util import date_hour_from_datetime
+from notd.messages import UpdateActivityForAllCollectionsMessageContent
+from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
@@ -36,6 +33,7 @@ from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable

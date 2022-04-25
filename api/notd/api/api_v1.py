@@ -3,7 +3,6 @@ from typing import Optional
 
 from core.util import date_util
 from fastapi import APIRouter
-from notd.api.endpoints_v1 import  UpdateCollectionActivityResponse
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
@@ -24,6 +23,7 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
+from notd.api.endpoints_v1 import UpdateCollectionActivityResponse
 from notd.api.endpoints_v1 import UpdateCollectionRequest
 from notd.api.endpoints_v1 import UpdateCollectionResponse
 from notd.api.endpoints_v1 import UpdateCollectionTokenRequest

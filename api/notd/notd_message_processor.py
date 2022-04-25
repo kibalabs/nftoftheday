@@ -3,13 +3,13 @@ from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
-from notd.messages import UpdateActivityForCollectionMessageContent
-from notd.messages import UpdateActivityForAllCollectionsMessageContent
 
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
+from notd.messages import UpdateActivityForAllCollectionsMessageContent
+from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
