@@ -181,7 +181,11 @@ export const TokenPage = (): React.ReactElement => {
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
             <Text variant='header3'>Sales history</Text>
             <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-              {tokenSales && tokenSales.length !== 0 ? (
+              {tokenSales === undefined ? (
+                <LoadingSpinner />
+              ) : tokenSales === null ? (
+                <Text variant='error'>Token Sale failed to load</Text>
+              ) : tokenSales && tokenSales.length !== 0 ? (
                 tokenSales.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
                   <TokenSaleRow
                     tokenTransfer={tokenTransfer}
