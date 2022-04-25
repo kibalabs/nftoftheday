@@ -264,12 +264,12 @@ class Retriever(CoreRetriever):
         startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-period))
         duration = datetime.timedelta(days=period)
         query = select([
-            CollectionHourlyActivityTable.c.address, 
-            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.transferCount), 
-            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.saleCount), 
-            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.totalVolume), 
-            sqlalchemyfunc.min(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.minimumValue,0)), 
-            sqlalchemyfunc.max(CollectionHourlyActivityTable.c.maximumValue), 
+            CollectionHourlyActivityTable.c.address,
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.transferCount),
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.saleCount),
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.totalVolume),
+            sqlalchemyfunc.min(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.minimumValue,0)),
+            sqlalchemyfunc.max(CollectionHourlyActivityTable.c.maximumValue),
             sqlalchemyfunc.avg(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.averageValue,0)),
             sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date)])
         query = query.where(CollectionHourlyActivityTable.c.address == address)
