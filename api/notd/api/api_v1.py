@@ -126,6 +126,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
+
     @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
     async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
         collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress, startDate=date_util.datetime_from_string('2022-04-20T21:00:00.00'))

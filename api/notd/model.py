@@ -202,11 +202,13 @@ class CollectionActivity:
     lowestSaleLast24Hours: int
     highestSaleLast24Hours: int
     tradeVolume24Hours: int
+
 @dataclasses.dataclass
-class CollectionActivity:
+class Graph:
     date: datetime.date
-    totalVolume: int
     transferCount: int
-    minPrice: int
-    maxPrice: int
+    saleCount: int
+    totalVolume: int
+    minimumPrice: int
+    maximumPrice: int
     averagePrice: int

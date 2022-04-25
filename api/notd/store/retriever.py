@@ -14,6 +14,7 @@ from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from notd.model import Graph
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -281,24 +282,24 @@ class Retriever(CoreRetriever):
         startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-90))
         duration = datetime.timedelta(days=90)
         query = select([
-            TokenTransfersTable.c.registryAddress, 
-            sqlalchemyfunc.sum(TokenTransfersTable.c.amount), 
-            sqlalchemyfunc.sum(TokenTransfersTable.c.value), 
-            sqlalchemyfunc.min(sqlalchemyfunc.nullif(TokenTransfersTable.c.value,0)), 
-            sqlalchemyfunc.max(TokenTransfersTable.c.value), 
-            sqlalchemyfunc.avg(sqlalchemyfunc.nullif(TokenTransfersTable.c.value,0)),
-            sqlalchemyfunc.date(BlocksTable.c.blockDate)]).join(BlocksTable, 
-            BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-        query = query.where(TokenTransfersTable.c.registryAddress == address)
-        query = query.where(BlocksTable.c.blockDate >= startDate)
-        query = query.where(BlocksTable.c.blockDate < endDate)
-        query = query.group_by(sqlalchemyfunc.date(BlocksTable.c.blockDate),TokenTransfersTable.c.registryAddress)
+            CollectionHourlyActivityTable.c.address, 
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.transferCount), 
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.saleCount), 
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.totalVolume), 
+            sqlalchemyfunc.min(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.minimumValue,0)), 
+            sqlalchemyfunc.max(CollectionHourlyActivityTable.c.maximumValue), 
+            sqlalchemyfunc.avg(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.averageValue,0)),
+            sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date)])
+        query = query.where(CollectionHourlyActivityTable.c.address == address)
+        query = query.where(CollectionHourlyActivityTable.c.date >= startDate)
+        query = query.where(CollectionHourlyActivityTable.c.date < date_util.datetime_from_datetime(dt=startDate, days=1))
+        query = query.group_by(sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date),CollectionHourlyActivityTable.c.address)
         result = await self.database.execute(query=query, connection=connection)
-        collectionGraph = {row[6]:(row[1], row[2], row[3], row[4], row[5]) for row in result}
+        collectionGraph = {row[7]:(row[1], row[2], row[3], row[4], row[5], row[6]) for row in result}
         for delta in range(duration.days + 1):
             day = startDate + datetime.timedelta(days=delta)
             if  day.date() in collectionGraph.keys():
                 continue
-            collectionGraph[day.date()]=(0,0,0,0,0)
-        collectionGraph= [CollectionActivity(date=date, totalVolume=totalVolume, transferCount=transferCount, minPrice=minPrice, maxPrice=maxPrice, averagePrice=averagePrice) for date, (transferCount, totalVolume, minPrice, maxPrice, averagePrice) in collectionGraph.items()]
+            collectionGraph[day.date()]=(0,0,0,0,0,0)
+        collectionGraph= [Graph(date=date, transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumPrice=minimumPrice, maximumPrice=maximumPrice, averagePrice=averagePrice) for date, (transferCount, saleCount, totalVolume, minimumPrice, maximumPrice, averagePrice) in collectionGraph.items()]
         return collectionGraph
