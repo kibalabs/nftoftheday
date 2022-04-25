@@ -18,8 +18,6 @@ from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-from notd.store.schema import CollectionHourlyActivityTable
-from notd.model import CollectionActivity
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -28,6 +26,7 @@ from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
 from notd.model import CollectionActivity
+from notd.model import CollectionStatistics
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -128,24 +127,23 @@ class NotdManager:
         )
         return tokenTransfers
 
-    async def get_collection_statistics(self, address: str, startDate: datetime.datetime) -> CollectionActivity:
+    async def get_collection_statistics(self, address: str, startDate: datetime.datetime) -> CollectionStatistics:
         itemCount = await self.retriever.get_collection_item_count(address=address)
-        #holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
-        collectionActivity =  (await self.retriever.get_collection_statistics_24h(address=address, startDate=startDate))[0]
-        tradeVolume24Hours = collectionActivity[2]
-        highestSaleLast24Hours = collectionActivity[4]
-        lowestSaleLast24Hours = collectionActivity[5]
-        return CollectionActivity(
+        holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
+        totalTradedVolume = 0
+        collectionActivity =  (await self.retriever.get_collection_activity(address=address, startDate=startDate, period=1))[0]
+        return CollectionStatistics(
             date=startDate,
             itemCount=itemCount,
-            holderCount=0,
-            totalTradeVolume=0,
-            lowestSaleLast24Hours=lowestSaleLast24Hours,
-            highestSaleLast24Hours=highestSaleLast24Hours,
-            tradeVolume24Hours=tradeVolume24Hours,
+            holderCount=holderCount,
+            totalTradeVolume=totalTradedVolume,
+            lowestSaleLast24Hours=collectionActivity.minimumValue,
+            highestSaleLast24Hours=collectionActivity.maximumValue,
+            tradeVolume24Hours=collectionActivity.totalVolume,
         )
+
     async def get_collection_activity(self, registryAddress: str) -> List[CollectionActivity]:
-        collectionActivity = await self.retriever.get_collection_activity(address=registryAddress)
+        collectionActivity = await self.retriever.get_collection_activity(address=registryAddress, startDate=None, period=90)
         return collectionActivity
 
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:

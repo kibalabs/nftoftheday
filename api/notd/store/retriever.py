@@ -1,5 +1,6 @@
 import datetime
-from typing import List, Optional
+from typing import List
+from typing import Optional
 from typing import Sequence
 
 from core.exceptions import NotFoundException
@@ -7,18 +8,16 @@ from core.store.database import DatabaseConnection
 from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
-from core.util import date_util
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
-from notd.model import Graph
 
 from notd.model import Collection
-from notd.model import CollectionHourlyActivity
 from notd.model import CollectionActivity
+from notd.model import CollectionHourlyActivity
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
@@ -260,7 +259,10 @@ class Retriever(CoreRetriever):
             boughtTokens.remove(token)
         return list(boughtTokens)
 
-    async def get_collection_statistics_24h(self,address,startDate):
+    async def get_collection_activity(self, address: str, startDate: Optional[datetime.date], period: int, connection: Optional[DatabaseConnection] = None) -> List[CollectionActivity]:
+        endDate = date_util.start_of_day(dt=datetime.datetime.now()) if startDate is None else startDate
+        startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-period))
+        duration = datetime.timedelta(days=period)
         query = select([
             CollectionHourlyActivityTable.c.address, 
             sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.transferCount), 
@@ -272,27 +274,7 @@ class Retriever(CoreRetriever):
             sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date)])
         query = query.where(CollectionHourlyActivityTable.c.address == address)
         query = query.where(CollectionHourlyActivityTable.c.date >= startDate)
-        query = query.where(CollectionHourlyActivityTable.c.date < date_util.datetime_from_datetime(dt=startDate, days=1))
-        query = query.group_by(sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date),CollectionHourlyActivityTable.c.address)
-        plays = await self.database.execute(query=query, connection=None)
-        return [(play[0],play[1],play[2],play[3],play[4],play[5],play[6]) for play in plays]
-
-    async def get_collection_activity(self, address: str, connection: Optional[DatabaseConnection] = None) -> List[CollectionActivity]:
-        endDate =  date_util.start_of_day(dt=datetime.datetime.now())
-        startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-90))
-        duration = datetime.timedelta(days=90)
-        query = select([
-            CollectionHourlyActivityTable.c.address, 
-            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.transferCount), 
-            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.saleCount), 
-            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.totalVolume), 
-            sqlalchemyfunc.min(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.minimumValue,0)), 
-            sqlalchemyfunc.max(CollectionHourlyActivityTable.c.maximumValue), 
-            sqlalchemyfunc.avg(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.averageValue,0)),
-            sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date)])
-        query = query.where(CollectionHourlyActivityTable.c.address == address)
-        query = query.where(CollectionHourlyActivityTable.c.date >= startDate)
-        query = query.where(CollectionHourlyActivityTable.c.date < date_util.datetime_from_datetime(dt=startDate, days=1))
+        query = query.where(CollectionHourlyActivityTable.c.date < date_util.datetime_from_datetime(dt=startDate, days=period))
         query = query.group_by(sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date),CollectionHourlyActivityTable.c.address)
         result = await self.database.execute(query=query, connection=connection)
         collectionGraph = {row[7]:(row[1], row[2], row[3], row[4], row[5], row[6]) for row in result}
@@ -301,5 +283,6 @@ class Retriever(CoreRetriever):
             if  day.date() in collectionGraph.keys():
                 continue
             collectionGraph[day.date()]=(0,0,0,0,0,0)
-        collectionGraph= [Graph(date=date, transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumPrice=minimumPrice, maximumPrice=maximumPrice, averagePrice=averagePrice) for date, (transferCount, saleCount, totalVolume, minimumPrice, maximumPrice, averagePrice) in collectionGraph.items()]
+        print(collectionGraph)
+        collectionGraph= [CollectionActivity(date=date, transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue) for date, (transferCount, saleCount, totalVolume, minimumValue, maximumValue, averageValue) in collectionGraph.items()]
         return collectionGraph

@@ -4,11 +4,10 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
-from notd.model import CollectionActivity
 
 from notd.api.models_v1 import ApiCollection
-from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionActivity
+from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
@@ -134,4 +133,4 @@ class ResponseBuilder:
         )
 
     async def collection_activity_from_model(self, collectionActivities: Sequence[CollectionActivity]) -> Sequence[ApiCollectionActivity]:
-        return [ApiCollectionActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, minPrice=collectionActivity.minimumPrice, maxPrice=collectionActivity.maximumPrice, averagePrice=collectionActivity.averagePrice)  for collectionActivity in collectionActivities]
+        return [ApiCollectionActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, minimumValue=collectionActivity.minimumValue, maximumValue=collectionActivity.maximumValue, averageValue=collectionActivity.averageValue)  for collectionActivity in collectionActivities]
