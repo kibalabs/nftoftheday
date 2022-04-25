@@ -220,7 +220,7 @@ export const CollectionPage = (): React.ReactElement => {
               { account ? (
                 <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
                   <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
-                  <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                  <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                     {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
                       <TokenCard
                         key={index}
@@ -241,8 +241,12 @@ export const CollectionPage = (): React.ReactElement => {
               )}
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
                 <Text variant='header3'>Recent Sales</Text>
-                <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                  {recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
+                <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                  { recentSales === undefined ? (
+                    <LoadingSpinner />
+                  ) : recentSales === null ? (
+                    <Text variant='error'>Collection Sale failed to load</Text>
+                  ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
                     <TokenCard
                       key={index}
                       collectionToken={recentSale.token}
