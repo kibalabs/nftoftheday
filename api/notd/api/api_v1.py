@@ -3,12 +3,12 @@ from typing import Optional
 
 from core.util import date_util
 from fastapi import APIRouter
+from api.notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse, GetCollectionTokenResponse
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
+from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
-from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
-from notd.api.endpoints_v1 import GetCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
@@ -125,6 +125,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
+    @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
+    async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
+        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
+        return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
 
     @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)
     async def list_account_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):

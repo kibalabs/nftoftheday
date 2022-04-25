@@ -6,12 +6,14 @@ from typing import Sequence
 from core.exceptions import NotFoundException
 
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Collection
 from notd.model import SponsoredToken
+from notd.model import CollectionStatistics
 from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
@@ -102,7 +104,18 @@ class ResponseBuilder:
     async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
 
-    async def traded_token_from_model(self, tradedToken: TradedToken) -> ApiTradedToken:
+    async def get_collection_statistics(self, collectionStatistics: CollectionStatistics) -> ApiCollectionStatistics:
+        return ApiCollectionStatistics(
+            itemCount=collectionStatistics.itemCount,
+            holderCount=collectionStatistics.holderCount,
+            totalTradeVolume=collectionStatistics.totalTradeVolume,
+            lowestSaleLast24Hours=collectionStatistics.lowestSaleLast24Hours,
+            highestSaleLast24Hours=collectionStatistics.highestSaleLast24Hours,
+            tradeVolume24Hours=collectionStatistics.tradeVolume24Hours,
+        )
+
+
+    async def retrieve_most_traded_token_transfer(self, tradedToken: TradedToken) -> ApiTradedToken:
         return ApiTradedToken(
             token=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.latestTransfer.registryAddress, tokenId=tradedToken.latestTransfer.tokenId),
             collection=await self.collection_from_address(address=tradedToken.latestTransfer.registryAddress),

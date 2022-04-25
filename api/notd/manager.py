@@ -25,6 +25,7 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
+from notd.model import CollectionStatistics
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -124,6 +125,40 @@ class NotdManager:
             offset=offset,
         )
         return tokenTransfers
+
+    async def get_collection_statistics(self, address: str) -> CollectionStatistics:
+        itemCount = await self.retriever.get_collection_item_count(address=address)
+        holders = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
+            ]
+        )
+        toAddresses = [holder.toAddress for holder in holders]
+        fromAddresses = [holder.fromAddress for holder in holders]
+        for holderAddress in toAddresses:
+            if holderAddress in fromAddresses:
+                toAddresses.remove(holderAddress)
+
+        holderCount = len(toAddresses)
+        totalTradeVolume = sum([trade.value for trade in holders])
+        trades24h =  await self.retriever.list_token_transfers(
+            fieldFilters=[
+                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=date_util.start_of_day(dt=datetime.datetime.now()), lte=date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=datetime.datetime.now()), days=1))),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+        )
+        tradeVolume24Hours = sum([trade.value for trade in trades24h])
+        highestSaleLast24Hours = trades24h[0].value if len(trades24h) >0 else None
+        lowestSaleLast24Hours = trades24h[len(trades24h)-1].value if len(trades24h) >0 else None
+        return CollectionStatistics(
+            itemCount=itemCount,
+            holderCount=holderCount,
+            totalTradeVolume=totalTradeVolume,
+            lowestSaleLast24Hours=lowestSaleLast24Hours,
+            highestSaleLast24Hours=highestSaleLast24Hours,
+            tradeVolume24Hours=tradeVolume24Hours,
+        )
 
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(

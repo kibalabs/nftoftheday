@@ -61,3 +61,12 @@ class ApiSponsoredToken(BaseModel):
     collection: ApiCollection
     date: datetime.datetime
     latestTransfer: Optional[ApiTokenTransfer]
+
+
+class ApiCollectionStatistics(BaseModel):
+    itemCount: int
+    holderCount: int
+    totalTradeVolume: int
+    lowestSaleLast24Hours: Optional[int]
+    highestSaleLast24Hours: Optional[int]
+    tradeVolume24Hours: Optional[int]

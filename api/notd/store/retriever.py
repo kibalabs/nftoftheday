@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import List, Optional
 from typing import Sequence
 
 from core.exceptions import NotFoundException
@@ -229,3 +229,28 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         tokenCollections = [collection_activity_from_row(row) for row in result]
         return tokenCollections
+    async def get_collection_item_count(self, address, connection: Optional[DatabaseConnection] = None) -> int:
+        query = TokenTransfersTable.select()\
+            .with_only_columns([sqlalchemyfunc.count(TokenTransfersTable.c.tokenId)])\
+            .where(TokenTransfersTable.c.registryAddress == address)\
+            .group_by(TokenTransfersTable.c.tokenId)
+        rows = await self.database.execute(query=query, connection=connection)
+        count = len(list(rows))
+        return count
+
+    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> List[Token]:
+        boughtTokens = []
+        soldTokens= []
+        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
+        query = query.where(TokenTransfersTable.c.toAddress == ownerAddress)
+        boughtResult = await self.database.execute(query=query, connection=connection)
+        boughtTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in boughtResult]]
+        query = select([TokenTransfersTable, BlocksTable.c.blockDate]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = query.where(TokenTransfersTable.c.registryAddress == address)
+        query = query.where(TokenTransfersTable.c.fromAddress == ownerAddress)
+        soldResult = await self.database.execute(query=query, connection=connection)
+        soldTokens = [(token.registryAddress, token.tokenId) for token in [token_transfer_from_row(row) for row in soldResult]]
+        for token in soldTokens:
+            boughtTokens.remove(token)
+        return list(boughtTokens)
