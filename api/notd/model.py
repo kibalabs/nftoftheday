@@ -192,3 +192,13 @@ class CollectionHourlyActivity(RetrievedCollectionHourlyActivity):
     collectionActivityId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
+@dataclasses.dataclass
+class CollectionActivity:
+    date: datetime.date
+    itemCount: int
+    holderCount: int
+    totalTradeVolume: int
+    lowestSaleLast24Hours: int
+    highestSaleLast24Hours: int
+    tradeVolume24Hours: int

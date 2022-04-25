@@ -3,7 +3,7 @@ from typing import Optional
 
 from core.util import date_util
 from fastapi import APIRouter
-from api.notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse, GetCollectionTokenResponse
+from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse, GetCollectionTokenResponse
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
@@ -127,7 +127,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
     @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
     async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
-        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
+        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress, startDate=date_util.datetime_from_string('2022-04-20T21:00:00.00'))
         return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
 
     @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)

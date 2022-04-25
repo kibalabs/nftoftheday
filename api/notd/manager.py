@@ -18,6 +18,8 @@ from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
+from notd.store.schema import CollectionHourlyActivityTable
+from notd.model import CollectionActivity
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -25,7 +27,6 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
-from notd.model import CollectionStatistics
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -126,35 +127,18 @@ class NotdManager:
         )
         return tokenTransfers
 
-    async def get_collection_statistics(self, address: str) -> CollectionStatistics:
+    async def get_collection_statistics(self, address: str, startDate: datetime.datetime) -> CollectionActivity:
         itemCount = await self.retriever.get_collection_item_count(address=address)
-        holders = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
-            ]
-        )
-        toAddresses = [holder.toAddress for holder in holders]
-        fromAddresses = [holder.fromAddress for holder in holders]
-        for holderAddress in toAddresses:
-            if holderAddress in fromAddresses:
-                toAddresses.remove(holderAddress)
-
-        holderCount = len(toAddresses)
-        totalTradeVolume = sum([trade.value for trade in holders])
-        trades24h =  await self.retriever.list_token_transfers(
-            fieldFilters=[
-                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=date_util.start_of_day(dt=datetime.datetime.now()), lte=date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=datetime.datetime.now()), days=1))),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
-            ],
-            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
-        )
-        tradeVolume24Hours = sum([trade.value for trade in trades24h])
-        highestSaleLast24Hours = trades24h[0].value if len(trades24h) >0 else None
-        lowestSaleLast24Hours = trades24h[len(trades24h)-1].value if len(trades24h) >0 else None
-        return CollectionStatistics(
+        #holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
+        collectionActivity =  (await self.retriever.get_collection_statistics_24h(address=address, startDate=startDate))[0]
+        tradeVolume24Hours = collectionActivity[2]
+        highestSaleLast24Hours = collectionActivity[4]
+        lowestSaleLast24Hours = collectionActivity[5]
+        return CollectionActivity(
+            date=startDate,
             itemCount=itemCount,
-            holderCount=holderCount,
-            totalTradeVolume=totalTradeVolume,
+            holderCount=0,
+            totalTradeVolume=0,
             lowestSaleLast24Hours=lowestSaleLast24Hours,
             highestSaleLast24Hours=highestSaleLast24Hours,
             tradeVolume24Hours=tradeVolume24Hours,

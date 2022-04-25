@@ -7,6 +7,7 @@ from core.store.database import DatabaseConnection
 from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
+from core.util import date_util
 from core.store.retriever import StringFieldFilter
 from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
@@ -229,6 +230,7 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         tokenCollections = [collection_activity_from_row(row) for row in result]
         return tokenCollections
+
     async def get_collection_item_count(self, address, connection: Optional[DatabaseConnection] = None) -> int:
         query = TokenTransfersTable.select()\
             .with_only_columns([sqlalchemyfunc.count(TokenTransfersTable.c.tokenId)])\
@@ -254,3 +256,20 @@ class Retriever(CoreRetriever):
         for token in soldTokens:
             boughtTokens.remove(token)
         return list(boughtTokens)
+
+    async def get_collection_statistics_24h(self,address,startDate):
+        query = select([
+            CollectionHourlyActivityTable.c.address, 
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.transferCount), 
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.saleCount), 
+            sqlalchemyfunc.sum(CollectionHourlyActivityTable.c.totalVolume), 
+            sqlalchemyfunc.min(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.minimumValue,0)), 
+            sqlalchemyfunc.max(CollectionHourlyActivityTable.c.maximumValue), 
+            sqlalchemyfunc.avg(sqlalchemyfunc.nullif(CollectionHourlyActivityTable.c.averageValue,0)),
+            sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date)])
+        query = query.where(CollectionHourlyActivityTable.c.address == address)
+        query = query.where(CollectionHourlyActivityTable.c.date >= startDate)
+        query = query.where(CollectionHourlyActivityTable.c.date < date_util.datetime_from_datetime(dt=startDate, days=1))
+        query = query.group_by(sqlalchemyfunc.date(CollectionHourlyActivityTable.c.date),CollectionHourlyActivityTable.c.address)
+        plays = await self.database.execute(query=query, connection=None)
+        return [(play[0],play[1],play[2],play[3],play[4],play[5],play[6]) for play in plays]
