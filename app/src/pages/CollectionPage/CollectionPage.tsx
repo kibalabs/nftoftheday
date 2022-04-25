@@ -242,7 +242,11 @@ export const CollectionPage = (): React.ReactElement => {
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
                 <Text variant='header3'>Recent Sales</Text>
                 <Stack direction={Direction.Horizontal}contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                  {recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
+                  { recentSales === undefined ? (
+                    <LoadingSpinner />
+                  ) : recentSales === null ? (
+                    <Text variant='error'>Collection Sale failed to load</Text>
+                  ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
                     <TokenCard
                       key={index}
                       collectionToken={recentSale.token}
