@@ -26,7 +26,14 @@ class CollectionActivityProcessor:
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
         )
-        saleCount = transferCount = totalVolume = averageValue = minimumValue = 0
+
+        saleCount = 0
+        transferCount = 0
+        totalVolume = 0
+        averageValue = 0
+        minimumValue = 0
+        maximumValue = 0
+
         if len(tokenTransfers) > 0:
             for tokenTransfer in tokenTransfers:
                 if tokenTransfer.value != 0:
@@ -37,6 +44,4 @@ class CollectionActivityProcessor:
                 averageValue += totalVolume/transferCount
 
             maximumValue = tokenTransfers[0].value
-        else:
-            maximumValue = 0
         return RetrievedCollectionHourlyActivity(address=registryAddress, date=date.replace(minute=0, second=0, microsecond=0), transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
