@@ -130,7 +130,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
 
     @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
     async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
-        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress, startDate=date_util.datetime_from_string('2022-04-20T21:00:00.00'))
+        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress, startDate=date_util.start_of_day(date_util.datetime_from_now()))
         return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
 
     @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)

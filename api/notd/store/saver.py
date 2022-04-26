@@ -402,4 +402,3 @@ class Saver(CoreSaver):
             values[CollectionHourlyActivityTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = CollectionHourlyActivityTable.update(CollectionHourlyActivityTable.c.collectionActivityId == collectionActivityId).values(values)
         await self._execute(query=query, connection=connection)
-    

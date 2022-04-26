@@ -220,7 +220,6 @@ class NotdManager:
         await self.tokenManager.update_activity_for_all_collections_deferred()
 
     async def update_activity_for_all_collections(self) -> None:
-        #NOTE Account for deleted Transactions
         await self.tokenManager.update_activity_for_all_collections()
 
     async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:

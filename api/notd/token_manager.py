@@ -326,7 +326,7 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
-        #NOTE Account for deleted Transactions
+        #TODO (FEMI) Account for deleted Transactions
         collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
         if len(collectionActivity) > 0:
             lastDate = collectionActivity[0].date
