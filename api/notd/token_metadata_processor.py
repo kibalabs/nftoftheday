@@ -1,5 +1,6 @@
 import base64
 import json
+import random
 import urllib.parse
 from json.decoder import JSONDecodeError
 from typing import Any
@@ -221,7 +222,7 @@ class TokenMetadataProcessor():
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
-            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/' if random.randint() % 2 == 0 else 'https://ipfs.io/ipfs/')
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
