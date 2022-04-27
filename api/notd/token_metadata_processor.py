@@ -221,7 +221,7 @@ class TokenMetadataProcessor():
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
-            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://kibalabs.mypinata.cloud/ipfs/')
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
