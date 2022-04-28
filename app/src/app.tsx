@@ -39,6 +39,7 @@ const theme = buildNotdTheme();
 
 export const App = (): React.ReactElement => {
   useInitialization((): void => {
+    tracker.initialize();
     tracker.trackApplicationOpen();
   });
 
