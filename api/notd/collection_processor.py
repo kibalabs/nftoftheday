@@ -76,7 +76,7 @@ class CollectionProcessor:
         if contractMetadataUri:
             try:
                 if contractMetadataUri.startswith('ipfs://'):
-                    contractMetadataUri = contractMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+                    contractMetadataUri = contractMetadataUri.replace('ipfs://', 'https://kibalabs.mypinata.cloud/ipfs/')
                 if "{address}" in contractMetadataUri:
                     contractMetadataUri = contractMetadataUri.replace('{address}', address)
                 contractMetadataUriResponse = await self.requester.get(url=contractMetadataUri)

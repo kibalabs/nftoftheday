@@ -132,7 +132,7 @@ class TokenMetadataProcessor():
             animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
             youtubeUrl=tokenMetadataDict.get('youtube_url'),
             backgroundColor=tokenMetadataDict.get('background_color'),
-            frameImageUrl=tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url'),
+            frameImageUrl=tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage'),
             attributes=tokenMetadataDict.get('attributes', []),
         )
         return retrievedTokenMetadata
@@ -221,7 +221,7 @@ class TokenMetadataProcessor():
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
-            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+            tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://kibalabs.mypinata.cloud/ipfs/')
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):

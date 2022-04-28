@@ -37,7 +37,7 @@ isRunningDebugMode = environment == 'dev'
 if isRunningDebugMode:
     logging.init_basic_logging()
 else:
-    logging.init_logging(name=name, version=version, environment=environment, requestIdHolder=requestIdHolder)
+    logging.init_json_logging(name=name, version=version, environment=environment, requestIdHolder=requestIdHolder)
 
 databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
 database = Database(connectionString=databaseConnectionString)
@@ -88,4 +88,5 @@ async def shutdown():
     await s3manager.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
+    await awsRequester.close_connections()
     await requester.close_connections()

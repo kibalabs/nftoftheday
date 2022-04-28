@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday } from '@kibalabs/core';
 import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -14,23 +14,7 @@ import { MetricView } from '../../components/MetricView';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
-const TOKEN_DATE = new Date('2022-03-08T03:23:35');
-const COLLECTION = new Collection('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', '', '', '', '', '');
-const COLLECTIONTOKEN = new CollectionToken('0x1A257a5b37AC944DeF62b28cC5ec6c437178178c', '38123', 'Robo Ooga #38123', 'https://mekaapes.s3.amazonaws.com/images/38123.png', '', []);
-const TOKEN_TRANSFER = new TokenTransfer(86323519, '0x4de7e4cbaac06e3a4fa55b8af17bf72d23f90d9d6ccace517928bd3dbb8fbf2b', '0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0xEC1B09e43100957D7623661F43364e65175eeC08', '0', 650000000000000000000, 6500000, 98, 98889, 89889, '0x923dec2cb340dbd22a861070bb321752abec2416f24135bf473ce66fcb9479d4', TOKEN_DATE, COLLECTIONTOKEN, COLLECTION);
-const owner = '0x48e41913F2099300900cfcbB139F121429D38F5d';
 const RECENT_SALES_PAGE_SIZE = 10;
-const tokenDate = TOKEN_TRANSFER.blockDate;
-
-const getTokenDateString = (): string => {
-  if (tokenDate !== null) {
-    if (isToday(tokenDate)) {
-      return dateToString(tokenDate, 'HH:mm');
-    }
-    return dateToString(tokenDate, 'dd-MMM-yyyy');
-  }
-  return '';
-};
 
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
@@ -126,6 +110,16 @@ export const TokenPage = (): React.ReactElement => {
     setIsRefreshClicked(true);
   };
 
+  const getTokenDateString = (tokenDate: Date): string => {
+    if (tokenDate !== null) {
+      if (isToday(tokenDate)) {
+        return dateToString(tokenDate, 'HH:mm');
+      }
+      return dateToString(tokenDate, 'dd-MMM-yyyy');
+    }
+    return '';
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start}>
       {collectionToken === undefined ? (
@@ -134,71 +128,50 @@ export const TokenPage = (): React.ReactElement => {
         <Text variant='error'>Collection Token failed to load</Text>
       ) : (
         <ContainingView>
-          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} padding={PaddingSize.Wide2}>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} padding={PaddingSize.Wide2}>
             <Box height='20rem' width='20rem' shouldClipContent={true}>
               <Media source={imageUrl} alternativeText='image' fitType='contain' />
             </Box>
-            <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide}>
-                <Text variant='header1'>{collectionToken.name}</Text>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                  <Text>Owned By</Text>
-                  <Account accountId={owner} />
-                </Stack>
-                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} on ${getTokenDateString()}`}</Text>
-                <Spacing variant={PaddingSize.Wide} />
-                {collection === undefined ? (
-                  <LoadingSpinner />
-                ) : collection === null ? (
-                  <Text variant='error'>Collection failed to load</Text>
-                ) : (
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                    <Text>Part of</Text>
-                    <CollectionView
-                      collection={collection}
-                      target={`/collections/${collection.address}`}
-                    />
+            <Stack.Item growthFactor={1} shrinkFactor={1}>
+              <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
+                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} padding={PaddingSize.Wide}>
+                  <Text variant='header1'>{collectionToken.name}</Text>
+                  {tokenSales && tokenSales.length > 0 && (
+                    <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                        <Text>Owned By</Text>
+                        <Account
+                          accountId={tokenSales[0].toAddress}
+                          target={`/accounts/${tokenSales[0].toAddress}`}
+                        />
+                      </Stack>
+                      <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                    </Stack>
+                  )}
+                  <Spacing variant={PaddingSize.Wide} />
+                  {collection === undefined ? (
+                    <LoadingSpinner />
+                  ) : collection === null ? (
+                    <Text variant='error'>Collection failed to load</Text>
+                  ) : (
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                      <Text>Part of</Text>
+                      <CollectionView
+                        collection={collection}
+                        target={`/collections/${collection.address}`}
+                      />
+                    </Stack>
+                  )}
+                  <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
+                    <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                    <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
                   </Stack>
-                )}
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-                  <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                  <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
+                  {account?.address && !isRefreshClicked && (
+                    <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+                  )}
                 </Stack>
-                {account?.address && !isRefreshClicked && (
-                  <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
-                )}
-              </Stack>
-            </ResponsiveHidingView>
-            <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                <Text alignment={TextAlignment.Center} variant='header1'>{collectionToken.name}</Text>
-                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-                  <Text>Owned By</Text>
-                  <Account accountId={owner} />
-                </Stack>
-                <Text>{`Last Bought for Ξ${TOKEN_TRANSFER.value / 1000000000000000000.0} on ${getTokenDateString()}`}</Text>
-                {collection === undefined ? (
-                  <LoadingSpinner />
-                ) : collection === null ? (
-                  <Text variant='error'>Collection failed to load</Text>
-                ) : (
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                    <Text>Part of</Text>
-                    <CollectionView
-                      collection={collection}
-                      target={`/collections/${collection.address}`}
-                    />
-                  </Stack>
-                )}
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-                  <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                  <Button variant='tertiary' text={'Looksrare'} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} iconLeft={<KibaIcon iconId='ion-eye' />} />
-                </Stack>
-                {account?.address && !isRefreshClicked && (
-                  <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
-                )}
-              </Stack>
-            </ResponsiveHidingView>
+              </ResponsiveTextAlignmentView>
+            </Stack.Item>
           </Stack>
           <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true} padding={PaddingSize.Wide}>
             {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
@@ -208,7 +181,11 @@ export const TokenPage = (): React.ReactElement => {
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
             <Text variant='header3'>Sales history</Text>
             <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-              {tokenSales && tokenSales.length !== 0 ? (
+              {tokenSales === undefined ? (
+                <LoadingSpinner />
+              ) : tokenSales === null ? (
+                <Text variant='error'>Token Sale failed to load</Text>
+              ) : tokenSales && tokenSales.length !== 0 ? (
                 tokenSales.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
                   <TokenSaleRow
                     tokenTransfer={tokenTransfer}

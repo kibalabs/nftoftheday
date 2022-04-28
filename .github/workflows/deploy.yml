@@ -40,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NAME: nftoftheday-app
+      VERSION: ${{ github.sha }}
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
     steps:
       - name: executing remote ssh commands
@@ -49,27 +50,29 @@ jobs:
           username: ${{ secrets.APIBOX_USER }}
           key: ${{ secrets.APIBOX_SSH_KEY }}
           port: ${{ secrets.APIBOX_PORT }}
-          envs: DOCKER_IMAGE,NAME
+          envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
             url="nft.tokenhunt.io"
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
-                --name ${NAME} \
-                --detach \
-                --publish-all \
-                --restart unless-stopped \
-                --env NAME=${NAME} \
-                --env VIRTUAL_HOST=${url} \
-                --env LETSENCRYPT_HOST=${url} \
-                --env-file ~/.${NAME}.vars \
-                ${DOCKER_IMAGE}
+              --name ${NAME} \
+              --detach \
+              --publish-all \
+              --restart on-failure \
+              --env NAME=${NAME} \
+              --env VERSION=${VERSION} \
+              --env VIRTUAL_HOST=${url} \
+              --env LETSENCRYPT_HOST=${url} \
+              --env-file ~/.${NAME}.vars \
+              ${DOCKER_IMAGE}
   run-api:
     needs: deploy-api
     runs-on: ubuntu-latest
     env:
       NAME: nftoftheday-api
+      VERSION: ${{ github.sha }}
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
     steps:
       - name: executing remote ssh commands
@@ -79,27 +82,29 @@ jobs:
           username: ${{ secrets.APIBOX_USER }}
           key: ${{ secrets.APIBOX_SSH_KEY }}
           port: ${{ secrets.APIBOX_PORT }}
-          envs: DOCKER_IMAGE,NAME
+          envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
             url="notd-api.kibalabs.com"
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
-                --name ${NAME} \
-                --detach \
-                --publish-all \
-                --restart unless-stopped \
-                --env NAME=${NAME} \
-                --env VIRTUAL_HOST=${url} \
-                --env LETSENCRYPT_HOST=${url} \
-                --env-file ~/.${NAME}.vars \
-                ${DOCKER_IMAGE} './start-api.sh'
+              --name ${NAME} \
+              --detach \
+              --publish-all \
+              --restart on-failure \
+              --env NAME=${NAME} \
+              --env VERSION=${VERSION} \
+              --env VIRTUAL_HOST=${url} \
+              --env LETSENCRYPT_HOST=${url} \
+              --env-file ~/.${NAME}.vars \
+              ${DOCKER_IMAGE} './start-api.sh'
   run-worker:
     needs: deploy-api
     runs-on: ubuntu-latest
     env:
       NAME: nftoftheday-worker
+      VERSION: ${{ github.sha }}
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
     steps:
       - name: executing remote ssh commands
@@ -109,17 +114,44 @@ jobs:
           username: ${{ secrets.WORKERBOX_USER }}
           key: ${{ secrets.WORKERBOX_SSH_KEY }}
           port: ${{ secrets.WORKERBOX_PORT }}
-          envs: DOCKER_IMAGE,NAME
+          envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
-                --name ${NAME} \
-                --detach \
-                --restart unless-stopped \
-                --memory=768m \
-                --cpus=$(echo "scale=2 ; $(grep -c ^processor /proc/cpuinfo) / 1.5" | bc) \
-                --env NAME=${NAME} \
-                --env-file ~/.${NAME}.vars \
-                ${DOCKER_IMAGE} './start-worker.sh'
+              --name ${NAME} \
+              --detach \
+              --restart on-failure \
+              --env NAME=${NAME} \
+              --env VERSION=${VERSION} \
+              --env-file ~/.${NAME}.vars \
+              ${DOCKER_IMAGE} './start-worker.sh'
+  run-worker-2:
+    needs: deploy-api
+    runs-on: ubuntu-latest
+    env:
+      NAME: nftoftheday-worker
+      VERSION: ${{ github.sha }}
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
+    steps:
+      - name: executing remote ssh commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.APIBOX_URL }}
+          username: ${{ secrets.APIBOX_USER }}
+          key: ${{ secrets.APIBOX_SSH_KEY }}
+          port: ${{ secrets.APIBOX_PORT }}
+          envs: DOCKER_IMAGE,NAME,VERSION
+          script_stop: true
+          script: |
+            docker pull ${DOCKER_IMAGE}
+            docker stop ${NAME} && docker rm ${NAME} || true
+            docker run \
+              --name ${NAME} \
+              --detach \
+              --restart on-failure \
+              --env NAME=${NAME} \
+              --env VERSION=${VERSION} \
+              --env-file ~/.${NAME}.vars \
+              ${DOCKER_IMAGE} './start-worker.sh'
