@@ -79,6 +79,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
+    #NOTE CHANGE RESPONSE TO MATCH FUNCTION
     @router.post('/collections/update-activity-deferred', response_model=UpdateCollectionActivityResponse)
     async def update_activity_for_all_collections_deferred():
         await notdManager.update_activity_for_all_collections_deferred()
@@ -128,11 +129,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
         return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
-    @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
-    async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
-        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress, startDate=date_util.start_of_day(date_util.datetime_from_now()))
-        return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
-
     @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)
     async def list_account_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
         limit = limit if limit is not None else 100
@@ -145,10 +141,15 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
 
+    @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
+    async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
+        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
+        return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
+
     @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionActivityResponse)
     async def get_collection_daily_activities(registryAddress: str):
         collectionActivities = await notdManager.get_collection_daily_activities(registryAddress=registryAddress)
-        return GetCollectionActivityResponse(collectionActivity= await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities))
+        return GetCollectionActivityResponse(collectionActivity=(await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

@@ -17,31 +17,28 @@ class CollectionActivityProcessor:
     def __init__(self,retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def calculate_collection_hourly_activity(self, registryAddress: str, date: datetime.datetime) -> RetrievedCollectionHourlyActivity:
+    async def calculate_collection_hourly_activity(self, address: str, startDate: datetime.datetime) -> RetrievedCollectionHourlyActivity:
+        #TODO normalize address and startDate
         tokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
-                StringFieldFilter(TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                DateFieldFilter(BlocksTable.c.blockDate.key, gte=date_util.datetime_from_datetime(dt=date, hours=-1)),
-                DateFieldFilter(BlocksTable.c.blockDate.key, lt=date),
+                StringFieldFilter(TokenTransfersTable.c.registryAddress.key, eq=address),
+                DateFieldFilter(BlocksTable.c.blockDate.key, gte=startDate),
+                DateFieldFilter(BlocksTable.c.blockDate.key, lt=date_util.datetime_from_datetime(dt=startDate, hours=1)),
             ],
-            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
         )
-
+        #TODO INVESTIGATE VOLUME AND VALUE
         saleCount = 0
         transferCount = 0
         totalVolume = 0
         averageValue = 0
         minimumValue = 0
         maximumValue = 0
-
-        if len(tokenTransfers) > 0:
-            for tokenTransfer in tokenTransfers:
-                if tokenTransfer.value != 0:
-                    minimumValue = min(float('inf'),tokenTransfer.value)
-                    saleCount += 1
-                transferCount += tokenTransfer.amount
+        for tokenTransfer in tokenTransfers:
+            if tokenTransfer.value > 0:
+                saleCount += tokenTransfer.amount
                 totalVolume += tokenTransfer.value
-                averageValue += totalVolume/transferCount
-
-            maximumValue = tokenTransfers[0].value
-        return RetrievedCollectionHourlyActivity(address=registryAddress, date=date.replace(minute=0, second=0, microsecond=0), transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
+                minimumValue = min(minimumValue, tokenTransfer.value) if minimumValue > 0 else tokenTransfer.value
+                maximumValue = max(maximumValue, tokenTransfer.value)
+            transferCount += tokenTransfer.amount
+        averageValue = totalVolume / saleCount
+        return RetrievedCollectionHourlyActivity(address=address, date=startDate, transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)

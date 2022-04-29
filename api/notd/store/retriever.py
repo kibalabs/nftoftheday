@@ -232,7 +232,8 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         tokenCollections = [collection_activity_from_row(row) for row in result]
         return tokenCollections
-
+    
+    #TODO CLEAN RETRIEVER
     async def get_collection_item_count(self, address, connection: Optional[DatabaseConnection] = None) -> int:
         query = TokenTransfersTable.select()\
             .with_only_columns([sqlalchemyfunc.count(TokenTransfersTable.c.tokenId)])\
@@ -259,6 +260,8 @@ class Retriever(CoreRetriever):
             boughtTokens.remove(token)
         return list(boughtTokens)
 
+    #REMOVE
+    #clean
     async def get_collection_activity(self, address: str, startDate: Optional[datetime.date], period: int, connection: Optional[DatabaseConnection] = None) -> List[CollectionActivity]:
         endDate = date_util.start_of_day(dt=datetime.datetime.now()) if startDate is None else startDate
         startDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=endDate, days=-period))

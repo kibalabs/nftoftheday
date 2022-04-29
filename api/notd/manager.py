@@ -56,28 +56,36 @@ class NotdManager:
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
-        self.sponsoredTokens = [BaseSponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
+        self.sponsoredTokens = [BaseSponsoredToken.from_dict(
+            sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
 
     async def get_sponsored_token(self) -> SponsoredToken:
         baseSponsoredToken = self.sponsoredTokens[0]
         currentDate = date_util.datetime_from_now()
-        allPastTokens = [sponsoredToken for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
+        allPastTokens = [
+            sponsoredToken for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
         if allPastTokens:
-            baseSponsoredToken = max(allPastTokens, key=lambda sponsoredToken: sponsoredToken.date)
+            baseSponsoredToken = max(
+                allPastTokens, key=lambda sponsoredToken: sponsoredToken.date)
         latestTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=baseSponsoredToken.token.registryAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=baseSponsoredToken.token.tokenId),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key,
+                                  eq=baseSponsoredToken.token.registryAddress),
+                StringFieldFilter(
+                    fieldName=TokenTransfersTable.c.tokenId.key, eq=baseSponsoredToken.token.tokenId),
             ],
-            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key,
+                          direction=Direction.DESCENDING)],
             limit=1
         )
         return SponsoredToken(date=baseSponsoredToken.date, token=baseSponsoredToken.token, latestTransfer=latestTransfers[0] if len(latestTransfers) > 0 else None)
 
     async def retrieve_highest_priced_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
-            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+            fieldFilters=[DateFieldFilter(
+                fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key,
+                          direction=Direction.DESCENDING)],
             limit=1
         )
         return highestPricedTokenTransfers[0]
@@ -85,20 +93,23 @@ class NotdManager:
     async def retrieve_random_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         # NOTE(krishan711): this is no longer actually random, it's just the latest (random is too slow)
         randomTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
-            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            fieldFilters=[DateFieldFilter(
+                fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key,
+                          direction=Direction.DESCENDING)],
             offset=random.randint(1000, 10000),
             limit=1,
         )
         return randomTokenTransfers[0]
 
-    async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
+    async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
         return await self.retriever.get_transaction_count(startDate=startDate, endDate=endDate)
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
         query = (
-            sqlalchemy.select([TokenTransfersTable, BlocksTable]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            sqlalchemy.select([TokenTransfersTable, BlocksTable]).join(
+                BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
             .where(TokenTransfersTable.c.registryAddress == mostTradedToken.registryAddress)
@@ -118,24 +129,31 @@ class NotdManager:
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
+                StringFieldFilter(
+                    fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                IntegerFieldFilter(
+                    fieldName=TokenTransfersTable.c.value.key, gt=0),
             ],
-            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key,
+                          direction=Direction.DESCENDING)],
             limit=limit,
             offset=offset,
         )
         return tokenTransfers
 
-    async def get_collection_statistics(self, address: str, startDate: datetime.datetime) -> CollectionStatistics:
+    # TODO remove startDate
+    # TODO Normalize address
+    async def get_collection_statistics(self, address: str) -> CollectionStatistics:
         itemCount = await self.retriever.get_collection_item_count(address=address)
         holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
         totalTradedVolume = 0
-        collectionActivity =  (await self.retriever.get_collection_activity(address=address, startDate=startDate, period=1))[0]
+        startDate = 0
+        collectionActivity = (await self.retriever.get_collection_activity(address=address, startDate=startDate, period=1))[0]
         return CollectionStatistics(
-            date=startDate,
             itemCount=itemCount,
             holderCount=holderCount,
+            saleCount=0,
+            transferCount=0,
             totalTradeVolume=totalTradedVolume,
             lowestSaleLast24Hours=collectionActivity.minimumValue,
             highestSaleLast24Hours=collectionActivity.maximumValue,
@@ -150,11 +168,15 @@ class NotdManager:
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
-                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
+                StringFieldFilter(
+                    fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(
+                    fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+                IntegerFieldFilter(
+                    fieldName=TokenTransfersTable.c.value.key, gt=0),
             ],
-            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key,
+                          direction=Direction.DESCENDING)],
             limit=limit,
             offset=offset,
         )
@@ -163,22 +185,30 @@ class NotdManager:
     async def list_account_tokens(self, accountAddress: str, limit: int, offset: int) -> List[Token]:
         tokenSingleOwnerships = await self.retriever.list_token_ownerships(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
+                StringFieldFilter(
+                    fieldName=TokenOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
             ],
-            orders=[Order(fieldName=TokenOwnershipsTable.c.transferDate.key, direction=Direction.DESCENDING)],
+            orders=[Order(fieldName=TokenOwnershipsTable.c.transferDate.key,
+                          direction=Direction.DESCENDING)],
             limit=limit+offset,
         )
         tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
-                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, ne=0),
+                StringFieldFilter(
+                    fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
+                StringFieldFilter(
+                    fieldName=TokenMultiOwnershipsTable.c.quantity.key, ne=0),
             ],
-            orders=[Order(fieldName=TokenMultiOwnershipsTable.c.latestTransferDate.key, direction=Direction.DESCENDING)],
+            orders=[Order(fieldName=TokenMultiOwnershipsTable.c.latestTransferDate.key,
+                          direction=Direction.DESCENDING)],
             limit=limit+offset,
         )
-        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId, ownership.transferDate) for ownership in tokenSingleOwnerships]
-        tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
-        sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
+        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId,
+                                 ownership.transferDate) for ownership in tokenSingleOwnerships]
+        tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId,
+                                  ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
+        sortedTokenOwnershipTuples = sorted(
+            tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
     async def subscribe_email(self, email: str) -> None:
@@ -247,7 +277,8 @@ class NotdManager:
         latestBlocks = await self.retriever.list_blocks(orders=[Order(fieldName=BlocksTable.c.blockNumber.key, direction=Direction.DESCENDING)], limit=1)
         latestProcessedBlockNumber = latestBlocks[0].blockNumber
         latestBlockNumber = await self.blockProcessor.get_latest_block_number()
-        logging.info(f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
+        logging.info(
+            f'Scheduling messages for processing blocks from {latestProcessedBlockNumber} to {latestBlockNumber}')
         await self.process_blocks_deferred(blockNumbers=list(reversed(range(latestProcessedBlockNumber, latestBlockNumber + 1))))
 
     async def reprocess_old_blocks_deferred(self) -> None:
@@ -261,11 +292,13 @@ class NotdManager:
         )
         result = await self.retriever.database.execute(query=blocksToReprocessQuery)
         blockNumbers = [blockNumber for (blockNumber, ) in result]
-        logging.info(f'Scheduling messages for reprocessing {len(blockNumbers)} blocks')
+        logging.info(
+            f'Scheduling messages for reprocessing {len(blockNumbers)} blocks')
         await self.process_blocks_deferred(blockNumbers=blockNumbers, shouldSkipProcessingTokens=True)
 
     async def process_blocks_deferred(self, blockNumbers: Sequence[int], shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
-        messages = [ProcessBlockMessageContent(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens).to_message() for blockNumber in blockNumbers]
+        messages = [ProcessBlockMessageContent(
+            blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens).to_message() for blockNumber in blockNumbers]
         await self.workQueue.send_messages(messages=messages, delaySeconds=delaySeconds)
 
     async def process_block_deferred(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
@@ -273,11 +306,15 @@ class NotdManager:
 
     async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None) -> None:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
-        logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
+        logging.info(
+            f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
-        logging.info(f'Found {len(collectionTokenIds)} changed tokens in block #{blockNumber}')
-        collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
-        logging.info(f'Found {len(collectionAddresses)} changed collections in block #{blockNumber}')
+        logging.info(
+            f'Found {len(collectionTokenIds)} changed tokens in block #{blockNumber}')
+        collectionAddresses = list(
+            set(registryAddress for registryAddress, _ in collectionTokenIds))
+        logging.info(
+            f'Found {len(collectionAddresses)} changed collections in block #{blockNumber}')
         await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
             await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
@@ -301,26 +338,33 @@ class NotdManager:
             existingTokenTransfers = await self.retriever.list_token_transfers(
                 connection=connection,
                 fieldFilters=[
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber),
+                    StringFieldFilter(
+                        fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber),
                 ], shouldIgnoreRegistryBlacklist=True
             )
-            existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
+            existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(
+                tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())
-            retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in processedBlock.retrievedTokenTransfers}
+            retrievedTupleTransferMaps = {self._uniqueness_tuple_from_token_transfer(
+                tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in processedBlock.retrievedTokenTransfers}
             retrievedTuples = set(retrievedTupleTransferMaps.keys())
             tokenTransferIdsToDelete = []
             for existingTuple, existingTokenTransfer in existingTuplesTransferMap.items():
                 if existingTuple in retrievedTuples:
                     continue
-                tokenTransferIdsToDelete.append(existingTokenTransfer.tokenTransferId)
-                changedTokens.add((existingTokenTransfer.registryAddress, existingTokenTransfer.tokenId))
+                tokenTransferIdsToDelete.append(
+                    existingTokenTransfer.tokenTransferId)
+                changedTokens.add(
+                    (existingTokenTransfer.registryAddress, existingTokenTransfer.tokenId))
             await self.saver.delete_token_transfers(connection=connection, tokenTransferIds=tokenTransferIdsToDelete)
             retrievedTokenTransfersToSave = []
             for retrievedTuple, retrievedTokenTransfer in retrievedTupleTransferMaps.items():
                 if retrievedTuple in existingTuples:
                     continue
                 retrievedTokenTransfersToSave.append(retrievedTokenTransfer)
-                changedTokens.add((retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId))
+                changedTokens.add(
+                    (retrievedTokenTransfer.registryAddress, retrievedTokenTransfer.tokenId))
             await self.saver.create_token_transfers(connection=connection, retrievedTokenTransfers=retrievedTokenTransfersToSave)
-            logging.info(f'Saving transfers for block {processedBlock.blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
+            logging.info(
+                f'Saving transfers for block {processedBlock.blockNumber}: saved {len(retrievedTokenTransfersToSave)}, deleted {len(tokenTransferIdsToDelete)}, kept {len(existingTokenTransfers) - len(tokenTransferIdsToDelete)}')
         return list(changedTokens)
