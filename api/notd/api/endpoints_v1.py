@@ -1,5 +1,3 @@
-
-
 import datetime
 from typing import List
 from typing import Optional
@@ -133,6 +131,7 @@ class RefreshAccountTokenOwnershipsRequest(BaseModel):
 
 class RefreshAccountTokenOwnershipsResponse(BaseModel):
     pass
+
 class GetCollectionActivityRequest(BaseModel):
     pass
 

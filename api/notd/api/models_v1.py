@@ -71,6 +71,7 @@ class ApiCollectionStatistics(BaseModel):
     highestSaleLast24Hours: Optional[int]
     tradeVolume24Hours: Optional[int]
 
+
 class ApiCollectionActivity(BaseModel):
     date: datetime.date
     totalVolume: int

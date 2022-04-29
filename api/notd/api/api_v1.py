@@ -145,9 +145,9 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
 
-    @router.get('/collections/{registryAddress}/activity', response_model=GetCollectionActivityResponse)
-    async def get_collection_activity(registryAddress: str):
-        collectionActivities = await notdManager.get_collection_activity(registryAddress=registryAddress)
+    @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionActivityResponse)
+    async def get_collection_daily_activities(registryAddress: str):
+        collectionActivities = await notdManager.get_collection_daily_activities(registryAddress=registryAddress)
         return GetCollectionActivityResponse(collectionActivity= await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities))
 
     @router.post('/subscribe')
