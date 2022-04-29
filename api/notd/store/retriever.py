@@ -283,6 +283,5 @@ class Retriever(CoreRetriever):
             if  day.date() in collectionGraph.keys():
                 continue
             collectionGraph[day.date()]=(0,0,0,0,0,0)
-        print(collectionGraph)
         collectionGraph= [CollectionActivity(date=date, transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue) for date, (transferCount, saleCount, totalVolume, minimumValue, maximumValue, averageValue) in collectionGraph.items()]
         return collectionGraph

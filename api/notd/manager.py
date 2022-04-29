@@ -142,7 +142,7 @@ class NotdManager:
             tradeVolume24Hours=collectionActivity.totalVolume,
         )
 
-    async def get_collection_activity(self, registryAddress: str) -> List[CollectionActivity]:
+    async def get_collection_daily_activities(self, registryAddress: str) -> List[CollectionActivity]:
         collectionActivity = await self.retriever.get_collection_activity(address=registryAddress, startDate=None, period=90)
         return collectionActivity
 
