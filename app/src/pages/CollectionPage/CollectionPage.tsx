@@ -38,7 +38,7 @@ export const CollectionPage = (): React.ReactElement => {
 
   const updateCollection = React.useCallback(async (): Promise<void> => {
     setCollection(undefined);
-    notdClient.retrieveCollection(address).then((retrievedCollection: Collection): void => {
+    notdClient.getCollection(address).then((retrievedCollection: Collection): void => {
       setCollection(retrievedCollection);
     }).catch((error: unknown): void => {
       console.error(error);
@@ -99,7 +99,7 @@ export const CollectionPage = (): React.ReactElement => {
     await onLinkAccountsClicked();
   };
 
-  const collectionUpdate = (): void => {
+  const refreshMetadata = (): void => {
     if (!account) {
       return;
     }
@@ -111,7 +111,7 @@ export const CollectionPage = (): React.ReactElement => {
   };
 
   const onRefreshMetadataClicked = (): void => {
-    collectionUpdate();
+    refreshMetadata();
     setIsRefreshClicked(true);
   };
 
@@ -228,9 +228,9 @@ export const CollectionPage = (): React.ReactElement => {
                         // subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
                         target={`/collections/${holding.registryAddress}/tokens/${holding.tokenId}`}
                       />
-                    ))
-                      : <Text>No Holdings</Text>
-                    }
+                    )) : (
+                      <Text>No Holdings</Text>
+                    )}
                   </Stack>
                 </Stack>
               ) : (
@@ -253,9 +253,9 @@ export const CollectionPage = (): React.ReactElement => {
                       subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for Ξ${recentSale.value / 1000000000000000000.0}`}
                       target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
                     />
-                  ))
-                    : <Text>No recent sales</Text>
-                  }
+                  )) : (
+                    <Text>No recent sales</Text>
+                  )}
                 </Stack>
               </Stack>
             </Stack>
