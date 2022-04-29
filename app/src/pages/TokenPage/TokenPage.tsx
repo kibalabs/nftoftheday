@@ -44,7 +44,7 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
     setCollectionToken(undefined);
-    notdClient.retrieveCollectionToken(registryAddress, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
+    notdClient.getCollectionToken(registryAddress, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
       setCollectionToken(retrievedCollectionToken);
     }).catch((error: unknown): void => {
       console.error(error);
@@ -57,7 +57,7 @@ export const TokenPage = (): React.ReactElement => {
   }, [updateCollectionToken]);
   const updateCollection = React.useCallback(async (): Promise<void> => {
     setCollection(undefined);
-    notdClient.retrieveCollection(registryAddress).then((retrievedCollection: Collection): void => {
+    notdClient.getCollection(registryAddress).then((retrievedCollection: Collection): void => {
       setCollection(retrievedCollection);
     }).catch((error: unknown): void => {
       console.error(error);

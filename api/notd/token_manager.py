@@ -12,6 +12,7 @@ from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
+from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
 
@@ -55,9 +56,11 @@ class TokenManager:
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
+        address = chain_util.normalize_address(value=address)
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
 
     async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = 0) -> Collection:
+        address = chain_util.normalize_address(value=address)
         try:
             collection = await self.retriever.get_collection_by_address(address=address)
         except NotFoundException:
@@ -69,9 +72,11 @@ class TokenManager:
         return collection
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         return await self._get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId, shouldProcessIfNotFound=True)
 
     async def _get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = 0) -> TokenMetadata:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         try:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         except NotFoundException:
@@ -99,6 +104,7 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         if not shouldForce:
             recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
                 fieldFilters=[
@@ -113,6 +119,7 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         if not shouldForce:
             recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
                 fieldFilters=[
@@ -160,6 +167,7 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
+        address = chain_util.normalize_address(value=address)
         if not shouldForce:
             recentlyUpdatedCollections = await self.retriever.list_collections(
                 fieldFilters=[
@@ -173,6 +181,7 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
+        address = chain_util.normalize_address(value=address)
         if not shouldForce:
             recentlyUpdatedCollections = await self.retriever.list_collections(
                 fieldFilters=[
@@ -199,6 +208,7 @@ class TokenManager:
                 await self.saver.create_collection(connection=connection, address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
+        address = chain_util.normalize_address(value=address)
         tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
             StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
         ])
@@ -207,6 +217,7 @@ class TokenManager:
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
+        address = chain_util.normalize_address(value=address)
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 
     async def update_token_ownerships_deferred(self, collectionTokenIds: List[Tuple[str, str]]) -> None:
@@ -217,9 +228,11 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str):
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         collection = await self.get_collection_by_address(address=registryAddress)
         if collection.doesSupportErc721:
             await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
@@ -227,6 +240,7 @@ class TokenManager:
             await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
     async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         async with self.saver.create_transaction() as connection:
             try:
                 tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
@@ -247,6 +261,7 @@ class TokenManager:
         return (retrievedTokenMultiOwnership.registryAddress, retrievedTokenMultiOwnership.tokenId, retrievedTokenMultiOwnership.ownerAddress, retrievedTokenMultiOwnership.quantity, retrievedTokenMultiOwnership.averageTransferValue, retrievedTokenMultiOwnership.latestTransferDate, retrievedTokenMultiOwnership.latestTransferTransactionHash)
 
     async def _update_token_multi_ownership(self, registryAddress: str, tokenId: str) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         latestTransfers = await self.retriever.list_token_transfers(fieldFilters=[
             StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
             StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
@@ -291,6 +306,7 @@ class TokenManager:
                 await self.saver.update_token_multi_ownership(connection=connection, tokenMultiOwnershipId=firstOwnership.tokenMultiOwnershipId, ownerAddress=firstOwnership.ownerAddress)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
+        address = chain_util.normalize_address(value=address)
         collection = await self.get_collection_by_address(address=address)
         tokens = []
         if collection.doesSupportErc721:

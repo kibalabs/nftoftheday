@@ -17,6 +17,7 @@ from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
+from core.util import chain_util
 from core.util import date_util
 
 from notd.block_processor import BlockProcessor
@@ -113,6 +114,7 @@ class NotdManager:
         )
 
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
@@ -126,6 +128,7 @@ class NotdManager:
         return tokenTransfers
 
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
