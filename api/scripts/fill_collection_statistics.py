@@ -52,6 +52,8 @@ async def refill_collection_statistics(startDate: datetime.date, endDate: dateti
         )
         pairs = list(set([(tokenTransfer.registryAddress, date_util.datetime_from_datetime(
             date_hour_from_datetime(tokenTransfer.blockDate), hours=1)) for tokenTransfer in tokenTransfers]))
+        # DO this in Parallel for groups of 20
+        await tokenManger.update_activity_for_collection()
         async with saver.create_transaction() as connection:
             for pair in pairs:
                 collectionActivity = await collectionStatisticsProcessor.calculate_collection_hourly_activity(registryAddress=pair[0], date=pair[1])
