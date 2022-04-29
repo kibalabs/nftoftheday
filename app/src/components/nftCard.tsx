@@ -22,12 +22,12 @@ export interface NftCardProps {
 export const NftCard = (props: NftCardProps): React.ReactElement => {
   let imageUrl = props.token.imageUrl ?? props.collection.imageUrl ?? 'assets/icon.png';
   if (imageUrl.startsWith('ipfs://')) {
-    imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+    imageUrl = imageUrl.replace('ipfs://', 'https://kibalabs.mypinata.cloud/ipfs/');
   }
 
   let collectionImageUrl = props.collection.imageUrl;
   if (collectionImageUrl && collectionImageUrl.startsWith('ipfs://')) {
-    collectionImageUrl = collectionImageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+    collectionImageUrl = collectionImageUrl.replace('ipfs://', 'https://kibalabs.mypinata.cloud/ipfs/');
   }
   const extraLabelVariantsString = props.extraLabelVariants ? `-${props.extraLabelVariants.join('-')}` : '';
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';

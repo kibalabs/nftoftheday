@@ -32,7 +32,7 @@ export const TokenPage = (): React.ReactElement => {
 
   let imageUrl = collectionToken?.imageUrl || defaultImage;
   if (imageUrl?.startsWith('ipfs://')) {
-    imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+    imageUrl = imageUrl.replace('ipfs://', 'https://kibalabs.mypinata.cloud/ipfs/');
   }
 
   useInitialization((): void => {
