@@ -149,7 +149,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionActivityResponse)
     async def get_collection_daily_activities(registryAddress: str):
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
-        return GetCollectionActivityResponse(collectionActivity=(await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities)))
+        return GetCollectionActivityResponse(collectionActivities=(await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

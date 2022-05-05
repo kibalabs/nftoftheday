@@ -337,13 +337,11 @@ class TokenManager:
         newTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=lastestProcessedDate)],
         )
-        #TODO remove all refrences to future time
         registryDatePairs = {(tokenTransfer.registryAddress, date_util.date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
-        #TODO normalize address  and date
         address = chain_util.normalize_address(address)
         startDate = date_util.date_hour_from_datetime(startDate)
         await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message())
@@ -363,4 +361,3 @@ class TokenManager:
                 await self.saver.update_collection_hourly_activity(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
             else:
                 await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
-        await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=True)

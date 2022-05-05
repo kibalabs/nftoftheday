@@ -232,4 +232,3 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         tokenCollections = [collection_activity_from_row(row) for row in result]
         return tokenCollections
-    

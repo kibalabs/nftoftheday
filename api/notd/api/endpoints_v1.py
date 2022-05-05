@@ -136,4 +136,4 @@ class GetCollectionActivityRequest(BaseModel):
     pass
 
 class GetCollectionActivityResponse(BaseModel):
-    collectionActivity: List[ApiCollectionActivity]
+    collectionActivities: List[ApiCollectionActivity]
