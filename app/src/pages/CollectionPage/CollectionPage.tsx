@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { useInitialization, useIntegerUrlQueryState, useNavigator, useRouteParams } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
@@ -156,7 +156,7 @@ export const CollectionPage = (): React.ReactElement => {
           </Box>
           <ContainingView>
             <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} paddingBottom={PaddingSize.Wide2} paddingTop={PaddingSize.Default}>
-              <Text variant='header1'>{collection.name}</Text>
+              <Text variant='header1' alignment={TextAlignment.Center}>{collection.name}</Text>
               <Spacing variant={PaddingSize.Wide} />
               <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
                 {collection.discordUrl && (
