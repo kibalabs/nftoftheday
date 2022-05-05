@@ -17,7 +17,6 @@ from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
-from notd.store.schema import CollectionHourlyActivityTable
 from core.util import chain_util
 from core.util import date_util
 
@@ -38,6 +37,7 @@ from notd.model import TradedToken
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -194,7 +194,7 @@ class NotdManager:
             DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate),
             DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, lt=endDate),
         ])
-        delta = datetime.timedelta(days=1)        
+        delta = datetime.timedelta(days=1)
         collectionActivitiesPerDay = []
         currentDate = startDate
         while date_util.start_of_day(currentDate) <= date_util.start_of_day(endDate):
@@ -214,7 +214,7 @@ class NotdManager:
             collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalVolume=totalVolume,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
             currentDate += delta
         return collectionActivitiesPerDay
-            
+
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(

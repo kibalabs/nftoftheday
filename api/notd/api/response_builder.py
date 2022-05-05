@@ -4,7 +4,6 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
-from notd.model import CollectionStatistics
 
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -15,6 +14,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
+from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata

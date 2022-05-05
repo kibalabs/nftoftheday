@@ -1,5 +1,4 @@
 import datetime
-from typing import List
 from typing import Optional
 from typing import Sequence
 
@@ -9,7 +8,6 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from core.store.retriever import StringFieldFilter
-from core.util import date_util
 from sqlalchemy import func as sqlalchemyfunc
 from sqlalchemy import select
 from sqlalchemy.sql import Select
