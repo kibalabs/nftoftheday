@@ -25,7 +25,7 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
-from notd.api.endpoints_v1 import UpdateCollectionActivityResponse
+from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateCollectionRequest
 from notd.api.endpoints_v1 import UpdateCollectionResponse
 from notd.api.endpoints_v1 import UpdateCollectionTokenRequest
@@ -79,11 +79,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
-    #NOTE CHANGE RESPONSE TO MATCH FUNCTION
-    @router.post('/collections/update-activity-deferred', response_model=UpdateCollectionActivityResponse)
+    #NOTE(FEMI-OGUNKOlA): CHANGE RESPONSE TO MATCH FUNCTION
+    @router.post('/collections/update-activity-deferred', response_model=UpdateActivityForAllCollectionsDeferredResponse)
     async def update_activity_for_all_collections_deferred():
         await notdManager.update_activity_for_all_collections_deferred()
-        return UpdateCollectionActivityResponse()
+        return UpdateActivityForAllCollectionsDeferredResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
     async def get_collection_by_address(registryAddress: str):

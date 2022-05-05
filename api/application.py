@@ -56,7 +56,7 @@ collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClie
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
 collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
 revueApiKey = os.environ['REVUE_API_KEY']
-tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor,collectionActivityProcessor=collectionActivityProcessor)
+tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 

@@ -54,10 +54,10 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
-class UpdateCollectionActivityRequest(BaseModel):
+class UpdateActivityForAllCollectionsDeferredResponse(BaseModel):
     pass
 
-class UpdateCollectionActivityResponse(BaseModel):
+class UpdateActivityForAllCollectionsDeferredResponse(BaseModel):
     pass
 
 class SubscribeRequest(BaseModel):
@@ -101,9 +101,6 @@ class GetCollectionStatisticsRequest(BaseModel):
 
 class GetCollectionStatisticsResponse(BaseModel):
     collectionStatistics: ApiCollectionStatistics
-
-class RetrieveCollectionRequest(BaseModel):
-    address: str
 
 class GetCollectionTokenResponse(BaseModel):
     token: ApiCollectionToken

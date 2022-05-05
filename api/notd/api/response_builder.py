@@ -119,8 +119,7 @@ class ResponseBuilder:
             tradeVolume24Hours=collectionStatistics.tradeVolume24Hours,
         )
 
-
-    async def retrieve_most_traded_token_transfer(self, tradedToken: TradedToken) -> ApiTradedToken:
+    async def traded_token_from_model(self, tradedToken: TradedToken) -> ApiTradedToken:
         return ApiTradedToken(
             token=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.latestTransfer.registryAddress, tokenId=tradedToken.latestTransfer.tokenId),
             collection=await self.collection_from_address(address=tradedToken.latestTransfer.registryAddress),
