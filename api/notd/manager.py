@@ -17,7 +17,8 @@ from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
-from core.util import date_util
+from core.util import date_util, chain_util
+from notd.store.schema import CollectionHourlyActivityTable
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -144,26 +145,74 @@ class NotdManager:
     # TODO remove startDate
     # TODO Normalize address
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
-        itemCount = await self.retriever.get_collection_item_count(address=address)
-        holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
-        totalTradedVolume = 0
+        address = chain_util.normalize_address(address)
         startDate = 0
-        collectionActivity = (await self.retriever.get_collection_activity(address=address, startDate=startDate, period=1))[0]
+        endDate = 0
+        numberOfTokensInACollection = len(await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
+        holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
+        listOfAllCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)])
+        totalTradedVolume = sum([collectionActivity.totalVolume for collectionActivity in listOfAllCollectionActivity])
+        listOfDailyCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[
+                StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
+                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date, gte=startDate),
+                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date, lt=endDate),
+            ]
+        )
+        saleCount = 0
+        transferCount = 0
+        tradeVolume24Hours = 0
+        lowestSaleLast24Hours = 0
+        highestSaleLast24Hours = 0
+        for collectionActivity in listOfDailyCollectionActivity:
+            if collectionActivity.saleCount > 0:
+                saleCount += collectionActivity.saleCount
+                tradeVolume24Hours += collectionActivity.value
+                lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
+                highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
+            transferCount += collectionActivity.transferCount
+
         return CollectionStatistics(
-            itemCount=itemCount,
+            itemCount=numberOfTokensInACollection,
             holderCount=holderCount,
-            saleCount=0,
-            transferCount=0,
+            saleCount=saleCount,
+            transferCount=transferCount,
             totalTradeVolume=totalTradedVolume,
-            lowestSaleLast24Hours=collectionActivity.minimumValue,
-            highestSaleLast24Hours=collectionActivity.maximumValue,
-            tradeVolume24Hours=collectionActivity.totalVolume,
+            lowestSaleLast24Hours=lowestSaleLast24Hours,
+            highestSaleLast24Hours=highestSaleLast24Hours,
+            tradeVolume24Hours=tradeVolume24Hours,
         )
 
-    async def get_collection_daily_activities(self, registryAddress: str) -> List[CollectionActivity]:
-        collectionActivity = await self.retriever.get_collection_activity(address=registryAddress, startDate=None, period=90)
-        return collectionActivity
-
+    async def get_collection_daily_activities(self, address: str) -> List[CollectionActivity]:
+        address = chain_util.normalize_address(address)
+        endDate = date_util.datetime_from_string('2022-04-22T21:00:00.00')
+        startDate = date_util.datetime_from_datetime(dt=endDate, days=-89)
+        collectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
+            StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
+            DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate),
+            DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, lt=endDate),
+        ])
+        delta = datetime.timedelta(days=1)        
+        collectionActivitiesPerDay = []
+        
+        currentDate = startDate
+        while date_util.start_of_day(currentDate) <= date_util.start_of_day(endDate):
+            saleCount = 0
+            totalVolume = 0
+            transferCount = 0
+            minimumValue = 0
+            maximumValue = 0
+            for collectionActivity in collectionActivities:
+                if date_util.start_of_day(currentDate) == date_util.start_of_day(collectionActivity.date):
+                    if collectionActivity.saleCount > 0:
+                        saleCount += collectionActivity.saleCount
+                        totalVolume += collectionActivity.totalVolume
+                        minimumValue = min(minimumValue, collectionActivity.minimumValue) if minimumValue > 0 else collectionActivity.minimumValue
+                        maximumValue = max(maximumValue, collectionActivity.maximumValue)
+                    transferCount += collectionActivity.transferCount
+            collectionActivitiesPerDay.append(CollectionActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalVolume=totalVolume,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
+            currentDate += delta
+        return collectionActivitiesPerDay
+            
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         tokenTransfers = await self.retriever.list_token_transfers(
             shouldIgnoreRegistryBlacklist=True,
@@ -256,7 +305,7 @@ class NotdManager:
         await self.tokenManager.update_activity_for_collection_deferred(registryAddress=registryAddress, startDate=startDate)
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
-        await self.tokenManager.update_activity_for_collection(registryAddress=address, startDate=startDate)
+        await self.tokenManager.update_activity_for_collection(address=address, startDate=startDate)
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)

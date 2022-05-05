@@ -12,13 +12,13 @@ from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
-from core.util import date_util
+from core.util import chain_util
 from core.util import list_util
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
-from notd.date_util import date_hour_from_datetime
+from notd import date_util
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent
@@ -327,6 +327,7 @@ class TokenManager:
 
     async def update_activity_for_all_collections(self) -> None:
         #TODO (FEMI) Account for deleted Transactions
+        address = chain_util.normalize_address(address)
         collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
         if len(collectionActivity) > 0:
             lastestProcessedDate = collectionActivity[0].date
@@ -337,16 +338,19 @@ class TokenManager:
             fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=lastestProcessedDate)],
         )
         #TODO remove all refrences to future time
-        registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
+        registryDatePairs = {(tokenTransfer.registryAddress, date_util.date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
-        #TODO normalize address  and date 
+        #TODO normalize address  and date
+        address = chain_util.normalize_address(address)
+        startDate = date_util.date_hour_from_datetime(startDate)
         await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message())
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
-        #TODO normalize address  and date 
+        address = chain_util.normalize_address(address)
+        startDate = date_util.date_hour_from_datetime(startDate)
         async with self.saver.create_transaction() as connection:
             collectionActivity = await self.retriever.list_collections_activity(
                 fieldFilters=[
