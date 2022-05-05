@@ -42,7 +42,7 @@ TokenMetadatasTable = sqlalchemy.Table(
     sqlalchemy.Column(key='imageUrl', name='image_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='animationUrl', name='animation_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='youtubeUrl', name='youtube_url', type_=sqlalchemy.TEXT, nullable=True),
-    sqlalchemy.Column(key='backgroundColor', name='background_color', type_=sqlalchemy.TEXT, nullable=True),
+    sqlalchemy.Column(key='backgroundColour', name='background_colour', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='frameImageUrl', name='frame_image_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),

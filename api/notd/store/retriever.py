@@ -16,7 +16,6 @@ from sqlalchemy.sql import Select
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 from notd.model import Collection
-from notd.model import CollectionActivity
 from notd.model import CollectionHourlyActivity
 from notd.model import Token
 from notd.model import TokenMetadata

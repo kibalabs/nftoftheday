@@ -372,7 +372,7 @@ class TokenManager:
                     DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
                 ]
             )
-            retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, date=startDate)
+            retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, startDate=startDate)
             if len(collectionActivity) > 0:
                 await self.saver.update_collection_hourly_activity(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
             else:

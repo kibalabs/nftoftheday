@@ -195,16 +195,17 @@ class CollectionHourlyActivity(RetrievedCollectionHourlyActivity):
 
 @dataclasses.dataclass
 class CollectionStatistics:
-    date: datetime.date
     itemCount: int
     holderCount: int
+    saleCount: int
+    transferCount: int
     totalTradeVolume: int
     lowestSaleLast24Hours: int
     highestSaleLast24Hours: int
     tradeVolume24Hours: int
 
 @dataclasses.dataclass
-class CollectionActivity:
+class CollectionDailyActivity:
     date: datetime.date
     transferCount: int
     saleCount: int

@@ -27,7 +27,7 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
-from notd.model import CollectionActivity
+from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
@@ -152,14 +152,15 @@ class NotdManager:
         endDate = date_util.start_of_day(date_util.datetime_from_datetime(startDate))
         numberOfTokensInACollection = len(await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
         holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
-        listOfAllCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)])
+        listOfAllCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
         totalTradedVolume = sum([collectionActivity.totalVolume for collectionActivity in listOfAllCollectionActivity])
+        print("here")
         listOfDailyCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[
                 StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
-                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date, gte=startDate),
-                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date, lt=endDate),
+                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate, lt=endDate),
             ]
         )
+        print("here")
         saleCount = 0
         transferCount = 0
         tradeVolume24Hours = 0
@@ -184,7 +185,7 @@ class NotdManager:
             tradeVolume24Hours=tradeVolume24Hours,
         )
 
-    async def get_collection_daily_activities(self, address: str) -> List[CollectionActivity]:
+    async def get_collection_daily_activities(self, address: str) -> List[CollectionDailyActivity]:
         address = chain_util.normalize_address(address)
         endDate = date_util.datetime_from_string('2022-04-22T21:00:00.00')
         startDate = date_util.datetime_from_datetime(dt=endDate, days=-89)
@@ -210,7 +211,7 @@ class NotdManager:
                         minimumValue = min(minimumValue, collectionActivity.minimumValue) if minimumValue > 0 else collectionActivity.minimumValue
                         maximumValue = max(maximumValue, collectionActivity.maximumValue)
                     transferCount += collectionActivity.transferCount
-            collectionActivitiesPerDay.append(CollectionActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalVolume=totalVolume,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
+            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalVolume=totalVolume,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
             currentDate += delta
         return collectionActivitiesPerDay
             

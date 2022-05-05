@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from notd.api.models_v1 import ApiCollection
-from notd.api.models_v1 import ApiCollectionActivity
+from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
@@ -136,4 +136,4 @@ class GetCollectionActivityRequest(BaseModel):
     pass
 
 class GetCollectionActivityResponse(BaseModel):
-    collectionActivities: List[ApiCollectionActivity]
+    collectionActivities: List[ApiCollectionDailyActivity]

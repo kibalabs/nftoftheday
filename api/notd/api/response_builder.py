@@ -4,16 +4,17 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
+from notd.model import CollectionStatistics
 
 from notd.api.models_v1 import ApiCollection
-from notd.api.models_v1 import ApiCollectionActivity
+from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Collection
-from notd.model import CollectionActivity
+from notd.model import CollectionDailyActivity
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
@@ -106,10 +107,12 @@ class ResponseBuilder:
     async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
 
-    async def get_collection_statistics(self, collectionStatistics: CollectionActivity) -> ApiCollectionStatistics:
+    async def get_collection_statistics(self, collectionStatistics: CollectionStatistics) -> ApiCollectionStatistics:
         return ApiCollectionStatistics(
             itemCount=collectionStatistics.itemCount,
             holderCount=collectionStatistics.holderCount,
+            transferCount=collectionStatistics.transferCount,
+            saleCount=collectionStatistics.saleCount,
             totalTradeVolume=collectionStatistics.totalTradeVolume,
             lowestSaleLast24Hours=collectionStatistics.lowestSaleLast24Hours,
             highestSaleLast24Hours=collectionStatistics.highestSaleLast24Hours,
@@ -133,5 +136,5 @@ class ResponseBuilder:
             date=sponsoredToken.date,
         )
 
-    async def collection_activity_from_model(self, collectionActivities: Sequence[CollectionActivity]) -> Sequence[ApiCollectionActivity]:
-        return [ApiCollectionActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, minimumValue=collectionActivity.minimumValue, maximumValue=collectionActivity.maximumValue, averageValue=collectionActivity.averageValue)  for collectionActivity in collectionActivities]
+    async def collection_activity_from_model(self, collectionActivities: Sequence[CollectionDailyActivity]) -> Sequence[ApiCollectionDailyActivity]:
+        return [ApiCollectionDailyActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, saleCount=collectionActivity.saleCount , minimumValue=collectionActivity.minimumValue, maximumValue=collectionActivity.maximumValue, averageValue=collectionActivity.averageValue)  for collectionActivity in collectionActivities]
