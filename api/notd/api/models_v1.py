@@ -30,7 +30,7 @@ class ApiCollectionToken(BaseModel):
     description: Optional[str]
     imageUrl: Optional[str]
     frameImageUrl: Optional[str]
-    attributes: Optional[List[Dict[str, Union[str, int, float]]]]
+    attributes: Optional[List[Dict[str, Union[str, int, float, None, bool]]]]
 
 
 class ApiTokenTransfer(BaseModel):

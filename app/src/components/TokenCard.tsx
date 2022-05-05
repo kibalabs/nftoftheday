@@ -23,7 +23,7 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
 
   let imageUrl = props.collectionToken?.imageUrl || defaultImage;
   if (imageUrl?.startsWith('ipfs://')) {
-    imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+    imageUrl = imageUrl.replace('ipfs://', 'https://kibalabs.mypinata.cloud/ipfs/');
   }
 
   return (

@@ -4,7 +4,7 @@ import textwrap
 from typing import List
 
 from core import logging
-from core.util.chain_util import normalize_address
+from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 from web3 import Web3
 from web3.types import BlockData
@@ -95,14 +95,14 @@ class BlockProcessor:
     async def _process_erc1155_single_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
         transactionHash = event['transactionHash'].hex()
-        registryAddress = normalize_address(event['address'])
+        registryAddress = chain_util.normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
         if len(event['topics']) < 4:
             logging.debug('Ignoring event with less than 4 topics')
             return []
-        operatorAddress = normalize_address(event['topics'][1].hex())
-        fromAddress = normalize_address(event['topics'][2].hex())
-        toAddress = normalize_address(event['topics'][3].hex())
+        operatorAddress = chain_util.normalize_address(event['topics'][1].hex())
+        fromAddress = chain_util.normalize_address(event['topics'][2].hex())
+        toAddress = chain_util.normalize_address(event['topics'][3].hex())
         data = event['data']
         data = textwrap.wrap(data[2:], 64)
         data = [int(f'0x{elem}',16) for elem in data]
@@ -129,14 +129,14 @@ class BlockProcessor:
     async def _process_erc1155_batch_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
         transactionHash = event['transactionHash'].hex()
-        registryAddress = normalize_address(event['address'])
+        registryAddress = chain_util.normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
         if len(event['topics']) < 4:
             logging.debug('Ignoring event with less than 4 topics')
             return []
-        operatorAddress = normalize_address(event['topics'][1].hex())
-        fromAddress = normalize_address(event['topics'][2].hex())
-        toAddress = normalize_address(event['topics'][3].hex())
+        operatorAddress = chain_util.normalize_address(event['topics'][1].hex())
+        fromAddress = chain_util.normalize_address(event['topics'][2].hex())
+        toAddress = chain_util.normalize_address(event['topics'][3].hex())
         data = event['data']
         data = textwrap.wrap(data[2:], 64)
         data = [int(f'0x{elem}',16) for elem in data]
@@ -155,7 +155,7 @@ class BlockProcessor:
     async def _process_erc721_single_event(self, event: LogReceipt, blockData: BlockData) -> List[RetrievedTokenTransfer]:
         blockNumber = blockData['number']
         transactionHash = event['transactionHash'].hex()
-        registryAddress = normalize_address(event['address'])
+        registryAddress = chain_util.normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
         if registryAddress == self.cryptoKittiesContract.address:
             # NOTE(krishan711): for CryptoKitties the tokenId isn't indexed in the Transfer event
@@ -174,8 +174,8 @@ class BlockProcessor:
         if len(event['topics']) < 4:
             logging.debug('Ignoring event with less than 4 topics')
             return []
-        fromAddress = normalize_address(event['topics'][1].hex())
-        toAddress = normalize_address(event['topics'][2].hex())
+        fromAddress = chain_util.normalize_address(event['topics'][1].hex())
+        toAddress = chain_util.normalize_address(event['topics'][2].hex())
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
         ethTransaction = await self._get_transaction(transactionHash=transactionHash, blockData=blockData)
         operatorAddress = ethTransaction['from']
