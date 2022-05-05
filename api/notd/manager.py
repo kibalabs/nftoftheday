@@ -148,8 +148,8 @@ class NotdManager:
     # TODO Normalize address
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
         address = chain_util.normalize_address(address)
-        startDate = 0
-        endDate = 0
+        startDate = date_util.start_of_day(date_util.datetime_from_now())
+        endDate = date_util.start_of_day(date_util.datetime_from_datetime(startDate))
         numberOfTokensInACollection = len(await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
         holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
         listOfAllCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)])
@@ -195,7 +195,6 @@ class NotdManager:
         ])
         delta = datetime.timedelta(days=1)        
         collectionActivitiesPerDay = []
-        
         currentDate = startDate
         while date_util.start_of_day(currentDate) <= date_util.start_of_day(endDate):
             saleCount = 0
