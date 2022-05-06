@@ -68,7 +68,7 @@ class NotdManager:
             baseSponsoredToken = max(allPastTokens, key=lambda sponsoredToken: sponsoredToken.date)
         latestTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key,eq=baseSponsoredToken.token.registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=baseSponsoredToken.token.registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=baseSponsoredToken.token.tokenId),
             ],
             orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],

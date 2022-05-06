@@ -97,7 +97,7 @@ class GetCollectionRecentSalesResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
 
 class GetCollectionTokenRequest(BaseModel):
-     pass
+    pass
 
 class GetCollectionTokenResponse(BaseModel):
     token: ApiCollectionToken
