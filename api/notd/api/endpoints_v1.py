@@ -96,17 +96,17 @@ class GetCollectionRecentSalesRequest(BaseModel):
 class GetCollectionRecentSalesResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
 
-class GetCollectionStatisticsRequest(BaseModel):
-    pass
-
-class GetCollectionStatisticsResponse(BaseModel):
-    collectionStatistics: ApiCollectionStatistics
-
 class GetCollectionTokenRequest(BaseModel):
      pass
 
 class GetCollectionTokenResponse(BaseModel):
     token: ApiCollectionToken
+
+class GetCollectionStatisticsRequest(BaseModel):
+    pass
+
+class GetCollectionStatisticsResponse(BaseModel):
+    collectionStatistics: ApiCollectionStatistics
 
 class UpdateCollectionTokenRequest(BaseModel):
     userAddress: str
