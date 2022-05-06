@@ -79,7 +79,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
-    #NOTE(FEMI-OGUNKOlA): CHANGE RESPONSE TO MATCH FUNCTION
     @router.post('/collections/update-activity-deferred', response_model=UpdateActivityForAllCollectionsDeferredResponse)
     async def update_activity_for_all_collections_deferred():
         await notdManager.update_activity_for_all_collections_deferred()

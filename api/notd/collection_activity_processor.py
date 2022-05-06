@@ -40,5 +40,8 @@ class CollectionActivityProcessor:
                 minimumValue = min(minimumValue, tokenTransfer.value) if minimumValue > 0 else tokenTransfer.value
                 maximumValue = max(maximumValue, tokenTransfer.value)
             transferCount += tokenTransfer.amount
-        averageValue = totalVolume / saleCount
+        if saleCount > 0:
+            averageValue = totalVolume / saleCount
+        else:
+            averageValue = 0
         return RetrievedCollectionHourlyActivity(address=address, date=startDate, transferCount=transferCount, saleCount=saleCount, totalVolume=totalVolume, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)

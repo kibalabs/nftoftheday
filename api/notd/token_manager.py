@@ -260,10 +260,7 @@ class TokenManager:
             if tokenOwnership:
                 await self.saver.update_token_ownership(connection=connection, tokenOwnershipId=tokenOwnership.tokenOwnershipId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
             else:
-                if retrievedTokenOwnership.transferCount == 0:
-                    logging.info(f'Not creating ownership with transferCount==0')
-                else:
-                    await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
+                await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
 
     @staticmethod
     def _uniqueness_tuple_from_token_multi_ownership(retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> Tuple[str, str, str, int, int, datetime.datetime, str]:
@@ -350,7 +347,6 @@ class TokenManager:
         if len(collectionActivity) > 0:
             lastestProcessedDate = collectionActivity[0].date
         else:
-            #If we have never processed anything start from today
             lastestProcessedDate = date_util.start_of_day()
         newTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.updatedDate.key, gte=lastestProcessedDate)],
@@ -378,4 +374,7 @@ class TokenManager:
             if len(collectionActivity) > 0:
                 await self.saver.update_collection_hourly_activity(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
             else:
-                await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+                if retrievedCollectionActivity.transferCount == 0:
+                    logging.info(f'Not creating activity with transferCount==0')
+                else:
+                    await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalVolume=retrievedCollectionActivity.totalVolume, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
