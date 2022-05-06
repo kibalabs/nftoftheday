@@ -54,7 +54,7 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
-class UpdateActivityForAllCollectionsDeferredResponse(BaseModel):
+class UpdateActivityForAllCollectionsDeferredRequest(BaseModel):
     pass
 
 class UpdateActivityForAllCollectionsDeferredResponse(BaseModel):
