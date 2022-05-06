@@ -1,13 +1,13 @@
 resource "aws_iam_group" "notd_users" {
-  name = "notd-users"
+  name = "${local.project}-users"
 }
 
 resource "aws_iam_group" "notd_readers" {
-  name = "notd-readers"
+  name = "${local.project}-readers"
 }
 
 resource "aws_iam_user" "notd_api" {
-  name = "notd-api"
+  name = "${local.project}-api"
   tags = {
     app = "notd"
   }
@@ -27,9 +27,9 @@ resource "aws_iam_user_group_membership" "notd_api" {
 }
 
 resource "aws_iam_user" "notd_user_obafemi" {
-  name = "notd-user-obafemi"
+  name = "${local.project}-user-obafemi"
   tags = {
-    app = "notd"
+    app = local.project
   }
 }
 
