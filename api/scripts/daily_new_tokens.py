@@ -22,7 +22,7 @@ async def daily_new_registries():
         TokenTransfersTable.select()
         .with_only_columns([TokenTransfersTable.c.registryAddress])
             .group_by(TokenTransfersTable.c.registryAddress)
-            .having(sqlalchemyfunc.count(TokenTransfersTable.c.registryAddress)==1)
+            .having(sqlalchemyfunc.count(TokenTransfersTable.c.registryAddress) == 1)
 
     ))
     query = query.where(sqlalchemyfunc.date(TokenTransfersTable.c.blockDate) == sqlalchemyfunc.current_date())
