@@ -5,7 +5,7 @@ from core.util import date_util
 from fastapi import APIRouter
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
-from notd.api.endpoints_v1 import GetCollectionActivityResponse
+from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
@@ -145,10 +145,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
         return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
 
-    @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionActivityResponse)
+    @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionDailyActivitiesResponse)
     async def get_collection_daily_activities(registryAddress: str):
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
-        return GetCollectionActivityResponse(collectionActivities=(await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities)))
+        return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activity_from_model(collectionActivities=collectionActivities)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

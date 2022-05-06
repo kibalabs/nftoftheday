@@ -132,8 +132,8 @@ class RefreshAccountTokenOwnershipsRequest(BaseModel):
 class RefreshAccountTokenOwnershipsResponse(BaseModel):
     pass
 
-class GetCollectionActivityRequest(BaseModel):
+class GetCollectionDailyActivitiesRequest(BaseModel):
     pass
 
-class GetCollectionActivityResponse(BaseModel):
+class GetCollectionDailyActivitiesResponse(BaseModel):
     collectionActivities: List[ApiCollectionDailyActivity]

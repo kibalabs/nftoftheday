@@ -228,11 +228,11 @@ class NotdManager:
                 StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
                 StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, ne=0),
             ],
-            orders=[Order(fieldName=TokenMultiOwnershipsTable.c.latestTransferDate.key,direction=Direction.DESCENDING)],
+            orders=[Order(fieldName=TokenMultiOwnershipsTable.c.latestTransferDate.key, direction=Direction.DESCENDING)],
             limit=limit+offset,
         )
-        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId,ownership.transferDate) for ownership in tokenSingleOwnerships]
-        tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId,ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
+        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId, ownership.transferDate) for ownership in tokenSingleOwnerships]
+        tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
