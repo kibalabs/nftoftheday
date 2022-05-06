@@ -102,6 +102,9 @@ class GetCollectionStatisticsRequest(BaseModel):
 class GetCollectionStatisticsResponse(BaseModel):
     collectionStatistics: ApiCollectionStatistics
 
+class GetCollectionTokenRequest(BaseModel):
+     pass
+
 class GetCollectionTokenResponse(BaseModel):
     token: ApiCollectionToken
 

@@ -131,15 +131,17 @@ class NotdManager:
         return tokenTransfers
 
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
-        address = chain_util.normalize_address(address)
-        startDate = date_util.start_of_day(date_util.datetime_from_now())
-        endDate = date_util.start_of_day(date_util.datetime_from_datetime(startDate))
-        numberOfTokensInACollection = len(await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
+        address = chain_util.normalize_address(value=address)
+        startDate = date_util.start_of_day()
+        endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+        itemCount = len(await self.retriever.list_token_metadatas(fieldFilters=[
+            StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address),
+            StringFieldFilter(fieldName=TokenOwnershipsTable.c.ownerAddress.key, ne=chain_util.BURN_ADDRESS),
+        ]))
         holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
-        listOfAllCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
-        totalTradedVolume = sum([collectionActivity.totalVolume for collectionActivity in listOfAllCollectionActivity])
-        print("here")
-        listOfDailyCollectionActivity = await self.retriever.list_collections_activity(fieldFilters=[
+        allCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
+        totalTradedVolume = sum([collectionActivity.totalVolume for collectionActivity in allCollectionActivities])
+        dayCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
                 StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
                 DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate, lt=endDate),
             ]
@@ -149,16 +151,16 @@ class NotdManager:
         tradeVolume24Hours = 0
         lowestSaleLast24Hours = 0
         highestSaleLast24Hours = 0
-        for collectionActivity in listOfDailyCollectionActivity:
+        for collectionActivity in dayCollectionActivities:
+            #TODO(Femi-Ogunkola): Check if line below is required
             if collectionActivity.saleCount > 0:
                 saleCount += collectionActivity.saleCount
                 tradeVolume24Hours += collectionActivity.value
                 lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
                 highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
             transferCount += collectionActivity.transferCount
-
         return CollectionStatistics(
-            itemCount=numberOfTokensInACollection,
+            itemCount=itemCount,
             holderCount=holderCount,
             saleCount=saleCount,
             transferCount=transferCount,
