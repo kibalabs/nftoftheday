@@ -19,10 +19,10 @@ from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.date_util import date_hour_from_datetime
 
 
-# @click.command()
-# @click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)
-# @click.option('-e', '--end-block-number', 'endBlock', required=True, type=int)
-# @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=3)
+@click.command()
+@click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)
+@click.option('-e', '--end-block-number', 'endBlock', required=True, type=int)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=3)
 async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
@@ -57,4 +57,4 @@ async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSi
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(backfill_collection_statistics(startBlock=14630006, endBlock=14630106, batchSize=10))
+    asyncio.run(backfill_collection_statistics())
