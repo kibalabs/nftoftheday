@@ -43,6 +43,7 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
+from notd.store.retriever import _REGISTRY_BLACKLIST
 
 
 class NotdManager:
@@ -94,23 +95,46 @@ class NotdManager:
         )
         return randomTokenTransfers[0]
 
-    async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) -> int:
-        return await self.retriever.get_transaction_count(startDate=startDate, endDate=endDate)
 
-    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
-        mostTradedToken = await self.retriever.get_most_traded_token(startDate=startDate, endDate=endDate)
+    async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
-            sqlalchemy.select([TokenTransfersTable, BlocksTable]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            TokenTransfersTable.select() \
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .with_only_columns([sqlalchemy.func.count()])
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
-            .where(TokenTransfersTable.c.registryAddress == mostTradedToken.registryAddress)
-            .where(TokenTransfersTable.c.tokenId == mostTradedToken.tokenId)
-            .order_by(TokenTransfersTable.c.value.desc())
         )
-        result = await self.retriever.database.execute(query=query, connection=None)
+        result = await self.retriever.database.execute(query=query)
+        count = result.scalar()
+        return count
+
+
+    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
+        query = (
+            TokenTransfersTable.select()
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber) \
+            .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()]) \
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId) \
+            .where(BlocksTable.c.blockDate >= startDate) \
+            .where(BlocksTable.c.blockDate < endDate) \
+            .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST)) \
+            .order_by(sqlalchemy.func.count().desc()) \
+            .limit(1)
+        )
+        result = await self.retriever.database.execute(query=query)
+        (registryAddress, tokenId, transferCount) = result.first()
+        query = (
+            sqlalchemy.select([TokenTransfersTable, BlocksTable])
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(BlocksTable.c.blockDate >= startDate)
+            .where(BlocksTable.c.blockDate < endDate)
+            .where(TokenTransfersTable.c.registryAddress == registryAddress)
+            .where(TokenTransfersTable.c.tokenId == tokenId)
+            .order_by(TokenTransfersTable.c.value.desc())
+            .limit(1)
+        )
+        result = await self.retriever.database.execute(query=query)
         latestTransferRow = result.first()
-        countResult = await self.retriever.database.execute(query=sqlalchemy.select(sqlalchemy.func.count()).select_from(query), connection=None)
-        transferCount = countResult.scalar()
         return TradedToken(
             latestTransfer=token_transfer_from_row(latestTransferRow),
             transferCount=transferCount,

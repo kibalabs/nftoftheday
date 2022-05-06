@@ -82,6 +82,7 @@ CREATE TABLE tbl_blocks (
 );
 CREATE UNIQUE INDEX tbl_blocks_block_number ON tbl_blocks (block_number);
 CREATE INDEX tbl_blocks_block_number_updated_date ON tbl_blocks (block_number, updated_date);
+CREATE INDEX tbl_blocks_block_number_block_date ON tbl_blocks (block_number, block_date);
 CREATE INDEX tbl_blocks_created_date ON tbl_blocks (created_date);
 CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
 CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
