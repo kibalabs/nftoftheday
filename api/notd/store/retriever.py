@@ -12,7 +12,6 @@ from sqlalchemy.sql import Select
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
-from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
@@ -104,14 +103,6 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         return await self.query_token_metadatas(query=query, connection=connection)
-
-    async def get_item_count(self, registryAddress:str, connection: Optional[DatabaseConnection] = None) -> int:
-        query = TokenMetadatasTable.select()
-        query = query.with_only_columns([sqlalchemyfunc.count(TokenMetadatasTable.c.tokenMetadataId)])
-        query = query.where(TokenMetadatasTable.c.registryAddress == registryAddress)
-        result = await self.database.execute(query=query, connection=connection)
-        count = result.scalar()
-        return count
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
         query = TokenMetadatasTable.select() \
