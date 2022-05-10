@@ -135,4 +135,4 @@ class ResponseBuilder:
         )
 
     async def collection_activities_from_models(self, collectionActivities: Sequence[CollectionDailyActivity]) -> Sequence[ApiCollectionDailyActivity]:
-        return [ApiCollectionDailyActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, saleCount=collectionActivity.saleCount , minimumValue=collectionActivity.minimumValue, maximumValue=collectionActivity.maximumValue, averageValue=collectionActivity.averageValue)  for collectionActivity in collectionActivities]
+        return [ApiCollectionDailyActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, saleCount=collectionActivity.saleCount, minimumValue=collectionActivity.minimumValue, maximumValue=collectionActivity.maximumValue, averageValue=collectionActivity.averageValue) for collectionActivity in collectionActivities]
