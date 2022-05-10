@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Alignment, Box, Button, Direction, Image, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, Image, LinkBase, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from './Account';
@@ -19,9 +19,11 @@ export const NavBar = (): React.ReactElement => {
         <Box shouldClipContent={true} width='40px' height='40px'>
           <Image source='/assets/icon.png' alternativeText='logo' fitType='cover' />
         </Box>
-        <Box variant='unrounded' shouldClipContent={true} height='20px' isFullWidth={false}>
-          <Image source='/assets/wordmark.svg' alternativeText='wordmark' fitType='cover' />
-        </Box>
+        <LinkBase target='/'>
+          <Box variant='unrounded' shouldClipContent={true} height='20px' isFullWidth={false}>
+            <Image source='/assets/wordmark.svg' alternativeText='wordmark' fitType='cover' />
+          </Box>
+        </LinkBase>
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <Spacing variant={PaddingSize.Wide2} />
         </Stack.Item>
