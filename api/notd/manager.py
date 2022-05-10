@@ -34,6 +34,7 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
+from notd.store.retriever import _REGISTRY_BLACKLIST
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -44,7 +45,6 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
-from notd.store.retriever import _REGISTRY_BLACKLIST
 
 
 class NotdManager:

@@ -12,8 +12,8 @@ from core.slack_client import SlackClient
 from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
-from api.notd.collection_activity_processor import CollectionActivityProcessor
 
+from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.block_processor import BlockProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager

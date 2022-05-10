@@ -1,22 +1,22 @@
 
 import asyncio
-import sys
-import os
 import logging
-import asyncclick as click
+import os
+import sys
 
-from core.util import list_util
+import asyncclick as click
+from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.database import Database
 from core.store.retriever import DateFieldFilter
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.util import list_util
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.token_manager import TokenManager
-from notd.store.schema import BlocksTable
-from notd.store.saver import Saver
-from notd.store.retriever import Retriever
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.date_util import date_hour_from_datetime
+from notd.store.retriever import Retriever
+from notd.store.saver import Saver
+from notd.store.schema import BlocksTable
+from notd.token_manager import TokenManager
 
 
 @click.command()
