@@ -134,5 +134,5 @@ class ResponseBuilder:
             date=sponsoredToken.date,
         )
 
-    async def collection_activity_from_model(self, collectionActivities: Sequence[CollectionDailyActivity]) -> Sequence[ApiCollectionDailyActivity]:
+    async def collection_activities_from_models(self, collectionActivities: Sequence[CollectionDailyActivity]) -> Sequence[ApiCollectionDailyActivity]:
         return [ApiCollectionDailyActivity(date=collectionActivity.date, totalVolume=collectionActivity.totalVolume, transferCount=collectionActivity.transferCount, saleCount=collectionActivity.saleCount , minimumValue=collectionActivity.minimumValue, maximumValue=collectionActivity.maximumValue, averageValue=collectionActivity.averageValue)  for collectionActivity in collectionActivities]
