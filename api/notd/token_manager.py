@@ -349,7 +349,7 @@ class TokenManager:
         else:
             lastestProcessedDate = date_util.start_of_day()
         newTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=TokenTransfersTable.c.updatedDate.key, gte=lastestProcessedDate)],
+            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.updatedDate.key, gte=lastestProcessedDate)],
         )
         registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]

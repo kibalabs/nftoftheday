@@ -38,6 +38,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -159,8 +160,7 @@ class NotdManager:
         startDate = date_util.start_of_day()
         endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         itemCount = len(await self.retriever.list_token_metadatas(fieldFilters=[
-            StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address),
-            StringFieldFilter(fieldName=TokenOwnershipsTable.c.ownerAddress.key, ne=chain_util.BURN_ADDRESS),
+            StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
         ]))
         holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
         allCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
@@ -176,12 +176,10 @@ class NotdManager:
         lowestSaleLast24Hours = 0
         highestSaleLast24Hours = 0
         for collectionActivity in dayCollectionActivities:
-            #TODO(Femi-Ogunkola): Check if line below is required
-            if collectionActivity.saleCount > 0:
-                saleCount += collectionActivity.saleCount
-                tradeVolume24Hours += collectionActivity.value
-                lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
-                highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
+            saleCount += collectionActivity.saleCount
+            tradeVolume24Hours += collectionActivity.totalVolume
+            lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
+            highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
             transferCount += collectionActivity.transferCount
         return CollectionStatistics(
             itemCount=itemCount,
@@ -196,8 +194,8 @@ class NotdManager:
 
     async def get_collection_daily_activities(self, address: str) -> List[CollectionDailyActivity]:
         address = chain_util.normalize_address(address)
-        endDate = date_util.datetime_from_string('2022-04-22T21:00:00.00')
-        startDate = date_util.datetime_from_datetime(dt=endDate, days=-89)
+        endDate = date_util.datetime_from_now()
+        startDate = date_util.datetime_from_datetime(dt=endDate, days=-90)
         collectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
             StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
             DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate),
