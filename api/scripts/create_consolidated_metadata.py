@@ -6,8 +6,8 @@ import sys
 import asyncclick as click
 from core import logging
 from core.store.database import Database
-from core.util import chain_util
 from core.store.retriever import StringFieldFilter
+from core.util import chain_util
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.retriever import Retriever
