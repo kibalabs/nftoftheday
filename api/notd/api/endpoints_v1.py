@@ -78,6 +78,12 @@ class UpdateCollectionTokensRequest(BaseModel):
 class UpdateCollectionTokensResponse(BaseModel):
     pass
 
+class ListCollectionTokensRequest(BaseModel):
+    pass
+
+class ListCollectionTokensResponse(BaseModel):
+    tokens: List[ApiCollectionToken]
+
 class ListCollectionTokensByOwnerRequest(BaseModel):
     pass
 

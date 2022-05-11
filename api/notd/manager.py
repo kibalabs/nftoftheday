@@ -32,6 +32,7 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
+from notd.store.retriever import _REGISTRY_BLACKLIST
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -40,7 +41,6 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
-from notd.store.retriever import _REGISTRY_BLACKLIST
 
 
 class NotdManager:
@@ -225,6 +225,9 @@ class NotdManager:
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         return await self.tokenManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
+        return await self.tokenManager.list_collection_tokens(address=address)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
         return await self.tokenManager.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress)
