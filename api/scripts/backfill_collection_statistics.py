@@ -46,7 +46,7 @@ async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSi
         )
         pairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers}
         print(len(pairs))
-        for pairChunk in list_util.generate_chunks(lst=list(pairs), chunkSize=20):
+        for pairChunk in list_util.generate_chunks(lst=list(pairs), chunkSize=10):
             await asyncio.gather(*[tokenManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
         currentBlockNumber = endBlockNumber
 

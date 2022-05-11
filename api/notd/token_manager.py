@@ -361,11 +361,8 @@ class TokenManager:
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
         startDate = date_hour_from_datetime(startDate)
-        print('here')
         retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, startDate=startDate)
-        print('here2')
         async with self.saver.create_transaction() as connection:
-            print('here3')
             collectionActivity = await self.retriever.list_collections_activity(
                 connection=connection,
                 fieldFilters=[
@@ -373,7 +370,6 @@ class TokenManager:
                     DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
                 ]
             )
-            print('here4')
             if len(collectionActivity) > 0:
                 await self.saver.update_collection_hourly_activity(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
             else:
