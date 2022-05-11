@@ -182,7 +182,7 @@ class RetrievedCollectionHourlyActivity:
     date: datetime.datetime
     transferCount: int
     saleCount: int
-    totalVolume: int
+    totalValue: int
     minimumValue: int
     maximumValue: int
     averageValue: int
@@ -209,7 +209,7 @@ class CollectionDailyActivity:
     date: datetime.date
     transferCount: int
     saleCount: int
-    totalVolume: int
+    totalValue: int
     minimumValue: int
     maximumValue: int
     averageValue: int

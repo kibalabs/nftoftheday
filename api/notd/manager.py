@@ -164,7 +164,7 @@ class NotdManager:
         ]))
         holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
         allCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
-        totalTradedVolume = sum([collectionActivity.totalVolume for collectionActivity in allCollectionActivities])
+        totalTradeVolume = sum([collectionActivity.totalValue for collectionActivity in allCollectionActivities])
         dayCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
                 StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
                 DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate, lt=endDate),
@@ -177,7 +177,7 @@ class NotdManager:
         highestSaleLast24Hours = 0
         for collectionActivity in dayCollectionActivities:
             saleCount += collectionActivity.saleCount
-            tradeVolume24Hours += collectionActivity.totalVolume
+            tradeVolume24Hours += collectionActivity.totalValue
             lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
             highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
             transferCount += collectionActivity.transferCount
@@ -186,7 +186,7 @@ class NotdManager:
             holderCount=holderCount,
             saleCount=saleCount,
             transferCount=transferCount,
-            totalTradeVolume=totalTradedVolume,
+            totalTradeVolume=totalTradeVolume,
             lowestSaleLast24Hours=lowestSaleLast24Hours,
             highestSaleLast24Hours=highestSaleLast24Hours,
             tradeVolume24Hours=tradeVolume24Hours,
@@ -206,7 +206,7 @@ class NotdManager:
         currentDate = startDate
         while date_util.start_of_day(currentDate) <= date_util.start_of_day(endDate):
             saleCount = 0
-            totalVolume = 0
+            totalValue = 0
             transferCount = 0
             minimumValue = 0
             maximumValue = 0
@@ -214,11 +214,11 @@ class NotdManager:
                 if date_util.start_of_day(currentDate) == date_util.start_of_day(collectionActivity.date):
                     if collectionActivity.saleCount > 0:
                         saleCount += collectionActivity.saleCount
-                        totalVolume += collectionActivity.totalVolume
+                        totalValue += collectionActivity.totalValue
                         minimumValue = min(minimumValue, collectionActivity.minimumValue) if minimumValue > 0 else collectionActivity.minimumValue
                         maximumValue = max(maximumValue, collectionActivity.maximumValue)
                     transferCount += collectionActivity.transferCount
-            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalVolume=totalVolume,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
+            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalValue=totalValue,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
             currentDate += delta
         return collectionActivitiesPerDay
 

@@ -110,7 +110,7 @@ CollectionHourlyActivityTable = sqlalchemy.Table(
     sqlalchemy.Column(key='date', name='date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='transferCount', name='transfer_count', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='saleCount', name='sale_count', type_=sqlalchemy.Integer, nullable=False),
-    sqlalchemy.Column(key='totalVolume', name='total_volume', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='totalValue', name='total_volume', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='minimumValue', name='minimum_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='maximumValue', name='maximum_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='averageValue', name='average_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),

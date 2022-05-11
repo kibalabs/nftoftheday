@@ -78,7 +78,7 @@ class ApiCollectionDailyActivity(BaseModel):
     date: datetime.date
     transferCount: int
     saleCount: int
-    totalVolume: int
+    totalValue: int
     minimumValue: int
     maximumValue: int
     averageValue: int

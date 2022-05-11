@@ -145,19 +145,19 @@ CREATE TABLE tbl_collection_hourly_activity (
     date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     transfer_count INTEGER NOT NULL,
     sale_count INTEGER NOT NULL,
-    total_volume NUMERIC(256, 0) NOT NULL,
+    total_value NUMERIC(256, 0) NOT NULL,
     minimum_value NUMERIC(256, 0) NOT NULL,
     maximum_value NUMERIC(256, 0) NOT NULL,
     average_value NUMERIC(256, 0) NOT NULL
 );
-CREATE UNIQUE INDEX tbl_collection_hourly_activity_date_address ON tbl_collection_hourly_activity (date, address);
+CREATE UNIQUE INDEX tbl_collection_hourly_activity_address_date ON tbl_collection_hourly_activity (address, date);
 CREATE INDEX tbl_collection_hourly_activity_created_date ON tbl_collection_hourly_activity (created_date);
 CREATE INDEX tbl_collection_hourly_activity_updated_date ON tbl_collection_hourly_activity (updated_date);
 CREATE INDEX tbl_collection_hourly_activity_address ON tbl_collection_hourly_activity (address);
 CREATE INDEX tbl_collection_hourly_activity_date ON tbl_collection_hourly_activity (date);
 CREATE INDEX tbl_collection_hourly_activity_transfer_count ON tbl_collection_hourly_activity (transfer_count);
 CREATE INDEX tbl_collection_hourly_activity_sale_count ON tbl_collection_hourly_activity (sale_count);
-CREATE INDEX tbl_collection_hourly_activity_total_volume ON tbl_collection_hourly_activity (total_volume);
+CREATE INDEX tbl_collection_hourly_activity_total_value ON tbl_collection_hourly_activity (total_value);
 CREATE INDEX tbl_collection_hourly_activity_minimum_value ON tbl_collection_hourly_activity (minimum_value);
 CREATE INDEX tbl_collection_hourly_activity_maximum_value ON tbl_collection_hourly_activity (maximum_value);
 CREATE INDEX tbl_collection_hourly_activity_average_value ON tbl_collection_hourly_activity (average_value);

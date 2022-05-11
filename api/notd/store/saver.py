@@ -348,7 +348,7 @@ class Saver(CoreSaver):
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds))
         await self._execute(query=query, connection=connection)
 
-    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, saleCount: int, totalVolume: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
+    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -358,7 +358,7 @@ class Saver(CoreSaver):
             CollectionHourlyActivityTable.c.date.key: date,
             CollectionHourlyActivityTable.c.transferCount.key: transferCount,
             CollectionHourlyActivityTable.c.saleCount.key: saleCount,
-            CollectionHourlyActivityTable.c.totalVolume.key: totalVolume,
+            CollectionHourlyActivityTable.c.totalValue.key: totalValue,
             CollectionHourlyActivityTable.c.minimumValue.key: minimumValue,
             CollectionHourlyActivityTable.c.maximumValue.key: maximumValue,
             CollectionHourlyActivityTable.c.averageValue.key: averageValue,
@@ -374,13 +374,13 @@ class Saver(CoreSaver):
             date=date,
             transferCount=transferCount,
             saleCount=saleCount,
-            totalVolume=totalVolume,
+            totalValue=totalValue,
             minimumValue=minimumValue,
             maximumValue=maximumValue,
             averageValue=averageValue,
         )
 
-    async def update_collection_hourly_activity(self, collectionActivityId: int, address: Optional[str], date: Optional[datetime.datetime], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalVolume: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_hourly_activity(self, collectionActivityId: int, address: Optional[str], date: Optional[datetime.datetime], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if address is not None:
             values[CollectionHourlyActivityTable.c.address.key] = address
@@ -390,8 +390,8 @@ class Saver(CoreSaver):
             values[CollectionHourlyActivityTable.c.transferCount.key] = transferCount
         if saleCount is not None:
             values[CollectionHourlyActivityTable.c.saleCount.key] = saleCount
-        if totalVolume is not None:
-            values[CollectionHourlyActivityTable.c.totalVolume.key] = totalVolume
+        if totalValue is not None:
+            values[CollectionHourlyActivityTable.c.totalValue.key] = totalValue
         if minimumValue is not None:
             values[CollectionHourlyActivityTable.c.minimumValue.key] = minimumValue
         if maximumValue is not None:
