@@ -9,6 +9,7 @@ from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
+from notd.api.endpoints_v1 import ListCollectionTokens
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
@@ -90,6 +91,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def update_collection_tokens(registryAddress: str, request: UpdateCollectionTokensRequest):  # pylint: disable=unused-argument
         await notdManager.update_collection_tokens_deferred(address=registryAddress)
         return UpdateCollectionTokensResponse()
+
+    @router.get('/collections/{registryAddress}/tokens', response_model=ListCollectionTokens)
+    async def list_collection_tokens(registryAddress: str):
+        tokenMetadatas = await notdManager.list_collection_tokens(address=registryAddress)
+        return ListCollectionTokens(tokens=(await responseBuilder.collection_tokens_from_models(tokenMetadatas=tokenMetadatas)))
 
     @router.get('/collections/{registryAddress}/tokens/owner/{ownerAddress}', response_model=ListCollectionTokensByOwnerResponse)
     async def list_collection_tokens_by_owner(registryAddress: str, ownerAddress: str):

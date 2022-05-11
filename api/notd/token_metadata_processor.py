@@ -27,6 +27,7 @@ IPFS_PROVIDER_PREFIXES = [
     'https://time.mypinata.cloud/ipfs/',
     'https://robotos.mypinata.cloud/ipfs/',
     'https://cloudflare-ipfs.com/ipfs/',
+    'https://spriteclub.infura-ipfs.io/ipfs/',
 ]
 
 

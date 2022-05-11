@@ -165,23 +165,25 @@ export class RetrieveTransferCountResponse extends ResponseData {
   };
 }
 
+export class RetrieveCollectionTokensRequest extends RequestData {
+}
+
+export class RetrieveCollectionTokensResponse extends ResponseData {
+  readonly tokens: Resources.CollectionToken[];
+
+  public constructor(tokens: Resources.CollectionToken[]) {
+    super();
+    this.tokens = tokens;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveCollectionTokensResponse => {
+    return new RetrieveCollectionTokensResponse(
+      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionToken.fromObject(innerObj)),
+    );
+  };
+}
+
 export class RetrieveCollectionTokenRequest extends RequestData {
-  // NOTE(krishan711): uncomment when ServiceClient implements params filled into the path
-  // readonly registryAddress: string;
-  // readonly tokenId: string;
-
-  // public constructor(registryAddress?: string, tokenId?: string) {
-  //   super();
-  //   this.registryAddress = registryAddress;
-  //   this.tokenId = tokenId;
-  // }
-
-  // public toObject = (): Record<string, unknown> => {
-  //   return {
-  //         registryAddress: this.registryAddress,
-  //         tokenId: this.tokenId,
-  //   };
-  // };
 }
 
 export class RetrieveCollectionTokenResponse extends ResponseData {
@@ -200,22 +202,6 @@ export class RetrieveCollectionTokenResponse extends ResponseData {
 }
 
 export class RetrieveCollectionRequest extends RequestData {
-  // NOTE(krishan711): uncomment when ServiceClient implements params filled into the path
-  // readonly registryAddress: string;
-  // readonly tokenId: string;
-
-  // public constructor(registryAddress?: string, tokenId?: string) {
-  //   super();
-  //   this.registryAddress = registryAddress;
-  //   this.tokenId = tokenId;
-  // }
-
-  // public toObject = (): Record<string, unknown> => {
-  //   return {
-  //         registryAddress: this.registryAddress,
-  //         tokenId: this.tokenId,
-  //   };
-  // };
 }
 
 export class RetrieveCollectionResponse extends ResponseData {

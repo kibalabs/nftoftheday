@@ -305,6 +305,11 @@ class TokenManager:
                 firstOwnership = list(existingOwnershipTuplesMap.values())[0]
                 await self.saver.update_token_multi_ownership(connection=connection, tokenMultiOwnershipId=firstOwnership.tokenMultiOwnershipId, ownerAddress=firstOwnership.ownerAddress)
 
+    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
+        address = chain_util.normalize_address(value=address)
+        tokens = await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address)])
+        return tokens
+
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
         address = chain_util.normalize_address(value=address)
         collection = await self.get_collection_by_address(address=address)

@@ -48,6 +48,14 @@ export class NotdClient extends ServiceClient {
     return response.count;
   };
 
+  public getCollectionTokens = async (registryAddress: string): Promise<Resources.CollectionToken[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${registryAddress}/tokens`;
+    const request = new Endpoints.RetrieveCollectionTokensRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveCollectionTokensResponse);
+    return response.tokens;
+  };
+
   public getCollectionToken = async (registryAddress: string, tokenId: string): Promise<Resources.CollectionToken> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${registryAddress}/tokens/${tokenId}`;
