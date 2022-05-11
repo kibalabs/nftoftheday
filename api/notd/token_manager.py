@@ -342,15 +342,13 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
-        #TODO (FEMI) Account for deleted Transactions
+        # TODO(femi-ogunkola): Account for deleted transactions
         collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
         if len(collectionActivity) > 0:
             lastestProcessedDate = collectionActivity[0].date
         else:
             lastestProcessedDate = date_util.start_of_day()
-        newTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.updatedDate.key, gte=lastestProcessedDate)],
-        )
+        newTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.updatedDate.key, gte=lastestProcessedDate)])
         registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
@@ -363,14 +361,19 @@ class TokenManager:
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
         startDate = date_hour_from_datetime(startDate)
+        print('here')
+        retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, startDate=startDate)
+        print('here2')
         async with self.saver.create_transaction() as connection:
+            print('here3')
             collectionActivity = await self.retriever.list_collections_activity(
+                connection=connection,
                 fieldFilters=[
                     StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
                     DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
                 ]
             )
-            retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, startDate=startDate)
+            print('here4')
             if len(collectionActivity) > 0:
                 await self.saver.update_collection_hourly_activity(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
             else:

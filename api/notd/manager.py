@@ -80,7 +80,10 @@ class NotdManager:
 
     async def retrieve_highest_priced_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            fieldFilters=[
+                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST),
+            ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
         )
@@ -144,7 +147,6 @@ class NotdManager:
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
-            shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
@@ -225,7 +227,6 @@ class NotdManager:
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
-            shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
@@ -377,8 +378,7 @@ class NotdManager:
                 await self.saver.create_block(connection=connection, blockNumber=processedBlock.blockNumber, blockHash=processedBlock.blockHash, blockDate=processedBlock.blockDate)
             existingTokenTransfers = await self.retriever.list_token_transfers(
                 connection=connection,
-                fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber),
-                ], shouldIgnoreRegistryBlacklist=True
+                fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber)],
             )
             existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())

@@ -27,6 +27,7 @@ class CollectionActivityProcessor:
                 DateFieldFilter(BlocksTable.c.blockDate.key, lt=date_util.datetime_from_datetime(dt=startDate, hours=1)),
             ],
         )
+        print('len(tokenTransfers)', len(tokenTransfers))
         saleCount = 0
         transferCount = 0
         totalValue = 0

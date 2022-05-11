@@ -17,6 +17,7 @@ CREATE UNIQUE INDEX tbl_token_transfers_transaction_hash_registry_address_token_
 CREATE INDEX tbl_token_transfers_registry_address_token_id ON tbl_token_transfers (registry_address, token_id);
 CREATE INDEX tbl_token_transfers_registry_address_token_id_block_number ON tbl_token_transfers (registry_address, token_id, block_number);
 CREATE INDEX tbl_token_transfers_registry_address ON tbl_token_transfers (registry_address);
+CREATE INDEX tbl_token_transfers_registry_address_block_number ON tbl_token_transfers (registry_address, block_number);
 CREATE INDEX tbl_token_transfers_token_id ON tbl_token_transfers (token_id);
 CREATE INDEX tbl_token_transfers_value ON tbl_token_transfers (value);
 CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_number);
@@ -137,7 +138,7 @@ CREATE INDEX tbl_token_multi_ownerships_latest_transfer_date ON tbl_token_multi_
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_value ON tbl_token_multi_ownerships (latest_transfer_value);
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_transaction_hash ON tbl_token_multi_ownerships (latest_transfer_transaction_hash);
 
-CREATE TABLE tbl_collection_hourly_activity (
+CREATE TABLE tbl_collection_hourly_activities (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
