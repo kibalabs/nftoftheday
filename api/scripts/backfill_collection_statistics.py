@@ -22,7 +22,7 @@ from notd.token_manager import TokenManager
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlock', required=True, type=int)
-@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=10)
+@click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=500)
 async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
@@ -36,22 +36,19 @@ async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSi
     await tokenQueue.connect()
     currentBlockNumber = startBlock
     while currentBlockNumber < endBlock:
-        start = currentBlockNumber
-        end = start + batchSize
-
-        logging.info(f'Working on {start} to {end}...')
+        endBlockNumber = min(currentBlockNumber + batchSize, endBlock)
+        logging.info(f'Working on {currentBlockNumber} to {endBlockNumber}...')
         tokenTransfers = await retriever.list_token_transfers(
             fieldFilters=[
-                DateFieldFilter(BlocksTable.c.blockNumber.key, gte=start),
-                DateFieldFilter(BlocksTable.c.blockNumber.key, lt=end),
+                DateFieldFilter(BlocksTable.c.blockNumber.key, gte=currentBlockNumber),
+                DateFieldFilter(BlocksTable.c.blockNumber.key, lt=endBlockNumber),
             ],
         )
         pairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers}
         print(len(pairs))
         for pairChunk in list_util.generate_chunks(lst=list(pairs), chunkSize=20):
             await asyncio.gather(*[tokenManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
-
-        currentBlockNumber = end
+        currentBlockNumber = endBlockNumber
 
     await database.disconnect()
     await tokenQueue.disconnect()
