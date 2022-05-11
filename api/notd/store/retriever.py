@@ -6,7 +6,6 @@ from core.store.database import DatabaseConnection
 from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
-from core.store.retriever import StringFieldFilter
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
