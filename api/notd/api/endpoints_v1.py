@@ -1,5 +1,3 @@
-
-
 import datetime
 from typing import List
 from typing import Optional
@@ -7,6 +5,8 @@ from typing import Optional
 from pydantic import BaseModel
 
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionDailyActivity
+from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
@@ -52,6 +52,12 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass
 
 class ReceiveNewBlocksDeferredResponse(BaseModel):
+    pass
+
+class UpdateActivityForAllCollectionsDeferredRequest(BaseModel):
+    pass
+
+class UpdateActivityForAllCollectionsDeferredResponse(BaseModel):
     pass
 
 class SubscribeRequest(BaseModel):
@@ -102,6 +108,12 @@ class GetCollectionTokenRequest(BaseModel):
 class GetCollectionTokenResponse(BaseModel):
     token: ApiCollectionToken
 
+class GetCollectionStatisticsRequest(BaseModel):
+    pass
+
+class GetCollectionStatisticsResponse(BaseModel):
+    collectionStatistics: ApiCollectionStatistics
+
 class UpdateCollectionTokenRequest(BaseModel):
     userAddress: str
 
@@ -125,3 +137,9 @@ class RefreshAccountTokenOwnershipsRequest(BaseModel):
 
 class RefreshAccountTokenOwnershipsResponse(BaseModel):
     pass
+
+class GetCollectionDailyActivitiesRequest(BaseModel):
+    pass
+
+class GetCollectionDailyActivitiesResponse(BaseModel):
+    collectionActivities: List[ApiCollectionDailyActivity]

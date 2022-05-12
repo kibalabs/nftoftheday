@@ -24,7 +24,6 @@ class TokenOwnershipProcessor:
 
     async def calculate_token_single_ownership(self, registryAddress: str, tokenId: str)-> RetrievedTokenOwnership:
         tokenTransfers = await self.retriever.list_token_transfers(
-            shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
@@ -50,7 +49,6 @@ class TokenOwnershipProcessor:
         limit = 500
         while True:
             tokenTransfers = await self.retriever.list_token_transfers(
-                shouldIgnoreRegistryBlacklist=True,
                 fieldFilters=[
                     StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                     StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),

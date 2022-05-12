@@ -175,3 +175,41 @@ class TokenMultiOwnership(RetrievedTokenMultiOwnership):
     tokenMultiOwnershipId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
+@dataclasses.dataclass
+class RetrievedCollectionHourlyActivity:
+    address: str
+    date: datetime.datetime
+    transferCount: int
+    saleCount: int
+    totalValue: int
+    minimumValue: int
+    maximumValue: int
+    averageValue: int
+
+@dataclasses.dataclass
+class CollectionHourlyActivity(RetrievedCollectionHourlyActivity):
+    collectionActivityId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+@dataclasses.dataclass
+class CollectionStatistics:
+    itemCount: int
+    holderCount: int
+    saleCount: int
+    transferCount: int
+    totalTradeVolume: int
+    lowestSaleLast24Hours: int
+    highestSaleLast24Hours: int
+    tradeVolume24Hours: int
+
+@dataclasses.dataclass
+class CollectionDailyActivity:
+    date: datetime.date
+    transferCount: int
+    saleCount: int
+    totalValue: int
+    minimumValue: int
+    maximumValue: int
+    averageValue: int

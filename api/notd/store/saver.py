@@ -11,11 +11,13 @@ from core.util import list_util
 
 from notd.model import Block
 from notd.model import Collection
+from notd.model import CollectionHourlyActivity
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -344,4 +346,59 @@ class Saver(CoreSaver):
         if len(tokenMultiOwnershipIds) == 0:
             return
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds))
+        await self._execute(query=query, connection=connection)
+
+    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            CollectionHourlyActivityTable.c.createdDate.key: createdDate,
+            CollectionHourlyActivityTable.c.updatedDate.key: updatedDate,
+            CollectionHourlyActivityTable.c.address.key: address,
+            CollectionHourlyActivityTable.c.date.key: date,
+            CollectionHourlyActivityTable.c.transferCount.key: transferCount,
+            CollectionHourlyActivityTable.c.saleCount.key: saleCount,
+            CollectionHourlyActivityTable.c.totalValue.key: totalValue,
+            CollectionHourlyActivityTable.c.minimumValue.key: minimumValue,
+            CollectionHourlyActivityTable.c.maximumValue.key: maximumValue,
+            CollectionHourlyActivityTable.c.averageValue.key: averageValue,
+        }
+        query = CollectionHourlyActivityTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        collectionActivityId = result.inserted_primary_key[0]
+        return CollectionHourlyActivity(
+            collectionActivityId=collectionActivityId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            address=address,
+            date=date,
+            transferCount=transferCount,
+            saleCount=saleCount,
+            totalValue=totalValue,
+            minimumValue=minimumValue,
+            maximumValue=maximumValue,
+            averageValue=averageValue,
+        )
+
+    async def update_collection_hourly_activity(self, collectionActivityId: int, address: Optional[str], date: Optional[datetime.datetime], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if address is not None:
+            values[CollectionHourlyActivityTable.c.address.key] = address
+        if date is not None:
+            values[CollectionHourlyActivityTable.c.date.key] = date
+        if transferCount is not None:
+            values[CollectionHourlyActivityTable.c.transferCount.key] = transferCount
+        if saleCount is not None:
+            values[CollectionHourlyActivityTable.c.saleCount.key] = saleCount
+        if totalValue is not None:
+            values[CollectionHourlyActivityTable.c.totalValue.key] = totalValue
+        if minimumValue is not None:
+            values[CollectionHourlyActivityTable.c.minimumValue.key] = minimumValue
+        if maximumValue is not None:
+            values[CollectionHourlyActivityTable.c.maximumValue.key] = maximumValue
+        if averageValue is not None:
+            values[CollectionHourlyActivityTable.c.averageValue.key] = averageValue
+        if len(values) > 0:
+            values[CollectionHourlyActivityTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = CollectionHourlyActivityTable.update(CollectionHourlyActivityTable.c.collectionActivityId == collectionActivityId).values(values)
         await self._execute(query=query, connection=connection)

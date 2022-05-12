@@ -2,11 +2,13 @@ from typing import Mapping
 
 from notd.model import Block
 from notd.model import Collection
+from notd.model import CollectionHourlyActivity
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
 from notd.model import TokenTransfer
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -107,4 +109,19 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
         averageTransferValue=row[TokenMultiOwnershipsTable.c.averageTransferValue],
         latestTransferDate=row[TokenMultiOwnershipsTable.c.latestTransferDate],
         latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
+    )
+
+def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
+    return CollectionHourlyActivity(
+        collectionActivityId=row[CollectionHourlyActivityTable.c.collectionActivityId],
+        createdDate=row[CollectionHourlyActivityTable.c.createdDate],
+        updatedDate=row[CollectionHourlyActivityTable.c.updatedDate],
+        address=row[CollectionHourlyActivityTable.c.address],
+        date=row[CollectionHourlyActivityTable.c.date],
+        transferCount=row[CollectionHourlyActivityTable.c.transferCount],
+        saleCount=row[CollectionHourlyActivityTable.c.saleCount],
+        totalValue=row[CollectionHourlyActivityTable.c.totalValue],
+        minimumValue=row[CollectionHourlyActivityTable.c.minimumValue],
+        maximumValue=row[CollectionHourlyActivityTable.c.maximumValue],
+        averageValue=row[CollectionHourlyActivityTable.c.averageValue],
     )

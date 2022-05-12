@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from core.queues.model import MessageContent
@@ -37,3 +38,11 @@ class UpdateCollectionTokensMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION_TOKENS'
     address: str
     shouldForce: Optional[bool]
+
+class UpdateActivityForAllCollectionsMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_ACTIVITY_FOR_ALL_COLLECTIONS'
+
+class UpdateActivityForCollectionMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_ACTIVITY'
+    address: str
+    startDate: datetime.datetime

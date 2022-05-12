@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.block_processor import BlockProcessor
+from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
@@ -53,8 +54,9 @@ tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=e
 openseaApiKey = os.environ['OPENSEA_API_KEY']
 collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
+collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
 revueApiKey = os.environ['REVUE_API_KEY']
-tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor)
+tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 

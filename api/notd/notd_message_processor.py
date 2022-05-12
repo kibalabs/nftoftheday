@@ -8,6 +8,8 @@ from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
+from notd.messages import UpdateActivityForAllCollectionsMessageContent
+from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
@@ -53,5 +55,13 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateCollectionTokensMessageContent.get_command():
             messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
             await self.notdManager.update_collection_tokens(address=messageContent.address, shouldForce=messageContent.shouldForce)
+            return
+        if message.command == UpdateActivityForAllCollectionsMessageContent.get_command():
+            messageContent = UpdateActivityForAllCollectionsMessageContent.parse_obj(message.content)
+            await self.notdManager.update_activity_for_all_collections()
+            return
+        if message.command == UpdateActivityForCollectionMessageContent.get_command():
+            messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
             return
         raise KibaException(message='Message was unhandled')

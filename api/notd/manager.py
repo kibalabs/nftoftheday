@@ -26,6 +26,8 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
+from notd.model import CollectionDailyActivity
+from notd.model import CollectionStatistics
 from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -36,6 +38,8 @@ from notd.store.retriever import _REGISTRY_BLACKLIST
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -76,7 +80,10 @@ class NotdManager:
 
     async def retrieve_highest_priced_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
+            fieldFilters=[
+                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST),
+            ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
         )
@@ -92,6 +99,7 @@ class NotdManager:
         )
         return randomTokenTransfers[0]
 
+
     async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
             TokenTransfersTable.select() \
@@ -103,6 +111,7 @@ class NotdManager:
         result = await self.retriever.database.execute(query=query)
         count = result.scalar()
         return count
+
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         query = (
@@ -138,7 +147,6 @@ class NotdManager:
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
-            shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                 IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
@@ -149,10 +157,76 @@ class NotdManager:
         )
         return tokenTransfers
 
+    async def get_collection_statistics(self, address: str) -> CollectionStatistics:
+        address = chain_util.normalize_address(value=address)
+        startDate = date_util.start_of_day()
+        endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
+        itemCount = len(await self.retriever.list_token_metadatas(fieldFilters=[
+            StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
+        ]))
+        holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
+        allCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
+        totalTradeVolume = sum([collectionActivity.totalValue for collectionActivity in allCollectionActivities])
+        dayCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
+                StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
+                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate, lt=endDate),
+            ]
+        )
+        saleCount = 0
+        transferCount = 0
+        tradeVolume24Hours = 0
+        lowestSaleLast24Hours = 0
+        highestSaleLast24Hours = 0
+        for collectionActivity in dayCollectionActivities:
+            saleCount += collectionActivity.saleCount
+            tradeVolume24Hours += collectionActivity.totalValue
+            lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
+            highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
+            transferCount += collectionActivity.transferCount
+        return CollectionStatistics(
+            itemCount=itemCount,
+            holderCount=holderCount,
+            saleCount=saleCount,
+            transferCount=transferCount,
+            totalTradeVolume=totalTradeVolume,
+            lowestSaleLast24Hours=lowestSaleLast24Hours,
+            highestSaleLast24Hours=highestSaleLast24Hours,
+            tradeVolume24Hours=tradeVolume24Hours,
+        )
+
+    async def get_collection_daily_activities(self, address: str) -> List[CollectionDailyActivity]:
+        address = chain_util.normalize_address(address)
+        endDate = date_util.datetime_from_now()
+        startDate = date_util.datetime_from_datetime(dt=endDate, days=-90)
+        collectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
+            StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
+            DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate),
+            DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, lt=endDate),
+        ])
+        delta = datetime.timedelta(days=1)
+        collectionActivitiesPerDay = []
+        currentDate = startDate
+        while date_util.start_of_day(currentDate) <= date_util.start_of_day(endDate):
+            saleCount = 0
+            totalValue = 0
+            transferCount = 0
+            minimumValue = 0
+            maximumValue = 0
+            for collectionActivity in collectionActivities:
+                if date_util.start_of_day(currentDate) == date_util.start_of_day(collectionActivity.date):
+                    if collectionActivity.saleCount > 0:
+                        saleCount += collectionActivity.saleCount
+                        totalValue += collectionActivity.totalValue
+                        minimumValue = min(minimumValue, collectionActivity.minimumValue) if minimumValue > 0 else collectionActivity.minimumValue
+                        maximumValue = max(maximumValue, collectionActivity.maximumValue)
+                    transferCount += collectionActivity.transferCount
+            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalValue=totalValue,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
+            currentDate += delta
+        return collectionActivitiesPerDay
+
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
-            shouldIgnoreRegistryBlacklist=True,
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
@@ -219,6 +293,18 @@ class NotdManager:
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
+
+    async def update_activity_for_all_collections_deferred(self) -> None:
+        await self.tokenManager.update_activity_for_all_collections_deferred()
+
+    async def update_activity_for_all_collections(self) -> None:
+        await self.tokenManager.update_activity_for_all_collections()
+
+    async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:
+        await self.tokenManager.update_activity_for_collection_deferred(registryAddress=registryAddress, startDate=startDate)
+
+    async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
+        await self.tokenManager.update_activity_for_collection(address=address, startDate=startDate)
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)
@@ -295,9 +381,7 @@ class NotdManager:
                 await self.saver.create_block(connection=connection, blockNumber=processedBlock.blockNumber, blockHash=processedBlock.blockHash, blockDate=processedBlock.blockDate)
             existingTokenTransfers = await self.retriever.list_token_transfers(
                 connection=connection,
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber),
-                ], shouldIgnoreRegistryBlacklist=True
+                fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber)],
             )
             existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())

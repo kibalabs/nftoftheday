@@ -5,8 +5,10 @@ from core.util import date_util
 from fastapi import APIRouter
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
+from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
+from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
@@ -24,6 +26,7 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
+from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateCollectionRequest
 from notd.api.endpoints_v1 import UpdateCollectionResponse
 from notd.api.endpoints_v1 import UpdateCollectionTokenRequest
@@ -76,6 +79,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.receive_new_blocks_deferred()
         await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
+
+    @router.post('/collections/update-activity-deferred', response_model=UpdateActivityForAllCollectionsDeferredResponse)
+    async def update_activity_for_all_collections_deferred():
+        await notdManager.update_activity_for_all_collections_deferred()
+        return UpdateActivityForAllCollectionsDeferredResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
     async def get_collection_by_address(registryAddress: str):
@@ -137,6 +145,16 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_owner_token_ownerships(accountAddress: str):
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
+
+    @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
+    async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
+        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
+        return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
+
+    @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionDailyActivitiesResponse)
+    async def get_collection_daily_activities(registryAddress: str):
+        collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
+        return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):
