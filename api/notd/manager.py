@@ -238,6 +238,19 @@ class NotdManager:
         )
         return tokenTransfers
 
+    async def get_collection_token_recent_transfers(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
+        tokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
+            limit=limit,
+            offset=offset,
+        )
+        return tokenTransfers
+
     async def list_account_tokens(self, accountAddress: str, limit: int, offset: int) -> List[Token]:
         tokenSingleOwnerships = await self.retriever.list_token_ownerships(
             fieldFilters=[
