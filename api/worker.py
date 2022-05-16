@@ -13,8 +13,8 @@ from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 
-from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.block_processor import BlockProcessor
+from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.notd_message_processor import NotdMessageProcessor
