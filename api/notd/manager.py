@@ -224,17 +224,6 @@ class NotdManager:
             currentDate += delta
         return collectionActivitiesPerDay
 
-    async def get_token_holder(self, address: str, tokenId: str) -> str:
-        tokenTransfer = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=address),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
-            ],
-            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
-            limit=1
-        )
-        return tokenTransfer[0].toAddress
-
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
