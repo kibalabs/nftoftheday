@@ -66,6 +66,12 @@ class SubscribeRequest(BaseModel):
 class SubscribeResponse(BaseModel):
     pass
 
+class GetTokenRecentTransfersRequest(BaseModel):
+    pass
+
+class GetTokenRecentTransfersResponse(BaseModel):
+    tokenTransfers: List[ApiTokenTransfer]
+
 class GetCollectionRequest(BaseModel):
     address: str
 
