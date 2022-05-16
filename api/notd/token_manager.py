@@ -355,6 +355,7 @@ class TokenManager:
             lastestProcessedDate = date_util.start_of_day()
         newTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.updatedDate.key, gte=lastestProcessedDate)])
         registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
+        logging.info(f'Scheduling processing for {len(registryDatePairs)} collection, hour pairs')
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
 
