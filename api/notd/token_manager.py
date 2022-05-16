@@ -348,18 +348,13 @@ class TokenManager:
 
     async def update_activity_for_all_collections(self) -> None:
         # TODO(femi-ogunkola): Account for deleted transactions
-        print('here 1')
-        # collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
-        # print('here 2', collectionActivity)
-        # if len(collectionActivity) > 0:
-        #     lastestProcessedDate = collectionActivity[0].date
-        # else:
-        lastestProcessedDate = date_util.start_of_day()
-        print('here 3', lastestProcessedDate)
+        collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
+        if len(collectionActivity) > 0:
+            lastestProcessedDate = collectionActivity[0].date
+        else:
+            lastestProcessedDate = date_util.start_of_day()
         newTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.updatedDate.key, gte=lastestProcessedDate)])
-        print('here 4', len(newTokenTransfers))
         registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
-        print('registryDatePairs', len(registryDatePairs))
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
 
