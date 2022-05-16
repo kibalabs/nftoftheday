@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
-import { useInitialization, useIntegerUrlQueryState, useNavigator, useRouteParams } from '@kibalabs/core-react';
+import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
@@ -21,11 +21,10 @@ export const CollectionPage = (): React.ReactElement => {
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [shouldRefreshAllTokens, _] = useIntegerUrlQueryState('shouldRefreshAllTokens');
   const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
-  const routeParams = useRouteParams();
+  const address = useStringRouteParam('address');
   const navigator = useNavigator();
   const account = useAccount();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
-  const address = routeParams.address as string;
   const bannerImageUrl = collection?.bannerImageUrl || '/assets/black_banner.png';
   const imageUrl = collection?.imageUrl || '/assets/icon.png';
 

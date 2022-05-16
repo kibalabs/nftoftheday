@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString, isToday } from '@kibalabs/core';
-import { useInitialization, useNavigator, useRouteParams } from '@kibalabs/core-react';
+import { useInitialization, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
@@ -19,15 +19,14 @@ const RECENT_SALES_PAGE_SIZE = 10;
 export const TokenPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const account = useAccount();
-  const routeParams = useRouteParams();
+  const registryAddress = useStringRouteParam('registryAddress');
+  const tokenId = useStringRouteParam('tokenId');
   const navigator = useNavigator();
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [showLoadMore, setShowLoadMore] = React.useState<boolean>(false);
-  const registryAddress = routeParams.registryAddress as string;
-  const tokenId = routeParams.tokenId as string;
   const defaultImage = '/assets/icon.png';
 
   let imageUrl = collectionToken?.imageUrl || defaultImage;
