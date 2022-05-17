@@ -237,6 +237,40 @@ export class GetCollectionStatisticsResponse extends ResponseData {
   };
 }
 
+export class GetTokenRecentSalesRequest extends RequestData {
+  readonly limit?: number;
+  readonly offset?: number;
+
+
+  constructor(limit?: number, offset?: number) {
+    super();
+    this.limit = limit;
+    this.offset = offset;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      limit: this.limit,
+      offset: this.offset,
+    };
+  };
+}
+
+export class GetTokenRecentSalesResponse extends ResponseData {
+  readonly tokenTransfers: Resources.TokenTransfer[];
+
+  public constructor(TokenRecentSales: Resources.TokenTransfer[]) {
+    super();
+    this.tokenTransfers = TokenRecentSales;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetTokenRecentSalesResponse => {
+    return new GetTokenRecentSalesResponse(
+      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+    );
+  };
+}
+
 export class GetTokenRecentTransfersRequest extends RequestData {
   readonly limit?: number;
   readonly offset?: number;
