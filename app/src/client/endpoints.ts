@@ -237,7 +237,7 @@ export class GetCollectionStatisticsResponse extends ResponseData {
   };
 }
 
-export class GetTokenRecentSalesRequest extends RequestData {
+export class GetTokenRecentTransfersRequest extends RequestData {
   readonly limit?: number;
   readonly offset?: number;
 
@@ -256,16 +256,16 @@ export class GetTokenRecentSalesRequest extends RequestData {
   };
 }
 
-export class GetTokenRecentSalesResponse extends ResponseData {
+export class GetTokenRecentTransfersResponse extends ResponseData {
   readonly tokenTransfers: Resources.TokenTransfer[];
 
-  public constructor(TokenRecentSales: Resources.TokenTransfer[]) {
+  public constructor(TokenRecentTransfers: Resources.TokenTransfer[]) {
     super();
-    this.tokenTransfers = TokenRecentSales;
+    this.tokenTransfers = TokenRecentTransfers;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): GetTokenRecentSalesResponse => {
-    return new GetTokenRecentSalesResponse(
+  public static fromObject = (obj: Record<string, unknown>): GetTokenRecentTransfersResponse => {
+    return new GetTokenRecentTransfersResponse(
       (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
     );
   };

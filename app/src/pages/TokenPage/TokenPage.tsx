@@ -71,7 +71,7 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenSales(undefined);
-    notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.getTokenRecentTransfers(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales(tokenTransfers);
       setShowLoadMore(tokenTransfers.length === RECENT_SALES_PAGE_SIZE);
     }).catch((error: unknown): void => {
@@ -86,7 +86,7 @@ export const TokenPage = (): React.ReactElement => {
 
   const onLoadMoreClicked = (): void => {
     const tokenSalesCount = tokenSales ? tokenSales.length : 0;
-    notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.getTokenRecentTransfers(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
       setShowLoadMore(tokenTransfers.length === RECENT_SALES_PAGE_SIZE);
     }).catch((error: unknown): void => {
