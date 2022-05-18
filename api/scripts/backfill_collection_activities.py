@@ -7,7 +7,7 @@ import sys
 import asyncclick as click
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.database import Database
-from core.store.retriever import  DateFieldFilter
+from core.store.retriever import DateFieldFilter
 from core.store.retriever import IntegerFieldFilter
 from core.util import list_util
 from core.store.retriever import Order
