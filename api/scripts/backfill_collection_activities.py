@@ -23,7 +23,7 @@ from notd.token_manager import TokenManager
 @click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlock', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=500)
-async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSize: int):
+async def backfill_collection_activities(startBlock: int, endBlock: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
@@ -44,9 +44,11 @@ async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSi
                 DateFieldFilter(BlocksTable.c.blockNumber.key, lt=endBlockNumber),
             ],
         )
-        pairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers}
-        print(len(pairs))
-        for pairChunk in list_util.generate_chunks(lst=list(pairs), chunkSize=10):
+        registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers}
+        print(f'Processing {len(registryDatePairs)} pairs from {len(tokenTransfers)} transfers')
+        # messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
+        # await tokenQueue.send_messages(messages=messages)
+        for pairChunk in list_util.generate_chunks(lst=list(registryDatePairs), chunkSize=50):
             await asyncio.gather(*[tokenManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
         currentBlockNumber = endBlockNumber
 
@@ -55,4 +57,4 @@ async def backfill_collection_statistics(startBlock: int, endBlock: int, batchSi
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(backfill_collection_statistics())
+    asyncio.run(backfill_collection_activities())

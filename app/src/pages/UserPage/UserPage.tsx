@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { truncateMiddle } from '@kibalabs/core';
-import { useRouteParams } from '@kibalabs/core-react';
+import { useInitialization, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Direction, Image, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { ethers } from 'ethers';
 
 import { CollectionToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
@@ -10,9 +11,16 @@ import { useGlobals } from '../../globalsContext';
 
 export const UserPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
-  const routeParams = useRouteParams();
-  const accountAddress = routeParams.accountAddress as string;
+  const navigator = useNavigator();
+  const accountAddress = useStringRouteParam('accountAddress');
   const [ownerTokens, setOwnerTokens] = React.useState<CollectionToken[] | undefined | null>(undefined);
+
+  useInitialization((): void => {
+    const checksumAddress = ethers.utils.getAddress(accountAddress);
+    if (accountAddress !== checksumAddress) {
+      navigator.navigateTo(`/collections/${checksumAddress}`);
+    }
+  });
 
   const refreshOwnerTokens = React.useCallback(async (): Promise<void> => {
     setOwnerTokens(undefined);
