@@ -72,6 +72,8 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'https://pfpkit.kibalabs.com',
     'https://pfpkit.xyz',
     'https://pfpkit.com',
+    'https://mdtp-gallery.kibalabs.com',
+    'https://sprites-gallery.kibalabs.com',
     'http://localhost:3000',
 ])
 
