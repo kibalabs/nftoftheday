@@ -45,14 +45,14 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
         tokenTransfers = await retriever.list_token_transfers(
             fieldFilters=[
                 IntegerFieldFilter(BlocksTable.c.blockNumber.key, gte=currentBlockNumber),
-                IntegerFieldFilter(BlocksTable.c.blockNumber.key, lt=endBlockNumber),
+                IntegerFieldFilter(BlocksTable.c.blockNumber.key, lte=endBlockNumber),
             ],
             orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.ASCENDING)],
         )
         collectionHourlyActivities = await retriever.list_collections_activity(
             fieldFilters=[
-                DateFieldFilter(CollectionHourlyActivityTable.c.date.key, gte=tokenTransfers[0].blockDate),
-                DateFieldFilter(CollectionHourlyActivityTable.c.date.key, lte=tokenTransfers[-1].blockDate),
+                DateFieldFilter(CollectionHourlyActivityTable.c.date.key, gte=date_hour_from_datetime(tokenTransfers[0].blockDate)),
+                DateFieldFilter(CollectionHourlyActivityTable.c.date.key, lte=date_hour_from_datetime(tokenTransfers[-1].blockDate)),
             ],
         )
         processedPairs = {(collectionHourlyActivity.address, collectionHourlyActivity.date) for collectionHourlyActivity in collectionHourlyActivities}
