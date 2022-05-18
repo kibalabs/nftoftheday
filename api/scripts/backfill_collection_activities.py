@@ -56,9 +56,9 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
             ],
         )
         processedPairs = {(collectionHourlyActivity.address, collectionHourlyActivity.date) for collectionHourlyActivity in collectionHourlyActivities}
-        pairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers if (tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) not in processedPairs}
-        print(len(pairs))
-        for pairChunk in list_util.generate_chunks(lst=list(pairs), chunkSize=10):
+        registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers if (tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) not in processedPairs}
+        print(f'Processing {len(registryDatePairs)} pairs from {len(tokenTransfers)} transfers')
+        for pairChunk in list_util.generate_chunks(lst=list(registryDatePairs), chunkSize=50):
             await asyncio.gather(*[tokenManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
         currentBlockNumber = endBlockNumber
 
