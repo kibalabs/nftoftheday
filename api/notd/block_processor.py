@@ -75,13 +75,13 @@ class BlockProcessor:
         erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
         logging.info(f'Found {len(erc721events)} erc721 events in block #{blockNumber}')
         transactionHashes = [event["transactionHash"].hex() for event in erc721events]
-        transactionHashCount = {k : transactionHashes.count(k) for k in transactionHashes}
+        transactionHashCount = {transactionHash : transactionHashes.count(transactionHash) for transactionHash in transactionHashes}
         for event in erc721events:
             retrievedTokenTransfers += await self._process_erc721_single_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
         erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
         logging.info(f'Found {len(erc1155events)} erc1155Single events in block #{blockNumber}')
         transactionHashes = [event["transactionHash"].hex() for event in erc1155events]
-        transactionHashCount = {k : transactionHashes.count(k) for k in transactionHashes}
+        transactionHashCount = {transactionHash : transactionHashes.count(transactionHash) for transactionHash in transactionHashes}
         erc1155Transfers = []
         for event in erc1155events:
             erc1155Transfers += await self._process_erc1155_single_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
