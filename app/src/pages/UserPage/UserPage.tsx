@@ -3,11 +3,11 @@ import React from 'react';
 import { truncateMiddle } from '@kibalabs/core';
 import { useInitialization, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Direction, Image, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { ethers } from 'ethers';
 
 import { CollectionToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
-import { ethers } from 'ethers';
 
 export const UserPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
