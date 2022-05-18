@@ -13,6 +13,7 @@ from core.util import list_util
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.date_util import date_hour_from_datetime
+from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -44,9 +45,11 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
                 DateFieldFilter(BlocksTable.c.blockNumber.key, lt=endBlockNumber),
             ],
         )
-        pairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers}
-        print(f'Processing {len(pairs)} pairs from {len(tokenTransfers)} transfers')
-        for pairChunk in list_util.generate_chunks(lst=list(pairs), chunkSize=10):
+        registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers}
+        print(f'Processing {len(registryDatePairs)} pairs from {len(tokenTransfers)} transfers')
+        # messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
+        # await tokenQueue.send_messages(messages=messages)
+        for pairChunk in list_util.generate_chunks(lst=list(registryDatePairs), chunkSize=50):
             await asyncio.gather(*[tokenManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
         currentBlockNumber = endBlockNumber
 
