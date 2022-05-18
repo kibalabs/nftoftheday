@@ -24,7 +24,7 @@ export const TokenPage = (): React.ReactElement => {
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
-  const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [tokenRecentTransfers, setTokenRecentTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [showLoadMore, setShowLoadMore] = React.useState<boolean>(false);
   const registryAddress = routeParams.registryAddress as string;
   const tokenId = routeParams.tokenId as string;
@@ -70,13 +70,13 @@ export const TokenPage = (): React.ReactElement => {
   }, [updateCollection]);
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
-    setTokenSales(undefined);
-    notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE).then((tokenTransfers: TokenTransfer[]): void => {
-      setTokenSales(tokenTransfers);
+    setTokenRecentTransfers(undefined);
+    notdClient.getTokenRecentTransfers(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenRecentTransfers(tokenTransfers);
       setShowLoadMore(tokenTransfers.length === RECENT_SALES_PAGE_SIZE);
     }).catch((error: unknown): void => {
       console.error(error);
-      setTokenSales(null);
+      setTokenRecentTransfers(null);
     });
   }, [notdClient, registryAddress, tokenId]);
 
@@ -85,9 +85,9 @@ export const TokenPage = (): React.ReactElement => {
   }, [updateTokenSales]);
 
   const onLoadMoreClicked = (): void => {
-    const tokenSalesCount = tokenSales ? tokenSales.length : 0;
-    notdClient.getTokenRecentSales(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
-      setTokenSales((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
+    const tokenSalesCount = tokenRecentTransfers ? tokenRecentTransfers.length : 0;
+    notdClient.getTokenRecentTransfers(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE, tokenSalesCount).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenRecentTransfers((prevTokenSales) => [...(prevTokenSales || []), ...tokenTransfers]);
       setShowLoadMore(tokenTransfers.length === RECENT_SALES_PAGE_SIZE);
     }).catch((error: unknown): void => {
       console.error(error);
@@ -136,16 +136,16 @@ export const TokenPage = (): React.ReactElement => {
               <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
                 <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} padding={PaddingSize.Wide}>
                   <Text variant='header1'>{collectionToken.name}</Text>
-                  {tokenSales && tokenSales.length > 0 && (
+                  {tokenRecentTransfers && tokenRecentTransfers.length > 0 && (
                     <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
                       <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                         <Text>Owned By</Text>
                         <Account
-                          accountId={tokenSales[0].toAddress}
-                          target={`/accounts/${tokenSales[0].toAddress}`}
+                          accountId={tokenRecentTransfers[0].toAddress}
+                          target={`/accounts/${tokenRecentTransfers[0].toAddress}`}
                         />
                       </Stack>
-                      <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                      <Text>{`Last Bought for Ξ${tokenRecentTransfers[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
                     </Stack>
                   )}
                   <Spacing variant={PaddingSize.Wide} />
@@ -181,12 +181,12 @@ export const TokenPage = (): React.ReactElement => {
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} shouldWrapItems={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
             <Text variant='header3'>Sales history</Text>
             <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldWrapItems={true}>
-              {tokenSales === undefined ? (
+              {tokenRecentTransfers === undefined ? (
                 <LoadingSpinner />
-              ) : tokenSales === null ? (
+              ) : tokenRecentTransfers === null ? (
                 <Text variant='error'>Token Sale failed to load</Text>
-              ) : tokenSales && tokenSales.length !== 0 ? (
-                tokenSales.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
+              ) : tokenRecentTransfers && tokenRecentTransfers.length !== 0 ? (
+                tokenRecentTransfers.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
                   <TokenSaleRow
                     tokenTransfer={tokenTransfer}
                     key={index}
