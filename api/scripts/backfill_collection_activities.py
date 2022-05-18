@@ -13,7 +13,6 @@ from core.util import list_util
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.date_util import date_hour_from_datetime
-from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
