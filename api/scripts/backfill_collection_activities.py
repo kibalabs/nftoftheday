@@ -8,9 +8,13 @@ import asyncclick as click
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.database import Database
 from core.store.retriever import DateFieldFilter
+from core.store.retriever import IntegerFieldFilter
 from core.util import list_util
+from core.store.retriever import Order
+from core.store.retriever import Direction
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.date_util import date_hour_from_datetime
 from notd.store.retriever import Retriever
@@ -40,16 +44,27 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
         logging.info(f'Working on {currentBlockNumber} to {endBlockNumber}...')
         tokenTransfers = await retriever.list_token_transfers(
             fieldFilters=[
-                DateFieldFilter(BlocksTable.c.blockNumber.key, gte=currentBlockNumber),
-                DateFieldFilter(BlocksTable.c.blockNumber.key, lt=endBlockNumber),
+                IntegerFieldFilter(BlocksTable.c.blockNumber.key, gte=currentBlockNumber),
+                IntegerFieldFilter(BlocksTable.c.blockNumber.key, lte=endBlockNumber),
             ],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.ASCENDING)],
         )
-        registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers}
-        print(f'Processing {len(registryDatePairs)} pairs from {len(tokenTransfers)} transfers')
-        # messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
-        # await tokenQueue.send_messages(messages=messages)
-        for pairChunk in list_util.generate_chunks(lst=list(registryDatePairs), chunkSize=50):
-            await asyncio.gather(*[tokenManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
+        if len(tokenTransfers) == 0:
+            print(f"Skipping {currentBlockNumber} to {endBlockNumber} with 0 transfers ")
+        else:
+            collectionHourlyActivities = await retriever.list_collections_activity(
+                fieldFilters=[
+                    DateFieldFilter(CollectionHourlyActivityTable.c.date.key, gte=date_hour_from_datetime(tokenTransfers[0].blockDate)),
+                    DateFieldFilter(CollectionHourlyActivityTable.c.date.key, lte=date_hour_from_datetime(tokenTransfers[-1].blockDate)),
+                ],
+            )
+            processedPairs = {(collectionHourlyActivity.address, collectionHourlyActivity.date) for collectionHourlyActivity in collectionHourlyActivities}
+            registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers if (tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) not in processedPairs}
+            print(f'Processing {len(registryDatePairs)} pairs from {len(tokenTransfers)} transfers')
+            # messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
+            # await tokenQueue.send_messages(messages=messages)
+            for pairChunk in list_util.generate_chunks(lst=list(registryDatePairs), chunkSize=50):
+                await asyncio.gather(*[tokenManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
         currentBlockNumber = endBlockNumber
 
     await database.disconnect()
