@@ -28,9 +28,7 @@ from notd.token_manager import TokenManager
 @click.option('-e', '--end-block-number', 'endBlock', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=500)
 async def backfill_collection_activities(startBlock: int, endBlock: int, batchSize: int):
-    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["REMOTE_DB_USERNAME"], password=os.environ["REMOTE_DB_PASSWORD"], host=os.environ["REMOTE_DB_HOST"], port=os.environ["REMOTE_DB_PORT"], name=os.environ["REMOTE_DB_NAME"])
-
-    #databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
     saver = Saver(database=database)
