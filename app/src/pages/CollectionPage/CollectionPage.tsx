@@ -269,7 +269,7 @@ export const CollectionPage = (): React.ReactElement => {
                     <TokenCard
                       key={index}
                       collectionToken={recentSale.token}
-                      subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for Ξ${recentSale.value / 1000000000000000000.0}`}
+                      subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for Ξ${ethers.utils.formatEther(recentSale.value)}`}
                       target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
                     />
                   )) : (

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Alignment, Box, Direction, IconButton, KibaIcon, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { ethers } from 'ethers';
 
 import { TokenTransfer } from '../client/resources';
 import { Account } from './Account';
@@ -67,7 +68,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
             </Stack.Item>
             <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
               <Text alignment={TextAlignment.Center}>
-                { `Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
+                { `Ξ${ethers.utils.formatEther(props.tokenTransfer.value)}`}
               </Text>
             </Stack.Item>
             <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
@@ -87,7 +88,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Narrow}>
               <Stack.Item alignment={Alignment.Center}>
                 <Text alignment={TextAlignment.Right}>
-                  { `Ξ${props.tokenTransfer.value / 1000000000000000000.0}`}
+                  { `Ξ${ethers.utils.formatEther(props.tokenTransfer.value)}`}
                 </Text>
               </Stack.Item>
               <Spacing variant={PaddingSize.Wide2} />

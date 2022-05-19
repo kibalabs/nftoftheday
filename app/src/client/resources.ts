@@ -8,7 +8,7 @@ export class TokenTransfer {
   readonly fromAddress: string;
   readonly toAddress: string;
   readonly tokenId: string;
-  readonly value: number;
+  readonly value: BigNumber;
   readonly gasLimit: number;
   readonly gasPrice: number;
   readonly gasUsed: number;
@@ -18,7 +18,7 @@ export class TokenTransfer {
   readonly token: CollectionToken;
   readonly collection: Collection;
 
-  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date, token: CollectionToken, collection: Collection) {
+  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: BigNumber, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date, token: CollectionToken, collection: Collection) {
     this.tokenTransferId = tokenTransferId;
     this.transactionHash = transactionHash;
     this.registryAddress = registryAddress;
@@ -44,7 +44,7 @@ export class TokenTransfer {
       String(obj.fromAddress),
       String(obj.toAddress),
       String(obj.tokenId),
-      Number(obj.value),
+      BigNumber.from(String(obj.value)),
       Number(obj.gasLimit),
       Number(obj.gasPrice),
       Number(obj.gasUsed),
@@ -61,9 +61,9 @@ export class TradedToken {
   readonly token: CollectionToken;
   readonly collection: Collection;
   readonly latestTransfer: TokenTransfer;
-  readonly transferCount: number;
+  readonly transferCount: BigNumber;
 
-  public constructor(token: CollectionToken, collection: Collection, latestTransfer: TokenTransfer, transferCount: number) {
+  public constructor(token: CollectionToken, collection: Collection, latestTransfer: TokenTransfer, transferCount: BigNumber) {
     this.token = token;
     this.collection = collection;
     this.latestTransfer = latestTransfer;
@@ -75,7 +75,7 @@ export class TradedToken {
       CollectionToken.fromObject(obj.token as Record<string, unknown>),
       Collection.fromObject(obj.collection as Record<string, unknown>),
       TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>),
-      Number(obj.transferCount),
+      BigNumber.from(String(obj.transferCount)),
     );
   };
 }
@@ -194,11 +194,11 @@ export class CollectionStatistics {
   readonly itemCount: number;
   readonly holderCount: number;
   readonly totalTradeVolume: BigNumber;
-  readonly lowestSaleLast24Hours: BigNumber | null;
-  readonly highestSaleLast24Hours: BigNumber | null;
-  readonly tradeVolume24Hours: BigNumber | null;
+  readonly lowestSaleLast24Hours: BigNumber;
+  readonly highestSaleLast24Hours: BigNumber;
+  readonly tradeVolume24Hours: BigNumber;
 
-  public constructor(itemCount: number, holderCount: number, totalTradeVolume: BigNumber, lowestSaleLast24Hours: BigNumber | null, highestSaleLast24Hours: BigNumber | null, tradeVolume24Hours: BigNumber | null) {
+  public constructor(itemCount: number, holderCount: number, totalTradeVolume: BigNumber, lowestSaleLast24Hours: BigNumber, highestSaleLast24Hours: BigNumber, tradeVolume24Hours: BigNumber) {
     this.itemCount = itemCount;
     this.holderCount = holderCount;
     this.totalTradeVolume = totalTradeVolume;
@@ -212,9 +212,9 @@ export class CollectionStatistics {
       Number(obj.itemCount),
       Number(obj.holderCount),
       BigNumber.from(String(obj.totalTradeVolume)),
-      obj.lowestSaleLast24Hours ? BigNumber.from(String(obj.lowestSaleLast24Hours)) : null,
-      obj.highestSaleLast24Hours ? BigNumber.from(String(obj.highestSaleLast24Hours)) : null,
-      obj.tradeVolume24Hours ? BigNumber.from(String(obj.tradeVolume24Hours)) : null,
+      BigNumber.from(String(obj.lowestSaleLast24Hours)),
+      BigNumber.from(String(obj.highestSaleLast24Hours)),
+      BigNumber.from(String(obj.tradeVolume24Hours)),
     );
   };
 }
