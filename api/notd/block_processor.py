@@ -114,7 +114,7 @@ class BlockProcessor:
         ethTransaction = await self._get_transaction(transactionHash=transactionHash, blockData=blockData)
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
-        value = ethTransaction['value']/transactionHashCount[transactionHash]
+        value = (ethTransaction['value']*amount)/transactionHashCount[transactionHash]
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155single')]
         return transactions
 
@@ -125,6 +125,7 @@ class BlockProcessor:
             firstTransfer = firstTransfers.get(transferKer)
             if firstTransfer:
                 firstTransfer.amount += transfer.amount
+                firstTransfer.value += transfer.value
             else:
                 firstTransfers[transferKer] = transfer
         return list(firstTransfers.values())
@@ -152,7 +153,7 @@ class BlockProcessor:
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
         value = ethTransaction['value']/transactionHashCount[transactionHash]
-        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
+        transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value*amount, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
         return transactions
 
     async def _process_erc721_single_event(self, event: LogReceipt, blockData: BlockData, transactionHashCount: dict) -> List[RetrievedTokenTransfer]:
@@ -184,6 +185,6 @@ class BlockProcessor:
         operatorAddress = ethTransaction['from']
         gasLimit = ethTransaction['gas']
         gasPrice = ethTransaction['gasPrice']
-        value = ethTransaction['value']/transactionHashCount[transactionHash]
+        value = ethTransaction['value']*1/transactionHashCount[transactionHash]
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc721')]
         return transactions
