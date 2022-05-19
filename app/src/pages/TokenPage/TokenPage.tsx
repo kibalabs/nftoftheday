@@ -144,7 +144,7 @@ export const TokenPage = (): React.ReactElement => {
                           target={`/accounts/${tokenRecentTransfers[0].toAddress}`}
                         />
                       </Stack>
-                      <Text>{`Last Bought for Ξ${tokenRecentTransfers[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
+                      <Text>{`Last Bought for Ξ${ethers.utils.formatEther(tokenRecentTransfers[0].value)} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
                     </Stack>
                   )}
                   <Spacing variant={PaddingSize.Wide} />

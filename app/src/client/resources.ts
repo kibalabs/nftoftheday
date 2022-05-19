@@ -8,7 +8,7 @@ export class TokenTransfer {
   readonly fromAddress: string;
   readonly toAddress: string;
   readonly tokenId: string;
-  readonly value: number;
+  readonly value: BigNumber;
   readonly gasLimit: number;
   readonly gasPrice: number;
   readonly gasUsed: number;
