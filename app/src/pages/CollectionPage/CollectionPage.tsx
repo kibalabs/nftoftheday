@@ -2,12 +2,13 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
+import { Collection, CollectionActivities, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -17,6 +18,7 @@ export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
+  const [collectionActivities, setCollectionActivities] = React.useState<CollectionActivities | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [shouldRefreshAllTokens, _] = useIntegerUrlQueryState('shouldRefreshAllTokens');
@@ -127,6 +129,24 @@ export const CollectionPage = (): React.ReactElement => {
     }
   }, [notdClient, account, address, shouldRefreshAllTokens]);
 
+  const updateCollectionActivities = React.useCallback(async (): Promise<void> => {
+    setCollectionActivities(undefined);
+    notdClient.getCollectionActivities(address).then((retrievedCollectionActivities: CollectionActivities): void => {
+      setCollectionActivities(retrievedCollectionActivities);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setCollectionActivities(null);
+    });
+  }, [notdClient, address]);
+
+  React.useEffect((): void => {
+    updateCollectionActivities();
+  }, [updateCollectionActivities]);
+
+  const colors = useColors();
+  const renderColorfulLegendText = (value: string) => {
+    return <span style={{ color: '#FFFFFF' }}>{value}</span>;
+  };
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
       {collection === undefined ? (
@@ -204,15 +224,15 @@ export const CollectionPage = (): React.ReactElement => {
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
                     <MetricView name={'Items'} value={`${collectionStatistics.itemCount}`} />
                     <MetricView name={'Owners'} value={`${collectionStatistics.holderCount}`} />
-                    <MetricView name={'Total Volume'} value={`${collectionStatistics.totalTradeVolume}`} />
+                    <MetricView name={'Total Volume'} value={`${ethers.utils.formatEther(collectionStatistics.totalTradeVolume)}`} />
                   </Stack>
                   <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
                     <Box variant='divider' isFullHeight={true} width='1px' />
                   </ResponsiveHidingView>
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                    <MetricView name={'24h Low Sale'} value={`Ξ ${collectionStatistics.totalTradeVolume}`} />
-                    <MetricView name={'24h High Sale'} value={`Ξ ${collectionStatistics.highestSaleLast24Hours}`} />
-                    <MetricView name={'24h Volume'} value={`Ξ ${collectionStatistics.tradeVolume24Hours}`} />
+                    <MetricView name={'24h Low Sale'} value={`Ξ ${ethers.utils.formatEther(collectionStatistics.lowestSaleLast24Hours)}`} />
+                    <MetricView name={'24h High Sale'} value={`Ξ ${ethers.utils.formatEther(collectionStatistics.highestSaleLast24Hours)}`} />
+                    <MetricView name={'24h Volume'} value={`Ξ ${ethers.utils.formatEther(collectionStatistics.tradeVolume24Hours)}`} />
                   </Stack>
                 </Stack>
               )}
@@ -257,6 +277,27 @@ export const CollectionPage = (): React.ReactElement => {
                   )}
                 </Stack>
               </Stack>
+              { collectionActivities && (
+                <Box height='350px'>
+                  <Text variant='header3'>Recent Activity</Text>
+                  <RechartsContainer width='100%' height='100%'>
+                    <AreaChart data={[collectionActivities]}>
+                      <defs>
+                        <linearGradient id='gradient-color' x1='0%' y1='0%' x2='100%' y2='0%'>
+                          <stop stopColor={colors.brandPrimaryClear50} />
+                        </linearGradient>
+                      </defs>
+                      <Legend formatter={renderColorfulLegendText} iconType='circle' align='right' />
+                      <CartesianGrid stroke='#691019' strokeDasharray='3 3' />
+                      <XAxis dataKey={collectionActivities?.date} />
+                      <YAxis />
+                      <Tooltip />
+                      <Area isAnimationActive={false} type='monotone' dataKey={ethers.utils.formatEther(collectionActivities.minimumValue)} stroke='#732B31' strokeWidth={2} fill='#ffffff' fillOpacity={0.15} />
+                      <Area isAnimationActive={false} type='monotone' dataKey={ethers.utils.formatEther(collectionActivities.maximumValue)} stroke='#F0F0F0' strokeWidth={2} fill='#ffffff' fillOpacity={0} />
+                    </AreaChart>
+                  </RechartsContainer>
+                </Box>
+              )}
             </Stack>
           </ContainingView>
         </Stack>
