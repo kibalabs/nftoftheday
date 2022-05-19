@@ -76,18 +76,21 @@ class BlockProcessor:
         erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
         erc1155Batchevents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
         events = erc721events + erc1155events + erc1155Batchevents
-        transactionHashes = [event["transactionHash"].hex() for event in events]
+        transactionHashes = [event["transactionHash"].hex() for event in events if len(event['topics']) > 3 or chain_util.normalize_address(event['address']) == self.cryptoKittiesContract.address or chain_util.normalize_address(event['address']) == self.cryptoPunksContract.address]
         transactionHashCount = {transactionHash : transactionHashes.count(transactionHash) for transactionHash in transactionHashes}
         logging.info(f'Found {len(erc721events)} erc721 events in block #{blockNumber}')
         for event in erc721events:
-            retrievedTokenTransfers += await self._process_erc721_single_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
+            if len(event['topics']) > 3 or chain_util.normalize_address(event['address']) == self.cryptoKittiesContract.address or chain_util.normalize_address(event['address']) == self.cryptoPunksContract.address:
+                retrievedTokenTransfers += await self._process_erc721_single_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
         logging.info(f'Found {len(erc1155events)} erc1155Single events in block #{blockNumber}')
         erc1155Transfers = []
         for event in erc1155events:
-            erc1155Transfers += await self._process_erc1155_single_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
+            if len(event['topics'])>3:
+                erc1155Transfers += await self._process_erc1155_single_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
         logging.info(f'Found {len(erc1155Batchevents)} erc1155Batch events in block #{blockNumber}')
         for event in erc1155Batchevents:
-            erc1155Transfers += await self._process_erc1155_batch_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
+            if len(event['topics'])>3:
+                erc1155Transfers += await self._process_erc1155_batch_event(event=dict(event), blockData=blockData, transactionHashCount=transactionHashCount)
         # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
         retrievedTokenTransfers += await self._merge_erc1155_transfers(erc1155Transfers=erc1155Transfers)
         blockNumber = blockData['number']
