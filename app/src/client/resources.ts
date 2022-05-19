@@ -221,16 +221,15 @@ export class CollectionStatistics {
 
 export class CollectionActivities {
   readonly date: string;
-  readonly transferCount: BigNumber| null;
-  readonly saleCount: BigNumber | null;
-  readonly totalValue: BigNumber| null;
-  readonly minimumValue: BigNumber | null;
-  readonly maximumValue: BigNumber| null;
-  readonly averageValue: BigNumber| null;
+  readonly transferCount: BigNumber;
+  readonly saleCount: BigNumber;
+  readonly totalValue: BigNumber;
+  readonly minimumValue: BigNumber;
+  readonly maximumValue: BigNumber;
+  readonly averageValue: BigNumber;
 
-  public constructor(date: string, transferCount: BigNumber | null, saleCount: BigNumber | null, totalValue: BigNumber | null, minimumValue: BigNumber | null, maximumValue: BigNumber | null, averageValue: BigNumber | null) {
-    this.date = date;
-    this.transferCount = transferCount;
+  public constructor(date: string, transferCount: BigNumber, saleCount: BigNumber, totalValue: BigNumber, minimumValue: BigNumber, maximumValue: BigNumber, averageValue: BigNumber) {
+    this.date = date; this.transferCount = transferCount;
     this.saleCount = saleCount;
     this.totalValue = totalValue;
     this.minimumValue = minimumValue;
@@ -241,12 +240,12 @@ export class CollectionActivities {
   public static fromObject = (obj: Record<string, unknown>): CollectionActivities => {
     return new CollectionActivities(
       String(obj.date),
-      obj.transferCount ? BigNumber.from(String(obj.transferCount)) : null,
-      obj.saleCount ? BigNumber.from(String(obj.saleCount)) : null,
-      obj.totalValue ? BigNumber.from(String(obj.totalValue)) : null,
-      obj.minimumValue ? BigNumber.from(String(obj.minimumValue)) : null,
-      obj.maximumValue ? BigNumber.from(String(obj.maximumValue)) : null,
-      obj.averageValue ? BigNumber.from(String(obj.averageValue)) : null,
+      BigNumber.from(String(obj.transferCount)),
+      BigNumber.from(String(obj.saleCount)),
+      BigNumber.from(String(obj.totalValue)),
+      BigNumber.from(String(obj.minimumValue)),
+      BigNumber.from(String(obj.maximumValue)),
+      BigNumber.from(String(obj.averageValue)),
     );
   };
 }
