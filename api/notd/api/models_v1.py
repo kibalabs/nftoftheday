@@ -40,7 +40,7 @@ class ApiTokenTransfer(BaseModel):
     fromAddress: str
     toAddress: str
     tokenId: str
-    value: int
+    value: str
     gasLimit: int
     gasPrice: int
     blockNumber: int
@@ -53,7 +53,7 @@ class ApiTradedToken(BaseModel):
     token: ApiCollectionToken
     collection: ApiCollection
     latestTransfer: ApiTokenTransfer
-    transferCount: int
+    transferCount: str
 
 
 class ApiSponsoredToken(BaseModel):
@@ -68,17 +68,17 @@ class ApiCollectionStatistics(BaseModel):
     holderCount: int
     saleCount: int
     transferCount: int
-    totalTradeVolume: int
-    lowestSaleLast24Hours: int
-    highestSaleLast24Hours: int
-    tradeVolume24Hours: int
+    totalTradeVolume: str
+    lowestSaleLast24Hours: str
+    highestSaleLast24Hours: str
+    tradeVolume24Hours: str
 
 
 class ApiCollectionDailyActivity(BaseModel):
     date: datetime.date
-    transferCount: int
-    saleCount: int
-    totalValue: int
-    minimumValue: int
-    maximumValue: int
-    averageValue: int
+    transferCount: str
+    saleCount: str
+    totalValue: str
+    minimumValue: str
+    maximumValue: str
+    averageValue: str
