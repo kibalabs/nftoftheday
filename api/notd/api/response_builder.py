@@ -94,7 +94,7 @@ class ResponseBuilder:
             fromAddress=tokenTransfer.fromAddress,
             toAddress=tokenTransfer.toAddress,
             tokenId=tokenTransfer.tokenId,
-            value=tokenTransfer.value,
+            value=str(tokenTransfer.value),
             gasLimit=tokenTransfer.gasLimit,
             gasPrice=tokenTransfer.gasPrice,
             blockNumber=tokenTransfer.blockNumber,
@@ -110,12 +110,12 @@ class ResponseBuilder:
         return ApiCollectionStatistics(
             itemCount=collectionStatistics.itemCount,
             holderCount=collectionStatistics.holderCount,
-            transferCount=collectionStatistics.transferCount,
-            saleCount=collectionStatistics.saleCount,
-            totalTradeVolume=collectionStatistics.totalTradeVolume,
-            lowestSaleLast24Hours=collectionStatistics.lowestSaleLast24Hours,
-            highestSaleLast24Hours=collectionStatistics.highestSaleLast24Hours,
-            tradeVolume24Hours=collectionStatistics.tradeVolume24Hours,
+            transferCount=str(collectionStatistics.transferCount),
+            saleCount=str(collectionStatistics.saleCount),
+            totalTradeVolume=str(collectionStatistics.totalTradeVolume),
+            lowestSaleLast24Hours=str(collectionStatistics.lowestSaleLast24Hours),
+            highestSaleLast24Hours=str(collectionStatistics.highestSaleLast24Hours),
+            tradeVolume24Hours=str(collectionStatistics.tradeVolume24Hours),
         )
 
     async def traded_token_from_model(self, tradedToken: TradedToken) -> ApiTradedToken:
@@ -123,7 +123,7 @@ class ResponseBuilder:
             token=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.latestTransfer.registryAddress, tokenId=tradedToken.latestTransfer.tokenId),
             collection=await self.collection_from_address(address=tradedToken.latestTransfer.registryAddress),
             latestTransfer=await self.token_transfer_from_model(tokenTransfer=tradedToken.latestTransfer),
-            transferCount=tradedToken.transferCount,
+            transferCount=str(tradedToken.transferCount),
         )
 
     async def sponsored_token_from_model(self, sponsoredToken: SponsoredToken) -> ApiSponsoredToken:
@@ -135,4 +135,12 @@ class ResponseBuilder:
         )
 
     async def collection_activities_from_models(self, collectionActivities: Sequence[CollectionDailyActivity]) -> Sequence[ApiCollectionDailyActivity]:
-        return [ApiCollectionDailyActivity(date=collectionActivity.date, totalValue=collectionActivity.totalValue, transferCount=collectionActivity.transferCount, saleCount=collectionActivity.saleCount, minimumValue=collectionActivity.minimumValue, maximumValue=collectionActivity.maximumValue, averageValue=collectionActivity.averageValue) for collectionActivity in collectionActivities]
+        return [ApiCollectionDailyActivity(
+            date=collectionActivity.date,
+            totalValue=str(collectionActivity.totalValue),
+            transferCount=str(collectionActivity.transferCount),
+            saleCount=str(collectionActivity.saleCount),
+            minimumValue=str(collectionActivity.minimumValue),
+            maximumValue=str(collectionActivity.maximumValue),
+            averageValue=str(collectionActivity.averageValue)
+        ) for collectionActivity in collectionActivities]
