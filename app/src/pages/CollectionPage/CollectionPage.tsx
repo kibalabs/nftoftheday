@@ -5,10 +5,10 @@ import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRout
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer as RechartsContainer, XAxis, YAxis } from 'recharts';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { Collection, CollectionActivities, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
+import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -18,7 +18,7 @@ export const CollectionPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
-  const [collectionActivities, setCollectionActivities] = React.useState<CollectionActivities | undefined | null>(undefined);
+  const [collectionActivities, setCollectionActivities] = React.useState<CollectionActivity[] | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [shouldRefreshAllTokens, _] = useIntegerUrlQueryState('shouldRefreshAllTokens');
@@ -131,14 +131,13 @@ export const CollectionPage = (): React.ReactElement => {
 
   const updateCollectionActivities = React.useCallback(async (): Promise<void> => {
     setCollectionActivities(undefined);
-    notdClient.getCollectionActivities(address).then((retrievedCollectionActivities: CollectionActivities): void => {
+    notdClient.getCollectionActivities(address).then((retrievedCollectionActivities: CollectionActivity[]): void => {
       setCollectionActivities(retrievedCollectionActivities);
     }).catch((error: unknown): void => {
       console.error(error);
       setCollectionActivities(null);
     });
   }, [notdClient, address]);
-
   React.useEffect((): void => {
     updateCollectionActivities();
   }, [updateCollectionActivities]);
@@ -281,7 +280,7 @@ export const CollectionPage = (): React.ReactElement => {
                 <Box height='350px'>
                   <Text variant='header3'>Recent Activity</Text>
                   <RechartsContainer width='100%' height='100%'>
-                    <AreaChart data={[collectionActivities]}>
+                    <AreaChart data={collectionActivities}>
                       <defs>
                         <linearGradient id='gradient-color' x1='0%' y1='0%' x2='100%' y2='0%'>
                           <stop stopColor={colors.brandPrimaryClear50} />
@@ -289,11 +288,10 @@ export const CollectionPage = (): React.ReactElement => {
                       </defs>
                       <Legend formatter={renderColorfulLegendText} iconType='circle' align='right' />
                       <CartesianGrid stroke='#691019' strokeDasharray='3 3' />
-                      <XAxis dataKey={collectionActivities?.date} />
+                      <XAxis dataKey='date' />
                       <YAxis />
-                      <Tooltip />
-                      <Area isAnimationActive={false} type='monotone' dataKey={ethers.utils.formatEther(collectionActivities.minimumValue)} stroke='#732B31' strokeWidth={2} fill='#ffffff' fillOpacity={0.15} />
-                      <Area isAnimationActive={false} type='monotone' dataKey={ethers.utils.formatEther(collectionActivities.maximumValue)} stroke='#F0F0F0' strokeWidth={2} fill='#ffffff' fillOpacity={0} />
+                      <Area isAnimationActive={false} type='monotone' dataKey='maximumValue' stroke='#732B31' strokeWidth={2} fill='#ffffff' fillOpacity={0.15} />
+                      <Area isAnimationActive={false} type='monotone' dataKey='totalValue' stroke='#F0F0F0' strokeWidth={2} fill='#ffffff' fillOpacity={0} />
                     </AreaChart>
                   </RechartsContainer>
                 </Box>

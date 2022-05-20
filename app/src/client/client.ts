@@ -148,7 +148,7 @@ export class NotdClient extends ServiceClient {
     return response.tokens;
   };
 
-  public getCollectionActivities = async (address: string): Promise<Resources.CollectionActivities> => {
+  public getCollectionActivities = async (address: string): Promise<Resources.CollectionActivity[]> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${address}/daily-activities`;
     const request = new Endpoints.GetCollectionActivitiesRequest();

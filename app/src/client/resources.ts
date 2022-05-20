@@ -219,8 +219,8 @@ export class CollectionStatistics {
   };
 }
 
-export class CollectionActivities {
-  readonly date: string;
+export class CollectionActivity {
+  readonly date: Date;
   readonly transferCount: BigNumber;
   readonly saleCount: BigNumber;
   readonly totalValue: BigNumber;
@@ -228,8 +228,9 @@ export class CollectionActivities {
   readonly maximumValue: BigNumber;
   readonly averageValue: BigNumber;
 
-  public constructor(date: string, transferCount: BigNumber, saleCount: BigNumber, totalValue: BigNumber, minimumValue: BigNumber, maximumValue: BigNumber, averageValue: BigNumber) {
-    this.date = date; this.transferCount = transferCount;
+  public constructor(date: Date, transferCount: BigNumber, saleCount: BigNumber, totalValue: BigNumber, minimumValue: BigNumber, maximumValue: BigNumber, averageValue: BigNumber) {
+    this.date = date;
+    this.transferCount = transferCount;
     this.saleCount = saleCount;
     this.totalValue = totalValue;
     this.minimumValue = minimumValue;
@@ -237,9 +238,9 @@ export class CollectionActivities {
     this.averageValue = averageValue;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): CollectionActivities => {
-    return new CollectionActivities(
-      String(obj.date),
+  public static fromObject = (obj: Record<string, unknown>): CollectionActivity => {
+    return new CollectionActivity(
+      dateFromString(obj.date as string),
       BigNumber.from(String(obj.transferCount)),
       BigNumber.from(String(obj.saleCount)),
       BigNumber.from(String(obj.totalValue)),
