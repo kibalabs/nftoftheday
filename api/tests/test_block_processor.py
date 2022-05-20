@@ -15,12 +15,11 @@ from notd.model import RetrievedTokenTransfer
 
 
 async def main():
-    awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     requester = Requester()
+    # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
 
-    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
-
-    #ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
 
     result = await blockProcessor.process_block(13281280)
@@ -241,8 +240,8 @@ async def main():
 
     result = await blockProcessor.process_block(11003194)
     expected = ProcessedBlock(
-        blockNumber=11003194, 
-        blockHash='0x8fa1ce1c506697f9da5efdfe475bd6234802c90d10ba667246b57d5ffaa4facf', 
+        blockNumber=11003194,
+        blockHash='0x8fa1ce1c506697f9da5efdfe475bd6234802c90d10ba667246b57d5ffaa4facf',
         blockDate=datetime.datetime(2020, 10, 6, 16, 16, 25),
         retrievedTokenTransfers=[
             RetrievedTokenTransfer(transactionHash='0x7cef3002426de03ff4b7be57931912af2b8829486d765593773faa7f69b2ebdc', registryAddress='0x06012c8cf97BEaD5deAe237070F9587f8E7A266d', tokenId='297658', fromAddress='0xb1690C08E213a35Ed9bAb7B318DE14420FB57d8C', toAddress='0xC7B14d7485fde23bF67ACf22b618dC9F8BD587dC', operatorAddress='0x411413BA3bDcA40257a0072220647429eBa81A81', amount=1, value=0, gasLimit=154946, gasPrice=170000001459, blockNumber=11003194, tokenType='erc721'),
@@ -257,6 +256,8 @@ async def main():
         ]
     )
     assert(result == expected)
+
+    await requester.close_connections()
     await awsRequester.close_connections()
 
 if __name__ == '__main__':
