@@ -12,10 +12,14 @@ import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
+import { usePageData } from '../../PageDataContext';
+import { ICollectionPageData } from './getCollectionPageData';
 
 export const CollectionPage = (): React.ReactElement => {
+  const { data } = usePageData();
+  const pageData = data as ICollectionPageData | null | undefined;
   const { notdClient } = useGlobals();
-  const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
+  const [collection, setCollection] = React.useState<Collection | undefined | null>(pageData?.collection || undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
@@ -35,8 +39,10 @@ export const CollectionPage = (): React.ReactElement => {
     }
   });
 
-  const updateCollection = React.useCallback(async (): Promise<void> => {
-    setCollection(undefined);
+  const updateCollection = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setCollection(undefined);
+    }
     notdClient.getCollection(address).then((retrievedCollection: Collection): void => {
       setCollection(retrievedCollection);
     }).catch((error: unknown): void => {
@@ -49,8 +55,10 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollection();
   }, [updateCollection]);
 
-  const updateCollectionSales = React.useCallback(async (): Promise<void> => {
-    setRecentSales(undefined);
+  const updateCollectionSales = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setRecentSales(undefined);
+    }
     notdClient.getCollectionRecentSales(address).then((tokenTransfers: TokenTransfer[]): void => {
       setRecentSales(tokenTransfers);
     }).catch((error: unknown): void => {
@@ -63,8 +71,10 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollectionSales();
   }, [updateCollectionSales]);
 
-  const updateCollectionStatistics = React.useCallback(async (): Promise<void> => {
-    setCollectionStatistics(undefined);
+  const updateCollectionStatistics = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setCollectionStatistics(undefined);
+    }
     notdClient.getCollectionStatistics(address).then((retrievedCollectionStatistics: CollectionStatistics): void => {
       setCollectionStatistics(retrievedCollectionStatistics);
     }).catch((error: unknown): void => {
@@ -77,9 +87,12 @@ export const CollectionPage = (): React.ReactElement => {
     updateCollectionStatistics();
   }, [updateCollectionStatistics]);
 
-  const getCollectionHoldings = React.useCallback(async (): Promise<void> => {
-    setHoldings(undefined);
+  const getCollectionHoldings = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setHoldings(undefined);
+    }
     if (!account) {
+      setHoldings(null);
       return;
     }
     notdClient.getCollectionHoldings(address, account.address).then((tokenTransfers: CollectionToken[]): void => {
