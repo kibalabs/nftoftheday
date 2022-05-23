@@ -8,7 +8,6 @@ from core import logging
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 from web3 import Web3
-from web3.types import BlockData
 from web3.types import HexBytes
 from web3.types import LogReceipt
 from web3.types import TxData
