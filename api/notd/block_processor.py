@@ -81,9 +81,11 @@ class BlockProcessor:
         transactionHashes = [event["transactionHash"].hex() for event in events if len(event['topics']) > 3 or chain_util.normalize_address(event['address']) == self.cryptoKittiesContract.address or chain_util.normalize_address(event['address']) == self.cryptoPunksContract.address]
         transactionTransferCountMap = Counter(transactionHashes)
         blockNumber = blockData['number']
+        erc721transactionHashes = [event["transactionHash"].hex() for event in events if (len(event['topics']) > 3 and chain_util.normalize_address(event['topics'][1].hex()) != transactionMap[event['transactionHash'].hex()]['from']) or chain_util.normalize_address(event['address']) == self.cryptoKittiesContract.address or chain_util.normalize_address(event['address']) == self.cryptoPunksContract.address]
+        erc721transactionTransferCountMap = Counter(erc721transactionHashes)
         for event in erc721events:
             if len(event['topics']) > 3 or chain_util.normalize_address(event['address']) in {self.cryptoKittiesContract.address, self.cryptoPunksContract.address}:
-                retrievedTokenTransfers += await self._process_erc721_single_event(event=dict(event), blockNumber=blockNumber, transaction=transactionMap[event['transactionHash'].hex()], transactionTransferCountMap=transactionTransferCountMap)
+                retrievedTokenTransfers += await self._process_erc721_single_event(event=dict(event), blockNumber=blockNumber, transaction=transactionMap[event['transactionHash'].hex()], transactionTransferCountMap=erc721transactionTransferCountMap)
         erc1155Transfers = []
         for event in erc1155SingleEvents:
             if len(event['topics']) > 3:
@@ -113,7 +115,7 @@ class BlockProcessor:
         amount = data[1]
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        value = (transaction['value'] * amount) / transactionTransferCountMap[transactionHash]
+        value = (transaction['value'] * amount) / transactionTransferCountMap[transactionHash] if transaction['from'] != fromAddress else 0
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155single')]
         return transactions
 
@@ -149,7 +151,7 @@ class BlockProcessor:
         dataDict = {tokenIds[i]: amounts[i] for i in range(len(tokenIds))}
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        value = transaction['value'] / transactionTransferCountMap[transactionHash]
+        value = transaction['value'] / transactionTransferCountMap[transactionHash] if transaction['from'] != fromAddress else 0
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value*amount, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
         return transactions
 
@@ -180,6 +182,6 @@ class BlockProcessor:
         operatorAddress = transaction['from']
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        value = transaction['value'] / transactionTransferCountMap[transactionHash]
+        value = transaction['value'] / transactionTransferCountMap[transactionHash] if operatorAddress != fromAddress else 0
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc721')]
         return transactions
