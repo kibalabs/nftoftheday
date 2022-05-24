@@ -99,10 +99,9 @@ class NotdManager:
         )
         return randomTokenTransfers[0]
 
-
     async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
-            TokenTransfersTable.select() \
+            TokenTransfersTable.select()
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .with_only_columns([sqlalchemy.func.count()])
             .where(BlocksTable.c.blockDate >= startDate)
@@ -112,17 +111,16 @@ class NotdManager:
         count = result.scalar()
         return count
 
-
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         query = (
             TokenTransfersTable.select()
-            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber) \
-            .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()]) \
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId) \
-            .where(BlocksTable.c.blockDate >= startDate) \
-            .where(BlocksTable.c.blockDate < endDate) \
-            .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST)) \
-            .order_by(sqlalchemy.func.count().desc()) \
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()])
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .where(BlocksTable.c.blockDate >= startDate)
+            .where(BlocksTable.c.blockDate < endDate)
+            .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+            .order_by(sqlalchemy.func.count().desc())
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
@@ -161,28 +159,45 @@ class NotdManager:
         address = chain_util.normalize_address(value=address)
         startDate = date_util.start_of_day()
         endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
-        itemCount = len(await self.retriever.list_token_metadatas(fieldFilters=[
-            StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
-        ]))
-        holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
-        allCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
-        totalTradeVolume = sum([collectionActivity.totalValue for collectionActivity in allCollectionActivities])
-        dayCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
-                StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
-                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate, lt=endDate),
-            ]
+        itemCountQuery = (
+            TokenMetadatasTable.select()
+            .with_only_columns([sqlalchemy.func.count()])
+            .where(TokenMetadatasTable.c.registryAddress == address)
         )
-        saleCount = 0
-        transferCount = 0
-        tradeVolume24Hours = 0
-        lowestSaleLast24Hours = 0
-        highestSaleLast24Hours = 0
-        for collectionActivity in dayCollectionActivities:
-            saleCount += collectionActivity.saleCount
-            tradeVolume24Hours += collectionActivity.totalValue
-            lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
-            highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
-            transferCount += collectionActivity.transferCount
+        itemCountResult = await self.retriever.database.execute(query=itemCountQuery)
+        itemCount = itemCountResult.scalar()
+        holderCountQuery = (
+            TokenOwnershipsTable.select()
+            .with_only_columns([sqlalchemy.func.count()])
+            .where(TokenOwnershipsTable.c.registryAddress == address)
+            .where(TokenOwnershipsTable.c.ownerAddress != chain_util.BURN_ADDRESS)
+        )
+        holderCountResult = await self.retriever.database.execute(query=holderCountQuery)
+        holderCount = holderCountResult.scalar()
+        allActivityQuery = (
+            CollectionHourlyActivityTable.select()
+            .with_only_columns([
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.saleCount),
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.transferCount),
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
+            ])
+            .where(CollectionHourlyActivityTable.c.address == address)
+        )
+        allActivityResult = await self.retriever.database.execute(query=allActivityQuery)
+        (saleCount, transferCount, totalTradeVolume) = allActivityResult.first()
+        dayActivityQuery = (
+            CollectionHourlyActivityTable.select()
+            .with_only_columns([
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
+                sqlalchemy.func.min(CollectionHourlyActivityTable.c.minimumValue),
+                sqlalchemy.func.max(CollectionHourlyActivityTable.c.maximumValue),
+            ])
+            .where(CollectionHourlyActivityTable.c.address == address)
+            .where(CollectionHourlyActivityTable.c.date >= startDate)
+            .where(CollectionHourlyActivityTable.c.date < endDate)
+        )
+        dayActivityResult = await self.retriever.database.execute(query=dayActivityQuery)
+        (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityResult.first()
         return CollectionStatistics(
             itemCount=itemCount,
             holderCount=holderCount,

@@ -13,18 +13,21 @@ import { CollectionView } from '../../components/CollectionView';
 import { MetricView } from '../../components/MetricView';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
+import { usePageData } from '../../PageDataContext';
+import { ITokenPageData } from './getTokenPageData';
 
 const RECENT_SALES_PAGE_SIZE = 10;
 
 export const TokenPage = (): React.ReactElement => {
+  const { data } = usePageData<ITokenPageData>();
   const { notdClient } = useGlobals();
   const account = useAccount();
   const registryAddress = useStringRouteParam('registryAddress');
   const tokenId = useStringRouteParam('tokenId');
   const navigator = useNavigator();
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
-  const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(undefined);
-  const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
+  const [collectionToken, setCollectionToken] = React.useState<CollectionToken | undefined | null>(data?.collectionToken || undefined);
+  const [collection, setCollection] = React.useState<Collection | undefined | null>(data?.collection || undefined);
   const [tokenRecentTransfers, setTokenRecentTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [showLoadMore, setShowLoadMore] = React.useState<boolean>(false);
   const defaultImage = '/assets/icon.png';
@@ -41,8 +44,10 @@ export const TokenPage = (): React.ReactElement => {
     }
   });
 
-  const updateCollectionToken = React.useCallback(async (): Promise<void> => {
-    setCollectionToken(undefined);
+  const updateCollectionToken = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setCollectionToken(undefined);
+    }
     notdClient.getCollectionToken(registryAddress, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
       setCollectionToken(retrievedCollectionToken);
     }).catch((error: unknown): void => {
@@ -54,8 +59,11 @@ export const TokenPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateCollectionToken();
   }, [updateCollectionToken]);
-  const updateCollection = React.useCallback(async (): Promise<void> => {
-    setCollection(undefined);
+
+  const updateCollection = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setCollection(undefined);
+    }
     notdClient.getCollection(registryAddress).then((retrievedCollection: Collection): void => {
       setCollection(retrievedCollection);
     }).catch((error: unknown): void => {
@@ -68,8 +76,10 @@ export const TokenPage = (): React.ReactElement => {
     updateCollection();
   }, [updateCollection]);
 
-  const updateTokenSales = React.useCallback(async (): Promise<void> => {
-    setTokenRecentTransfers(undefined);
+  const updateTokenSales = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setTokenRecentTransfers(undefined);
+    }
     notdClient.getTokenRecentTransfers(registryAddress, tokenId, RECENT_SALES_PAGE_SIZE).then((tokenTransfers: TokenTransfer[]): void => {
       setTokenRecentTransfers(tokenTransfers);
       setShowLoadMore(tokenTransfers.length === RECENT_SALES_PAGE_SIZE);

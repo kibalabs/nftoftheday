@@ -1,5 +1,5 @@
 # Stage 1: build
-FROM node:16.13.0-stretch as build
+FROM node:18.2.0 as build
 
 WORKDIR /app
 
@@ -10,8 +10,11 @@ RUN npm ci
 
 # Build app
 COPY . .
-RUN npm run build
+RUN npm run build-ssr
 
-# Stage 2: Serve build files with nginx
-FROM ghcr.io/kibalabs/app-serve:latest
-COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 3000
+CMD ["./dist/start.sh"]
+
+# # Stage 2: Serve with nginx
+# FROM ghcr.io/kibalabs/app-serve:latest
+# COPY --from=build /app/dist /usr/share/nginx/html
