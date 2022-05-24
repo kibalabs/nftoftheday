@@ -3,9 +3,9 @@ import React from 'react';
 import { dateToString } from '@kibalabs/core';
 import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { toast } from 'react-toastify';
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer as RechartsContainer, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
@@ -19,6 +19,7 @@ export const CollectionPage = (): React.ReactElement => {
   const [collection, setCollection] = React.useState<Collection | undefined | null>(undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [collectionActivities, setCollectionActivities] = React.useState<CollectionActivity[] | undefined | null>(undefined);
+  const [chartData, setChartData] = React.useState< any[] | undefined >(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [shouldRefreshAllTokens, _] = useIntegerUrlQueryState('shouldRefreshAllTokens');
@@ -133,6 +134,16 @@ export const CollectionPage = (): React.ReactElement => {
     setCollectionActivities(undefined);
     notdClient.getCollectionActivities(address).then((retrievedCollectionActivities: CollectionActivity[]): void => {
       setCollectionActivities(retrievedCollectionActivities);
+      const data = retrievedCollectionActivities.map((formattedValues) => ({
+        date: dateToString(formattedValues.date, 'dd MMMM yyyy'),
+        maximumValue: formatEtherValue(formattedValues.maximumValue),
+        minimumValue: formatEtherValue(formattedValues.minimumValue),
+        totalValue: formatEtherValue(formattedValues.averageValue),
+        transferCount: formatEtherValue(formattedValues.transferCount),
+        averageValue: formatEtherValue(formattedValues.averageValue),
+        saleCount: (formattedValues.saleCount.toNumber()),
+      }));
+      setChartData(data);
     }).catch((error: unknown): void => {
       console.error(error);
       setCollectionActivities(null);
@@ -146,6 +157,25 @@ export const CollectionPage = (): React.ReactElement => {
   const renderColorfulLegendText = (value: string) => {
     return <span style={{ color: '#FFFFFF' }}>{value}</span>;
   };
+
+  let formatEtherValue = (value: BigNumber) => {
+    return ethers.utils.formatEther(value);
+  };
+
+  const renderCustomToolTip = (data: any) => {
+    if (!data.payload || data.payload.length === 0) return null;
+    const tooltipData = data.payload[0].payload;
+    return (
+      <Box variant='card'>
+        <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide1}>
+          <Text>{`Date:${tooltipData.date}`}</Text>
+          <Text>{`SaleCount:${tooltipData.saleCount}`}</Text>
+          <Text>{`AverageValue:${tooltipData.averageValue}`}</Text>
+        </Stack>
+      </Box>
+    );
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
       {collection === undefined ? (
@@ -230,7 +260,7 @@ export const CollectionPage = (): React.ReactElement => {
                   </ResponsiveHidingView>
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
                     <MetricView name={'24h Low Sale'} value={`Ξ ${ethers.utils.formatEther(collectionStatistics.lowestSaleLast24Hours)}`} />
-                    <MetricView name={'24h High Sale'} value={`Ξ ${ethers.utils.formatEther(collectionStatistics.highestSaleLast24Hours)}`} />
+                    <MetricView name={'24h High Sale'} value={`Ξ  ${ethers.utils.formatEther(collectionStatistics.highestSaleLast24Hours)}`} />
                     <MetricView name={'24h Volume'} value={`Ξ ${ethers.utils.formatEther(collectionStatistics.tradeVolume24Hours)}`} />
                   </Stack>
                 </Stack>
@@ -252,7 +282,7 @@ export const CollectionPage = (): React.ReactElement => {
                   </Stack>
                 </Stack>
               ) : (
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                <Stack direction={Direction.Horizontal} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
                   <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
                   <Text>to show your holdings and watchlist.</Text>
                 </Stack>
@@ -280,18 +310,19 @@ export const CollectionPage = (): React.ReactElement => {
                 <Box height='350px'>
                   <Text variant='header3'>Recent Activity</Text>
                   <RechartsContainer width='100%' height='100%'>
-                    <AreaChart data={collectionActivities}>
+                    <AreaChart data={chartData}>
                       <defs>
                         <linearGradient id='gradient-color' x1='0%' y1='0%' x2='100%' y2='0%'>
                           <stop stopColor={colors.brandPrimaryClear50} />
                         </linearGradient>
                       </defs>
                       <Legend formatter={renderColorfulLegendText} iconType='circle' align='right' />
-                      <CartesianGrid stroke='#691019' strokeDasharray='3 3' />
+                      <CartesianGrid stroke={colors.brandPrimary} strokeDasharray='3 3' />
                       <XAxis dataKey='date' />
                       <YAxis />
-                      <Area isAnimationActive={false} type='monotone' dataKey='maximumValue' stroke='#732B31' strokeWidth={2} fill='#ffffff' fillOpacity={0.15} />
-                      <Area isAnimationActive={false} type='monotone' dataKey='totalValue' stroke='#F0F0F0' strokeWidth={2} fill='#ffffff' fillOpacity={0} />
+                      <Tooltip content={renderCustomToolTip} />
+                      <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.xAxis1} strokeWidth={2} fill='#ffffff' fillOpacity={0.15} />
+                      <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text}strokeWidth={2} fill='#ffffff' fillOpacity={0} />
                     </AreaChart>
                   </RechartsContainer>
                 </Box>

@@ -12,6 +12,7 @@ export const buildNotdTheme = (): ITheme => {
       background: '#000000',
       text: '#ffffff',
       placeholderText: 'rgba(255, 255, 255, 0.5)',
+      xAxis1: '#732B31',
     },
     fonts: {
       main: {
