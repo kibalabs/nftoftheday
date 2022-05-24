@@ -11,7 +11,6 @@ import { MostTradedTokenTransferCard } from '../../components/mostTradedTokenTra
 import { RandomTokenTransferCard } from '../../components/randomTokenTransferCard';
 import { SponsoredTokenCard } from '../../components/sponsoredTokenCard';
 import { useGlobals } from '../../globalsContext';
-import '../../fonts.css';
 
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);

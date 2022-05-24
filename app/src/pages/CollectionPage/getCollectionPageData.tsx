@@ -4,22 +4,23 @@ import { Collection } from '../../client/resources';
 import { IGlobals } from '../../globalsContext';
 
 export interface ICollectionPageData {
-  collection: Collection;
+  collection: Collection | null;
 }
 
-export const getCollectionPageData = async (globals: IGlobals, params: Record<string, string>): Promise<ICollectionPageData | null> => {
+export const getCollectionPageData = async (globals: IGlobals, params: Record<string, string>): Promise<ICollectionPageData> => {
   const address = params.address;
   if (!address) {
     console.error('Expected address to be passed to getCollectionPageData via params');
-    return null;
+    return {
+      collection: null,
+    };
   }
   const checksumAddress = ethers.utils.getAddress(address);
   const collection = await globals.notdClient.getCollection(checksumAddress)
     .catch((error: unknown): void => {
       console.error(error);
     });
-  if (collection) {
-    return { collection };
-  }
-  return null;
+  return {
+    collection: collection || null,
+  };
 };

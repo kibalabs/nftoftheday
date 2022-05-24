@@ -10,14 +10,17 @@ import { ToastContainer } from 'react-toastify';
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { NavBar } from './components/NavBar';
-import { GlobalsProvider } from './globalsContext';
+import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { CollectionPage } from './pages/CollectionPage';
 import { getCollectionPageData } from './pages/CollectionPage/getCollectionPageData';
 import { HomePage } from './pages/HomePage';
 import { TokenPage } from './pages/TokenPage';
+import { getTokenPageData } from './pages/TokenPage/getTokenPageData';
 import { UserPage } from './pages/UserPage';
 import { buildNotdTheme } from './theme';
+import './fonts.css';
+
 
 declare global {
   export interface Window {
@@ -44,10 +47,10 @@ export interface IAppProps extends IHeadRootProviderProps {
   pageData?: unknown | undefined | null;
 }
 
-export const routes: IRoute[] = [
+export const routes: IRoute<IGlobals>[] = [
   { path: '/', page: HomePage },
   { path: '/collections/:address', page: CollectionPage, getPageData: getCollectionPageData },
-  { path: '/collections/:registryAddress/tokens/:tokenId', page: TokenPage },
+  { path: '/collections/:registryAddress/tokens/:tokenId', page: TokenPage, getPageData: getTokenPageData },
   { path: '/accounts/:accountAddress', page: UserPage },
 ];
 

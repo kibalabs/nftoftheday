@@ -2,9 +2,10 @@ import React, { useContext, useState } from 'react';
 
 import { IMultiAnyChildProps } from '@kibalabs/core-react';
 
-interface IPageData {
-  data: unknown | null | undefined;
-  setData: (data: unknown | null | undefined) => void;
+// NOTE(krishan711): this may be better without the setData?
+interface IPageData<DataType = unknown, > {
+  data: DataType | null | undefined;
+  setData: (data: DataType | null | undefined) => void;
 }
 
 const PageDataContext = React.createContext<IPageData | null>(null);
@@ -22,10 +23,13 @@ export const PageDataProvider = (props: IPageDataProviderProps) => {
   );
 };
 
-export const usePageData = (): IPageData => {
+export const usePageData = <DataType, >(): IPageData<DataType> => {
   const pageDataContext = useContext(PageDataContext);
   if (!pageDataContext) {
     throw new Error('Cannot use usePageData since pageDataContext has not ben provided above in the hierarchy');
   }
-  return pageDataContext;
+  return {
+    data: pageDataContext.data as DataType,
+    setData: pageDataContext.setData as ((data: DataType | null | undefined) => void),
+  };
 };
