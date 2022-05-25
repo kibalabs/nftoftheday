@@ -116,10 +116,10 @@ class NotdManager:
             TokenTransfersTable.select()
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()])
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
             .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
             .order_by(sqlalchemy.func.count().desc())
             .limit(1)
         )
@@ -201,12 +201,12 @@ class NotdManager:
         return CollectionStatistics(
             itemCount=itemCount,
             holderCount=holderCount,
-            saleCount=saleCount,
-            transferCount=transferCount,
-            totalTradeVolume=totalTradeVolume,
-            lowestSaleLast24Hours=lowestSaleLast24Hours,
-            highestSaleLast24Hours=highestSaleLast24Hours,
-            tradeVolume24Hours=tradeVolume24Hours,
+            saleCount=saleCount or 0,
+            transferCount=transferCount or 0,
+            totalTradeVolume=totalTradeVolume or 0,
+            lowestSaleLast24Hours=lowestSaleLast24Hours or 0,
+            highestSaleLast24Hours=highestSaleLast24Hours or 0,
+            tradeVolume24Hours=tradeVolume24Hours or 0,
         )
 
     async def get_collection_daily_activities(self, address: str) -> List[CollectionDailyActivity]:
