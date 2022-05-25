@@ -141,7 +141,7 @@ export const CollectionPage = (): React.ReactElement => {
         totalValue: formatEtherValue(formattedValues.averageValue),
         transferCount: formatEtherValue(formattedValues.transferCount),
         averageValue: formatEtherValue(formattedValues.averageValue),
-        saleCount: (formattedValues.saleCount.toNumber()),
+        saleCount: formatEtherValue(formattedValues.saleCount),
       }));
       setChartData(data);
     }).catch((error: unknown): void => {
@@ -319,10 +319,11 @@ export const CollectionPage = (): React.ReactElement => {
                       <Legend formatter={renderColorfulLegendText} iconType='circle' align='right' />
                       <CartesianGrid stroke={colors.brandPrimary} strokeDasharray='3 3' />
                       <XAxis dataKey='date' />
-                      <YAxis />
+                      <YAxis yAxisId={0} />
+                      <YAxis yAxisId={1}type='number' domain={['dataMin', 'auto']} orientation='right' />
                       <Tooltip content={renderCustomToolTip} />
-                      <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.xAxis1} strokeWidth={2} fill='#ffffff' fillOpacity={0.15} />
-                      <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text}strokeWidth={2} fill='#ffffff' fillOpacity={0} />
+                      <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.xAxis1} strokeWidth={2} fill='#ffffff' fillOpacity={0.15} yAxisId={1} />
+                      <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text}strokeWidth={2} fill='#ffffff' fillOpacity={0} yAxisId={0} />
                     </AreaChart>
                   </RechartsContainer>
                 </Box>
