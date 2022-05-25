@@ -7,7 +7,7 @@ export const buildNotdTheme = (): ITheme => {
       fontSize: '18px',
     },
     colors: {
-      brandPrimary: '#6F0000',
+      brandPrimary: '#000000',
       brandSecondary: '#200122',
       background: '#000000',
       text: '#ffffff',
@@ -43,7 +43,7 @@ export const buildNotdTheme = (): ITheme => {
     },
     texts: {
       default: {
-        'font-family': "'Post No Bills Jaffna', sans-serif",
+        'font-family': "'Roboto Condensed', sans-serif",
         'font-weight': '400',
       },
       header3: {
