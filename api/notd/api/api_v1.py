@@ -4,7 +4,7 @@ from typing import Optional
 from core.util import date_util
 from fastapi import APIRouter
 
-from notd.api.endpoints_v1 import GetAccountTokensResponse, SubmitTreasureHuntForCollectionTokenRequest, SubmitTreasureHuntForCollectionTokenResponse
+from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
@@ -25,6 +25,8 @@ from notd.api.endpoints_v1 import RetrieveRandomTransferResponse
 from notd.api.endpoints_v1 import RetrieveSponsoredTokenResponse
 from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
+from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
+from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse

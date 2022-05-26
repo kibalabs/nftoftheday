@@ -20,8 +20,8 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-from web3 import Web3
 from eth_account.messages import defunct_hash_message
+from web3 import Web3
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
