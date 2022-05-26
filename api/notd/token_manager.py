@@ -348,7 +348,7 @@ class TokenManager:
 
     async def update_activity_for_all_collections(self) -> None:
         # TODO(femi-ogunkola): Account for deleted transactions
-        collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
+        collectionActivity = await self.retriever.list_collection_activities(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
         if len(collectionActivity) > 0:
             lastestProcessedDate = collectionActivity[0].date
         else:
@@ -369,7 +369,7 @@ class TokenManager:
         startDate = date_hour_from_datetime(startDate)
         retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, startDate=startDate)
         async with self.saver.create_transaction() as connection:
-            collectionActivity = await self.retriever.list_collections_activity(
+            collectionActivity = await self.retriever.list_collection_activities(
                 connection=connection,
                 fieldFilters=[
                     StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),

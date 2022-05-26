@@ -1,13 +1,13 @@
 from typing import Mapping
 
-from notd.model import Block
+from notd.model import Block, UserInteraction
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
 from notd.model import TokenTransfer
-from notd.store.schema import BlocksTable
+from notd.store.schema import BlocksTable, UserInteractionsTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
@@ -124,4 +124,16 @@ def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
         minimumValue=row[CollectionHourlyActivityTable.c.minimumValue],
         maximumValue=row[CollectionHourlyActivityTable.c.maximumValue],
         averageValue=row[CollectionHourlyActivityTable.c.averageValue],
+    )
+
+def user_interaction_from_row(row: Mapping) -> UserInteraction:
+    return UserInteraction(
+        userInteractionId=row[UserInteractionsTable.c.userInteractionId],
+        createdDate=row[UserInteractionsTable.c.createdDate],
+        updatedDate=row[UserInteractionsTable.c.updatedDate],
+        date=row[UserInteractionsTable.c.date],
+        userAddress=row[UserInteractionsTable.c.userAddress],
+        command=row[UserInteractionsTable.c.command],
+        signature=row[UserInteractionsTable.c.signature],
+        message=row[UserInteractionsTable.c.message],
     )

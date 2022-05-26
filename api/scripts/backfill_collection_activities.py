@@ -52,7 +52,7 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
         if len(tokenTransfers) == 0:
             print(f"Skipping {currentBlockNumber} to {endBlockNumber} with 0 transfers ")
         else:
-            collectionHourlyActivities = await retriever.list_collections_activity(
+            collectionHourlyActivities = await retriever.list_collection_activities(
                 fieldFilters=[
                     DateFieldFilter(CollectionHourlyActivityTable.c.date.key, gte=date_hour_from_datetime(tokenTransfers[0].blockDate)),
                     DateFieldFilter(CollectionHourlyActivityTable.c.date.key, lte=date_hour_from_datetime(tokenTransfers[-1].blockDate)),

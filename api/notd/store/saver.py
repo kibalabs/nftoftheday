@@ -8,15 +8,16 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
+from sqlalchemy import JSON
 
-from notd.model import Block
+from notd.model import Block, UserInteraction
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
-from notd.store.schema import BlocksTable
+from notd.store.schema import BlocksTable, UserInteractionsTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
@@ -402,3 +403,29 @@ class Saver(CoreSaver):
             values[CollectionHourlyActivityTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = CollectionHourlyActivityTable.update(CollectionHourlyActivityTable.c.collectionActivityId == collectionActivityId).values(values)
         await self._execute(query=query, connection=connection)
+
+    async def create_user_interaction(self, date: datetime.datetime, userAddress: str, command: str, signature: str, message: JSON, connection: Optional[DatabaseConnection] = None) -> UserInteraction:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            UserInteractionsTable.c.createdDate.key: createdDate,
+            UserInteractionsTable.c.updatedDate.key: updatedDate,
+            UserInteractionsTable.c.date.key: date,
+            UserInteractionsTable.c.userAddress.key: userAddress,
+            UserInteractionsTable.c.command.key: command,
+            UserInteractionsTable.c.signature.key: signature,
+            UserInteractionsTable.c.message.key: message,
+        }
+        query = UserInteractionsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        userInteractionId = result.inserted_primary_key[0]
+        return UserInteraction(
+            userInteractionId=userInteractionId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            date=date,
+            userAddress=userAddress,
+            command=command,
+            signature=signature,
+            message=message,
+        )

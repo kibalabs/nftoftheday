@@ -4,7 +4,7 @@ from typing import Optional
 from core.util import date_util
 from fastapi import APIRouter
 
-from notd.api.endpoints_v1 import GetAccountTokensResponse
+from notd.api.endpoints_v1 import GetAccountTokensResponse, SubmitTreasureHuntForCollectionTokenRequest, SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
@@ -111,7 +111,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokens = await notdManager.list_collection_tokens_by_owner(address=registryAddress, ownerAddress=ownerAddress)
         return ListCollectionTokensByOwnerResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
 
-    @router.get('/collections/{registryAddress}/token/{tokenId}/recent-transfers', response_model=GetTokenRecentTransfersResponse)
+    @router.get('/collections/{registryAddress}/tokens/{tokenId}/recent-transfers', response_model=GetTokenRecentTransfersResponse)
     async def get_collection_token_recent_transfers(registryAddress: str, tokenId: str, limit: Optional[int] = None, offset: Optional[int] = None):
         limit = limit if limit is not None else 20
         offset = offset if offset is not None else 0
@@ -168,5 +168,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def subscribe_email(request: SubscribeRequest):
         await notdManager.subscribe_email(email=request.email)
         return SubscribeResponse()
+
+    @router.post('/collections/{registryAddress}/tokens/{tokenId}/submit-treasure-hunt')
+    async def submit_treasure_hunt_for_collection_token(registryAddress: str, tokenId: str, request: SubmitTreasureHuntForCollectionTokenRequest):
+        await notdManager.submit_treasure_hunt_for_collection_token(registryAddress=registryAddress, tokenId=tokenId, userAddress=request.userAddress, signature=request.signature)
+        return SubmitTreasureHuntForCollectionTokenResponse()
 
     return router

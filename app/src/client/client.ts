@@ -106,7 +106,7 @@ export class NotdClient extends ServiceClient {
 
   public getTokenRecentTransfers = async (registryAddress: string, tokenId: string, limit?: number, offset?: number): Promise<Resources.TokenTransfer[]> => {
     const method = RestMethod.GET;
-    const path = `v1/collections/${registryAddress}/token/${tokenId}/recent-transfers`;
+    const path = `v1/collections/${registryAddress}/tokens/${tokenId}/recent-transfers`;
     const request = new Endpoints.GetTokenRecentTransfersRequest(limit, offset);
     const response = await this.makeRequest(method, path, request, Endpoints.GetTokenRecentTransfersResponse);
     return response.tokenTransfers;

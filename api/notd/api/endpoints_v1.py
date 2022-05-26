@@ -149,3 +149,10 @@ class GetCollectionDailyActivitiesRequest(BaseModel):
 
 class GetCollectionDailyActivitiesResponse(BaseModel):
     collectionActivities: List[ApiCollectionDailyActivity]
+
+class SubmitTreasureHuntForCollectionTokenRequest(BaseModel):
+    userAddress: str
+    signature: str
+
+class SubmitTreasureHuntForCollectionTokenResponse(BaseModel):
+    pass
