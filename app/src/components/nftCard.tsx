@@ -33,7 +33,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
 
   return (
-    <Box variant='card'>
+    <Box variant='card' shouldClipContent={true}>
       <Stack direction={Direction.Vertical} childAlignment={Alignment.Center}>
         <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
           <Box variant={`cardLabelBox${extraLabelBoxVariantsString}`} isFullWidth={false}>
