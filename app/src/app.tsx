@@ -19,8 +19,6 @@ import { TokenPage } from './pages/TokenPage';
 import { getTokenPageData } from './pages/TokenPage/getTokenPageData';
 import { UserPage } from './pages/UserPage';
 import { buildNotdTheme } from './theme';
-import './fonts.css';
-
 
 declare global {
   export interface Window {
@@ -65,7 +63,7 @@ export const App = (props: IAppProps): React.ReactElement => {
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={globals}>
           <AccountControlProvider>
-            <BackgroundView linearGradient='#200122,#6F0000'>
+            <BackgroundView linearGradient='#200122,#000000'>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
                 <NavBar />
                 <Stack.Item growthFactor={1} shrinkFactor={1}>

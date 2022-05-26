@@ -13,11 +13,6 @@ export const buildNotdTheme = (): ITheme => {
       text: '#ffffff',
       placeholderText: 'rgba(255, 255, 255, 0.5)',
     },
-    fonts: {
-      main: {
-        url: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700,800,900&display=swap',
-      },
-    },
     links: {
       default: {
         normal: {
@@ -43,7 +38,7 @@ export const buildNotdTheme = (): ITheme => {
     },
     texts: {
       default: {
-        'font-family': "'Post No Bills Jaffna', sans-serif",
+        'font-family': "'Roboto Condensed', sans-serif",
         'font-weight': '400',
       },
       header3: {

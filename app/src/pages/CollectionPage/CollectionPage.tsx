@@ -250,7 +250,7 @@ export const CollectionPage = (): React.ReactElement => {
                     </Stack>
                   </Stack>
                 ) : (
-                  <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                  <Stack direction={Direction.Horizontal} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
                     <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
                     <Text>to show your holdings and watchlist.</Text>
                   </Stack>
