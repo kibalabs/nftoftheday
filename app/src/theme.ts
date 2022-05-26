@@ -6,6 +6,11 @@ export const buildNotdTheme = (): ITheme => {
     dimensions: {
       fontSize: '18px',
     },
+    fonts: {
+      main: {
+        url: 'https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap',
+      },
+    },
     colors: {
       brandPrimary: '#6F0000',
       brandSecondary: '#200122',

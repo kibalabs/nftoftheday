@@ -7,6 +7,7 @@ from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
 from notd.model import TokenTransfer
+from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenCollectionsTable
@@ -14,6 +15,7 @@ from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema import UserInteractionsTable
 
 
 def token_transfer_from_row(row: Mapping) -> TokenTransfer:
@@ -124,4 +126,16 @@ def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
         minimumValue=row[CollectionHourlyActivityTable.c.minimumValue],
         maximumValue=row[CollectionHourlyActivityTable.c.maximumValue],
         averageValue=row[CollectionHourlyActivityTable.c.averageValue],
+    )
+
+def user_interaction_from_row(row: Mapping) -> UserInteraction:
+    return UserInteraction(
+        userInteractionId=row[UserInteractionsTable.c.userInteractionId],
+        createdDate=row[UserInteractionsTable.c.createdDate],
+        updatedDate=row[UserInteractionsTable.c.updatedDate],
+        date=row[UserInteractionsTable.c.date],
+        userAddress=row[UserInteractionsTable.c.userAddress],
+        command=row[UserInteractionsTable.c.command],
+        signature=row[UserInteractionsTable.c.signature],
+        message=row[UserInteractionsTable.c.message],
     )

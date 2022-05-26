@@ -162,3 +162,21 @@ CREATE INDEX tbl_collection_hourly_activities_total_value ON tbl_collection_hour
 CREATE INDEX tbl_collection_hourly_activities_minimum_value ON tbl_collection_hourly_activities (minimum_value);
 CREATE INDEX tbl_collection_hourly_activities_maximum_value ON tbl_collection_hourly_activities (maximum_value);
 CREATE INDEX tbl_collection_hourly_activities_average_value ON tbl_collection_hourly_activities (average_value);
+
+CREATE TABLE tbl_user_interactions (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    user_address TEXT NOT NULL,
+    command TEXT NOT NULL,
+    signature TEXT NOT NULL,
+    message JSONB NOT NULL
+);
+CREATE INDEX tbl_user_interactions_created_date ON tbl_user_interactions (created_date);
+CREATE INDEX tbl_user_interactions_updated_date ON tbl_user_interactions (updated_date);
+CREATE INDEX tbl_user_interactions_date ON tbl_user_interactions (date);
+CREATE INDEX tbl_user_interactions_user_address ON tbl_user_interactions (user_address);
+CREATE INDEX tbl_user_interactions_command ON tbl_user_interactions (command);
+CREATE INDEX tbl_user_interactions_user_address_command ON tbl_user_interactions (user_address, command);
+CREATE INDEX tbl_user_interactions_message ON tbl_user_interactions USING GIN (message);
