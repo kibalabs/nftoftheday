@@ -7,16 +7,11 @@ export const buildNotdTheme = (): ITheme => {
       fontSize: '18px',
     },
     colors: {
-      brandPrimary: '#000000',
+      brandPrimary: '#6F0000',
       brandSecondary: '#200122',
       background: '#000000',
       text: '#ffffff',
       placeholderText: 'rgba(255, 255, 255, 0.5)',
-    },
-    fonts: {
-      main: {
-        url: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700,800,900&display=swap',
-      },
     },
     links: {
       default: {

@@ -19,8 +19,6 @@ import { TokenPage } from './pages/TokenPage';
 import { getTokenPageData } from './pages/TokenPage/getTokenPageData';
 import { UserPage } from './pages/UserPage';
 import { buildNotdTheme } from './theme';
-import './fonts.css';
-
 
 declare global {
   export interface Window {
