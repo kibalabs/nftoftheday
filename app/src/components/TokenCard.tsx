@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { truncateStart } from '@kibalabs/core';
-import { Alignment, Box, Direction, Media, LinkBase, PaddingSize, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, LinkBase, Media, PaddingSize, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { CollectionToken } from '../client/resources';
 
