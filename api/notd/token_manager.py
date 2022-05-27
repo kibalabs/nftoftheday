@@ -221,6 +221,7 @@ class TokenManager:
         collectionTokenIds = [(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas]
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
+        await self.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         address = chain_util.normalize_address(value=address)
