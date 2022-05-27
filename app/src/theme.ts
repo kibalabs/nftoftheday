@@ -106,9 +106,10 @@ export const buildNotdTheme = (): ITheme => {
       unrounded: {
         'border-radius': '0',
       },
-      wideBorder: {
-        'border-color': '#4B0312',
-        'border-width': '7px',
+      avatar: {
+        'border-color': '$colors.brandSecondary',
+        'background-color': '$colors.brandSecondary',
+        'border-width': '5px',
       },
       divider: {
         'background-color': 'rgba(255, 255, 255, 0.15)',

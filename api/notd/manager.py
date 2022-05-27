@@ -163,21 +163,16 @@ class NotdManager:
         address = chain_util.normalize_address(value=address)
         startDate = date_util.start_of_day()
         endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
-        itemCountQuery = (
-            TokenMetadatasTable.select()
-            .with_only_columns([sqlalchemy.func.count()])
-            .where(TokenMetadatasTable.c.registryAddress == address)
-        )
-        itemCountResult = await self.retriever.database.execute(query=itemCountQuery)
-        itemCount = itemCountResult.scalar()
         holderCountQuery = (
             TokenOwnershipsTable.select()
-            .with_only_columns([sqlalchemy.func.count()])
+            .with_only_columns([
+                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
+                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
+            ])
             .where(TokenOwnershipsTable.c.registryAddress == address)
-            .where(TokenOwnershipsTable.c.ownerAddress != chain_util.BURN_ADDRESS)
         )
         holderCountResult = await self.retriever.database.execute(query=holderCountQuery)
-        holderCount = holderCountResult.scalar()
+        (itemCount, holderCount) = holderCountResult.first()
         allActivityQuery = (
             CollectionHourlyActivityTable.select()
             .with_only_columns([
