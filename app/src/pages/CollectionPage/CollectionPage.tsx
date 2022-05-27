@@ -2,13 +2,15 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import styled from 'styled-components';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { shortFormatEther } from '../../chainUtil';
-import { Collection, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
+import { etherToNumber, shortFormatEther } from '../../chainUtil';
+import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
@@ -16,12 +18,20 @@ import { useGlobals } from '../../globalsContext';
 import { usePageData } from '../../PageDataContext';
 import { ICollectionPageData } from './getCollectionPageData';
 
+interface ChartData {
+  date: string;
+  averageValue: number;
+  saleCount: number;
+}
+
 export const CollectionPage = (): React.ReactElement => {
+  const colors = useColors();
   const { data } = usePageData<ICollectionPageData>();
   const { notdClient } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | undefined | null>(data?.collection || undefined);
   const [collectionStatistics, setCollectionStatistics] = React.useState<CollectionStatistics | undefined | null>(undefined);
   const [recentSales, setRecentSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [collectionActivities, setCollectionActivities] = React.useState<CollectionActivity[] | undefined | null>(undefined);
   const [isRefreshClicked, setIsRefreshClicked] = React.useState<boolean>(false);
   const [shouldRefreshAllTokens, _] = useIntegerUrlQueryState('shouldRefreshAllTokens');
   const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
@@ -107,6 +117,20 @@ export const CollectionPage = (): React.ReactElement => {
     getCollectionHoldings();
   }, [getCollectionHoldings]);
 
+  const updateCollectionActivities = React.useCallback(async (): Promise<void> => {
+    setCollectionActivities(undefined);
+    notdClient.getCollectionDailyActivities(address).then((retrievedCollectionActivities: CollectionActivity[]): void => {
+      setCollectionActivities(retrievedCollectionActivities);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setCollectionActivities(null);
+    });
+  }, [notdClient, address]);
+
+  React.useEffect((): void => {
+    updateCollectionActivities();
+  }, [updateCollectionActivities]);
+
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
@@ -140,6 +164,34 @@ export const CollectionPage = (): React.ReactElement => {
     }
   }, [notdClient, account, address, shouldRefreshAllTokens]);
 
+  const chartData = React.useMemo((): ChartData[] | null => {
+    if (!collectionActivities) {
+      return null;
+    }
+    return collectionActivities.map((collectionActivity: CollectionActivity): ChartData => ({
+      date: dateToString(collectionActivity.date, 'dd/MM/yy'),
+      averageValue: etherToNumber(collectionActivity.averageValue),
+      saleCount: collectionActivity.saleCount.toNumber(),
+    }));
+  }, [collectionActivities]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderCustomToolTip = (dataItem: any): React.ReactElement | null => {
+    if (!dataItem.payload || dataItem.payload.length === 0) {
+      return null;
+    }
+    const tooltipData = dataItem.payload[0].payload;
+    return (
+      <Box variant='card'>
+        <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide1}>
+          <Text>{`Date: ${tooltipData.date}`}</Text>
+          <Text>{`Sale count: ${tooltipData.saleCount}`}</Text>
+          <Text>{`Average value: Ξ${tooltipData.averageValue}`}</Text>
+        </Stack>
+      </Box>
+    );
+  };
+
   return (
     <React.Fragment>
       <Head>
@@ -151,7 +203,7 @@ export const CollectionPage = (): React.ReactElement => {
         ) : collection === null ? (
           <Text variant='error'>Collection failed to load</Text>
         ) : (
-          <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
+          <React.Fragment>
             <Box height='300px'>
               <LayerContainer>
                 <LayerContainer.Layer isFullHeight={false} alignmentVertical={Alignment.Start}>
@@ -233,8 +285,9 @@ export const CollectionPage = (): React.ReactElement => {
                     </Stack>
                   </Stack>
                 )}
+                <Spacing variant={PaddingSize.Wide2} />
                 { account ? (
-                  <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
+                  <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
                     <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
                     <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                       {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
@@ -255,18 +308,19 @@ export const CollectionPage = (): React.ReactElement => {
                     <Text>to show your holdings and watchlist.</Text>
                   </Stack>
                 )}
-                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2} isScrollableHorizontally={true}>
+                <Spacing variant={PaddingSize.Wide2} />
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
                   <Text variant='header3'>Recent Sales</Text>
                   <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                     { recentSales === undefined ? (
                       <LoadingSpinner />
                     ) : recentSales === null ? (
-                      <Text variant='error'>Collection Sale failed to load</Text>
+                      <Text variant='error'>Failed to load recent sales</Text>
                     ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
                       <TokenCard
                         key={index}
                         collectionToken={recentSale.token}
-                        subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for Ξ${ethers.utils.formatEther(recentSale.value)}`}
+                        subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
                         target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
                       />
                     )) : (
@@ -274,11 +328,58 @@ export const CollectionPage = (): React.ReactElement => {
                     )}
                   </Stack>
                 </Stack>
+                <Spacing variant={PaddingSize.Wide2} />
+                { collectionActivities === undefined ? (
+                  <LoadingSpinner />
+                ) : collectionActivities === null || chartData === null ? (
+                  <Text variant='error'>Failed to load activity</Text>
+                ) : (
+                  <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={false}>
+                    <Text variant='header3'>Recent Activity</Text>
+                    <Box height='350px'>
+                      <RechartsContainer width='100%' height='100%'>
+                        <AreaChart data={chartData}>
+                          <defs>
+                            <linearGradient id='gradient-color' x1='0%' y1='0%' x2='100%' y2='0%'>
+                              <stop stopColor={colors.brandPrimaryClear50} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
+                          <XAxis dataKey='date' />
+                          <YAxis yAxisId={0} />
+                          <YAxis yAxisId={1}type='number' domain={['dataMin', 'auto']} orientation='right' />
+                          <Tooltip content={renderCustomToolTip} />
+                          <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={2} fill={colors.brandPrimary} fillOpacity={0.15} yAxisId={1} />
+                          <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text} strokeWidth={2} fillOpacity={0} yAxisId={0} />
+                        </AreaChart>
+                      </RechartsContainer>
+                    </Box>
+                    <Stack direction={Direction.Horizontal} shouldWrapItems={true} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide} isFullWidth={true}>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                        <ColoredCircle fillColor={colors.brandPrimary} strokeColor={colors.brandPrimary} />
+                        <Text variant='small'>Sale count</Text>
+                      </Stack>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                        <ColoredCircle fillColor={colors.text} strokeColor={colors.text} />
+                        <Text variant='small'>Average value</Text>
+                      </Stack>
+                    </Stack>
+                  </Stack>
+                )}
               </Stack>
             </ContainingView>
-          </Stack>
+          </React.Fragment>
         )}
       </Stack>
     </React.Fragment>
   );
 };
+
+
+const ColoredCircle = styled.div<{ fillColor: string, strokeColor: string }>`
+  background-color: ${(props) => props.fillColor};
+  width: 0.7em;
+  height: 0.7em;
+  border: 1px solid ${(props) => props.strokeColor};
+  border-radius: 100%;
+`;

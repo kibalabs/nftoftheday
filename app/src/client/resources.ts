@@ -218,3 +218,35 @@ export class CollectionStatistics {
     );
   };
 }
+
+export class CollectionActivity {
+  readonly date: Date;
+  readonly transferCount: BigNumber;
+  readonly saleCount: BigNumber;
+  readonly totalValue: BigNumber;
+  readonly minimumValue: BigNumber;
+  readonly maximumValue: BigNumber;
+  readonly averageValue: BigNumber;
+
+  public constructor(date: Date, transferCount: BigNumber, saleCount: BigNumber, totalValue: BigNumber, minimumValue: BigNumber, maximumValue: BigNumber, averageValue: BigNumber) {
+    this.date = date;
+    this.transferCount = transferCount;
+    this.saleCount = saleCount;
+    this.totalValue = totalValue;
+    this.minimumValue = minimumValue;
+    this.maximumValue = maximumValue;
+    this.averageValue = averageValue;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): CollectionActivity => {
+    return new CollectionActivity(
+      dateFromString(obj.date as string),
+      BigNumber.from(String(obj.transferCount)),
+      BigNumber.from(String(obj.saleCount)),
+      BigNumber.from(String(obj.totalValue)),
+      BigNumber.from(String(obj.minimumValue)),
+      BigNumber.from(String(obj.maximumValue)),
+      BigNumber.from(String(obj.averageValue)),
+    );
+  };
+}

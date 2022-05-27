@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
-import { ethers } from 'ethers';
 
+import { shortFormatEther } from '../chainUtil';
 import { TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
 
@@ -14,7 +14,7 @@ export const RandomTokenTransferCard = (props: RandomTokenTransferCardProps): Re
   return (
     <NftCard
       label='Random'
-      subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for Ξ${ethers.utils.formatEther(props.tokenTransfer.value)}`}
+      subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for ${shortFormatEther(props.tokenTransfer.value)}`}
       primaryButtonText='View Token'
       secondaryButtonText='View Tx'
       secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
