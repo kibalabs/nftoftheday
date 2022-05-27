@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { truncateStart } from '@kibalabs/core';
-import { Alignment, Box, Direction, Image, LinkBase, PaddingSize, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, Media, LinkBase, PaddingSize, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { CollectionToken } from '../client/resources';
 
@@ -31,7 +31,7 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
       <Box variant='tokenCard' shouldClipContent={true}>
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
           <Box height='11rem' width='11rem'>
-            <Image source={ imageUrl || defaultImage} alternativeText='image' fitType='contain' />
+            <Media source={ imageUrl || defaultImage} alternativeText='image' fitType='contain' />
           </Box>
           <Box>
             <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide}>
