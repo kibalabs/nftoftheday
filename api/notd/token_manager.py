@@ -140,8 +140,8 @@ class TokenManager:
         collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
-        except (TokenDoesNotExistException, TokenHasNoMetadataException):
-            logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
+        except (TokenDoesNotExistException, TokenHasNoMetadataException) as exception:
+            logging.info(f'Failed to retrieve metadata for token: {registryAddress}/{tokenId}: {exception}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         await self.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
 

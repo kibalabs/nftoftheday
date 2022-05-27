@@ -81,6 +81,10 @@ export const buildNotdTheme = (): ITheme => {
         overflow: 'hidden',
         'text-overflow': 'ellipsis',
       },
+      // NOTE(krishan711): this is a hack, update the library to add a 'shouldClipContent' param or similar
+      forcedMultipleLine: {
+        'word-break': 'break-word',
+      },
     },
     boxes: {
       phBanner: {

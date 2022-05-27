@@ -19,7 +19,7 @@
     "@kibalabs/core-react": "^0.9.2-next.0",
     "@kibalabs/everyview-tracker": "0.4.0",
     "@kibalabs/everyview-tracker-react": "0.4.0",
-    "@kibalabs/ui-react": "0.9.8",
+    "@kibalabs/ui-react": "0.9.9-next.0",
     "@metamask/detect-provider": "^1.2.0",
     "ethers": "^5.6.7",
     "react": "17.0.2",
