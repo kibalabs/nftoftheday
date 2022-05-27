@@ -193,6 +193,7 @@ class TokenMetadataProcessor():
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
+        print('badRequestException', badRequestException)
         if badRequestException is not None:
             if 'URI query for nonexistent token' in badRequestException.message:
                 raise TokenDoesNotExistException()
@@ -219,6 +220,7 @@ class TokenMetadataProcessor():
         for ipfsProviderPrefix in IPFS_PROVIDER_PREFIXES:
             if tokenMetadataUri.startswith(ipfsProviderPrefix):
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
+        print('tokenMetadataUri', tokenMetadataUri)
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
