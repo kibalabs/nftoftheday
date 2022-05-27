@@ -218,9 +218,10 @@ class TokenManager:
         tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
             StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
         ])
-        collectionTokenIds = [(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas]
+        collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
+        await self.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         address = chain_util.normalize_address(value=address)

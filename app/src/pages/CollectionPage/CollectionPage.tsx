@@ -215,7 +215,7 @@ export const CollectionPage = (): React.ReactElement => {
                 </LayerContainer.Layer>
                 <LayerContainer.Layer isFullHeight={false} isFullWidth={false} alignmentVertical={Alignment.End} alignmentHorizontal={Alignment.Center}>
                   {imageUrl && (
-                    <Box variant='rounded-wideBorder' shouldClipContent={true} width='130px' height='130px'>
+                    <Box variant='rounded-avatar' shouldClipContent={true} width='130px' height='130px'>
                       <Image source={imageUrl} alternativeText='image' fitType='contain' />
                     </Box>
                   )}
@@ -339,11 +339,6 @@ export const CollectionPage = (): React.ReactElement => {
                     <Box height='350px'>
                       <RechartsContainer width='100%' height='100%'>
                         <AreaChart data={chartData}>
-                          <defs>
-                            <linearGradient id='gradient-color' x1='0%' y1='0%' x2='100%' y2='0%'>
-                              <stop stopColor={colors.brandPrimaryClear50} />
-                            </linearGradient>
-                          </defs>
                           <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
                           <XAxis dataKey='date' />
                           <YAxis yAxisId={0} />
