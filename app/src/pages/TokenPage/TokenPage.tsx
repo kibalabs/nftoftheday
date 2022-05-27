@@ -7,6 +7,7 @@ import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
 import { useAccount } from '../../AccountContext';
+import { shortFormatEther } from '../../chainUtil';
 import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../../client/resources';
 import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';
@@ -154,7 +155,7 @@ export const TokenPage = (): React.ReactElement => {
                           target={`/accounts/${tokenRecentTransfers[0].toAddress}`}
                         />
                       </Stack>
-                      <Text>{`Last Bought for Ξ${ethers.utils.formatEther(tokenRecentTransfers[0].value)} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
+                      <Text>{`Last Bought for ${shortFormatEther(tokenRecentTransfers[0].value)} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
                     </Stack>
                   )}
                   <Spacing variant={PaddingSize.Wide} />

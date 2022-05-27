@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { Alignment, Box, Direction, IconButton, KibaIcon, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
-import { ethers } from 'ethers';
 
+import { shortFormatEther } from '../chainUtil';
 import { TokenTransfer } from '../client/resources';
 import { Account } from './Account';
 
@@ -67,14 +67,10 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
               <Spacing variant={PaddingSize.Wide2} />
             </Stack.Item>
             <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
-              <Text alignment={TextAlignment.Center}>
-                { `Ξ${ethers.utils.formatEther(props.tokenTransfer.value)}`}
-              </Text>
+              <Text alignment={TextAlignment.Center}>{`${shortFormatEther(props.tokenTransfer.value)}`}</Text>
             </Stack.Item>
             <Stack.Item baseSize='12rem' alignment={Alignment.Center}>
-              <Text alignment={TextAlignment.Center}>
-                {`${formatDate(props.tokenTransfer.blockDate)} ago`}
-              </Text>
+              <Text alignment={TextAlignment.Center}>{`${formatDate(props.tokenTransfer.blockDate)} ago`}</Text>
             </Stack.Item>
             <Stack.Item alignment={Alignment.Center}>
               <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`} />
@@ -87,15 +83,11 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
           <Box variant='tokenSaleRow' isFullWidth={true}>
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Narrow}>
               <Stack.Item alignment={Alignment.Center}>
-                <Text alignment={TextAlignment.Right}>
-                  { `Ξ${ethers.utils.formatEther(props.tokenTransfer.value)}`}
-                </Text>
+                <Text alignment={TextAlignment.Right}>{`${shortFormatEther(props.tokenTransfer.value)}`}</Text>
               </Stack.Item>
               <Spacing variant={PaddingSize.Wide2} />
               <Stack.Item alignment={Alignment.Center}>
-                <Text alignment={TextAlignment.Left}>
-                  {`${formatDate(props.tokenTransfer.blockDate)} ago`}
-                </Text>
+                <Text alignment={TextAlignment.Left}>{`${formatDate(props.tokenTransfer.blockDate)} ago`}</Text>
               </Stack.Item>
               <Stack.Item alignment={Alignment.Center}>
                 <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`} />

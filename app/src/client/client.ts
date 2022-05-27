@@ -147,4 +147,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.GetOwnerTokensResponse);
     return response.tokens;
   };
+
+  public getCollectionDailyActivities = async (address: string): Promise<Resources.CollectionActivity[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${address}/daily-activities`;
+    const request = new Endpoints.GetCollectionActivitiesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionActivitiesResponse);
+    return response.collectionActivities;
+  };
 }
