@@ -170,10 +170,7 @@ export const TokenPage = (): React.ReactElement => {
                       <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Center}>
                         <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                           <Text>Owned By</Text>
-                          <Account
-                            accountId={tokenRecentTransfers[0].toAddress}
-                            target={`/accounts/${tokenRecentTransfers[0].toAddress}`}
-                          />
+                          <Account accountId={tokenRecentTransfers[0].toAddress} target={`/accounts/${tokenRecentTransfers[0].toAddress}`} />
                         </Stack>
                         <Text>{`Last Bought for ${shortFormatEther(tokenRecentTransfers[0].value)} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
                       </Stack>
