@@ -17,6 +17,9 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='gasPrice', name='gas_price', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='blockNumber', name='block_number', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='tokenType', name='token_type', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='isMultiAddress', name='is_multi_address', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isInterstitialTransfer', name='is_interstitial_transfer', type_=sqlalchemy.BOOLEAN, nullable=False),
+
 )
 
 BlocksTable = sqlalchemy.Table(

@@ -31,6 +31,8 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         gasPrice=row[TokenTransfersTable.c.gasPrice],
         blockNumber=row[TokenTransfersTable.c.blockNumber],
         tokenType=row[TokenTransfersTable.c.tokenType],
+        isMultiAddress=row[TokenTransfersTable.c.isMultiAddress],
+        isInterstitialTransfer=row[TokenTransfersTable.c.isInterstitialTransfer],
         blockDate=row[BlocksTable.c.blockDate],
         updatedDate=row[BlocksTable.c.updatedDate],
     )

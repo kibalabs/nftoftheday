@@ -69,6 +69,8 @@ class RetrievedTokenTransfer:
     gasPrice: int
     blockNumber: int
     tokenType: Optional[str]
+    isMultiAddress: bool
+    isInterstitialTransfer: bool
 
 
 @dataclasses.dataclass(unsafe_hash=True)
