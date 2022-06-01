@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { dateToString } from '@kibalabs/core';
+import { dateToString, etherToNumber, shortFormatEther } from '@kibalabs/core';
 import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
@@ -9,7 +9,6 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContaine
 import styled from 'styled-components';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { etherToNumber, shortFormatEther } from '../../chainUtil';
 import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
