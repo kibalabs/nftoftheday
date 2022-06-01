@@ -115,9 +115,9 @@ class BlockProcessor:
         amount = data[1]
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        isMultiAddress = False
-        isInterstitialTransfer = False
-        value = (transaction['value'] * amount) / transactionTransferCountMap[transactionHash] if transaction['from'] != fromAddress else 0
+        isMultiAddress = True if transactionTransferCountMap[transactionHash] > 1 else False
+        isInterstitialTransfer = True if fromAddress != transaction['from'] and toAddress != transaction['from'] else False
+        value = 0 if isInterstitialTransfer or transactionTransferCountMap[transactionHash] < 1 else (transaction['value'] * amount) / transactionTransferCountMap[transactionHash]
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155single', isMultiAddress=isMultiAddress, isInterstitialTransfer=isInterstitialTransfer)]
         return transactions
 
@@ -153,9 +153,9 @@ class BlockProcessor:
         dataDict = {tokenIds[i]: amounts[i] for i in range(len(tokenIds))}
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        value = transaction['value'] / transactionTransferCountMap[transactionHash] if transaction['from'] != fromAddress else 0
-        isMultiAddress = False
-        isInterstitialTransfer = False
+        isMultiAddress = True if transactionTransferCountMap[transactionHash] > 1 else False
+        isInterstitialTransfer = True if fromAddress != transaction['from'] and toAddress != transaction['from'] else False
+        value = 0 if isInterstitialTransfer or transactionTransferCountMap[transactionHash] < 1 else transaction['value'] / transactionTransferCountMap[transactionHash]
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value*amount, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155batch', isMultiAddress=isMultiAddress, isInterstitialTransfer=isInterstitialTransfer) for (id, amount) in dataDict.items()]
         return transactions
 
@@ -183,11 +183,11 @@ class BlockProcessor:
         fromAddress = chain_util.normalize_address(event['topics'][1].hex())
         toAddress = chain_util.normalize_address(event['topics'][2].hex())
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
-        isMultiAddress = False
-        isInterstitialTransfer = False
         operatorAddress = transaction['from']
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        value = transaction['value'] / transactionTransferCountMap[transactionHash] if operatorAddress != fromAddress else 0
+        isMultiAddress = True if transactionTransferCountMap[transactionHash] > 1 else False
+        isInterstitialTransfer = True if fromAddress != operatorAddress and toAddress != operatorAddress else False
+        value = 0 if isInterstitialTransfer or transactionTransferCountMap[transactionHash] < 1 else transaction['value'] / transactionTransferCountMap[transactionHash] 
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc721', isMultiAddress=isMultiAddress, isInterstitialTransfer=isInterstitialTransfer)]
         return transactions
