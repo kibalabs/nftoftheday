@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import textwrap
@@ -76,30 +77,16 @@ class BlockProcessor:
         logging.info(f'Found {len(erc1155SingleEvents)} erc1155Single events in block #{blockNumber}')
         erc1155BatchEvents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
         logging.info(f'Found {len(erc1155BatchEvents)} erc1155Batch events in block #{blockNumber}')
+        retrievedTokenTransfers += await asyncio.gather(*[self.process_transaction(erc721events=erc721events, erc1155SingleEvents=erc1155SingleEvents, erc1155BatchEvents=erc1155BatchEvents, transaction=transaction) for transaction in blockData['transactions']])
+        retrievedTokenTransfers =  [tokenTransfer for tokenTransfers in retrievedTokenTransfers if tokenTransfers is not None for tokenTransfer in tokenTransfers if tokenTransfer is not None]
 
-        events = erc721events + erc1155SingleEvents + erc1155BatchEvents
-        transactionHashes = [event["transactionHash"].hex() for event in events if len(event['topics']) > 3 or chain_util.normalize_address(event['address']) == self.cryptoKittiesContract.address or chain_util.normalize_address(event['address']) == self.cryptoPunksContract.address]
-        transactionTransferCountMap = Counter(transactionHashes)
-        blockNumber = blockData['number']
-        erc721transactionHashes = [event["transactionHash"].hex() for event in events if (len(event['topics']) > 3 and chain_util.normalize_address(event['topics'][1].hex()) != transactionMap[event['transactionHash'].hex()]['from']) or chain_util.normalize_address(event['address']) == self.cryptoKittiesContract.address or chain_util.normalize_address(event['address']) == self.cryptoPunksContract.address]
-        erc721transactionTransferCountMap = Counter(erc721transactionHashes)
-        for event in erc721events:
-            if len(event['topics']) > 3 or chain_util.normalize_address(event['address']) in {self.cryptoKittiesContract.address, self.cryptoPunksContract.address}:
-                retrievedTokenTransfers += await self._process_erc721_single_event(event=dict(event), blockNumber=blockNumber, transaction=transactionMap[event['transactionHash'].hex()], transactionTransferCountMap=erc721transactionTransferCountMap)
-        erc1155Transfers = []
-        for event in erc1155SingleEvents:
-            if len(event['topics']) > 3:
-                erc1155Transfers += await self._process_erc1155_single_event(event=dict(event), blockNumber=blockNumber, transaction=transactionMap[event['transactionHash'].hex()], transactionTransferCountMap=transactionTransferCountMap)
-        for event in erc1155BatchEvents:
-            if len(event['topics']) > 3:
-                erc1155Transfers += await self._process_erc1155_batch_event(event=dict(event), blockNumber=blockNumber, transaction=transactionMap[event['transactionHash'].hex()], transactionTransferCountMap=transactionTransferCountMap)
-        # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
-        retrievedTokenTransfers += await self._merge_erc1155_transfers(erc1155Transfers=erc1155Transfers)
+    #     # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
+    #     retrievedTokenTransfers += await self._merge_erc1155_transfers(erc1155Transfers=erc1155Transfers)
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
 
-    async def _process_erc1155_single_event(self, event: LogReceipt, blockNumber: int, transaction: TxData, transactionTransferCountMap: Dict) -> List[RetrievedTokenTransfer]:
+    async def _process_erc1155_single_event(self, event: LogReceipt, blockNumber: int, transaction: TxData, ) -> List[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = chain_util.normalize_address(event['address'])
         if len(event['topics']) < 4:
@@ -115,9 +102,9 @@ class BlockProcessor:
         amount = data[1]
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        isMultiAddress = True if transactionTransferCountMap[transactionHash] > 1 else False
-        isInterstitialTransfer = True if fromAddress != transaction['from'] and toAddress != transaction['from'] else False
-        value = 0 if isInterstitialTransfer or transactionTransferCountMap[transactionHash] < 1 else (transaction['value'] * amount) / transactionTransferCountMap[transactionHash]
+        isMultiAddress =  False
+        isInterstitialTransfer =  False
+        value = transaction['value']
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, value=value, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155single', isMultiAddress=isMultiAddress, isInterstitialTransfer=isInterstitialTransfer)]
         return transactions
 
@@ -133,7 +120,7 @@ class BlockProcessor:
                 firstTransfers[transferKer] = transfer
         return list(firstTransfers.values())
 
-    async def _process_erc1155_batch_event(self, event: LogReceipt, blockNumber: int, transaction: TxData, transactionTransferCountMap: Dict) -> List[RetrievedTokenTransfer]:
+    async def _process_erc1155_batch_event(self, event: LogReceipt, blockNumber: int, transaction: TxData) -> List[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = chain_util.normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
@@ -153,13 +140,13 @@ class BlockProcessor:
         dataDict = {tokenIds[i]: amounts[i] for i in range(len(tokenIds))}
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        isMultiAddress = True if transactionTransferCountMap[transactionHash] > 1 else False
-        isInterstitialTransfer = True if fromAddress != transaction['from'] and toAddress != transaction['from'] else False
-        value = 0 if isInterstitialTransfer or transactionTransferCountMap[transactionHash] < 1 else transaction['value'] / transactionTransferCountMap[transactionHash]
+        isMultiAddress =  False
+        isInterstitialTransfer =  False
+        value = transaction['value']
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount ,value=value*amount, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc1155batch', isMultiAddress=isMultiAddress, isInterstitialTransfer=isInterstitialTransfer) for (id, amount) in dataDict.items()]
         return transactions
 
-    async def _process_erc721_single_event(self, event: LogReceipt, blockNumber: int, transaction: TxData, transactionTransferCountMap: Dict) -> List[RetrievedTokenTransfer]:
+    async def _process_erc721_single_event(self, event: LogReceipt, blockNumber: int, transaction: TxData) -> List[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = chain_util.normalize_address(event['address'])
         logging.debug(f'------------- {transactionHash} ------------')
@@ -186,8 +173,40 @@ class BlockProcessor:
         operatorAddress = transaction['from']
         gasLimit = transaction['gas']
         gasPrice = transaction['gasPrice']
-        isMultiAddress = True if transactionTransferCountMap[transactionHash] > 1 else False
-        isInterstitialTransfer = True if fromAddress != operatorAddress and toAddress != operatorAddress else False
-        value = 0 if isInterstitialTransfer or transactionTransferCountMap[transactionHash] < 1 else transaction['value'] / transactionTransferCountMap[transactionHash] 
+        isMultiAddress = False 
+        isInterstitialTransfer =  False
+        value = transaction['value']
         transactions = [RetrievedTokenTransfer(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, value=value, amount=1, gasLimit=gasLimit, gasPrice=gasPrice, blockNumber=blockNumber, tokenType='erc721', isMultiAddress=isMultiAddress, isInterstitialTransfer=isInterstitialTransfer)]
         return transactions
+
+    async def process_transaction(self, erc721events: List[LogReceipt], erc1155SingleEvents: List[LogReceipt], erc1155BatchEvents: List[LogReceipt],transaction: TxData):
+        #print([transaction if transaction['hash'].hex()=='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef' else []])
+        sol = []
+        retrievedTokenTransfers = {}
+        for event in erc721events:
+            if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
+                retrievedTokenTransfers[event['transactionHash'].hex()] = retrievedTokenTransfers.get(event['transactionHash'].hex()) + await self._process_erc721_single_event(event=event, blockNumber=transaction['blockNumber'], transaction=transaction,) if retrievedTokenTransfers.get(event['transactionHash'].hex()) else await self._process_erc721_single_event(event=event, blockNumber=transaction['blockNumber'], transaction=transaction,)
+                #retrievedTokenTransfer += await asyncio.gather(*[self._process_erc721_single_event(event=event, blockNumber=transaction['blockNumber'], transaction=transaction,)])
+        for event in erc1155SingleEvents:
+            if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
+                retrievedTokenTransfers[event['transactionHash'].hex()] = retrievedTokenTransfers.get(event['transactionHash'].hex()) + await self._process_erc1155_single_event(event=event, blockNumber=transaction['blockNumber'], transaction=transaction,) if retrievedTokenTransfers.get(event['transactionHash'].hex()) else await self._process_erc1155_single_event(event=event, blockNumber=transaction['blockNumber'], transaction=transaction,)
+        for event in erc1155BatchEvents:
+            if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
+                retrievedTokenTransfers[event['transactionHash'].hex()] = retrievedTokenTransfers.get(event['transactionHash'].hex()) + await self._process_erc1155_batch_event(event=event, blockNumber=transaction['blockNumber'], transaction=transaction,) if retrievedTokenTransfers.get(event['transactionHash'].hex()) else await self._process_erc1155_batch_event(event=event, blockNumber=transaction['blockNumber'], transaction=transaction,)
+
+        for tokenTransfers in retrievedTokenTransfers.values():
+            if len({tokenTransfer.registryAddress for tokenTransfer in tokenTransfers}) > 1:
+                for tokenTransfer in tokenTransfers:
+                    tokenTransfer.isMultiAddress = True
+                    tokenTransfer.value = 0
+            count = len(tokenTransfers)
+            for i, tokenTransfer in enumerate(tokenTransfers):
+                if i != len(tokenTransfers)-1 and  transaction['from'] != tokenTransfer.fromAddress:
+                    tokenTransfer.isInterstitialTransfer = True
+                    tokenTransfer.value = 0
+                    count -= 1
+            for tokenTransfer in tokenTransfers:
+                if not tokenTransfer.isInterstitialTransfer and not tokenTransfer.isMultiAddress and tokenTransfer != 0:
+                    tokenTransfer.value = tokenTransfer.value//count
+
+            return tokenTransfers 
