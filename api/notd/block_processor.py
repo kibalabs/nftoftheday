@@ -17,6 +17,9 @@ from web3.types import TxReceipt
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 
+class RetrievedEvents():
+    pass
+
 
 class BlockProcessor:
 
@@ -180,6 +183,8 @@ class BlockProcessor:
         return transactions
 
     async def process_transaction(self, erc721events: List[LogReceipt], erc1155SingleEvents: List[LogReceipt], erc1155BatchEvents: List[LogReceipt],transaction: TxData):
+        #EXtract events here
+        #NO LOGIC IN PROCESS BLOCK
         #print([transaction if transaction['hash'].hex()=='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef' else []])
         sol = []
         retrievedTokenTransfers = {}
@@ -213,3 +218,7 @@ class BlockProcessor:
                     tokenTransfer.value = tokenTransfer.value//count
 
             return tokenTransfers
+
+
+            #move logic from proces block and process event to process transaction
+            #process events returns retrieved events
