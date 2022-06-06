@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { dateToString, isToday } from '@kibalabs/core';
+import { dateToString, isToday, shortFormatEther } from '@kibalabs/core';
 import { useInitialization, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Head, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
 import { useAccount } from '../../AccountContext';
-import { shortFormatEther } from '../../chainUtil';
 import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../../client/resources';
 import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';

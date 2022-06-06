@@ -1,8 +1,7 @@
 import React from 'react';
 
-import { dateToString } from '@kibalabs/core';
+import { dateToString, shortFormatEther } from '@kibalabs/core';
 
-import { shortFormatEther } from '../chainUtil';
 import { TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
 

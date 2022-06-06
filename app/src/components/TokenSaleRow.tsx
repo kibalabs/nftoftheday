@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { shortFormatEther } from '@kibalabs/core';
 import { Alignment, Box, Direction, IconButton, KibaIcon, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { shortFormatEther } from '../chainUtil';
 import { TokenTransfer } from '../client/resources';
 import { Account } from './Account';
 
