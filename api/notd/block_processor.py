@@ -184,7 +184,7 @@ class BlockProcessor:
         retrievedEvents = {}
         for event in erc721events:
             if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
-                retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc721_single_event(event=event, transaction=transaction,) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc721_single_event(event=event, transaction=transaction,)
+                retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc721_single_event(event=event, transaction=transaction) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc721_single_event(event=event, transaction=transaction)
                 #retrievedTokenTransfer += await asyncio.gather(*[self._process_erc721_single_event(event=event, transaction=transaction,)])
         for event in erc1155SingleEvents:
             if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
