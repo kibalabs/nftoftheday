@@ -11,8 +11,7 @@ from sqlalchemy import values
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
-from notd.model import ProcessedBlock
-from notd.model import RetrievedTokenTransfer
+from notd.model import ProcessedBlock, RetrievedTokenTransfer
 
 
 async def main():
@@ -806,12 +805,6 @@ async def main():
             RetrievedTokenTransfer(transactionHash='0xb055acd592e8b9cf27917f5921681e759e87fbb56a4e84c41693ebe2d521be24', registryAddress='0xc3ed53b27e89Ea95b925A1443Df12031f6099C4e', tokenId='3605', fromAddress='0x0000000000000000000000000000000000000000', toAddress='0x508735CDD4aC62f9424aA5754b9F3A1EFDC30dE0', operatorAddress='0x508735CDD4aC62f9424aA5754b9F3A1EFDC30dE0', amount=1, value=1000000000000000, gasLimit=84961, gasPrice=23437785018, blockNumber=14853186, tokenType='erc721', isMultiAddress=False, isInterstitialTransfer=False)
         ]
     )
-
-    #GET transaction event
-
-    #event returns transfers
-    #process_event changes values
-
     assert result == expected
 
     await awsRequester.close_connections()
