@@ -15,8 +15,10 @@ from notd.model import ProcessedBlock, RetrievedTokenTransfer
 
 
 async def main():
-    awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    #awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    requester = Requester()
+    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
+    #ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
 
     result = await blockProcessor.process_block(13281280)
@@ -807,7 +809,7 @@ async def main():
     )
     assert result == expected
 
-    await awsRequester.close_connections()
+    await requester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
