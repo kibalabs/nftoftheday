@@ -262,105 +262,105 @@ export const CollectionPage = (): React.ReactElement => {
                     maximumCharacters={300}
                   />
                 )}
-                <Spacing variant={PaddingSize.Wide2} />
-                {collectionStatistics === undefined ? (
-                  <LoadingSpinner />
-                ) : collectionStatistics === null ? (
-                  <Text variant='error'>Collection statistics failed to load</Text>
-                ) : (
-                  <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                      <MetricView name={'Items'} value={`${collectionStatistics.itemCount}`} />
-                      <MetricView name={'Owners'} value={`${collectionStatistics.holderCount}`} />
-                      <MetricView name={'Total Volume'} value={shortFormatEther(collectionStatistics.totalTradeVolume)} />
-                    </Stack>
-                    <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                      <Box variant='divider' isFullHeight={true} width='1px' />
-                    </ResponsiveHidingView>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                      <MetricView name={'24h Low Sale'} value={shortFormatEther(collectionStatistics.lowestSaleLast24Hours)} />
-                      <MetricView name={'24h High Sale'} value={shortFormatEther(collectionStatistics.highestSaleLast24Hours)} />
-                      <MetricView name={'24h Volume'} value={shortFormatEther(collectionStatistics.tradeVolume24Hours)} />
-                    </Stack>
+              </Stack>
+              <Spacing variant={PaddingSize.Wide2} />
+              {collectionStatistics === undefined ? (
+                <LoadingSpinner />
+              ) : collectionStatistics === null ? (
+                <Text variant='error'>Collection statistics failed to load</Text>
+              ) : (
+                <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                    <MetricView name={'Items'} value={`${collectionStatistics.itemCount}`} />
+                    <MetricView name={'Owners'} value={`${collectionStatistics.holderCount}`} />
+                    <MetricView name={'Total Volume'} value={shortFormatEther(collectionStatistics.totalTradeVolume)} />
                   </Stack>
-                )}
-                <Spacing variant={PaddingSize.Wide2} />
-                { account ? (
-                  <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
-                    <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
-                    <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                      {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
-                        <TokenCard
-                          key={index}
-                          collectionToken={holding}
-                          // subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
-                          target={`/collections/${holding.registryAddress}/tokens/${holding.tokenId}`}
-                        />
-                      )) : (
-                        <Text>No Holdings</Text>
-                      )}
-                    </Stack>
+                  <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                    <Box variant='divider' isFullHeight={true} width='1px' />
+                  </ResponsiveHidingView>
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                    <MetricView name={'24h Low Sale'} value={shortFormatEther(collectionStatistics.lowestSaleLast24Hours)} />
+                    <MetricView name={'24h High Sale'} value={shortFormatEther(collectionStatistics.highestSaleLast24Hours)} />
+                    <MetricView name={'24h Volume'} value={shortFormatEther(collectionStatistics.tradeVolume24Hours)} />
                   </Stack>
-                ) : (
-                  <Stack direction={Direction.Horizontal} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
-                    <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
-                    <Text>to show your holdings and watchlist.</Text>
-                  </Stack>
-                )}
-                <Spacing variant={PaddingSize.Wide2} />
-                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true}>
-                  <Text variant='header3'>Recent Sales</Text>
-                  <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} isScrollableHorizontally={true}>
-                    { recentSales === undefined ? (
-                      <LoadingSpinner />
-                    ) : recentSales === null ? (
-                      <Text variant='error'>Failed to load recent sales</Text>
-                    ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
+                </Stack>
+              )}
+              <Spacing variant={PaddingSize.Wide2} />
+              { account ? (
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
+                  <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
+                  <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                    {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
                       <TokenCard
                         key={index}
-                        collectionToken={recentSale.token}
-                        subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
-                        target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
+                        collectionToken={holding}
+                        // subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
+                        target={`/collections/${holding.registryAddress}/tokens/${holding.tokenId}`}
                       />
                     )) : (
-                      <Text>No recent sales</Text>
+                      <Text>No Holdings</Text>
                     )}
                   </Stack>
                 </Stack>
-                <Spacing variant={PaddingSize.Wide2} />
-                { collectionActivities === undefined ? (
-                  <LoadingSpinner />
-                ) : collectionActivities === null || chartData === null ? (
-                  <Text variant='error'>Failed to load activity</Text>
-                ) : (
-                  <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={false}>
-                    <Text variant='header3'>Recent Activity</Text>
-                    <Box height='350px'>
-                      <RechartsContainer width='100%' height='100%'>
-                        <AreaChart data={chartData}>
-                          <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
-                          <XAxis dataKey='date' />
-                          <YAxis yAxisId={0} />
-                          <YAxis yAxisId={1}type='number' domain={['dataMin', 'auto']} orientation='right' />
-                          <Tooltip content={renderCustomToolTip} />
-                          <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={2} fill={colors.brandPrimary} fillOpacity={0.15} yAxisId={1} />
-                          <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text} strokeWidth={2} fillOpacity={0} yAxisId={0} />
-                        </AreaChart>
-                      </RechartsContainer>
-                    </Box>
-                    <Stack direction={Direction.Horizontal} shouldWrapItems={true} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide} isFullWidth={true}>
-                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                        <ColoredCircle fillColor={colors.brandPrimary} strokeColor={colors.brandPrimary} />
-                        <Text variant='small'>Sale count</Text>
-                      </Stack>
-                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                        <ColoredCircle fillColor={colors.text} strokeColor={colors.text} />
-                        <Text variant='small'>Average value</Text>
-                      </Stack>
+              ) : (
+                <Stack direction={Direction.Horizontal} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
+                  <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
+                  <Text>to show your holdings and watchlist.</Text>
+                </Stack>
+              )}
+              <Spacing variant={PaddingSize.Wide2} />
+              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                <Text variant='header3'>Recent Sales</Text>
+                <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}isScrollableHorizontally={true}>
+                  { recentSales === undefined ? (
+                    <LoadingSpinner />
+                  ) : recentSales === null ? (
+                    <Text variant='error'>Failed to load recent sales</Text>
+                  ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
+                    <TokenCard
+                      key={index}
+                      collectionToken={recentSale.token}
+                      subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
+                      target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
+                    />
+                  )) : (
+                    <Text>No recent sales</Text>
+                  )}
+                </Stack>
+              </Stack>
+              <Spacing variant={PaddingSize.Wide2} />
+              { collectionActivities === undefined ? (
+                <LoadingSpinner />
+              ) : collectionActivities === null || chartData === null ? (
+                <Text variant='error'>Failed to load activity</Text>
+              ) : (
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={false}>
+                  <Text variant='header3'>Recent Activity</Text>
+                  <Box height='350px'>
+                    <RechartsContainer width='100%' height='100%'>
+                      <AreaChart data={chartData}>
+                        <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
+                        <XAxis dataKey='date' />
+                        <YAxis yAxisId={0} />
+                        <YAxis yAxisId={1}type='number' domain={['dataMin', 'auto']} orientation='right' />
+                        <Tooltip content={renderCustomToolTip} />
+                        <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={2} fill={colors.brandPrimary} fillOpacity={0.15} yAxisId={1} />
+                        <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text} strokeWidth={2} fillOpacity={0} yAxisId={0} />
+                      </AreaChart>
+                    </RechartsContainer>
+                  </Box>
+                  <Stack direction={Direction.Horizontal} shouldWrapItems={true} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide} isFullWidth={true}>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                      <ColoredCircle fillColor={colors.brandPrimary} strokeColor={colors.brandPrimary} />
+                      <Text variant='small'>Sale count</Text>
+                    </Stack>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                      <ColoredCircle fillColor={colors.text} strokeColor={colors.text} />
+                      <Text variant='small'>Average value</Text>
                     </Stack>
                   </Stack>
-                )}
-              </Stack>
+                </Stack>
+              )}
             </ContainingView>
           </React.Fragment>
         )}
