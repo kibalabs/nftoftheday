@@ -199,14 +199,17 @@ class BlockProcessor:
                 for tokenTransfer in tokenTransfers:
                     tokenTransfer.isMultiAddress = True
                     tokenTransfer.value = 0
+            tokens =[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId) for tokenTransfer in tokenTransfers]
+            tokensCount = {(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId):tokens.count((tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)) for tokenTransfer in tokenTransfers}
             count = len(tokenTransfers)
-            for i, tokenTransfer in enumerate(tokenTransfers):
-                if i != len(tokenTransfers)-1 and  transaction['from'] != tokenTransfer.fromAddress:
+            for  tokenTransfer in tokenTransfers:
+                if tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)] > 1:
                     tokenTransfer.isInterstitialTransfer = True
                     tokenTransfer.value = 0
+                    tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)] -= 1
                     count -= 1
             for tokenTransfer in tokenTransfers:
-                if not tokenTransfer.isInterstitialTransfer and not tokenTransfer.isMultiAddress and tokenTransfer != 0:
+                if not tokenTransfer.isInterstitialTransfer and not tokenTransfer.isMultiAddress and tokenTransfer.value != 0:
                     tokenTransfer.value = tokenTransfer.value//count
 
-            return tokenTransfers 
+            return tokenTransfers
