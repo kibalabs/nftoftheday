@@ -83,10 +83,8 @@ class BlockProcessor:
         # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
         retrievedTokenTransfers = await asyncio.gather(*[self.process_transaction(transaction=transaction) for transaction in blockData['transactions']])
-        #retrievedTokenTransfers = [tokenTransfer for tokenTransfers in retrievedTokenTransfers if tokenTransfers is not None for tokenTransfer in tokenTransfers if tokenTransfer is not None]
-        itertools.chain(*retrievedTokenTransfers)
+        retrievedTokenTransfers = list(itertools.chain(*retrievedTokenTransfers))
 
-       # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
@@ -108,6 +106,7 @@ class BlockProcessor:
         transactions = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155single')]
         return transactions
 
+    # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
     async def _merge_erc1155_transfers(self, erc1155Transfers: List[RetrievedTokenTransfer]) -> List[RetrievedTokenTransfer]:
         firstTransfers = dict()
         for transfer in erc1155Transfers:
@@ -181,9 +180,8 @@ class BlockProcessor:
         erc721events, erc1155SingleEvents, erc1155BatchEvents = await self.get_events(blockNumber=blockNumber)
         retrievedEvents = {}
         for event in erc721events:
-            if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
+            if (event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3) or (event['transactionHash'].hex() == transaction['hash'].hex() and chain_util.normalize_address(event['address']) in {self.cryptoKittiesContract.address, self.cryptoPunksContract.address}):
                 retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc721_single_event(event=event, transaction=transaction) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc721_single_event(event=event, transaction=transaction)
-                #retrievedTokenTransfer += await asyncio.gather(*[self._process_erc721_single_event(event=event, transaction=transaction,)])
         for event in erc1155SingleEvents:
             if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
                 retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc1155_single_event(event=event) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc1155_single_event(event=event)
