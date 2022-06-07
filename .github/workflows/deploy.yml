@@ -1,6 +1,6 @@
 name: Deploy
 on:
-  pull_request:
+  push:
     branches: [main]
 jobs:
   deploy-app:
@@ -146,7 +146,7 @@ jobs:
           script_stop: true
           script: |
             docker pull ${DOCKER_IMAGE}
-            docker stop ${NAME} && docker rm ${NAME} || true
+            docker stop ${NAME}-2 && docker rm ${NAME}-2 || true
             docker run \
               --name ${NAME}-2 \
               --detach \
