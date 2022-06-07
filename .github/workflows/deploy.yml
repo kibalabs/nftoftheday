@@ -1,7 +1,7 @@
 name: Deploy
 on:
   push:
-    branches: [main]Fiddle: add manual dispatch to github workflow
+    branches: [main]
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
