@@ -72,7 +72,6 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'https://pfpkit.xyz',
     'https://mdtp-gallery.kibalabs.com',
     'https://sprites-gallery.kibalabs.com',
-    'https://goblintown-gallery.kibalabs.com',
     'http://localhost:3000',
 ], allow_origin_regex='https://.*\.tokenpage\.xyz')
 
