@@ -1,6 +1,7 @@
 import asyncio
 import dataclasses
 import datetime
+import itertools
 import json
 import textwrap
 from typing import List
@@ -18,7 +19,7 @@ from web3.types import TxReceipt
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 
-@dataclasses.dataclass(unsafe_hash=True)
+@dataclasses.dataclass
 class RetrievedEvent:
     transactionHash: str
     registryAddress: str
@@ -81,9 +82,9 @@ class BlockProcessor:
         # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
         # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
-        retrievedTokenTransfers =[]
-        retrievedTokenTransfers += await asyncio.gather(*[self.process_transaction(transaction=transaction) for transaction in blockData['transactions']])
-        retrievedTokenTransfers = [tokenTransfer for tokenTransfers in retrievedTokenTransfers if tokenTransfers is not None for tokenTransfer in tokenTransfers if tokenTransfer is not None]
+        retrievedTokenTransfers = await asyncio.gather(*[self.process_transaction(transaction=transaction) for transaction in blockData['transactions']])
+        #retrievedTokenTransfers = [tokenTransfer for tokenTransfers in retrievedTokenTransfers if tokenTransfers is not None for tokenTransfer in tokenTransfers if tokenTransfer is not None]
+        itertools.chain(*retrievedTokenTransfers)
 
        # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
         blockHash = blockData['hash'].hex()
@@ -114,7 +115,6 @@ class BlockProcessor:
             firstTransfer = firstTransfers.get(transferKer)
             if firstTransfer:
                 firstTransfer.amount += transfer.amount
-                firstTransfer.value += transfer.value
             else:
                 firstTransfers[transferKer] = transfer
         return list(firstTransfers.values())
@@ -122,7 +122,6 @@ class BlockProcessor:
     async def _process_erc1155_batch_event(self, event: LogReceipt,) -> List[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = chain_util.normalize_address(event['address'])
-        logging.debug(f'------------- {transactionHash} ------------')
         if len(event['topics']) < 4:
             logging.debug('Ignoring event with less than 4 topics')
             return []
@@ -143,7 +142,6 @@ class BlockProcessor:
     async def _process_erc721_single_event(self, event: LogReceipt, transaction: TxData) -> List[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
         registryAddress = chain_util.normalize_address(event['address'])
-        logging.debug(f'------------- {transactionHash} ------------')
         if registryAddress == self.cryptoKittiesContract.address:
             # NOTE(krishan711): for CryptoKitties the tokenId isn't indexed in the Transfer event
             decodedEventData = self.cryptoKittiesTransferEvent.processLog(event)
