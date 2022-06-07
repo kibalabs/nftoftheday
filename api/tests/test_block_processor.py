@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
 from notd.model import ProcessedBlock, RetrievedTokenTransfer
 
-async def get_block_data(ethClient: EthClientInterface, blockNumber: int, transactionHash: str) -> dict:
+async def _get_transaction_data(ethClient: EthClientInterface, blockNumber: int, transactionHash: str) -> dict:
     blockData =  await ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
     for transaction in blockData['transactions']:
         if transaction['hash'].hex() == transactionHash:
@@ -250,7 +250,7 @@ async def main():
     # Burning NFTs
     # https://etherscan.io/tx/0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef started by 0xfff8
     # 3 transfers with 0 value with 0x000 as the receiver and 0xfff as the sender
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=13281280, transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=13281280, transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -264,7 +264,7 @@ async def main():
     # Account buys multiple NFTs (of the same collection) from another account
     # https://etherscan.io/tx/0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954  started by 027a
     # 5 transfers each with (0.684/5)eth value with 0x27a as the receiver for each and multiple senders  
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14471751, transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14471751, transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -279,7 +279,7 @@ async def main():
     # Account buys multiple NFTs (of the same collection) from multiple accounts in one transaction started by 0x4ea
     # https://etherscan.io/tx/0x8b52d281485f735dbe910f76d92dd317549790f39778e9461c81f489ebd3763c
     # 5 transfers each with (1.338/5)eth value with 0x4ea as the receiver for each and multiple senders   
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14850684, transactionHash='0x8b52d281485f735dbe910f76d92dd317549790f39778e9461c81f489ebd3763c')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14850684, transactionHash='0x8b52d281485f735dbe910f76d92dd317549790f39778e9461c81f489ebd3763c')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -295,7 +295,7 @@ async def main():
     # https://etherscan.io/tx/0xd40859bfc1ce80da0e81b8f82b15db1222f6937d108daca7f259e3dd162c5170 started by 0x9e56
     # Transfer of 2 SANDBOX tokens: value=0 from 0xf91 to 0x9e5 isMultiAddressTransfer=true
     # Transfer of 5 SANDBOX ASSET tokens: value=0 from 0xf91 to 0x9e5 isMultiAddressTransfer=true
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=11003194, transactionHash='0xd40859bfc1ce80da0e81b8f82b15db1222f6937d108daca7f259e3dd162c5170')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=11003194, transactionHash='0xd40859bfc1ce80da0e81b8f82b15db1222f6937d108daca7f259e3dd162c5170')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -314,7 +314,7 @@ async def main():
     # https://etherscan.io/tx/0x6bb37dcb9a60ed49da56ccfb21dfcae886e81debd3ab94d73497d62744e758d2 started by 0x04c
     # Transfer of token 5309..: value=0 from 0x000 to 0x283 isInterstitial=true
     # Transfer of token 5309..: value=0.0014 from 0x283 to 0x04c
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=13898509, transactionHash='0x6bb37dcb9a60ed49da56ccfb21dfcae886e81debd3ab94d73497d62744e758d2')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=13898509, transactionHash='0x6bb37dcb9a60ed49da56ccfb21dfcae886e81debd3ab94d73497d62744e758d2')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -327,7 +327,7 @@ async def main():
     # Transfer of token 5309..: value=0 from 0x393 to 0x000 isInterstitial=true
     # Transfer of token 5309..: value=0 from 0x000 to 0x283 isInterstitial=true
     # Transfer of token 5309..: value=0.005 from 0x283 to 0x04c
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14471751, transactionHash='0xafd0535c4fe269b57cdcd4489eb11f05ff42dce04190b3e65f659ab9f05b71ee')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14471751, transactionHash='0xafd0535c4fe269b57cdcd4489eb11f05ff42dce04190b3e65f659ab9f05b71ee')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -343,7 +343,7 @@ async def main():
     # Transfer of token 3624: value=0 from 0xfa8 to 0x83c isInterstitial=true
     # Transfer of token 3624: value=(5.73/3) from 0x83c to 0xdfd 
     # Transfer of token 220: value=(5.73/3) from 0x9dc to 0xdfd 
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14806164, transactionHash='0xd7721e7d21313f791ad279d806d9b506fe4acfc6bfbd0dec3436ce640ebc299d')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14806164, transactionHash='0xd7721e7d21313f791ad279d806d9b506fe4acfc6bfbd0dec3436ce640ebc299d')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -355,7 +355,7 @@ async def main():
     assert result == expected
 
    
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14471751, transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14471751, transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954')
     result = (await blockProcessor.process_transaction(transaction=transaction)) 
     expected = [
         RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='3729', fromAddress='0xB8b6aF171335Ce2E327Afd2ebEf1a2c46cd67B01', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitialTransfer=False),
@@ -368,7 +368,7 @@ async def main():
     # Account buying an NFT with ERC-20 not eth
     # https://etherscan.io/tx/0xdfc7fa60b02bb76f021e1ddd7ce61ba654f0fa5df6214fcc412935fd95fa8705 started by 0x400
     # Transfer of 219281: value=0.015 from 0x000 to 0x400
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14550945, transactionHash='0xdfc7fa60b02bb76f021e1ddd7ce61ba654f0fa5df6214fcc412935fd95fa8705')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14550945, transactionHash='0xdfc7fa60b02bb76f021e1ddd7ce61ba654f0fa5df6214fcc412935fd95fa8705')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [RetrievedTokenTransfer(transactionHash='0xdfc7fa60b02bb76f021e1ddd7ce61ba654f0fa5df6214fcc412935fd95fa8705', registryAddress='0xC36442b4a4522E871399CD717aBDD847Ab11FE88', tokenId='219281', fromAddress='0x0000000000000000000000000000000000000000', toAddress='0x400815b954C964C3BC356E5541301D957D417EC9', operatorAddress='0x400815b954C964C3BC356E5541301D957D417EC9', amount=1, value=15677481882371820, gasLimit=495462, gasPrice=32756055350, blockNumber=14550945, tokenType='erc721', isMultiAddress=False, isInterstitialTransfer=False)]
@@ -377,7 +377,7 @@ async def main():
     # Account accepts and offer for purchase in ERC-20 not eth
     # https://etherscan.io/tx/0x09890dfbd47c251f16088ce6f995228d5f864f43ce620b70edd6fd852be9d4e1 started by 0x283
     # Transfer of 9571: value=0 (goal:1.15) from 0x283 to 0x28a
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14851881, transactionHash='0x09890dfbd47c251f16088ce6f995228d5f864f43ce620b70edd6fd852be9d4e1')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14851881, transactionHash='0x09890dfbd47c251f16088ce6f995228d5f864f43ce620b70edd6fd852be9d4e1')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [RetrievedTokenTransfer(transactionHash='0x09890dfbd47c251f16088ce6f995228d5f864f43ce620b70edd6fd852be9d4e1', registryAddress='0xfE8C6d19365453D26af321D0e8c910428c23873F', tokenId='9571', fromAddress='0x283929Fa5fcFaf27D9898FD867A78Fb5a8B44b5F', toAddress='0x28ad7d7838E693d05B64d516171ea0D3Bd67b70b', operatorAddress='0x283929Fa5fcFaf27D9898FD867A78Fb5a8B44b5F', amount=1, value=0, gasLimit=293512, gasPrice=74122712424, blockNumber=14851881, tokenType='erc721', isMultiAddress=False, isInterstitialTransfer=False)]
@@ -386,7 +386,7 @@ async def main():
     # Account buys NFTs for another account
     # https://etherscan.io/tx/0x1a466fa7f3815776d272bdb70a2f0a306d8aa1d10953f98d9531e81c7bb7d36b started by 0xbd9
     # 7 Transfers: value=(0.4816/7) from 0x000 0x126
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14853186, transactionHash='0x1a466fa7f3815776d272bdb70a2f0a306d8aa1d10953f98d9531e81c7bb7d36b')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14853186, transactionHash='0x1a466fa7f3815776d272bdb70a2f0a306d8aa1d10953f98d9531e81c7bb7d36b')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
@@ -403,7 +403,7 @@ async def main():
     # https://etherscan.io/tx/0x466e880275ee3f815d0c0bd787009632a437eefe1e7e7dab753d21ea16c0bd8b started by 0xaf6
     # Transfer of token 7963 value=(0) from 0x13d to 0xaf6 isSwapTransfer=true
     # Transfer of token 7139 value=7eth from 0xaf6 to 0x023 isSwapTransfer=true
-    transaction = await get_block_data(ethClient=ethClient,blockNumber=14806164, transactionHash='0x466e880275ee3f815d0c0bd787009632a437eefe1e7e7dab753d21ea16c0bd8b')
+    transaction = await _get_transaction_data(ethClient=ethClient,blockNumber=14806164, transactionHash='0x466e880275ee3f815d0c0bd787009632a437eefe1e7e7dab753d21ea16c0bd8b')
     result = (await blockProcessor.process_transaction(transaction=transaction))
             
     expected = [
