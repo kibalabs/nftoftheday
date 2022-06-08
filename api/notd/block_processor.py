@@ -5,7 +5,6 @@ import itertools
 import json
 import textwrap
 from typing import List
-from async_lru import alru_cache
 
 from core import logging
 from core.util import chain_util
@@ -168,8 +167,7 @@ class BlockProcessor:
     async def process_transaction(self, transaction: TxData):
         transactionEvents = await self.ethClient.get_transaction_receipt(transactionHash=transaction['hash'].hex())
         retrievedEvents = {}
-        for i in range(len(transactionEvents['logs'])):
-            event = transactionEvents['logs'][i]
+        for event in transactionEvents['logs']:
             if ((len(event['topics'])>3) and (event['topics'][0].hex() == self.erc721TansferEventSignatureHash) or chain_util.normalize_address(event['address']) in {self.cryptoKittiesContract.address, self.cryptoPunksContract.address}):
                 retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc721_single_event(event=event, transaction=transactionEvents) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc721_single_event(event=event, transaction=transactionEvents)
             if (len(event['topics'])>3) and (event['topics'][0].hex() == self.erc1155TansferEventSignatureHash):
