@@ -19,13 +19,7 @@ export const TruncateText = (props: TruncateTextProps): React.ReactElement => {
         <MarkdownText textAlignment={TextAlignment.Center} source={props.markdownText} />
       </Box>
       {props.markdownText.length >= props.maximumCharacters && (
-        <React.Fragment>
-          {shouldTruncateText ? (
-            <Button variant='small' text={'read more'} onClicked={onToggleClicked} />
-          ) : (
-            <Button variant='small' text={'read less'} onClicked={onToggleClicked} />
-          )}
-        </React.Fragment>
+        <Button variant='small' text={shouldTruncateText ? 'read more' : 'read less'} onClicked={onToggleClicked} />
       )}
     </Stack>
   );
