@@ -84,7 +84,7 @@ class BlockProcessor:
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
         retrievedTokenTransfers = await asyncio.gather(*[self.process_transaction(transaction=transaction) for transaction in blockData['transactions']])
         retrievedTokenTransfers = list(itertools.chain(*retrievedTokenTransfers))
-
+        logging.info(f'Processed block {blockNumber}')
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
@@ -165,28 +165,16 @@ class BlockProcessor:
         transactions = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, amount=1, tokenId=tokenId, tokenType = 'erc721')]
         return transactions
 
-    @alru_cache()
-    async def get_events(self, blockNumber: str):
-        erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
-        logging.info(f'Found {len(erc721events)} erc721 events in block #{blockNumber}')
-        erc1155SingleEvents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
-        logging.info(f'Found {len(erc1155SingleEvents)} erc1155Single events in block #{blockNumber}')
-        erc1155BatchEvents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
-        logging.info(f'Found {len(erc1155BatchEvents)} erc1155Batch events in block #{blockNumber}')
-        return (erc721events, erc1155SingleEvents, erc1155BatchEvents)
-
     async def process_transaction(self, transaction: TxData):
-        blockNumber = transaction['blockNumber']
-        erc721events, erc1155SingleEvents, erc1155BatchEvents = await self.get_events(blockNumber=blockNumber)
+        transactionEvents = await self.ethClient.get_transaction_receipt(transactionHash=transaction['hash'].hex())
         retrievedEvents = {}
-        for event in erc721events:
-            if (event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3) or (event['transactionHash'].hex() == transaction['hash'].hex() and chain_util.normalize_address(event['address']) in {self.cryptoKittiesContract.address, self.cryptoPunksContract.address}):
-                retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc721_single_event(event=event, transaction=transaction) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc721_single_event(event=event, transaction=transaction)
-        for event in erc1155SingleEvents:
-            if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
+        for i in range(len(transactionEvents['logs'])):
+            event = transactionEvents['logs'][i]
+            if ((len(event['topics'])>3) and (event['topics'][0].hex() == self.erc721TansferEventSignatureHash) or chain_util.normalize_address(event['address']) in {self.cryptoKittiesContract.address, self.cryptoPunksContract.address}):
+                retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc721_single_event(event=event, transaction=transactionEvents) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc721_single_event(event=event, transaction=transactionEvents)
+            if (len(event['topics'])>3) and (event['topics'][0].hex() == self.erc1155TansferEventSignatureHash):
                 retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc1155_single_event(event=event) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc1155_single_event(event=event)
-        for event in erc1155BatchEvents:
-            if event['transactionHash'].hex() == transaction['hash'].hex() and len(event['topics']) > 3:
+            if (len(event['topics'])>3) and (event['topics'][0].hex() == self.erc1155TansferBatchEventSignatureHash):
                 retrievedEvents[event['transactionHash'].hex()] = retrievedEvents.get(event['transactionHash'].hex()) + await self._process_erc1155_batch_event(event=event) if retrievedEvents.get(event['transactionHash'].hex()) else await self._process_erc1155_batch_event(event=event)
 
         tokenTransfers =  []
@@ -223,5 +211,5 @@ class BlockProcessor:
                 ]
 
             tokenTransfers += retrievedTokenTransfers
-
+        logging.info(f'Processed transactionHash {transaction["hash"].hex()} transaction with {len(tokenTransfers)} token transfers')
         return tokenTransfers
