@@ -310,7 +310,7 @@ export const CollectionPage = (): React.ReactElement => {
               )}
               <Spacing variant={PaddingSize.Wide2} />
               <Text variant='header3'>Recent Sales</Text>
-              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} isScrollableHorizontally={true}>
+              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} isScrollableHorizontally={true} paddingTop={PaddingSize.Wide}>
                 { recentSales === undefined ? (
                   <LoadingSpinner />
                 ) : recentSales === null ? (
