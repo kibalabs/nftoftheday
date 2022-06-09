@@ -13,7 +13,7 @@ export const HighestPricedTokenTransferCard = (props: HighestPricedTokenTransfer
   return (
     <NftCard
       label='Highest Priced'
-      subtitle={`Sold at ${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} for ${shortFormatEther(props.tokenTransfer.value)}`}
+      subtitle={`${dateToString(props.tokenTransfer.blockDate, 'HH:mm')} • ${shortFormatEther(props.tokenTransfer.value)}`}
       primaryButtonText='View Token'
       secondaryButtonText='View Tx'
       secondaryButtonTarget={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`}
