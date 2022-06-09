@@ -15,7 +15,7 @@ export const TruncateText = (props: TruncateTextProps): React.ReactElement => {
   };
   return (
     <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isFullWidth={true} contentAlignment={Alignment.Center}>
-      <Box maxHeight={shouldTruncateText ? `calc(${theme.texts.default['line-height']} * 3)` : undefined} shouldClipContent={true}>
+      <Box variant='collectionDescription' maxHeight={shouldTruncateText ? `calc(${theme.texts.default['line-height']} * 3)` : undefined} shouldClipContent={true}>
         <MarkdownText textAlignment={TextAlignment.Center} source={props.markdownText} />
       </Box>
       {props.markdownText.length >= props.maximumCharacters && (

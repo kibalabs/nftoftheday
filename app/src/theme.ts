@@ -137,6 +137,7 @@ export const buildNotdTheme = (): ITheme => {
         margin: '0',
         'border-radius': '0',
       },
+      collectionDescription: { 'text-align': 'center' },
     },
     images: {
       default: {
