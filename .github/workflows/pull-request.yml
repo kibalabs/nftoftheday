@@ -24,7 +24,15 @@ jobs:
           cache-to: type=gha,mode=max
         # run: docker buildx build --load --cache-from type=gha --cache-to type=gha,mode=max .
       - name: Build testable docker image
-        run: docker buildx build --load --cache-from type=gha --cache-to type=gha,mode=max --target build --tag $DOCKER_IMAGE .
+        uses: docker/build-push-action@v2
+        with:
+          context: app
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          target: build
+          tag: $DOCKER_IMAGE
+        # run: docker buildx build --load --cache-from type=gha --cache-to type=gha,mode=max --target build --tag $DOCKER_IMAGE .
       - name: Run linting
         run: |
           docker run --name lint $DOCKER_IMAGE npm run lint -- --output-file lint-results.json --output-file-format annotations
