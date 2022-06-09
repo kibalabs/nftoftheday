@@ -5,6 +5,7 @@ import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRout
 import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
+import { TwitterTimelineEmbed } from 'react-twitter-embed';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from 'styled-components';
 
@@ -357,6 +358,13 @@ export const CollectionPage = (): React.ReactElement => {
                       <Text variant='small'>Average value</Text>
                     </Stack>
                   </Stack>
+                  <Spacing variant={PaddingSize.Wide2} />
+                  <Text variant='header3'>Recent Tweets</Text>
+                  <TwitterTimelineEmbed
+                    sourceType='profile'
+                    screenName='TokenHunt'
+                    options={{ width: 900, height: 500 }}
+                  />
                 </Stack>
               )}
             </ContainingView>
@@ -366,7 +374,6 @@ export const CollectionPage = (): React.ReactElement => {
     </React.Fragment>
   );
 };
-
 
 const ColoredCircle = styled.div<{ fillColor: string, strokeColor: string }>`
   background-color: ${(props) => props.fillColor};
