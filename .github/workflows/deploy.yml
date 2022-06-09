@@ -19,8 +19,8 @@ jobs:
         with:
           context: app
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,mode=max,scope=app
           tags: ${{ env.DOCKER_IMAGE }}
   deploy-api:
     runs-on: ubuntu-latest
@@ -38,8 +38,8 @@ jobs:
         with:
           context: api
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
           tags: ${{ env.DOCKER_IMAGE }}
   run-app:
     needs: deploy-app
