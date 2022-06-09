@@ -5,6 +5,7 @@ import { useFavicon, useInitialization, useIntegerUrlQueryState, useNavigator, u
 import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
+import { TwitterTimelineEmbed } from 'react-twitter-embed';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from 'styled-components';
 
@@ -371,6 +372,14 @@ export const CollectionPage = (): React.ReactElement => {
                         <Text variant='small'>Average value</Text>
                       </Stack>
                     </Stack>
+                    <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                      <Text variant='header3'>Recent Tweets</Text>
+                      <TwitterTimelineEmbed
+                        sourceType='profile'
+                        screenName='TokenHunt'
+                        options={{ width: 900, height: 500 }}
+                      />
+                    </Stack.Item>
                   </React.Fragment>
                 )}
               </Stack>
