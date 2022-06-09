@@ -372,14 +372,16 @@ export const CollectionPage = (): React.ReactElement => {
                         <Text variant='small'>Average value</Text>
                       </Stack>
                     </Stack>
-                    <Stack.Item gutterAfter={PaddingSize.Narrow}>
-                      <Text variant='header3'>Recent Tweets</Text>
-                      <TwitterTimelineEmbed
-                        sourceType='profile'
-                        screenName='TokenHunt'
-                        options={{ width: 900, height: 500 }}
-                      />
-                    </Stack.Item>
+                    { collection.twitterUsername && (
+                      <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                        <Text variant='header3'>Recent Tweets</Text>
+                        <TwitterTimelineEmbed
+                          sourceType='profile'
+                          screenName={`${collection.twitterUsername}`}
+                          options={{ width: 900, height: 500 }}
+                        />
+                      </Stack.Item>
+                    )}
                   </React.Fragment>
                 )}
               </Stack>
