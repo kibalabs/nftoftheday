@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { dateToString, etherToNumber, shortFormatEther } from '@kibalabs/core';
-import { useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
+import { useFavicon, useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
+import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -40,6 +40,7 @@ export const CollectionPage = (): React.ReactElement => {
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const bannerImageUrl = collection?.bannerImageUrl || '/assets/black_banner.png';
   const imageUrl = collection?.imageUrl || '/assets/icon.png';
+  useFavicon(imageUrl);
 
   useInitialization((): void => {
     const checksumAddress = ethers.utils.getAddress(address);
@@ -213,18 +214,22 @@ export const CollectionPage = (): React.ReactElement => {
                   )}
                 </LayerContainer.Layer>
                 <LayerContainer.Layer isFullHeight={false} isFullWidth={false} alignmentVertical={Alignment.End} alignmentHorizontal={Alignment.Center}>
-                  {imageUrl && (
-                    <Box variant='rounded-avatar' shouldClipContent={true} width='130px' height='130px'>
-                      <Image source={imageUrl} alternativeText='image' fitType='contain' />
-                    </Box>
-                  )}
+                  <Box variant='rounded-avatar' shouldClipContent={true} width='130px' height='130px'>
+                    <Image source={imageUrl} alternativeText='image' fitType='contain' />
+                  </Box>
                 </LayerContainer.Layer>
               </LayerContainer>
             </Box>
             <ContainingView>
-              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} paddingBottom={PaddingSize.Wide2} paddingTop={PaddingSize.Default}>
-                <Text variant='header1' alignment={TextAlignment.Center}>{collection.name}</Text>
-                <Spacing variant={PaddingSize.Wide} />
+              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Fill} paddingHorizontal={PaddingSize.Wide2} paddingBottom={PaddingSize.Wide2} paddingTop={PaddingSize.Default} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2}>
+                <Stack.Item gutterAfter={PaddingSize.Default}>
+                  <Text variant='header1' alignment={TextAlignment.Center}>{collection.name}</Text>
+                </Stack.Item>
+                <Stack.Item alignment={Alignment.Center} gutterAfter={PaddingSize.Default}>
+                  {account?.address && !isRefreshClicked && (
+                    <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+                  )}
+                </Stack.Item>
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
                   {collection.discordUrl && (
                     <Stack.Item baseSize='10em'>
@@ -252,113 +257,114 @@ export const CollectionPage = (): React.ReactElement => {
                     </Stack.Item>
                   )}
                 </Stack>
-                {account?.address && !isRefreshClicked && (
-                  <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
-                )}
-                <Spacing variant={PaddingSize.Wide2} />
                 {collection.description && (
                   <TruncateText
                     markdownText={collection.description}
+                    textAlignment={TextAlignment.Center}
                     maximumCharacters={300}
                   />
                 )}
-              </Stack>
-              <Spacing variant={PaddingSize.Wide2} />
-              {collectionStatistics === undefined ? (
-                <LoadingSpinner />
-              ) : collectionStatistics === null ? (
-                <Text variant='error'>Collection statistics failed to load</Text>
-              ) : (
-                <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                    <MetricView name={'Items'} value={`${collectionStatistics.itemCount}`} />
-                    <MetricView name={'Owners'} value={`${collectionStatistics.holderCount}`} />
-                    <MetricView name={'Total Volume'} value={shortFormatEther(collectionStatistics.totalTradeVolume)} />
-                  </Stack>
-                  <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                    <Box variant='divider' isFullHeight={true} width='1px' />
-                  </ResponsiveHidingView>
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                    <MetricView name={'24h Low Sale'} value={shortFormatEther(collectionStatistics.lowestSaleLast24Hours)} />
-                    <MetricView name={'24h High Sale'} value={shortFormatEther(collectionStatistics.highestSaleLast24Hours)} />
-                    <MetricView name={'24h Volume'} value={shortFormatEther(collectionStatistics.tradeVolume24Hours)} />
-                  </Stack>
-                </Stack>
-              )}
-              <Spacing variant={PaddingSize.Wide2} />
-              { account ? (
-                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true}>
-                  <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
-                  <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} isScrollableHorizontally={true}>
-                    {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
-                      <TokenCard
-                        key={index}
-                        collectionToken={holding}
-                        // subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
-                        target={`/collections/${holding.registryAddress}/tokens/${holding.tokenId}`}
-                      />
-                    )) : (
-                      <Text>No Holdings</Text>
-                    )}
-                  </Stack>
-                </Stack>
-              ) : (
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
-                  <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
-                  <Text>to show your holdings and watchlist.</Text>
-                </Stack>
-              )}
-              <Spacing variant={PaddingSize.Wide2} />
-              <Text variant='header3'>Recent Sales</Text>
-              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} isScrollableHorizontally={true} paddingTop={PaddingSize.Wide}>
-                { recentSales === undefined ? (
+                {collectionStatistics === undefined ? (
                   <LoadingSpinner />
-                ) : recentSales === null ? (
-                  <Text variant='error'>Failed to load recent sales</Text>
-                ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
-                  <TokenCard
-                    key={index}
-                    collectionToken={recentSale.token}
-                    subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
-                    target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
-                  />
-                )) : (
-                  <Text>No recent sales</Text>
+                ) : collectionStatistics === null ? (
+                  <Text variant='error'>Collection statistics failed to load</Text>
+                ) : (
+                  <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                      <MetricView name={'Items'} value={`${collectionStatistics.itemCount}`} />
+                      <MetricView name={'Owners'} value={`${collectionStatistics.holderCount}`} />
+                      <MetricView name={'Total Volume'} value={shortFormatEther(collectionStatistics.totalTradeVolume)} />
+                    </Stack>
+                    <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                      <Box variant='divider' isFullHeight={true} width='1px' />
+                    </ResponsiveHidingView>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                      <MetricView name={'24h Low Sale'} value={shortFormatEther(collectionStatistics.lowestSaleLast24Hours)} />
+                      <MetricView name={'24h High Sale'} value={shortFormatEther(collectionStatistics.highestSaleLast24Hours)} />
+                      <MetricView name={'24h Volume'} value={shortFormatEther(collectionStatistics.tradeVolume24Hours)} />
+                    </Stack>
+                  </Stack>
+                )}
+                { account ? (
+                  <React.Fragment>
+                    <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                      <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
+                    </Stack.Item>
+                    <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
+                      {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
+                        <TokenCard
+                          key={index}
+                          collectionToken={holding}
+                          // subtitle={`Bought at ${dateToString(holding.blockDate, 'HH:mm')} for Ξ${holding.value / 1000000000000000000.0}`}
+                          target={`/collections/${holding.registryAddress}/tokens/${holding.tokenId}`}
+                        />
+                      )) : (
+                        <Text>No Holdings</Text>
+                      )}
+                    </Stack>
+                  </React.Fragment>
+                ) : (
+                  <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center}>
+                    <Link text='Connect your wallet' onClicked={onConnectWalletClicked} />
+                    <Text>to show your holdings and watchlist.</Text>
+                  </Stack>
+                )}
+                <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                  <Text variant='header3'>Recent Sales</Text>
+                </Stack.Item>
+                <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
+                  { recentSales === undefined ? (
+                    <LoadingSpinner />
+                  ) : recentSales === null ? (
+                    <Text variant='error'>Failed to load recent sales</Text>
+                  ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
+                    <TokenCard
+                      key={index}
+                      collectionToken={recentSale.token}
+                      subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
+                      target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
+                    />
+                  )) : (
+                    <Text>No recent sales</Text>
+                  )}
+                </Stack>
+                <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                  <Text variant='header3'>Recent Activity</Text>
+                </Stack.Item>
+                { collectionActivities === undefined ? (
+                  <LoadingSpinner />
+                ) : collectionActivities === null || chartData === null ? (
+                  <Text variant='error'>Failed to load activity</Text>
+                ) : (
+                  <React.Fragment>
+                    <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                      <Box height='350px'>
+                        <RechartsContainer width='100%' height='100%'>
+                          <AreaChart data={chartData}>
+                            <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
+                            <XAxis dataKey='date' />
+                            <YAxis yAxisId={0} />
+                            <YAxis yAxisId={1}type='number' domain={['dataMin', 'auto']} orientation='right' />
+                            <Tooltip content={renderCustomToolTip} />
+                            <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={2} fill={colors.brandPrimary} fillOpacity={0.15} yAxisId={1} />
+                            <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text} strokeWidth={2} fillOpacity={0} yAxisId={0} />
+                          </AreaChart>
+                        </RechartsContainer>
+                      </Box>
+                    </Stack.Item>
+                    <Stack direction={Direction.Horizontal} shouldWrapItems={true} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide} isFullWidth={true}>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                        <ColoredCircle fillColor={colors.brandPrimary} strokeColor={colors.brandPrimary} />
+                        <Text variant='small'>Sale count</Text>
+                      </Stack>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                        <ColoredCircle fillColor={colors.text} strokeColor={colors.text} />
+                        <Text variant='small'>Average value</Text>
+                      </Stack>
+                    </Stack>
+                  </React.Fragment>
                 )}
               </Stack>
-              <Spacing variant={PaddingSize.Wide2} />
-              { collectionActivities === undefined ? (
-                <LoadingSpinner />
-              ) : collectionActivities === null || chartData === null ? (
-                <Text variant='error'>Failed to load activity</Text>
-              ) : (
-                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={false}>
-                  <Text variant='header3'>Recent Activity</Text>
-                  <Box height='350px'>
-                    <RechartsContainer width='100%' height='100%'>
-                      <AreaChart data={chartData}>
-                        <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
-                        <XAxis dataKey='date' />
-                        <YAxis yAxisId={0} />
-                        <YAxis yAxisId={1}type='number' domain={['dataMin', 'auto']} orientation='right' />
-                        <Tooltip content={renderCustomToolTip} />
-                        <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={2} fill={colors.brandPrimary} fillOpacity={0.15} yAxisId={1} />
-                        <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text} strokeWidth={2} fillOpacity={0} yAxisId={0} />
-                      </AreaChart>
-                    </RechartsContainer>
-                  </Box>
-                  <Stack direction={Direction.Horizontal} shouldWrapItems={true} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide} isFullWidth={true}>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                      <ColoredCircle fillColor={colors.brandPrimary} strokeColor={colors.brandPrimary} />
-                      <Text variant='small'>Sale count</Text>
-                    </Stack>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                      <ColoredCircle fillColor={colors.text} strokeColor={colors.text} />
-                      <Text variant='small'>Average value</Text>
-                    </Stack>
-                  </Stack>
-                </Stack>
-              )}
             </ContainingView>
           </React.Fragment>
         )}
