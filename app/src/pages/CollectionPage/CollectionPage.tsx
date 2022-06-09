@@ -222,7 +222,7 @@ export const CollectionPage = (): React.ReactElement => {
               </LayerContainer>
             </Box>
             <ContainingView>
-              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} paddingBottom={PaddingSize.Wide2} paddingTop={PaddingSize.Default}>
+              <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} paddingBottom={PaddingSize.Wide2} paddingTop={PaddingSize.Default}>
                 <Text variant='header1' alignment={TextAlignment.Center}>{collection.name}</Text>
                 <Spacing variant={PaddingSize.Wide} />
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
@@ -287,9 +287,9 @@ export const CollectionPage = (): React.ReactElement => {
               )}
               <Spacing variant={PaddingSize.Wide2} />
               { account ? (
-                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
                   <Text variant='header3'>{`Your Holdings (${holdings?.length})`}</Text>
-                  <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} isScrollableHorizontally={true}>
+                  <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
                     {holdings && holdings.length !== 0 ? holdings.map((holding: CollectionToken, index: number) : React.ReactElement => (
                       <TokenCard
                         key={index}
@@ -310,21 +310,23 @@ export const CollectionPage = (): React.ReactElement => {
               )}
               <Spacing variant={PaddingSize.Wide2} />
               <Text variant='header3'>Recent Sales</Text>
-              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} isScrollableHorizontally={true} paddingTop={PaddingSize.Wide}>
-                { recentSales === undefined ? (
-                  <LoadingSpinner />
-                ) : recentSales === null ? (
-                  <Text variant='error'>Failed to load recent sales</Text>
-                ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
-                  <TokenCard
-                    key={index}
-                    collectionToken={recentSale.token}
-                    subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
-                    target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
-                  />
-                )) : (
-                  <Text>No recent sales</Text>
-                )}
+              <Stack direction={Direction.Vertical} isFullWidth={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true} isScrollableHorizontally={true}>
+                <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
+                  { recentSales === undefined ? (
+                    <LoadingSpinner />
+                  ) : recentSales === null ? (
+                    <Text variant='error'>Failed to load recent sales</Text>
+                  ) : recentSales && recentSales.length !== 0 ? recentSales.map((recentSale: TokenTransfer, index: number) : React.ReactElement => (
+                    <TokenCard
+                      key={index}
+                      collectionToken={recentSale.token}
+                      subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
+                      target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
+                    />
+                  )) : (
+                    <Text>No recent sales</Text>
+                  )}
+                </Stack>
               </Stack>
               <Spacing variant={PaddingSize.Wide2} />
               { collectionActivities === undefined ? (
