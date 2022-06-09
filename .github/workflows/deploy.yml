@@ -1,13 +1,10 @@
 name: Deploy
 on:
-  push:
+  pull_request:
     branches: [main]
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./app
     env:
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
     steps:
@@ -15,15 +12,18 @@ jobs:
         uses: actions/checkout@v2
       - name: Login to GitHub container registry
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Build docker image
-        run: docker build --tag $DOCKER_IMAGE .
-      - name: Push to container registry
-        run: docker push $DOCKER_IMAGE
+        uses: docker/build-push-action@v2
+        with:
+          context: app
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ${{ env.DOCKER_IMAGE }}
   deploy-api:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./api
     env:
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
     steps:
@@ -31,10 +31,16 @@ jobs:
         uses: actions/checkout@v2
       - name: Login to GitHub container registry
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Build docker image
-        run: docker build --tag $DOCKER_IMAGE .
-      - name: Push to container registry
-        run: docker push $DOCKER_IMAGE
+        uses: docker/build-push-action@v2
+        with:
+          context: api
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ${{ env.DOCKER_IMAGE }}
   run-app:
     needs: deploy-app
     runs-on: ubuntu-latest
