@@ -31,7 +31,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           target: build
-          tags: $DOCKER_IMAGE
+          tags: ${{ env.DOCKER_IMAGE }}
         # run: docker buildx build --load --cache-from type=gha --cache-to type=gha,mode=max --target build --tag $DOCKER_IMAGE .
       - name: Run linting
         run: |
