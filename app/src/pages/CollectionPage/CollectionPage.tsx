@@ -373,14 +373,16 @@ export const CollectionPage = (): React.ReactElement => {
                       </Stack>
                     </Stack>
                     { collection.twitterUsername && (
-                      <Stack.Item gutterAfter={PaddingSize.Narrow}>
-                        <Text variant='header3'>Recent Tweets</Text>
+                      <Stack direction={Direction.Vertical} shouldWrapItems={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide} isFullWidth={true}>
+                        <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                          <Text variant='header3'>Recent Tweets</Text>
+                        </Stack.Item>
                         <TwitterTimelineEmbed
                           sourceType='profile'
                           screenName={`${collection.twitterUsername}`}
                           options={{ width: 900, height: 500 }}
                         />
-                      </Stack.Item>
+                      </Stack>
                     )}
                   </React.Fragment>
                 )}
