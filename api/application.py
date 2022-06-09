@@ -68,11 +68,12 @@ app.add_middleware(ServerHeadersMiddleware, name=name, version=version, environm
 app.add_middleware(LoggingMiddleware, requestIdHolder=requestIdHolder)
 app.add_middleware(DatabaseConnectionMiddleware, database=database)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], allow_headers=['*'], expose_headers=['*'], allow_origins=[
+    'http://localhost:3000',
+    'https://tokenhunt.io',
     'https://nft.tokenhunt.io',
     'https://pfpkit.xyz',
     'https://mdtp-gallery.kibalabs.com',
     'https://sprites-gallery.kibalabs.com',
-    'http://localhost:3000',
 ], allow_origin_regex='https://.*\.tokenpage\.xyz')
 
 @app.on_event('startup')
