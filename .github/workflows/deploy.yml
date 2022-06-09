@@ -67,7 +67,7 @@ jobs:
           envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
-            url="nft.tokenhunt.io"
+            url="tokenhunt.io"
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
@@ -99,7 +99,7 @@ jobs:
           envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
-            url="notd-api.kibalabs.com"
+            url="notd-api.kibalabs.com,api.tokenhunt.io"
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
             docker run \
