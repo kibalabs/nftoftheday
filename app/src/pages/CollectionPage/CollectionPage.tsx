@@ -13,6 +13,7 @@ import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, 
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
+import { dateToRelativeShortString } from '../../dateUtil';
 import { useGlobals } from '../../globalsContext';
 import { usePageData } from '../../PageDataContext';
 import { ICollectionPageData } from './getCollectionPageData';
@@ -22,6 +23,14 @@ interface ChartData {
   averageValue: number;
   saleCount: number;
 }
+
+const ColoredCircle = styled.div<{ fillColor: string, strokeColor: string }>`
+  background-color: ${(props) => props.fillColor};
+  width: 0.7em;
+  height: 0.7em;
+  border: 1px solid ${(props) => props.strokeColor};
+  border-radius: 100%;
+`;
 
 export const CollectionPage = (): React.ReactElement => {
   const colors = useColors();
@@ -321,7 +330,7 @@ export const CollectionPage = (): React.ReactElement => {
                     <TokenCard
                       key={index}
                       collectionToken={recentSale.token}
-                      subtitle={`Sold at ${dateToString(recentSale.blockDate, 'HH:mm')} for ${shortFormatEther(recentSale.value)}`}
+                      subtitle={`${dateToRelativeShortString(recentSale.blockDate)} • ${shortFormatEther(recentSale.value)}`}
                       target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
                     />
                   )) : (
@@ -372,12 +381,3 @@ export const CollectionPage = (): React.ReactElement => {
     </React.Fragment>
   );
 };
-
-
-const ColoredCircle = styled.div<{ fillColor: string, strokeColor: string }>`
-  background-color: ${(props) => props.fillColor};
-  width: 0.7em;
-  height: 0.7em;
-  border: 1px solid ${(props) => props.strokeColor};
-  border-radius: 100%;
-`;
