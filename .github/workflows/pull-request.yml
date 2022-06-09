@@ -13,10 +13,12 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Build docker image
-        run: docker build .
+        run: docker buildx build .
       - name: Build testable docker image
-        run: docker build --target build --tag $DOCKER_IMAGE .
+        run: docker buildx build --target build --tag $DOCKER_IMAGE .
       - name: Run linting
         run: |
           docker run --name lint $DOCKER_IMAGE npm run lint -- --output-file lint-results.json --output-file-format annotations
