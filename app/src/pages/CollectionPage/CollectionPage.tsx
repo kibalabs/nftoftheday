@@ -1,10 +1,11 @@
 import React from 'react';
 
-import { dateToString, etherToNumber, shortFormatEther } from '@kibalabs/core';
+import { dateToRelativeShortString, dateToString, etherToNumber, shortFormatEther } from '@kibalabs/core';
 import { useFavicon, useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
+import { TwitterTimelineEmbed } from 'react-twitter-embed';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from 'styled-components';
 
@@ -13,7 +14,6 @@ import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, 
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
-import { dateToRelativeShortString } from '../../dateUtil';
 import { useGlobals } from '../../globalsContext';
 import { usePageData } from '../../PageDataContext';
 import { ICollectionPageData } from './getCollectionPageData';
@@ -371,6 +371,22 @@ export const CollectionPage = (): React.ReactElement => {
                         <Text variant='small'>Average value</Text>
                       </Stack>
                     </Stack>
+                    { collection.twitterUsername && (
+                      <React.Fragment>
+                        <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                          <Text variant='header3'>Recent Tweets</Text>
+                        </Stack.Item>
+                        <Stack.Item alignment={Alignment.Center}>
+                          <Box width='900px'>
+                            <TwitterTimelineEmbed
+                              sourceType='profile'
+                              screenName={`${collection.twitterUsername}`}
+                              options={{ width: 900, height: 500 }}
+                            />
+                          </Box>
+                        </Stack.Item>
+                      </React.Fragment>
+                    )}
                   </React.Fragment>
                 )}
               </Stack>
