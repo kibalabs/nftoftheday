@@ -377,7 +377,7 @@ export const CollectionPage = (): React.ReactElement => {
                           <Text variant='header3'>Recent Tweets</Text>
                         </Stack.Item>
                         <Stack.Item alignment={Alignment.Center}>
-                          <Box width='900'>
+                          <Box width='900px'>
                             <TwitterTimelineEmbed
                               sourceType='profile'
                               screenName={`${collection.twitterUsername}`}
