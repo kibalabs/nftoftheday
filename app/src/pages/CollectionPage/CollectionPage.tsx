@@ -377,11 +377,13 @@ export const CollectionPage = (): React.ReactElement => {
                           <Text variant='header3'>Recent Tweets</Text>
                         </Stack.Item>
                         <Stack.Item alignment={Alignment.Center}>
-                          <TwitterTimelineEmbed
-                            sourceType='profile'
-                            screenName={`${collection.twitterUsername}`}
-                            options={{ width: 900, height: 500 }}
-                          />
+                          <Box width='900'>
+                            <TwitterTimelineEmbed
+                              sourceType='profile'
+                              screenName={`${collection.twitterUsername}`}
+                              options={{ width: 900, height: 500 }}
+                            />
+                          </Box>
                         </Stack.Item>
                       </React.Fragment>
                     )}
