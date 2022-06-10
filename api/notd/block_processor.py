@@ -94,7 +94,7 @@ class BlockProcessor:
         logging.info(f'Found {len(erc1155Batchevents)} erc1155Batch events in block #{blockNumber}')
         for event in erc1155Batchevents:
             erc1155RetrievedEvents += await self._process_erc1155_batch_event(event=dict(event))
-        # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
+        # NOTE(krishan711): these need to be merged because of floor sweeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
         retrievedEvents += await self._merge_erc1155_retrieved_events(erc1155RetrievedEvents=erc1155RetrievedEvents)
         transactionHashEventMap = defaultdict(list)
         for retrievedEvent in retrievedEvents:
@@ -123,7 +123,6 @@ class BlockProcessor:
         retrievedEvent = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155single')]
         return retrievedEvent
 
-    # NOTE(krishan711): these need to be merged because of floor sweeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
     async def _merge_erc1155_retrieved_events(self, erc1155RetrievedEvents: List[RetrievedEvent]) -> List[RetrievedEvent]:
         firstEvents =  dict()
         for event in erc1155RetrievedEvents:
