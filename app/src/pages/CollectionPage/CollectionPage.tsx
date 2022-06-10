@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { dateToString, etherToNumber, shortFormatEther } from '@kibalabs/core';
+import { dateToRelativeShortString, dateToString, etherToNumber, shortFormatEther } from '@kibalabs/core';
 import { useFavicon, useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { ethers } from 'ethers';
@@ -14,7 +14,6 @@ import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, 
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
-import { dateToRelativeShortString } from '../../dateUtil';
 import { useGlobals } from '../../globalsContext';
 import { usePageData } from '../../PageDataContext';
 import { ICollectionPageData } from './getCollectionPageData';
@@ -377,13 +376,13 @@ export const CollectionPage = (): React.ReactElement => {
                         <Stack.Item gutterAfter={PaddingSize.Narrow}>
                           <Text variant='header3'>Recent Tweets</Text>
                         </Stack.Item>
-                        <Stack direction={Direction.Vertical} shouldWrapItems={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide} isFullWidth={true}>
+                        <Stack.Item alignment={Alignment.Center}>
                           <TwitterTimelineEmbed
                             sourceType='profile'
                             screenName={`${collection.twitterUsername}`}
                             options={{ width: 900, height: 500 }}
                           />
-                        </Stack>
+                        </Stack.Item>
                       </React.Fragment>
                     )}
                   </React.Fragment>
