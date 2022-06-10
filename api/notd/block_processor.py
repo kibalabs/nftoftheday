@@ -76,10 +76,7 @@ class BlockProcessor:
     async def get_latest_block_number(self) -> int:
         return await self.ethClient.get_latest_block_number()
 
-    async def process_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
-        # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
-        # for these, we can use infura specifically but if this problem gets too big find a better solution
-        blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
+    async def _get_retrieved_events(self, blockNumber: int):
         retrievedEvents = []
         erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
         logging.info(f'Found {len(erc721events)} erc721 events in block #{blockNumber}')
@@ -90,15 +87,22 @@ class BlockProcessor:
         erc1155RetrievedEvents = []
         for event in erc1155events:
             erc1155RetrievedEvents += await self._process_erc1155_single_event(event=dict(event))
-        erc1155BatchEvents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
-        logging.info(f'Found {len(erc1155BatchEvents)} erc1155Batch events in block #{blockNumber}')
-        for event in erc1155BatchEvents:
+        erc1155Batchevents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
+        logging.info(f'Found {len(erc1155Batchevents)} erc1155Batch events in block #{blockNumber}')
+        for event in erc1155Batchevents:
             erc1155RetrievedEvents += await self._process_erc1155_batch_event(event=dict(event))
-        # NOTE(krishan711): these need to be merged because of floor sweeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
+        # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
         retrievedEvents += await self._merge_erc1155_retrieved_events(erc1155RetrievedEvents=erc1155RetrievedEvents)
         transactionHashEventMap = defaultdict(list)
         for retrievedEvent in retrievedEvents:
             transactionHashEventMap[retrievedEvent.transactionHash].append(retrievedEvent)
+        return transactionHashEventMap
+
+    async def process_block(self, blockNumber: int) -> List[RetrievedTokenTransfer]:
+        # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
+        # for these, we can use infura specifically but if this problem gets too big find a better solution
+        blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
+        transactionHashEventMap = await self._get_retrieved_events(blockNumber=blockNumber)
         retrievedTokenTransfers = []
         for transaction in blockData['transactions']:
             retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()])
