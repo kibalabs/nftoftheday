@@ -90,9 +90,9 @@ class BlockProcessor:
         erc1155RetrievedEvents = []
         for event in erc1155events:
             erc1155RetrievedEvents += await self._process_erc1155_single_event(event=dict(event))
-        erc1155Batchevents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
-        logging.info(f'Found {len(erc1155Batchevents)} erc1155Batch events in block #{blockNumber}')
-        for event in erc1155Batchevents:
+        erc1155BatchEvents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
+        logging.info(f'Found {len(erc1155BatchEvents)} erc1155Batch events in block #{blockNumber}')
+        for event in erc1155BatchEvents:
             erc1155RetrievedEvents += await self._process_erc1155_batch_event(event=dict(event))
         # NOTE(krishan711): these need to be merged because of floor sweeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
         retrievedEvents += await self._merge_erc1155_retrieved_events(erc1155RetrievedEvents=erc1155RetrievedEvents)
@@ -120,18 +120,18 @@ class BlockProcessor:
         data = [int(f'0x{elem}', 16) for elem in data]
         tokenId = data[0]
         amount = data[1]
-        retrievedEvent = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155single')]
-        return retrievedEvent
+        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155single')]
+        return retrievedEvents
 
     async def _merge_erc1155_retrieved_events(self, erc1155RetrievedEvents: List[RetrievedEvent]) -> List[RetrievedEvent]:
         firstEvents =  dict()
         for event in erc1155RetrievedEvents:
-            eventKer = (event.transactionHash, event.registryAddress, event.tokenId, event.fromAddress, event.toAddress, event.tokenType)
-            firstEvent = firstEvents.get(eventKer)
+            eventKey = (event.transactionHash, event.registryAddress, event.tokenId, event.fromAddress, event.toAddress, event.tokenType)
+            firstEvent = firstEvents.get(eventKey)
             if firstEvent:
                 firstEvent.amount += event.amount
             else:
-                firstEvents[eventKer] = event
+                firstEvents[eventKey] = event
         return list(firstEvents.values())
 
     async def _process_erc1155_batch_event(self, event: LogReceipt,) -> List[RetrievedTokenTransfer]:
@@ -151,8 +151,8 @@ class BlockProcessor:
         lengthOfValue = data[3+lengthOfArray]
         amounts = data[4+lengthOfArray:4+lengthOfArray+lengthOfValue]
         dataDict = {tokenIds[i]: amounts[i] for i in range(len(tokenIds))}
-        retrievedEvent = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount, tokenType = 'erc1155batch') for (id, amount) in dataDict.items()]
-        return retrievedEvent
+        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount, tokenType = 'erc1155batch') for (id, amount) in dataDict.items()]
+        return retrievedEvents
 
     async def _process_erc721_single_event(self, event: LogReceipt) -> List[RetrievedTokenTransfer]:
         transactionHash = event['transactionHash'].hex()
@@ -177,8 +177,8 @@ class BlockProcessor:
         fromAddress = chain_util.normalize_address(event['topics'][1].hex())
         toAddress = chain_util.normalize_address(event['topics'][2].hex())
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
-        retrievedEvent = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, amount=1, tokenId=tokenId, tokenType='erc721')]
-        return retrievedEvent
+        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, amount=1, tokenId=tokenId, tokenType='erc721')]
+        return retrievedEvents
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: dict) -> List[RetrievedTokenTransfer]:
         retrievedTokenTransfers = []
