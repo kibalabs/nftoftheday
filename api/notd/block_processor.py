@@ -186,17 +186,21 @@ class BlockProcessor:
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: dict) -> List[RetrievedTokenTransfer]:
         retrievedTokenTransfers = []
+        isBatchTransfer = False
         tokens =[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokensCount = {(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId):tokens.count((retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)) for retrievedEvent in retrievedEvents}
         count = len(tokensCount)
         setOfAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
+        isSwapTransfer = False
         for retrievedEvent in retrievedEvents:
             isMultiAddress = (bool(len(setOfAddresses) > 1))
+            isSwapTransfer =  bool(transaction['from'] in {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1} or isSwapTransfer)
             if tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)] > 1:
                 isInterstitialTransfer = True
                 tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)] -= 1
             else:
                 isInterstitialTransfer = False
+                isBatchTransfer = count != tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)]
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
@@ -206,13 +210,15 @@ class BlockProcessor:
                     toAddress=retrievedEvent.toAddress,
                     operatorAddress=retrievedEvent.operatorAddress if retrievedEvent.operatorAddress else transaction['from'],
                     amount=retrievedEvent.amount,
-                    value=transaction['value']/count if transaction['value']>0 and not (isInterstitialTransfer or isMultiAddress)  else 0,
+                    value=transaction['value']/count if transaction['value']>0 and not (isInterstitialTransfer or isMultiAddress or isSwapTransfer)  else 0,
                     gasLimit=transaction['gas'],
                     gasPrice=transaction['gasPrice'],
                     blockNumber=transaction['blockNumber'],
                     tokenType=retrievedEvent.tokenType,
                     isMultiAddress=False or isMultiAddress,
                     isInterstitialTransfer=False or isInterstitialTransfer,
+                    isSwapTransfer = True if isSwapTransfer and retrievedEvent.toAddress != chain_util.BURN_ADDRESS else False,
+                    isBatchTransfer = False or isBatchTransfer
                 )
             ]
         return retrievedTokenTransfers
