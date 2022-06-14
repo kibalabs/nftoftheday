@@ -191,10 +191,12 @@ class BlockProcessor:
         tokensCount = {(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId):tokens.count((retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)) for retrievedEvent in retrievedEvents}
         count = len(tokensCount)
         setOfAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
+        setOfFromAddress = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
+        setOfToAddress = {retrievedEvent.toAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
         isSwapTransfer = False
         for retrievedEvent in retrievedEvents:
             isMultiAddress = (bool(len(setOfAddresses) > 1))
-            isSwapTransfer =  bool(transaction['from'] in {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1} or isSwapTransfer)
+            isSwapTransfer =  bool((transaction['from'] in setOfFromAddress and transaction['from'] in setOfToAddress) or isSwapTransfer)
             if tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)] > 1:
                 isInterstitialTransfer = True
                 tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)] -= 1
