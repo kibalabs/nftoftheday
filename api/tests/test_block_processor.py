@@ -247,7 +247,6 @@ async def main():
             RetrievedTokenTransfer(transactionHash='0x2d1f99ae8a9a4c1b8a84164e6105e7ab90a9779913453c81406c67be79d602d5', registryAddress='0x0841098535ABB3fADc4DC5389EBc3B434D678AcC', tokenId='486', fromAddress='0xEa92A3bbBC1EFc14C75a0880d29D435192ab946E', toAddress='0xDA9c6682b950EF1c8074EB7706793B80aec20b41', operatorAddress='0xDA9c6682b950EF1c8074EB7706793B80aec20b41', amount=1, value=10000000000000000, gasLimit=278711, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitialTransfer=False, isSwapTransfer=False, isBatchTransfer=False)
         ]
     )
-    print(result)
     assert(result == expected)
 
     # Burning NFTs
