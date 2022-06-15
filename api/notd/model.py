@@ -71,6 +71,8 @@ class RetrievedTokenTransfer:
     tokenType: Optional[str]
     isMultiAddress: bool
     isInterstitialTransfer: bool
+    isSwapTransfer: bool
+    isBatchTransfer: bool
 
 
 @dataclasses.dataclass(unsafe_hash=True)

@@ -19,6 +19,8 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='tokenType', name='token_type', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='isMultiAddress', name='is_multi_address', type_=sqlalchemy.BOOLEAN, nullable=False),
     sqlalchemy.Column(key='isInterstitialTransfer', name='is_interstitial_transfer', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isSwapTransfer', name='is_swap_transfer', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isBatchTransfer', name='is_batch_transfer', type_=sqlalchemy.BOOLEAN, nullable=False),
 
 )
 
