@@ -19,7 +19,7 @@ from notd.store.schema_conversions import token_transfer_from_row
 @click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlock', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
-async def multiple_transfers_value(startBlock: int, endBlock: int, batchSize: int):
+async def process_multi_transfers(startBlock: int, endBlock: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
@@ -81,4 +81,4 @@ async def multiple_transfers_value(startBlock: int, endBlock: int, batchSize: in
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(multiple_transfers_value())
+    asyncio.run(process_multi_transfers())
