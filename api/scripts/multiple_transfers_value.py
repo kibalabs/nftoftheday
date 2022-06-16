@@ -1,15 +1,19 @@
-import asyncio
-import logging
 import os
 import sys
+import asyncio
+import logging
 import sqlalchemy
-from core.store.database import Database
-import asyncclick as click
+from collections import defaultdict
 
+from core.store.database import Database
+from core.util import chain_util
+import asyncclick as click
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.saver import Saver
+from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema_conversions import token_transfer_from_row
 
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)
@@ -27,24 +31,56 @@ async def multiple_transfers_value(startBlock: int, endBlock: int, batchSize: in
         end = min(currentBlockNumber + batchSize, endBlock)
         logging.info(f'Working on {start} to {end}...')
         async with saver.create_transaction() as connection:
-            query = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.transactionHash, sqlalchemy.func.round(TokenTransfersTable.c.value/sqlalchemy.func.count(TokenTransfersTable.c.transactionHash))]) \
+            subquery = TokenTransfersTable.select() \
+                        .with_only_columns([TokenTransfersTable.c.transactionHash]) \
                         .filter(TokenTransfersTable.c.blockNumber >= start) \
                         .filter(TokenTransfersTable.c.blockNumber < end) \
-                        .group_by(TokenTransfersTable.c.transactionHash,TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.value,) \
-                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1)
-            
+                        .group_by(TokenTransfersTable.c.transactionHash).subquery()
+                        # .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1).subquery()
+            query = sqlalchemy.select(TokenTransfersTable,BlocksTable)\
+                        .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)\
+                        .where(TokenTransfersTable.c.transactionHash.in_(subquery))    
             result = await database.execute(query=query)
-            transactionHashValuepairs = [(row[1],row[2]) for row in result]
-            logging.info(f'Updating {len(transactionHashValuepairs)} transfers...')
-            for transactionHash, value in transactionHashValuepairs:
-                values ={}
-                values[TokenTransfersTable.c.value.key] = value        
-                query = TokenTransfersTable.update(TokenTransfersTable.c.transactionHash == transactionHash).values(values)
-                await database.execute(query=query, connection=connection)
-        currentBlockNumber = endBlock
+            tokenTransfers = [token_transfer_from_row(row) for row in result]
+            transactionHashTokenTransferMap = defaultdict(list)
+            for tokenTransfer in tokenTransfers:
+                transactionHashTokenTransferMap[tokenTransfer.transactionHash].append(tokenTransfer)
+            
+            for transactionHash, tokenTransfers in transactionHashTokenTransferMap.items():
+                tokens =[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId) for retrievedEvent in tokenTransfers]
+                tokensCount = {(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId):tokens.count((retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)) for retrievedEvent in tokenTransfers}
+                count = len(tokensCount)
+                setOfAddresses = {tokenTransfer.registryAddress for tokenTransfer in tokenTransfers}
+                setOfFromAddress = {tokenTransfer.fromAddress for tokenTransfer in tokenTransfers if len(tokenTransfers)>1}
+                setOfToAddress = {tokenTransfer.toAddress for tokenTransfer in tokenTransfers if len(tokenTransfers)>1}
+                isSwapTransfer = False
+                isBatchTransfer = False
+                logging.info(f'Updating {(len(tokenTransfers))} transfers...')
+                for tokenTransfer in tokenTransfers:
+                    isMultiAddress = (bool(len(setOfAddresses) > 1))
+                    isSwapTransfer =  bool(tokenTransfer.operatorAddress in setOfFromAddress and tokenTransfer.operatorAddress in setOfToAddress or isSwapTransfer)
+                    if tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)] > 1:
+                        isInterstitialTransfer = True
+                        tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)] -= 1
+                    else:
+                        isInterstitialTransfer = False
+                        isBatchTransfer = count != tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)]
+
+
+                    #print(isMultiAddress,isInterstitialTransfer,isSwapTransfer,isBatchTransfer)
+                    values = {}
+                    values[TokenTransfersTable.c.value.key] = tokenTransfer.value/count if tokenTransfer.value>0 and not (isInterstitialTransfer or isMultiAddress or isSwapTransfer)  else 0
+                    values[TokenTransfersTable.c.isMultiAddress.key] = isMultiAddress
+                    values[TokenTransfersTable.c.isInterstitialTransfer.key] = isInterstitialTransfer
+                    values[TokenTransfersTable.c.isSwapTransfer.key] =   bool(isSwapTransfer and tokenTransfer.toAddress != chain_util.BURN_ADDRESS and tokenTransfer.fromAddress != chain_util.BURN_ADDRESS)
+                    values[TokenTransfersTable.c.isBatchTransfer.key] = isBatchTransfer
+                    query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId).values(values)
+      
+                    await database.execute(query=query, connection=connection)
+        currentBlockNumber = currentBlockNumber + batchSize
 
     await database.disconnect()
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     asyncio.run(multiple_transfers_value())

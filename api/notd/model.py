@@ -69,10 +69,11 @@ class RetrievedTokenTransfer:
     gasPrice: int
     blockNumber: int
     tokenType: Optional[str]
-    isMultiAddress: bool
-    isInterstitialTransfer: bool
-    isSwapTransfer: bool
-    isBatchTransfer: bool
+    #NOTE Femi-Ogunkola Make non-optional w=once db is backfilled
+    isMultiAddress: Optional[bool]
+    isInterstitialTransfer: Optional[bool] 
+    isSwapTransfer: Optional[bool]
+    isBatchTransfer: Optional[bool]
 
 
 @dataclasses.dataclass(unsafe_hash=True)

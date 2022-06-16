@@ -219,7 +219,7 @@ class BlockProcessor:
                     tokenType=retrievedEvent.tokenType,
                     isMultiAddress=False or isMultiAddress,
                     isInterstitialTransfer=False or isInterstitialTransfer,
-                    isSwapTransfer = bool(isSwapTransfer and retrievedEvent.toAddress != chain_util.BURN_ADDRESS),
+                    isSwapTransfer = bool(isSwapTransfer and retrievedEvent.toAddress != chain_util.BURN_ADDRESS and retrievedEvent.fromAddress != chain_util.BURN_ADDRESS),
                     isBatchTransfer = False or isBatchTransfer
                 )
             ]
