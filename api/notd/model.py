@@ -71,7 +71,7 @@ class RetrievedTokenTransfer:
     tokenType: Optional[str]
     #NOTE Femi-Ogunkola Make non-optional w=once db is backfilled
     isMultiAddress: Optional[bool]
-    isInterstitialTransfer: Optional[bool] 
+    isInterstitialTransfer: Optional[bool]
     isSwapTransfer: Optional[bool]
     isBatchTransfer: Optional[bool]
 
