@@ -66,8 +66,6 @@ async def multiple_transfers_value(startBlock: int, endBlock: int, batchSize: in
                         isInterstitialTransfer = False
                         isBatchTransfer = count != tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)]
 
-
-                    #print(isMultiAddress,isInterstitialTransfer,isSwapTransfer,isBatchTransfer)
                     values = {}
                     values[TokenTransfersTable.c.value.key] = tokenTransfer.value/count if tokenTransfer.value>0 and not (isInterstitialTransfer or isMultiAddress or isSwapTransfer)  else 0
                     values[TokenTransfersTable.c.isMultiAddress.key] = isMultiAddress
