@@ -35,6 +35,7 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
+    #NOTE Change to aws credentials before final push
     workQueue = SqsMessageQueue(region='us-east-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.us-east-1.amazonaws.com/113848722427/FemiKiBa')
     tokenQueue = SqsMessageQueue(region='us-east-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.us-east-1.amazonaws.com/113848722427/FemiKiBa')
     requester = Requester()
@@ -47,6 +48,8 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=tokenQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     await database.connect()
+    await workQueue.connect()
+    await tokenQueue.connect()
     currentBlockNumber = startBlock
     while currentBlockNumber < endBlock:
         start = currentBlockNumber
@@ -58,65 +61,42 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
                         .filter(TokenTransfersTable.c.blockNumber >= start) \
                         .filter(TokenTransfersTable.c.blockNumber < end) \
                         .group_by(TokenTransfersTable.c.transactionHash) \
-                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1).subquery()
+                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) == 1).subquery()
             query = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.blockNumber])\
-                        .where(sqlalchemy.or_(TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(subquery)), TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85'))
+                        .with_only_columns([TokenTransfersTable.c.tokenTransferId]) \
+                        .where(sqlalchemy.and_(TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(subquery)), TokenTransfersTable.c.registryAddress != '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85'))
             result = await database.execute(query=query)
-            blocksToReprocess = {row[0] for row in result}
-            print(len(blocksToReprocess))
-            for blockNumber in blocksToReprocess:
-                await notdManager.process_block_deferred(blockNumber=blockNumber, shouldSkipProcessingTokens=True)
+            tokenTransferIdsToSet = {row[0] for row in result}
+            logging.info(f'Setting {len(tokenTransferIdsToSet)} transfers')
+            for tokenTransferId in tokenTransferIdsToSet:
+                values = {}
+                values[TokenTransfersTable.c.isMultiAddress.key] = False
+                values[TokenTransfersTable.c.isInterstitialTransfer.key] = False
+                values[TokenTransfersTable.c.isSwapTransfer.key] =   False
+                values[TokenTransfersTable.c.isBatchTransfer.key] = False
+                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransferId).values(values)
+                await database.execute(query=query, connection=connection)
+
 
             subquery = TokenTransfersTable.select() \
                         .with_only_columns([TokenTransfersTable.c.transactionHash]) \
                         .filter(TokenTransfersTable.c.blockNumber >= start) \
                         .filter(TokenTransfersTable.c.blockNumber < end) \
                         .group_by(TokenTransfersTable.c.transactionHash) \
-                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) == 1).subquery()
+                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1).subquery()
             query = TokenTransfersTable.select() \
-                        .where(sqlalchemy.and_(TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(subquery)), TokenTransfersTable.c.registryAddress != '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85'))
+                        .with_only_columns([TokenTransfersTable.c.blockNumber])\
+                        .where(sqlalchemy.or_(TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(subquery)), TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85'))
             result = await database.execute(query=query)
-            tokenTransfersToSet = {row[0] for row in result}
-            print(len(tokenTransfersToSet))
-
-            break 
-            # transactionHashTokenTransferMap = defaultdict(list)
-            # for tokenTransfer in tokenTransfers:
-            #     transactionHashTokenTransferMap[tokenTransfer.transactionHash].append(tokenTransfer)
-            
-            # for transactionHash, tokenTransfers in transactionHashTokenTransferMap.items():
-            #     tokens =[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId) for retrievedEvent in tokenTransfers]
-            #     tokensCount = {(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId):tokens.count((retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)) for retrievedEvent in tokenTransfers}
-            #     count = len(tokensCount)
-            #     setOfAddresses = {tokenTransfer.registryAddress for tokenTransfer in tokenTransfers}
-            #     setOfFromAddress = {tokenTransfer.fromAddress for tokenTransfer in tokenTransfers if len(tokenTransfers)>1}
-            #     setOfToAddress = {tokenTransfer.toAddress for tokenTransfer in tokenTransfers if len(tokenTransfers)>1}
-            #     isSwapTransfer = False
-            #     isBatchTransfer = False
-            #     logging.info(f'Updating {(len(tokenTransfers))} transfers...')
-            #     for tokenTransfer in tokenTransfers:
-            #         isMultiAddress = (bool(len(setOfAddresses) > 1))
-            #         isSwapTransfer =  bool(tokenTransfer.operatorAddress in setOfFromAddress and tokenTransfer.operatorAddress in setOfToAddress or isSwapTransfer)
-            #         if tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)] > 1:
-            #             isInterstitialTransfer = True
-            #             tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)] -= 1
-            #         else:
-            #             isInterstitialTransfer = False
-            #             isBatchTransfer = count != tokensCount[(tokenTransfer.transactionHash,tokenTransfer.registryAddress,tokenTransfer.tokenId)]
-
-            #         values = {}
-            #         values[TokenTransfersTable.c.value.key] = tokenTransfer.value/count if tokenTransfer.value>0 and not (isInterstitialTransfer or isMultiAddress or isSwapTransfer)  else 0
-            #         values[TokenTransfersTable.c.isMultiAddress.key] = isMultiAddress
-            #         values[TokenTransfersTable.c.isInterstitialTransfer.key] = isInterstitialTransfer
-            #         values[TokenTransfersTable.c.isSwapTransfer.key] =   bool(isSwapTransfer and tokenTransfer.toAddress != chain_util.BURN_ADDRESS and tokenTransfer.fromAddress != chain_util.BURN_ADDRESS)
-            #         values[TokenTransfersTable.c.isBatchTransfer.key] = isBatchTransfer
-            #         query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransfer.tokenTransferId).values(values)
-      
-            #         await database.execute(query=query, connection=connection)
+            blocksToReprocess = {row[0] for row in result}
+            logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
+            await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True) 
+                  
         currentBlockNumber = currentBlockNumber + batchSize
 
     await database.disconnect()
+    await workQueue.connect()
+    await tokenQueue.connect()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
