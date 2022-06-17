@@ -225,6 +225,7 @@ class NotdManager:
             transferCount = 0
             minimumValue = 0
             maximumValue = 0
+            averageValue = 0
             for collectionActivity in collectionActivities:
                 if date_util.start_of_day(currentDate) == date_util.start_of_day(collectionActivity.date):
                     if collectionActivity.saleCount > 0:
@@ -233,8 +234,8 @@ class NotdManager:
                         minimumValue = min(minimumValue, collectionActivity.minimumValue) if minimumValue > 0 else collectionActivity.minimumValue
                         maximumValue = max(maximumValue, collectionActivity.maximumValue)
                     transferCount += collectionActivity.transferCount
-            averageValue = totalValue / saleCount if saleCount > 0 else 0
-            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate, transferCount=transferCount, saleCount=saleCount, totalValue=totalValue, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue))
+                    averageValue += totalValue/transferCount
+            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalValue=totalValue,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=averageValue))
             currentDate += delta
         return collectionActivitiesPerDay
 
