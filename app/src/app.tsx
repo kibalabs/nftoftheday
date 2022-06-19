@@ -3,12 +3,13 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Direction, IHeadRootProviderProps, KibaApp, Stack } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
+import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
@@ -68,7 +69,10 @@ export const App = (props: IAppProps): React.ReactElement => {
                 <NavBar />
                 <Stack.Item growthFactor={1} shrinkFactor={1}>
                   <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-                    <Router staticPath={props.staticPath} routes={routes} />
+                    <Box>
+                      <Router staticPath={props.staticPath} routes={routes} />
+                    </Box>
+                    <Footer />
                   </Stack>
                 </Stack.Item>
               </Stack>

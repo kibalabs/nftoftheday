@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
 import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { SponsoredToken, TokenTransfer, TradedToken } from '../../client/resources';
 import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
@@ -176,9 +176,6 @@ export const HomePage = (): React.ReactElement => {
           </Stack.Item>
         </Stack>
         <Spacing />
-        <Spacing />
-        <MarkdownText textVariant='light' source='Made by [Kiba Labs](https://www.kibalabs.com)' />
-        <Spacing variant={PaddingSize.Narrow} />
       </Stack>
       <EmailSubsriptionPopup
         isOpen={isEmailPopupShowing}
