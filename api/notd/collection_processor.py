@@ -126,6 +126,7 @@ class CollectionProcessor:
         url = None
         discordUrl = None
         bannerImageUrl = None
+        print('collectionMetadata', collectionMetadata)
         if collectionMetadata:
             name = name or collectionMetadata.get('name')
             symbol = symbol or collectionMetadata.get('symbol')
@@ -138,6 +139,7 @@ class CollectionProcessor:
             url = collectionMetadata.get('external_link')
             discordUrl = collectionMetadata.get('discord_url')
             bannerImageUrl = collectionMetadata.get('bannerImageUrl')
+        print('openseaCollection', openseaCollection)
         if openseaCollection:
             name = name or openseaCollection.get('name')
             symbol = symbol or openseaCollection.get('symbol')
