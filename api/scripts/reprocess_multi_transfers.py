@@ -72,10 +72,9 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
             result = await database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
-            #await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True) 
+            await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True) 
             blocksToBackfill = set(list(range(start, end))) - blocksToReprocess
-            print(len(blocksToBackfill), len(blocksToReprocess))
-            logging.info(f'Backfilling {len(blocksToBackfill)} blocks')
+            logging.info(f'Back filling {len(blocksToBackfill)} blocks')
             values = {}
             values[TokenTransfersTable.c.isMultiAddress.key] = False
             values[TokenTransfersTable.c.isInterstitialTransfer.key] = False
@@ -87,8 +86,8 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
         currentBlockNumber = currentBlockNumber + batchSize
 
     await database.disconnect()
-    await workQueue.connect()
-    await tokenQueue.connect()
+    await workQueue.disconnect()
+    await tokenQueue.disconnect()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

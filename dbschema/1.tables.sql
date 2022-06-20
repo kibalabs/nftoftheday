@@ -12,10 +12,10 @@ CREATE TABLE tbl_token_transfers (
     gas_price NUMERIC(256, 0) NOT NULL,
     block_number INTEGER NOT NULL,
     token_type TEXT NOT NULL,
-    is_multi_address BOOLEAN NOT NULL,
-    is_interstitial_transfer BOOLEAN NOT NULL,
-    is_swap_transfer BOOLEAN NOT NULL,
-    is_batch_transfer BOOLEAN NOT NULL
+    is_multi_address BOOLEAN,
+    is_interstitial_transfer BOOLEAN,
+    is_swap_transfer BOOLEAN,
+    is_batch_transfer BOOLEAN
 );
 CREATE UNIQUE INDEX tbl_token_transfers_transaction_hash_registry_address_token_id_from_address_to_address_block_number_amount ON tbl_token_transfers (transaction_hash, registry_address, token_id, from_address, to_address, block_number, amount_2);
 CREATE INDEX tbl_token_transfers_registry_address_token_id ON tbl_token_transfers (registry_address, token_id);
