@@ -17,7 +17,8 @@ from notd.store.schema import TokenMetadatasTable
 @click.command()
 @click.option('-c', '--collection-address', 'address', required=True, type=str)
 @click.option('-o', '--output-filename', 'outputFilename', required=False, type=str)
-async def create_consolidated_metadata(address: str, outputFilename: str):
+@click.option('-d', '--remove-descriptions', 'shouldRemoveDescriptions', is_flag=True, required=False, type=bool, default=False)
+async def create_consolidated_metadata(address: str, outputFilename: str, shouldRemoveDescriptions: bool):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
@@ -47,7 +48,7 @@ async def create_consolidated_metadata(address: str, outputFilename: str):
                 'tokenId': token.tokenId,
                 'metadataUrl': token.metadataUrl,
                 'name': token.name,
-                'description': token.description,
+                'description': '' if shouldRemoveDescriptions else token.description,
                 'imageUrl': token.imageUrl,
                 'animationUrl': token.animationUrl,
                 'youtubeUrl': token.youtubeUrl,

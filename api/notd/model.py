@@ -218,3 +218,15 @@ class CollectionDailyActivity:
     minimumValue: int
     maximumValue: int
     averageValue: int
+
+
+@dataclasses.dataclass
+class UserInteraction:
+    userInteractionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    date: datetime.datetime
+    userAddress: str
+    command: str
+    signature: str
+    message: JSON

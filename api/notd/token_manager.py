@@ -140,8 +140,8 @@ class TokenManager:
         collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
-        except (TokenDoesNotExistException, TokenHasNoMetadataException):
-            logging.info(f'Failed to retrieve metadata for token: {registryAddress}: {tokenId}')
+        except (TokenDoesNotExistException, TokenHasNoMetadataException) as exception:
+            logging.info(f'Failed to retrieve metadata for token: {registryAddress}/{tokenId}: {exception}')
             retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         await self.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata)
 
@@ -218,9 +218,10 @@ class TokenManager:
         tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
             StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
         ])
-        collectionTokenIds = [(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas]
+        collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
         await self.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
+        await self.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         address = chain_util.normalize_address(value=address)
@@ -348,7 +349,7 @@ class TokenManager:
 
     async def update_activity_for_all_collections(self) -> None:
         # TODO(femi-ogunkola): Account for deleted transactions
-        collectionActivity = await self.retriever.list_collections_activity(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
+        collectionActivity = await self.retriever.list_collection_activities(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
         if len(collectionActivity) > 0:
             lastestProcessedDate = collectionActivity[0].date
         else:
@@ -369,7 +370,7 @@ class TokenManager:
         startDate = date_hour_from_datetime(startDate)
         retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, startDate=startDate)
         async with self.saver.create_transaction() as connection:
-            collectionActivity = await self.retriever.list_collections_activity(
+            collectionActivity = await self.retriever.list_collection_activities(
                 connection=connection,
                 fieldFilters=[
                     StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),

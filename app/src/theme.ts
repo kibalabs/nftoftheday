@@ -6,17 +6,17 @@ export const buildNotdTheme = (): ITheme => {
     dimensions: {
       fontSize: '18px',
     },
+    fonts: {
+      main: {
+        url: 'https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap',
+      },
+    },
     colors: {
       brandPrimary: '#6F0000',
       brandSecondary: '#200122',
       background: '#000000',
       text: '#ffffff',
       placeholderText: 'rgba(255, 255, 255, 0.5)',
-    },
-    fonts: {
-      main: {
-        url: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700,800,900&display=swap',
-      },
     },
     links: {
       default: {
@@ -43,7 +43,7 @@ export const buildNotdTheme = (): ITheme => {
     },
     texts: {
       default: {
-        'font-family': "'Post No Bills Jaffna', sans-serif",
+        'font-family': "'Roboto Condensed', sans-serif",
         'font-weight': '400',
       },
       header3: {
@@ -81,6 +81,10 @@ export const buildNotdTheme = (): ITheme => {
         overflow: 'hidden',
         'text-overflow': 'ellipsis',
       },
+      // NOTE(krishan711): this is a hack, update the library to add a 'shouldClipContent' param or similar
+      forcedMultipleLine: {
+        'word-break': 'break-word',
+      },
     },
     boxes: {
       phBanner: {
@@ -106,9 +110,10 @@ export const buildNotdTheme = (): ITheme => {
       unrounded: {
         'border-radius': '0',
       },
-      wideBorder: {
-        'border-color': '#4B0312',
-        'border-width': '7px',
+      avatar: {
+        'border-color': '$colors.brandSecondary',
+        'background-color': '$colors.brandSecondary',
+        'border-width': '5px',
       },
       divider: {
         'background-color': 'rgba(255, 255, 255, 0.15)',

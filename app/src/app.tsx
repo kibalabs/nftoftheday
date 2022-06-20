@@ -3,17 +3,21 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Direction, KibaApp, Stack } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
+import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
-import { GlobalsProvider } from './globalsContext';
+import { GlobalsProvider, IGlobals } from './globalsContext';
+import { PageDataProvider } from './PageDataContext';
 import { CollectionPage } from './pages/CollectionPage';
+import { getCollectionPageData } from './pages/CollectionPage/getCollectionPageData';
 import { HomePage } from './pages/HomePage';
 import { TokenPage } from './pages/TokenPage';
+import { getTokenPageData } from './pages/TokenPage/getTokenPageData';
 import { UserPage } from './pages/UserPage';
 import { buildNotdTheme } from './theme';
 
@@ -29,7 +33,7 @@ const notdClient = new NotdClient(requester, typeof window !== 'undefined' ? win
 const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
 
-const globals = {
+export const globals = {
   requester,
   notdClient,
   localStorageClient,
@@ -37,36 +41,46 @@ const globals = {
 
 const theme = buildNotdTheme();
 
-export const App = (): React.ReactElement => {
+export interface IAppProps extends IHeadRootProviderProps {
+  staticPath?: string;
+  pageData?: unknown | undefined | null;
+}
+
+export const routes: IRoute<IGlobals>[] = [
+  { path: '/', page: HomePage },
+  { path: '/collections/:address', page: CollectionPage, getPageData: getCollectionPageData },
+  { path: '/collections/:registryAddress/tokens/:tokenId', page: TokenPage, getPageData: getTokenPageData },
+  { path: '/accounts/:accountAddress', page: UserPage },
+];
+
+export const App = (props: IAppProps): React.ReactElement => {
   useInitialization((): void => {
     tracker.initialize();
     tracker.trackApplicationOpen();
   });
 
-  const routes: IRoute[] = [
-    { path: '/', page: HomePage },
-    { path: '/collections/:address', page: CollectionPage },
-    { path: '/collections/:registryAddress/tokens/:tokenId', page: TokenPage },
-    { path: '/accounts/:accountAddress', page: UserPage },
-  ];
-
   return (
-    <KibaApp theme={theme} isFullPageApp={true}>
-      <GlobalsProvider globals={globals}>
-        <AccountControlProvider>
-          <BackgroundView linearGradient='#200122,#6F0000'>
-            <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
-              <NavBar />
-              <Stack.Item growthFactor={1} shrinkFactor={1}>
-                <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-                  <Router routes={routes} />
-                </Stack>
-              </Stack.Item>
-            </Stack>
-          </BackgroundView>
-        </AccountControlProvider>
-        <ToastContainer />
-      </GlobalsProvider>
+    <KibaApp theme={theme} isFullPageApp={true} setHead={props.setHead}>
+      <PageDataProvider initialData={props.pageData}>
+        <GlobalsProvider globals={globals}>
+          <AccountControlProvider>
+            <BackgroundView linearGradient='#200122,#000000'>
+              <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+                <NavBar />
+                <Stack.Item growthFactor={1} shrinkFactor={1}>
+                  <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
+                    <Box>
+                      <Router staticPath={props.staticPath} routes={routes} />
+                    </Box>
+                    <Footer />
+                  </Stack>
+                </Stack.Item>
+              </Stack>
+            </BackgroundView>
+          </AccountControlProvider>
+          <ToastContainer />
+        </GlobalsProvider>
+      </PageDataProvider>
       <ToastContainer />
     </KibaApp>
   );

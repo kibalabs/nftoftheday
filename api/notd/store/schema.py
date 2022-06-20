@@ -120,3 +120,16 @@ CollectionHourlyActivityTable = sqlalchemy.Table(
     sqlalchemy.Column(key='maximumValue', name='maximum_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='averageValue', name='average_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
 )
+
+UserInteractionsTable = sqlalchemy.Table(
+    'tbl_user_interactions',
+    metadata,
+    sqlalchemy.Column(key='userInteractionId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='date', name='date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='userAddress', name='user_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='command', name='command', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='message', name='message', type_=sqlalchemy.JSON, nullable=False),
+)

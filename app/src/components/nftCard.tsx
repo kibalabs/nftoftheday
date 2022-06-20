@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { truncateEnd } from '@kibalabs/core';
 import { Alignment, Box, Button, Direction, Image, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { Collection, CollectionToken } from '../client/resources';
-import { truncateTitle } from '../titleUtil';
 import { CollectionView } from './CollectionView';
 
 export interface NftCardProps {
@@ -33,7 +33,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
   const extraLabelBoxVariantsString = props.extraLabelBoxVariants ? `-${props.extraLabelBoxVariants.join('-')}` : '';
 
   return (
-    <Box variant='card'>
+    <Box variant='card' shouldClipContent={true}>
       <Stack direction={Direction.Vertical} childAlignment={Alignment.Center}>
         <Stack.Item alignment={Alignment.Start} gutterAfter={PaddingSize.Wide}>
           <Box variant={`cardLabelBox${extraLabelBoxVariantsString}`} isFullWidth={false}>
@@ -55,7 +55,7 @@ export const NftCard = (props: NftCardProps): React.ReactElement => {
               )}
             </Box>
           </Stack.Item>
-          <Text variant='header3-singleLine' alignment={TextAlignment.Center}>{truncateTitle(props.token.name)}</Text>
+          <Text variant='header3-singleLine' alignment={TextAlignment.Center}>{truncateEnd(props.token.name, 40)}</Text>
           <Text alignment={TextAlignment.Center}>{props.subtitle}</Text>
           <Spacing variant={PaddingSize.Wide} />
           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>

@@ -30,7 +30,7 @@ export const NavBar = (): React.ReactElement => {
         { !account ? (
           <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
         ) : (
-          <Account accountId={account.address} />
+          <Account accountId={account.address} target={`/accounts/${account.address}`} />
         )}
       </Stack>
     </Box>

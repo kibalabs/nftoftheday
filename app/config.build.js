@@ -21,5 +21,9 @@ const seoTags = [
 module.exports = (config) => {
   config.seoTags = seoTags;
   config.title = title;
+  config.pages = [{
+    path: '/',
+    filename: 'index.html',
+  }];
   return config;
 };

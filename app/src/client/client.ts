@@ -5,7 +5,7 @@ import * as Resources from './resources';
 
 export class NotdClient extends ServiceClient {
   public constructor(requester: Requester, baseUrl?: string) {
-    super(requester, baseUrl || 'https://notd-api.kibalabs.com');
+    super(requester, baseUrl || 'https://api.tokenhunt.io');
   }
 
   public retrieveHighestPriceTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
@@ -106,7 +106,7 @@ export class NotdClient extends ServiceClient {
 
   public getTokenRecentTransfers = async (registryAddress: string, tokenId: string, limit?: number, offset?: number): Promise<Resources.TokenTransfer[]> => {
     const method = RestMethod.GET;
-    const path = `v1/collections/${registryAddress}/token/${tokenId}/recent-transfers`;
+    const path = `v1/collections/${registryAddress}/tokens/${tokenId}/recent-transfers`;
     const request = new Endpoints.GetTokenRecentTransfersRequest(limit, offset);
     const response = await this.makeRequest(method, path, request, Endpoints.GetTokenRecentTransfersResponse);
     return response.tokenTransfers;
@@ -146,5 +146,13 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.GetOwnerTokensRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.GetOwnerTokensResponse);
     return response.tokens;
+  };
+
+  public getCollectionDailyActivities = async (address: string): Promise<Resources.CollectionActivity[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${address}/daily-activities`;
+    const request = new Endpoints.GetCollectionActivitiesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionActivitiesResponse);
+    return response.collectionActivities;
   };
 }

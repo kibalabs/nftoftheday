@@ -9,6 +9,7 @@ from typing import Tuple
 
 import sqlalchemy
 from core import logging
+from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -19,6 +20,8 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from eth_account.messages import defunct_hash_message
+from web3 import Web3
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -39,7 +42,6 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
-from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -61,6 +63,7 @@ class NotdManager:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
         self.sponsoredTokens = [BaseSponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
+        self.web3 = Web3()
 
     async def get_sponsored_token(self) -> SponsoredToken:
         baseSponsoredToken = self.sponsoredTokens[0]
@@ -99,10 +102,9 @@ class NotdManager:
         )
         return randomTokenTransfers[0]
 
-
     async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
-            TokenTransfersTable.select() \
+            TokenTransfersTable.select()
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .with_only_columns([sqlalchemy.func.count()])
             .where(BlocksTable.c.blockDate >= startDate)
@@ -112,17 +114,16 @@ class NotdManager:
         count = result.scalar()
         return count
 
-
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
         query = (
             TokenTransfersTable.select()
-            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber) \
-            .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()]) \
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId) \
-            .where(BlocksTable.c.blockDate >= startDate) \
-            .where(BlocksTable.c.blockDate < endDate) \
-            .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST)) \
-            .order_by(sqlalchemy.func.count().desc()) \
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()])
+            .where(BlocksTable.c.blockDate >= startDate)
+            .where(BlocksTable.c.blockDate < endDate)
+            .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .order_by(sqlalchemy.func.count().desc())
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
@@ -161,44 +162,56 @@ class NotdManager:
         address = chain_util.normalize_address(value=address)
         startDate = date_util.start_of_day()
         endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
-        itemCount = len(await self.retriever.list_token_metadatas(fieldFilters=[
-            StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
-        ]))
-        holderCount = len(await self.retriever.list_token_ownerships(fieldFilters=[StringFieldFilter(fieldName=TokenOwnershipsTable.c.registryAddress.key, eq=address)]))
-        allCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address)])
-        totalTradeVolume = sum([collectionActivity.totalValue for collectionActivity in allCollectionActivities])
-        dayCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
-                StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
-                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate, lt=endDate),
-            ]
+        holderCountQuery = (
+            TokenOwnershipsTable.select()
+            .with_only_columns([
+                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
+                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
+            ])
+            .where(TokenOwnershipsTable.c.registryAddress == address)
         )
-        saleCount = 0
-        transferCount = 0
-        tradeVolume24Hours = 0
-        lowestSaleLast24Hours = 0
-        highestSaleLast24Hours = 0
-        for collectionActivity in dayCollectionActivities:
-            saleCount += collectionActivity.saleCount
-            tradeVolume24Hours += collectionActivity.totalValue
-            lowestSaleLast24Hours = min(lowestSaleLast24Hours, collectionActivity.minimumValue) if lowestSaleLast24Hours > 0 else collectionActivity.minimumValue
-            highestSaleLast24Hours = max(highestSaleLast24Hours, collectionActivity.maximumValue)
-            transferCount += collectionActivity.transferCount
+        holderCountResult = await self.retriever.database.execute(query=holderCountQuery)
+        (itemCount, holderCount) = holderCountResult.first()
+        allActivityQuery = (
+            CollectionHourlyActivityTable.select()
+            .with_only_columns([
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.saleCount),
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.transferCount),
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
+            ])
+            .where(CollectionHourlyActivityTable.c.address == address)
+        )
+        allActivityResult = await self.retriever.database.execute(query=allActivityQuery)
+        (saleCount, transferCount, totalTradeVolume) = allActivityResult.first()
+        dayActivityQuery = (
+            CollectionHourlyActivityTable.select()
+            .with_only_columns([
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
+                sqlalchemy.func.min(CollectionHourlyActivityTable.c.minimumValue),
+                sqlalchemy.func.max(CollectionHourlyActivityTable.c.maximumValue),
+            ])
+            .where(CollectionHourlyActivityTable.c.address == address)
+            .where(CollectionHourlyActivityTable.c.date >= startDate)
+            .where(CollectionHourlyActivityTable.c.date < endDate)
+        )
+        dayActivityResult = await self.retriever.database.execute(query=dayActivityQuery)
+        (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityResult.first()
         return CollectionStatistics(
             itemCount=itemCount,
             holderCount=holderCount,
-            saleCount=saleCount,
-            transferCount=transferCount,
-            totalTradeVolume=totalTradeVolume,
-            lowestSaleLast24Hours=lowestSaleLast24Hours,
-            highestSaleLast24Hours=highestSaleLast24Hours,
-            tradeVolume24Hours=tradeVolume24Hours,
+            saleCount=saleCount or 0,
+            transferCount=transferCount or 0,
+            totalTradeVolume=totalTradeVolume or 0,
+            lowestSaleLast24Hours=lowestSaleLast24Hours or 0,
+            highestSaleLast24Hours=highestSaleLast24Hours or 0,
+            tradeVolume24Hours=tradeVolume24Hours or 0,
         )
 
     async def get_collection_daily_activities(self, address: str) -> List[CollectionDailyActivity]:
         address = chain_util.normalize_address(address)
         endDate = date_util.datetime_from_now()
         startDate = date_util.datetime_from_datetime(dt=endDate, days=-90)
-        collectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
+        collectionActivities = await self.retriever.list_collection_activities(fieldFilters=[
             StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
             DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate),
             DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, lt=endDate),
@@ -220,7 +233,8 @@ class NotdManager:
                         minimumValue = min(minimumValue, collectionActivity.minimumValue) if minimumValue > 0 else collectionActivity.minimumValue
                         maximumValue = max(maximumValue, collectionActivity.maximumValue)
                     transferCount += collectionActivity.transferCount
-            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate,transferCount=transferCount,saleCount=saleCount,totalValue=totalValue,minimumValue=minimumValue,maximumValue=maximumValue,averageValue=0))
+            averageValue = totalValue / saleCount if saleCount > 0 else 0
+            collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate, transferCount=transferCount, saleCount=saleCount, totalValue=totalValue, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue))
             currentDate += delta
         return collectionActivitiesPerDay
 
@@ -274,6 +288,23 @@ class NotdManager:
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
+
+    async def submit_treasure_hunt_for_collection_token(self, registryAddress: str, tokenId: str, userAddress: str, signature: str) -> None:
+        if registryAddress != '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3':
+            raise BadRequestException(f'Collection does not have an active treasure hunt')
+        if registryAddress != '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3' or tokenId != '101':
+            raise BadRequestException(f'Incorrect token')
+        command = 'COMPLETE_TREASURE_HUNT'
+        message = {
+            'registryAddress': registryAddress,
+            'tokenId': tokenId,
+        }
+        signedMessage = json.dumps({ 'command': command, 'message': message }, separators=(',', ':'))
+        messageHash = defunct_hash_message(text=signedMessage)
+        signer = self.web3.eth.account.recoverHash(message_hash=messageHash, signature=signature)
+        if signer != userAddress:
+            raise BadRequestException('Invalid signature')
+        await self.saver.create_user_interaction(date=date_util.datetime_from_now(), userAddress=userAddress, command=command, signature=signature, message=message)
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

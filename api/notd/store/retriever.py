@@ -22,6 +22,7 @@ from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema import UserInteractionsTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
@@ -29,6 +30,7 @@ from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
+from notd.store.schema_conversions import user_interaction_from_row
 
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
@@ -181,7 +183,7 @@ class Retriever(CoreRetriever):
         tokenOwnership = token_multi_ownership_from_row(row)
         return tokenOwnership
 
-    async def list_collections_activity(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
+    async def list_collection_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
         query = CollectionHourlyActivityTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=CollectionHourlyActivityTable, fieldFilters=fieldFilters)
@@ -190,5 +192,17 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenCollections = [collection_activity_from_row(row) for row in result]
-        return tokenCollections
+        collectionActivities = [collection_activity_from_row(row) for row in result]
+        return collectionActivities
+
+    async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
+        query = UserInteractionsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=UserInteractionsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=UserInteractionsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        userInteractions = [user_interaction_from_row(row) for row in result]
+        return userInteractions

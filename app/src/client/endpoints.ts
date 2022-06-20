@@ -442,3 +442,21 @@ export class GetOwnerTokensResponse extends ResponseData {
     );
   };
 }
+
+export class GetCollectionActivitiesRequest extends RequestData {
+}
+
+export class GetCollectionActivitiesResponse extends ResponseData {
+  readonly collectionActivities: Resources.CollectionActivity[];
+
+  public constructor(collectionActivities: Resources.CollectionActivity[]) {
+    super();
+    this.collectionActivities = collectionActivities;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionActivitiesResponse => {
+    return new GetCollectionActivitiesResponse(
+      (obj.collectionActivities as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionActivity.fromObject(innerObj)),
+    );
+  };
+}
