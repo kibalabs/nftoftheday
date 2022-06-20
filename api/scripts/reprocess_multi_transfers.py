@@ -56,42 +56,34 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
         end = min(currentBlockNumber + batchSize, endBlock)
         logging.info(f'Working on {start} to {end}...')
         async with saver.create_transaction() as connection:
-            subquery = TokenTransfersTable.select() \
+            multiTransferSubquery = TokenTransfersTable.select() \
                         .with_only_columns([TokenTransfersTable.c.transactionHash]) \
                         .filter(TokenTransfersTable.c.blockNumber >= start) \
                         .filter(TokenTransfersTable.c.blockNumber < end) \
                         .group_by(TokenTransfersTable.c.transactionHash) \
-                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) == 1).subquery()
-            query = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.tokenTransferId]) \
-                        .where(sqlalchemy.and_(TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(subquery)), TokenTransfersTable.c.registryAddress != '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85'))
-            result = await database.execute(query=query)
-            tokenTransferIdsToSet = {row[0] for row in result}
-            logging.info(f'Setting {len(tokenTransferIdsToSet)} transfers')
-            for tokenTransferId in tokenTransferIdsToSet:
-                values = {}
-                values[TokenTransfersTable.c.isMultiAddress.key] = False
-                values[TokenTransfersTable.c.isInterstitialTransfer.key] = False
-                values[TokenTransfersTable.c.isSwapTransfer.key] =   False
-                values[TokenTransfersTable.c.isBatchTransfer.key] = False
-                query = TokenTransfersTable.update(TokenTransfersTable.c.tokenTransferId == tokenTransferId).values(values)
-                await database.execute(query=query, connection=connection)
-
-
-            subquery = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.transactionHash]) \
-                        .filter(TokenTransfersTable.c.blockNumber >= start) \
-                        .filter(TokenTransfersTable.c.blockNumber < end) \
-                        .group_by(TokenTransfersTable.c.transactionHash) \
-                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1).subquery()
+                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1) \
+                        .subquery()
             query = TokenTransfersTable.select() \
                         .with_only_columns([TokenTransfersTable.c.blockNumber])\
-                        .where(sqlalchemy.or_(TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(subquery)), TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85'))
+                        .where(sqlalchemy.or_(
+                            TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(multiTransferSubquery)),
+                            TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85')
+                        )
             result = await database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
-            await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True) 
-                  
+            #await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True) 
+            blocksToBackfill = set(list(range(start, end))) - blocksToReprocess
+            print(len(blocksToBackfill), len(blocksToReprocess))
+            logging.info(f'Backfilling {len(blocksToBackfill)} blocks')
+            values = {}
+            values[TokenTransfersTable.c.isMultiAddress.key] = False
+            values[TokenTransfersTable.c.isInterstitialTransfer.key] = False
+            values[TokenTransfersTable.c.isSwapTransfer.key] =   False
+            values[TokenTransfersTable.c.isBatchTransfer.key] = False
+            query = TokenTransfersTable.update(TokenTransfersTable.c.blockNumber.in_(blocksToBackfill)).values(values)
+            await database.execute(query=query)
+
         currentBlockNumber = currentBlockNumber + batchSize
 
     await database.disconnect()
