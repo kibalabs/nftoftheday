@@ -162,31 +162,37 @@ class NotdManager:
         address = chain_util.normalize_address(value=address)
         startDate = date_util.start_of_day()
         endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
-        query = (
-            TokenMetadatasTable.select() \
-            .where(TokenMetadatasTable.c.registryAddress == address)
-            .with_only_columns([sqlalchemy.func.count()])
-        )
-        result = await self.retriever.database.execute(query=query)
-        itemCount = result.scalar()
-        query = (
-            TokenOwnershipsTable.select() \
+        holderCountQuery = (
+            TokenOwnershipsTable.select()
+            .with_only_columns([
+                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
+                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
+            ])
             .where(TokenOwnershipsTable.c.registryAddress == address)
-            .with_only_columns([sqlalchemy.func.count()])
         )
-        result = await self.retriever.database.execute(query=query)
-        holderCount = result.scalar()
-        query = (
+        holderCountResult = await self.retriever.database.execute(query=holderCountQuery)
+        (itemCount, holderCount) = holderCountResult.first()
+        allActivityQuery = (
             CollectionHourlyActivityTable.select()
-                .with_only_columns([sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue)])
-                .where(CollectionHourlyActivityTable.c.address == address)
+            .with_only_columns([
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.saleCount),
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.transferCount),
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
+            ])
+            .where(CollectionHourlyActivityTable.c.address == address)
         )
-        result = await self.retriever.database.execute(query=query)
-        totalTradeVolume = result.scalar()
-        dayCollectionActivities = await self.retriever.list_collections_activity(fieldFilters=[
-                StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
-                DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate, lt=endDate),
-            ]
+        allActivityResult = await self.retriever.database.execute(query=allActivityQuery)
+        (saleCount, transferCount, totalTradeVolume) = allActivityResult.first()
+        dayActivityQuery = (
+            CollectionHourlyActivityTable.select()
+            .with_only_columns([
+                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
+                sqlalchemy.func.min(CollectionHourlyActivityTable.c.minimumValue),
+                sqlalchemy.func.max(CollectionHourlyActivityTable.c.maximumValue),
+            ])
+            .where(CollectionHourlyActivityTable.c.address == address)
+            .where(CollectionHourlyActivityTable.c.date >= startDate)
+            .where(CollectionHourlyActivityTable.c.date < endDate)
         )
         dayActivityResult = await self.retriever.database.execute(query=dayActivityQuery)
         (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityResult.first()
