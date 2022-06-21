@@ -6,7 +6,6 @@ from typing import Optional
 from typing import Sequence
 from typing import Set
 from typing import Tuple
-import time
 
 import sqlalchemy
 from core import logging
