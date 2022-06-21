@@ -152,16 +152,16 @@ class TokenManager:
             except NotFoundException:
                 tokenMetadata = None
             if tokenMetadata.metadataUrl == retrievedTokenMetadata.metadataUrl and \
-                 tokenMetadata.name == retrievedTokenMetadata.name  and \
-                 tokenMetadata.description == retrievedTokenMetadata.description and \
-                 tokenMetadata.imageUrl == retrievedTokenMetadata.imageUrl and \
-                 tokenMetadata.animationUrl == retrievedTokenMetadata.animationUrl and \
-                 tokenMetadata.youtubeUrl == retrievedTokenMetadata.youtubeUrl and \
-                 tokenMetadata.backgroundColor == retrievedTokenMetadata.backgroundColor and \
-                 tokenMetadata.frameImageUrl == retrievedTokenMetadata.frameImageUrl  and \
-                 tokenMetadata.attributes == retrievedTokenMetadata.attributes :
-                 logging.info(f'Skipping token metadata update because it has not changed.')
-                 return
+                tokenMetadata.name == retrievedTokenMetadata.name  and \
+                tokenMetadata.description == retrievedTokenMetadata.description and \
+                tokenMetadata.imageUrl == retrievedTokenMetadata.imageUrl and \
+                tokenMetadata.animationUrl == retrievedTokenMetadata.animationUrl and \
+                tokenMetadata.youtubeUrl == retrievedTokenMetadata.youtubeUrl and \
+                tokenMetadata.backgroundColor == retrievedTokenMetadata.backgroundColor and \
+                tokenMetadata.frameImageUrl == retrievedTokenMetadata.frameImageUrl  and \
+                tokenMetadata.attributes == retrievedTokenMetadata.attributes :
+                logging.info(f'Skipping token metadata update because it has not changed.')
+                return
             if tokenMetadata:
                 await self.saver.update_token_metadata(connection=connection, tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
             else:
