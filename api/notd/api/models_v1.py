@@ -45,11 +45,11 @@ class ApiTokenTransfer(BaseModel):
     gasPrice: int
     blockNumber: int
     tokenType: str
-    isMultiAddress: bool
-    isInterstitial: bool
-    isSwap: bool
-    isBatch: bool
-    isOutbound: bool
+    isMultiAddress: Optional[bool]
+    isInterstitial: Optional[bool]
+    isSwap: Optional[bool]
+    isBatch: Optional[bool]
+    isOutbound: Optional[bool]
     blockDate: datetime.datetime
     collection: ApiCollection
     token: ApiCollectionToken
