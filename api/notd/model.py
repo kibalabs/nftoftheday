@@ -69,7 +69,7 @@ class RetrievedTokenTransfer:
     gasPrice: int
     blockNumber: int
     tokenType: Optional[str]
-    #NOTE Femi-Ogunkola Make non-optional w=once db is backfilled
+    # TODO(Femi-Ogunkola): Make non-optional w=once db is backfilled
     isMultiAddress: Optional[bool]
     isInterstitial: Optional[bool]
     isSwap: Optional[bool]
