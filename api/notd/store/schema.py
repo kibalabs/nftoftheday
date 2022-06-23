@@ -18,9 +18,11 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='blockNumber', name='block_number', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='tokenType', name='token_type', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='isMultiAddress', name='is_multi_address', type_=sqlalchemy.BOOLEAN, nullable=False),
-    sqlalchemy.Column(key='isInterstitialTransfer', name='is_interstitial_transfer', type_=sqlalchemy.BOOLEAN, nullable=False),
-    sqlalchemy.Column(key='isSwapTransfer', name='is_swap_transfer', type_=sqlalchemy.BOOLEAN, nullable=False),
-    sqlalchemy.Column(key='isBatchTransfer', name='is_batch_transfer', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isInterstitial', name='is_interstitial', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isSwap', name='is_swap', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isBatch', name='is_batch', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isOutbound', name='is_outbound', type_=sqlalchemy.BOOLEAN, nullable=False),
+
 
 )
 

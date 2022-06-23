@@ -46,9 +46,10 @@ class ApiTokenTransfer(BaseModel):
     blockNumber: int
     tokenType: str
     isMultiAddress: bool
-    isInterstitialTransfer: bool
-    isSwapTransfer: bool
-    isBatchTransfer: bool
+    isInterstitial: bool
+    isSwap: bool
+    isBatch: bool
+    isOutbound: bool
     blockDate: datetime.datetime
     collection: ApiCollection
     token: ApiCollectionToken

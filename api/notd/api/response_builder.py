@@ -99,6 +99,11 @@ class ResponseBuilder:
             gasPrice=tokenTransfer.gasPrice,
             blockNumber=tokenTransfer.blockNumber,
             blockDate=tokenTransfer.blockDate,
+            isMultiAddress=tokenTransfer.isMultiAddress,
+            isInterstitial=tokenTransfer.isInterstitial,
+            isSwap=tokenTransfer.isSwap,
+            isBatch=tokenTransfer.isBatch,
+            isOutbound=tokenTransfer.isOutbound,
             collection=(await self.collection_from_address(address=tokenTransfer.registryAddress)),
             token=(await self.collection_token_from_registry_address_token_id(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId)),
         )

@@ -34,9 +34,10 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         blockNumber=row[TokenTransfersTable.c.blockNumber],
         tokenType=row[TokenTransfersTable.c.tokenType],
         isMultiAddress=row[TokenTransfersTable.c.isMultiAddress],
-        isInterstitialTransfer=row[TokenTransfersTable.c.isInterstitialTransfer],
-        isSwapTransfer=row[TokenTransfersTable.c.isSwapTransfer],
-        isBatchTransfer=row[TokenTransfersTable.c.isBatchTransfer],
+        isInterstitial=row[TokenTransfersTable.c.isInterstitial],
+        isSwap=row[TokenTransfersTable.c.isSwap],
+        isBatch=row[TokenTransfersTable.c.isBatch],
+        isBatch=row[TokenTransfersTable.c.isBatch],
         blockDate=row[BlocksTable.c.blockDate],
         updatedDate=row[BlocksTable.c.updatedDate],
     )

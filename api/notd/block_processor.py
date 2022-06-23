@@ -199,8 +199,8 @@ class BlockProcessor:
             tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
             tokenKeyCount = tokenKeyCounts[tokenKey]
             tokenKeySeenCounts[tokenKey] += 1
-            isInterstitialTransfer = tokenKeySeenCounts[tokenKey] < tokenKeyCount
-            isOutboundTransfer = retrievedEvent.fromAddress == transaction['from']
+            isInterstitial = tokenKeySeenCounts[tokenKey] < tokenKeyCount
+            isOutbound = retrievedEvent.fromAddress == transaction['from']
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
@@ -216,28 +216,28 @@ class BlockProcessor:
                     blockNumber=transaction['blockNumber'],
                     tokenType=retrievedEvent.tokenType,
                     isMultiAddress=isMultiAddress,
-                    isInterstitialTransfer=isInterstitialTransfer,
-                    isOutboundTransfer=isOutboundTransfer,
-                    isSwapTransfer=False,
-                    isBatchTransfer=False,
+                    isInterstitial=isInterstitial,
+                    isOutbound=isOutbound,
+                    isSwap=False,
+                    isBatch=False,
                 )
             ]
-        # Calculate isBatchTransfer only if this is not a multi address
+        # Calculate isBatch only if this is not a multi address
         if not isMultiAddress:
-            isBatchTransfer = len({retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer}) > 1
+            isBatch = len({retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial}) > 1
             for retrievedTokenTransfer in retrievedTokenTransfers:
-                retrievedTokenTransfer.isBatchTransfer = isBatchTransfer and not retrievedTokenTransfer.isInterstitialTransfer
+                retrievedTokenTransfer.isBatch = isBatch and not retrievedTokenTransfer.isInterstitial
         # Calculate swaps as anywhere the transaction creator receives a token
         # NOTE(krishan711): this is wrong cos it marks accepted offers as swaps but is acceptable for now cos it marks the value as 0
         # example of why this is necessary: https://etherscan.io/tx/0x6332d565f96a1ae47ae403df47acc0d28fe11c409fb2e3cc4d1a96a1c5987ed8
-        nonInterstitialFromAddresses = {retrievedTokenTransfer.fromAddress for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer}
-        nonInterstitialToAddresses = {retrievedTokenTransfer.toAddress for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer}
-        isSwapTransfer = len(nonInterstitialFromAddresses.intersection(nonInterstitialToAddresses)) > 0
+        nonInterstitialFromAddresses = {retrievedTokenTransfer.fromAddress for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial}
+        nonInterstitialToAddresses = {retrievedTokenTransfer.toAddress for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial}
+        isSwap = len(nonInterstitialFromAddresses.intersection(nonInterstitialToAddresses)) > 0
         for retrievedTokenTransfer in retrievedTokenTransfers:
-            retrievedTokenTransfer.isSwapTransfer = isSwapTransfer
+            retrievedTokenTransfer.isSwap = isSwap
         # Only calculate value for remaining
         if transaction['value'] > 0 and not isMultiAddress:
-            valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer and not retrievedTokenTransfer.isSwapTransfer and not isOutboundTransfer]
+            valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap and not isOutbound]
             for retrievedTokenTransfer in valuedTransfers:
                 retrievedTokenTransfer.value = int(transaction['value'] / len(valuedTransfers))
         return retrievedTokenTransfers

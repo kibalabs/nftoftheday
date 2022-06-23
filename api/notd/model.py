@@ -71,10 +71,10 @@ class RetrievedTokenTransfer:
     tokenType: Optional[str]
     #NOTE Femi-Ogunkola Make non-optional w=once db is backfilled
     isMultiAddress: Optional[bool]
-    isInterstitialTransfer: Optional[bool]
-    isSwapTransfer: Optional[bool]
-    isBatchTransfer: Optional[bool]
-    isOutboundTransfer: Optional[bool]
+    isInterstitial: Optional[bool]
+    isSwap: Optional[bool]
+    isBatch: Optional[bool]
+    isOutbound: Optional[bool]
 
 
 @dataclasses.dataclass(unsafe_hash=True)
