@@ -186,23 +186,24 @@ class BlockProcessor:
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: dict) -> List[RetrievedTokenTransfer]:
         retrievedTokenTransfers = []
-        isBatchTransfer = False
-        tokens = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
-        tokensCount = {(retrievedEvent.registryAddress, retrievedEvent.tokenId): tokens.count((retrievedEvent.registryAddress, retrievedEvent.tokenId)) for retrievedEvent in retrievedEvents}
-        count = len(tokensCount)
+        tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
+        tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
+        count = len(tokenKeyCounts)
         registryAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
         fromAddresses = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
         toAddresses = {retrievedEvent.toAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
         isMultiAddress = len(registryAddresses) > 1
+        isBatchTransfer = False
         isSwapTransfer = False
         for retrievedEvent in retrievedEvents:
+            tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
             isSwapTransfer =  bool((transaction['from'] in fromAddresses and transaction['from'] in toAddresses) or isSwapTransfer)
-            if tokensCount[(retrievedEvent.registryAddress, retrievedEvent.tokenId)] > 1:
+            if tokenKeyCounts[tokenKey] > 1:
                 isInterstitialTransfer = True
-                tokensCount[(retrievedEvent.registryAddress, retrievedEvent.tokenId)] -= 1
+                tokenKeyCounts[tokenKey] -= 1
             else:
                 isInterstitialTransfer = False
-                isBatchTransfer = count != tokensCount[(retrievedEvent.registryAddress, retrievedEvent.tokenId)]
+                isBatchTransfer = count != tokenKeyCounts[tokenKey]
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
