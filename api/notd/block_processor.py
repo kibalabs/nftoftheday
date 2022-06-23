@@ -187,35 +187,16 @@ class BlockProcessor:
     async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent]) -> List[RetrievedTokenTransfer]:
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
-        registryKeys = [retrievedEvent.registryAddress for retrievedEvent in retrievedEvents]
-        registryKeyCounts = {registryKey: registryKeys.count(registryKey) for registryKey in registryKeys}
-        uniqueTokenCount = len(tokenKeyCounts)
         registryAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
-        fromAddresses = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents}
-        toAddresses = {retrievedEvent.toAddress for retrievedEvent in retrievedEvents}
+        retrievedTokenTransfers: list[RetrievedTokenTransfer] = []
+        # NOTE(krishan711) Set interstitial and multi first, they are independent of other info
         isMultiAddress = len(registryAddresses) > 1
-#        isBatchTransfer = False
-        isSwapTransfer = False
-        retrievedTokenTransfers = []
         tokenKeySeenCounts: Dict[Tuple(str, str), int] = defaultdict(int)
         for retrievedEvent in retrievedEvents:
             tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
             tokenKeyCount = tokenKeyCounts[tokenKey]
-            registryKeyCount = registryKeyCounts[retrievedEvent.registryAddress]
             tokenKeySeenCounts[tokenKey] += 1
-            isSwapTransfer = (len(retrievedEvents) > 1 and transaction['from'] in fromAddresses and transaction['from'] in toAddresses) or isSwapTransfer
             isInterstitialTransfer = tokenKeySeenCounts[tokenKey] < tokenKeyCount
-            # if tokenKeyCounts[tokenKey] > 1:
-            #     isInterstitialTransfer = True
-            #     tokenKeyCounts[tokenKey] -= 1
-            # else:
-            #     isInterstitialTransfer = False
-            #     #isBatchTransfer = uniqueTokenCount != tokenKeyCounts[tokenKey]
-            isBatchTransfer = not isMultiAddress and not isInterstitialTransfer and registryKeyCount > 1
-            # print("isBatchTransfer", isBatchTransfer)
-            # print("isMultiAddress", isMultiAddress)
-            # print("isInterstitialTransfer", isInterstitialTransfer)
-            # print("registryKeyCount > 1", registryKeyCount > 1)
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
@@ -225,15 +206,32 @@ class BlockProcessor:
                     toAddress=retrievedEvent.toAddress,
                     operatorAddress=retrievedEvent.operatorAddress if retrievedEvent.operatorAddress else transaction['from'],
                     amount=retrievedEvent.amount,
-                    value=transaction['value'] / uniqueTokenCount if transaction['value']>0 and not (isInterstitialTransfer or isMultiAddress or isSwapTransfer)  else 0,
+                    value=0,
                     gasLimit=transaction['gas'],
                     gasPrice=transaction['gasPrice'],
                     blockNumber=transaction['blockNumber'],
                     tokenType=retrievedEvent.tokenType,
                     isMultiAddress=isMultiAddress,
                     isInterstitialTransfer=isInterstitialTransfer,
-                    isSwapTransfer=bool(isSwapTransfer and retrievedEvent.toAddress != chain_util.BURN_ADDRESS and retrievedEvent.fromAddress != chain_util.BURN_ADDRESS),
-                    isBatchTransfer=isBatchTransfer
+                    isSwapTransfer=False,
+                    isBatchTransfer=False,
                 )
             ]
+        # Calculate isBatchTransfer only if this is not a multi address
+        if not isMultiAddress:
+            isBatchTransfer = len({retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer}) > 1
+            for retrievedTokenTransfer in retrievedTokenTransfers:
+                retrievedTokenTransfer.isBatchTransfer = isBatchTransfer and not retrievedTokenTransfer.isInterstitialTransfer
+        # Calculate swaps as anywhere the transaction creator receives a token
+        # NOTE(krishan711): this is wrong cos it marks accepted offers as swaps but is acceptable for now cos it marks the value as 0
+        # example of why this is necessary: https://etherscan.io/tx/0x6332d565f96a1ae47ae403df47acc0d28fe11c409fb2e3cc4d1a96a1c5987ed8
+        fromAddresses = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents}
+        isSwapTransfer = transaction['from'] in fromAddresses
+        for retrievedTokenTransfer in retrievedTokenTransfers:
+            retrievedTokenTransfer.isSwapTransfer = isSwapTransfer
+        # Only calculate value for remaining
+        if transaction['value'] > 0 and not isMultiAddress:
+            valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer and not retrievedTokenTransfer.isSwapTransfer]
+            for retrievedTokenTransfer in valuedTransfers:
+                retrievedTokenTransfer.value = int(transaction['value'] / len(valuedTransfers))
         return retrievedTokenTransfers
