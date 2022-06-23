@@ -74,6 +74,7 @@ class RetrievedTokenTransfer:
     isInterstitialTransfer: Optional[bool]
     isSwapTransfer: Optional[bool]
     isBatchTransfer: Optional[bool]
+    isOutboundTransfer: Optional[bool]
 
 
 @dataclasses.dataclass(unsafe_hash=True)

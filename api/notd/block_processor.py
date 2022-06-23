@@ -197,6 +197,7 @@ class BlockProcessor:
             tokenKeyCount = tokenKeyCounts[tokenKey]
             tokenKeySeenCounts[tokenKey] += 1
             isInterstitialTransfer = tokenKeySeenCounts[tokenKey] < tokenKeyCount
+            isOutboundTransfer = retrievedEvent.fromAddress == transaction['from']
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
@@ -213,6 +214,7 @@ class BlockProcessor:
                     tokenType=retrievedEvent.tokenType,
                     isMultiAddress=isMultiAddress,
                     isInterstitialTransfer=isInterstitialTransfer,
+                    isOutboundTransfer=isOutboundTransfer,
                     isSwapTransfer=False,
                     isBatchTransfer=False,
                 )
@@ -232,7 +234,7 @@ class BlockProcessor:
             retrievedTokenTransfer.isSwapTransfer = isSwapTransfer
         # Only calculate value for remaining
         if transaction['value'] > 0 and not isMultiAddress:
-            valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer and not retrievedTokenTransfer.isSwapTransfer]
+            valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer and not retrievedTokenTransfer.isSwapTransfer and not isOutboundTransfer]
             for retrievedTokenTransfer in valuedTransfers:
                 retrievedTokenTransfer.value = int(transaction['value'] / len(valuedTransfers))
         return retrievedTokenTransfers
