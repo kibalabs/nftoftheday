@@ -140,39 +140,41 @@ class TokenManager:
                 return
         collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
         try:
-            retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
+            raise TokenDoesNotExistException
+        #    retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
         except (TokenDoesNotExistException, TokenHasNoMetadataException) as exception:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}/{tokenId}: {exception}')
             retrievedTokenMetadata = None
-        await self.save_token_metadata(retrievedTokenMetadata=retrievedTokenMetadata, registryAddress=registryAddress, tokenId=tokenId)
 
-    async def save_token_metadata(self, retrievedTokenMetadata: RetrievedTokenMetadata, registryAddress: str, tokenId: str):
         async with self.saver.create_transaction() as connection:
             try:
                 tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
             except NotFoundException:
                 tokenMetadata = None
-            
-            if tokenMetadata == None and retrievedTokenMetadata==None:
-                defaultTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-                await self.saver.create_token_metadata(connection=connection, registryAddress=defaultTokenMetadata.registryAddress, tokenId=defaultTokenMetadata.tokenId, metadataUrl=defaultTokenMetadata.metadataUrl, name=defaultTokenMetadata.name, description=defaultTokenMetadata.description, imageUrl=defaultTokenMetadata.imageUrl, animationUrl=defaultTokenMetadata.animationUrl, youtubeUrl=defaultTokenMetadata.youtubeUrl, backgroundColor=defaultTokenMetadata.backgroundColor, frameImageUrl=defaultTokenMetadata.frameImageUrl, attributes=defaultTokenMetadata.attributes)
-            
-            if tokenMetadata and retrievedTokenMetadata:
-                if tokenMetadata.metadataUrl == retrievedTokenMetadata.metadataUrl and \
-                    tokenMetadata.name == retrievedTokenMetadata.name  and \
-                    tokenMetadata.description == retrievedTokenMetadata.description and \
-                    tokenMetadata.imageUrl == retrievedTokenMetadata.imageUrl and \
-                    tokenMetadata.animationUrl == retrievedTokenMetadata.animationUrl and \
-                    tokenMetadata.youtubeUrl == retrievedTokenMetadata.youtubeUrl and \
-                    tokenMetadata.backgroundColor == retrievedTokenMetadata.backgroundColor and \
-                    tokenMetadata.frameImageUrl == retrievedTokenMetadata.frameImageUrl  and \
-                    tokenMetadata.attributes == retrievedTokenMetadata.attributes :
-                    logging.info(f'Skipping token metadata update because it has not changed.')
+            if tokenMetadata:
+                if not retrievedTokenMetadata:
+                    logging.info(f'Skipped updating token metadata because it failed to retrieve.')
+                    return
+                hasTokenChanged = (
+                    tokenMetadata.metadataUrl != retrievedTokenMetadata.metadataUrl or \
+                    tokenMetadata.name != retrievedTokenMetadata.name  or \
+                    tokenMetadata.description != retrievedTokenMetadata.description or \
+                    tokenMetadata.imageUrl != retrievedTokenMetadata.imageUrl or \
+                    tokenMetadata.animationUrl != retrievedTokenMetadata.animationUrl or \
+                    tokenMetadata.youtubeUrl != retrievedTokenMetadata.youtubeUrl or \
+                    tokenMetadata.backgroundColor != retrievedTokenMetadata.backgroundColor or \
+                    tokenMetadata.frameImageUrl != retrievedTokenMetadata.frameImageUrl or \
+                    tokenMetadata.attributes != retrievedTokenMetadata.attributes 
+                )
+                if not hasTokenChanged:
+                    logging.info(f'Skipped updating token metadata because it has not changed.')
                     return
                 await self.saver.update_token_metadata(connection=connection, tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
-            elif retrievedTokenMetadata:
-                await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
-
+            else:
+                if retrievedTokenMetadata == None:
+                    retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+                await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)        
+    
     async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
         if len(addresses) == 0:
             return
