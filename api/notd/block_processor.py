@@ -188,22 +188,31 @@ class BlockProcessor:
         retrievedTokenTransfers = []
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
+        registryKeys = [retrievedEvent.registryAddress for retrievedEvent in retrievedEvents]
+        registryKeyCounts = {registryKey: registryKeys.count(registryKey) for registryKey in registryKeys}
         uniqueTokenCount = len(tokenKeyCounts)
         registryAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
         fromAddresses = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents}
         toAddresses = {retrievedEvent.toAddress for retrievedEvent in retrievedEvents}
         isMultiAddress = len(registryAddresses) > 1
-        isBatchTransfer = False
+#        isBatchTransfer = False
         isSwapTransfer = False
         for retrievedEvent in retrievedEvents:
             tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
+            tokenKeyCount = tokenKeyCounts[tokenKey]
+            registryKeyCount = registryKeyCounts[retrievedEvent.registryAddress]
             isSwapTransfer = (len(retrievedEvents) > 1 and transaction['from'] in fromAddresses and transaction['from'] in toAddresses) or isSwapTransfer
             if tokenKeyCounts[tokenKey] > 1:
                 isInterstitialTransfer = True
                 tokenKeyCounts[tokenKey] -= 1
             else:
                 isInterstitialTransfer = False
-                isBatchTransfer = uniqueTokenCount != tokenKeyCounts[tokenKey]
+                #isBatchTransfer = uniqueTokenCount != tokenKeyCounts[tokenKey]
+            isBatchTransfer = not isMultiAddress and not isInterstitialTransfer and registryKeyCount > 1
+            print("isBatchTransfer", isBatchTransfer)
+            print("isMultiAddress", isMultiAddress)
+            print("isInterstitialTransfer", isInterstitialTransfer)
+            print("registryKeyCount > 1", registryKeyCount > 1)
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
@@ -213,7 +222,7 @@ class BlockProcessor:
                     toAddress=retrievedEvent.toAddress,
                     operatorAddress=retrievedEvent.operatorAddress if retrievedEvent.operatorAddress else transaction['from'],
                     amount=retrievedEvent.amount,
-                    value=transaction['value']/uniqueTokenCount if transaction['value']>0 and not (isInterstitialTransfer or isMultiAddress or isSwapTransfer)  else 0,
+                    value=transaction['value'] / uniqueTokenCount if transaction['value']>0 and not (isInterstitialTransfer or isMultiAddress or isSwapTransfer)  else 0,
                     gasLimit=transaction['gas'],
                     gasPrice=transaction['gasPrice'],
                     blockNumber=transaction['blockNumber'],
