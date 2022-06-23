@@ -3,7 +3,7 @@ import dataclasses
 import datetime
 import json
 import textwrap
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from core import logging
 from core.util import chain_util
@@ -185,7 +185,6 @@ class BlockProcessor:
         return retrievedEvents
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent]) -> List[RetrievedTokenTransfer]:
-        retrievedTokenTransfers = []
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
         registryKeys = [retrievedEvent.registryAddress for retrievedEvent in retrievedEvents]
@@ -197,22 +196,26 @@ class BlockProcessor:
         isMultiAddress = len(registryAddresses) > 1
 #        isBatchTransfer = False
         isSwapTransfer = False
+        retrievedTokenTransfers = []
+        tokenKeySeenCounts: Dict[Tuple(str, str), int] = defaultdict(int)
         for retrievedEvent in retrievedEvents:
             tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
             tokenKeyCount = tokenKeyCounts[tokenKey]
             registryKeyCount = registryKeyCounts[retrievedEvent.registryAddress]
+            tokenKeySeenCounts[tokenKey] += 1
             isSwapTransfer = (len(retrievedEvents) > 1 and transaction['from'] in fromAddresses and transaction['from'] in toAddresses) or isSwapTransfer
-            if tokenKeyCounts[tokenKey] > 1:
-                isInterstitialTransfer = True
-                tokenKeyCounts[tokenKey] -= 1
-            else:
-                isInterstitialTransfer = False
-                #isBatchTransfer = uniqueTokenCount != tokenKeyCounts[tokenKey]
+            isInterstitialTransfer = tokenKeySeenCounts[tokenKey] < tokenKeyCount
+            # if tokenKeyCounts[tokenKey] > 1:
+            #     isInterstitialTransfer = True
+            #     tokenKeyCounts[tokenKey] -= 1
+            # else:
+            #     isInterstitialTransfer = False
+            #     #isBatchTransfer = uniqueTokenCount != tokenKeyCounts[tokenKey]
             isBatchTransfer = not isMultiAddress and not isInterstitialTransfer and registryKeyCount > 1
-            print("isBatchTransfer", isBatchTransfer)
-            print("isMultiAddress", isMultiAddress)
-            print("isInterstitialTransfer", isInterstitialTransfer)
-            print("registryKeyCount > 1", registryKeyCount > 1)
+            # print("isBatchTransfer", isBatchTransfer)
+            # print("isMultiAddress", isMultiAddress)
+            # print("isInterstitialTransfer", isInterstitialTransfer)
+            # print("registryKeyCount > 1", registryKeyCount > 1)
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
