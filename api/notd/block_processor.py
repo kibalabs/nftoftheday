@@ -187,22 +187,22 @@ class BlockProcessor:
     async def process_transaction(self, transaction: TxData, retrievedEvents: dict) -> List[RetrievedTokenTransfer]:
         retrievedTokenTransfers = []
         isBatchTransfer = False
-        tokens =[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
-        tokensCount = {(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId):tokens.count((retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)) for retrievedEvent in retrievedEvents}
+        tokens = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
+        tokensCount = {(retrievedEvent.registryAddress, retrievedEvent.tokenId): tokens.count((retrievedEvent.registryAddress, retrievedEvent.tokenId)) for retrievedEvent in retrievedEvents}
         count = len(tokensCount)
-        setOfAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
-        setOfFromAddress = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
-        setOfToAddress = {retrievedEvent.toAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
+        registryAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
+        fromAddresses = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
+        toAddresses = {retrievedEvent.toAddress for retrievedEvent in retrievedEvents if len(retrievedEvents)>1}
+        isMultiAddress = len(registryAddresses) > 1
         isSwapTransfer = False
         for retrievedEvent in retrievedEvents:
-            isMultiAddress = (bool(len(setOfAddresses) > 1))
-            isSwapTransfer =  bool((transaction['from'] in setOfFromAddress and transaction['from'] in setOfToAddress) or isSwapTransfer)
-            if tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)] > 1:
+            isSwapTransfer =  bool((transaction['from'] in fromAddresses and transaction['from'] in toAddresses) or isSwapTransfer)
+            if tokensCount[(retrievedEvent.registryAddress, retrievedEvent.tokenId)] > 1:
                 isInterstitialTransfer = True
-                tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)] -= 1
+                tokensCount[(retrievedEvent.registryAddress, retrievedEvent.tokenId)] -= 1
             else:
                 isInterstitialTransfer = False
-                isBatchTransfer = count != tokensCount[(retrievedEvent.transactionHash,retrievedEvent.registryAddress,retrievedEvent.tokenId)]
+                isBatchTransfer = count != tokensCount[(retrievedEvent.registryAddress, retrievedEvent.tokenId)]
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
