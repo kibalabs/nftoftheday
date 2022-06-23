@@ -1,30 +1,30 @@
-import os
-import sys
 import asyncio
 import logging
-import sqlalchemy
+import os
+import sys
 from collections import defaultdict
-import asyncclick as click
 
-from core.store.database import Database
-from core.util import chain_util
+import asyncclick as click
+import sqlalchemy
 from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
 from core.store.database import Database
+from core.util import chain_util
 from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
-from notd.token_manager import TokenManager
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
+from notd.token_manager import TokenManager
+
 
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)

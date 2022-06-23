@@ -1,30 +1,27 @@
-import asyncio
-from collections import defaultdict
 import datetime
 import os
 import sys
-from typing import List
 import unittest
-
-from core import logging
-from core.aws_requester import AwsRequester
-from core.util import chain_util
-from core.web3.eth_client import EthClientInterface
-from core.requester import Requester
-from core.web3.eth_client import RestEthClient
-from sqlalchemy import values
+from typing import List
 from unittest import IsolatedAsyncioTestCase
 
+from core.aws_requester import AwsRequester
+from core.web3.eth_client import EthClientInterface
+from core.web3.eth_client import RestEthClient
+from web3.types import TxData
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.block_processor import BlockProcessor, RetrievedEvent
-from notd.model import ProcessedBlock, RetrievedTokenTransfer
+from notd.block_processor import BlockProcessor
+from notd.model import ProcessedBlock
+from notd.model import RetrievedTokenTransfer
 
-async def _get_transaction(ethClient: EthClientInterface, blockNumber: int, transactionHash: str) -> dict:
+
+async def _get_transaction(ethClient: EthClientInterface, blockNumber: int, transactionHash: str) -> TxData:
     blockData = await ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
-    transaction = [transaction for transaction in blockData['transactions'] if transaction['hash'].hex()==transactionHash]
-    return transaction[0]
+    transaction = next((transaction for transaction in blockData['transactions'] if transaction['hash'].hex() == transactionHash), None)
+    return transaction
 
-async def get_transaction_retrieved_events(blockProcessor: BlockProcessor,  blockNumber: int, transactionHash: str):
+async def get_transaction_retrieved_events(blockProcessor: BlockProcessor, blockNumber: int, transactionHash: str):
     transactionHashEventMap = await blockProcessor._get_retrieved_events(blockNumber=blockNumber)
     return transactionHashEventMap[transactionHash]
 
@@ -32,6 +29,7 @@ class KibaAsyncTestCase(IsolatedAsyncioTestCase):
 
     def __init__(self, methodName: str = 'runTest') -> None:
         super().__init__(methodName=methodName)
+
 
 class BlockProcessorTestCase(KibaAsyncTestCase):
 
@@ -50,7 +48,7 @@ class BlockProcessorTestCase(KibaAsyncTestCase):
         # await self.requester.close_connections()
         await super().asyncTearDown()
 
-@unittest.skip
+
 class TestProcessBlock(BlockProcessorTestCase):
 
     async def test_1(self):
@@ -282,10 +280,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         retrievedTokenTransfers = await self.blockProcessor.process_transaction(transaction=transaction, retrievedEvents=retrievedEvents)
         return retrievedTokenTransfers
 
-    async def test_1(self):
-        # Burning NFTs
-        # https://etherscan.io/tx/0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef started by 0xfff8
-        # 3 transfers with 0 value with 0x000 as the receiver and 0xfff as the sender
+    async def test_burning_multiple(self):
         result = await self._process_block_transaction(blockNumber=13281280, transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef', registryAddress='0x2216d47494E516d8206B70FCa8585820eD3C4946', tokenId='14364', fromAddress='0xffF8f66e26ac1A75F2b5Da49c247f3Ec0D0EA5ba', toAddress='0x0000000000000000000000000000000000080085', operatorAddress='0xffF8f66e26ac1A75F2b5Da49c247f3Ec0D0EA5ba', amount=1, value=0, gasLimit=449751, gasPrice=48786337690, blockNumber=13281280, tokenType='erc721', isMultiAddress=False, isInterstitialTransfer=False, isSwapTransfer=False, isBatchTransfer=True, isOutboundTransfer=True),

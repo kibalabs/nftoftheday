@@ -1,9 +1,11 @@
-from collections import defaultdict
 import dataclasses
 import datetime
 import json
 import textwrap
-from typing import Dict, List, Tuple
+from collections import defaultdict
+from typing import Dict
+from typing import List
+from typing import Tuple
 
 from core import logging
 from core.util import chain_util
@@ -16,6 +18,7 @@ from web3.types import TxReceipt
 
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
+
 
 @dataclasses.dataclass
 class RetrievedEvent:
