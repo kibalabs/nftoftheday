@@ -225,8 +225,9 @@ class BlockProcessor:
         # Calculate swaps as anywhere the transaction creator receives a token
         # NOTE(krishan711): this is wrong cos it marks accepted offers as swaps but is acceptable for now cos it marks the value as 0
         # example of why this is necessary: https://etherscan.io/tx/0x6332d565f96a1ae47ae403df47acc0d28fe11c409fb2e3cc4d1a96a1c5987ed8
-        fromAddresses = {retrievedEvent.fromAddress for retrievedEvent in retrievedEvents}
-        isSwapTransfer = transaction['from'] in fromAddresses
+        nonInterstitialFromAddresses = {retrievedTokenTransfer.fromAddress for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer}
+        nonInterstitialToAddresses = {retrievedTokenTransfer.toAddress for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitialTransfer}
+        isSwapTransfer = transaction['from'] in nonInterstitialFromAddresses or len(nonInterstitialFromAddresses.intersection(nonInterstitialToAddresses)) > 0
         for retrievedTokenTransfer in retrievedTokenTransfers:
             retrievedTokenTransfer.isSwapTransfer = isSwapTransfer
         # Only calculate value for remaining
