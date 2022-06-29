@@ -32,7 +32,7 @@ CREATE TABLE tbl_token_metadatas (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
-    metadata_url TEXT NOT NULL,
+    metadata_url TEXT,
     image_url TEXT,
     animation_url TEXT,
     youtube_url TEXT,
