@@ -281,7 +281,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         retrievedTokenTransfers = await self.blockProcessor.process_transaction(transaction=transaction, retrievedEvents=retrievedEvents)
         return retrievedTokenTransfers
 
-    async def test_burning_multiple(self):
+    async def test_selling_multiple(self):
         result = await self._process_block_transaction(blockNumber=13281280, transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef', registryAddress='0x2216d47494E516d8206B70FCa8585820eD3C4946', tokenId='14364', fromAddress='0xffF8f66e26ac1A75F2b5Da49c247f3Ec0D0EA5ba', toAddress='0x0000000000000000000000000000000000080085', operatorAddress='0xffF8f66e26ac1A75F2b5Da49c247f3Ec0D0EA5ba', amount=1, value=0, gasLimit=449751, gasPrice=48786337690, blockNumber=13281280, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=True),
@@ -329,7 +329,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_is_multiple(self):
+    async def test_multiple_collections_in_a_single_transaction(self):
         # Account buys multiple NFTs (of the different collections) from another account
         # https://etherscan.io/tx/0xd40859bfc1ce80da0e81b8f82b15db1222f6937d108daca7f259e3dd162c5170 started by 0x9e56
         # Transfer of 2 SANDBOX tokens: value=0 from 0xf91 to 0x9e5 isMultiAddressTransfer=true
@@ -420,7 +420,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_minting_multiple(self):
+    async def test_minting_multiple_tokens_from_same_collection(self):
         # Account buys NFTs for another account
         # https://etherscan.io/tx/0x1a466fa7f3815776d272bdb70a2f0a306d8aa1d10953f98d9531e81c7bb7d36b started by 0xbd9
         # 7 Transfers: value=(0.4816/7) from 0x000 0x126
@@ -436,7 +436,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_is_swap(self):
+    async def test_swapping_of_tokens(self):
         # Account buys NFT from another account with ERC-721 token plus eth
         # https://etherscan.io/tx/0x466e880275ee3f815d0c0bd787009632a437eefe1e7e7dab753d21ea16c0bd8b started by 0xaf6
         # Transfer of token 7963 value=(0) from 0x13d to 0xaf6 isSwap=true
