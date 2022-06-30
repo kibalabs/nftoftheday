@@ -97,6 +97,7 @@ class ResponseBuilder:
             value=str(tokenTransfer.value),
             gasLimit=tokenTransfer.gasLimit,
             gasPrice=tokenTransfer.gasPrice,
+            tokenType=tokenTransfer.tokenType,
             blockNumber=tokenTransfer.blockNumber,
             blockDate=tokenTransfer.blockDate,
             isMultiAddress=tokenTransfer.isMultiAddress,
