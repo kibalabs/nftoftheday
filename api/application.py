@@ -55,8 +55,8 @@ openseaApiKey = os.environ['OPENSEA_API_KEY']
 collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
 collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
-revueApiKey = os.environ['REVUE_API_KEY']
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor)
+revueApiKey = os.environ['REVUE_API_KEY']
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 

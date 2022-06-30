@@ -47,6 +47,11 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.gasPrice.key: retrievedTokenTransfer.gasPrice,
             TokenTransfersTable.c.blockNumber.key: retrievedTokenTransfer.blockNumber,
             TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
+            TokenTransfersTable.c.isMultiAddress: retrievedTokenTransfer.isMultiAddress,
+            TokenTransfersTable.c.isInterstitial: retrievedTokenTransfer.isInterstitial,
+            TokenTransfersTable.c.isSwap: retrievedTokenTransfer.isSwap,
+            TokenTransfersTable.c.isBatch: retrievedTokenTransfer.isBatch,
+            TokenTransfersTable.c.isOutbound: retrievedTokenTransfer.isOutbound,
         }
 
     async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer, connection: Optional[DatabaseConnection] = None) -> int:
