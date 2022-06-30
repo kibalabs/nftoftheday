@@ -40,6 +40,7 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.fromAddress.key: retrievedTokenTransfer.fromAddress,
             TokenTransfersTable.c.toAddress.key: retrievedTokenTransfer.toAddress,
             TokenTransfersTable.c.operatorAddress.key: retrievedTokenTransfer.operatorAddress,
+            TokenTransfersTable.c.contractAddress.key: retrievedTokenTransfer.contractAddress,
             TokenTransfersTable.c.tokenId.key: retrievedTokenTransfer.tokenId,
             TokenTransfersTable.c.value.key: retrievedTokenTransfer.value,
             TokenTransfersTable.c.amount.key: retrievedTokenTransfer.amount,

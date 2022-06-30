@@ -26,6 +26,7 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         fromAddress=row[TokenTransfersTable.c.fromAddress],
         toAddress=row[TokenTransfersTable.c.toAddress],
         operatorAddress=row[TokenTransfersTable.c.operatorAddress],
+        contractAddress=row[TokenTransfersTable.c.contractAddress],
         tokenId=row[TokenTransfersTable.c.tokenId],
         value=row[TokenTransfersTable.c.value],
         amount=row[TokenTransfersTable.c.amount],
