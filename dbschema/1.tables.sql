@@ -5,7 +5,7 @@ CREATE TABLE tbl_token_transfers (
     from_address TEXT NOT NULL,
     to_address TEXT NOT NULL,
     operator_address TEXT NOT NULL,
-    contract_address TEXT NOT NULL,
+    contract_address TEXT,
     token_id TEXT NOT NULL,
     value NUMERIC(256, 0) NOT NULL,
     amount_2 NUMERIC(256, 0) NOT NULL,
