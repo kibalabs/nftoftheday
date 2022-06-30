@@ -37,7 +37,7 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         isInterstitial=row[TokenTransfersTable.c.isInterstitial],
         isSwap=row[TokenTransfersTable.c.isSwap],
         isBatch=row[TokenTransfersTable.c.isBatch],
-        isBatch=row[TokenTransfersTable.c.isBatch],
+        isOutbound=row[TokenTransfersTable.c.isOutbound],
         blockDate=row[BlocksTable.c.blockDate],
         updatedDate=row[BlocksTable.c.updatedDate],
     )

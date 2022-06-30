@@ -5,8 +5,8 @@ import unittest
 from typing import List
 from unittest import IsolatedAsyncioTestCase
 
-from core.requester import Requester
 from core.aws_requester import AwsRequester
+from core.requester import Requester
 from core.web3.eth_client import EthClientInterface
 from core.web3.eth_client import RestEthClient
 from web3.types import TxData
