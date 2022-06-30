@@ -39,7 +39,7 @@ class ApiTokenTransfer(BaseModel):
     registryAddress: str
     fromAddress: str
     toAddress: str
-    contractAddress: str
+    contractAddress: Optional[str]
     tokenId: str
     value: str
     gasLimit: int
