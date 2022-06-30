@@ -93,6 +93,7 @@ class ResponseBuilder:
             registryAddress=tokenTransfer.registryAddress,
             fromAddress=tokenTransfer.fromAddress,
             toAddress=tokenTransfer.toAddress,
+            contractAddress=tokenTransfer.contractAddress,
             tokenId=tokenTransfer.tokenId,
             value=str(tokenTransfer.value),
             gasLimit=tokenTransfer.gasLimit,

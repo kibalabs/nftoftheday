@@ -209,6 +209,7 @@ class BlockProcessor:
                     fromAddress=retrievedEvent.fromAddress,
                     toAddress=retrievedEvent.toAddress,
                     operatorAddress=retrievedEvent.operatorAddress if retrievedEvent.operatorAddress else transaction['from'],
+                    contractAddress=transaction['to'],
                     amount=retrievedEvent.amount,
                     value=0,
                     gasLimit=transaction['gas'],

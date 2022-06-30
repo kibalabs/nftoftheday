@@ -63,6 +63,7 @@ class RetrievedTokenTransfer:
     fromAddress: str
     toAddress: str
     operatorAddress: Optional[str]
+    contractAddress: Optional[str]
     amount: Optional[int]
     value: int
     gasLimit: int
