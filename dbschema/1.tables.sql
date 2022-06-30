@@ -5,6 +5,7 @@ CREATE TABLE tbl_token_transfers (
     from_address TEXT NOT NULL,
     to_address TEXT NOT NULL,
     operator_address TEXT NOT NULL,
+    contract_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
     value NUMERIC(256, 0) NOT NULL,
     amount_2 NUMERIC(256, 0) NOT NULL,
@@ -29,6 +30,7 @@ CREATE INDEX tbl_token_transfers_block_number ON tbl_token_transfers (block_numb
 CREATE INDEX tbl_token_transfers_to_address ON tbl_token_transfers (to_address);
 CREATE INDEX tbl_token_transfers_from_address ON tbl_token_transfers (from_address);
 CREATE INDEX tbl_token_transfers_operator_address ON tbl_token_transfers (operator_address);
+CREATE INDEX tbl_token_transfers_contract_address ON tbl_token_transfers (contract_address);
 CREATE INDEX tbl_token_transfers_token_type ON tbl_token_transfers (token_type);
 CREATE INDEX tbl_token_transfers_is_multi_address ON tbl_token_transfers (is_multi_address);
 CREATE INDEX tbl_token_transfers_is_interstitial ON tbl_token_transfers (is_interstitial);
