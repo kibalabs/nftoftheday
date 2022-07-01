@@ -67,9 +67,8 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
                         .with_only_columns([TokenTransfersTable.c.blockNumber])\
                         .where(sqlalchemy.or_(
                             TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(multiTransferSubquery)),
-                            TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85'),
+                            TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85')
                         )
-            print(query)
             result = await database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
