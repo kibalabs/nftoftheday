@@ -11,6 +11,7 @@ from core.slack_client import SlackClient
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
 from core.queues.sqs_message_queue import SqsMessageQueue
+from core.util import list_util
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.manager import NotdManager
@@ -48,11 +49,19 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
             end = min(currentBlockNumber + batchSize, endBlockNumber)
             logging.info(f'Working on {start} to {end}...')
             async with saver.create_transaction() as connection:
-                query = TokenTransfersTable.select() .with_only_columns([TokenTransfersTable.c.blockNumber]).filter(TokenTransfersTable.c.blockNumber >= start) .filter(TokenTransfersTable.c.blockNumber < end) .where(TokenTransfersTable.c.contractAddress ==  None).group_by(TokenTransfersTable.c.blockNumber)
+                query = (
+                TokenTransfersTable.select()
+                    .with_only_columns([TokenTransfersTable.c.blockNumber])
+                    .filter(TokenTransfersTable.c.blockNumber >= start)
+                    .filter(TokenTransfersTable.c.blockNumber < end)
+                    .where(TokenTransfersTable.c.contractAddress == None)
+                    .group_by(TokenTransfersTable.c.blockNumber)
+                )
                 result = await database.execute(query=query)
                 blocksToReprocess = {row[0] for row in result}
                 logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
-                await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True)for blockNumber in blocksToReprocess]) 
+                for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=10):
+                    await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True)for blockNumber in chunk]) 
             currentBlockNumber = currentBlockNumber + batchSize
             await slackClient.post(text=f'reprocess_transfers → ✅ completed : {startBlockNumber}-{endBlockNumber}')
     except Exception as exception:
