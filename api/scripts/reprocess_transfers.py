@@ -40,27 +40,33 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     await database.connect()
     await workQueue.connect()
     await tokenQueue.connect()
-    currentBlockNumber = startBlockNumber
-    while currentBlockNumber < endBlockNumber:
-        start = currentBlockNumber
-        end = min(currentBlockNumber + batchSize, endBlockNumber)
-        logging.info(f'Working on {start} to {end}...')
-        async with saver.create_transaction() as connection:
-            query = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.blockNumber])\
-                        .filter(TokenTransfersTable.c.blockNumber >= start) \
-                        .filter(TokenTransfersTable.c.blockNumber < end) \
-                        .where(TokenTransfersTable.c.contractAddress ==  None)\
-                        .group_by(TokenTransfersTable.c.blockNumber)
-            result = await database.execute(query=query)
-            blocksToReprocess = {row[0] for row in result}
-            logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
-            await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True) 
-        currentBlockNumber = currentBlockNumber + batchSize
-
-    await database.disconnect()
-    await workQueue.disconnect()
-    await tokenQueue.disconnect()
+    await slackClient.post(text=f'reprocess_transfers → 🚧 started: {startBlockNumber}-{endBlockNumber}')
+    try:
+        currentBlockNumber = startBlockNumber
+        while currentBlockNumber < endBlockNumber:
+            start = currentBlockNumber
+            end = min(currentBlockNumber + batchSize, endBlockNumber)
+            logging.info(f'Working on {start} to {end}...')
+            async with saver.create_transaction() as connection:
+                query = TokenTransfersTable.select() \
+                            .with_only_columns([TokenTransfersTable.c.blockNumber])\
+                            .filter(TokenTransfersTable.c.blockNumber >= start) \
+                            .filter(TokenTransfersTable.c.blockNumber < end) \
+                            .where(TokenTransfersTable.c.contractAddress ==  None)\
+                            .group_by(TokenTransfersTable.c.blockNumber)
+                result = await database.execute(query=query)
+                blocksToReprocess = {row[0] for row in result}
+                logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
+                await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True)for blockNumber in blocksToReprocess]) 
+            currentBlockNumber = currentBlockNumber + batchSize
+            await slackClient.post(text=f'reprocess_transfers → ✅ completed : {startBlockNumber}-{endBlockNumber}')
+    except Exception as exception:
+        await slackClient.post(text=f'reprocess_transfers → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')
+        raise exception
+    finally:
+        await database.disconnect()
+        await requester.close_connections()
+        await awsRequester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
