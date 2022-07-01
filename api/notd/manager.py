@@ -410,7 +410,7 @@ class NotdManager:
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, int]:
-        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount)
+        return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount, tokenTransfer.isMultiAddress, tokenTransfer.isInterstitial, tokenTransfer.isBatch, tokenTransfer.isSwap, tokenTransfer.isOutbound, tokenTransfer.contractAddress)
 
     async def _save_processed_block(self, processedBlock: ProcessedBlock) -> Sequence[Tuple[str, str]]:
         changedTokens: Set[Tuple[str, str]] = set()
