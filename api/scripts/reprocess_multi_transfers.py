@@ -77,9 +77,9 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
             logging.info(f'Back filling {len(blocksToBackfill)} blocks')
             values = {}
             values[TokenTransfersTable.c.isMultiAddress.key] = False
-            values[TokenTransfersTable.c.isInterstitialTransfer.key] = False
-            values[TokenTransfersTable.c.isSwapTransfer.key] =   False
-            values[TokenTransfersTable.c.isBatchTransfer.key] = False
+            values[TokenTransfersTable.c.isInterstitial.key] = False
+            values[TokenTransfersTable.c.isSwap.key] =   False
+            values[TokenTransfersTable.c.isBatch.key] = False
             query = TokenTransfersTable.update(TokenTransfersTable.c.blockNumber.in_(blocksToBackfill)).values(values)
             await database.execute(query=query)
 
