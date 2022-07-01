@@ -46,12 +46,14 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
         end = min(currentBlockNumber + batchSize, endBlockNumber)
         logging.info(f'Working on {start} to {end}...')
         async with saver.create_transaction() as connection:
-            query = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.blockNumber])\
-                        .filter(TokenTransfersTable.c.blockNumber >= start) \
-                        .filter(TokenTransfersTable.c.blockNumber < end) \
-                        .where(TokenTransfersTable.c.contractAddress ==  None)\
-                        .group_by(TokenTransfersTable.c.blockNumber)
+            query = (
+                TokenTransfersTable.select()
+                        .with_only_columns([TokenTransfersTable.c.blockNumber])
+                    .filter(TokenTransfersTable.c.blockNumber >= start)
+                    .filter(TokenTransfersTable.c.blockNumber < end)
+                    .where(TokenTransfersTable.c.contractAddress == None)
+                    .group_by(TokenTransfersTable.c.blockNumber)
+            )
             result = await database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
