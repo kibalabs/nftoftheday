@@ -272,7 +272,8 @@ class TestProcessBlock(BlockProcessorTestCase):
             ]
         )
         assert(result == expected)
-
+    
+    
 class TestProcessTransaction(BlockProcessorTestCase):
 
     async def _process_block_transaction(self, blockNumber: int, transactionHash: str) -> List[RetrievedTokenTransfer]:
@@ -481,6 +482,11 @@ class TestProcessTransaction(BlockProcessorTestCase):
         expected = [
             RetrievedTokenTransfer(transactionHash='0x6332d565f96a1ae47ae403df47acc0d28fe11c409fb2e3cc4d1a96a1c5987ed8', registryAddress='0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B', tokenId='17028', fromAddress='0xB0c3666a6980D6cfBB97890564934e0d818A9e4A', toAddress='0xe7967e0ec15CB48939Fcf0BC5764c2a634349eCB', operatorAddress='0xB0c3666a6980D6cfBB97890564934e0d818A9e4A', amount=1, value=0, gasLimit=356881, gasPrice=72692865001, blockNumber=15014054, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
         ]
+        self.assertEqual(result, expected)
+    
+    async def test_contract_creation(self):
+        result = await self._process_block_transaction(blockNumber=4313447, transactionHash='0x9aea97f9124ce28745206a721b955ca915d09fe9cb97210290b73465802ca44e')
+        expected = [RetrievedTokenTransfer(transactionHash='0x9aea97f9124ce28745206a721b955ca915d09fe9cb97210290b73465802ca44e', registryAddress='0xe46912A20A7E84da7f29Cdd6883AA71a7864F23f', tokenId='600000000000000000000000000', fromAddress='0xe46912A20A7E84da7f29Cdd6883AA71a7864F23f', toAddress='0x514bc174df04a4b04ae2Be81ee8c788c3796B06B', operatorAddress='0xc98588F01cCc612FE010ef7bF29d6748d4621b72', contractAddress=None, amount=1, value=0, gasLimit=3066382, gasPrice=42000000000, blockNumber=4313447, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)]
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':
