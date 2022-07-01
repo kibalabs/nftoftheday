@@ -14,6 +14,8 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.util import list_util
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from notd.token_manager import TokenManager
+from notd.block_processor import BlockProcessor
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -36,7 +38,9 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
-    notdManager = NotdManager(blockProcessor=None, saver=saver, retriever=retriever, workQueue=None, tokenManager=None, requester=requester, revueApiKey=None)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=workQueue, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None)
+    blockProcessor = BlockProcessor(ethClient=ethClient)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=None)
 
     await database.connect()
     await workQueue.connect()
@@ -69,6 +73,8 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
         raise exception
     finally:
         await database.disconnect()
+        await workQueue.disconnect()
+        await tokenQueue.disconnect()
         await requester.close_connections()
         await awsRequester.close_connections()
 
