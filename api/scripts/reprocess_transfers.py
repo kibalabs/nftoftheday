@@ -62,7 +62,7 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
             result = await database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
-            for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=5):
+            for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=10):
                 await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True) for blockNumber in chunk])
             currentBlockNumber = currentBlockNumber + batchSize
         await slackClient.post(text=f'reprocess_transfers → ✅ completed : {startBlockNumber}-{endBlockNumber}')
