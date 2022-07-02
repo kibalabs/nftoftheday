@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import random
 from typing import List
+from typing import Set
 from typing import Tuple
 
 import sqlalchemy
@@ -364,15 +365,35 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
-        # TODO(femi-ogunkola): Account for deleted transactions
         collectionActivity = await self.retriever.list_collection_activities(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
         if len(collectionActivity) > 0:
-            lastestProcessedDate = collectionActivity[0].date
+            latestProcessedDate = collectionActivity[0].date
         else:
-            lastestProcessedDate = date_util.start_of_day()
-        newTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.updatedDate.key, gte=lastestProcessedDate)])
-        registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in newTokenTransfers}
-        logging.info(f'Scheduling processing for {len(registryDatePairs)} collection, hour pairs')
+            latestProcessedDate = date_util.start_of_day()
+        logging.info(f'Finding changed blocks since {latestProcessedDate}')
+        updatedBlocksQuery = (
+            BlocksTable.select()
+                .with_only_columns([BlocksTable.c.blockNumber])
+                .where(BlocksTable.c.updatedDate >= latestProcessedDate)
+        )
+        updatedBlocksResult = await self.retriever.database.execute(query=updatedBlocksQuery)
+        updatedBlocks = sorted([blockNumber for (blockNumber, ) in updatedBlocksResult])
+        logging.info(f'Found {len(updatedBlocks)} changed blocks')
+        registryDatePairs: Set[Tuple(str, datetime.datetime)] = set()
+        for blockNumbers in list_util.generate_chunks(lst=updatedBlocks, chunkSize=1000):
+            logging.info(f'Finding changed transfers in {len(blockNumbers)} updatedBlocks')
+            updatedTransfersQuery = (
+                TokenTransfersTable.select()
+                    .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+                    .with_only_columns([TokenTransfersTable.c.registryAddress, BlocksTable.c.blockDate])
+                    .where(TokenTransfersTable.c.blockNumber.in_(blockNumbers))
+            )
+            updatedTransfersResult = await self.retriever.database.execute(query=updatedTransfersQuery)
+            newRegistryDatePairs = {(registryAddress, date_hour_from_datetime(dt=date)) for (registryAddress, date) in updatedTransfersResult}
+            logging.info(f'Found {len(newRegistryDatePairs)} newRegistryDatePairs')
+            registryDatePairs.update(newRegistryDatePairs)
+        # TODO(krishan711): once we have updated_date on transfers, query for those as well and add new ones to the list
+        logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
 
