@@ -21,6 +21,8 @@ from notd.store.schema import UserInteractionsTable
 def token_transfer_from_row(row: Mapping) -> TokenTransfer:
     return TokenTransfer(
         tokenTransferId=row[TokenTransfersTable.c.tokenTransferId],
+        createdDate=row[TokenTransfersTable.c.createdDate],
+        updatedDate=row[TokenTransfersTable.c.updatedDate],
         transactionHash=row[TokenTransfersTable.c.transactionHash],
         registryAddress=row[TokenTransfersTable.c.registryAddress],
         fromAddress=row[TokenTransfersTable.c.fromAddress],

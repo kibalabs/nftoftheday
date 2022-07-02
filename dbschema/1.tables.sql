@@ -1,7 +1,7 @@
 CREATE TABLE tbl_token_transfers (
     id BIGSERIAL PRIMARY KEY,
-    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    created_date TIMESTAMP WITHOUT TIME ZONE,
+    updated_date TIMESTAMP WITHOUT TIME ZONE,
     transaction_hash TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     from_address TEXT NOT NULL,
