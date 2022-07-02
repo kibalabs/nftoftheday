@@ -1,5 +1,7 @@
 CREATE TABLE tbl_token_transfers (
     id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     transaction_hash TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     from_address TEXT NOT NULL,
@@ -20,6 +22,7 @@ CREATE TABLE tbl_token_transfers (
     is_outbound BOOLEAN
 );
 CREATE UNIQUE INDEX tbl_token_transfers_transaction_hash_registry_address_token_id_from_address_to_address_block_number_amount ON tbl_token_transfers (transaction_hash, registry_address, token_id, from_address, to_address, block_number, amount_2);
+CREATE INDEX tbl_token_transfers_registry_address_token_id_updated_date ON tbl_token_transfers (registry_address, token_id, updated_date);
 CREATE INDEX tbl_token_transfers_registry_address_token_id ON tbl_token_transfers (registry_address, token_id);
 CREATE INDEX tbl_token_transfers_registry_address_token_id_block_number ON tbl_token_transfers (registry_address, token_id, block_number);
 CREATE INDEX tbl_token_transfers_registry_address ON tbl_token_transfers (registry_address);
