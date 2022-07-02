@@ -35,8 +35,6 @@ class Saver(CoreSaver):
     @staticmethod
     def _get_create_token_transfer_values(retrievedTokenTransfer: RetrievedTokenTransfer) -> Dict[str, Union[str, int, float, None, bool]]:
         return {
-            TokenTransfersTable.c.createdDate.key: retrievedTokenTransfer.createdDate,
-            TokenTransfersTable.c.updatedDate.key: retrievedTokenTransfer.updatedDate,
             TokenTransfersTable.c.transactionHash.key: retrievedTokenTransfer.transactionHash,
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
             TokenTransfersTable.c.fromAddress.key: retrievedTokenTransfer.fromAddress,
