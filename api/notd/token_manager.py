@@ -16,6 +16,7 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
+from api.notd.store.schema import LatestUpdatesTable
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -365,11 +366,17 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
-        collectionActivity = await self.retriever.list_collection_activities(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
-        if len(collectionActivity) > 0:
-            latestProcessedDate = collectionActivity[0].date
+        # collectionActivity = await self.retriever.list_collection_activities(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
+        latestUpdate = await self.retriever.list_latest_updates(fieldFilters=[StringFieldFilter(LatestUpdatesTable.c.key.key, eq='hourly_collection_activities')],
+            orders=[Order(fieldName=LatestUpdatesTable.c.date.key, direction=Direction.DESCENDING)],
+            limit=1
+        )
+        if not latestUpdate:
+            raise Exception
         else:
-            latestProcessedDate = date_util.start_of_day()
+            latestProcessedDate = latestUpdate.date
+        # else:
+        #     latestProcessedDate = date_util.start_of_day()
         logging.info(f'Finding changed blocks since {latestProcessedDate}')
         updatedBlocksQuery = (
             BlocksTable.select()
