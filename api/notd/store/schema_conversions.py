@@ -1,9 +1,9 @@
 from typing import Mapping
-from notd.model import LatestUpdate
 
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import LatestUpdate
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership

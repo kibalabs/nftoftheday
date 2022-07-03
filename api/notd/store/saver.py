@@ -9,12 +9,11 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
-from notd.model import LatestUpdate
-from notd.store.schema import LatestUpdatesTable
 
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import LatestUpdate
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
@@ -22,6 +21,7 @@ from notd.model import TokenOwnership
 from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
