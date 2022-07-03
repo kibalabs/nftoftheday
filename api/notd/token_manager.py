@@ -373,7 +373,6 @@ class TokenManager:
         )
         if not latestUpdate:
             raise Exception
-        
         latestProcessedDate = latestUpdate.date
         # else:
         #     latestProcessedDate = date_util.start_of_day()
