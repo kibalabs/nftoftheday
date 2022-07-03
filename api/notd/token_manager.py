@@ -403,6 +403,7 @@ class TokenManager:
         logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
+        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=date_util.datetime_from_now())
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
