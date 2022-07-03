@@ -1,5 +1,5 @@
 from typing import Mapping
-from api.notd.store.schema import LatestUpdatesTable
+from notd.store.schema import LatestUpdatesTable
 
 from notd.model import Block
 from notd.model import Collection

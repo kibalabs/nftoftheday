@@ -225,8 +225,8 @@ class Retriever(CoreRetriever):
 
     async def get_latest_update_by_key(self, key: str, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:  # pylint: disable=invalid-name
         query = (
-            LatestUpdatesTable.select() 
-            .where(LatestUpdatesTable.c.key == key) 
+            LatestUpdatesTable.select()
+            .where(LatestUpdatesTable.c.key == key)
         )
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()

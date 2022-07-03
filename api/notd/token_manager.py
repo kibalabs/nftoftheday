@@ -16,7 +16,6 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
-from notd.store.schema import LatestUpdatesTable
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -368,7 +367,7 @@ class TokenManager:
     async def update_activity_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key(key='hourly_collection_activities')
-        latestProcessedDate = latestUpdate.date 
+        latestProcessedDate = latestUpdate.date
         logging.info(f'Finding changed blocks since {latestProcessedDate}')
         updatedBlocksQuery = (
             BlocksTable.select()
