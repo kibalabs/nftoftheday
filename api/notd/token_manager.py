@@ -373,8 +373,8 @@ class TokenManager:
         )
         if not latestUpdate:
             raise Exception
-        else:
-            latestProcessedDate = latestUpdate.date
+        
+        latestProcessedDate = latestUpdate.date
         # else:
         #     latestProcessedDate = date_util.start_of_day()
         logging.info(f'Finding changed blocks since {latestProcessedDate}')
