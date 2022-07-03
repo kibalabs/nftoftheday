@@ -1,4 +1,5 @@
 from typing import Mapping
+from notd.model import LatestUpdate
 
 from notd.model import Block
 from notd.model import Collection
@@ -144,4 +145,14 @@ def user_interaction_from_row(row: Mapping) -> UserInteraction:
         command=row[UserInteractionsTable.c.command],
         signature=row[UserInteractionsTable.c.signature],
         message=row[UserInteractionsTable.c.message],
+    )
+
+def latest_update_from_row(row: Mapping) -> LatestUpdate:
+    return LatestUpdate(
+        latestUpdateId=row[UserInteractionsTable.c.latestUpdateId],
+        createdDate=row[UserInteractionsTable.c.createdDate],
+        updatedDate=row[UserInteractionsTable.c.updatedDate],
+        key=row[UserInteractionsTable.c.key],
+        name=row[UserInteractionsTable.c.name],
+        date=row[UserInteractionsTable.c.date],
     )
