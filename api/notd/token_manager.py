@@ -16,7 +16,7 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
-from api.notd.store.schema import LatestUpdatesTable
+from notd.store.schema import LatestUpdatesTable
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
