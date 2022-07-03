@@ -9,8 +9,8 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
-from api.notd.model import LatestUpdate
-from api.notd.store.schema import LatestUpdatesTable
+from notd.model import LatestUpdate
+from notd.store.schema import LatestUpdatesTable
 
 from notd.model import Block
 from notd.model import Collection
