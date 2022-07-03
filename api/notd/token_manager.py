@@ -366,16 +366,9 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
-        # collectionActivity = await self.retriever.list_collection_activities(orders=[Order(fieldName=CollectionHourlyActivityTable.c.date.key, direction=Direction.DESCENDING)], limit=1)
-        latestUpdate = await self.retriever.list_latest_updates(fieldFilters=[StringFieldFilter(LatestUpdatesTable.c.key.key, eq='hourly_collection_activities')],
-            orders=[Order(fieldName=LatestUpdatesTable.c.date.key, direction=Direction.DESCENDING)],
-            limit=1
-        )
-        if not latestUpdate:
-            raise Exception
-        latestProcessedDate = latestUpdate.date
-        # else:
-        #     latestProcessedDate = date_util.start_of_day()
+        startDate = date_util.datetime_from_now()
+        latestUpdate = await self.retriever.get_latest_update_by_key(key='hourly_collection_activities')
+        latestProcessedDate = latestUpdate.date 
         logging.info(f'Finding changed blocks since {latestProcessedDate}')
         updatedBlocksQuery = (
             BlocksTable.select()
@@ -402,7 +395,7 @@ class TokenManager:
         logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
         messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
-        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=date_util.datetime_from_now())
+        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)

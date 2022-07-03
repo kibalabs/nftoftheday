@@ -1,4 +1,5 @@
 from typing import Mapping
+from api.notd.store.schema import LatestUpdatesTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -149,10 +150,10 @@ def user_interaction_from_row(row: Mapping) -> UserInteraction:
 
 def latest_update_from_row(row: Mapping) -> LatestUpdate:
     return LatestUpdate(
-        latestUpdateId=row[UserInteractionsTable.c.latestUpdateId],
-        createdDate=row[UserInteractionsTable.c.createdDate],
-        updatedDate=row[UserInteractionsTable.c.updatedDate],
-        key=row[UserInteractionsTable.c.key],
-        name=row[UserInteractionsTable.c.name],
-        date=row[UserInteractionsTable.c.date],
+        latestUpdateId=row[LatestUpdatesTable.c.latestUpdateId],
+        createdDate=row[LatestUpdatesTable.c.createdDate],
+        updatedDate=row[LatestUpdatesTable.c.updatedDate],
+        key=row[LatestUpdatesTable.c.key],
+        name=row[LatestUpdatesTable.c.name],
+        date=row[LatestUpdatesTable.c.date],
     )

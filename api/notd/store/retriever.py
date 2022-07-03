@@ -222,3 +222,15 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         latestUpdates = [latest_update_from_row(row) for row in result]
         return latestUpdates
+
+    async def get_latest_update_by_key(self, key: str, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:  # pylint: disable=invalid-name
+        query = (
+            LatestUpdatesTable.select() 
+            .where(LatestUpdatesTable.c.key == key) 
+        )
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Latest Update  with key:{key} not found')
+        latestUpdate = latest_update_from_row(row)
+        return latestUpdate
