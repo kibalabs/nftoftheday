@@ -13,6 +13,7 @@ from sqlalchemy import JSON
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import LatestUpdate
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
@@ -20,6 +21,7 @@ from notd.model import TokenOwnership
 from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -437,3 +439,38 @@ class Saver(CoreSaver):
             signature=signature,
             message=message,
         )
+
+    async def create_latest_update(self, date: datetime.datetime, key: str, name: Optional[str], connection: Optional[DatabaseConnection] = None) -> LatestUpdate:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            LatestUpdatesTable.c.createdDate.key: createdDate,
+            LatestUpdatesTable.c.updatedDate.key: updatedDate,
+            LatestUpdatesTable.c.date.key: date,
+            LatestUpdatesTable.c.key.key: key,
+            LatestUpdatesTable.c.name.key: name,
+        }
+        query = LatestUpdatesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        latestUpdateId = result.inserted_primary_key[0]
+        return LatestUpdate(
+            latestUpdateId=latestUpdateId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            key=key,
+            name=name,
+            date=date,
+        )
+
+    async def update_latest_update(self, latestUpdateId: int, key: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, date: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if key is not None:
+            values[LatestUpdatesTable.c.key.key] = key
+        if name != _EMPTY_STRING:
+            values[LatestUpdatesTable.c.name.key] = name
+        if date is not None:
+            values[LatestUpdatesTable.c.date.key] = date
+        if len(values) > 0:
+            values[LatestUpdatesTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = LatestUpdatesTable.update(LatestUpdatesTable.c.latestUpdateId == latestUpdateId).values(values)
+        await self._execute(query=query, connection=connection)

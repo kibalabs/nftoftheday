@@ -232,3 +232,13 @@ class UserInteraction:
     command: str
     signature: str
     message: JSON
+
+
+@dataclasses.dataclass
+class LatestUpdate:
+    latestUpdateId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    key: str
+    name: Optional[str]
+    date: datetime.datetime

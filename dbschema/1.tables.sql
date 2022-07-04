@@ -193,3 +193,18 @@ CREATE INDEX tbl_user_interactions_user_address ON tbl_user_interactions (user_a
 CREATE INDEX tbl_user_interactions_command ON tbl_user_interactions (command);
 CREATE INDEX tbl_user_interactions_user_address_command ON tbl_user_interactions (user_address, command);
 CREATE INDEX tbl_user_interactions_message ON tbl_user_interactions USING GIN (message);
+
+CREATE TABLE tbl_latest_updates (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    key TEXT NOT NULL,
+    name TEXT ,
+    date TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);
+CREATE UNIQUE INDEX tbl_latest_updates_key_name on tbl_latest_updates (key, name);
+CREATE INDEX tbl_latest_updates_created_date ON tbl_latest_updates (created_date);
+CREATE INDEX tbl_latest_updates_updated_date ON tbl_latest_updates (updated_date);
+CREATE INDEX tbl_latest_updates_date ON tbl_latest_updates (date);
+CREATE INDEX tbl_latest_updates_key ON tbl_latest_updates (key);
+CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);

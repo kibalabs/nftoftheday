@@ -16,3 +16,5 @@ GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_collection_hourly_activity TO notd_a
 GRANT ALL ON SEQUENCE tbl_collection_hourly_activity_id_seq TO notd_api;
 GRANT INSERT, SELECT ON tbl_user_interactions TO notd_api;
 GRANT ALL ON SEQUENCE tbl_user_interactions_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE ON tbl_latest_updates TO notd_api;
+GRANT ALL ON SEQUENCE tbl_latest_updates_id_seq TO notd_api;

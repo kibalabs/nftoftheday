@@ -1,8 +1,10 @@
 from typing import Mapping
+from notd.store.schema import LatestUpdatesTable
 
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import LatestUpdate
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
@@ -144,4 +146,14 @@ def user_interaction_from_row(row: Mapping) -> UserInteraction:
         command=row[UserInteractionsTable.c.command],
         signature=row[UserInteractionsTable.c.signature],
         message=row[UserInteractionsTable.c.message],
+    )
+
+def latest_update_from_row(row: Mapping) -> LatestUpdate:
+    return LatestUpdate(
+        latestUpdateId=row[LatestUpdatesTable.c.latestUpdateId],
+        createdDate=row[LatestUpdatesTable.c.createdDate],
+        updatedDate=row[LatestUpdatesTable.c.updatedDate],
+        key=row[LatestUpdatesTable.c.key],
+        name=row[LatestUpdatesTable.c.name],
+        date=row[LatestUpdatesTable.c.date],
     )

@@ -136,3 +136,14 @@ UserInteractionsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='message', name='message', type_=sqlalchemy.JSON, nullable=False),
 )
+
+LatestUpdatesTable = sqlalchemy.Table(
+    'tbl_latest_updates',
+    metadata,
+    sqlalchemy.Column(key='latestUpdateId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='key', name='key', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='date', name='date', type_=sqlalchemy.DateTime, nullable=False),
+)

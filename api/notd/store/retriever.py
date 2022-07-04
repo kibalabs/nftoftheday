@@ -11,12 +11,15 @@ from sqlalchemy.sql import Select
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import LatestUpdate
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
 from notd.model import TokenTransfer
+from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -26,6 +29,7 @@ from notd.store.schema import UserInteractionsTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
@@ -195,7 +199,7 @@ class Retriever(CoreRetriever):
         collectionActivities = [collection_activity_from_row(row) for row in result]
         return collectionActivities
 
-    async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
+    async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[UserInteraction]:
         query = UserInteractionsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=UserInteractionsTable, fieldFilters=fieldFilters)
@@ -206,3 +210,28 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         userInteractions = [user_interaction_from_row(row) for row in result]
         return userInteractions
+
+    async def list_latest_updates(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[LatestUpdate]:
+        query = LatestUpdatesTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=LatestUpdatesTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=LatestUpdatesTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        latestUpdates = [latest_update_from_row(row) for row in result]
+        return latestUpdates
+
+    async def get_latest_update_by_key_name(self, key: str, name: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:  # pylint: disable=invalid-name
+        query = (
+            LatestUpdatesTable.select()
+            .where(LatestUpdatesTable.c.key == key)
+            .where(LatestUpdatesTable.c.name == name)
+        )
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Latest Update  with key:{key} and name;{name} not found')
+        latestUpdate = latest_update_from_row(row)
+        return latestUpdate
