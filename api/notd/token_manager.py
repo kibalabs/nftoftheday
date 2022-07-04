@@ -366,7 +366,7 @@ class TokenManager:
 
     async def update_activity_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
-        latestUpdate = await self.retriever.get_latest_update_by_key(key='hourly_collection_activities')
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
         latestProcessedDate = latestUpdate.date
         logging.info(f'Finding changed blocks since {latestProcessedDate}')
         updatedBlocksQuery = (
