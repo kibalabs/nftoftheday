@@ -462,11 +462,11 @@ class Saver(CoreSaver):
             date=date,
         )
 
-    async def update_latest_update(self, latestUpdateId: int, key: Optional[str] = None, name: Optional[str] = None, date: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_latest_update(self, latestUpdateId: int, key: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, date: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if key is not None:
             values[LatestUpdatesTable.c.key.key] = key
-        if name is not None:
+        if name != _EMPTY_STRING:
             values[LatestUpdatesTable.c.name.key] = name
         if date is not None:
             values[LatestUpdatesTable.c.date.key] = date

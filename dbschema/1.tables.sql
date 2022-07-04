@@ -200,7 +200,7 @@ CREATE TABLE tbl_latest_updates (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     key TEXT NOT NULL,
     name TEXT ,
-    date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    date TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 CREATE UNIQUE INDEX tbl_latest_updates_key_name on tbl_latest_updates (key, name);
 CREATE INDEX tbl_latest_updates_created_date ON tbl_latest_updates (created_date);
