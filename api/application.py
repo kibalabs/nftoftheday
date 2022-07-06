@@ -74,6 +74,7 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'https://pfpkit.xyz',
     'https://mdtp-gallery.kibalabs.com',
     'https://sprites-gallery.kibalabs.com',
+    'https://sprites-gallery.tokenpage.xyz',
 ], allow_origin_regex='https://.*\.tokenpage\.xyz')
 
 @app.on_event('startup')
