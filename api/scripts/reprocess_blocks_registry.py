@@ -45,7 +45,7 @@ async def reprocess_transfers(registryAddress: str, startBlockNumber: int, endBl
     await database.connect()
     await workQueue.connect()
     await tokenQueue.connect()
-    await slackClient.post(text=f'reprocess_transfers → 🚧 started: {startBlockNumber}-{endBlockNumber}')
+    await slackClient.post(text=f'reprocess_blocks_registry → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         currentBlockNumber = startBlockNumber
         while currentBlockNumber < endBlockNumber:
@@ -66,9 +66,9 @@ async def reprocess_transfers(registryAddress: str, startBlockNumber: int, endBl
             for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=10):
                 await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True) for blockNumber in chunk])
             currentBlockNumber = currentBlockNumber + batchSize
-        await slackClient.post(text=f'reprocess_transfers → ✅ completed : {startBlockNumber}-{endBlockNumber}')
+        await slackClient.post(text=f'reprocess_blocks_registry → ✅ completed : {startBlockNumber}-{endBlockNumber}')
     except Exception as exception:
-        await slackClient.post(text=f'reprocess_transfers → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')
+        await slackClient.post(text=f'reprocess_blocks_registry → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')
         raise exception
     finally:
         await database.disconnect()
