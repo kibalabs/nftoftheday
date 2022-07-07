@@ -242,3 +242,12 @@ class LatestUpdate:
     key: str
     name: Optional[str]
     date: datetime.datetime
+
+
+@dataclasses.dataclass
+class Airdrop:
+    tokenKey: Token
+    name: str
+    isClaimed: bool
+    claimTokenKey: Token
+    claimUrl: str

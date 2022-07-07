@@ -89,3 +89,11 @@ class ApiCollectionDailyActivity(BaseModel):
     minimumValue: str
     maximumValue: str
     averageValue: str
+
+
+class ApiAirdrop(BaseModel):
+    token: ApiCollectionToken
+    name: str
+    isClaimed: bool
+    claimToken: ApiCollectionToken
+    claimUrl: str

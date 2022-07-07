@@ -5,14 +5,14 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
-from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiAirdrop, ApiCollection
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
-from notd.model import Collection
+from notd.model import Airdrop, Collection
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
@@ -151,3 +151,12 @@ class ResponseBuilder:
             maximumValue=str(collectionActivity.maximumValue),
             averageValue=str(collectionActivity.averageValue)
         ) for collectionActivity in collectionActivities]
+
+    async def airdrops_from_models(self, airdrops: Sequence[Airdrop]) -> Sequence[ApiAirdrop]:
+        return [ApiAirdrop(
+            token=await self.collection_token_from_token_key(tokenKey=airdrop.tokenKey),
+            name=airdrop.name,
+            isClaimed=airdrop.isClaimed,
+            claimToken=await self.collection_token_from_token_key(tokenKey=airdrop.claimTokenKey),
+            claimUrl=airdrop.claimUrl,
+        ) for airdrop in airdrops]

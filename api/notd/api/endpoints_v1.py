@@ -11,9 +11,10 @@ from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
+from notd.api.models_v1 import ApiAirdrop
 
 
-class  RetrieveHighestPriceTransferRequest(BaseModel):
+class RetrieveHighestPriceTransferRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
 
@@ -156,3 +157,9 @@ class SubmitTreasureHuntForCollectionTokenRequest(BaseModel):
 
 class SubmitTreasureHuntForCollectionTokenResponse(BaseModel):
     pass
+
+class ListCollectionTokenAirdropsRequest(BaseModel):
+    pass
+
+class ListCollectionTokenAirdropsResponse(BaseModel):
+    airdrops: List[ApiAirdrop]
