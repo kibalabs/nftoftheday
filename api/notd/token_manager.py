@@ -256,12 +256,18 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str):
-        registryAddress = chain_util.normalize_address(value=registryAddress)
-        collection = await self.get_collection_by_address(address=registryAddress)
-        if collection.doesSupportErc721:
-            await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
-        elif collection.doesSupportErc1155:
-            await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
+        startDate = date_util.datetime_from_now()
+        latestOwnershipUpdate = await self.retriever.get_latest_update_by_key_name(key='ownership')
+        latestTransferUpdate = await self.retriever.get_latest_update_by_key_name(key='transfers')
+        if latestTransferUpdate > latestOwnershipUpdate:
+            async with self.saver.create_transaction() as connection:
+                registryAddress = chain_util.normalize_address(value=registryAddress)
+                collection = await self.get_collection_by_address(address=registryAddress)
+                if collection.doesSupportErc721:
+                    await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
+                elif collection.doesSupportErc1155:
+                    await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
+                await self.saver.update_latest_update(key="ownership", date=startDate, connection=connection)
 
     async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
         registryAddress = chain_util.normalize_address(value=registryAddress)
