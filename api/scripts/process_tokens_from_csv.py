@@ -10,8 +10,8 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
-from core.web3.eth_client import RestEthClient
 from core.util import list_util
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_activity_processor import CollectionActivityProcessor

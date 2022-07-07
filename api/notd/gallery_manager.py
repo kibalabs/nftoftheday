@@ -1,10 +1,11 @@
 import json
 from typing import List
+
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 
-from notd.model import Airdrop, Token
-
+from notd.model import Airdrop
+from notd.model import Token
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF'

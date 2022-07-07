@@ -4,6 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
@@ -11,7 +12,6 @@ from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
-from notd.api.models_v1 import ApiAirdrop
 
 
 class RetrieveHighestPriceTransferRequest(BaseModel):

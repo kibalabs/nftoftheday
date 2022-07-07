@@ -1,6 +1,6 @@
-import sys
 import asyncio
 import os
+import sys
 
 import asyncclick as click
 from core import logging
