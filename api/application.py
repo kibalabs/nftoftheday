@@ -17,10 +17,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from notd.api.api_v1 import create_api as create_v1_api
+from notd.api.gallery_v1 import create_api as create_gallery_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionProcessor
+from notd.gallery_manager import GalleryManager
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -59,10 +61,12 @@ tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQu
 revueApiKey = os.environ['REVUE_API_KEY']
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
+galleryManager = GalleryManager(ethClient=ethClient)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=name, version=version, environment=environment))
 app.include_router(prefix='/v1', router=create_v1_api(notdManager=notdManager, responseBuilder=responseBuilder))
+app.include_router(prefix='/gallery/v1', router=create_gallery_v1_api(galleryManager=galleryManager, responseBuilder=responseBuilder))
 app.add_middleware(ExceptionHandlingMiddleware)
 app.add_middleware(ServerHeadersMiddleware, name=name, version=version, environment=environment)
 app.add_middleware(LoggingMiddleware, requestIdHolder=requestIdHolder)

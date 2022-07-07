@@ -4,6 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
@@ -13,7 +14,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 
 
-class  RetrieveHighestPriceTransferRequest(BaseModel):
+class RetrieveHighestPriceTransferRequest(BaseModel):
     startDate: Optional[datetime.datetime]
     endDate: Optional[datetime.datetime]
 
@@ -156,3 +157,9 @@ class SubmitTreasureHuntForCollectionTokenRequest(BaseModel):
 
 class SubmitTreasureHuntForCollectionTokenResponse(BaseModel):
     pass
+
+class ListCollectionTokenAirdropsRequest(BaseModel):
+    pass
+
+class ListCollectionTokenAirdropsResponse(BaseModel):
+    airdrops: List[ApiAirdrop]

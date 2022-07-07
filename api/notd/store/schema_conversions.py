@@ -1,5 +1,4 @@
 from typing import Mapping
-from notd.store.schema import LatestUpdatesTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -12,6 +11,7 @@ from notd.model import TokenTransfer
 from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable

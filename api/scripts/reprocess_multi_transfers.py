@@ -44,8 +44,8 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     revueApiKey = os.environ['REVUE_API_KEY']
-    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=workQueue, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=tokenQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     await database.connect()
     await workQueue.connect()
@@ -72,7 +72,7 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
             result = await database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
-            await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True) 
+            await notdManager.process_blocks_deferred(blockNumbers=list(blocksToReprocess), shouldSkipProcessingTokens=True)
             blocksToBackfill = set(list(range(start, end))) - blocksToReprocess
             logging.info(f'Back filling {len(blocksToBackfill)} blocks')
             values = {}

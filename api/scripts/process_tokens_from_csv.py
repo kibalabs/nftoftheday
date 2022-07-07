@@ -10,6 +10,7 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
+from core.util import list_util
 from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -20,6 +21,11 @@ from notd.store.saver import Saver
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
+
+
+async def process_token_metadata(tokenManager: TokenManager, registryAddress: str, tokenId: str):
+    print(registryAddress, tokenId)
+    await tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=True)
 
 
 @click.command()
@@ -47,9 +53,8 @@ async def run(inputFilePath: str):
     try:
         with open(inputFilePath, 'r') as inputFile:
             tokensToUpdate = list(DictReader(inputFile, delimiter='\t'))
-        for tokensToUpdate in tokensToUpdate:
-            print(tokensToUpdate['registry_address'], tokensToUpdate['token_id'])
-            await tokenManager.update_token_metadata(registryAddress=tokensToUpdate['registry_address'], tokenId=tokensToUpdate['token_id'], shouldForce=True)
+        for tokensToUpdateSublist in list_util.generate_chunks(lst=tokensToUpdate, chunkSize=10):
+            await asyncio.gather(*[process_token_metadata(tokenManager=tokenManager, registryAddress=tokenToUpdate['registry_address'], tokenId=tokenToUpdate['token_id']) for tokenToUpdate in tokensToUpdateSublist])
     finally:
         await database.disconnect()
         await s3manager.disconnect()
