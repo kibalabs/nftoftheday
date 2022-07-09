@@ -258,18 +258,31 @@ class TokenManager:
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str):
         registryAddress = chain_util.normalize_address(value=registryAddress)
-        collection = await self.get_collection_by_address(address=registryAddress)
-        if collection.doesSupportErc721:
-            await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
-        elif collection.doesSupportErc1155:
-            await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
-
-    async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
-        registryAddress = chain_util.normalize_address(value=registryAddress)
         latestTransfers: TokenTransfer = await self.retriever.list_token_transfers(fieldFilters=[
             StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
             StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
         ], orders=[Order(fieldName=BlocksTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
+        try:
+            tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+        except NotFoundException:
+                tokenOwnership = None
+        if not tokenOwnership:
+            collection = await self.get_collection_by_address(address=registryAddress)
+            if collection.doesSupportErc721:
+                await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
+            elif collection.doesSupportErc1155:
+                await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
+        else:
+            if latestTransfers.updatedDate > tokenOwnership.updatedDate:
+                collection = await self.get_collection_by_address(address=registryAddress)
+                if collection.doesSupportErc721:
+                    await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
+                elif collection.doesSupportErc1155:
+                    await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
+            
+
+    async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         async with self.saver.create_transaction() as connection:
             try:
                 tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
@@ -281,8 +294,7 @@ class TokenManager:
                 logging.error(f'No ownership found for {registryAddress}:{tokenId}')
                 return
             if tokenOwnership:
-                if latestTransfers.updatedDate > tokenOwnership.updatedDate:
-                    await self.saver.update_token_ownership(connection=connection, tokenOwnershipId=tokenOwnership.tokenOwnershipId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
+                await self.saver.update_token_ownership(connection=connection, tokenOwnershipId=tokenOwnership.tokenOwnershipId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
             else:
                 await self.saver.create_token_ownership(connection=connection, registryAddress=retrievedTokenOwnership.registryAddress, tokenId=retrievedTokenOwnership.tokenId, ownerAddress=retrievedTokenOwnership.ownerAddress, transferDate=retrievedTokenOwnership.transferDate, transferValue=retrievedTokenOwnership.transferValue, transferTransactionHash=retrievedTokenOwnership.transferTransactionHash)
 
