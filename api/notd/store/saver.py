@@ -16,12 +16,14 @@ from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
+from notd.model import TokenAttribute
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
 from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestUpdatesTable
+from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -473,4 +475,39 @@ class Saver(CoreSaver):
         if len(values) > 0:
             values[LatestUpdatesTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = LatestUpdatesTable.update(LatestUpdatesTable.c.latestUpdateId == latestUpdateId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    async def create_token_attribute(self, registryAddress: str, tokenId: str, attributeName: Optional[str], attributeValue: Optional[str], connection: Optional[DatabaseConnection] = None) -> TokenAttribute:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TokenAttributesTable.c.createdDate.key: createdDate,
+            TokenAttributesTable.c.updatedDate.key: updatedDate,
+            TokenAttributesTable.c.registryAddress.key: registryAddress,
+            TokenAttributesTable.c.tokenId.key: tokenId,
+            TokenAttributesTable.c.attributeName.key: attributeName,
+            TokenAttributesTable.c.attributeValue.key: attributeValue,
+        }
+        query = TokenAttributesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenAttributeId = result.inserted_primary_key[0]
+        return TokenAttribute(
+            tokenAttributeId=tokenAttributeId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            attributeName=attributeName,
+            attributeValue=attributeValue,
+        )
+
+    async def update_token_attribute(self, tokenAttributeId: int, attributeName: Optional[str] = _EMPTY_STRING, attributeValue: Optional[str] = _EMPTY_STRING, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if attributeName != _EMPTY_STRING:
+            values[TokenAttributesTable.c.attributeName.key] = attributeName
+        if attributeValue is not None:
+            values[TokenAttributesTable.c.attributeValue.key] = attributeValue
+        if len(values) > 0:
+            values[TokenAttributesTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TokenAttributesTable.update(TokenAttributesTable.c.tokenAttributeId == tokenAttributeId).values(values)
         await self._execute(query=query, connection=connection)

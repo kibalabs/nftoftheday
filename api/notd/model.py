@@ -243,6 +243,15 @@ class LatestUpdate:
     name: Optional[str]
     date: datetime.datetime
 
+@dataclasses.dataclass
+class TokenAttribute:
+    tokenAttributeId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    attributeName: str
+    attributeValue: str
 
 @dataclasses.dataclass
 class Airdrop:

@@ -12,6 +12,7 @@ from sqlalchemy.sql import Select
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
+from notd.model import TokenAttribute
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
@@ -20,6 +21,7 @@ from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestUpdatesTable
+from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -222,6 +224,18 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         latestUpdates = [latest_update_from_row(row) for row in result]
         return latestUpdates
+
+    async def list_token_attributes(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenAttribute]:
+        query = TokenAttributesTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenAttributesTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenAttributesTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenAttributes = [latest_update_from_row(row) for row in result]
+        return tokenAttributes
 
     async def get_latest_update_by_key_name(self, key: str, name: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:  # pylint: disable=invalid-name
         query = (
