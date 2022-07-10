@@ -260,3 +260,10 @@ class Airdrop:
     isClaimed: bool
     claimTokenKey: Token
     claimUrl: str
+
+@dataclasses.dataclass
+class RetrievedTokenAttributes:
+    registryAddress: str
+    tokenId: str
+    attributeName: Optional[str]
+    attributeValue: str

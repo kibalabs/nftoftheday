@@ -60,6 +60,7 @@ class TokenManager:
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
         self.collectionActivityProcessor = collectionActivityProcessor
+        self.tokenAttributeProcessor = None
 
     async def get_collection_by_address(self, address: str) -> Collection:
         address = chain_util.normalize_address(value=address)
@@ -420,3 +421,25 @@ class TokenManager:
                     logging.info(f'Not creating activity with transferCount==0')
                 else:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+
+    async def update_attributes_for_token(self, address: str, startDate: datetime.datetime) -> None:
+        address = chain_util.normalize_address(address)
+        startDate = date_hour_from_datetime(startDate)
+        retrievedTokenAttributes = await self.tokenAttributeProcessor.get_token_attribute(address="0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", startDate=startDate)
+        async with self.saver.create_transaction() as connection:
+            collectionActivity = await self.retriever.list_token_attributes(
+                connection=connection,
+                fieldFilters=[
+                    StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
+                    DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
+                ]
+            )
+            if len(collectionActivity) > 0:
+                pass
+                # await self.saver.update_token_attribute(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+            else:
+                if retrievedTokenAttributes.transferCount == 0:
+                    logging.info(f'Not creating activity with transferCount==0')
+                else:
+                    pass
+                    # await self.saver.create_token_attribute(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
