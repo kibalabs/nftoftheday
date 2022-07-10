@@ -265,7 +265,7 @@ class TokenManager:
         try:
             tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         except NotFoundException:
-                tokenOwnership = None
+            tokenOwnership = None
         if not tokenOwnership:
             collection = await self.get_collection_by_address(address=registryAddress)
             if collection.doesSupportErc721:
@@ -279,7 +279,6 @@ class TokenManager:
                     await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
                 elif collection.doesSupportErc1155:
                     await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
-            
 
     async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
         registryAddress = chain_util.normalize_address(value=registryAddress)
