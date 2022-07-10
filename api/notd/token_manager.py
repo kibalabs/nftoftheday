@@ -16,6 +16,12 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
+from notd.model import RetrievedTokenAttribute
+from notd.token_attributes_processor import TokenAttributeProcessor
+from notd.gallery_manager import SPRITE_CLUB_REGISTRY_ADDRESS
+from notd.messages import UpdateAttributeForAllTokensMessageContent, UpdateAttributeForTokenMessageContent
+from notd.model import TokenAttribute
+from notd.store.schema import TokenAttributesTable
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -52,7 +58,7 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor, tokenAttributeProcessor: TokenAttributeProcessor):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
@@ -60,7 +66,7 @@ class TokenManager:
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
         self.collectionActivityProcessor = collectionActivityProcessor
-        self.tokenAttributeProcessor = None
+        self.tokenAttributeProcessor = tokenAttributeProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
         address = chain_util.normalize_address(value=address)
@@ -365,6 +371,9 @@ class TokenManager:
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
+    async def update_attributes_for_all_tokens_deferred(self) -> None:
+        await self.tokenQueue.send_message(message=UpdateAttributeForAllTokensMessageContent().to_message())
+
     async def update_activity_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
@@ -397,6 +406,28 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
+    async def update_attribute_for_all_tokens(self) -> None:
+        #Get date of the last processed attribute
+        #Get all tokens to have been updated after this date
+        #send all the updatedTokens to the queue for processing
+        latestProcessedTokenAttribute: List[TokenAttribute] = await self.retriever.list_token_attributes(orders=[Order(fieldName=TokenAttributesTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
+        if len(latestProcessedTokenAttribute) > 0:
+            latestProcessedDate = latestProcessedTokenAttribute[0].updatedDate
+        else:
+            latestProcessedDate = date_util.datetime_from_now(weeks=-1)
+        logging.info(f'Finding changed tokens since {latestProcessedDate}')
+        updateTokenMetadataQuery = (
+            TokenMetadatasTable.select()
+            .with_only_columns([TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId])
+            .where(TokenMetadatasTable.c.registryAddress == SPRITE_CLUB_REGISTRY_ADDRESS)
+            .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
+        )
+        updateTokenMetadataQueryResult = await self.retriever.database.execute(query=updateTokenMetadataQuery)
+        updatedTokenMetadata = {(registryAddress, tokenId) for (registryAddress, tokenId) in updateTokenMetadataQueryResult}
+        logging.info(f'Scheduling processing for {len(updatedTokenMetadata)} updatedTokenMetadata')
+        messages = [UpdateAttributeForTokenMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadata]
+        await self.tokenQueue.send_messages(messages=messages)
+
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
         startDate = date_hour_from_datetime(startDate)
@@ -422,24 +453,20 @@ class TokenManager:
                 else:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
-    async def update_attributes_for_token(self, address: str, startDate: datetime.datetime) -> None:
-        address = chain_util.normalize_address(address)
-        startDate = date_hour_from_datetime(startDate)
-        retrievedTokenAttributes = await self.tokenAttributeProcessor.get_token_attribute(address="0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", startDate=startDate)
-        async with self.saver.create_transaction() as connection:
-            collectionActivity = await self.retriever.list_token_attributes(
-                connection=connection,
-                fieldFilters=[
-                    StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
-                    DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
-                ]
-            )
-            if len(collectionActivity) > 0:
-                pass
-                # await self.saver.update_token_attribute(connection=connection, collectionActivityId=collectionActivity[0].collectionActivityId, address=address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
-            else:
-                if retrievedTokenAttributes.transferCount == 0:
-                    logging.info(f'Not creating activity with transferCount==0')
+    async def update_attribute_for_token(self, registryAddress: str, tokenId: str) -> None:
+        retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
+        for retrievedTokenAttribute in retrievedTokenAttributes:
+            async with self.saver.create_transaction() as connection:
+                tokenAttribute = await self.retriever.list_token_attributes(
+                    connection=connection,
+                    fieldFilters=[
+                        StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
+                        StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
+                        StringFieldFilter(fieldName=TokenAttributesTable.c.attributeName.key, eq=retrievedTokenAttribute.attributeName)
+                    ]
+                )
+                if len(tokenAttribute) > 0:
+                    await self.saver.update_token_attribute(connection=connection, tokenAttributeId=tokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
                 else:
-                    pass
-                    # await self.saver.create_token_attribute(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+

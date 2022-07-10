@@ -4,7 +4,7 @@ from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-from notd.model import RetrievedTokenAttributes
+from notd.model import RetrievedTokenAttribute
 from notd.store.schema import TokenMetadatasTable
 
 from notd.date_util import date_hour_from_datetime
@@ -19,19 +19,17 @@ class TokenAttributeProcessor:
     def __init__(self,retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def get_token_attribute(self, address: str, startDate: datetime.datetime) -> None:
+    async def get_token_attributes(self, registryAddress: str, tokenId: str) -> None:
         tokenMetadatas = await self.retriever.list_token_metadatas(
             fieldFilters=[
-                StringFieldFilter(TokenMetadatasTable.c.registryAddress.key, eq=address),
-                DateFieldFilter(TokenMetadatasTable.c.updatedDate.key, gte=startDate),
+                StringFieldFilter(TokenMetadatasTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(TokenMetadatasTable.c.tokenId.key, eq=tokenId),
             ]
         )
-        print(len(tokenMetadatas))
+        tokenAttributes = []
         for tokenMetadata in tokenMetadatas:
-            print(tokenMetadata.attributes)
             for attribute in tokenMetadata.attributes:
-                tokenAttribute = RetrievedTokenAttributes(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, attributeName=attribute.get("trait_type"), attributeValue=attribute.get("value"))
-                print(tokenAttribute)
-            break
-        pass
+                tokenAttributes += [RetrievedTokenAttribute(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, attributeName=attribute.get("trait_type"), attributeValue=attribute.get("value"))]
+                
+        return tokenAttributes
         

@@ -17,9 +17,8 @@ SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dC
 
 class GalleryManager:
 
-    def __init__(self, ethClient: EthClientInterface, tokenQueue: SqsMessageQueue) -> None:
+    def __init__(self, ethClient: EthClientInterface) -> None:
         self.ethClient = ethClient
-        self.tokenQueue = tokenQueue
         with open('./contracts/SpriteClub.json', 'r') as contractJsonFile:
             self.spriteClubContract = json.load(contractJsonFile)
         with open('./contracts/SpriteClubStormdrop.json', 'r') as contractJsonFile:
@@ -38,8 +37,3 @@ class GalleryManager:
             claimTokenKey = Token(registryAddress=SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS, tokenId=claimTokenId)
             return [Airdrop(name='Stormdrop ⚡️⚡️', tokenKey=tokenKey, isClaimed=isClaimed, claimTokenKey=claimTokenKey, claimUrl='https://stormdrop.spriteclubnft.com')]
         return []
-
-    async def update_activity_for_all_collections_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateAttributeForAllTokensMessageContent().to_message())
-
-   

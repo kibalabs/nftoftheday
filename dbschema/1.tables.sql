@@ -220,7 +220,7 @@ CREATE TABLE tbl_token_attributes (
     attribute_name TEXT,
     attribute_value TEXT
 );
-CREATE UNIQUE INDEX tbl_token_attributes_registry_address_token_id on tbl_token_attributes (registry_address, token_id);
+CREATE UNIQUE INDEX tbl_token_attributes_registry_address_token_id_attribute_name on tbl_token_attributes (registry_address, token_id, attribute_name);
 CREATE INDEX tbl_token_attributes_created_date ON tbl_token_attributes (created_date);
 CREATE INDEX tbl_token_attributes_updated_date ON tbl_token_attributes (updated_date);
 CREATE INDEX tbl_token_attributes_registry_address ON tbl_token_attributes (registry_address);

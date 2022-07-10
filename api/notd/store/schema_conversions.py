@@ -162,7 +162,7 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
 
 def token_attributes_from_row(row: Mapping) -> TokenAttribute:
     return TokenAttribute(
-        TokenAttributeId=row[TokenAttributesTable.c.TokenAttributeId],
+        tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
         createdDate=row[TokenAttributesTable.c.createdDate],
         updatedDate=row[TokenAttributesTable.c.updatedDate],
         registryAddress=row[TokenAttributesTable.c.registryAddress],

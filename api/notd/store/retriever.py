@@ -8,6 +8,7 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
+from notd.store.schema_conversions import token_attributes_from_row
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -234,7 +235,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenAttributes = [latest_update_from_row(row) for row in result]
+        tokenAttributes = [token_attributes_from_row(row) for row in result]
         return tokenAttributes
 
     async def get_latest_update_by_key_name(self, key: str, name: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:  # pylint: disable=invalid-name

@@ -243,15 +243,6 @@ class LatestUpdate:
     name: Optional[str]
     date: datetime.datetime
 
-@dataclasses.dataclass
-class TokenAttribute:
-    tokenAttributeId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
-    registryAddress: str
-    tokenId: str
-    attributeName: str
-    attributeValue: str
 
 @dataclasses.dataclass
 class Airdrop:
@@ -262,8 +253,14 @@ class Airdrop:
     claimUrl: str
 
 @dataclasses.dataclass
-class RetrievedTokenAttributes:
+class RetrievedTokenAttribute:
     registryAddress: str
     tokenId: str
     attributeName: Optional[str]
     attributeValue: str
+
+@dataclasses.dataclass
+class TokenAttribute(RetrievedTokenAttribute):
+    tokenAttributeId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime

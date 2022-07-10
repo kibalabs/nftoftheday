@@ -3,6 +3,7 @@ from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
+from notd.messages import UpdateAttributeForTokenMessageContent
 from notd.messages import UpdateAttributeForAllTokensMessageContent
 
 from notd.manager import NotdManager
@@ -64,15 +65,19 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateActivityForAllCollectionsMessageContent.parse_obj(message.content)
             await self.notdManager.update_activity_for_all_collections()
             return
+        if message.command == UpdateActivityForCollectionMessageContent.get_command():
+            messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
+            return
         if message.command == UpdateAttributeForAllTokensMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
                 logging.info(f'Skipping UPDATE_ATTRIBUTE_FOR_ALL_TOKENS from more than 10 minutes ago')
                 return
             messageContent = UpdateAttributeForAllTokensMessageContent.parse_obj(message.content)
-            await self.galleryManager.update_attribute_for_all_tokens()
+            await self.notdManager.update_attribute_for_all_tokens()
             return
-        if message.command == UpdateActivityForCollectionMessageContent.get_command():
-            messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
+        if message.command == UpdateAttributeForTokenMessageContent.get_command():
+            messageContent = UpdateAttributeForTokenMessageContent.parse_obj(message.content)
+            await self.notdManager.update_attribute_for_token(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
             return
         raise KibaException(message='Message was unhandled')
