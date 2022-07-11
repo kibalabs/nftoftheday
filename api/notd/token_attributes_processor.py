@@ -32,4 +32,3 @@ class TokenAttributeProcessor:
                 tokenAttributes += [RetrievedTokenAttribute(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, attributeName=attribute.get("trait_type"), attributeValue=attribute.get("value"))]
                 
         return tokenAttributes
-        
