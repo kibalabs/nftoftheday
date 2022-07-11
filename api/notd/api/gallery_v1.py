@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from notd.api.endpoints_v1 import UpdateAttributeForAllTokensDeferredResponse
 
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.response_builder import ResponseBuilder

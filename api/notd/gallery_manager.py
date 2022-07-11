@@ -1,12 +1,8 @@
 import json
-import logging
 from typing import List
 
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
-from core.queues.sqs_message_queue import SqsMessageQueue
-from notd.messages import UpdateAttributeForAllTokensMessageContent
-from core.util import date_util
 
 
 from notd.model import Airdrop

@@ -355,7 +355,7 @@ class NotdManager:
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         await self.tokenManager.update_activity_for_collection(address=address, startDate=startDate)
-    
+
     async def update_attribute_for_token(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenManager.update_attribute_for_token(registryAddress=registryAddress, tokenId=tokenId)
 

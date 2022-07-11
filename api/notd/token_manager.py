@@ -423,7 +423,7 @@ class TokenManager:
             .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
         )
         updateTokenMetadataQueryResult = await self.retriever.database.execute(query=updateTokenMetadataQuery)
-        updatedTokenMetadata = {(registryAddress, tokenId) for (registryAddress, tokenId) in updateTokenMetadataQueryResult}
+        updatedTokenMetadata = set(updateTokenMetadataQueryResult)
         logging.info(f'Scheduling processing for {len(updatedTokenMetadata)} updatedTokenMetadata')
         messages = [UpdateAttributeForTokenMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadata]
         await self.tokenQueue.send_messages(messages=messages)
@@ -469,4 +469,3 @@ class TokenManager:
                     await self.saver.update_token_attribute(connection=connection, tokenAttributeId=tokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
                 else:
                     await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
-
