@@ -424,7 +424,7 @@ class TokenManager:
         )
         updateTokenMetadataQueryResult = await self.retriever.database.execute(query=updateTokenMetadataQuery)
         updatedTokenMetadata = set(updateTokenMetadataQueryResult)
-        logging.info(f'Scheduling processing for {len(updatedTokenMetadata)} updatedTokenMetadata')
+        logging.info(f'Scheduling processing for {len(updatedTokenMetadata)} updatedTokenAttributes')
         messages = [UpdateAttributeForTokenMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadata]
         await self.tokenQueue.send_messages(messages=messages)
 
