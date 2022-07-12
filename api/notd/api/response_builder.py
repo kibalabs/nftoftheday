@@ -168,5 +168,5 @@ class ResponseBuilder:
     async def attributes_from_models(self, attributes: Sequence[Attribute]) -> Sequence[ApiAttribute]:
         return [ApiAttribute(
             attributeName=attribute.attributeName,
-            attributeValue=attribute.attributeValue
+            attributeValues=attribute.attributeValues
         ) for attribute in attributes]

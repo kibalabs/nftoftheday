@@ -268,4 +268,4 @@ class TokenAttribute(RetrievedTokenAttribute):
 @dataclasses.dataclass
 class Attribute:
     attributeName: str
-    attributeValue: List[str]
+    attributeValues: List[str]

@@ -100,4 +100,4 @@ class ApiAirdrop(BaseModel):
 
 class ApiAttribute(BaseModel):
     attributeName: str
-    attributeValue: List[str]
+    attributeValues: List[str]

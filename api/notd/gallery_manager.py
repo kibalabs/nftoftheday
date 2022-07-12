@@ -47,7 +47,7 @@ class GalleryManager:
                 .group_by(TokenAttributesTable.c.attributeName)
         )
         result = await self.retriever.database.execute(query=query)
-        attributeValues = [Attribute(attributeName=row[0], attributeValue=list({row[1]})) for row in result]
+        attributeValues = [Attribute(attributeName=row[0], attributeValues=list({row[1]})) for row in result]
         return attributeValues
 
     async def get_tokens_with_attributes(self, registryAddress: str, attributeName: Optional[str], attributeValue: Optional[str],attributeName2: Optional[str], attributeValue2: Optional[str], limit: int, offset: int):
