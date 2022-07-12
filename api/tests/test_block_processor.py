@@ -282,7 +282,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         retrievedTokenTransfers = await self.blockProcessor.process_transaction(transaction=transaction, retrievedEvents=retrievedEvents)
         return retrievedTokenTransfers
 
-    async def test_selling_multiple(self):
+    async def test_batch_tokens_from_account_a_to_b(self):
         result = await self._process_block_transaction(blockNumber=13281280, transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xf1f0758d54474efb810e470592349703adc758c5037e56ae1bd6a789e9a079ef', registryAddress='0x2216d47494E516d8206B70FCa8585820eD3C4946', tokenId='14364', fromAddress='0xffF8f66e26ac1A75F2b5Da49c247f3Ec0D0EA5ba', toAddress='0x0000000000000000000000000000000000080085', operatorAddress='0xffF8f66e26ac1A75F2b5Da49c247f3Ec0D0EA5ba', amount=1, value=0, gasLimit=449751, gasPrice=48786337690, blockNumber=13281280, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=True),
@@ -291,7 +291,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_buying_multiple_tokens_from_same_collection(self):
+    async def test_batch_transfers_from_accounts_to_b(self):
         # Account buys multiple NFTs (of the same collection) from another account
         # https://etherscan.io/tx/0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954  started by 027a
         # 5 transfers each with (0.684/5)eth value with 0x27a as the receiver for each and multiple senders
@@ -305,7 +305,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_buying_multiple_with_interstitial(self):
+    async def test_batch_and_interstitial_transfers_from_accounts_to_accounts(self):
         # Account buys multiple NFTs (of the same collection) from multiple accounts in one transaction started by 0x4ea
         # https://etherscan.io/tx/0x8b52d281485f735dbe910f76d92dd317549790f39778e9461c81f489ebd3763c
         # 5 transfers each with (1.338/5)eth value with 0x4ea as the receiver for each and multiple senders
@@ -319,7 +319,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_buying_multiple_erc721_tokens_from_same_collection(self):
+    async def test_batch_erc721_tokens_from_same_collection(self):
         # https://etherscan.io/tx/0x06dba7d73e25ca8b918d50fb9f9f53d8afa5318e2fdcc499c432cb7a130ea4e6 started by 0x1809
         # 3 transfers with value(0.0115/3)
         result = await self._process_block_transaction(blockNumber=14804639, transactionHash='0x06dba7d73e25ca8b918d50fb9f9f53d8afa5318e2fdcc499c432cb7a130ea4e6')
@@ -330,7 +330,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_multiple_collections_in_a_single_transaction(self):
+    async def test_multiple_token_types(self):
         # Account buys multiple NFTs (of the different collections) from another account
         # https://etherscan.io/tx/0xd40859bfc1ce80da0e81b8f82b15db1222f6937d108daca7f259e3dd162c5170 started by 0x9e56
         # Transfer of 2 SANDBOX tokens: value=0 from 0xf91 to 0x9e5 isMultiAddressTransfer=true
@@ -347,7 +347,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_ens_and_is_interstitial(self):
+    async def test_mint_with_ens_transfer(self):
         # Account buys an NFT but there are interstitial transfers in the same transaction
         # https://etherscan.io/tx/0x6bb37dcb9a60ed49da56ccfb21dfcae886e81debd3ab94d73497d62744e758d2 started by 0x04c
         # Transfer of token 5309..: value=0 from 0x000 to 0x283 isInterstitial=true
@@ -359,7 +359,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_more_than_one_interstitial(self):
+    async def test_token_with_multiple_interstitial_transfers(self):
         # https://etherscan.io/tx/0xafd0535c4fe269b57cdcd4489eb11f05ff42dce04190b3e65f659ab9f05b71ee started by 0x92a
         # Transfer of token 5309..: value=0 from 0x393 to 0x000 isInterstitial=true
         # Transfer of token 5309..: value=0 from 0x000 to 0x283 isInterstitial=true
@@ -372,7 +372,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_multiple_tokens_have_interstitial(self):
+    async def test_batch_interstitial_transfer(self):
         # Account buys multiple NFTs (of the same collection) from multiple accounts, but there are some interstitial transfers in the same transaction
         # https://etherscan.io/tx/0xd7721e7d21313f791ad279d806d9b506fe4acfc6bfbd0dec3436ce640ebc299d started by 0xdfd
         # Transfer of token 7723: value=0 from 0x505 to 0x83c isInterstitial=true
@@ -449,7 +449,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_is_batch_multiple_interstitial(self):
+    async def test_is_batch_with_multiple_interstitial(self):
         result = await self._process_block_transaction(blockNumber=14748832, transactionHash='0xf53d103bec79b91de7e29a71a44fc32fa8407edfe01623f8c3ed3f9f9ebc85b6')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xf53d103bec79b91de7e29a71a44fc32fa8407edfe01623f8c3ed3f9f9ebc85b6', registryAddress='0xb4d06d46A8285F4EC79Fd294F78a881799d8cEd9', tokenId='8947', fromAddress='0x9762a4773ea912f699365261B55c3075D8aD55AC', toAddress='0x08046e2349017615d53D3977c307d39AB4eEB3CF', operatorAddress='0x08046e2349017615d53D3977c307d39AB4eEB3CF', amount=1, value=1163750000000000000, gasLimit=2271239, gasPrice=34755900972, blockNumber=14748832, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False),
@@ -469,7 +469,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_ens_is_interstitial(self):
+    async def test_mint_with_ens_transfer_2(self):
         result = await self._process_block_transaction(blockNumber=14747306, transactionHash='0x00176653394a0ddfea697e6fdbd67630e8196e4de04afc46a3927480d7dc2e93')
         expected = [
             RetrievedTokenTransfer(transactionHash='0x00176653394a0ddfea697e6fdbd67630e8196e4de04afc46a3927480d7dc2e93', registryAddress='0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85', tokenId='49292164327206987068568468070661731820284689921166579102841753123805598472689', fromAddress='0x0000000000000000000000000000000000000000', toAddress='0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5', operatorAddress='0xba26232213ba33eE1fc73fc9f2848c3ec55f4F8f', amount=1, value=0, gasLimit=287785, gasPrice=39321890650, blockNumber=14747306, tokenType='erc721', isMultiAddress=False, isInterstitial=True, isSwap=False, isBatch=False, isOutbound=False),
@@ -477,7 +477,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_is_outbound(self):
+    async def test_is_outbound_transfer_true(self):
         result = await self._process_block_transaction(blockNumber=15014054, transactionHash='0x6332d565f96a1ae47ae403df47acc0d28fe11c409fb2e3cc4d1a96a1c5987ed8')
         expected = [
             RetrievedTokenTransfer(transactionHash='0x6332d565f96a1ae47ae403df47acc0d28fe11c409fb2e3cc4d1a96a1c5987ed8', registryAddress='0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B', tokenId='17028', fromAddress='0xB0c3666a6980D6cfBB97890564934e0d818A9e4A', toAddress='0xe7967e0ec15CB48939Fcf0BC5764c2a634349eCB', operatorAddress='0xB0c3666a6980D6cfBB97890564934e0d818A9e4A', amount=1, value=0, gasLimit=356881, gasPrice=72692865001, blockNumber=15014054, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
