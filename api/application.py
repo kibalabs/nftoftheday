@@ -15,7 +15,6 @@ from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from notd.token_attributes_processor import TokenAttributeProcessor
 
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.gallery_v1 import create_api as create_gallery_v1_api
@@ -27,6 +26,7 @@ from notd.gallery_manager import GalleryManager
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.token_attributes_processor import TokenAttributeProcessor
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor

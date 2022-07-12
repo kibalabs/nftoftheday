@@ -1,8 +1,9 @@
 from typing import Optional
-from fastapi import APIRouter
-from notd.api.endpoints_v1 import GetTokensWithAttributeResponse
-from notd.api.endpoints_v1 import GetCollectionAttributesResponse
 
+from fastapi import APIRouter
+
+from notd.api.endpoints_v1 import GetCollectionAttributesResponse
+from notd.api.endpoints_v1 import GetTokensWithAttributeResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.response_builder import ResponseBuilder
 from notd.gallery_manager import GalleryManager

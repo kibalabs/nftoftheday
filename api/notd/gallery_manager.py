@@ -1,18 +1,18 @@
 import json
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
+import sqlalchemy
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 from soupsieve import select
-import sqlalchemy
-from notd.model import Attribute
-from notd.store.retriever import Retriever
-from notd.store.schema import TokenAttributesTable
 from sqlalchemy import literal_column
 
-
 from notd.model import Airdrop
+from notd.model import Attribute
 from notd.model import Token
+from notd.store.retriever import Retriever
+from notd.store.schema import TokenAttributesTable
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF'

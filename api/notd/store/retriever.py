@@ -8,7 +8,6 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
-from notd.store.schema_conversions import token_attributes_from_row
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -33,6 +32,7 @@ from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import latest_update_from_row
+from notd.store.schema_conversions import token_attributes_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row

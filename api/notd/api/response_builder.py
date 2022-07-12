@@ -4,10 +4,9 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
-from notd.api.models_v1 import ApiAttribute
-from notd.model import Attribute
 
 from notd.api.models_v1 import ApiAirdrop
+from notd.api.models_v1 import ApiAttribute
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
@@ -16,6 +15,7 @@ from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Airdrop
+from notd.model import Attribute
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics

@@ -1,11 +1,12 @@
 
 from typing import List
-from core.store.retriever import StringFieldFilter
-from notd.model import TokenMetadata
-from notd.model import RetrievedTokenAttribute
-from notd.store.schema import TokenMetadatasTable
 
+from core.store.retriever import StringFieldFilter
+
+from notd.model import RetrievedTokenAttribute
+from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
+from notd.store.schema import TokenMetadatasTable
 
 
 class TokenAttributeProcessor:
