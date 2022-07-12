@@ -3,6 +3,11 @@ from typing import List
 
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
+import sqlalchemy
+from notd.model import Attribute
+from notd.store.retriever import Retriever
+from notd.store.schema import TokenAttributesTable
+from sqlalchemy import literal_column
 
 
 from notd.model import Airdrop
@@ -13,8 +18,9 @@ SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dC
 
 class GalleryManager:
 
-    def __init__(self, ethClient: EthClientInterface) -> None:
+    def __init__(self, ethClient: EthClientInterface, retriever: Retriever) -> None:
         self.ethClient = ethClient
+        self.retriever = retriever
         with open('./contracts/SpriteClub.json', 'r') as contractJsonFile:
             self.spriteClubContract = json.load(contractJsonFile)
         with open('./contracts/SpriteClubStormdrop.json', 'r') as contractJsonFile:
@@ -33,3 +39,14 @@ class GalleryManager:
             claimTokenKey = Token(registryAddress=SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS, tokenId=claimTokenId)
             return [Airdrop(name='Stormdrop ⚡️⚡️', tokenKey=tokenKey, isClaimed=isClaimed, claimTokenKey=claimTokenKey, claimUrl='https://stormdrop.spriteclubnft.com')]
         return []
+
+    async def get_collection_attributes(self, address: str) -> List[Attribute]:
+        query = (
+            TokenAttributesTable.select()
+                .with_only_columns([TokenAttributesTable.c.attributeName, sqlalchemy.func.string_agg(TokenAttributesTable.c.attributeValue, literal_column("', '"))])
+                .group_by(TokenAttributesTable.c.attributeName)
+        )
+        result = await self.retriever.database.execute(query=query)
+        attributeValues = [{row[0]:list({row[1]})} for row in result]
+        # print(attributeValues)
+        return attributeValues

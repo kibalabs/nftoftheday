@@ -97,3 +97,7 @@ class ApiAirdrop(BaseModel):
     isClaimed: bool
     claimToken: ApiCollectionToken
     claimUrl: str
+
+class ApiAttribute(BaseModel):
+    attributeName: str
+    attributeValue: List[str]

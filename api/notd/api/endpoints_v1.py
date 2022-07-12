@@ -3,6 +3,7 @@ from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
+from api.notd.api.models_v1 import ApiAttribute
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -168,4 +169,10 @@ class UpdateAttributeForAllTokensDeferredRequest(BaseModel):
     pass
 
 class UpdateAttributeForAllTokensDeferredResponse(BaseModel):
+    pass
+
+class GetCollectionAttributesResponse(BaseModel):
+    attributes: List[ApiAttribute]
+
+class GetCollectionAttributesRequest(BaseModel):
     pass

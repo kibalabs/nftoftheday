@@ -4,6 +4,8 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
+from notd.api.models_v1 import ApiAttribute
+from notd.model import Attribute
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -162,3 +164,9 @@ class ResponseBuilder:
             claimToken=await self.collection_token_from_token_key(tokenKey=airdrop.claimTokenKey),
             claimUrl=airdrop.claimUrl,
         ) for airdrop in airdrops]
+
+    async def attributes_from_models(self, attributes: Sequence[Attribute]) -> Sequence[ApiAttribute]:
+        return [ApiAttribute(
+            attributeName=attribute.attributeName,
+            attributeValue=attribute.attributeValue
+        ) for attribute in attributes]
