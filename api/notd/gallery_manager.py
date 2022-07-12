@@ -4,7 +4,6 @@ from typing import List
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 
-
 from notd.model import Airdrop
 from notd.model import Token
 
