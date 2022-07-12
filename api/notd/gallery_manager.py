@@ -1,8 +1,9 @@
 import json
-from typing import List
+from typing import List, Optional
 
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
+from soupsieve import select
 import sqlalchemy
 from notd.model import Attribute
 from notd.store.retriever import Retriever
@@ -49,3 +50,25 @@ class GalleryManager:
         result = await self.retriever.database.execute(query=query)
         attributeValues = [Attribute(attributeName=row[0], attributeValue=list({row[1]})) for row in result]
         return attributeValues
+
+    async def get_tokens_with_attributes(self, registryAddress: str, attributeName: Optional[str], attributeValue: Optional[str],attributeName2: Optional[str], attributeValue2: Optional[str], limit: int, offset: int):
+        firstQuery = (
+            TokenAttributesTable.select()
+                .with_only_columns([TokenAttributesTable.c.tokenId])
+                .where(TokenAttributesTable.c.attributeName == attributeName)
+                .where(TokenAttributesTable.c.attributeValue == attributeValue)
+                .subquery()
+        )
+        query = (
+            TokenAttributesTable.select()
+                .with_only_columns([TokenAttributesTable.c.registryAddress, TokenAttributesTable.c.tokenId])
+                .where(TokenAttributesTable.c.tokenId.in_(sqlalchemy.select(firstQuery)))
+                .where(TokenAttributesTable.c.attributeName == attributeName2)
+                .where(TokenAttributesTable.c.attributeValue == attributeValue2)
+                .offset(offset)
+                .limit(limit)
+        )
+        result = await self.retriever.database.execute(query=query)
+        tokens = [Token(registryAddress=row[0], tokenId=row[1]) for row in result]
+        print(tokens)
+        return tokens

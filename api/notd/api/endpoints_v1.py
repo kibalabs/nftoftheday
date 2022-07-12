@@ -176,3 +176,9 @@ class GetCollectionAttributesResponse(BaseModel):
 
 class GetCollectionAttributesRequest(BaseModel):
     pass
+
+class GetTokensWithAttributeResponse(BaseModel):
+    pass
+
+class GetTokensWithAttributeRequest(BaseModel):
+    pass
