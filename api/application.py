@@ -63,7 +63,7 @@ tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQu
 revueApiKey = os.environ['REVUE_API_KEY']
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
-galleryManager = GalleryManager(ethClient=ethClient)
+galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=name, version=version, environment=environment))

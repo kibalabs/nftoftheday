@@ -40,13 +40,12 @@ class GalleryManager:
             return [Airdrop(name='Stormdrop ⚡️⚡️', tokenKey=tokenKey, isClaimed=isClaimed, claimTokenKey=claimTokenKey, claimUrl='https://stormdrop.spriteclubnft.com')]
         return []
 
-    async def get_collection_attributes(self, address: str) -> List[Attribute]:
+    async def get_collection_attributes(self, registryAddress: str) -> List[Attribute]:
         query = (
             TokenAttributesTable.select()
                 .with_only_columns([TokenAttributesTable.c.attributeName, sqlalchemy.func.string_agg(TokenAttributesTable.c.attributeValue, literal_column("', '"))])
                 .group_by(TokenAttributesTable.c.attributeName)
         )
         result = await self.retriever.database.execute(query=query)
-        attributeValues = [{row[0]:list({row[1]})} for row in result]
-        # print(attributeValues)
+        attributeValues = [Attribute(attributeName=row[0], attributeValue=list({row[1]})) for row in result]
         return attributeValues
