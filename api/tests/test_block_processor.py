@@ -52,7 +52,7 @@ class BlockProcessorTestCase(KibaAsyncTestCase):
 
 class TestProcessBlock(BlockProcessorTestCase):
 
-    async def test_1(self):
+    async def test_block_with_no_interstitial_transfer(self):
         result = await self.blockProcessor.process_block(13281280)
         expected = ProcessedBlock(
             blockNumber=13281280,
@@ -75,7 +75,7 @@ class TestProcessBlock(BlockProcessorTestCase):
         )
         assert(result == expected)
 
-    async def test_2(self):
+    async def test_block_with_no_swap_transfer(self):
         result = await self.blockProcessor.process_block(12839305)
         expected = ProcessedBlock(
             blockNumber=12839305,
@@ -91,7 +91,7 @@ class TestProcessBlock(BlockProcessorTestCase):
         )
         assert(result == expected)
 
-    async def test_3(self):
+    async def test_block_with_outbound_transfer(self):
         result = await self.blockProcessor.process_block(13281282)
         expected = ProcessedBlock(
             blockNumber=13281282,
@@ -163,7 +163,7 @@ class TestProcessBlock(BlockProcessorTestCase):
         )
         assert(result == expected)
 
-    async def test_4(self):
+    async def test_block_with_no_multi_address(self):
         result = await self.blockProcessor.process_block(13898509)
         expected = ProcessedBlock(
             blockNumber=13898509,
@@ -188,7 +188,7 @@ class TestProcessBlock(BlockProcessorTestCase):
         )
         assert(result == expected)
 
-    async def test_5(self):
+    async def test_block(self):
         result = await self.blockProcessor.process_block(14471751)
         expected = ProcessedBlock(
             blockNumber=14471751,
