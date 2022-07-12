@@ -16,6 +16,7 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
+from api.notd.model import LatestUpdate
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -411,23 +412,22 @@ class TokenManager:
         #Get date of the last processed attribute
         #Get all tokens to have been updated after this date
         #send all the updatedTokens to the queue for processing
-        latestProcessedTokenAttribute: List[TokenAttribute] = await self.retriever.list_token_attributes(orders=[Order(fieldName=TokenAttributesTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
-        if len(latestProcessedTokenAttribute) > 0:
-            latestProcessedDate = latestProcessedTokenAttribute[0].updatedDate
-        else:
-            latestProcessedDate = date_util.datetime_from_now(weeks=-1)
+        startDate = date_util.datetime_from_now()
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='token_attributes')
+        latestProcessedDate = latestUpdate.date
         logging.info(f'Finding changed tokens since {latestProcessedDate}')
-        updateTokenMetadataQuery = (
+        recentMetadataTokenQuery = (
             TokenMetadatasTable.select()
             .with_only_columns([TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId])
             .where(TokenMetadatasTable.c.registryAddress == SPRITE_CLUB_REGISTRY_ADDRESS)
             .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
         )
-        updateTokenMetadataQueryResult = await self.retriever.database.execute(query=updateTokenMetadataQuery)
-        updatedTokenMetadata = set(updateTokenMetadataQueryResult)
-        logging.info(f'Scheduling processing for {len(updatedTokenMetadata)} updatedTokenAttributes')
-        messages = [UpdateAttributeForTokenMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadata]
+        recentMetadataTokenQueryResult = await self.retriever.database.execute(query=recentMetadataTokenQuery)
+        updatedTokenMetadatas = set(recentMetadataTokenQueryResult)
+        logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} updatedTokenAttributes')
+        messages = [UpdateAttributeForTokenMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
         await self.tokenQueue.send_messages(messages=messages)
+        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)

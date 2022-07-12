@@ -256,7 +256,7 @@ class Airdrop:
 class RetrievedTokenAttribute:
     registryAddress: str
     tokenId: str
-    attributeName: Optional[str]
+    attributeName: str
     attributeValue: str
 
 @dataclasses.dataclass
