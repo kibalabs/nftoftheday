@@ -16,7 +16,7 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def list_collection_token_airdrops(registryAddress: str, tokenId: str):
         airdrops = await galleryManager.list_collection_token_airdrops(registryAddress=registryAddress, tokenId=tokenId)
         return ListCollectionTokenAirdropsResponse(airdrops=(await responseBuilder.airdrops_from_models(airdrops=airdrops)))
-    
+
     @router.get('/collections/{registryAddress}/attributes', response_model=GetCollectionAttributesResponse)
     async def get_collection_attributes(registryAddress: str):
         attributes = await galleryManager.get_collection_attributes(registryAddress=registryAddress)

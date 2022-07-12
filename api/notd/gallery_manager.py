@@ -5,7 +5,6 @@ from typing import Optional
 import sqlalchemy
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
-from soupsieve import select
 from sqlalchemy import literal_column
 
 from notd.model import Airdrop
