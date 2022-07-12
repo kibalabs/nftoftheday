@@ -6,8 +6,8 @@ from typing import Sequence
 from core.exceptions import NotFoundException
 
 from notd.api.models_v1 import ApiAirdrop
-from notd.api.models_v1 import ApiAttribute
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
@@ -15,8 +15,8 @@ from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Airdrop
-from notd.model import Attribute
 from notd.model import Collection
+from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
@@ -165,8 +165,8 @@ class ResponseBuilder:
             claimUrl=airdrop.claimUrl,
         ) for airdrop in airdrops]
 
-    async def attributes_from_models(self, attributes: Sequence[Attribute]) -> Sequence[ApiAttribute]:
-        return [ApiAttribute(
-            attributeName=attribute.attributeName,
-            attributeValues=attribute.attributeValues
+    async def attributes_from_models(self, attributes: Sequence[CollectionAttribute]) -> Sequence[ApiCollectionAttribute]:
+        return [ApiCollectionAttribute(
+            attributeName=attribute.name,
+            attributeValues=attribute.values
         ) for attribute in attributes]

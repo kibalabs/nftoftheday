@@ -7,9 +7,8 @@ from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 from sqlalchemy import literal_column
 
-
 from notd.model import Airdrop
-from notd.model import Attribute
+from notd.model import CollectionAttribute
 from notd.model import Token
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenAttributesTable
@@ -41,14 +40,14 @@ class GalleryManager:
             return [Airdrop(name='Stormdrop ⚡️⚡️', tokenKey=tokenKey, isClaimed=isClaimed, claimTokenKey=claimTokenKey, claimUrl='https://stormdrop.spriteclubnft.com')]
         return []
 
-    async def get_collection_attributes(self, registryAddress: str) -> List[Attribute]:
+    async def get_collection_attributes(self, registryAddress: str) -> List[CollectionAttribute]:
         query = (
             TokenAttributesTable.select()
                 .with_only_columns([TokenAttributesTable.c.attributeName, sqlalchemy.func.string_agg(TokenAttributesTable.c.attributeValue, literal_column("', '"))])
                 .group_by(TokenAttributesTable.c.attributeName)
         )
         result = await self.retriever.database.execute(query=query)
-        attributeValues = [Attribute(attributeName=row[0], attributeValues=list({row[1]})) for row in result]
+        attributeValues = [CollectionAttribute(attributeName=row[0], attributeValues=list({row[1]})) for row in result]
         return attributeValues
 
     async def get_tokens_with_attributes(self, registryAddress: str, attributeName: Optional[str], attributeValue: Optional[str],attributeName2: Optional[str], attributeValue2: Optional[str], limit: int, offset: int):

@@ -98,6 +98,6 @@ class ApiAirdrop(BaseModel):
     claimToken: ApiCollectionToken
     claimUrl: str
 
-class ApiAttribute(BaseModel):
-    attributeName: str
-    attributeValues: List[str]
+class ApiCollectionAttribute(BaseModel):
+    name: str
+    values: List[str]

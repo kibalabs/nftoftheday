@@ -266,6 +266,6 @@ class TokenAttribute(RetrievedTokenAttribute):
     updatedDate: datetime.datetime
 
 @dataclasses.dataclass
-class Attribute:
-    attributeName: str
-    attributeValues: List[str]
+class CollectionAttribute:
+    name: str
+    values: List[str]
