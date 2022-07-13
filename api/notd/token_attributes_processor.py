@@ -1,7 +1,12 @@
 
+import logging
 from typing import List
+from attr import attributes
 
 from core.store.retriever import StringFieldFilter
+from notd.model import TokenAttribute
+from notd.store.saver import Saver
+from notd.store.schema import TokenAttributesTable
 
 from notd.model import RetrievedTokenAttribute
 from notd.model import TokenMetadata
@@ -14,7 +19,7 @@ class TokenAttributeProcessor:
     def __init__(self,retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def get_token_attributes(self, registryAddress: str, tokenId: str) -> None:
+    async def get_token_attributes(self, registryAddress: str, tokenId: str) -> List[TokenAttribute]:
         tokenMetadata: List[TokenMetadata] = await self.retriever.list_token_metadatas(
             fieldFilters=[
                 StringFieldFilter(TokenMetadatasTable.c.registryAddress.key, eq=registryAddress),

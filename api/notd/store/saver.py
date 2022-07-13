@@ -511,3 +511,9 @@ class Saver(CoreSaver):
             values[TokenAttributesTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = TokenAttributesTable.update(TokenAttributesTable.c.tokenAttributeId == tokenAttributeId).values(values)
         await self._execute(query=query, connection=connection)
+
+    async def delete_token_attributes(self, tokenAttributeIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(tokenAttributeIds) == 0:
+            return
+        query = TokenAttributesTable.delete().where(TokenAttributesTable.c.tokenAttributeId.in_(tokenAttributeIds))
+        await self._execute(query=query, connection=connection)
