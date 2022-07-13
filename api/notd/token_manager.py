@@ -450,25 +450,32 @@ class TokenManager:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
     async def update_attribute_for_token(self, registryAddress: str, tokenId: str) -> None:
-        retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
-        retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
-        tokenAttribute = await self.retriever.list_token_attributes(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
-            ]
-        )
-        for retrievedTokenAttribute in retrievedTokenAttributes:
-            async with self.saver.create_transaction() as connection:
-                if len(tokenAttribute) > 0:
-                    existingTokenAttributesTuples = {(existingTokenAttribute.registryAddress, existingTokenAttribute.tokenId, existingTokenAttribute.attributeName): existingTokenAttribute.tokenAttributeId for existingTokenAttribute in tokenAttribute }
-                    tokenAttributeIdsToDelete = []
-                    for uniqueTokenAttributeTuple, tokenAttributeId in existingTokenAttributesTuples.items():
-                        if uniqueTokenAttributeTuple in retrievedTokenAttributesTuple.keys():
-                            continue
-                        tokenAttributeIdsToDelete.append(tokenAttributeId)
-                    logging.info(f'Deleting  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
-                    await self.saver.delete_token_attributes(connection=connection, tokenAttributeIds=tokenAttributeIdsToDelete)
-                    await self.saver.update_token_attribute(connection=connection, tokenAttributeId=tokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
-                else:
-                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+        async with self.saver.create_transaction() as connection:
+            retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
+            retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
+            tokenAttributes = await self.retriever.list_token_attributes(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
+                ]
+            )
+            if tokenAttributes:
+                existingTokenAttributesTuples = {(existingTokenAttribute.registryAddress, existingTokenAttribute.tokenId, existingTokenAttribute.attributeName): existingTokenAttribute.tokenAttributeId for existingTokenAttribute in tokenAttributes }
+                tokenAttributeIdsToDelete = []
+                for uniqueTokenAttributeTuple, tokenAttributeId in existingTokenAttributesTuples.items():
+                    if uniqueTokenAttributeTuple in retrievedTokenAttributesTuple.keys():
+                        continue
+                    tokenAttributeIdsToDelete.append(tokenAttributeId)
+                logging.info(f'Deleting  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
+                await self.saver.delete_token_attributes(connection=connection, tokenAttributeIds=tokenAttributeIdsToDelete)
+                for retrievedTokenAttribute in retrievedTokenAttributes:
+                    existingTokenAttribute = [tokenAttribute for tokenAttribute in tokenAttributes if tokenAttribute.attributeName == retrievedTokenAttribute.attributeName]
+                    if len(existingTokenAttribute) > 0:
+                        if retrievedTokenAttribute.attributeValue == existingTokenAttribute[0].attributeValue:
+                            logging.info(f"Skipping registryAddress {registryAddress}, tokenId {tokenId}, {retrievedTokenAttribute.attributeName} because of no change")
+                        await self.saver.update_token_attribute(connection=connection, tokenAttributeId=existingTokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+                    else:
+                        await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+            else:
+                for retrievedTokenAttribute in retrievedTokenAttributes:
+                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue) 
