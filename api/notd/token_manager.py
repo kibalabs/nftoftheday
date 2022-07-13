@@ -16,7 +16,6 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
-from notd.model import LatestUpdate
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -35,7 +34,6 @@ from notd.model import Collection
 from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import Token
-from notd.model import TokenAttribute
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -456,25 +454,23 @@ class TokenManager:
 
     async def update_attribute_for_token(self, registryAddress: str, tokenId: str) -> None:
         retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
-        tokenAttribute = await self.retriever.list_token_attributes(
-            connection=connection,
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
-                StringFieldFilter(fieldName=TokenAttributesTable.c.attributeName.key, eq=retrievedTokenAttribute.attributeName)
-            ]
-        )
         retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
         for retrievedTokenAttribute in retrievedTokenAttributes:
+            tokenAttribute = await self.retriever.list_token_attributes(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
+                    StringFieldFilter(fieldName=TokenAttributesTable.c.attributeName.key, eq=retrievedTokenAttribute.attributeName)
+                ]
+            )
             async with self.saver.create_transaction() as connection:
                 if len(tokenAttribute) > 0:
                     existingTokenAttributesTuples = {(existingTokenAttribute.registryAddress, existingTokenAttribute.tokenId, existingTokenAttribute.attributeName): existingTokenAttribute.tokenAttributeId for existingTokenAttribute in tokenAttribute }
                     tokenAttributeIdsToDelete = []
-                    for k,v in existingTokenAttributesTuples.items():
-                        if k in retrievedTokenAttributesTuple.keys():
+                    for uniqueTokenAttributeTuple, tokenAttributeId in existingTokenAttributesTuples.items():
+                        if uniqueTokenAttributeTuple in retrievedTokenAttributesTuple.keys():
                             continue
-                        else:
-                            tokenAttributeIdsToDelete.append(v)
+                        tokenAttributeIdsToDelete.append(tokenAttributeId)
                     logging.info(f'Deleting  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
                     await self.saver.delete_token_attributes(connection=connection, tokenAttributeIds=tokenAttributeIdsToDelete)
                     await self.saver.update_token_attribute(connection=connection, tokenAttributeId=tokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
