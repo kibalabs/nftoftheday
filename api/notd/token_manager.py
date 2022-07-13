@@ -478,4 +478,4 @@ class TokenManager:
                         await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
             else:
                 for retrievedTokenAttribute in retrievedTokenAttributes:
-                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue) 
+                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
