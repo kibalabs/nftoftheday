@@ -407,9 +407,6 @@ class TokenManager:
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
     async def update_attribute_for_all_tokens(self) -> None:
-        #Get date of the last processed attribute
-        #Get all tokens to have been updated after this date
-        #send all the updatedTokens to the queue for processing
         startDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='token_attributes')
         latestProcessedDate = latestUpdate.date
@@ -455,14 +452,13 @@ class TokenManager:
     async def update_attribute_for_token(self, registryAddress: str, tokenId: str) -> None:
         retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
         retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
+        tokenAttribute = await self.retriever.list_token_attributes(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
+            ]
+        )
         for retrievedTokenAttribute in retrievedTokenAttributes:
-            tokenAttribute = await self.retriever.list_token_attributes(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
-                    StringFieldFilter(fieldName=TokenAttributesTable.c.attributeName.key, eq=retrievedTokenAttribute.attributeName)
-                ]
-            )
             async with self.saver.create_transaction() as connection:
                 if len(tokenAttribute) > 0:
                     existingTokenAttributesTuples = {(existingTokenAttribute.registryAddress, existingTokenAttribute.tokenId, existingTokenAttribute.attributeName): existingTokenAttribute.tokenAttributeId for existingTokenAttribute in tokenAttribute }
