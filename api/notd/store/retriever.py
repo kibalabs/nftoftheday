@@ -9,7 +9,7 @@ from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
-from notd.model import Collection
+from notd.model import Collection, TokenListing
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import TokenMetadata
@@ -232,7 +232,7 @@ class Retriever(CoreRetriever):
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
 
-    async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[LatestUpdate]:
+    async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenListing]:
         query = LatestTokenListingsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=LatestTokenListingsTable, fieldFilters=fieldFilters)
@@ -241,5 +241,5 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        latestUpdates = [token_listing_from_row(row) for row in result]
-        return latestUpdates
+        latestTokenListings = [token_listing_from_row(row) for row in result]
+        return latestTokenListings
