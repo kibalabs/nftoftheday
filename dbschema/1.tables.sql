@@ -210,7 +210,6 @@ CREATE INDEX tbl_latest_updates_key ON tbl_latest_updates (key);
 CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);
 
 
--- tbl_token_attributes (id, registry_address, token_id, attribute_name, attribute_value)
 CREATE TABLE tbl_token_attributes (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
