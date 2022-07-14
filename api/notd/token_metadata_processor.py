@@ -229,7 +229,7 @@ class TokenMetadataProcessor():
             tokenMetadataDict = self._resolve_data(dataString=tokenMetadataUri, registryAddress=registryAddress, tokenId=tokenId)
         else:
             try:
-                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=5)
+                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=10)
                 tokenMetadataDict = tokenMetadataResponse.json()
                 if tokenMetadataDict is None:
                     raise Exception('Empty response')

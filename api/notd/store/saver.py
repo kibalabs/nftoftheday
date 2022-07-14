@@ -14,6 +14,7 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
+from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
 from notd.model import TokenMetadata
@@ -21,6 +22,7 @@ from notd.model import TokenOwnership
 from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
@@ -473,4 +475,52 @@ class Saver(CoreSaver):
         if len(values) > 0:
             values[LatestUpdatesTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = LatestUpdatesTable.update(LatestUpdatesTable.c.latestUpdateId == latestUpdateId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    @staticmethod
+    def _get_create_latest_token_listing_values(retrievedTokenListing: RetrievedTokenListing, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
+            LatestTokenListingsTable.c.createdDate.key: createdDate,
+            LatestTokenListingsTable.c.updatedDate.key: updatedDate,
+            LatestTokenListingsTable.c.registryAddress.key: retrievedTokenListing.registryAddress,
+            LatestTokenListingsTable.c.tokenId.key: retrievedTokenListing.tokenId,
+            LatestTokenListingsTable.c.offererAddress.key: retrievedTokenListing.offererAddress,
+            LatestTokenListingsTable.c.startDate.key: retrievedTokenListing.startDate,
+            LatestTokenListingsTable.c.endDate.key: retrievedTokenListing.endDate,
+            LatestTokenListingsTable.c.isValueNative.key: retrievedTokenListing.isValueNative,
+            LatestTokenListingsTable.c.value.key: retrievedTokenListing.value,
+            LatestTokenListingsTable.c.source.key: retrievedTokenListing.source,
+            LatestTokenListingsTable.c.sourceId.key: retrievedTokenListing.sourceId,
+        }
+
+    async def create_latest_token_listing(self, retrievedTokenListing: RetrievedTokenListing, connection: Optional[DatabaseConnection] = None) -> int:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = self._get_create_latest_token_listing_values(retrievedTokenListing=retrievedTokenListing, createdDate=createdDate, updatedDate=updatedDate)
+        query = LatestTokenListingsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        latestTokenListingId = result.inserted_primary_key[0]
+        return latestTokenListingId
+
+    async def create_latest_token_listings(self, retrievedTokenListings: List[RetrievedTokenListing], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedTokenListings) == 0:
+            return
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        latestTokenListingIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenListings, chunkSize=100):
+            values = [self._get_create_latest_token_listing_values(retrievedTokenListing=retrievedTokenListing, createdDate=createdDate, updatedDate=updatedDate) for retrievedTokenListing in chunk]
+            query = LatestTokenListingsTable.insert().values(values).returning(LatestTokenListingsTable.c.latestTokenListingId)
+            rows = await self._execute(query=query, connection=connection)
+            latestTokenListingIds += [row[0] for row in rows]
+        return latestTokenListingIds
+
+    async def delete_latest_token_listing(self, latestTokenListingId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = LatestTokenListingsTable.delete().where(LatestTokenListingsTable.c.latestTokenListingId == latestTokenListingId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_latest_token_listings(self, latestTokenListingIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(latestTokenListingIds) == 0:
+            return
+        query = LatestTokenListingsTable.delete().where(LatestTokenListingsTable.c.latestTokenListingId.in_(latestTokenListingIds))
         await self._execute(query=query, connection=connection)

@@ -183,6 +183,7 @@ class TokenMultiOwnership(RetrievedTokenMultiOwnership):
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
 
+
 @dataclasses.dataclass
 class RetrievedCollectionHourlyActivity:
     address: str
@@ -194,11 +195,13 @@ class RetrievedCollectionHourlyActivity:
     maximumValue: int
     averageValue: int
 
+
 @dataclasses.dataclass
 class CollectionHourlyActivity(RetrievedCollectionHourlyActivity):
     collectionActivityId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
 
 @dataclasses.dataclass
 class CollectionStatistics:
@@ -210,6 +213,7 @@ class CollectionStatistics:
     lowestSaleLast24Hours: int
     highestSaleLast24Hours: int
     tradeVolume24Hours: int
+
 
 @dataclasses.dataclass
 class CollectionDailyActivity:
@@ -251,3 +255,23 @@ class Airdrop:
     isClaimed: bool
     claimTokenKey: Token
     claimUrl: str
+
+
+@dataclasses.dataclass
+class RetrievedTokenListing:
+    registryAddress: str
+    tokenId: str
+    offererAddress: str
+    startDate: datetime.datetime
+    endDate: datetime.datetime
+    isValueNative: bool
+    value: int
+    source: str
+    sourceId: str
+
+
+@dataclasses.dataclass
+class TokenListing(RetrievedTokenListing):
+    tokenListingId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime

@@ -208,3 +208,22 @@ CREATE INDEX tbl_latest_updates_updated_date ON tbl_latest_updates (updated_date
 CREATE INDEX tbl_latest_updates_date ON tbl_latest_updates (date);
 CREATE INDEX tbl_latest_updates_key ON tbl_latest_updates (key);
 CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);
+
+CREATE TABLE tbl_latest_token_listings (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    offerer_address TEXT NOT NULL,
+    start_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    end_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    is_value_native BOOLEAN NOT NULL,
+    value NUMERIC(256, 0) NOT NULL,
+    source TEXT NOT NULL,
+    source_id TEXT NOT NULL
+);
+CREATE UNIQUE INDEX tbl_latest_token_listings_source_registry_address_token_id_offerer_address ON tbl_latest_token_listings (source, registry_address, token_id, offerer_address);
+CREATE INDEX tbl_latest_token_listings_registry_address_token_id_offerer_address ON tbl_latest_token_listings (registry_address, token_id, offerer_address);
+CREATE INDEX tbl_latest_token_listings_created_date ON tbl_latest_token_listings (created_date);
+CREATE INDEX tbl_latest_token_listings_updated_date ON tbl_latest_token_listings (updated_date);
