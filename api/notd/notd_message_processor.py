@@ -10,8 +10,8 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
-from notd.messages import UpdateAttributeForAllTokensMessageContent
-from notd.messages import UpdateAttributeForTokenMessageContent
+from notd.messages import UpdateCollectionAttributesMessageContent
+from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
@@ -69,15 +69,15 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
             await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
             return
-        if message.command == UpdateAttributeForAllTokensMessageContent.get_command():
+        if message.command == UpdateCollectionAttributesMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
                 logging.info(f'Skipping UPDATE_ATTRIBUTE_FOR_ALL_TOKENS from more than 10 minutes ago')
                 return
-            messageContent = UpdateAttributeForAllTokensMessageContent.parse_obj(message.content)
-            await self.notdManager.update_attribute_for_all_tokens()
+            messageContent = UpdateCollectionAttributesMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection_attributes()
             return
-        if message.command == UpdateAttributeForTokenMessageContent.get_command():
-            messageContent = UpdateAttributeForTokenMessageContent.parse_obj(message.content)
-            await self.notdManager.update_attribute_for_token(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+        if message.command == UpdateCollectionTokenAttributesMessageContent.get_command():
+            messageContent = UpdateCollectionTokenAttributesMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection_token_attribute(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
             return
         raise KibaException(message='Message was unhandled')

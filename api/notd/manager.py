@@ -341,14 +341,14 @@ class NotdManager:
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.tokenManager.update_activity_for_all_collections_deferred()
 
-    async def update_attributes_for_all_tokens_deferred(self) -> None:
-        await self.tokenManager.update_attributes_for_all_tokens_deferred()
+    async def update_collection_attributes_deferred(self) -> None:
+        await self.tokenManager.update_collection_attributes_deferred()
 
     async def update_activity_for_all_collections(self) -> None:
         await self.tokenManager.update_activity_for_all_collections()
 
-    async def update_attribute_for_all_tokens(self) -> None:
-        await self.tokenManager.update_attribute_for_all_tokens()
+    async def update_collection_attributes(self) -> None:
+        await self.tokenManager.update_collection_attributes()
 
     async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:
         await self.tokenManager.update_activity_for_collection_deferred(registryAddress=registryAddress, startDate=startDate)
@@ -356,8 +356,8 @@ class NotdManager:
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         await self.tokenManager.update_activity_for_collection(address=address, startDate=startDate)
 
-    async def update_attribute_for_token(self, registryAddress: str, tokenId: str) -> None:
-        await self.tokenManager.update_attribute_for_token(registryAddress=registryAddress, tokenId=tokenId)
+    async def update_collection_token_attribute(self, registryAddress: str, tokenId: str) -> None:
+        await self.tokenManager.update_collection_token_attribute(registryAddress=registryAddress, tokenId=tokenId)
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)

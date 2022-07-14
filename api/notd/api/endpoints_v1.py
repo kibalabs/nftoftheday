@@ -164,8 +164,8 @@ class ListCollectionTokenAirdropsRequest(BaseModel):
 class ListCollectionTokenAirdropsResponse(BaseModel):
     airdrops: List[ApiAirdrop]
 
-class UpdateAttributeForAllTokensDeferredRequest(BaseModel):
+class UpdateCollectionAttributesDeferredRequest(BaseModel):
     pass
 
-class UpdateAttributeForAllTokensDeferredResponse(BaseModel):
+class UpdateCollectionAttributesDeferredResponse(BaseModel):
     pass

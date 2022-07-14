@@ -24,8 +24,8 @@ from notd.date_util import date_hour_from_datetime
 from notd.gallery_manager import SPRITE_CLUB_REGISTRY_ADDRESS
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
-from notd.messages import UpdateAttributeForAllTokensMessageContent
-from notd.messages import UpdateAttributeForTokenMessageContent
+from notd.messages import UpdateCollectionAttributesMessageContent
+from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
@@ -371,8 +371,8 @@ class TokenManager:
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
-    async def update_attributes_for_all_tokens_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateAttributeForAllTokensMessageContent().to_message())
+    async def update_collection_attributes_deferred(self) -> None:
+        await self.tokenQueue.send_message(message=UpdateCollectionAttributesMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
@@ -406,7 +406,7 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
-    async def update_attribute_for_all_tokens(self) -> None:
+    async def update_collection_attributes(self) -> None:
         startDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='token_attributes')
         latestProcessedDate = latestUpdate.date
@@ -420,7 +420,7 @@ class TokenManager:
         recentMetadataTokenQueryResult = await self.retriever.database.execute(query=recentMetadataTokenQuery)
         updatedTokenMetadatas = set(recentMetadataTokenQueryResult)
         logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} updatedTokenAttributes')
-        messages = [UpdateAttributeForTokenMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
+        messages = [UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
@@ -449,7 +449,7 @@ class TokenManager:
                 else:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
-    async def update_attribute_for_token(self, registryAddress: str, tokenId: str) -> None:
+    async def update_collection_token_attribute(self, registryAddress: str, tokenId: str) -> None:
         async with self.saver.create_transaction() as connection:
             retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
             retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
