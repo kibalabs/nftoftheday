@@ -1,7 +1,5 @@
 import asyncio
 import datetime
-import json
-import os
 import random
 from typing import List
 from typing import Set
@@ -32,7 +30,6 @@ from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
 from notd.model import Collection
-from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import Token
 from notd.model import TokenMetadata

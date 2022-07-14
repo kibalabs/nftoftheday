@@ -1,5 +1,4 @@
 import datetime
-import json
 from typing import List
 
 from core import logging
@@ -43,7 +42,7 @@ class TokenListingProcessor:
                         continue
                     startDate = datetime.datetime.utcfromtimestamp(sellOrder["listing_time"])
                     endDate = datetime.datetime.utcfromtimestamp(sellOrder["expiration_time"])
-                    current_price = int(sellOrder["current_price"].split('.')[0])
+                    currentPrice = int(sellOrder["current_price"].split('.')[0])
                     offererAddress = sellOrder["maker"]["address"]
                     sourceId = sellOrder["order_hash"]
                     isValueNative = sellOrder["payment_token_contract"]["symbol"] == "ETH"
@@ -53,7 +52,7 @@ class TokenListingProcessor:
                         startDate=startDate,
                         endDate=endDate,
                         isValueNative=isValueNative,
-                        value=current_price,
+                        value=currentPrice,
                         offererAddress=offererAddress,
                         source='opensea-wyvern',
                         sourceId=sourceId,
@@ -73,7 +72,7 @@ class TokenListingProcessor:
                         continue
                     startDate = datetime.datetime.utcfromtimestamp(seaportSellOrder["listing_time"])
                     endDate = datetime.datetime.utcfromtimestamp(seaportSellOrder["expiration_time"])
-                    current_price = int(seaportSellOrder["current_price"].split('.')[0])
+                    currentPrice = int(seaportSellOrder["current_price"].split('.')[0])
                     offererAddress = seaportSellOrder["maker"]["address"]
                     sourceId = seaportSellOrder["order_hash"]
                     isValueNative = True
@@ -84,7 +83,7 @@ class TokenListingProcessor:
                         startDate=startDate,
                         endDate=endDate,
                         isValueNative=isValueNative,
-                        value=current_price,
+                        value=currentPrice,
                         offererAddress=offererAddress,
                         source='opensea-seaport',
                         sourceId=sourceId,
