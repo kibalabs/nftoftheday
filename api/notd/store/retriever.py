@@ -33,11 +33,8 @@ from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import latest_update_from_row
-<<<<<<< HEAD
 from notd.store.schema_conversions import token_attributes_from_row
-=======
 from notd.store.schema_conversions import token_listing_from_row
->>>>>>> main
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
