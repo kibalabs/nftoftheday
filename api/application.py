@@ -65,7 +65,6 @@ tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
 collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
 tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenAttributeProcessor=tokenAttributeProcessor)
-revueApiKey = os.environ['REVUE_API_KEY']
 galleryManager = GalleryManager(ethClient=ethClient)
 openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
 tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)

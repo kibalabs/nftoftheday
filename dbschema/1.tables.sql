@@ -209,7 +209,6 @@ CREATE INDEX tbl_latest_updates_date ON tbl_latest_updates (date);
 CREATE INDEX tbl_latest_updates_key ON tbl_latest_updates (key);
 CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);
 
-
 CREATE TABLE tbl_token_attributes (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -229,6 +228,8 @@ CREATE INDEX tbl_token_attributes_attribute_value ON tbl_token_attributes (attri
 
 CREATE TABLE tbl_latest_token_listings (
     offerer_address TEXT NOT NULL,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
     start_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     end_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     is_value_native BOOLEAN NOT NULL,

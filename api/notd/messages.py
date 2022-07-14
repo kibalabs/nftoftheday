@@ -52,11 +52,11 @@ class UpdateActivityForCollectionMessageContent(MessageContent):
     address: str
     startDate: datetime.datetime
 
-class UpdateAllCollectionTokenAttributesMessageContent(MessageContent):
-    _COMMAND = 'UPDATE_ALL_COLLECTION_TOKEN_ATTRIBUTES'
+class UpdateTokenAttributesForAllCollectionsMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_ATTRIBUTES_FOR_ALL_COLLECTIONS'
 
-class UpdateCollectionTokenAttributesMessageContent(MessageContent):
-    _COMMAND = 'UPDATE_COLLECTION_TOKEN_ATTRIBUTE'
+class UpdateTokenAttributesForCollectionMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_ATTRIBUTES_FOR_COLLECTION'
     registryAddress: str
     tokenId: str
 

@@ -154,6 +154,7 @@ LatestUpdatesTable = sqlalchemy.Table(
     sqlalchemy.Column(key='date', name='date', type_=sqlalchemy.DateTime, nullable=False),
 )
 
+
 TokenAttributesTable = sqlalchemy.Table(
     'tbl_token_attributes',
     metadata,
@@ -165,6 +166,7 @@ TokenAttributesTable = sqlalchemy.Table(
     sqlalchemy.Column(key='attributeName', name='attribute_name', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='attributeValue', name='attribute_value', type_=sqlalchemy.Text, nullable=True),
 )
+
 
 LatestTokenListingsTable = sqlalchemy.Table(
     'tbl_latest_token_listings',

@@ -347,14 +347,8 @@ class NotdManager:
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.tokenManager.update_activity_for_all_collections_deferred()
 
-    async def update_all_collection_token_attributes_deferred(self) -> None:
-        await self.tokenManager.update_all_collection_token_attributes_deferred()
-
     async def update_activity_for_all_collections(self) -> None:
         await self.tokenManager.update_activity_for_all_collections()
-
-    async def update_all_collection_token_attributes(self) -> None:
-        await self.tokenManager.update_all_collection_token_attributes()
 
     async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:
         await self.tokenManager.update_activity_for_collection_deferred(registryAddress=registryAddress, startDate=startDate)
@@ -362,8 +356,17 @@ class NotdManager:
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         await self.tokenManager.update_activity_for_collection(address=address, startDate=startDate)
 
-    async def update_collection_token_attribute(self, registryAddress: str, tokenId: str) -> None:
-        await self.tokenManager.update_collection_token_attribute(registryAddress=registryAddress, tokenId=tokenId)
+    async def update_token_attributes_for_all_collections_deferred(self) -> None:
+        await self.tokenManager.update_token_attributes_for_all_collections_deferred()
+
+    async def update_token_attributes_for_all_collection(self) -> None:
+        await self.tokenManager.update_token_attributes_for_all_collection()
+
+    async def update_token_attributes_for_collection_deferred(self, registryAddress: str, tokenId: str) ->None:
+        await self.tokenManager.update_token_attributes_for_collection_deferred(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def update_token_attributes_for_collection(self, registryAddress: str, tokenId: str) -> None:
+        await self.tokenManager.update_token_attributes_for_collection(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
         await self.tokenManager.update_latest_listings_for_all_collections_deferred(delaySeconds=delaySeconds)

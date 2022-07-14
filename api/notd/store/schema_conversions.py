@@ -170,6 +170,7 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
         date=row[LatestUpdatesTable.c.date],
     )
 
+
 def token_attributes_from_row(row: Mapping) -> TokenAttribute:
     return TokenAttribute(
         tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
@@ -180,6 +181,7 @@ def token_attributes_from_row(row: Mapping) -> TokenAttribute:
         attributeName=row[TokenAttributesTable.c.attributeName],
         attributeValue=row[TokenAttributesTable.c.attributeValue],
     )
+
 
 def token_listing_from_row(row: Mapping) -> TokenListing:
     return TokenListing(
