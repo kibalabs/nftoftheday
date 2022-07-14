@@ -14,6 +14,8 @@ from notd.messages import UpdateAllCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
+from notd.messages import UpdateListingsForAllCollections
+from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
 
@@ -79,5 +81,12 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateCollectionTokenAttributesMessageContent.get_command():
             messageContent = UpdateCollectionTokenAttributesMessageContent.parse_obj(message.content)
             await self.notdManager.update_collection_token_attribute(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+        if message.command == UpdateListingsForAllCollections.get_command():
+            messageContent = UpdateListingsForAllCollections.parse_obj(message.content)
+            await self.notdManager.update_latest_listings_for_all_collections()
+            return
+        if message.command == UpdateListingsForCollection.get_command():
+            messageContent = UpdateListingsForCollection.parse_obj(message.content)
+            await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
             return
         raise KibaException(message='Message was unhandled')

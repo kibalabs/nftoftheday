@@ -23,9 +23,8 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='isSwap', name='is_swap', type_=sqlalchemy.BOOLEAN, nullable=False),
     sqlalchemy.Column(key='isBatch', name='is_batch', type_=sqlalchemy.BOOLEAN, nullable=False),
     sqlalchemy.Column(key='isOutbound', name='is_outbound', type_=sqlalchemy.BOOLEAN, nullable=False),
-
-
 )
+
 
 BlocksTable = sqlalchemy.Table(
     'tbl_blocks',
@@ -37,6 +36,7 @@ BlocksTable = sqlalchemy.Table(
     sqlalchemy.Column(key='blockHash', name='block_hash', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='blockDate', name='block_date', type_=sqlalchemy.DateTime, nullable=False),
 )
+
 
 TokenMetadatasTable = sqlalchemy.Table(
     'tbl_token_metadatas',
@@ -56,6 +56,7 @@ TokenMetadatasTable = sqlalchemy.Table(
     sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='attributes', name='attributes', type_=sqlalchemy.JSON, nullable=True),
 )
+
 
 TokenCollectionsTable = sqlalchemy.Table(
     'tbl_collections',
@@ -79,6 +80,7 @@ TokenCollectionsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='doesSupportErc1155', name='does_support_erc1155', type_=sqlalchemy.Boolean, nullable=False),
 )
 
+
 TokenOwnershipsTable = sqlalchemy.Table(
     'tbl_token_ownerships',
     metadata,
@@ -92,6 +94,7 @@ TokenOwnershipsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='transferDate', name='transfer_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='transferTransactionHash', name='transfer_transaction_hash', type_=sqlalchemy.Text, nullable=False),
 )
+
 
 TokenMultiOwnershipsTable = sqlalchemy.Table(
     'tbl_token_multi_ownerships',
@@ -107,6 +110,7 @@ TokenMultiOwnershipsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='latestTransferDate', name='latest_transfer_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='latestTransferTransactionHash', name='latest_transfer_transaction_hash', type_=sqlalchemy.Text, nullable=False),
 )
+
 
 CollectionHourlyActivityTable = sqlalchemy.Table(
     'tbl_collection_hourly_activities',
@@ -124,6 +128,7 @@ CollectionHourlyActivityTable = sqlalchemy.Table(
     sqlalchemy.Column(key='averageValue', name='average_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
 )
 
+
 UserInteractionsTable = sqlalchemy.Table(
     'tbl_user_interactions',
     metadata,
@@ -136,6 +141,7 @@ UserInteractionsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='message', name='message', type_=sqlalchemy.JSON, nullable=False),
 )
+
 
 LatestUpdatesTable = sqlalchemy.Table(
     'tbl_latest_updates',
@@ -158,4 +164,19 @@ TokenAttributesTable = sqlalchemy.Table(
     sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='attributeName', name='attribute_name', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='attributeValue', name='attribute_value', type_=sqlalchemy.Text, nullable=True),
+)
+
+LatestTokenListingsTable = sqlalchemy.Table(
+    'tbl_latest_token_listings',
+    metadata,
+    sqlalchemy.Column(key='latestTokenListingId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='offererAddress', name='offerer_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='startDate', name='start_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='endDate', name='end_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='isValueNative', name='is_value_native', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='value', name='value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='source', name='source', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='sourceId', name='source_id', type_=sqlalchemy.Text, nullable=False),
 )

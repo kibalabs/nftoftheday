@@ -9,7 +9,7 @@ from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
-from notd.model import Collection
+from notd.model import Collection, TokenListing
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import TokenAttribute
@@ -20,6 +20,7 @@ from notd.model import TokenTransfer
 from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
@@ -32,19 +33,17 @@ from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import latest_update_from_row
+<<<<<<< HEAD
 from notd.store.schema_conversions import token_attributes_from_row
+=======
+from notd.store.schema_conversions import token_listing_from_row
+>>>>>>> main
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.store.schema_conversions import user_interaction_from_row
 
-_REGISTRY_BLACKLIST = set([
-    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
-    '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e', # zed.run
-    '0xC36442b4a4522E871399CD717aBDD847Ab11FE88', # uniswap-v3-positions
-    '0xb9ed94c6d594b2517c4296e24a8c517ff133fb6d', # hegic-eth-atm-calls-pool
-])
 
 class Retriever(CoreRetriever):
 
@@ -250,3 +249,15 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'Latest Update  with key:{key} and name;{name} not found')
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
+
+    async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenListing]:
+        query = LatestTokenListingsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=LatestTokenListingsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=LatestTokenListingsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        latestTokenListings = [token_listing_from_row(row) for row in result]
+        return latestTokenListings

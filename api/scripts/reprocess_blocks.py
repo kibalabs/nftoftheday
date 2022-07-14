@@ -22,11 +22,18 @@ from notd.store.schema import TokenTransfersTable
 from notd.token_manager import TokenManager
 
 
+async def reprocess_block(notdManager: NotdManager, blockNumber: int):
+    try:
+        await notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True)
+    except Exception as exception:
+        logging.error(f'Failed to process block {blockNumber}: {exception}')
+
+
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
-async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchSize: int):
+async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
@@ -37,14 +44,17 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
-    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None)
+    # infuraAuth = BasicAuthentication(username='', password=os.environ["INFURA_PROJECT_SECRET"])
+    # infuraRequester = Requester(headers={'Authorization': f'Basic {infuraAuth.to_string()}'})
+    # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None, tokenListingProcessor=None)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=None)
 
     await database.connect()
     await workQueue.connect()
     await tokenQueue.connect()
-    await slackClient.post(text=f'reprocess_transfers → 🚧 started: {startBlockNumber}-{endBlockNumber}')
+    await slackClient.post(text=f'reprocess_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         currentBlockNumber = startBlockNumber
         while currentBlockNumber < endBlockNumber:
@@ -63,11 +73,11 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
             for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=10):
-                await asyncio.gather(*[notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True) for blockNumber in chunk])
+                await asyncio.gather(*[reprocess_block(notdManager=notdManager, blockNumber=blockNumber) for blockNumber in chunk])
             currentBlockNumber = currentBlockNumber + batchSize
-        await slackClient.post(text=f'reprocess_transfers → ✅ completed : {startBlockNumber}-{endBlockNumber}')
+        await slackClient.post(text=f'reprocess_blocks → ✅ completed : {startBlockNumber}-{endBlockNumber}')
     except Exception as exception:
-        await slackClient.post(text=f'reprocess_transfers → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')
+        await slackClient.post(text=f'reprocess_blocks → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')
         raise exception
     finally:
         await database.disconnect()
@@ -78,4 +88,4 @@ async def reprocess_transfers(startBlockNumber: int, endBlockNumber: int, batchS
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(reprocess_transfers())
+    asyncio.run(reprocess_blocks())
