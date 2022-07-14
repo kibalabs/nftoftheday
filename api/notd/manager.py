@@ -37,7 +37,6 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
-from notd.store.retriever import _REGISTRY_BLACKLIST
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -47,6 +46,13 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
+
+_REGISTRY_BLACKLIST = set([
+    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
+    '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e', # zed.run
+    '0xC36442b4a4522E871399CD717aBDD847Ab11FE88', # uniswap-v3-positions
+    '0xb9ed94c6d594b2517c4296e24a8c517ff133fb6d', # hegic-eth-atm-calls-pool
+])
 
 
 class NotdManager:
@@ -349,6 +355,18 @@ class NotdManager:
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         await self.tokenManager.update_activity_for_collection(address=address, startDate=startDate)
+
+    async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
+        await self.tokenManager.update_latest_listings_for_all_collections_deferred(delaySeconds=delaySeconds)
+
+    async def update_latest_listings_for_all_collections(self) -> None:
+        await self.tokenManager.update_latest_listings_for_all_collections()
+
+    async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
+        await self.tokenManager.update_latest_listings_for_collection_deferred(address=address, delaySeconds=delaySeconds)
+
+    async def update_latest_listings_for_collection(self, address: str) -> None:
+        await self.tokenManager.update_latest_listings_for_collection(address=address)
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)

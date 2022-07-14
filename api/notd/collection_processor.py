@@ -79,7 +79,7 @@ class CollectionProcessor:
                     contractMetadataUri = contractMetadataUri.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')
                 if "{address}" in contractMetadataUri:
                     contractMetadataUri = contractMetadataUri.replace('{address}', address)
-                contractMetadataUriResponse = await self.requester.get(url=contractMetadataUri)
+                contractMetadataUriResponse = await self.requester.get(url=contractMetadataUri, timeout=10)
                 collectionMetadata = contractMetadataUriResponse.json()
                 if isinstance(collectionMetadata, str):
                     collectionMetadata = json.loads(collectionMetadata)

@@ -25,6 +25,8 @@ from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
+from notd.messages import UpdateListingsForAllCollections
+from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
 from notd.model import Collection
@@ -35,11 +37,13 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
+from notd.token_listing_processor import TokenListingProcessor
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -49,10 +53,19 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 _TOKEN_UPDATE_MIN_DAYS = 7
 _COLLECTION_UPDATE_MIN_DAYS = 30
 
+GALLERY_COLLECTIONS = {
+    # Sprite Club
+    chain_util.normalize_address(value='0x2744fe5e7776bca0af1cdeaf3ba3d1f5cae515d3'),
+    # Goblin Town
+    chain_util.normalize_address(value='0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e'),
+    # MDTP
+    chain_util.normalize_address(value='0x8e720f90014fa4de02627f4a4e217b7e3942d5e8'),
+}
+
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor, tokenListingProcessor: TokenListingProcessor):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
@@ -60,6 +73,7 @@ class TokenManager:
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
         self.collectionActivityProcessor = collectionActivityProcessor
+        self.tokenListingProcessor = tokenListingProcessor
 
     async def get_collection_by_address(self, address: str) -> Collection:
         address = chain_util.normalize_address(value=address)
@@ -420,3 +434,37 @@ class TokenManager:
                     logging.info(f'Not creating activity with transferCount==0')
                 else:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+
+    async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
+        await self.tokenQueue.send_messages(messages=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
+
+    async def update_latest_listings_for_all_collections(self) -> None:
+        # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
+        for index, registryAddress in enumerate(GALLERY_COLLECTIONS):
+            await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=(60 * 5 * index))
+
+    async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
+        await self.tokenQueue.send_messages(messages=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
+
+    async def update_latest_listings_for_collection(self, address: str) -> None:
+        tokenIdsQuery = (
+            TokenMetadatasTable.select()
+            .with_only_columns([TokenMetadatasTable.c.tokenId])
+            .where(TokenMetadatasTable.c.registryAddress == address)
+            .order_by(TokenMetadatasTable.c.tokenId.asc())
+        )
+        tokenIdsQueryResult = await self.retriever.database.execute(query=tokenIdsQuery)
+        tokenIds = [tokenId for (tokenId, ) in tokenIdsQueryResult]
+        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
+        logging.info(f'Retrieved {len(openseaListings)} opensea listings')
+        allListings = openseaListings
+        # TODO(krishan711): change this to not delete existing. should add / remove / update changed only
+        async with self.saver.create_transaction() as connection:
+            currentLatestTokenListings = await self.retriever.list_latest_token_listings(fieldFilters=[
+                StringFieldFilter(fieldName=LatestTokenListingsTable.c.registryAddress.key, eq=address)
+            ], connection=connection)
+            currentLatestTokenListingIds = [latestTokenListing.tokenListingId for latestTokenListing in currentLatestTokenListings]
+            logging.info(f'Deleting {len(currentLatestTokenListingIds)} existing listings')
+            await self.saver.delete_latest_token_listings(latestTokenListingIds=currentLatestTokenListingIds, connection=connection)
+            logging.info(f'Saving {len(allListings)} listings')
+            await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
