@@ -30,7 +30,7 @@ from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
-from notd.api.endpoints_v1 import UpdateCollectionAttributesDeferredResponse
+from notd.api.endpoints_v1 import UpdateAllCollectionTokenAttributesDeferredResponse
 from notd.api.endpoints_v1 import UpdateCollectionRequest
 from notd.api.endpoints_v1 import UpdateCollectionResponse
 from notd.api.endpoints_v1 import UpdateCollectionTokenRequest
@@ -89,10 +89,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.update_activity_for_all_collections_deferred()
         return UpdateActivityForAllCollectionsDeferredResponse()
 
-    @router.post('/update-collection-attributes-deferred', response_model=UpdateCollectionAttributesDeferredResponse)
-    async def update_collection_attributes_deferred():
-        await notdManager.update_collection_attributes_deferred()
-        return UpdateCollectionAttributesDeferredResponse()
+    @router.post('/collection/update-all-token-attributes-deferred', response_model=UpdateAllCollectionTokenAttributesDeferredResponse)
+    async def update_all_collection_token_attributes_deferred():
+        await notdManager.update_all_collection_token_attributes_deferred()
+        return UpdateAllCollectionTokenAttributesDeferredResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
     async def get_collection_by_address(registryAddress: str):

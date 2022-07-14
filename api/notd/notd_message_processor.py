@@ -10,7 +10,7 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
-from notd.messages import UpdateCollectionAttributesMessageContent
+from notd.messages import UpdateAllCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
@@ -69,12 +69,12 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
             await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
             return
-        if message.command == UpdateCollectionAttributesMessageContent.get_command():
+        if message.command == UpdateAllCollectionTokenAttributesMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
                 logging.info(f'Skipping UPDATE_ATTRIBUTE_FOR_ALL_TOKENS from more than 10 minutes ago')
                 return
-            messageContent = UpdateCollectionAttributesMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection_attributes()
+            messageContent = UpdateAllCollectionTokenAttributesMessageContent.parse_obj(message.content)
+            await self.notdManager.update_all_collection_token_attributes()
             return
         if message.command == UpdateCollectionTokenAttributesMessageContent.get_command():
             messageContent = UpdateCollectionTokenAttributesMessageContent.parse_obj(message.content)

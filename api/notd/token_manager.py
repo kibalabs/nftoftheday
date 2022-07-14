@@ -24,7 +24,7 @@ from notd.date_util import date_hour_from_datetime
 from notd.gallery_manager import SPRITE_CLUB_REGISTRY_ADDRESS
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
-from notd.messages import UpdateCollectionAttributesMessageContent
+from notd.messages import UpdateAllCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
@@ -371,8 +371,8 @@ class TokenManager:
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
-    async def update_collection_attributes_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateCollectionAttributesMessageContent().to_message())
+    async def update_all_collection_token_attributes_deferred(self) -> None:
+        await self.tokenQueue.send_message(message=UpdateAllCollectionTokenAttributesMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
@@ -406,7 +406,7 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
-    async def update_collection_attributes(self) -> None:
+    async def update_all_collection_token_attributes(self) -> None:
         startDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='token_attributes')
         latestProcessedDate = latestUpdate.date
