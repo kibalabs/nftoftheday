@@ -256,6 +256,7 @@ class Airdrop:
     claimTokenKey: Token
     claimUrl: str
 
+
 @dataclasses.dataclass
 class RetrievedTokenAttribute:
     registryAddress: str
@@ -263,11 +264,13 @@ class RetrievedTokenAttribute:
     name: str
     value: Optional[str]
 
+
 @dataclasses.dataclass
 class TokenAttribute(RetrievedTokenAttribute):
     tokenAttributeId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
 
 @dataclasses.dataclass
 class RetrievedTokenListing:
