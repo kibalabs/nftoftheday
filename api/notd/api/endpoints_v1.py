@@ -177,8 +177,8 @@ class GetCollectionAttributesResponse(BaseModel):
 class GetCollectionAttributesRequest(BaseModel):
     pass
 
-class GetCollectionTokenResponse(BaseModel):
-    pass
+class GetCollectionTokensResponse(BaseModel):
+    tokens: List[ApiCollectionToken]
 
-class GetCollectionTokenRequest(BaseModel):
+class GetCollectionTokensRequest(BaseModel):
     pass

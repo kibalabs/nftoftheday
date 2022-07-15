@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Request
+from notd.api.endpoints_v1 import GetCollectionTokensResponse
 
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
@@ -24,12 +25,9 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
 
     @router.get('/collections/{registryAddress}/tokens')
     async def get_collection_tokens(request: Request, registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        # print(dict(request._query_params))
         queryStringDict = dict(request.query_params)
-        print(queryStringDict)
         limit = limit if limit is not None else 20
         offset = offset if offset is not None else 0
         tokens = await galleryManager.get_tokens_with_attributes(registryAddress=registryAddress, queryStringDict=queryStringDict, limit=limit, offset=offset)
-        print(tokens)
-        # return GetCollectionTokenRecentSalesResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
+        return GetCollectionTokensResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
     return router

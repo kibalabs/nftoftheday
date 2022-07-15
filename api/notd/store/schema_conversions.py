@@ -167,6 +167,6 @@ def token_attributes_from_row(row: Mapping) -> TokenAttribute:
         updatedDate=row[TokenAttributesTable.c.updatedDate],
         registryAddress=row[TokenAttributesTable.c.registryAddress],
         tokenId=row[TokenAttributesTable.c.tokenId],
-        attributeName=row[TokenAttributesTable.c.attributeName],
-        attributeValue=row[TokenAttributesTable.c.attributeValue],
+        name=row[TokenAttributesTable.c.name],
+        value=row[TokenAttributesTable.c.value],
     )
