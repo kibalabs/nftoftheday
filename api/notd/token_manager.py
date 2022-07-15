@@ -480,7 +480,7 @@ class TokenManager:
             await self.saver.create_token_attributes(retrievedTokenAttributes=tokenAttributes, connection=connection)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
-        await self.tokenQueue.send_messages(messages=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
+        await self.tokenQueue.send_message(message=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
