@@ -444,10 +444,6 @@ class TokenManager:
         await self.tokenQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
 
     async def update_token_attributes_for_all_collections(self) -> None:
-        for address in GALLERY_COLLECTIONS:
-            await self.update_token_attributes_for_collection(address=address)
-
-    async def update_token_attributes_for_collection(self, address: str) -> None:
         startDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='token_attributes')
         latestProcessedDate = latestUpdate.date
@@ -455,12 +451,12 @@ class TokenManager:
         updatedTokenMetadatasQuery = (
             TokenMetadatasTable.select()
             .with_only_columns([TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId])
-            .where(TokenMetadatasTable.c.registryAddress == address)
+            .where(TokenMetadatasTable.c.registryAddress._in(GALLERY_COLLECTIONS))
             .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
         )
         updatedTokenMetadatasQueryResult = await self.retriever.database.execute(query=updatedTokenMetadatasQuery)
         updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
-        logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} tokens in collection {address}')
+        logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} changed tokens')
         messages = [UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
