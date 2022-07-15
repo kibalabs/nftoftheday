@@ -10,12 +10,12 @@ from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
-from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
-from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
+from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateListingsForAllCollections
 from notd.messages import UpdateListingsForCollection
+from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
 
