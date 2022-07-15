@@ -491,7 +491,7 @@ class Saver(CoreSaver):
             TokenAttributesTable.c.value.key: retrievedTokenAttribute.value,
         }
 
-    async def create_token_attributes(self, retrievedTokenAttribute: RetrievedTokenAttribute, connection: Optional[DatabaseConnection] = None) -> int:
+    async def create_token_attribute(self, retrievedTokenAttribute: RetrievedTokenAttribute, connection: Optional[DatabaseConnection] = None) -> int:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = self._get_create_token_attributes_values(retrievedTokenAttribute=retrievedTokenAttribute, createdDate=createdDate, updatedDate=updatedDate)
