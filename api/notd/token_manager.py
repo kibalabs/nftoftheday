@@ -451,7 +451,7 @@ class TokenManager:
         updatedTokenMetadatasQuery = (
             TokenMetadatasTable.select()
             .with_only_columns([TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId])
-            .where(TokenMetadatasTable.c.registryAddress._in(GALLERY_COLLECTIONS))
+            .where(TokenMetadatasTable.c.registryAddress.in_(GALLERY_COLLECTIONS))
             .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
         )
         updatedTokenMetadatasQueryResult = await self.retriever.database.execute(query=updatedTokenMetadatasQuery)
