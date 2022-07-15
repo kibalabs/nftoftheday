@@ -20,6 +20,7 @@ from notd.manager import NotdManager
 from notd.notd_message_processor import NotdMessageProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.token_attributes_processor import TokenAttributeProcessor
 from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
@@ -60,7 +61,8 @@ async def main():
     collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)
-    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenListingProcessor=tokenListingProcessor)
+    tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenListingProcessor=tokenListingProcessor, tokenAttributeProcessor=tokenAttributeProcessor)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)

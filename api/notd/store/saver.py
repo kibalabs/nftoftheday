@@ -18,7 +18,6 @@ from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
-from notd.model import TokenAttribute
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
 from notd.model import UserInteraction
