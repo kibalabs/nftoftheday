@@ -14,6 +14,7 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
+from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
@@ -24,6 +25,7 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
+from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -475,6 +477,49 @@ class Saver(CoreSaver):
         if len(values) > 0:
             values[LatestUpdatesTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = LatestUpdatesTable.update(LatestUpdatesTable.c.latestUpdateId == latestUpdateId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    @staticmethod
+    def _get_create_token_attributes_values(retrievedTokenAttribute: RetrievedTokenAttribute, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
+            TokenAttributesTable.c.createdDate.key: createdDate,
+            TokenAttributesTable.c.updatedDate.key: updatedDate,
+            TokenAttributesTable.c.registryAddress.key: retrievedTokenAttribute.registryAddress,
+            TokenAttributesTable.c.tokenId.key: retrievedTokenAttribute.tokenId,
+            TokenAttributesTable.c.name.key: retrievedTokenAttribute.name,
+            TokenAttributesTable.c.value.key: retrievedTokenAttribute.value,
+        }
+
+    async def create_token_attribute(self, retrievedTokenAttribute: RetrievedTokenAttribute, connection: Optional[DatabaseConnection] = None) -> int:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = self._get_create_token_attributes_values(retrievedTokenAttribute=retrievedTokenAttribute, createdDate=createdDate, updatedDate=updatedDate)
+        query = TokenAttributesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenAttributeId = result.inserted_primary_key[0]
+        return tokenAttributeId
+
+    async def create_token_attributes(self, retrievedTokenAttributes: List[RetrievedTokenAttribute], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedTokenAttributes) == 0:
+            return
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        tokenAttributeIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenAttributes, chunkSize=100):
+            values = [self._get_create_token_attributes_values(retrievedTokenAttribute=retrievedTokenAttribute, createdDate=createdDate, updatedDate=updatedDate) for retrievedTokenAttribute in chunk]
+            query = TokenAttributesTable.insert().values(values).returning(TokenAttributesTable.c.tokenAttributeId)
+            rows = await self._execute(query=query, connection=connection)
+            tokenAttributeIds += [row[0] for row in rows]
+        return tokenAttributeIds
+
+    async def delete_token_attribute(self, tokenAttributeId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenAttributesTable.delete().where(TokenAttributesTable.c.tokenAttributeId == tokenAttributeId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_token_attributes(self, tokenAttributeIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(tokenAttributeIds) == 0:
+            return
+        query = TokenAttributesTable.delete().where(TokenAttributesTable.c.tokenAttributeId.in_(tokenAttributeIds))
         await self._execute(query=query, connection=connection)
 
     @staticmethod

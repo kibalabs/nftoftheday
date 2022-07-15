@@ -155,6 +155,19 @@ LatestUpdatesTable = sqlalchemy.Table(
 )
 
 
+TokenAttributesTable = sqlalchemy.Table(
+    'tbl_token_attributes',
+    metadata,
+    sqlalchemy.Column(key='tokenAttributeId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='value', name='value', type_=sqlalchemy.Text, nullable=True),
+)
+
+
 LatestTokenListingsTable = sqlalchemy.Table(
     'tbl_latest_token_listings',
     metadata,

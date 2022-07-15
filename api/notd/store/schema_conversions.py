@@ -4,6 +4,7 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
+from notd.model import TokenAttribute
 from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
@@ -14,6 +15,7 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
+from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
@@ -166,6 +168,18 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
         key=row[LatestUpdatesTable.c.key],
         name=row[LatestUpdatesTable.c.name],
         date=row[LatestUpdatesTable.c.date],
+    )
+
+
+def token_attributes_from_row(row: Mapping) -> TokenAttribute:
+    return TokenAttribute(
+        tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
+        createdDate=row[TokenAttributesTable.c.createdDate],
+        updatedDate=row[TokenAttributesTable.c.updatedDate],
+        registryAddress=row[TokenAttributesTable.c.registryAddress],
+        tokenId=row[TokenAttributesTable.c.tokenId],
+        name=row[TokenAttributesTable.c.name],
+        value=row[TokenAttributesTable.c.value],
     )
 
 

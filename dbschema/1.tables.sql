@@ -210,12 +210,9 @@ CREATE INDEX tbl_latest_updates_key ON tbl_latest_updates (key);
 CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);
 
 CREATE TABLE tbl_latest_token_listings (
-    id BIGSERIAL PRIMARY KEY,
-    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    offerer_address TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
-    offerer_address TEXT NOT NULL,
     start_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     end_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     is_value_native BOOLEAN NOT NULL,
@@ -227,3 +224,20 @@ CREATE UNIQUE INDEX tbl_latest_token_listings_source_registry_address_token_id_o
 CREATE INDEX tbl_latest_token_listings_registry_address_token_id_offerer_address ON tbl_latest_token_listings (registry_address, token_id, offerer_address);
 CREATE INDEX tbl_latest_token_listings_created_date ON tbl_latest_token_listings (created_date);
 CREATE INDEX tbl_latest_token_listings_updated_date ON tbl_latest_token_listings (updated_date);
+
+CREATE TABLE tbl_token_attributes (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    value TEXT
+);
+CREATE UNIQUE INDEX tbl_token_attributes_registry_address_token_id_name on tbl_token_attributes (registry_address, token_id, name);
+CREATE INDEX tbl_token_attributes_registry_address_token_id_name_value on tbl_token_attributes (registry_address, token_id, name, value);
+CREATE INDEX tbl_token_attributes_created_date ON tbl_token_attributes (created_date);
+CREATE INDEX tbl_token_attributes_updated_date ON tbl_token_attributes (updated_date);
+CREATE INDEX tbl_token_attributes_registry_address ON tbl_token_attributes (registry_address);
+CREATE INDEX tbl_token_attributes_name ON tbl_token_attributes (name);
+CREATE INDEX tbl_token_attributes_value ON tbl_token_attributes (value);
