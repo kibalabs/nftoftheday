@@ -234,7 +234,7 @@ class Retriever(CoreRetriever):
         tokenAttributes = [token_attributes_from_row(row) for row in result]
         return tokenAttributes
 
-    async def get_latest_update_by_key_name(self, key: str, name: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:  # pylint: disable=invalid-name
+    async def get_latest_update_by_key_name(self, key: str, name: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:
         query = (
             LatestUpdatesTable.select()
             .where(LatestUpdatesTable.c.key == key)
