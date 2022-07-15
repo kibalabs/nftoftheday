@@ -13,12 +13,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import TokenAttribute
-
-<<<<<<< HEAD
-=======
 from notd.model import TokenListing
-
->>>>>>> main
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
@@ -40,12 +35,7 @@ from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import token_attribute_from_row
-
-<<<<<<< HEAD
-=======
 from notd.store.schema_conversions import token_listing_from_row
-
->>>>>>> main
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
