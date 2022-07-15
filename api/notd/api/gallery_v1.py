@@ -21,8 +21,8 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
 
     @router.get('/collections/{registryAddress}/attributes', response_model=GetCollectionAttributesResponse)
     async def get_collection_attributes(registryAddress: str):
-        attributes = await galleryManager.get_collection_attributes(registryAddress=registryAddress)
-        return GetCollectionAttributesResponse(attributes=(await responseBuilder.attributes_from_models(attributes=attributes)))
+        collectionAttributes = await galleryManager.get_collection_attributes(registryAddress=registryAddress)
+        return GetCollectionAttributesResponse(attributes=(await responseBuilder.collection_attributes_from_models(collectionAttributes=collectionAttributes)))
 
     @router.get('/collections/{registryAddress}/tokens')
     async def get_collection_tokens(request: Request, registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):

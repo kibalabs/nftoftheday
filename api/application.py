@@ -63,7 +63,7 @@ tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=e
 collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
 collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
-galleryManager = GalleryManager(ethClient=ethClient)
+galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever)
 openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
 tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)
 tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)

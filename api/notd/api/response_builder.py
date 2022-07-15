@@ -165,8 +165,8 @@ class ResponseBuilder:
             claimUrl=airdrop.claimUrl,
         ) for airdrop in airdrops]
 
-    async def attributes_from_models(self, attributes: Sequence[CollectionAttribute]) -> Sequence[ApiCollectionAttribute]:
+    async def collection_attributes_from_models(self, collectionAttributes: Sequence[CollectionAttribute]) -> Sequence[ApiCollectionAttribute]:
         return [ApiCollectionAttribute(
-            attributeName=attribute.name,
-            attributeValues=attribute.values
-        ) for attribute in attributes]
+            name=attribute.name,
+            values=attribute.values
+        ) for attribute in collectionAttributes]

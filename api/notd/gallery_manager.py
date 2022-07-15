@@ -1,5 +1,6 @@
+from collections import defaultdict
 import json
-from typing import List
+from typing import Dict, List
 from typing import Optional
 
 import sqlalchemy
@@ -42,14 +43,23 @@ class GalleryManager:
         return []
 
     async def get_collection_attributes(self, registryAddress: str) -> List[CollectionAttribute]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         query = (
             TokenAttributesTable.select()
-                .with_only_columns([TokenAttributesTable.c.attributeName, sqlalchemy.func.string_agg(TokenAttributesTable.c.attributeValue, literal_column("', '"))])
-                .group_by(TokenAttributesTable.c.attributeName)
+                .distinct()
+                .with_only_columns([TokenAttributesTable.c.name, TokenAttributesTable.c.value])
+                .where(TokenAttributesTable.c.registryAddress == registryAddress)
+                .order_by(TokenAttributesTable.c.name.asc(), TokenAttributesTable.c.value.asc())
         )
         result = await self.retriever.database.execute(query=query)
-        attributeValues = [CollectionAttribute(attributeName=row[0], attributeValues=list({row[1]})) for row in result]
-        return attributeValues
+        collectionAttributeNameMap: Dict[str, CollectionAttribute] = dict()
+        for name, value in result:
+            collectionAttribute = collectionAttributeNameMap.get(name)
+            if not collectionAttribute:
+                collectionAttribute = CollectionAttribute(name=name, values=[])
+                collectionAttributeNameMap[name] = collectionAttribute
+            collectionAttribute.values.append(value)
+        return list(collectionAttributeNameMap.values())
 
     async def get_tokens_with_attributes(self, registryAddress: str, queryStringDict: dict, limit: int, offset: int):
         query = (TokenAttributesTable.select()
@@ -60,9 +70,9 @@ class GalleryManager:
             query = (query.select()
                 .with_only_columns([TokenAttributesTable.c.registryAddress, TokenAttributesTable.c.tokenId])
                 .where(sqlalchemy.tuple_(TokenAttributesTable.c.registryAddress,TokenAttributesTable.c.tokenId).in_(query.select()))
-                .where(sqlalchemy.tuple_(TokenAttributesTable.c.name,TokenAttributesTable.c.value) == (name, value)))   
+                .where(sqlalchemy.tuple_(TokenAttributesTable.c.name,TokenAttributesTable.c.value) == (name, value)))
         query = query.offset(offset)
-        query = query.limit(limit)     
+        query = query.limit(limit)
         result = await self.retriever.database.execute(query=query)
         tokens = [Token(registryAddress=row[0], tokenId=row[1]) for row in result]
         return tokens
