@@ -22,7 +22,7 @@ class TokenListingProcessor:
                 'token_ids': chunkedTokenIs,
                 'asset_contract_address': registryAddress,
                 'include_orders': True,
-                'limit': 30,
+                'limit': len(chunkedTokenIs),
             }
             response = await self.openseaRequester.get(url='https://api.opensea.io/api/v1/assets', dataDict=queryData, timeout=30)
             responseJson = response.json()

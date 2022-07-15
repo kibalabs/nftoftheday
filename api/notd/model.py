@@ -261,7 +261,7 @@ class RetrievedTokenAttribute:
     registryAddress: str
     tokenId: str
     name: str
-    value: str
+    value: Optional[str]
 
 @dataclasses.dataclass
 class TokenAttribute(RetrievedTokenAttribute):
