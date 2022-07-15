@@ -11,7 +11,7 @@ from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
-from notd.messages import UpdateTokenAttributesForCollectionMessageContent
+from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateListingsForAllCollections
@@ -78,9 +78,9 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateTokenAttributesForAllCollectionsMessageContent.parse_obj(message.content)
             await self.notdManager.update_token_attributes_for_all_collection()
             return
-        if message.command == UpdateTokenAttributesForCollectionMessageContent.get_command():
-            messageContent = UpdateTokenAttributesForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_token_attributes_for_collection(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+        if message.command == UpdateCollectionTokenAttributesMessageContent.get_command():
+            messageContent = UpdateCollectionTokenAttributesMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection_token_attributes(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
             return
         if message.command == UpdateListingsForAllCollections.get_command():
             messageContent = UpdateListingsForAllCollections.parse_obj(message.content)

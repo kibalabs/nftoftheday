@@ -16,7 +16,7 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
-from notd.messages import UpdateTokenAttributesForCollectionMessageContent
+from notd.messages import UpdateCollectionTokenAttributesMessageContent
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
@@ -463,14 +463,14 @@ class TokenManager:
         updatedTokenMetadatasQueryResult = await self.retriever.database.execute(query=updatedTokenMetadatasQuery)
         updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
         logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} tokens in collection {address}')
-        messages = [UpdateTokenAttributesForCollectionMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
+        messages = [UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
     async def update_collection_token_attributes_deferred(self, registryAddress: str, tokenId: str) -> None:
-        await self.tokenQueue.send_messages(messages=UpdateTokenAttributesForCollectionMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
+        await self.tokenQueue.send_messages(messages=UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
-    async def update_token_attributes_for_collection_token(self, registryAddress: str, tokenId: str) -> None:
+    async def update_collection_token_attributes(self, registryAddress: str, tokenId: str) -> None:
         retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
         tokenAttributes = await self.retriever.list_token_attributes(
             fieldFilters=[
@@ -485,12 +485,13 @@ class TokenManager:
                 logging.info(f'Deleting  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
                 await self.saver.delete_token_attributes(connection=connection, tokenAttributeIds=tokenAttributeIdsToDelete)
                 #NOTE Didn't use comprehension cause connection kept closing
+                #TODO Account for only updated collection token attribute
                 for retrievedTokenAttribute in retrievedTokenAttributes:
                     logging.info(f'Saving  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
                     await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, name=retrievedTokenAttribute.name, value=retrievedTokenAttribute.value)
             else:
                 for retrievedTokenAttribute in retrievedTokenAttributes:
-                    logging.info(f'Saving  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
+                    logging.info(f'Creating  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
                     await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, name=retrievedTokenAttribute.name, value=retrievedTokenAttribute.value)
 
             # retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}

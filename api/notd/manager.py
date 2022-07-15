@@ -365,8 +365,8 @@ class NotdManager:
     async def update_collection_token_attributes_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenManager.update_collection_token_attributes_deferred(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def update_token_attributes_for_collection_token(self, registryAddress: str, tokenId: str) -> None:
-        await self.tokenManager.update_token_attributes_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
+    async def update_collection_token_attributes(self, registryAddress: str, tokenId: str) -> None:
+        await self.tokenManager.update_collection_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
         await self.tokenManager.update_latest_listings_for_all_collections_deferred(delaySeconds=delaySeconds)

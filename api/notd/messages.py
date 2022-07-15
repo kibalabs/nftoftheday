@@ -55,8 +55,8 @@ class UpdateActivityForCollectionMessageContent(MessageContent):
 class UpdateTokenAttributesForAllCollectionsMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_ATTRIBUTES_FOR_ALL_COLLECTIONS'
 
-class UpdateTokenAttributesForCollectionMessageContent(MessageContent):
-    _COMMAND = 'UPDATE_TOKEN_ATTRIBUTES_FOR_COLLECTION'
+class UpdateCollectionTokenAttributesMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_TOKEN_ATTRIBUTES'
     registryAddress: str
     tokenId: str
 
