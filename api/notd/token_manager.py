@@ -467,7 +467,7 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
-    async def update_token_attributes_for_collection_token_deferred(self, registryAddress: str, tokenId: str) -> None:
+    async def update_collection_token_attributes_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenQueue.send_messages(messages=UpdateTokenAttributesForCollectionMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_attributes_for_collection_token(self, registryAddress: str, tokenId: str) -> None:
