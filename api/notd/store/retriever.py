@@ -222,18 +222,6 @@ class Retriever(CoreRetriever):
         latestUpdates = [latest_update_from_row(row) for row in result]
         return latestUpdates
 
-    async def list_token_attributes(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenAttribute]:
-        query = TokenAttributesTable.select()
-        if fieldFilters:
-            query = self._apply_field_filters(query=query, table=TokenAttributesTable, fieldFilters=fieldFilters)
-        if orders:
-            query = self._apply_orders(query=query, table=TokenAttributesTable, orders=orders)
-        if limit:
-            query = query.limit(limit)
-        result = await self.database.execute(query=query, connection=connection)
-        tokenAttributes = [token_attributes_from_row(row) for row in result]
-        return tokenAttributes
-
     async def get_latest_update_by_key_name(self, key: str, name: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:
         query = (
             LatestUpdatesTable.select()
@@ -246,6 +234,19 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'Latest Update  with key:{key} and name;{name} not found')
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
+    
+
+    async def list_token_attributes(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenAttribute]:
+        query = TokenAttributesTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenAttributesTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenAttributesTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenAttributes = [token_attributes_from_row(row) for row in result]
+        return tokenAttributes
 
     async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenListing]:
         query = LatestTokenListingsTable.select()

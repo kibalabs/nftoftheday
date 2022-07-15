@@ -13,7 +13,7 @@ from notd.store.schema import TokenMetadatasTable
 
 class TokenAttributeProcessor:
 
-    def __init__(self,retriever: Retriever) -> None:
+    def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
 
     async def get_token_attributes(self, registryAddress: str, tokenId: str) -> List[TokenAttribute]:
