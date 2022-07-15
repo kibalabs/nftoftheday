@@ -91,7 +91,7 @@ class TradedToken:
     transferCount: int
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class Token:
     registryAddress: str
     tokenId: str

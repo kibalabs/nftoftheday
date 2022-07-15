@@ -5,6 +5,8 @@ from typing import Optional
 import sqlalchemy
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
+from core.store.retriever import StringFieldFilter
+
 from sqlalchemy import literal_column
 
 from notd.model import Airdrop
@@ -50,24 +52,36 @@ class GalleryManager:
         attributeValues = [CollectionAttribute(attributeName=row[0], attributeValues=list({row[1]})) for row in result]
         return attributeValues
 
-    async def get_tokens_with_attributes(self, registryAddress: str, attributeName: Optional[str], attributeValue: Optional[str],attributeName2: Optional[str], attributeValue2: Optional[str], limit: int, offset: int):
-        firstQuery = (
-            TokenAttributesTable.select()
-                .with_only_columns([TokenAttributesTable.c.tokenId])
-                .where(TokenAttributesTable.c.attributeName == attributeName)
-                .where(TokenAttributesTable.c.attributeValue == attributeValue)
-                .subquery()
-        )
-        query = (
-            TokenAttributesTable.select()
-                .with_only_columns([TokenAttributesTable.c.registryAddress, TokenAttributesTable.c.tokenId])
-                .where(TokenAttributesTable.c.tokenId.in_(sqlalchemy.select(firstQuery)))
-                .where(TokenAttributesTable.c.attributeName == attributeName2)
-                .where(TokenAttributesTable.c.attributeValue == attributeValue2)
-                .offset(offset)
-                .limit(limit)
-        )
+    async def get_tokens_with_attributes(self, registryAddress: str, queryStringDict: dict, limit: int, offset: int):
+        query = TokenAttributesTable.select()
+        query = query.with_only_columns([TokenAttributesTable.c.registryAddress, TokenAttributesTable.c.tokenId])
+        query = query.where(sqlalchemy.tuple_(TokenAttributesTable.c.attributeName,TokenAttributesTable.c.attributeValue) == ("Blemish", "Tears"))
+        queryStringDict.popitem()
+        for name, value in queryStringDict.items():
+            print(name,value)
+            query = query.where(sqlalchemy.tuple_(TokenAttributesTable.c.registryAddress,TokenAttributesTable.c.tokenId).in_(query)).where(sqlalchemy.tuple_(TokenAttributesTable.c.attributeName,TokenAttributesTable.c.attributeValue) == ("Background", "Green"))
+            
+        #print(query)
+        query = query.offset(offset)
+        #query = query.limit(limit)
+        
+        # firstQuery = (
+        #     TokenAttributesTable.select()
+        #         .with_only_columns([TokenAttributesTable.c.tokenId])
+        #         .where(TokenAttributesTable.c.attributeName == attributeName)
+        #         .where(TokenAttributesTable.c.attributeValue == attributeValue)
+        #         .subquery()
+        # )
+        # query = (
+        #     TokenAttributesTable.select()
+        #         .with_only_columns([TokenAttributesTable.c.registryAddress, TokenAttributesTable.c.tokenId])
+        #         .where(TokenAttributesTable.c.tokenId.in_(sqlalchemy.select(firstQuery)))
+        #         .where(TokenAttributesTable.c.attributeName == attributeName2)
+        #         .where(TokenAttributesTable.c.attributeValue == attributeValue2)
+        #         .offset(offset)
+        #         .limit(limit)
+        # )
         result = await self.retriever.database.execute(query=query)
         tokens = [Token(registryAddress=row[0], tokenId=row[1]) for row in result]
-        print(tokens)
-        return tokens
+        print(len(tokens))
+        # return tokens
