@@ -26,5 +26,5 @@ class TokenAttributeProcessor:
         token = tokenMetadata[0]
         tokenAttributes = []
         for attribute in token.attributes:
-            tokenAttributes += [RetrievedTokenAttribute(registryAddress=token.registryAddress, tokenId=token.tokenId, attributeName=attribute.get("trait_type"), attributeValue=attribute.get("value"))]
+            tokenAttributes += [RetrievedTokenAttribute(registryAddress=token.registryAddress, tokenId=token.tokenId, name=attribute.get("trait_type"), value=attribute.get("value"))]
         return tokenAttributes

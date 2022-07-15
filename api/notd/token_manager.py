@@ -384,9 +384,6 @@ class TokenManager:
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
-    async def update_token_attributes_for_all_collections_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
-
     async def update_activity_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
@@ -419,28 +416,6 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
-    async def update_token_attributes_for_all_collection(self) -> None:
-        for _, address in enumerate(GALLERY_COLLECTIONS):
-            await self.update_token_attributes_for_all_collection_deferred(address=address)
-
-    async def update_token_attributes_for_all_collection_deferred(self, address: str) -> None:
-        startDate = date_util.datetime_from_now()
-        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='token_attributes')
-        latestProcessedDate = latestUpdate.date
-        logging.info(f'Finding changed tokens since {latestProcessedDate}')
-        updatedTokenMetadatasQuery = (
-            TokenMetadatasTable.select()
-            .with_only_columns([TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId])
-            .where(TokenMetadatasTable.c.registryAddress == address)
-            .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
-        )
-        updatedTokenMetadatasQueryResult = await self.retriever.database.execute(query=updatedTokenMetadatasQuery)
-        updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
-        logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} tokens in collection {address}')
-        messages = [UpdateTokenAttributesForCollectionMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
-        await self.tokenQueue.send_messages(messages=messages)
-        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
-
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
         startDate = date_hour_from_datetime(startDate)
@@ -466,39 +441,70 @@ class TokenManager:
                 else:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
-    async def update_token_attributes_for_collection_deferred(self, registryAddress: str, tokenId: str) -> None:
+
+    async def update_token_attributes_for_all_collections_deferred(self) -> None:
+        await self.tokenQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
+
+    async def update_token_attributes_for_all_collection(self) -> None:
+        for _, address in enumerate(GALLERY_COLLECTIONS):
+            await self.update_token_attributes_for_collection(address=address)
+
+    async def update_token_attributes_for_collection(self, address: str) -> None:
+        startDate = date_util.datetime_from_now()
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='token_attributes')
+        latestProcessedDate = latestUpdate.date
+        logging.info(f'Finding changed tokens since {latestProcessedDate}')
+        updatedTokenMetadatasQuery = (
+            TokenMetadatasTable.select()
+            .with_only_columns([TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId])
+            .where(TokenMetadatasTable.c.registryAddress == address)
+            .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
+        )
+        updatedTokenMetadatasQueryResult = await self.retriever.database.execute(query=updatedTokenMetadatasQuery)
+        updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
+        logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} tokens in collection {address}')
+        messages = [UpdateTokenAttributesForCollectionMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
+        await self.tokenQueue.send_messages(messages=messages)
+        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
+
+    async def update_token_attributes_for_collection_token_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenQueue.send_messages(messages=UpdateTokenAttributesForCollectionMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
-    async def update_token_attributes_for_collection(self, registryAddress: str, tokenId: str) -> None:
+    async def update_token_attributes_for_collection_token(self, registryAddress: str, tokenId: str) -> None:
+        retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
+        tokenAttributes = await self.retriever.list_token_attributes(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
+            ]
+        )
         async with self.saver.create_transaction() as connection:
-            retrievedTokenAttributes: List[RetrievedTokenAttribute] = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
-            retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
-            tokenAttributes = await self.retriever.list_token_attributes(
-                fieldFilters=[
-                    StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId),
-                ]
-            )
             if tokenAttributes:
-                existingTokenAttributesTuples = {(existingTokenAttribute.registryAddress, existingTokenAttribute.tokenId, existingTokenAttribute.attributeName): existingTokenAttribute.tokenAttributeId for existingTokenAttribute in tokenAttributes }
-                tokenAttributeIdsToDelete = []
-                for uniqueTokenAttributeTuple, tokenAttributeId in existingTokenAttributesTuples.items():
-                    if uniqueTokenAttributeTuple in retrievedTokenAttributesTuple.keys():
-                        continue
-                    tokenAttributeIdsToDelete.append(tokenAttributeId)
+                existingTokenAttributesTuples = {(existingTokenAttribute.registryAddress, existingTokenAttribute.tokenId, existingTokenAttribute.name): existingTokenAttribute.tokenAttributeId for existingTokenAttribute in tokenAttributes }
+                tokenAttributeIdsToDelete = (list(existingTokenAttributesTuples.values()))
                 logging.info(f'Deleting  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
                 await self.saver.delete_token_attributes(connection=connection, tokenAttributeIds=tokenAttributeIdsToDelete)
+                #NOTE Didn't use comprehension cause connection kept closing
                 for retrievedTokenAttribute in retrievedTokenAttributes:
-                    existingTokenAttribute = [tokenAttribute for tokenAttribute in tokenAttributes if tokenAttribute.attributeName == retrievedTokenAttribute.attributeName]
-                    if len(existingTokenAttribute) > 0:
-                        if retrievedTokenAttribute.attributeValue == existingTokenAttribute[0].attributeValue:
-                            logging.info(f"Skipping registryAddress {registryAddress}, tokenId {tokenId}, {retrievedTokenAttribute.attributeName} because of no change")
-                        await self.saver.update_token_attribute(connection=connection, tokenAttributeId=existingTokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
-                    else:
-                        await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+                    logging.info(f'Saving  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
+                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, name=retrievedTokenAttribute.name, value=retrievedTokenAttribute.value)
             else:
                 for retrievedTokenAttribute in retrievedTokenAttributes:
-                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+                    logging.info(f'Saving  {len(tokenAttributeIdsToDelete)} attributes for registryAddress: {registryAddress}, tokenId: {tokenId}')
+                    await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, name=retrievedTokenAttribute.name, value=retrievedTokenAttribute.value)
+
+            # retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
+            #     for retrievedTokenAttribute in retrievedTokenAttributes:
+            #         existingTokenAttribute = [tokenAttribute for tokenAttribute in tokenAttributes if tokenAttribute.attributeName == retrievedTokenAttribute.attributeName]
+            #         if len(existingTokenAttribute) > 0:
+            #             if retrievedTokenAttribute.attributeValue == existingTokenAttribute[0].attributeValue:
+            #                 logging.info(f"Skipping registryAddress {registryAddress}, tokenId {tokenId}, {retrievedTokenAttribute.attributeName} because of no change")
+            #             await self.saver.update_token_attribute(connection=connection, tokenAttributeId=existingTokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+            #         else:
+            #             await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
+            # else:
+            #     for retrievedTokenAttribute in retrievedTokenAttributes:
+            #         await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
         await self.tokenQueue.send_messages(messages=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)

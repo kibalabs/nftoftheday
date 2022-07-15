@@ -260,8 +260,8 @@ class Airdrop:
 class RetrievedTokenAttribute:
     registryAddress: str
     tokenId: str
-    attributeName: str
-    attributeValue: str
+    name: str
+    value: str
 
 @dataclasses.dataclass
 class TokenAttribute(RetrievedTokenAttribute):

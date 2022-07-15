@@ -95,7 +95,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.update_activity_for_all_collections_deferred()
         return UpdateActivityForAllCollectionsDeferredResponse()
 
-    @router.post('/collections/update-all-token-attributes-deferred', response_model=UpdateTokenAttributesForAllCollectionsDeferredResponse)
+    @router.post('/collections/update-token-attributes-deferred', response_model=UpdateTokenAttributesForAllCollectionsDeferredResponse)
     async def update_token_attributes_for_all_collections_deferred():
         await notdManager.update_token_attributes_for_all_collections_deferred()
         return UpdateTokenAttributesForAllCollectionsDeferredResponse()
