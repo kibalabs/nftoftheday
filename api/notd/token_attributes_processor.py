@@ -2,8 +2,6 @@ from typing import List
 
 from notd.model import RetrievedTokenAttribute
 from notd.store.retriever import Retriever
-from notd.model import RetrievedTokenAttribute
-from notd.store.retriever import Retriever
 
 
 class TokenAttributeProcessor:

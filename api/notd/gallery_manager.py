@@ -3,10 +3,9 @@ from typing import List
 from typing import Optional
 
 import sqlalchemy
+from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
-from core.store.retriever import StringFieldFilter
-
 from sqlalchemy import literal_column
 
 from notd.model import Airdrop

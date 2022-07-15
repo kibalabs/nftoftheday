@@ -11,7 +11,6 @@ from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateAllCollectionTokenAttributesMessageContent
-from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent

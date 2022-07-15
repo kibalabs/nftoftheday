@@ -30,7 +30,6 @@ from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
-from notd.api.endpoints_v1 import UpdateAllCollectionTokenAttributesDeferredResponse
 from notd.api.endpoints_v1 import UpdateCollectionRequest
 from notd.api.endpoints_v1 import UpdateCollectionResponse
 from notd.api.endpoints_v1 import UpdateCollectionTokenRequest
