@@ -76,9 +76,9 @@ async def main():
     await tokenQueue.connect()
     try:
         while True:
-            hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=3, longPollSeconds=1, shouldProcessInParallel=True)
-            if hasProcessedWork:
-                continue
+            # hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=3, longPollSeconds=1, shouldProcessInParallel=True)
+            # if hasProcessedWork:
+            #     continue
             hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=True)
             if hasProcessedToken:
                 continue
