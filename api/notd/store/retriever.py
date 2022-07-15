@@ -235,7 +235,6 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'Latest Update  with key:{key} and name;{name} not found')
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
-    
 
     async def list_token_attributes(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenAttribute]:
         query = TokenAttributesTable.select()
