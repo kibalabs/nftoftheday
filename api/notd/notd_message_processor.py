@@ -13,7 +13,11 @@ from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateAllCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionMessageContent
+from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
+from notd.messages import UpdateListingsForAllCollections
+from notd.messages import UpdateListingsForCollection
+from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
 
@@ -30,14 +34,14 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == ReceiveNewBlocksMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
-                logging.info(f'Skipping RECEIVE_NEW_BLOCKS from more than 5 minutes ago')
+                logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
             messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
             await self.notdManager.receive_new_blocks()
             return
         if message.command == ReprocessBlocksMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
-                logging.info(f'Skipping REPROCESS_OLD_BLOCKS from more than 5 minutes ago')
+                logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
             messageContent = ReprocessBlocksMessageContent.parse_obj(message.content)
             await self.notdManager.reprocess_old_blocks()
@@ -60,7 +64,7 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == UpdateActivityForAllCollectionsMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
-                logging.info(f'Skipping UPDATE_ACTIVITY_FOR_COLLECTION from more than 10 minutes ago')
+                logging.info(f'Skipping {message.command} from more than 10 minutes ago')
                 return
             messageContent = UpdateActivityForAllCollectionsMessageContent.parse_obj(message.content)
             await self.notdManager.update_activity_for_all_collections()
@@ -69,15 +73,26 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
             await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
             return
-        if message.command == UpdateAllCollectionTokenAttributesMessageContent.get_command():
-            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
-                logging.info(f'Skipping UPDATE_ATTRIBUTE_FOR_ALL_TOKENS from more than 10 minutes ago')
+        if message.command == UpdateTokenAttributesForAllCollectionsMessageContent.get_command():
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
+                logging.info(f'Skipping {message.command} from more than 60 minutes ago')
                 return
-            messageContent = UpdateAllCollectionTokenAttributesMessageContent.parse_obj(message.content)
-            await self.notdManager.update_all_collection_token_attributes()
+            messageContent = UpdateTokenAttributesForAllCollectionsMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_attributes_for_all_collections()
             return
         if message.command == UpdateCollectionTokenAttributesMessageContent.get_command():
             messageContent = UpdateCollectionTokenAttributesMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection_token_attribute(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+            await self.notdManager.update_collection_token_attributes(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+            return
+        if message.command == UpdateListingsForAllCollections.get_command():
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
+                logging.info(f'Skipping {message.command} from more than 60 minutes ago')
+                return
+            messageContent = UpdateListingsForAllCollections.parse_obj(message.content)
+            await self.notdManager.update_latest_listings_for_all_collections()
+            return
+        if message.command == UpdateListingsForCollection.get_command():
+            messageContent = UpdateListingsForCollection.parse_obj(message.content)
+            await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
             return
         raise KibaException(message='Message was unhandled')

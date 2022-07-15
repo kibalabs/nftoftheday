@@ -24,33 +24,49 @@ class UpdateTokenMetadataMessageContent(MessageContent):
     tokenId: str
     shouldForce: Optional[bool]
 
+
 class UpdateTokenOwnershipMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_OWNERSHIP'
     registryAddress: str
     tokenId: str
+
 
 class UpdateCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION'
     address: str
     shouldForce: Optional[bool]
 
+
 class UpdateCollectionTokensMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION_TOKENS'
     address: str
     shouldForce: Optional[bool]
 
+
 class UpdateActivityForAllCollectionsMessageContent(MessageContent):
     _COMMAND = 'UPDATE_ACTIVITY_FOR_ALL_COLLECTIONS'
+
 
 class UpdateActivityForCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION_ACTIVITY'
     address: str
     startDate: datetime.datetime
 
-class UpdateAllCollectionTokenAttributesMessageContent(MessageContent):
-    _COMMAND = 'UPDATE_ALL_COLLECTION_TOKEN_ATTRIBUTES'
+
+class UpdateTokenAttributesForAllCollectionsMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_ATTRIBUTES_FOR_ALL_COLLECTIONS'
+
 
 class UpdateCollectionTokenAttributesMessageContent(MessageContent):
-    _COMMAND = 'UPDATE_COLLECTION_TOKEN_ATTRIBUTE'
+    _COMMAND = 'UPDATE_COLLECTION_TOKEN_ATTRIBUTES'
     registryAddress: str
     tokenId: str
+
+
+class UpdateListingsForAllCollections(MessageContent):
+    _COMMAND = 'UPDATE_LISTINGS_FOR_ALL_COLLECTIONS'
+
+
+class UpdateListingsForCollection(MessageContent):
+    _COMMAND = 'UPDATE_LISTINGS_FOR_COLLECTION'
+    address: str

@@ -56,6 +56,12 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
+class UpdateLatestListingsAllCollectionsDeferredRequest(BaseModel):
+    pass
+
+class UpdateLatestListingsAllCollectionsDeferredResponse(BaseModel):
+    pass
+
 class UpdateActivityForAllCollectionsDeferredRequest(BaseModel):
     pass
 
@@ -165,10 +171,10 @@ class ListCollectionTokenAirdropsRequest(BaseModel):
 class ListCollectionTokenAirdropsResponse(BaseModel):
     airdrops: List[ApiAirdrop]
 
-class UpdateAllCollectionTokenAttributesDeferredRequest(BaseModel):
+class UpdateTokenAttributesForAllCollectionsDeferredRequest(BaseModel):
     pass
 
-class UpdateAllCollectionTokenAttributesDeferredResponse(BaseModel):
+class UpdateTokenAttributesForAllCollectionsDeferredResponse(BaseModel):
     pass
 
 class GetCollectionAttributesResponse(BaseModel):

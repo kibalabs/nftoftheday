@@ -5,6 +5,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import TokenAttribute
+from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
@@ -12,6 +13,7 @@ from notd.model import TokenTransfer
 from notd.model import UserInteraction
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
@@ -27,11 +29,11 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         tokenTransferId=row[TokenTransfersTable.c.tokenTransferId],
         transactionHash=row[TokenTransfersTable.c.transactionHash],
         registryAddress=row[TokenTransfersTable.c.registryAddress],
+        tokenId=row[TokenTransfersTable.c.tokenId],
         fromAddress=row[TokenTransfersTable.c.fromAddress],
         toAddress=row[TokenTransfersTable.c.toAddress],
         operatorAddress=row[TokenTransfersTable.c.operatorAddress],
         contractAddress=row[TokenTransfersTable.c.contractAddress],
-        tokenId=row[TokenTransfersTable.c.tokenId],
         value=row[TokenTransfersTable.c.value],
         amount=row[TokenTransfersTable.c.amount],
         gasLimit=row[TokenTransfersTable.c.gasLimit],
@@ -47,6 +49,7 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
         updatedDate=row[BlocksTable.c.updatedDate],
     )
 
+
 def block_from_row(row: Mapping) -> Block:
     return Block(
         blockId=row[BlocksTable.c.blockId],
@@ -56,6 +59,7 @@ def block_from_row(row: Mapping) -> Block:
         blockHash=row[BlocksTable.c.blockHash],
         blockDate=row[BlocksTable.c.blockDate],
     )
+
 
 def token_metadata_from_row(row: Mapping) -> TokenMetadata:
     return TokenMetadata(
@@ -74,6 +78,7 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
         description=row[TokenMetadatasTable.c.description],
         attributes=row[TokenMetadatasTable.c.attributes],
     )
+
 
 def collection_from_row(row: Mapping) -> Collection:
     return Collection(
@@ -96,6 +101,7 @@ def collection_from_row(row: Mapping) -> Collection:
         doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
     )
 
+
 def token_ownership_from_row(row: Mapping) -> TokenOwnership:
     return TokenOwnership(
         tokenOwnershipId=row[TokenOwnershipsTable.c.tokenOwnershipId],
@@ -108,6 +114,7 @@ def token_ownership_from_row(row: Mapping) -> TokenOwnership:
         transferDate=row[TokenOwnershipsTable.c.transferDate],
         transferTransactionHash=row[TokenOwnershipsTable.c.transferTransactionHash],
     )
+
 
 def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
     return TokenMultiOwnership(
@@ -122,6 +129,7 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
         latestTransferDate=row[TokenMultiOwnershipsTable.c.latestTransferDate],
         latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
     )
+
 
 def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
     return CollectionHourlyActivity(
@@ -138,6 +146,7 @@ def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
         averageValue=row[CollectionHourlyActivityTable.c.averageValue],
     )
 
+
 def user_interaction_from_row(row: Mapping) -> UserInteraction:
     return UserInteraction(
         userInteractionId=row[UserInteractionsTable.c.userInteractionId],
@@ -150,6 +159,7 @@ def user_interaction_from_row(row: Mapping) -> UserInteraction:
         message=row[UserInteractionsTable.c.message],
     )
 
+
 def latest_update_from_row(row: Mapping) -> LatestUpdate:
     return LatestUpdate(
         latestUpdateId=row[LatestUpdatesTable.c.latestUpdateId],
@@ -160,7 +170,8 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
         date=row[LatestUpdatesTable.c.date],
     )
 
-def token_attributes_from_row(row: Mapping) -> TokenAttribute:
+
+def token_attribute_from_row(row: Mapping) -> TokenAttribute:
     return TokenAttribute(
         tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
         createdDate=row[TokenAttributesTable.c.createdDate],
@@ -169,4 +180,21 @@ def token_attributes_from_row(row: Mapping) -> TokenAttribute:
         tokenId=row[TokenAttributesTable.c.tokenId],
         name=row[TokenAttributesTable.c.name],
         value=row[TokenAttributesTable.c.value],
+    )
+
+
+def token_listing_from_row(row: Mapping) -> TokenListing:
+    return TokenListing(
+        tokenListingId=row[LatestTokenListingsTable.c.latestTokenListingId],
+        createdDate=row[LatestTokenListingsTable.c.createdDate],
+        updatedDate=row[LatestTokenListingsTable.c.updatedDate],
+        registryAddress=row[LatestTokenListingsTable.c.registryAddress],
+        tokenId=row[LatestTokenListingsTable.c.tokenId],
+        offererAddress=row[LatestTokenListingsTable.c.offererAddress],
+        startDate=row[LatestTokenListingsTable.c.startDate],
+        endDate=row[LatestTokenListingsTable.c.endDate],
+        isValueNative=row[LatestTokenListingsTable.c.isValueNative],
+        value=row[LatestTokenListingsTable.c.value],
+        source=row[LatestTokenListingsTable.c.source],
+        sourceId=row[LatestTokenListingsTable.c.sourceId],
     )
