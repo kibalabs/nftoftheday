@@ -462,7 +462,7 @@ class TokenManager:
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
     async def update_collection_token_attributes_deferred(self, registryAddress: str, tokenId: str) -> None:
-        await self.tokenQueue.send_messages(messages=UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
+        await self.tokenQueue.send_message(message=UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_collection_token_attributes(self, registryAddress: str, tokenId: str) -> None:
         tokenAttributes = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
@@ -488,7 +488,7 @@ class TokenManager:
             await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=(60 * 5 * index))
 
     async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
-        await self.tokenQueue.send_messages(messages=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
+        await self.tokenQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
         tokenIdsQuery = (
