@@ -493,19 +493,6 @@ class TokenManager:
             logging.info(f'Saving {len(allAttributes)} listings')
             await self.saver.create_latest_token_listings(retrievedTokenListings=allAttributes, connection=connection)
 
-            # retrievedTokenAttributesTuple = {(attribute.registryAddress, attribute.tokenId, attribute.attributeName): attribute.attributeValue for attribute in retrievedTokenAttributes}
-            #     for retrievedTokenAttribute in retrievedTokenAttributes:
-            #         existingTokenAttribute = [tokenAttribute for tokenAttribute in tokenAttributes if tokenAttribute.attributeName == retrievedTokenAttribute.attributeName]
-            #         if len(existingTokenAttribute) > 0:
-            #             if retrievedTokenAttribute.attributeValue == existingTokenAttribute[0].attributeValue:
-            #                 logging.info(f"Skipping registryAddress {registryAddress}, tokenId {tokenId}, {retrievedTokenAttribute.attributeName} because of no change")
-            #             await self.saver.update_token_attribute(connection=connection, tokenAttributeId=existingTokenAttribute[0].tokenAttributeId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
-            #         else:
-            #             await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
-            # else:
-            #     for retrievedTokenAttribute in retrievedTokenAttributes:
-            #         await self.saver.create_token_attribute(connection=connection, registryAddress=registryAddress, tokenId=tokenId, attributeName=retrievedTokenAttribute.attributeName, attributeValue=retrievedTokenAttribute.attributeValue)
-
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
         await self.tokenQueue.send_messages(messages=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
 
