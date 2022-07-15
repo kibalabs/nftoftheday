@@ -16,15 +16,9 @@ class TokenAttributeProcessor:
         self.retriever = retriever
 
     async def get_token_attributes(self, registryAddress: str, tokenId: str) -> List[TokenAttribute]:
-        tokenMetadata: List[TokenMetadata] = await self.retriever.list_token_metadatas(
-            fieldFilters=[
-                StringFieldFilter(TokenMetadatasTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(TokenMetadatasTable.c.tokenId.key, eq=tokenId),
-            ]
-        )
-        token = tokenMetadata[0]
+        tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         tokenAttributes = []
-        for attribute in token.attributes:
+        for attribute in tokenMetadata.attributes:
             name, value = list(attribute.values())[0], list(attribute.values())[1]
-            tokenAttributes += [RetrievedTokenAttribute(registryAddress=token.registryAddress, tokenId=token.tokenId, name=name, value=value)]
+            tokenAttributes += [RetrievedTokenAttribute(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, name=name, value=value)]
         return tokenAttributes

@@ -9,6 +9,7 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
+from notd.model import RetrievedTokenAttribute
 
 from notd.model import Block
 from notd.model import Collection
@@ -479,39 +480,41 @@ class Saver(CoreSaver):
         query = LatestUpdatesTable.update(LatestUpdatesTable.c.latestUpdateId == latestUpdateId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_attribute(self, registryAddress: str, tokenId: str, name: Optional[str], value: Optional[str], connection: Optional[DatabaseConnection] = None) -> TokenAttribute:
-        createdDate = date_util.datetime_from_now()
-        updatedDate = createdDate
-        values = {
+    @staticmethod
+    def _get_create_token_attributes_values(retrievedTokenAttribute: RetrievedTokenAttribute, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
             TokenAttributesTable.c.createdDate.key: createdDate,
             TokenAttributesTable.c.updatedDate.key: updatedDate,
-            TokenAttributesTable.c.registryAddress.key: registryAddress,
-            TokenAttributesTable.c.tokenId.key: tokenId,
-            TokenAttributesTable.c.name.key: name,
-            TokenAttributesTable.c.value.key: value,
+            TokenAttributesTable.c.registryAddress.key: retrievedTokenAttribute.registryAddress,
+            TokenAttributesTable.c.tokenId.key: retrievedTokenAttribute.tokenId,
+            TokenAttributesTable.c.name.key: retrievedTokenAttribute.name,
+            TokenAttributesTable.c.value.key: retrievedTokenAttribute.value,
         }
+
+    async def create_token_attributes(self, retrievedTokenAttribute: RetrievedTokenAttribute, connection: Optional[DatabaseConnection] = None) -> int:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = self._get_create_token_attributes_values(retrievedTokenAttribute=retrievedTokenAttribute, createdDate=createdDate, updatedDate=updatedDate)
         query = TokenAttributesTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
         tokenAttributeId = result.inserted_primary_key[0]
-        return TokenAttribute(
-            tokenAttributeId=tokenAttributeId,
-            createdDate=createdDate,
-            updatedDate=updatedDate,
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            name=name,
-            value=value,
-        )
+        return tokenAttributeId
 
-    async def update_token_attribute(self, tokenAttributeId: int, name: Optional[str] = _EMPTY_STRING, value: Optional[str] = _EMPTY_STRING, connection: Optional[DatabaseConnection] = None) -> None:
-        values = {}
-        if name != _EMPTY_STRING:
-            values[TokenAttributesTable.c.name.key] = name
-        if value is not None:
-            values[TokenAttributesTable.c.value.key] = value
-        if len(values) > 0:
-            values[TokenAttributesTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = TokenAttributesTable.update(TokenAttributesTable.c.tokenAttributeId == tokenAttributeId).values(values)
+    async def create_token_attributes(self, retrievedTokenAttributes: List[RetrievedTokenAttribute], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedTokenAttributes) == 0:
+            return
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        tokenAttributeIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenAttributes, chunkSize=100):
+            values = [self._get_create_token_attributes_values(retrievedTokenAttribute=retrievedTokenAttribute, createdDate=createdDate, updatedDate=updatedDate) for retrievedTokenAttribute in chunk]
+            query = TokenAttributesTable.insert().values(values).returning(TokenAttributesTable.c.tokenAttributeId)
+            rows = await self._execute(query=query, connection=connection)
+            tokenAttributeIds += [row[0] for row in rows]
+        return tokenAttributeIds
+
+    async def delete_token_attributes(self, tokenAttributeId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenAttributesTable.delete().where(TokenAttributesTable.c.tokenAttributeId == tokenAttributeId)
         await self._execute(query=query, connection=connection)
 
     async def delete_token_attributes(self, tokenAttributeIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
