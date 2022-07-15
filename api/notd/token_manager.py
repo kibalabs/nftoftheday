@@ -488,10 +488,10 @@ class TokenManager:
                 StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId)
             ], connection=connection)
             currentTokenAttributes = [tokenAttributes.tokenAttributeId for tokenAttributes in currentTokenAttributes]
-            logging.info(f'Deleting {len(currentTokenAttributes)} existing listings')
-            await self.saver.delete_latest_token_listings(latestTokenAttributeIds=currentTokenAttributes, connection=connection)
-            logging.info(f'Saving {len(allAttributes)} listings')
-            await self.saver.create_latest_token_listings(retrievedTokenListings=allAttributes, connection=connection)
+            logging.info(f'Deleting {len(currentTokenAttributes)} existing attributes')
+            await self.saver.delete_token_attributes(tokenAttributeIds=currentTokenAttributes, connection=connection)
+            logging.info(f'Saving {len(allAttributes)} attributes')
+            await self.saver.create_token_attributes(retrievedTokenAttributes=allAttributes, connection=connection)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
         await self.tokenQueue.send_messages(messages=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)

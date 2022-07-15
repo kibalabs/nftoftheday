@@ -72,8 +72,8 @@ class NotdMessageProcessor(MessageProcessor):
             await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
             return
         if message.command == UpdateTokenAttributesForAllCollectionsMessageContent.get_command():
-            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
-                logging.info(f'Skipping UPDATE_TOKEN_ATTRIBUTES_FOR_ALL_COLLECTIONS from more than 10 minutes ago')
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
+                logging.info(f'Skipping UPDATE_TOKEN_ATTRIBUTES_FOR_ALL_COLLECTIONS from more than 60 minutes ago')
                 return
             messageContent = UpdateTokenAttributesForAllCollectionsMessageContent.parse_obj(message.content)
             await self.notdManager.update_token_attributes_for_all_collection()

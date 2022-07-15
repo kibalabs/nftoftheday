@@ -513,7 +513,7 @@ class Saver(CoreSaver):
             tokenAttributeIds += [row[0] for row in rows]
         return tokenAttributeIds
 
-    async def delete_token_attributes(self, tokenAttributeId: int, connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_token_attribute(self, tokenAttributeId: int, connection: Optional[DatabaseConnection] = None) -> None:
         query = TokenAttributesTable.delete().where(TokenAttributesTable.c.tokenAttributeId == tokenAttributeId)
         await self._execute(query=query, connection=connection)
 
