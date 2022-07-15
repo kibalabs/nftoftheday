@@ -84,7 +84,7 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == UpdateListingsForAllCollections.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
-                logging.info(f'Skipping UPDATE_TOKEN_ATTRIBUTES_FOR_ALL_COLLECTIONS from more than 60 minutes ago')
+                logging.info(f'Skipping UPDATE_LISTINGS_FOR_ALL_COLLECTIONS from more than 60 minutes ago')
                 return
             messageContent = UpdateListingsForAllCollections.parse_obj(message.content)
             await self.notdManager.update_latest_listings_for_all_collections()
