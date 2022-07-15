@@ -445,7 +445,7 @@ class TokenManager:
     async def update_token_attributes_for_all_collections_deferred(self) -> None:
         await self.tokenQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
 
-    async def update_token_attributes_for_all_collection(self) -> None:
+    async def update_token_attributes_for_all_collections(self) -> None:
         for _, address in enumerate(GALLERY_COLLECTIONS):
             await self.update_token_attributes_for_collection(address=address)
 
