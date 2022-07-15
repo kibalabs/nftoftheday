@@ -469,28 +469,19 @@ class TokenManager:
         await self.tokenQueue.send_messages(messages=UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_collection_token_attributes(self, registryAddress: str, tokenId: str) -> None:
-        tokenIdsQuery = (
-            TokenMetadatasTable.select()
-            .with_only_columns([TokenMetadatasTable.c.tokenId])
-            .where(TokenMetadatasTable.c.registryAddress == registryAddress)
-            .where(TokenMetadatasTable.c.tokenId == tokenId)
-            .order_by(TokenMetadatasTable.c.tokenId.asc())
-        )
-        tokenIdsQueryResult = await self.retriever.database.execute(query=tokenIdsQuery)
-        tokenIds = [tokenId for (tokenId, ) in tokenIdsQueryResult]
-        allAttributes = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
-        logging.info(f'Retrieved {len(tokenIds)} tokens')
+        tokenAttributes = await self.tokenAttributeProcessor.get_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
+        logging.info(f'Retrieved {len(tokenAttributes)} attributes')
         # TODO(krishan711): change this to not delete existing. should add / remove / update changed only
         async with self.saver.create_transaction() as connection:
             currentTokenAttributes = await self.retriever.list_token_attributes(fieldFilters=[
                 StringFieldFilter(fieldName=TokenAttributesTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenAttributesTable.c.tokenId.key, eq=tokenId)
             ], connection=connection)
-            currentTokenAttributes = [tokenAttributes.tokenAttributeId for tokenAttributes in currentTokenAttributes]
-            logging.info(f'Deleting {len(currentTokenAttributes)} existing attributes')
-            await self.saver.delete_token_attributes(tokenAttributeIds=currentTokenAttributes, connection=connection)
-            logging.info(f'Saving {len(allAttributes)} attributes')
-            await self.saver.create_token_attributes(retrievedTokenAttributes=allAttributes, connection=connection)
+            currentTokenAttributeIds = [tokenAttributes.tokenAttributeId for tokenAttributes in currentTokenAttributes]
+            logging.info(f'Deleting {len(currentTokenAttributeIds)} existing attributes')
+            await self.saver.delete_token_attributes(tokenAttributeIds=currentTokenAttributeIds, connection=connection)
+            logging.info(f'Saving {len(tokenAttributes)} attributes')
+            await self.saver.create_token_attributes(retrievedTokenAttributes=tokenAttributes, connection=connection)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
         await self.tokenQueue.send_messages(messages=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
