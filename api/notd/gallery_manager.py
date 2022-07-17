@@ -88,7 +88,6 @@ class GalleryManager:
         if tokenIdIn:
             query = query.where(TokenMetadatasTable.c.tokenId.in_(tokenIdIn))
         if attributeFilters:
-            print('attributeFilters', attributeFilters)
             query = query.join(TokenAttributesTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenAttributesTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenAttributesTable.c.tokenId))
             for attributeFilter in attributeFilters:
                 query = (
