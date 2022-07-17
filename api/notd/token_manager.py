@@ -20,7 +20,8 @@ from core.util import list_util
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
-from notd.date_util import date_hour_from_datetime, generate_clock_hour_intervals
+from notd.date_util import date_hour_from_datetime
+from notd.date_util import generate_clock_hour_intervals
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent

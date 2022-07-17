@@ -1,5 +1,8 @@
 import datetime
-from typing import Iterator, Optional, Tuple
+from typing import Iterator
+from typing import Optional
+from typing import Tuple
+
 from core.util import date_util
 
 
