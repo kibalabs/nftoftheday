@@ -273,6 +273,12 @@ class TokenAttribute(RetrievedTokenAttribute):
 
 
 @dataclasses.dataclass
+class CollectionAttribute:
+    name: str
+    values: List[str]
+
+
+@dataclasses.dataclass
 class RetrievedTokenListing:
     registryAddress: str
     tokenId: str

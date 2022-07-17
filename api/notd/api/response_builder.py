@@ -7,6 +7,7 @@ from core.exceptions import NotFoundException
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
@@ -15,6 +16,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Airdrop
 from notd.model import Collection
+from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
@@ -162,3 +164,9 @@ class ResponseBuilder:
             claimToken=await self.collection_token_from_token_key(tokenKey=airdrop.claimTokenKey),
             claimUrl=airdrop.claimUrl,
         ) for airdrop in airdrops]
+
+    async def collection_attributes_from_models(self, collectionAttributes: Sequence[CollectionAttribute]) -> Sequence[ApiCollectionAttribute]:
+        return [ApiCollectionAttribute(
+            name=attribute.name,
+            values=attribute.values
+        ) for attribute in collectionAttributes]

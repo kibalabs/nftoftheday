@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
@@ -175,3 +176,25 @@ class UpdateTokenAttributesForAllCollectionsDeferredRequest(BaseModel):
 
 class UpdateTokenAttributesForAllCollectionsDeferredResponse(BaseModel):
     pass
+
+class GetCollectionAttributesRequest(BaseModel):
+    pass
+
+class GetCollectionAttributesResponse(BaseModel):
+    attributes: List[ApiCollectionAttribute]
+
+class InQueryParam(BaseModel):
+    fieldName: str
+    values: List[str]
+
+class GetCollectionTokensRequest(BaseModel):
+    limit: Optional[int]
+    offset: Optional[int]
+    minPrice: Optional[int]
+    maxPrice: Optional[int]
+    isListed: Optional[bool]
+    tokenIdIn: Optional[List[str]]
+    attributeFilters: Optional[List[InQueryParam]]
+
+class GetCollectionTokensResponse(BaseModel):
+    tokens: List[ApiCollectionToken]
