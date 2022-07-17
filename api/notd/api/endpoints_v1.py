@@ -187,7 +187,7 @@ class InQueryParam(BaseModel):
     fieldName: str
     values: List[str]
 
-class GetCollectionTokensRequest(BaseModel):
+class QueryCollectionTokensRequest(BaseModel):
     limit: Optional[int]
     offset: Optional[int]
     minPrice: Optional[int]
@@ -196,5 +196,5 @@ class GetCollectionTokensRequest(BaseModel):
     tokenIdIn: Optional[List[str]]
     attributeFilters: Optional[List[InQueryParam]]
 
-class GetCollectionTokensResponse(BaseModel):
+class QueryCollectionTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
