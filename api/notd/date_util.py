@@ -9,7 +9,7 @@ def date_hour_from_datetime(dt: Optional[datetime.datetime] = None) -> datetime.
 
 
 def generate_clock_hour_intervals(startDate: datetime.datetime, endDate: datetime.datetime) -> Iterator[Tuple[datetime.datetime, datetime.datetime]]:
-    # NOTE(krishan711) this has the results that look like [startDate, hourA]...[hourN, hourM]...[hourY, endDate]
+    # NOTE(krishan711) this has the results that look like [startDate, hourA:00]...[hourN:00, hourM:00]...[hourY:00, endDate]
     startDateNextHour = date_util.datetime_from_datetime(dt=date_hour_from_datetime(dt=startDate), hours=1)
     if startDate < startDateNextHour:
         yield (startDate, startDateNextHour)
