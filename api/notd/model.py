@@ -273,6 +273,12 @@ class TokenAttribute(RetrievedTokenAttribute):
 
 
 @dataclasses.dataclass
+class CollectionAttribute:
+    name: str
+    values: List[str]
+
+
+@dataclasses.dataclass
 class RetrievedTokenListing:
     registryAddress: str
     tokenId: str
@@ -290,3 +296,24 @@ class TokenListing(RetrievedTokenListing):
     tokenListingId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
+
+
+@dataclasses.dataclass
+class EqualQueryParam:
+    fieldName: str
+    value: str
+
+
+@dataclasses.dataclass
+class BetweenQueryParam:
+    fieldName: str
+    minimumValue: str
+    maximumValue: str
+
+
+@dataclasses.dataclass
+class QueryParam:
+    fieldName: str
+    operator: str
+    value: str
