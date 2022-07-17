@@ -48,31 +48,31 @@ export class NotdClient extends ServiceClient {
     return response.count;
   };
 
-  public getCollectionTokens = async (registryAddress: string): Promise<Resources.CollectionToken[]> => {
+  public listCollectionTokens = async (registryAddress: string): Promise<Resources.CollectionToken[]> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${registryAddress}/tokens`;
-    const request = new Endpoints.RetrieveCollectionTokensRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveCollectionTokensResponse);
+    const request = new Endpoints.ListCollectionTokensRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTokensResponse);
     return response.tokens;
   };
 
   public getCollectionToken = async (registryAddress: string, tokenId: string): Promise<Resources.CollectionToken> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${registryAddress}/tokens/${tokenId}`;
-    const request = new Endpoints.RetrieveCollectionTokenRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveCollectionTokenResponse);
+    const request = new Endpoints.GetCollectionTokenRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionTokenResponse);
     return response.token;
   };
 
   public getCollection = async (registryAddress: string): Promise<Resources.Collection> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${registryAddress}`;
-    const request = new Endpoints.RetrieveCollectionRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveCollectionResponse);
+    const request = new Endpoints.GetCollectionRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionResponse);
     return response.collection;
   };
 
-  public getCollectionRecentSales = async (address: string): Promise<Resources.TokenTransfer[]> => {
+  public listCollectionRecentSales = async (address: string): Promise<Resources.TokenTransfer[]> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${address}/recent-sales`;
     const request = new Endpoints.GetCollectionRecentSalesRequest();

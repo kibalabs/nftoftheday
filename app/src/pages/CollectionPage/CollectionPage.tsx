@@ -78,7 +78,7 @@ export const CollectionPage = (): React.ReactElement => {
     if (shouldClear) {
       setRecentSales(undefined);
     }
-    notdClient.getCollectionRecentSales(address).then((tokenTransfers: TokenTransfer[]): void => {
+    notdClient.listCollectionRecentSales(address).then((tokenTransfers: TokenTransfer[]): void => {
       setRecentSales(tokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);

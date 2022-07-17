@@ -165,10 +165,10 @@ export class RetrieveTransferCountResponse extends ResponseData {
   };
 }
 
-export class RetrieveCollectionTokensRequest extends RequestData {
+export class ListCollectionTokensRequest extends RequestData {
 }
 
-export class RetrieveCollectionTokensResponse extends ResponseData {
+export class ListCollectionTokensResponse extends ResponseData {
   readonly tokens: Resources.CollectionToken[];
 
   public constructor(tokens: Resources.CollectionToken[]) {
@@ -176,17 +176,17 @@ export class RetrieveCollectionTokensResponse extends ResponseData {
     this.tokens = tokens;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveCollectionTokensResponse => {
-    return new RetrieveCollectionTokensResponse(
+  public static fromObject = (obj: Record<string, unknown>): ListCollectionTokensResponse => {
+    return new ListCollectionTokensResponse(
       (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionToken.fromObject(innerObj)),
     );
   };
 }
 
-export class RetrieveCollectionTokenRequest extends RequestData {
+export class GetCollectionTokenRequest extends RequestData {
 }
 
-export class RetrieveCollectionTokenResponse extends ResponseData {
+export class GetCollectionTokenResponse extends ResponseData {
   readonly token: Resources.CollectionToken;
 
   public constructor(token: Resources.CollectionToken) {
@@ -194,17 +194,17 @@ export class RetrieveCollectionTokenResponse extends ResponseData {
     this.token = token;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveCollectionTokenResponse => {
-    return new RetrieveCollectionTokenResponse(
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionTokenResponse => {
+    return new GetCollectionTokenResponse(
       Resources.CollectionToken.fromObject(obj.token as Record<string, unknown>),
     );
   };
 }
 
-export class RetrieveCollectionRequest extends RequestData {
+export class GetCollectionRequest extends RequestData {
 }
 
-export class RetrieveCollectionResponse extends ResponseData {
+export class GetCollectionResponse extends ResponseData {
   readonly collection: Resources.Collection;
 
   public constructor(collection: Resources.Collection) {
@@ -212,8 +212,8 @@ export class RetrieveCollectionResponse extends ResponseData {
     this.collection = collection;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): RetrieveCollectionResponse => {
-    return new RetrieveCollectionResponse(
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionResponse => {
+    return new GetCollectionResponse(
       Resources.Collection.fromObject(obj.collection as Record<string, unknown>),
     );
   };

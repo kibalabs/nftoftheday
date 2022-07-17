@@ -36,7 +36,7 @@ class CollectionProcessorTestCase(KibaAsyncTestCase):
         await super().asyncTearDown()
 
 
-class TestRetrieveCollection(CollectionProcessorTestCase):
+class TestGetCollection(CollectionProcessorTestCase):
 
     async def test_has_no_contract_uri(self):
         result = await self.collectionProcessor.retrieve_collection('0xE3f92992BB4F0f0D173623A52b2922d65172601d')

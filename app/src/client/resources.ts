@@ -190,6 +190,7 @@ export class Collection {
   };
 }
 
+
 export class CollectionStatistics {
   readonly itemCount: number;
   readonly holderCount: number;
