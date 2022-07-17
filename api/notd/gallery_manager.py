@@ -64,7 +64,7 @@ class GalleryManager:
             collectionAttribute.values.append(value)
         return list(collectionAttributeNameMap.values())
 
-    async def get_collection_tokens(self, registryAddress: str, minPrice: Optional[int], maxPrice: Optional[int], isListed: Optional[bool], tokenIdIn: Optional[List[str]], attributeFilters: Optional[List[InQueryParam]], limit: int, offset: int) -> Sequence[TokenMetadata]:
+    async def query_collection_tokens(self, registryAddress: str, minPrice: Optional[int], maxPrice: Optional[int], isListed: Optional[bool], tokenIdIn: Optional[List[str]], attributeFilters: Optional[List[InQueryParam]], limit: int, offset: int) -> Sequence[TokenMetadata]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         # TODO(krishan711): this shouldn't join on single ownerships for erc1155
         query = (
@@ -94,7 +94,5 @@ class GalleryManager:
                         .where(TokenAttributesTable.c.name == attributeFilter.fieldName)
                         .where(TokenAttributesTable.c.value.in_(attributeFilter.values))
                 )
-        print('query', query)
         tokenMetadatas = await self.retriever.query_token_metadatas(query=query)
-        print('tokenMetadatas', tokenMetadatas)
         return tokenMetadatas
