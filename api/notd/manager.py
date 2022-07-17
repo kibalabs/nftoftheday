@@ -430,12 +430,12 @@ class NotdManager:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
         logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
-        collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
-        logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
-        await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
-        if not shouldSkipProcessingTokens:
-            await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
-            await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
+        # collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
+        # logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
+        # await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
+        # if not shouldSkipProcessingTokens:
+        #     await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
+        #     await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
 
     @staticmethod
     def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, int, str, bool, bool, bool, bool, bool, str]:

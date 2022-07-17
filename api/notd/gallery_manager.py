@@ -1,19 +1,20 @@
 from collections import defaultdict
 import json
-from typing import Dict, List
+from typing import Dict, List, Sequence
 from typing import Optional
 
 import sqlalchemy
-from core.store.retriever import StringFieldFilter
+from core.store.retriever import FieldFilter
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 from sqlalchemy import literal_column
+from notd.api.endpoints_v1 import InQueryParam
 
-from notd.model import Airdrop
+from notd.model import Airdrop, TokenMetadata
 from notd.model import CollectionAttribute
 from notd.model import Token
 from notd.store.retriever import Retriever
-from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenAttributesTable, TokenMetadatasTable, LatestTokenListingsTable, TokenOwnershipsTable
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF'
@@ -61,18 +62,37 @@ class GalleryManager:
             collectionAttribute.values.append(value)
         return list(collectionAttributeNameMap.values())
 
-    async def get_tokens_with_attributes(self, registryAddress: str, queryStringDict: dict, limit: int, offset: int):
-        query = (TokenAttributesTable.select()
-                .with_only_columns([TokenAttributesTable.c.registryAddress, TokenAttributesTable.c.tokenId])
-                .where(TokenAttributesTable.c.registryAddress == registryAddress)
-                .subquery())
-        for name, value in queryStringDict.items():
-            query = (query.select()
-                .with_only_columns([TokenAttributesTable.c.registryAddress, TokenAttributesTable.c.tokenId])
-                .where(sqlalchemy.tuple_(TokenAttributesTable.c.registryAddress,TokenAttributesTable.c.tokenId).in_(query.select()))
-                .where(sqlalchemy.tuple_(TokenAttributesTable.c.name,TokenAttributesTable.c.value) == (name, value)))
-        query = query.offset(offset)
-        query = query.limit(limit)
-        result = await self.retriever.database.execute(query=query)
-        tokens = [Token(registryAddress=row[0], tokenId=row[1]) for row in result]
-        return tokens
+    async def get_collection_tokens(self, registryAddress: str, minPrice: Optional[int], maxPrice: Optional[int], isListed: Optional[bool], tokenIdIn: Optional[List[str]], attributeFilters: Optional[List[InQueryParam]], limit: int, offset: int) -> Sequence[TokenMetadata]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
+        # TODO(krishan711): this shouldn't join on single ownerships for erc1155
+        query = (
+            TokenMetadatasTable.select()
+                .where(TokenMetadatasTable.c.registryAddress == registryAddress)
+                .order_by(TokenMetadatasTable.c.tokenId.asc())
+                .limit(limit)
+                .offset(offset)
+        )
+        if isListed or minPrice or maxPrice:
+            query = (
+                query
+                    .join(LatestTokenListingsTable, TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId)
+                    .join(TokenOwnershipsTable, TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId, TokenOwnershipsTable.c.ownerAddress == LatestTokenListingsTable.c.offererAddress)
+            )
+        if minPrice:
+            query = query.where(LatestTokenListingsTable.c.value >= minPrice)
+        if maxPrice:
+            query = query.where(LatestTokenListingsTable.c.value <= maxPrice)
+        if tokenIdIn:
+            query = query.where(TokenMetadatasTable.c.tokenId.in_(tokenIdIn))
+        if attributeFilters:
+            query = query.join(TokenAttributesTable, TokenMetadatasTable.c.registryAddress == TokenAttributesTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenAttributesTable.c.tokenId)
+            for attributeFilter in attributeFilters:
+                query = (
+                    query
+                        .where(TokenAttributesTable.c.name == attributeFilter.fieldName)
+                        .where(TokenAttributesTable.c.value.in_(attributeFilter.values))
+                )
+        print('query', query)
+        tokenMetadatas = await self.retriever.query_token_metadatas(query=query)
+        print('tokenMetadatas', tokenMetadatas)
+        return tokenMetadatas

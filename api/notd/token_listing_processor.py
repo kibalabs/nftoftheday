@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 from typing import List
 
@@ -93,4 +94,6 @@ class TokenListingProcessor:
                     # NOTE(krishan711): take the lowest one
                     sortedAssetListings = sorted(assetListings, key=lambda listing: listing.value, reverse=False)
                     listings.append(sortedAssetListings[0])
+            # NOTE(krishan711): sleep to avoid opensea limits
+            await asyncio.sleep(0.1)
         return listings

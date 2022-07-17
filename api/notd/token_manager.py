@@ -70,9 +70,10 @@ GALLERY_COLLECTIONS = {
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor, tokenAttributeProcessor: TokenAttributeProcessor, tokenListingProcessor: TokenListingProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor, tokenAttributeProcessor: TokenAttributeProcessor, tokenListingProcessor: TokenListingProcessor):
         self.saver = saver
         self.retriever = retriever
+        self.workQueue = workQueue
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
         self.tokenMetadataProcessor = tokenMetadataProcessor
@@ -382,7 +383,7 @@ class TokenManager:
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
 
     async def update_activity_for_all_collections_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
+        await self.workQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
     async def update_activity_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
@@ -419,7 +420,7 @@ class TokenManager:
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
         startDate = date_hour_from_datetime(startDate)
-        await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message())
+        await self.workQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message())
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
@@ -459,7 +460,7 @@ class TokenManager:
         updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
         logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} changed tokens')
         messages = [UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
-        await self.tokenQueue.send_messages(messages=messages)
+        await self.workQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
     async def update_collection_token_attributes_deferred(self, registryAddress: str, tokenId: str) -> None:
@@ -481,7 +482,7 @@ class TokenManager:
             await self.saver.create_token_attributes(retrievedTokenAttributes=tokenAttributes, connection=connection)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
-        await self.tokenQueue.send_message(message=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
+        await self.workQueue.send_message(message=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
@@ -489,7 +490,7 @@ class TokenManager:
             await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=(60 * 5 * index))
 
     async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
-        await self.tokenQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
+        await self.workQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
         tokenIdsQuery = (

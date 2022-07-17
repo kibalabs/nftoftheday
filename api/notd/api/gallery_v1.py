@@ -1,14 +1,18 @@
-from typing import Optional
+import re
+from typing import Dict, List, Optional
 
 from fastapi import APIRouter
 from fastapi import Request
+from pydantic import BaseModel
+import pydantic
 
-from notd.api.endpoints_v1 import GetCollectionAttributesResponse
+from notd.api.endpoints_v1 import GetCollectionAttributesResponse, GetCollectionTokensRequest
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokensResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.response_builder import ResponseBuilder
 from notd.gallery_manager import GalleryManager
+from notd.model import QueryParam
 
 
 def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder) -> APIRouter:
@@ -24,11 +28,22 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         collectionAttributes = await galleryManager.get_collection_attributes(registryAddress=registryAddress)
         return GetCollectionAttributesResponse(attributes=(await responseBuilder.collection_attributes_from_models(collectionAttributes=collectionAttributes)))
 
-    @router.get('/collections/{registryAddress}/tokens')
-    async def get_collection_tokens(request: Request, registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        queryStringDict = dict(request.query_params)
-        limit = limit if limit is not None else 20
-        offset = offset if offset is not None else 0
-        tokens = await galleryManager.get_tokens_with_attributes(registryAddress=registryAddress, queryStringDict=queryStringDict, limit=limit, offset=offset)
-        return GetCollectionTokensResponse(tokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokens)))
+    def process_query_params(queryParts: Dict[str, str]) -> QueryParam:
+        queryParams = []
+        for name, value in queryParts.items():
+            match = re.compile('([A-Z]+)\[(.*)\]').match(value)
+            if match:
+                print(match)
+                queryParams.append(QueryParam(fieldName=name, operator=match.group(1), value=match.group(2)))
+            else:
+                queryParams.append(QueryParam(fieldName=name, operator='EQ', value=value))
+        return queryParams
+
+    # TODO(krishan711): make this a GET request once we understand complex query params
+    @router.post('/collections/{registryAddress}/tokens')
+    async def get_collection_tokens(registryAddress: str, request: GetCollectionTokensRequest) -> GetCollectionTokensResponse:
+        limit = request.limit if request.limit is not None else 20
+        offset = request.offset if request.offset is not None else 0
+        tokenMetadatas = await galleryManager.get_collection_tokens(registryAddress=registryAddress, minPrice=request.minPrice, maxPrice=request.maxPrice, isListed=request.isListed, tokenIdIn=request.tokenIdIn, attributeFilters=request.attributeFilters, limit=limit, offset=offset)
+        return GetCollectionTokensResponse(tokens=(await responseBuilder.collection_tokens_from_models(tokenMetadatas=tokenMetadatas)))
     return router
