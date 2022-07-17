@@ -423,7 +423,7 @@ class TokenManager:
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
         startDate = date_hour_from_datetime(startDate)
-        await self.workQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message())
+        await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message())
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
@@ -446,7 +446,7 @@ class TokenManager:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
     async def update_token_attributes_for_all_collections_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
+        await self.workQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
 
     async def update_token_attributes_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
@@ -463,7 +463,7 @@ class TokenManager:
         updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
         logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} changed tokens')
         messages = [UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
-        await self.workQueue.send_messages(messages=messages)
+        await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 
     async def update_collection_token_attributes_deferred(self, registryAddress: str, tokenId: str) -> None:
