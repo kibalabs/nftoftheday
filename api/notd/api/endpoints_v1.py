@@ -2,8 +2,6 @@ import datetime
 from typing import List
 from typing import Optional
 
-from pydantic import BaseModel
-
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
@@ -13,6 +11,7 @@ from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
+from pydantic import BaseModel
 
 
 class RetrieveHighestPriceTransferRequest(BaseModel):

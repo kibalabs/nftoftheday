@@ -8,8 +8,6 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
-from sqlalchemy import JSON
-
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -32,6 +30,7 @@ from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema import UserInteractionsTable
+from sqlalchemy import JSON
 
 _EMPTY_STRING = '_EMPTY_STRING'
 _EMPTY_OBJECT = '_EMPTY_OBJECT'

@@ -4,7 +4,6 @@ from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-
 from notd.date_util import date_hour_from_datetime
 from notd.model import RetrievedCollectionHourlyActivity
 from notd.store.retriever import Retriever

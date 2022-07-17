@@ -5,7 +5,6 @@ from typing import List
 from core import logging
 from core.requester import Requester
 from core.util import list_util
-
 from notd.model import RetrievedTokenListing
 
 

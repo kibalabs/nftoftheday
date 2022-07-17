@@ -3,7 +3,6 @@ from typing import Optional
 
 from core.util import date_util
 from fastapi import APIRouter
-
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse

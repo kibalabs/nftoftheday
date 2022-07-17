@@ -4,10 +4,9 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 
+import sqlalchemy
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
-import sqlalchemy
-
 from notd.api.endpoints_v1 import InQueryParam
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
