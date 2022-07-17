@@ -1,10 +1,8 @@
 import datetime
-import re
 from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
-import pydantic
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection

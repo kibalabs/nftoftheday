@@ -1,18 +1,11 @@
-import re
-from typing import Dict, List, Optional
-
 from fastapi import APIRouter
-from fastapi import Request
-from pydantic import BaseModel
-import pydantic
 
-from notd.api.endpoints_v1 import GetCollectionAttributesResponse, GetCollectionTokensRequest
-from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
+from notd.api.endpoints_v1 import GetCollectionAttributesResponse
+from notd.api.endpoints_v1 import GetCollectionTokensRequest
 from notd.api.endpoints_v1 import GetCollectionTokensResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.response_builder import ResponseBuilder
 from notd.gallery_manager import GalleryManager
-from notd.model import QueryParam
 
 
 def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder) -> APIRouter:
@@ -27,17 +20,6 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def get_collection_attributes(registryAddress: str):
         collectionAttributes = await galleryManager.get_collection_attributes(registryAddress=registryAddress)
         return GetCollectionAttributesResponse(attributes=(await responseBuilder.collection_attributes_from_models(collectionAttributes=collectionAttributes)))
-
-    def process_query_params(queryParts: Dict[str, str]) -> QueryParam:
-        queryParams = []
-        for name, value in queryParts.items():
-            match = re.compile('([A-Z]+)\[(.*)\]').match(value)
-            if match:
-                print(match)
-                queryParams.append(QueryParam(fieldName=name, operator=match.group(1), value=match.group(2)))
-            else:
-                queryParams.append(QueryParam(fieldName=name, operator='EQ', value=value))
-        return queryParams
 
     # TODO(krishan711): make this a GET request once we understand complex query params
     @router.post('/collections/{registryAddress}/tokens')

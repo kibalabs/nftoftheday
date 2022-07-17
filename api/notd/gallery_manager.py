@@ -1,20 +1,22 @@
-from collections import defaultdict
 import json
-from typing import Dict, List, Sequence
+from typing import Dict
+from typing import List
 from typing import Optional
+from typing import Sequence
 
-import sqlalchemy
-from core.store.retriever import FieldFilter
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
-from sqlalchemy import literal_column
-from notd.api.endpoints_v1 import InQueryParam
 
-from notd.model import Airdrop, TokenMetadata
+from notd.api.endpoints_v1 import InQueryParam
+from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import Token
+from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
-from notd.store.schema import TokenAttributesTable, TokenMetadatasTable, LatestTokenListingsTable, TokenOwnershipsTable
+from notd.store.schema import LatestTokenListingsTable
+from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenMetadatasTable
+from notd.store.schema import TokenOwnershipsTable
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF'
