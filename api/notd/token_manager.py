@@ -20,7 +20,7 @@ from core.util import list_util
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
-from notd.date_util import date_hour_from_datetime
+from notd.date_util import date_hour_from_datetime, generate_clock_hour_intervals
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent
@@ -386,7 +386,6 @@ class TokenManager:
         await self.workQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
     async def _get_transferred_collections_in_period(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Set[Tuple[str, datetime.datetime]]:
-        logging.info(f'Finding changed blocks between {startDate} and {endDate}')
         updatedBlocksQuery = (
             BlocksTable.select()
                 .with_only_columns([BlocksTable.c.blockNumber])
@@ -395,10 +394,8 @@ class TokenManager:
         )
         updatedBlocksResult = await self.retriever.database.execute(query=updatedBlocksQuery)
         updatedBlocks = sorted([blockNumber for (blockNumber, ) in updatedBlocksResult])
-        logging.info(f'Found {len(updatedBlocks)} changed blocks')
         registryDatePairs: Set[Tuple[str, datetime.datetime]] = set()
-        for blockNumbers in list_util.generate_chunks(lst=updatedBlocks, chunkSize=1000):
-            logging.info(f'Finding changed transfers in {len(blockNumbers)} updatedBlocks')
+        for blockNumbers in list_util.generate_chunks(lst=updatedBlocks, chunkSize=100):
             updatedTransfersQuery = (
                 TokenTransfersTable.select()
                     .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
@@ -407,18 +404,19 @@ class TokenManager:
             )
             updatedTransfersResult = await self.retriever.database.execute(query=updatedTransfersQuery)
             newRegistryDatePairs = {(registryAddress, date_hour_from_datetime(dt=date)) for (registryAddress, date) in updatedTransfersResult}
-            logging.info(f'Found {len(newRegistryDatePairs)} newRegistryDatePairs')
             registryDatePairs.update(newRegistryDatePairs)
         return registryDatePairs
 
     async def update_activity_for_all_collections(self) -> None:
-        startDate = date_util.datetime_from_now()
+        processStartDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
-        registryDatePairs = await self._get_transferred_collections_in_period(startDate=latestUpdate.date, endDate=startDate)
-        logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
-        messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=date).to_message() for (address, date) in registryDatePairs]
-        await self.tokenQueue.send_messages(messages=messages)
-        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
+        for periodStartDate, periodEndDate in generate_clock_hour_intervals(startDate=latestUpdate.date, endDate=processStartDate):
+            logging.info(f'Finding transferred collections between {periodStartDate} and {periodEndDate}')
+            registryDatePairs = await self._get_transferred_collections_in_period(startDate=periodStartDate, endDate=periodEndDate)
+            logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
+            messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=date).to_message() for (address, date) in registryDatePairs]
+            await self.tokenQueue.send_messages(messages=messages)
+            await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=periodEndDate)
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
