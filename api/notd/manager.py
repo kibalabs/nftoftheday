@@ -426,13 +426,14 @@ class NotdManager:
     async def process_block_deferred(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
         await self.workQueue.send_message(message=ProcessBlockMessageContent(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens).to_message(), delaySeconds=delaySeconds)
 
-    async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None) -> None:
+    async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, shouldSkipUpdatingOwnerships: Optional[bool] = None) -> None:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
         logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
-        await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
+        if not shouldSkipUpdatingOwnerships:
+            await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
             await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
             await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)

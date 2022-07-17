@@ -1,4 +1,3 @@
-
 from typing import List
 
 from notd.model import RetrievedTokenAttribute

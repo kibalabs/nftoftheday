@@ -62,7 +62,7 @@ async def main():
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)
     tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
-    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenListingProcessor=tokenListingProcessor, tokenAttributeProcessor=tokenAttributeProcessor)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenListingProcessor=tokenListingProcessor, tokenAttributeProcessor=tokenAttributeProcessor)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)

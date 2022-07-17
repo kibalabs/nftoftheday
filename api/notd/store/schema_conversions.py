@@ -171,7 +171,7 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
     )
 
 
-def token_attributes_from_row(row: Mapping) -> TokenAttribute:
+def token_attribute_from_row(row: Mapping) -> TokenAttribute:
     return TokenAttribute(
         tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
         createdDate=row[TokenAttributesTable.c.createdDate],

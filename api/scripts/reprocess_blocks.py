@@ -24,7 +24,7 @@ from notd.token_manager import TokenManager
 
 async def reprocess_block(notdManager: NotdManager, blockNumber: int):
     try:
-        await notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True)
+        await notdManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=True, shouldSkipUpdatingOwnerships=True)
     except Exception as exception:
         logging.error(f'Failed to process block {blockNumber}: {exception}')
 
@@ -39,21 +39,17 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
     saver = Saver(database=database)
     retriever = Retriever(database=database)
     requester = Requester()
-    workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
-    tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     # infuraAuth = BasicAuthentication(username='', password=os.environ["INFURA_PROJECT_SECRET"])
     # infuraRequester = Requester(headers={'Authorization': f'Basic {infuraAuth.to_string()}'})
     # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
-    tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None, tokenListingProcessor=None)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=None tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None, tokenListingProcessor=None, tokenAttributeProcessor=None)
     blockProcessor = BlockProcessor(ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=None)
+    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=None, tokenManager=tokenManager, requester=requester, revueApiKey=None)
 
     await database.connect()
-    await workQueue.connect()
-    await tokenQueue.connect()
     await slackClient.post(text=f'reprocess_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         currentBlockNumber = startBlockNumber
@@ -81,8 +77,6 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
         raise exception
     finally:
         await database.disconnect()
-        await workQueue.disconnect()
-        await tokenQueue.disconnect()
         await requester.close_connections()
         await awsRequester.close_connections()
 

@@ -34,7 +34,7 @@ from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import latest_update_from_row
-from notd.store.schema_conversions import token_attributes_from_row
+from notd.store.schema_conversions import token_attribute_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
@@ -245,7 +245,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenAttributes = [token_attributes_from_row(row) for row in result]
+        tokenAttributes = [token_attribute_from_row(row) for row in result]
         return tokenAttributes
 
     async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenListing]:

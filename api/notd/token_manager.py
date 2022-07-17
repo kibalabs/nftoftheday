@@ -21,6 +21,7 @@ from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
 from notd.date_util import date_hour_from_datetime
+from notd.date_util import generate_clock_hour_intervals
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateCollectionMessageContent
@@ -57,6 +58,7 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 _TOKEN_UPDATE_MIN_DAYS = 7
 _COLLECTION_UPDATE_MIN_DAYS = 30
 
+
 GALLERY_COLLECTIONS = {
     # Sprite Club
     chain_util.normalize_address(value='0x2744fe5e7776bca0af1cdeaf3ba3d1f5cae515d3'),
@@ -69,9 +71,10 @@ GALLERY_COLLECTIONS = {
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor, tokenAttributeProcessor: TokenAttributeProcessor, tokenListingProcessor: TokenListingProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor, tokenMetadataProcessor: TokenMetadataProcessor, tokenOwnershipProcessor: TokenOwnershipProcessor, collectionActivityProcessor: CollectionActivityProcessor, tokenAttributeProcessor: TokenAttributeProcessor, tokenListingProcessor: TokenListingProcessor):
         self.saver = saver
         self.retriever = retriever
+        self.workQueue = workQueue
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
         self.tokenMetadataProcessor = tokenMetadataProcessor
@@ -381,24 +384,19 @@ class TokenManager:
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
 
     async def update_activity_for_all_collections_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
+        await self.workQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
-    async def update_activity_for_all_collections(self) -> None:
-        startDate = date_util.datetime_from_now()
-        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
-        latestProcessedDate = latestUpdate.date
-        logging.info(f'Finding changed blocks since {latestProcessedDate}')
+    async def _get_transferred_collections_in_period(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Set[Tuple[str, datetime.datetime]]:
         updatedBlocksQuery = (
             BlocksTable.select()
                 .with_only_columns([BlocksTable.c.blockNumber])
-                .where(BlocksTable.c.updatedDate >= latestProcessedDate)
+                .where(BlocksTable.c.updatedDate >= startDate)
+                .where(BlocksTable.c.updatedDate <= endDate)
         )
         updatedBlocksResult = await self.retriever.database.execute(query=updatedBlocksQuery)
         updatedBlocks = sorted([blockNumber for (blockNumber, ) in updatedBlocksResult])
-        logging.info(f'Found {len(updatedBlocks)} changed blocks')
-        registryDatePairs: Set[Tuple(str, datetime.datetime)] = set()
-        for blockNumbers in list_util.generate_chunks(lst=updatedBlocks, chunkSize=1000):
-            logging.info(f'Finding changed transfers in {len(blockNumbers)} updatedBlocks')
+        registryDatePairs: Set[Tuple[str, datetime.datetime]] = set()
+        for blockNumbers in list_util.generate_chunks(lst=updatedBlocks, chunkSize=100):
             updatedTransfersQuery = (
                 TokenTransfersTable.select()
                     .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
@@ -407,13 +405,19 @@ class TokenManager:
             )
             updatedTransfersResult = await self.retriever.database.execute(query=updatedTransfersQuery)
             newRegistryDatePairs = {(registryAddress, date_hour_from_datetime(dt=date)) for (registryAddress, date) in updatedTransfersResult}
-            logging.info(f'Found {len(newRegistryDatePairs)} newRegistryDatePairs')
             registryDatePairs.update(newRegistryDatePairs)
-        # TODO(krishan711): once we have updated_date on transfers, query for those as well and add new ones to the list
-        logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
-        messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
-        await self.tokenQueue.send_messages(messages=messages)
-        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
+        return registryDatePairs
+
+    async def update_activity_for_all_collections(self) -> None:
+        processStartDate = date_util.datetime_from_now()
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
+        for periodStartDate, periodEndDate in generate_clock_hour_intervals(startDate=latestUpdate.date, endDate=processStartDate):
+            logging.info(f'Finding transferred collections between {periodStartDate} and {periodEndDate}')
+            registryDatePairs = await self._get_transferred_collections_in_period(startDate=periodStartDate, endDate=periodEndDate)
+            logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
+            messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=date).to_message() for (address, date) in registryDatePairs]
+            await self.tokenQueue.send_messages(messages=messages)
+            await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=periodEndDate)
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
@@ -441,7 +445,7 @@ class TokenManager:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
     async def update_token_attributes_for_all_collections_deferred(self) -> None:
-        await self.tokenQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
+        await self.workQueue.send_message(message=UpdateTokenAttributesForAllCollectionsMessageContent().to_message())
 
     async def update_token_attributes_for_all_collections(self) -> None:
         startDate = date_util.datetime_from_now()
@@ -480,7 +484,7 @@ class TokenManager:
             await self.saver.create_token_attributes(retrievedTokenAttributes=tokenAttributes, connection=connection)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
-        await self.tokenQueue.send_message(message=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
+        await self.workQueue.send_message(message=UpdateListingsForAllCollections().to_message(), delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
@@ -488,7 +492,7 @@ class TokenManager:
             await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=(60 * 5 * index))
 
     async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
-        await self.tokenQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
+        await self.workQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
         tokenIdsQuery = (
