@@ -21,6 +21,8 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from eth_account.messages import defunct_hash_message
+from web3 import Web3
+
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
@@ -44,7 +46,6 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
-from web3 import Web3
 
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap

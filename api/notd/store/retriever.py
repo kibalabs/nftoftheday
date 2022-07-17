@@ -6,6 +6,9 @@ from core.store.database import DatabaseConnection
 from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
+from sqlalchemy import select
+from sqlalchemy.sql import Select
+
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
@@ -38,8 +41,6 @@ from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.store.schema_conversions import user_interaction_from_row
-from sqlalchemy import select
-from sqlalchemy.sql import Select
 
 
 class Retriever(CoreRetriever):
