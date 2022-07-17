@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-import time
 
 import asyncclick as click
 from core import logging
@@ -27,7 +26,7 @@ from notd.token_manager import TokenManager
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
-async def reprocess_transfers(registryAddress: str, startBlockNumber: int, endBlockNumber: int, batchSize: int):
+async def reprocess_registry_blocks(registryAddress: str, startBlockNumber: int, endBlockNumber: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
@@ -79,4 +78,4 @@ async def reprocess_transfers(registryAddress: str, startBlockNumber: int, endBl
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(reprocess_transfers())
+    asyncio.run(reprocess_registry_blocks())
