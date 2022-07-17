@@ -385,20 +385,18 @@ class TokenManager:
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.workQueue.send_message(message=UpdateActivityForAllCollectionsMessageContent().to_message())
 
-    async def update_activity_for_all_collections(self) -> None:
-        startDate = date_util.datetime_from_now()
-        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
-        latestProcessedDate = latestUpdate.date
-        logging.info(f'Finding changed blocks since {latestProcessedDate}')
+    async def _get_transferred_collections_in_period(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Set[Tuple[str, datetime.datetime]]:
+        logging.info(f'Finding changed blocks between {startDate} and {endDate}')
         updatedBlocksQuery = (
             BlocksTable.select()
                 .with_only_columns([BlocksTable.c.blockNumber])
-                .where(BlocksTable.c.updatedDate >= latestProcessedDate)
+                .where(BlocksTable.c.updatedDate >= startDate)
+                .where(BlocksTable.c.updatedDate <= endDate)
         )
         updatedBlocksResult = await self.retriever.database.execute(query=updatedBlocksQuery)
         updatedBlocks = sorted([blockNumber for (blockNumber, ) in updatedBlocksResult])
         logging.info(f'Found {len(updatedBlocks)} changed blocks')
-        registryDatePairs: Set[Tuple(str, datetime.datetime)] = set()
+        registryDatePairs: Set[Tuple[str, datetime.datetime]] = set()
         for blockNumbers in list_util.generate_chunks(lst=updatedBlocks, chunkSize=1000):
             logging.info(f'Finding changed transfers in {len(blockNumbers)} updatedBlocks')
             updatedTransfersQuery = (
@@ -411,9 +409,14 @@ class TokenManager:
             newRegistryDatePairs = {(registryAddress, date_hour_from_datetime(dt=date)) for (registryAddress, date) in updatedTransfersResult}
             logging.info(f'Found {len(newRegistryDatePairs)} newRegistryDatePairs')
             registryDatePairs.update(newRegistryDatePairs)
-        # TODO(krishan711): once we have updated_date on transfers, query for those as well and add new ones to the list
+        return registryDatePairs
+
+    async def update_activity_for_all_collections(self) -> None:
+        startDate = date_util.datetime_from_now()
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
+        registryDatePairs = await self._get_transferred_collections_in_period(startDate=latestUpdate.date, endDate=startDate)
         logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
-        messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
+        messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=date).to_message() for (address, date) in registryDatePairs]
         await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=startDate)
 

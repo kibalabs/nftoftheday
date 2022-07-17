@@ -37,7 +37,9 @@ CREATE INDEX tbl_token_transfers_is_interstitial ON tbl_token_transfers (is_inte
 CREATE INDEX tbl_token_transfers_is_swap ON tbl_token_transfers (is_swap);
 CREATE INDEX tbl_token_transfers_is_batch ON tbl_token_transfers (is_batch);
 CREATE INDEX tbl_token_transfers_is_outbound ON tbl_token_transfers (is_outbound);
-
+-- NOTE(krishan711): this is O(100m) rows and fills O(100k) per day
+ALTER TABLE tbl_token_transfers SET (autovacuum_vacuum_scale_factor = 0.001);
+ALTER TABLE tbl_token_transfers SET (autovacuum_analyze_scale_factor = 0.0001);
 
 CREATE TABLE tbl_token_metadatas (
     id BIGSERIAL PRIMARY KEY,
@@ -61,6 +63,10 @@ CREATE INDEX tbl_token_metadatas_registry_address ON tbl_token_metadatas (regist
 CREATE INDEX tbl_token_metadatas_token_id ON tbl_token_metadatas (token_id);
 CREATE INDEX tbl_token_metadatas_updated_date ON tbl_token_metadatas (updated_date);
 CREATE INDEX tbl_token_metadatas_name ON tbl_token_metadatas (name);
+-- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
+ALTER TABLE tbl_token_metadatas SET (autovacuum_vacuum_scale_factor = 0.001);
+ALTER TABLE tbl_token_metadatas SET (autovacuum_analyze_scale_factor = 0.0001);
+
 
 CREATE TABLE tbl_collections (
     id BIGSERIAL PRIMARY KEY,
@@ -86,6 +92,7 @@ CREATE INDEX tbl_collections_address_updated_date ON tbl_collections (address, u
 CREATE INDEX tbl_collections_updated_date ON tbl_collections (updated_date);
 CREATE INDEX tbl_collections_name ON tbl_collections (name);
 
+
 CREATE TABLE tbl_blocks (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -101,6 +108,10 @@ CREATE INDEX tbl_blocks_created_date ON tbl_blocks (created_date);
 CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
 CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
 CREATE INDEX tbl_blocks_block_date ON tbl_blocks (block_date);
+-- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
+ALTER TABLE tbl_blocks SET (autovacuum_vacuum_scale_factor = 0.001);
+ALTER TABLE tbl_blocks SET (autovacuum_analyze_scale_factor = 0.0001);
+
 
 CREATE TABLE tbl_token_ownerships (
     id BIGSERIAL PRIMARY KEY,
@@ -124,6 +135,10 @@ CREATE INDEX tbl_token_ownerships_owner_address ON tbl_token_ownerships (owner_a
 CREATE INDEX tbl_token_ownerships_transfer_date ON tbl_token_ownerships (transfer_date);
 CREATE INDEX tbl_token_ownerships_transfer_value ON tbl_token_ownerships (transfer_value);
 CREATE INDEX tbl_token_ownerships_transfer_transaction_hash ON tbl_token_ownerships (transfer_transaction_hash);
+-- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
+ALTER TABLE tbl_token_ownerships SET (autovacuum_vacuum_scale_factor = 0.001);
+ALTER TABLE tbl_token_ownerships SET (autovacuum_analyze_scale_factor = 0.0001);
+
 
 CREATE TABLE tbl_token_multi_ownerships (
     id BIGSERIAL PRIMARY KEY,
@@ -150,6 +165,10 @@ CREATE INDEX tbl_token_multi_ownerships_owner_address ON tbl_token_multi_ownersh
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_date ON tbl_token_multi_ownerships (latest_transfer_date);
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_value ON tbl_token_multi_ownerships (latest_transfer_value);
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_transaction_hash ON tbl_token_multi_ownerships (latest_transfer_transaction_hash);
+-- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
+ALTER TABLE tbl_token_multi_ownerships SET (autovacuum_vacuum_scale_factor = 0.001);
+ALTER TABLE tbl_token_multi_ownerships SET (autovacuum_analyze_scale_factor = 0.0001);
+
 
 CREATE TABLE tbl_collection_hourly_activities (
     id BIGSERIAL PRIMARY KEY,
@@ -175,6 +194,10 @@ CREATE INDEX tbl_collection_hourly_activities_total_value ON tbl_collection_hour
 CREATE INDEX tbl_collection_hourly_activities_minimum_value ON tbl_collection_hourly_activities (minimum_value);
 CREATE INDEX tbl_collection_hourly_activities_maximum_value ON tbl_collection_hourly_activities (maximum_value);
 CREATE INDEX tbl_collection_hourly_activities_average_value ON tbl_collection_hourly_activities (average_value);
+-- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
+ALTER TABLE tbl_collection_hourly_activities SET (autovacuum_vacuum_scale_factor = 0.001);
+ALTER TABLE tbl_collection_hourly_activities SET (autovacuum_analyze_scale_factor = 0.0001);
+
 
 CREATE TABLE tbl_user_interactions (
     id BIGSERIAL PRIMARY KEY,
@@ -194,6 +217,7 @@ CREATE INDEX tbl_user_interactions_command ON tbl_user_interactions (command);
 CREATE INDEX tbl_user_interactions_user_address_command ON tbl_user_interactions (user_address, command);
 CREATE INDEX tbl_user_interactions_message ON tbl_user_interactions USING GIN (message);
 
+
 CREATE TABLE tbl_latest_updates (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -208,6 +232,7 @@ CREATE INDEX tbl_latest_updates_updated_date ON tbl_latest_updates (updated_date
 CREATE INDEX tbl_latest_updates_date ON tbl_latest_updates (date);
 CREATE INDEX tbl_latest_updates_key ON tbl_latest_updates (key);
 CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);
+
 
 CREATE TABLE tbl_latest_token_listings (
     offerer_address TEXT NOT NULL,
@@ -224,6 +249,7 @@ CREATE UNIQUE INDEX tbl_latest_token_listings_source_registry_address_token_id_o
 CREATE INDEX tbl_latest_token_listings_registry_address_token_id_offerer_address ON tbl_latest_token_listings (registry_address, token_id, offerer_address);
 CREATE INDEX tbl_latest_token_listings_created_date ON tbl_latest_token_listings (created_date);
 CREATE INDEX tbl_latest_token_listings_updated_date ON tbl_latest_token_listings (updated_date);
+
 
 CREATE TABLE tbl_token_attributes (
     id BIGSERIAL PRIMARY KEY,
