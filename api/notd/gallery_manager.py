@@ -96,6 +96,5 @@ class GalleryManager:
                         .where(TokenAttributesTable.c.name == attributeFilter.fieldName)
                         .where(TokenAttributesTable.c.value.in_(attributeFilter.values))
                 )
-        print('query', query)
         tokenMetadatas = await self.retriever.query_token_metadatas(query=query)
         return tokenMetadatas
