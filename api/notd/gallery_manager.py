@@ -65,13 +65,13 @@ class GalleryManager:
             collectionAttribute.values.append(value)
         return list(collectionAttributeNameMap.values())
 
-    async def query_collection_tokens(self, registryAddress: str, minPrice: Optional[int], maxPrice: Optional[int], isListed: Optional[bool], tokenIdIn: Optional[List[str]], attributeFilters: Optional[List[InQueryParam]], limit: int, offset: int) -> Sequence[TokenMetadata]:
+    async def query_collection_tokens(self, registryAddress: str, ownerAddress: Optional[str], minPrice: Optional[int], maxPrice: Optional[int], isListed: Optional[bool], tokenIdIn: Optional[List[str]], attributeFilters: Optional[List[InQueryParam]], limit: int, offset: int) -> Sequence[TokenMetadata]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         # TODO(krishan711): this shouldn't join on single ownerships for erc1155
         query = (
             TokenMetadatasTable.select()
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
-                .order_by(TokenMetadatasTable.c.tokenId.asc())
+                .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
                 .limit(limit)
                 .offset(offset)
         )
@@ -81,6 +81,8 @@ class GalleryManager:
                     .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId))
                     .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId, TokenOwnershipsTable.c.ownerAddress == LatestTokenListingsTable.c.offererAddress))
             )
+        if ownerAddress:
+            query = query.join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId, TokenOwnershipsTable.c.ownerAddress == ownerAddress))
         if minPrice:
             query = query.where(LatestTokenListingsTable.c.value >= minPrice)
         if maxPrice:
