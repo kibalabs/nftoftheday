@@ -54,7 +54,7 @@ class GalleryManager:
                 .distinct()
                 .with_only_columns([TokenAttributesTable.c.name, TokenAttributesTable.c.value])
                 .where(TokenAttributesTable.c.registryAddress == registryAddress)
-                .where(TokenAttributesTable.c.value != None)
+                .where(TokenAttributesTable.c.value.isnot(None))
                 .order_by(TokenAttributesTable.c.name.asc(), TokenAttributesTable.c.value.asc())
         )
         result = await self.retriever.database.execute(query=query)
