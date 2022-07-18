@@ -47,12 +47,14 @@ class GalleryManager:
         return []
 
     async def get_collection_attributes(self, registryAddress: str) -> List[CollectionAttribute]:
+        # NOTE(krishan711): deal with none values better!
         registryAddress = chain_util.normalize_address(value=registryAddress)
         query = (
             TokenAttributesTable.select()
                 .distinct()
                 .with_only_columns([TokenAttributesTable.c.name, TokenAttributesTable.c.value])
                 .where(TokenAttributesTable.c.registryAddress == registryAddress)
+                .where(TokenAttributesTable.c.value != None)
                 .order_by(TokenAttributesTable.c.name.asc(), TokenAttributesTable.c.value.asc())
         )
         result = await self.retriever.database.execute(query=query)
