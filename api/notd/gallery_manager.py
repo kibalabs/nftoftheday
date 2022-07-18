@@ -81,12 +81,12 @@ class GalleryManager:
                     .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId))
                     .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId, TokenOwnershipsTable.c.ownerAddress == LatestTokenListingsTable.c.offererAddress))
             )
+            if minPrice:
+                query = query.where(LatestTokenListingsTable.c.value >= minPrice)
+            if maxPrice:
+                query = query.where(LatestTokenListingsTable.c.value <= maxPrice)
         if ownerAddress:
             query = query.join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId, TokenOwnershipsTable.c.ownerAddress == ownerAddress))
-        if minPrice:
-            query = query.where(LatestTokenListingsTable.c.value >= minPrice)
-        if maxPrice:
-            query = query.where(LatestTokenListingsTable.c.value <= maxPrice)
         if tokenIdIn:
             query = query.where(TokenMetadatasTable.c.tokenId.in_(tokenIdIn))
         if attributeFilters:
