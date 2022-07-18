@@ -45,7 +45,7 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
     # infuraAuth = BasicAuthentication(username='', password=os.environ["INFURA_PROJECT_SECRET"])
     # infuraRequester = Requester(headers={'Authorization': f'Basic {infuraAuth.to_string()}'})
     # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
-    tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=None tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None, tokenListingProcessor=None, tokenAttributeProcessor=None)
+    tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=None, tokenQueue=None, collectionProcessor=None, tokenMetadataProcessor=None, tokenOwnershipProcessor=None, collectionActivityProcessor=None, tokenListingProcessor=None, tokenAttributeProcessor=None)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=None, tokenManager=tokenManager, requester=requester, revueApiKey=None)
 
