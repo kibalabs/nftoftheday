@@ -195,6 +195,7 @@ class QueryCollectionTokensRequest(BaseModel):
     isListed: Optional[bool]
     tokenIdIn: Optional[List[str]]
     attributeFilters: Optional[List[InQueryParam]]
+    ownerAddress: Optional[str]
 
 class QueryCollectionTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
