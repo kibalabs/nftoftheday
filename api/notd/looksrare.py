@@ -12,31 +12,27 @@ from notd.model import RetrievedTokenListing
 
 async def test():
     requester = Requester()
-    queryData = {
-                'collection': '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3',
-                'type': 'LIST',
-            }
-
-    response = await requester.get(url='https://api.looksrare.org/api/v1/events', dataDict=queryData)
+    queryData = { 
+        'isOrderAsk':'true',
+        'collection':'0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e',
+        'status[]':'VALID',
+        'pagination[first]': 150,
+        'sort':'PRICE_ASC',
+    }
+    response = await requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
     responseJson = response.json()
     assetListings = []
-    for event in responseJson['data']:
-        if event['order']['status'] == "CANCELLED":
-            continue
-        if event['order']['status'] == "EXPIRED":
-            continue
-        if event['order']['status'] == "INVALID_OWNER":
-            continue
-        print( event['order']['status'])
-        startDate = datetime.datetime.utcfromtimestamp(event['order']["startTime"])
-        endDate = datetime.datetime.utcfromtimestamp(event['order']["endTime"])
-        currentPrice = int(event['order']["price"])
-        offererAddress = event['from']
-        sourceId = event['order']["hash"]
-        isValueNative = event['order']["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    for order in responseJson['data']:
+        startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
+        endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
+        currentPrice = int(order["price"])
+        #Note(Femi-Ogunkola): Confirm what the signer address is
+        offererAddress = order['signer']
+        sourceId = order["hash"]
+        isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
         listing = RetrievedTokenListing(
-            registryAddress=event['order']['collectionAddress'],
-            tokenId=event['order']['tokenId'],
+            registryAddress=order['collectionAddress'],
+            tokenId=order['tokenId'],
             startDate=startDate,
             endDate=endDate,
             isValueNative=isValueNative,
@@ -45,7 +41,9 @@ async def test():
             source='LooksRare',
             sourceId=sourceId,
         )
+        print(offererAddress)
         assetListings.append(listing)
+    #print(assetListings)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
