@@ -1,6 +1,9 @@
 import asyncio
 import datetime
+from collections import defaultdict
+from typing import Dict
 from typing import List
+from typing import Tuple
 
 from core import logging
 from core.requester import Requester
@@ -96,4 +99,49 @@ class TokenListingProcessor:
                     listings.append(sortedAssetListings[0])
             # NOTE(krishan711): sleep to avoid opensea limits
             await asyncio.sleep(0.1)
+        return listings
+
+    async def get_looks_rare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
+        listings = []
+        queryData = {
+        'isOrderAsk':'true',
+        'collection':registryAddress,
+        'status[]':'VALID',
+        'pagination[first]': 100,
+        'sort':'PRICE_ASC',
+        }
+        flag = True
+        assetListings = []
+        while flag:
+            response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
+            responseJson = response.json()
+            if len(responseJson['data']) == 0:
+                flag = False
+                break
+            for order in responseJson['data']:
+                startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
+                endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
+                currentPrice = int(order["price"])
+                offererAddress = order['signer']
+                sourceId = order["hash"]
+                isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                listing = RetrievedTokenListing(
+                    registryAddress=order['collectionAddress'],
+                    tokenId=order['tokenId'],
+                    startDate=startDate,
+                    endDate=endDate,
+                    isValueNative=isValueNative,
+                    value=currentPrice,
+                    offererAddress=offererAddress,
+                    source='LooksRare',
+                    sourceId=sourceId,
+                )
+                assetListings.append(listing)
+            queryData['pagination[cursor]'] = order['hash']
+        tokenListingDict: Dict[Tuple(str, str), RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
+        if len(assetListings) > 0:
+            sortedAssetListings: List[RetrievedTokenListing] = sorted(assetListings, key=lambda listing: listing.value, reverse=True)
+            for listing in sortedAssetListings:
+                tokenListingDict[listing.registryAddress,listing.tokenId] = listing
+            listings = list(tokenListingDict.values())
         return listings
