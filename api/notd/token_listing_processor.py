@@ -109,7 +109,6 @@ class TokenListingProcessor:
             'pagination[first]': 100,
             'sort':'PRICE_DESC',
         }
-        
         assetListings = []
         while True:
             response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
