@@ -5,15 +5,13 @@ import logging
 import os
 import sys
 from core.requester import Requester
-import pandas as pd
-
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.model import RetrievedTokenListing
 
 async def test():
     requester = Requester()
-    queryData = { 
+    queryData = {
         'isOrderAsk':'true',
         'collection':'0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e',
         'status[]':'VALID',
