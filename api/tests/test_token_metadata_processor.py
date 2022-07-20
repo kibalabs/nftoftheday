@@ -23,14 +23,14 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 
 
 async def main():
-    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'],accessKeySecret=os.environ['AWS_SECRET'])
+    s3Manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'],accessKeySecret=os.environ['AWS_SECRET'])
     requester = Requester()
     ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
 
-    await s3manager.connect()
+    await s3Manager.connect()
     result = tokenMetadataProcessor.get_default_token_metadata(registryAddress='0x57E9a39aE8eC404C08f88740A9e6E306f50c937f',tokenId=165)
     expected = RetrievedTokenMetadata(
         registryAddress='0x57E9a39aE8eC404C08f88740A9e6E306f50c937f', tokenId='165', metadataUrl=None, imageUrl=None,animationUrl=None, youtubeUrl=None, backgroundColor=None, name='#165', description=None, frameImageUrl=None, attributes=[]
@@ -103,7 +103,7 @@ async def main():
     )
     assert (result == expected)
 
-    await s3manager.disconnect()
+    await s3Manager.disconnect()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

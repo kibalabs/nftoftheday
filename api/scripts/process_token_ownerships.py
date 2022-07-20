@@ -37,7 +37,7 @@ async def process_token_ownerships(startTokenId: int, endTokenId: int, batchSize
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    s3Manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     requester = Requester()
@@ -47,7 +47,7 @@ async def process_token_ownerships(startTokenId: int, endTokenId: int, batchSize
 
     await database.connect()
     await workQueue.connect()
-    await s3manager.connect()
+    await s3Manager.connect()
     await tokenQueue.connect()
 
     await database.connect()
@@ -72,7 +72,7 @@ async def process_token_ownerships(startTokenId: int, endTokenId: int, batchSize
         await database.disconnect()
         await workQueue.disconnect()
         await tokenQueue.disconnect()
-        await s3manager.disconnect()
+        await s3Manager.disconnect()
         await requester.close_connections()
 
 if __name__ == '__main__':

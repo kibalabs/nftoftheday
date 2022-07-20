@@ -23,11 +23,11 @@ from notd.store.schema_conversions import collection_from_row
 async def calculate_token_fields(startCollectionId: Optional[int], endCollectionId: Optional[int]):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
-    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    s3Manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     bucketName = os.environ['S3_BUCKET']
 
     await database.connect()
-    await s3manager.connect()
+    await s3Manager.connect()
     query = TokenCollectionsTable.select()
     if startCollectionId:
         query = query.where(TokenCollectionsTable.c.collectionId >= startCollectionId)
@@ -40,12 +40,12 @@ async def calculate_token_fields(startCollectionId: Optional[int], endCollection
         logging.info(f'Working on {collection.address}')
         collectionDirectory = f'{bucketName}/token-metadatas/{collection.address}/'
         index = 0
-        async for tokenFile in s3manager.generate_directory_files(s3Directory=collectionDirectory):
+        async for tokenFile in s3Manager.generate_directory_files(s3Directory=collectionDirectory):
             logging.info(f'Working on file {tokenFile.bucket}/{tokenFile.path}')
             if index > 3:
                 break
             try:
-                tokenDict = json.loads(await s3manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}'))
+                tokenDict = json.loads(await s3Manager.read_file(sourcePath=f'{tokenFile.bucket}/{tokenFile.path}'))
                 tokenDict['tokenId'] = tokenFile.path.split('/')[2]
                 if tokenDict.get('attributes'):
                     tokenDict['attributes'] = ",".join(list(set(key for attribute in tokenDict.get('attributes', []) for key in attribute.keys()))) if isinstance(tokenDict.get('attributes', []), List) else [attribute for attribute in tokenDict.get('attributes')]
@@ -73,7 +73,7 @@ async def calculate_token_fields(startCollectionId: Optional[int], endCollection
 
 
     await database.disconnect()
-    await s3manager.disconnect()
+    await s3Manager.disconnect()
 
 
 if __name__ == '__main__':

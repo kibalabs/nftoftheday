@@ -21,7 +21,7 @@ async def reprocess_metadata(startId: int, endId: int, batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database)
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=None, ethClient=None, s3manager=None, bucketName=None)
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=None, ethClient=None, s3Manager=None, bucketName=None)
 
     await database.connect()
 
