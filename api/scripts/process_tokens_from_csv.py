@@ -35,20 +35,20 @@ async def run(inputFilePath: str):
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    s3manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+    s3Manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'], queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     requester = Requester()
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
     openseaApiKey = os.environ['OPENSEA_API_KEY']
-    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3manager=s3manager, bucketName=os.environ['S3_BUCKET'])
+    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
     tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
     collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
     tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor)
 
     await database.connect()
-    await s3manager.connect()
+    await s3Manager.connect()
     await tokenQueue.connect()
     try:
         with open(inputFilePath, 'r') as inputFile:
@@ -57,7 +57,7 @@ async def run(inputFilePath: str):
             await asyncio.gather(*[process_token_metadata(tokenManager=tokenManager, registryAddress=tokenToUpdate['registry_address'], tokenId=tokenToUpdate['token_id']) for tokenToUpdate in tokensToUpdateSublist])
     finally:
         await database.disconnect()
-        await s3manager.disconnect()
+        await s3Manager.disconnect()
         await tokenQueue.disconnect()
         await requester.close_connections()
 

@@ -40,10 +40,10 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3manager: S3Manager, bucketName: str):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3Manager: S3Manager, bucketName: str):
         self.requester = requester
         self.ethClient = ethClient
-        self.s3manager = s3manager
+        self.s3Manager = s3Manager
         self.bucketName = bucketName
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
@@ -244,6 +244,6 @@ class TokenMetadataProcessor():
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to process metadata from {metadataUrl}: {type(exception)} {str(exception)}')
                 tokenMetadataDict = {}
-        await self.s3manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         return retrievedTokenMetadata

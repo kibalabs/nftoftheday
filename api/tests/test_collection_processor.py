@@ -28,7 +28,7 @@ class CollectionProcessorTestCase(KibaAsyncTestCase):
         self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
         self.openseaApiKey = os.environ['OPENSEA_API_KEY']
         self.bucket = os.environ['S3_BUCKET']
-        self.collectionProcessor = CollectionProcessor(requester=self.requester, ethClient=self.ethClient, s3manager=self.s3Manager, openseaApiKey=self.openseaApiKey, bucketName=self.bucket)
+        self.collectionProcessor = CollectionProcessor(requester=self.requester, ethClient=self.ethClient, s3Manager=self.s3Manager, openseaApiKey=self.openseaApiKey, bucketName=self.bucket)
 
     async def asyncTearDown(self) -> None:
         await self.requester.close_connections()
