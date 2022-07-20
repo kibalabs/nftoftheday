@@ -104,11 +104,11 @@ class TokenListingProcessor:
     async def get_looks_rare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
         listings = []
         queryData = {
-        'isOrderAsk':'true',
-        'collection':registryAddress,
-        'status[]':'VALID',
-        'pagination[first]': 100,
-        'sort':'PRICE_DESC',
+            'isOrderAsk':'true',
+            'collection':registryAddress,
+            'status[]':'VALID',
+            'pagination[first]': 100,
+            'sort':'PRICE_DESC',
         }
         flag = True
         assetListings = []
