@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 from core.requester import Requester
+import pandas as pd
 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -20,10 +21,10 @@ async def test():
         'sort':'PRICE_ASC',
     }
     flag = True
+    assetListings = []
     while flag:
         response = await requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
         responseJson = response.json()
-        assetListings = []
         if len(responseJson['data']) == 0:
             flag = False
             break
@@ -48,6 +49,7 @@ async def test():
             )
             assetListings.append(listing)
         queryData['pagination[cursor]'] = order['hash']
+    pd.DataFrame(assetListings).to_csv('globin_town.csv')
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
