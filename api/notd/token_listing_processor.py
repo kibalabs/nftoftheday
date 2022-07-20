@@ -108,7 +108,7 @@ class TokenListingProcessor:
         'collection':registryAddress,
         'status[]':'VALID',
         'pagination[first]': 100,
-        'sort':'PRICE_ASC',
+        'sort':'PRICE_DESC',
         }
         flag = True
         assetListings = []
@@ -141,8 +141,7 @@ class TokenListingProcessor:
             queryData['pagination[cursor]'] = order['hash']
         tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
         if len(assetListings) > 0:
-            sortedAssetListings: List[RetrievedTokenListing] = sorted(assetListings, key=lambda listing: listing.value, reverse=True)
-            for listing in sortedAssetListings:
-                tokenListingDict[listing.registryAddress,listing.tokenId] = listing
+            for listing in assetListings:
+                tokenListingDict[listing.tokenId] = listing
             listings = list(tokenListingDict.values())
         return listings
