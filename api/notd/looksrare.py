@@ -15,7 +15,7 @@ async def test():
     requester = Requester()
     queryData = { 
         'isOrderAsk':'true',
-        'collection':'0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e',
+        'collection':'0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e',
         'status[]':'VALID',
         'pagination[first]': 100,
         'sort':'PRICE_ASC',
@@ -49,7 +49,6 @@ async def test():
             )
             assetListings.append(listing)
         queryData['pagination[cursor]'] = order['hash']
-    pd.DataFrame(assetListings).to_csv('globin_town.csv')
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
