@@ -124,6 +124,7 @@ class TokenListingProcessor:
                 currentPrice = int(order["price"])
                 offererAddress = order['signer']
                 sourceId = order["hash"]
+                # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
                 isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
                 listing = RetrievedTokenListing(
                     registryAddress=order['collectionAddress'],
@@ -138,7 +139,7 @@ class TokenListingProcessor:
                 )
                 assetListings.append(listing)
             queryData['pagination[cursor]'] = order['hash']
-        tokenListingDict: Dict[Tuple(str, str), RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
+        tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
         if len(assetListings) > 0:
             sortedAssetListings: List[RetrievedTokenListing] = sorted(assetListings, key=lambda listing: listing.value, reverse=True)
             for listing in sortedAssetListings:
