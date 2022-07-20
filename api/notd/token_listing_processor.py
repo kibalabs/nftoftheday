@@ -3,7 +3,6 @@ import datetime
 from collections import defaultdict
 from typing import Dict
 from typing import List
-from typing import Tuple
 
 from core import logging
 from core.requester import Requester
@@ -110,13 +109,12 @@ class TokenListingProcessor:
             'pagination[first]': 100,
             'sort':'PRICE_DESC',
         }
-        flag = True
+        
         assetListings = []
-        while flag:
+        while True:
             response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
             responseJson = response.json()
             if len(responseJson['data']) == 0:
-                flag = False
                 break
             for order in responseJson['data']:
                 startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
