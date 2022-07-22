@@ -1,24 +1,16 @@
-import base64
+import datetime
 import os
 import sys
 
-from core import logging
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-import datetime
-
 from async_timeout import asyncio
-from core.aws_requester import AwsRequester
+from core import logging
 from core.requester import Requester
 from core.s3_manager import S3Manager
-from core.store.database import Database
 from core.web3.eth_client import RestEthClient
 
-from notd.block_processor import BlockProcessor
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.model import Collection
-from notd.model import RetrievedCollection
 from notd.model import RetrievedTokenMetadata
-from notd.store.retriever import Retriever
 from notd.token_metadata_processor import TokenMetadataProcessor
 
 
@@ -26,9 +18,7 @@ async def main():
     s3Manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'],accessKeySecret=os.environ['AWS_SECRET'])
     requester = Requester()
     ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=requester)
-    blockProcessor = BlockProcessor(ethClient=ethClient)
-    requester = Requester()
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'], pabloClient=None)
 
     await s3Manager.connect()
     result = tokenMetadataProcessor.get_default_token_metadata(registryAddress='0x57E9a39aE8eC404C08f88740A9e6E306f50c937f',tokenId=165)

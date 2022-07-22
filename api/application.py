@@ -15,6 +15,7 @@ from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pablo import PabloClient
 
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.gallery_v1 import create_api as create_gallery_v1_api
@@ -59,7 +60,8 @@ awsRequester = AwsRequester(accessKeyId=accessKeyId, accessKeySecret=accessKeySe
 ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
 blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
-tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
+pabloClient = PabloClient(requester=requester)
+tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'], pabloClient=pabloClient)
 collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
 collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
