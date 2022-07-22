@@ -13,8 +13,10 @@ from core.requester import ResponseException
 from core.s3_manager import S3Manager
 from core.util import date_util
 from core.web3.eth_client import EthClientInterface
+from pablo import PabloClient
 from web3.main import Web3
 
+from notd.model import GALLERY_COLLECTIONS
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
 
@@ -40,11 +42,12 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3Manager: S3Manager, bucketName: str):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3Manager: S3Manager, bucketName: str, pabloClient: PabloClient):
         self.requester = requester
         self.ethClient = ethClient
         self.s3Manager = s3Manager
         self.bucketName = bucketName
+        self.pabloClient = pabloClient
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetadataContractJson = json.load(contractJsonFile)
@@ -75,6 +78,7 @@ class TokenMetadataProcessor():
             name=f'#{tokenId}',
             description=None,
             imageUrl=None,
+            resizableImageUrl=None,
             animationUrl=None,
             youtubeUrl=None,
             backgroundColor=None,
@@ -130,6 +134,7 @@ class TokenMetadataProcessor():
             name=str(name).replace('\u0000', ''),
             description=str(description).replace('\u0000', '') if description else None,
             imageUrl=imageUrl,
+            resizableImageUrl=None,
             animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
             youtubeUrl=tokenMetadataDict.get('youtube_url'),
             backgroundColor=tokenMetadataDict.get('background_color'),
@@ -151,6 +156,7 @@ class TokenMetadataProcessor():
                 name=f'#{tokenId}',
                 description=None,
                 imageUrl=imageSvgResponse[0],
+                resizableImageUrl=None,
                 animationUrl=None,
                 youtubeUrl=None,
                 backgroundColor=None,
@@ -246,4 +252,7 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
+        if registryAddress in GALLERY_COLLECTIONS and retrievedTokenMetadata.imageUrl:
+            image = await self.pabloClient.upload_image_url(url=retrievedTokenMetadata.imageUrl)
+            retrievedTokenMetadata.resizableImageUrl = image.resizableUrl
         return retrievedTokenMetadata

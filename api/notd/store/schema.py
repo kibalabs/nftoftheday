@@ -48,6 +48,7 @@ TokenMetadatasTable = sqlalchemy.Table(
     sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='metadataUrl', name='metadata_url', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='imageUrl', name='image_url', type_=sqlalchemy.TEXT, nullable=True),
+    sqlalchemy.Column(key='resizableImageUrl', name='resizable_image_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='animationUrl', name='animation_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='youtubeUrl', name='youtube_url', type_=sqlalchemy.TEXT, nullable=True),
     sqlalchemy.Column(key='backgroundColor', name='background_color', type_=sqlalchemy.TEXT, nullable=True),

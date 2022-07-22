@@ -1,33 +1,33 @@
 import asyncio
-from collections import defaultdict
 import datetime
 import json
 import os
 import sys
-from typing import Optional
 import uuid
+from collections import defaultdict
+from typing import Optional
 
 import asyncclick as click
 from core import logging
+from core.s3_manager import S3Manager
 from core.store.database import Database
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
-from core.s3_manager import S3Manager
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.model import Collection, CollectionAttribute
+from notd.model import Collection
+from notd.model import CollectionAttribute
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenMetadatasTable
-
 
 _CACHE_CONTROL_FINAL_FILE = f'public max-age={60 * 60 * 24 * 365}'
 
 @click.command()
 @click.option('-d', '--directory', 'directory', required=True, type=str)
 @click.option('-n', '--name', 'name', required=True, type=str)
-@click.option('-u', '--upload-id', 'uploadId', required=True, type=str)
+@click.option('-u', '--upload-id', 'uploadId', required=False, type=str)
 @click.option('-o', '--output-filename', 'outputFilename', required=False, type=str)
-async def create_consolidated_metadata(directory: str, name: str, uploadId: str, outputFilename: Optional[str]):
+async def create_consolidated_metadata(directory: str, name: str, uploadId: Optional[str], outputFilename: Optional[str]):
     s3Manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     await s3Manager.connect()
 

@@ -71,6 +71,7 @@ class ResponseBuilder:
             name=tokenMetadata.name,
             description=tokenMetadata.description,
             imageUrl=tokenMetadata.imageUrl,
+            resizableImageUrl=tokenMetadata.resizableImageUrl,
             frameImageUrl=tokenMetadata.frameImageUrl,
             attributes=attributes,
         )
