@@ -3,9 +3,20 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+from core.util import chain_util
 from core.util import date_util
 from core.util.typing_util import JSON
 from pydantic import dataclasses
+
+
+GALLERY_COLLECTIONS = {
+    # Sprite Club
+    chain_util.normalize_address(value='0x2744fe5e7776bca0af1cdeaf3ba3d1f5cae515d3'),
+    # Goblin Town
+    chain_util.normalize_address(value='0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e'),
+    # MDTP
+    chain_util.normalize_address(value='0x8e720f90014fa4de02627f4a4e217b7e3942d5e8'),
+}
 
 
 @dataclasses.dataclass
@@ -41,6 +52,7 @@ class RetrievedTokenMetadata:
     name: Optional[str]
     description: Optional[str]
     imageUrl: Optional[str]
+    resizableImageUrl: Optional[str]
     animationUrl: Optional[str]
     youtubeUrl: Optional[str]
     backgroundColor: Optional[str]

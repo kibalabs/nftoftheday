@@ -32,7 +32,7 @@ from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
-from notd.model import Collection
+from notd.model import GALLERY_COLLECTIONS, Collection
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import Token
 from notd.model import TokenMetadata
@@ -57,16 +57,6 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 
 _TOKEN_UPDATE_MIN_DAYS = 7
 _COLLECTION_UPDATE_MIN_DAYS = 30
-
-
-GALLERY_COLLECTIONS = {
-    # Sprite Club
-    chain_util.normalize_address(value='0x2744fe5e7776bca0af1cdeaf3ba3d1f5cae515d3'),
-    # Goblin Town
-    chain_util.normalize_address(value='0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e'),
-    # MDTP
-    chain_util.normalize_address(value='0x8e720f90014fa4de02627f4a4e217b7e3942d5e8'),
-}
 
 
 class TokenManager:
@@ -165,7 +155,6 @@ class TokenManager:
         except (TokenDoesNotExistException, TokenHasNoMetadataException) as exception:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}/{tokenId}: {exception}')
             retrievedTokenMetadata = None
-
         async with self.saver.create_transaction() as connection:
             try:
                 tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
@@ -180,6 +169,7 @@ class TokenManager:
                     tokenMetadata.name != retrievedTokenMetadata.name  or \
                     tokenMetadata.description != retrievedTokenMetadata.description or \
                     tokenMetadata.imageUrl != retrievedTokenMetadata.imageUrl or \
+                    tokenMetadata.resizableImageUrl != retrievedTokenMetadata.resizableImageUrl or \
                     tokenMetadata.animationUrl != retrievedTokenMetadata.animationUrl or \
                     tokenMetadata.youtubeUrl != retrievedTokenMetadata.youtubeUrl or \
                     tokenMetadata.backgroundColor != retrievedTokenMetadata.backgroundColor or \
@@ -189,11 +179,11 @@ class TokenManager:
                 if not hasTokenChanged:
                     logging.info(f'Skipped updating token metadata because it has not changed.')
                     return
-                await self.saver.update_token_metadata(connection=connection, tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
+                await self.saver.update_token_metadata(connection=connection, tokenMetadataId=tokenMetadata.tokenMetadataId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, resizableImageUrl=retrievedTokenMetadata.resizableImageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
             else:
                 if retrievedTokenMetadata is None:
                     retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-                await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
+                await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, resizableImageUrl=retrievedTokenMetadata.resizableImageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
 
     async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
         if len(addresses) == 0:

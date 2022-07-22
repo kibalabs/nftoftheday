@@ -25,9 +25,9 @@ _CACHE_CONTROL_FINAL_FILE = f'public max-age={60 * 60 * 24 * 365}'
 @click.command()
 @click.option('-d', '--directory', 'directory', required=True, type=str)
 @click.option('-n', '--name', 'name', required=True, type=str)
-@click.option('-u', '--upload-id', 'uploadId', required=True, type=str)
+@click.option('-u', '--upload-id', 'uploadId', required=False, type=str)
 @click.option('-o', '--output-filename', 'outputFilename', required=False, type=str)
-async def create_consolidated_metadata(directory: str, name: str, uploadId: str, outputFilename: Optional[str]):
+async def create_consolidated_metadata(directory: str, name: str, uploadId: Optional[str], outputFilename: Optional[str]):
     s3Manager = S3Manager(region='eu-west-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
     await s3Manager.connect()
 

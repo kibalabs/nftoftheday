@@ -12,6 +12,7 @@ from core.slack_client import SlackClient
 from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
+from pablo import PabloClient
 
 from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
@@ -55,7 +56,8 @@ async def main():
     ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
+    pabloClient = PabloClient(requester=requester)
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'], pabloClient=pabloClient)
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
     tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
     collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)

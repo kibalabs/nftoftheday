@@ -122,7 +122,7 @@ class Saver(CoreSaver):
         query = BlocksTable.update(BlocksTable.c.blockId == blockId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, name: Optional[str], description: Optional[str], imageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], frameImageUrl: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
+    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, name: Optional[str], description: Optional[str], imageUrl: Optional[str], resizableImageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], frameImageUrl: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -134,6 +134,7 @@ class Saver(CoreSaver):
             TokenMetadatasTable.c.name.key: name,
             TokenMetadatasTable.c.description.key: description,
             TokenMetadatasTable.c.imageUrl.key: imageUrl,
+            TokenMetadatasTable.c.resizableImageUrl.key: resizableImageUrl,
             TokenMetadatasTable.c.animationUrl.key: animationUrl,
             TokenMetadatasTable.c.youtubeUrl.key: youtubeUrl,
             TokenMetadatasTable.c.backgroundColor.key: backgroundColor,
@@ -153,6 +154,7 @@ class Saver(CoreSaver):
             name=name,
             description=description,
             imageUrl=imageUrl,
+            resizableImageUrl=resizableImageUrl,
             animationUrl=animationUrl,
             youtubeUrl=youtubeUrl,
             backgroundColor=backgroundColor,
@@ -160,7 +162,7 @@ class Saver(CoreSaver):
             attributes=attributes,
         )
 
-    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, frameImageUrl: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, resizableImageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, frameImageUrl: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if metadataUrl is not None:
             values[TokenMetadatasTable.c.metadataUrl.key] = metadataUrl
@@ -170,6 +172,8 @@ class Saver(CoreSaver):
             values[TokenMetadatasTable.c.description.key] = description
         if imageUrl != _EMPTY_STRING:
             values[TokenMetadatasTable.c.imageUrl.key] = imageUrl
+        if resizableImageUrl != _EMPTY_STRING:
+            values[TokenMetadatasTable.c.resizableImageUrl.key] = resizableImageUrl
         if animationUrl != _EMPTY_STRING:
             values[TokenMetadatasTable.c.animationUrl.key] = animationUrl
         if youtubeUrl != _EMPTY_STRING:

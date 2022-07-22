@@ -71,6 +71,7 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
         metadataUrl=row[TokenMetadatasTable.c.metadataUrl],
         name=row[TokenMetadatasTable.c.name],
         imageUrl=row[TokenMetadatasTable.c.imageUrl],
+        resizableImageUrl=row[TokenMetadatasTable.c.resizableImageUrl],
         animationUrl=row[TokenMetadatasTable.c.animationUrl],
         youtubeUrl=row[TokenMetadatasTable.c.youtubeUrl],
         backgroundColor=row[TokenMetadatasTable.c.backgroundColor],
