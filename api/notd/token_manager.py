@@ -32,7 +32,8 @@ from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
-from notd.model import GALLERY_COLLECTIONS, Collection
+from notd.model import GALLERY_COLLECTIONS
+from notd.model import Collection
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import Token
 from notd.model import TokenMetadata

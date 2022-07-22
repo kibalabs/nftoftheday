@@ -10,8 +10,8 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
 from core.store.retriever import StringFieldFilter
-from core.web3.eth_client import RestEthClient
 from core.util import chain_util
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor
@@ -19,7 +19,7 @@ from notd.collection_processor import CollectionProcessor
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadatasTable, TokenMetadatasTable
+from notd.store.schema import TokenMetadatasTable
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 

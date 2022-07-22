@@ -4,6 +4,7 @@ import sys
 import time
 
 import asyncclick as click
+import sqlalchemy
 from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -11,16 +12,16 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.slack_client import SlackClient
 from core.store.database import Database
-from core.web3.eth_client import RestEthClient
 from core.util import chain_util
 from core.util import list_util
-import sqlalchemy
+from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_processor import CollectionProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TokenMetadatasTable, TokenOwnershipsTable
+from notd.store.schema import TokenMetadatasTable
+from notd.store.schema import TokenOwnershipsTable
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor

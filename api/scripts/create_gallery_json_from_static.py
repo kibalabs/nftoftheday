@@ -1,24 +1,24 @@
 import asyncio
-from collections import defaultdict
 import datetime
 import json
 import os
 import sys
-from typing import Optional
 import uuid
+from collections import defaultdict
+from typing import Optional
 
 import asyncclick as click
 from core import logging
+from core.s3_manager import S3Manager
 from core.store.database import Database
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
-from core.s3_manager import S3Manager
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.model import Collection, CollectionAttribute
+from notd.model import Collection
+from notd.model import CollectionAttribute
 from notd.store.retriever import Retriever
 from notd.store.schema import TokenMetadatasTable
-
 
 _CACHE_CONTROL_FINAL_FILE = f'public max-age={60 * 60 * 24 * 365}'
 

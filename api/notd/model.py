@@ -8,7 +8,6 @@ from core.util import date_util
 from core.util.typing_util import JSON
 from pydantic import dataclasses
 
-
 GALLERY_COLLECTIONS = {
     # Sprite Club
     chain_util.normalize_address(value='0x2744fe5e7776bca0af1cdeaf3ba3d1f5cae515d3'),

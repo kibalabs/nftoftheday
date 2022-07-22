@@ -16,9 +16,9 @@ from core.web3.eth_client import EthClientInterface
 from pablo import PabloClient
 from web3.main import Web3
 
-from notd.model import GALLERY_COLLECTIONS, Collection
+from notd.model import GALLERY_COLLECTIONS
+from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
-
 
 IPFS_PROVIDER_PREFIXES = [
     'https://gateway.pinata.cloud/ipfs/',
