@@ -19,8 +19,8 @@ class TokenListingProcessor:
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: str) -> List[RetrievedTokenListing]:
         listings = []
-        for chunkedTokenIs in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
-            logging.info(f'Getting opensea listings for {len(chunkedTokenIs)} tokens...')
+        for index, chunkedTokenIs in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
+            logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
             queryData = {
                 'token_ids': chunkedTokenIs,
                 'asset_contract_address': registryAddress,
@@ -100,21 +100,24 @@ class TokenListingProcessor:
             await asyncio.sleep(0.1)
         return listings
 
-    async def get_looks_rare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
-        listings = []
+    async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
         queryData = {
-            'isOrderAsk':'true',
-            'collection':registryAddress,
-            'status[]':'VALID',
+            'isOrderAsk': 'true',
+            'collection': registryAddress,
+            'status[]': 'VALID',
             'pagination[first]': 100,
-            'sort':'PRICE_DESC',
+            'sort': 'PRICE_DESC',
         }
         assetListings = []
+        index = 0
         while True:
+            logging.stat('RETRIEVE_LISTINGS_LOOKSRARE', registryAddress, index)
+            index += 1
             response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
             responseJson = response.json()
             if len(responseJson['data']) == 0:
                 break
+            latestOrderHash = None
             for order in responseJson['data']:
                 startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
                 endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
@@ -131,12 +134,14 @@ class TokenListingProcessor:
                     isValueNative=isValueNative,
                     value=currentPrice,
                     offererAddress=offererAddress,
-                    source='LooksRare',
+                    source='looksrare',
                     sourceId=sourceId,
                 )
                 assetListings.append(listing)
-            queryData['pagination[cursor]'] = order['hash']
+                latestOrderHash = order['hash']
+            queryData['pagination[cursor]'] = latestOrderHash
         tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
+        listings = []
         if len(assetListings) > 0:
             for listing in assetListings:
                 tokenListingDict[listing.tokenId] = listing
