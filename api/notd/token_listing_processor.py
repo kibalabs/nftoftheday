@@ -1,5 +1,7 @@
 import asyncio
 import datetime
+from collections import defaultdict
+from typing import Dict
 from typing import List
 
 from core import logging
@@ -17,8 +19,8 @@ class TokenListingProcessor:
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: str) -> List[RetrievedTokenListing]:
         listings = []
-        for chunkedTokenIs in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
-            logging.info(f'Getting opensea listings for {len(chunkedTokenIs)} tokens...')
+        for index, chunkedTokenIs in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
+            logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
             queryData = {
                 'token_ids': chunkedTokenIs,
                 'asset_contract_address': registryAddress,
@@ -96,4 +98,52 @@ class TokenListingProcessor:
                     listings.append(sortedAssetListings[0])
             # NOTE(krishan711): sleep to avoid opensea limits
             await asyncio.sleep(0.1)
+        return listings
+
+    async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
+        queryData = {
+            'isOrderAsk': 'true',
+            'collection': registryAddress,
+            'status[]': 'VALID',
+            'pagination[first]': 100,
+            'sort': 'PRICE_DESC',
+        }
+        assetListings = []
+        index = 0
+        while True:
+            logging.stat('RETRIEVE_LISTINGS_LOOKSRARE', registryAddress, index)
+            index += 1
+            response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
+            responseJson = response.json()
+            if len(responseJson['data']) == 0:
+                break
+            latestOrderHash = None
+            for order in responseJson['data']:
+                startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
+                endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
+                currentPrice = int(order["price"])
+                offererAddress = order['signer']
+                sourceId = order["hash"]
+                # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
+                isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                listing = RetrievedTokenListing(
+                    registryAddress=order['collectionAddress'],
+                    tokenId=order['tokenId'],
+                    startDate=startDate,
+                    endDate=endDate,
+                    isValueNative=isValueNative,
+                    value=currentPrice,
+                    offererAddress=offererAddress,
+                    source='looksrare',
+                    sourceId=sourceId,
+                )
+                assetListings.append(listing)
+                latestOrderHash = order['hash']
+            queryData['pagination[cursor]'] = latestOrderHash
+        tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
+        listings = []
+        if len(assetListings) > 0:
+            for listing in assetListings:
+                tokenListingDict[listing.tokenId] = listing
+            listings = list(tokenListingDict.values())
         return listings

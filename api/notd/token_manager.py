@@ -504,8 +504,10 @@ class TokenManager:
         tokenIdsQueryResult = await self.retriever.database.execute(query=tokenIdsQuery)
         tokenIds = [tokenId for (tokenId, ) in tokenIdsQueryResult]
         openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
-        logging.info(f'Retrieved {len(openseaListings)} opensea listings')
-        allListings = openseaListings
+        logging.info(f'Retrieved {len(openseaListings)} openseaListings')
+        looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_collection(registryAddress=address)
+        logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
+        allListings = openseaListings + looksrareListings
         # TODO(krishan711): change this to not delete existing. should add / remove / update changed only
         async with self.saver.create_transaction() as connection:
             currentLatestTokenListings = await self.retriever.list_latest_token_listings(fieldFilters=[
