@@ -9,7 +9,6 @@ from typing import Tuple
 
 import sqlalchemy
 from core import logging
-from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -20,8 +19,6 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-from eth_account.messages import defunct_hash_message
-from web3 import Web3
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -69,7 +66,6 @@ class NotdManager:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
         self.sponsoredTokens = [BaseSponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
-        self.web3 = Web3()
 
     async def get_sponsored_token(self) -> SponsoredToken:
         baseSponsoredToken = self.sponsoredTokens[0]
@@ -294,23 +290,6 @@ class NotdManager:
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
-
-    async def submit_treasure_hunt_for_collection_token(self, registryAddress: str, tokenId: str, userAddress: str, signature: str) -> None:
-        if registryAddress != '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3':
-            raise BadRequestException(f'Collection does not have an active treasure hunt')
-        if registryAddress != '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3' or tokenId != '101':
-            raise BadRequestException(f'Incorrect token')
-        command = 'COMPLETE_TREASURE_HUNT'
-        message = {
-            'registryAddress': registryAddress,
-            'tokenId': tokenId,
-        }
-        signedMessage = json.dumps({ 'command': command, 'message': message }, separators=(',', ':'))
-        messageHash = defunct_hash_message(text=signedMessage)
-        signer = self.web3.eth.account.recoverHash(message_hash=messageHash, signature=signature)
-        if signer != userAddress:
-            raise BadRequestException('Invalid signature')
-        await self.saver.create_user_interaction(date=date_util.datetime_from_now(), userAddress=userAddress, command=command, signature=signature, message=message)
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
