@@ -103,3 +103,21 @@ class ApiAirdrop(BaseModel):
 class ApiCollectionAttribute(BaseModel):
     name: str
     values: List[str]
+
+
+class ApiTokenCustomization(BaseModel):
+    tokenCustomizationId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    creatorAddress: str
+    blockNumber: int
+    signature: str
+    name: Optional[str]
+    description: Optional[str]
+
+
+class ApiGalleryToken(BaseModel):
+    collectionToken: ApiCollectionToken
+    tokenCustomization: Optional[ApiTokenCustomization]

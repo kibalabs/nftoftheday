@@ -5,6 +5,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import TokenAttribute
+from notd.model import TokenCustomization
 from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
@@ -17,6 +18,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
@@ -172,18 +174,6 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
     )
 
 
-def token_attribute_from_row(row: Mapping) -> TokenAttribute:
-    return TokenAttribute(
-        tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
-        createdDate=row[TokenAttributesTable.c.createdDate],
-        updatedDate=row[TokenAttributesTable.c.updatedDate],
-        registryAddress=row[TokenAttributesTable.c.registryAddress],
-        tokenId=row[TokenAttributesTable.c.tokenId],
-        name=row[TokenAttributesTable.c.name],
-        value=row[TokenAttributesTable.c.value],
-    )
-
-
 def token_listing_from_row(row: Mapping) -> TokenListing:
     return TokenListing(
         tokenListingId=row[LatestTokenListingsTable.c.latestTokenListingId],
@@ -198,4 +188,31 @@ def token_listing_from_row(row: Mapping) -> TokenListing:
         value=row[LatestTokenListingsTable.c.value],
         source=row[LatestTokenListingsTable.c.source],
         sourceId=row[LatestTokenListingsTable.c.sourceId],
+    )
+
+
+def token_attribute_from_row(row: Mapping) -> TokenAttribute:
+    return TokenAttribute(
+        tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
+        createdDate=row[TokenAttributesTable.c.createdDate],
+        updatedDate=row[TokenAttributesTable.c.updatedDate],
+        registryAddress=row[TokenAttributesTable.c.registryAddress],
+        tokenId=row[TokenAttributesTable.c.tokenId],
+        name=row[TokenAttributesTable.c.name],
+        value=row[TokenAttributesTable.c.value],
+    )
+
+
+def token_customization_from_row(row: Mapping) -> TokenCustomization:
+    return TokenCustomization(
+        tokenCustomizationId=row[TokenCustomizationsTable.c.tokenCustomizationId],
+        createdDate=row[TokenCustomizationsTable.c.createdDate],
+        updatedDate=row[TokenCustomizationsTable.c.updatedDate],
+        registryAddress=row[TokenCustomizationsTable.c.registryAddress],
+        tokenId=row[TokenCustomizationsTable.c.tokenId],
+        creatorAddress=row[TokenCustomizationsTable.c.creatorAddress],
+        signature=row[TokenCustomizationsTable.c.signature],
+        blockNumber=row[TokenCustomizationsTable.c.blockNumber],
+        name=row[TokenCustomizationsTable.c.name],
+        description=row[TokenCustomizationsTable.c.description],
     )

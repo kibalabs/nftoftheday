@@ -18,6 +18,7 @@ from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
+from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
 from notd.model import UserInteraction
@@ -27,6 +28,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
@@ -572,4 +574,38 @@ class Saver(CoreSaver):
         if len(latestTokenListingIds) == 0:
             return
         query = LatestTokenListingsTable.delete().where(LatestTokenListingsTable.c.latestTokenListingId.in_(latestTokenListingIds))
+        await self._execute(query=query, connection=connection)
+
+    async def create_token_customization(self, registryAddress: str, tokenId: str, creatorAddress: str, signature: str, blockNumber: int, name: Optional[str], description: Optional[str], connection: Optional[DatabaseConnection] = None) -> TokenCustomization:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TokenCustomizationsTable.c.createdDate.key: createdDate,
+            TokenCustomizationsTable.c.updatedDate.key: updatedDate,
+            TokenCustomizationsTable.c.registryAddress.key: registryAddress,
+            TokenCustomizationsTable.c.tokenId.key: tokenId,
+            TokenCustomizationsTable.c.creatorAddress.key: creatorAddress,
+            TokenCustomizationsTable.c.signature.key: signature,
+            TokenCustomizationsTable.c.blockNumber.key: blockNumber,
+            TokenCustomizationsTable.c.name.key: name,
+            TokenCustomizationsTable.c.description.key: description,
+        }
+        query = TokenCustomizationsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        tokenCustomizationId = result.inserted_primary_key[0]
+        return TokenCustomization(
+            tokenCustomizationId=tokenCustomizationId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            creatorAddress=creatorAddress,
+            blockNumber=blockNumber,
+            signature=signature,
+            name=name,
+            description=description,
+        )
+
+    async def delete_token_customization(self, tokenCustomizationId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenCustomizationsTable.delete().where(TokenCustomizationsTable.c.tokenCustomizationId == tokenCustomizationId)
         await self._execute(query=query, connection=connection)

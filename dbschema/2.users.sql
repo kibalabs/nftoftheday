@@ -22,3 +22,5 @@ GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_latest_token_listings TO notd_api;
 GRANT ALL ON SEQUENCE tbl_latest_token_listings_id_seq TO notd_api;
 GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_token_attributes TO notd_api;
 GRANT ALL ON SEQUENCE tbl_token_attributes_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_token_customizations TO notd_api;
+GRANT ALL ON SEQUENCE tbl_token_customizations_id_seq TO notd_api;

@@ -10,7 +10,9 @@ from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiSponsoredToken
+from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 
@@ -199,3 +201,20 @@ class QueryCollectionTokensRequest(BaseModel):
 
 class QueryCollectionTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
+    galleryTokens: List[ApiGalleryToken]
+
+class CreateCustomizationForCollectionTokenRequest(BaseModel):
+    creatorAddress: str
+    signature: str
+    blockNumber: int
+    name: Optional[str]
+    description: Optional[str]
+
+class CreateCustomizationForCollectionTokenResponse(BaseModel):
+    tokenCustomization: ApiTokenCustomization
+
+class GetGalleryTokenRequest(BaseModel):
+    pass
+
+class GetGalleryTokenResponse(BaseModel):
+    galleryToken: ApiGalleryToken

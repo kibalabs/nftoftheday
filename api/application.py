@@ -71,7 +71,7 @@ tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
 tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenListingProcessor=tokenListingProcessor, tokenAttributeProcessor=tokenAttributeProcessor)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
-galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever)
+galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=name, version=version, environment=environment))

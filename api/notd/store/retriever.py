@@ -13,6 +13,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import TokenAttribute
+from notd.model import TokenCustomization
 from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
@@ -25,6 +26,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
@@ -35,6 +37,7 @@ from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import token_attribute_from_row
+from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
@@ -115,8 +118,8 @@ class Retriever(CoreRetriever):
         row = result.first()
         if not row:
             raise NotFoundException(message=f'TokenMetadata with registry:{registryAddress} tokenId:{tokenId} not found')
-        tokenMetdata = token_metadata_from_row(row)
-        return tokenMetdata
+        tokenMetadata = token_metadata_from_row(row)
+        return tokenMetadata
 
     async def list_collections(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Collection]:
         query = TokenCollectionsTable.select()
@@ -259,3 +262,26 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         latestTokenListings = [token_listing_from_row(row) for row in result]
         return latestTokenListings
+
+    async def list_token_customizations(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenCustomization]:
+        query = TokenCustomizationsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenCustomizationsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenCustomizationsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenCustomizations = [token_customization_from_row(row) for row in result]
+        return tokenCustomizations
+
+    async def get_token_customization_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenCustomization:
+        query = TokenCustomizationsTable.select() \
+            .where(TokenCustomizationsTable.c.registryAddress == registryAddress) \
+            .where(TokenCustomizationsTable.c.tokenId == tokenId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TokenCustomization with registry:{registryAddress} tokenId:{tokenId} not found')
+        tokenCustomization = token_customization_from_row(row)
+        return tokenCustomization

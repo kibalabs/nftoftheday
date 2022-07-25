@@ -25,8 +25,6 @@ from notd.api.endpoints_v1 import RetrieveRandomTransferResponse
 from notd.api.endpoints_v1 import RetrieveSponsoredTokenResponse
 from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
-from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
-from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
@@ -182,10 +180,5 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def subscribe_email(request: SubscribeRequest):
         await notdManager.subscribe_email(email=request.email)
         return SubscribeResponse()
-
-    @router.post('/collections/{registryAddress}/tokens/{tokenId}/submit-treasure-hunt')
-    async def submit_treasure_hunt_for_collection_token(registryAddress: str, tokenId: str, request: SubmitTreasureHuntForCollectionTokenRequest):
-        await notdManager.submit_treasure_hunt_for_collection_token(registryAddress=registryAddress, tokenId=tokenId, userAddress=request.userAddress, signature=request.signature)
-        return SubmitTreasureHuntForCollectionTokenResponse()
 
     return router
