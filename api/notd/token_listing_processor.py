@@ -17,7 +17,7 @@ class TokenListingProcessor:
         self.requester = requester
         self.openseaRequester = openseaRequester
 
-    async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: str) -> List[RetrievedTokenListing]:
+    async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
         for index, chunkedTokenIs in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
             logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)

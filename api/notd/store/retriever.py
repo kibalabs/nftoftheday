@@ -263,6 +263,17 @@ class Retriever(CoreRetriever):
         latestTokenListings = [token_listing_from_row(row) for row in result]
         return latestTokenListings
 
+    async def get_latest_token_listing_by_registryAddress_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenListing:
+        query = LatestTokenListingsTable.select() \
+            .where(LatestTokenListingsTable.c.registryAddress == registryAddress) \
+            .where(LatestTokenListingsTable.c.tokenId == tokenId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'LatestTokenListings with registry:{registryAddress} tokenId:{tokenId} not found')
+        latestTokenListing = token_listing_from_row(row)
+        return latestTokenListing
+
     async def list_token_customizations(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenCustomization]:
         query = TokenCustomizationsTable.select()
         if fieldFilters:
