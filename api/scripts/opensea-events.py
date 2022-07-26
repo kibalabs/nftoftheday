@@ -21,8 +21,7 @@ openseaApiKey = os.environ['OPENSEA_API_KEY']
 
 
 async def test():
-    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["REMOTE_DB_USERNAME"], password=os.environ["REMOTE_DB_PASSWORD"], host=os.environ["REMOTE_DB_HOST"], port=os.environ["REMOTE_DB_PORT"], name=os.environ["REMOTE_DB_NAME"])
-    # databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
     saver = Saver(database=database)
@@ -30,8 +29,8 @@ async def test():
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)
     registryAddress = COLLECTION_GOBLINTOWN_ADDRESS
-    startHour = date_util.datetime_from_string('2022-07-26T19:04:00.000000')
-    endHour = date_util.datetime_from_datetime(dt=startHour, minutes=10)
+    startHour = date_util.datetime_from_string('2022-07-26T19:58:00.000000')
+    endHour = date_util.datetime_from_datetime(dt=startHour, minutes=60)
     queryData = {
         'asset_contract_address': registryAddress,
         "occurred_after": startHour,
@@ -49,27 +48,25 @@ async def test():
                 print(asset['event_timestamp'])
                 tokensToReprocess.append(asset['asset']['token_id'])
             
-        #print('tokensToReprocess', tokensToReprocess)
         openseaListing = await tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=registryAddress, tokenIds=tokensToReprocess)
-        #print(openseaListing)
-        for listing in openseaListing:
-            try:
-                latestTokenListing = await retriever.get_latest_token_listing_by_registryAddress_token_id(registryAddress=listing.registryAddress, tokenId=listing.tokenId)
-            except NotFoundException:
-                latestTokenListing = None
-            if not latestTokenListing:
-                print('create',listing.tokenId)
-                # await saver.create_latest_token_listing(retrievedTokenListings=listing, connection=connection)
-            else:
-                if listing.value < latestTokenListing.value:
-                    print('delete',listing.tokenId)
-                    #logging.info(f'Deleting existing listings')
-                    # await saver.delete_latest_token_listing(latestTokenListingId=latestTokenListing.tokenListingId, connection=connection)
-                    # logging.info(f'Saving listings')
-                    # await saver.create_latest_token_listing(retrievedTokenListings=listing, connection=connection)
+        async with saver.create_transaction() as connection:
+            for listing in openseaListing:
+                try:
+                    latestTokenListing = await retriever.get_token_listing_by_registry_address_token_id(registryAddress=listing.registryAddress, tokenId=listing.tokenId)
+                except NotFoundException:
+                    latestTokenListing = None
+                if not latestTokenListing:
+                    logging.info(f'Saving new listings')
+                    await saver.create_latest_token_listing(retrievedTokenListing=listing, connection=connection)
+                else:
+                    if listing.value < latestTokenListing.value:
+                        logging.info(f'Deleting existing listings')
+                        await saver.delete_latest_token_listing(latestTokenListingId=latestTokenListing.tokenListingId, connection=connection)
+                        logging.info(f'Saving listings')
+                        await saver.create_latest_token_listing(retrievedTokenListing=listing, connection=connection)
                     
             
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(5*60)
         startHour =  date_util.datetime_from_datetime(startHour, minutes=5)
         
 

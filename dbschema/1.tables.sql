@@ -236,6 +236,9 @@ CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);
 
 
 CREATE TABLE tbl_latest_token_listings (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     offerer_address TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
