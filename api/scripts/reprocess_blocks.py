@@ -1,3 +1,4 @@
+import math
 import asyncio
 import os
 import sys
@@ -53,6 +54,8 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
     await slackClient.post(text=f'reprocess_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         currentBlockNumber = startBlockNumber
+        milestoneBlockSize = math.ceil((endBlockNumber - startBlockNumber) / 100)
+        nextMilestoneBlockNumber = currentBlockNumber + milestoneBlockSize
         while currentBlockNumber < endBlockNumber:
             start = currentBlockNumber
             end = min(currentBlockNumber + batchSize, endBlockNumber)
@@ -71,6 +74,9 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
             for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=10):
                 await asyncio.gather(*[reprocess_block(notdManager=notdManager, blockNumber=blockNumber) for blockNumber in chunk])
             currentBlockNumber = currentBlockNumber + batchSize
+            if currentBlockNumber > nextMilestoneBlockNumber:
+                await slackClient.post(text=f'reprocess_blocks → 🚧 still going: {currentBlockNumber} / {startBlockNumber}-{endBlockNumber}')
+                nextMilestoneBlockNumber = currentBlockNumber + milestoneBlockSize
         await slackClient.post(text=f'reprocess_blocks → ✅ completed : {startBlockNumber}-{endBlockNumber}')
     except Exception as exception:
         await slackClient.post(text=f'reprocess_blocks → ❌ error: {startBlockNumber}-{endBlockNumber}\n```{str(exception)}```')
