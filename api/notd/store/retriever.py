@@ -263,7 +263,7 @@ class Retriever(CoreRetriever):
         latestTokenListings = [token_listing_from_row(row) for row in result]
         return latestTokenListings
 
-    async def get_latest_token_listing_by_registryAddress_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenListing:
+    async def get_token_listing_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenListing:
         query = LatestTokenListingsTable.select() \
             .where(LatestTokenListingsTable.c.registryAddress == registryAddress) \
             .where(LatestTokenListingsTable.c.tokenId == tokenId)
