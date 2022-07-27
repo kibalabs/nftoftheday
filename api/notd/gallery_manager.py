@@ -172,7 +172,7 @@ class GalleryManager:
             'name': name,
             'description': description,
         }
-        signedMessage = json.dumps({ 'command': command, 'message': message }, indent=2)
+        signedMessage = json.dumps({ 'command': command, 'message': message }, indent=2, ensure_ascii=False)
         messageHash = defunct_hash_message(text=signedMessage)
         signer = self.web3.eth.account.recoverHash(message_hash=messageHash, signature=signature)
         if signer != creatorAddress:
