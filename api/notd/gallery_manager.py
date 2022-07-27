@@ -124,13 +124,13 @@ class GalleryManager:
         if tokenIdIn:
             query = query.where(TokenMetadatasTable.c.tokenId.in_(tokenIdIn))
         if attributeFilters:
-            query = query.join(TokenAttributesTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenAttributesTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenAttributesTable.c.tokenId))
-            for attributeFilter in attributeFilters:
-                query = (
-                    query
-                        .where(TokenAttributesTable.c.name == attributeFilter.fieldName)
-                        .where(TokenAttributesTable.c.value.in_(attributeFilter.values))
-                )
+            for index, attributeFilter in enumerate(attributeFilters):
+                query = query.join(TokenAttributesTable.alias(f'attributes-{index}'), sqlalchemy.and_(
+                    TokenMetadatasTable.c.registryAddress == TokenAttributesTable.alias(f'attributes-{index}').c.registryAddress,
+                    TokenMetadatasTable.c.tokenId == TokenAttributesTable.alias(f'attributes-{index}').c.tokenId,
+                    TokenAttributesTable.alias(f'attributes-{index}').c.name == attributeFilter.fieldName,
+                    TokenAttributesTable.alias(f'attributes-{index}').c.value.in_(attributeFilter.values),
+                ))
         result = await self.retriever.database.execute(query=query)
         galleryTokens = []
         for row in result:
