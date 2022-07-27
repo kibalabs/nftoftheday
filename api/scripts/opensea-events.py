@@ -21,6 +21,8 @@ openseaApiKey = os.environ['OPENSEA_API_KEY']
 
 
 async def test():
+    startHour = date_util.datetime_from_string('2022-07-26T23:20:00.000000')
+    endHour = date_util.datetime_from_datetime(dt=startHour, minutes=60)
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
@@ -29,8 +31,6 @@ async def test():
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)
     registryAddress = COLLECTION_GOBLINTOWN_ADDRESS
-    startHour = date_util.datetime_from_string('2022-07-26T19:58:00.000000')
-    endHour = date_util.datetime_from_datetime(dt=startHour, minutes=60)
     queryData = {
         'asset_contract_address': registryAddress,
         "occurred_after": startHour,
@@ -44,8 +44,8 @@ async def test():
         response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData)
         responseJson = response.json()
         for asset in responseJson['asset_events']:
-            if asset['event_type']:
-                print(asset['event_timestamp'])
+            if asset['asset']:
+                # print(asset['event_timestamp'])
                 tokensToReprocess.append(asset['asset']['token_id'])
             
         openseaListing = await tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=registryAddress, tokenIds=tokensToReprocess)
@@ -56,13 +56,13 @@ async def test():
                 except NotFoundException:
                     latestTokenListing = None
                 if not latestTokenListing:
-                    logging.info(f'Saving new listings')
+                    logging.info(f'Saving new listing')
                     await saver.create_latest_token_listing(retrievedTokenListing=listing, connection=connection)
                 else:
                     if listing.value < latestTokenListing.value:
-                        logging.info(f'Deleting existing listings')
+                        logging.info(f'Deleting existing listing')
                         await saver.delete_latest_token_listing(latestTokenListingId=latestTokenListing.tokenListingId, connection=connection)
-                        logging.info(f'Saving listings')
+                        logging.info(f'Saving listing')
                         await saver.create_latest_token_listing(retrievedTokenListing=listing, connection=connection)
                     
             
