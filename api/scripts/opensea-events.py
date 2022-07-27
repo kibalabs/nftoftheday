@@ -9,6 +9,7 @@ from core.requester import Requester
 from core.util import date_util
 from core.exceptions import NotFoundException
 from core.store.database import Database
+import pandas as pd
 
 
 
@@ -21,8 +22,7 @@ openseaApiKey = os.environ['OPENSEA_API_KEY']
 
 
 async def test():
-    startHour = date_util.datetime_from_string('2022-07-26T23:20:00.000000')
-    endHour = date_util.datetime_from_datetime(dt=startHour, minutes=60)
+    startHour = date_util.datetime_from_now(minutes=-5) #date_util.datetime_from_string('2022-07-26T23:20:00.000000')
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
@@ -35,17 +35,20 @@ async def test():
         'asset_contract_address': registryAddress,
         "occurred_after": startHour,
     }
+    col =['Event timestamp', 'tokenId', 'event_type']
+    data = []
+    count = 0 
     await database.connect()
-    while startHour< endHour:
+    while True:
         #print(startHour, 'after')
         tokensToReprocess = []
         queryData['occurred_after'] = startHour
-        queryData['occurred_before'] = date_util.datetime_from_datetime(dt=startHour, minutes=5)
         response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData)
         responseJson = response.json()
+        print(f'Got {len(responseJson["asset_events"])} items')
         for asset in responseJson['asset_events']:
             if asset['asset']:
-                # print(asset['event_timestamp'])
+                data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
                 tokensToReprocess.append(asset['asset']['token_id'])
             
         openseaListing = await tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=registryAddress, tokenIds=tokensToReprocess)
@@ -65,9 +68,13 @@ async def test():
                         logging.info(f'Saving listing')
                         await saver.create_latest_token_listing(retrievedTokenListing=listing, connection=connection)
                     
-            
+        count += 1
+        if count > 5:
+            pd.DataFrame(data, columns=col).to_csv('events.csv')
+            break
         await asyncio.sleep(5*60)
-        startHour =  date_util.datetime_from_datetime(startHour, minutes=5)
+
+        
         
 
 
