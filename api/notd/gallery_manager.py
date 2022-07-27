@@ -131,7 +131,6 @@ class GalleryManager:
                     TokenAttributesTable.alias(f'attributes-{index}').c.name == attributeFilter.fieldName,
                     TokenAttributesTable.alias(f'attributes-{index}').c.value.in_(attributeFilter.values),
                 ))
-        print('query', query)
         result = await self.retriever.database.execute(query=query)
         galleryTokens = []
         for row in result:
