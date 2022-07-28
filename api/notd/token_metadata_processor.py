@@ -237,7 +237,7 @@ class TokenMetadataProcessor():
             try:
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=10)
                 tokenMetadataDict = tokenMetadataResponse.json()
-                if registryAddress == '0x8Cef7873425D94E2588f10A08428280a2e6338e3':
+                if isinstance(tokenMetadataDict, list):
                     tokenMetadataDict = tokenMetadataDict[0]
                 if tokenMetadataDict is None:
                     raise Exception('Empty response')
