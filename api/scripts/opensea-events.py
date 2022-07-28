@@ -14,6 +14,7 @@ import pandas as pd
 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from notd.store.schema import LatestTokenListingsTable
 from notd.token_listing_processor import TokenListingProcessor
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS, COLLECTION_GOBLINTOWN_ADDRESS
 from notd.store.retriever import Retriever
@@ -50,23 +51,19 @@ async def test():
             if asset['asset']:
                 data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
                 tokensToReprocess.append(asset['asset']['token_id'])
-            
-        openseaListing = await tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=registryAddress, tokenIds=tokensToReprocess)
+
         async with saver.create_transaction() as connection:
-            for listing in openseaListing:
-                try:
-                    latestTokenListing = await retriever.get_token_listing_by_registry_address_token_id(registryAddress=listing.registryAddress, tokenId=listing.tokenId)
-                except NotFoundException:
-                    latestTokenListing = None
-                if not latestTokenListing:
-                    logging.info(f'Saving new listing')
-                    await saver.create_latest_token_listing(retrievedTokenListing=listing, connection=connection)
-                else:
-                    if listing.value < latestTokenListing.value:
-                        logging.info(f'Deleting existing listing')
-                        await saver.delete_latest_token_listing(latestTokenListingId=latestTokenListing.tokenListingId, connection=connection)
-                        logging.info(f'Saving listing')
-                        await saver.create_latest_token_listing(retrievedTokenListing=listing, connection=connection)
+            query = (
+                LatestTokenListingsTable.select()
+                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                    .where(LatestTokenListingsTable.c.registryAddress == registryAddress)
+                    .where(LatestTokenListingsTable.c.tokenId.in_(tokensToReprocess))
+            )
+            result = await retriever.database.execute(query=query, connection=connection)
+            latestTokenListingIdsToDelete = {row[0] for row in result}
+            await saver.delete_latest_token_listings(latestTokenListingIds=latestTokenListingIdsToDelete, connection=connection)
+            openseaListings = await tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=registryAddress, tokenIds=tokensToReprocess)
+            await saver.create_latest_token_listings(retrievedTokenListings=openseaListings, connection=connection)
                     
         count += 1
         if count > 5:
