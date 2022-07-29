@@ -63,10 +63,13 @@ export const CollectionPage = (): React.ReactElement => {
       setCollection(undefined);
     }
     notdClient.getCollection(address).then((retrievedCollection: Collection): void => {
+      toast.success('collection succesfully loaded');
+
       setCollection(retrievedCollection);
     }).catch((error: unknown): void => {
       console.error(error);
       setCollection(null);
+      toast.error('Collection failed to load, try again');
     });
   }, [notdClient, address]);
 

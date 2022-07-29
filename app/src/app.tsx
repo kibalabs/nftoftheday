@@ -4,13 +4,13 @@ import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, Stack } from '@kibalabs/ui-react';
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
 
+import 'react-toastify/dist/ReactToastify.css';
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
+import { ReactToastify } from './components/ReactToastify';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { CollectionPage } from './pages/CollectionPage';
@@ -78,10 +78,11 @@ export const App = (props: IAppProps): React.ReactElement => {
               </Stack>
             </BackgroundView>
           </AccountControlProvider>
-          <ToastContainer />
+          {/* <ToastContainer /> */}
+          <ReactToastify />
         </GlobalsProvider>
       </PageDataProvider>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </KibaApp>
   );
 };
