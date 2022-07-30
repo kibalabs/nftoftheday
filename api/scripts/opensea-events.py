@@ -23,7 +23,7 @@ openseaApiKey = os.environ['OPENSEA_API_KEY']
 
 
 async def test():
-    startHour = date_util.datetime_from_now(minutes=-5) #date_util.datetime_from_string('2022-07-26T23:20:00.000000')
+    startHour = date_util.start_of_day()
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     retriever = Retriever(database=database)
@@ -38,42 +38,40 @@ async def test():
     }
     col =['Event timestamp', 'tokenId', 'event_type']
     data = []
-    count = 0 
     await database.connect()
+    tokensToReprocess = set()
     while True:
-        #print(startHour, 'after')
-        tokensToReprocess = []
-        queryData['occurred_after'] = startHour
-        response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData)
-        responseJson = response.json()
-        print(f'Got {len(responseJson["asset_events"])} items')
-        for asset in responseJson['asset_events']:
-            if asset['asset']:
-                data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
-                tokensToReprocess.append(asset['asset']['token_id'])
+        try:
+            response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
+            responseJson = response.json()
+            print(f'Got {len(responseJson["asset_events"])} items')
+            for asset in responseJson['asset_events']:
+                if asset['asset'] and asset.get('event_type') != 'bid_entered':
+                        data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
+                        tokensToReprocess.add(asset['asset']['token_id'])
+            if responseJson['next'] != None:
+                queryData['cursor'] = responseJson['next']
+            else:
+                break
+            await asyncio.sleep(0.1)
+        except:
+            # NOTE(Femi-Ogunkola): Because of opensea request throttling
+            await asyncio.sleep(2)
+    pd.DataFrame(data=data,columns=col).to_csv(f'{startHour}.csv')
 
-        async with saver.create_transaction() as connection:
-            query = (
-                LatestTokenListingsTable.select()
-                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
-                    .where(LatestTokenListingsTable.c.registryAddress == registryAddress)
-                    .where(LatestTokenListingsTable.c.tokenId.in_(tokensToReprocess))
-            )
-            result = await retriever.database.execute(query=query, connection=connection)
-            latestTokenListingIdsToDelete = {row[0] for row in result}
-            await saver.delete_latest_token_listings(latestTokenListingIds=latestTokenListingIdsToDelete, connection=connection)
-            openseaListings = await tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=registryAddress, tokenIds=tokensToReprocess)
-            await saver.create_latest_token_listings(retrievedTokenListings=openseaListings, connection=connection)
+    async with saver.create_transaction() as connection:
+        query = (
+            LatestTokenListingsTable.select()
+                .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                .where(LatestTokenListingsTable.c.registryAddress == registryAddress)
+                .where(LatestTokenListingsTable.c.tokenId.in_(tokensToReprocess))
+        )
+        result = await retriever.database.execute(query=query, connection=connection)
+        latestTokenListingIdsToDelete = {row[0] for row in result}
+        await saver.delete_latest_token_listings(latestTokenListingIds=latestTokenListingIdsToDelete, connection=connection)
+        openseaListings = await tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=registryAddress, tokenIds=list(tokensToReprocess))
+        await saver.create_latest_token_listings(retrievedTokenListings=openseaListings, connection=connection)
                     
-        count += 1
-        if count > 5:
-            pd.DataFrame(data, columns=col).to_csv('events.csv')
-            break
-        await asyncio.sleep(5*60)
-
-        
-        
-
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
