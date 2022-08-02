@@ -485,7 +485,7 @@ class TokenManager:
     async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
         await self.workQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
 
-    async def update_latest_listings_for_collection(self, address: str) -> None:
+    async def update_full_latest_listings_for_collection(self, address: str) -> None:
         tokenIdsQuery = (
             TokenMetadatasTable.select()
             .with_only_columns([TokenMetadatasTable.c.tokenId])
@@ -509,3 +509,43 @@ class TokenManager:
             await self.saver.delete_latest_token_listings(latestTokenListingIds=currentLatestTokenListingIds, connection=connection)
             logging.info(f'Saving {len(allListings)} listings')
             await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
+
+    async def update_partial_latest_listings_for_collection(self, address: str, startHour: datetime.datetime) -> None:
+        queryData = {
+        'asset_contract_address': address,
+        "occurred_after": startHour,
+        }
+        tokensToReprocess = set()
+        while True:
+            response = await self.tokenListingProcessor.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
+            responseJson = response.json()
+            if len(responseJson['data']) == 0:
+                break
+            print(f'Got {len(responseJson["asset_events"])} items')
+            for asset in responseJson['asset_events']:
+                if asset['asset'] and asset.get('event_type') != 'bid_entered':
+                        tokensToReprocess.add(asset['asset']['token_id'])
+            queryData['cursor'] = responseJson['next']
+            await asyncio.sleep(0.1)
+            
+        async with self.saver.create_transaction() as connection:
+            query = (
+                LatestTokenListingsTable.select()
+                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                    .where(LatestTokenListingsTable.c.registryAddress == address)
+                    .where(LatestTokenListingsTable.c.tokenId.in_(tokensToReprocess))
+            )
+            result = await self.retriever.database.execute(query=query, connection=connection)
+            latestTokenListingIdsToDelete = {row[0] for row in result}
+            await self.saver.delete_latest_token_listings(latestTokenListingIds=latestTokenListingIdsToDelete, connection=connection)
+            openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=list(tokensToReprocess))
+            await self.saver.create_latest_token_listings(retrievedTokenListings=openseaListings, connection=connection)
+
+    async def update_latest_listings_for_collection(self, address: str) -> None:
+        currentDate = date_util.datetime_from_now()
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='latest_token_listing')
+        latestProcessedDate = latestUpdate.date
+        if currentDate > date_util.datetime_from_datetime(currentDate, hours=1):
+            await self.update_full_latest_listings_for_collection(address=address)
+        else:
+            await self.update_partial_latest_listings_for_collection(address=address, startHour=currentDate)

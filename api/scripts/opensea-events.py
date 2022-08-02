@@ -41,22 +41,19 @@ async def test():
     await database.connect()
     tokensToReprocess = set()
     while True:
-        try:
-            response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
-            responseJson = response.json()
-            print(f'Got {len(responseJson["asset_events"])} items')
-            for asset in responseJson['asset_events']:
-                if asset['asset'] and asset.get('event_type') != 'bid_entered':
-                        data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
-                        tokensToReprocess.add(asset['asset']['token_id'])
-            if responseJson['next'] != None:
-                queryData['cursor'] = responseJson['next']
-            else:
-                break
-            await asyncio.sleep(0.1)
-        except:
-            # NOTE(Femi-Ogunkola): Because of opensea request throttling
-            await asyncio.sleep(2)
+        response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
+        responseJson = response.json()
+        if len(responseJson['data']) == 0:
+            break
+        print(f'Got {len(responseJson["asset_events"])} items')
+        for asset in responseJson['asset_events']:
+            if asset['asset'] and asset.get('event_type') != 'bid_entered':
+                    data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
+                    tokensToReprocess.add(asset['asset']['token_id'])
+        
+        queryData['cursor'] = responseJson['next']
+        await asyncio.sleep(0.1)
+        
     pd.DataFrame(data=data,columns=col).to_csv(f'{startHour}.csv')
 
     async with saver.create_transaction() as connection:
