@@ -524,10 +524,10 @@ class TokenManager:
             print(f'Got {len(responseJson["asset_events"])} items')
             for asset in responseJson['asset_events']:
                 if asset['asset'] and asset.get('event_type') != 'bid_entered':
-                        tokensToReprocess.add(asset['asset']['token_id'])
+                    tokensToReprocess.add(asset['asset']['token_id'])
             queryData['cursor'] = responseJson['next']
             await asyncio.sleep(0.1)
-            
+
         async with self.saver.create_transaction() as connection:
             query = (
                 LatestTokenListingsTable.select()
