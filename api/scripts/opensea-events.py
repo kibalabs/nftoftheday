@@ -32,9 +32,11 @@ async def test():
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)
     registryAddress = COLLECTION_GOBLINTOWN_ADDRESS
+    events = []
     queryData = {
         'asset_contract_address': registryAddress,
-        "occurred_after": startHour,
+        'occurred_after': startHour,
+        'event_type': ['transfer','successful','cancelled','created']
     }
     col =['Event timestamp', 'tokenId', 'event_type']
     data = []
@@ -50,7 +52,8 @@ async def test():
             if asset['asset'] and asset.get('event_type') != 'bid_entered':
                     data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
                     tokensToReprocess.add(asset['asset']['token_id'])
-        
+        if responseJson['next'] is None:
+            break
         queryData['cursor'] = responseJson['next']
         await asyncio.sleep(0.5)
         

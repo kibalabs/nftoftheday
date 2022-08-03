@@ -510,10 +510,10 @@ class TokenManager:
             logging.info(f'Saving {len(allListings)} listings')
             await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
 
-    async def update_partial_latest_listings_for_collection(self, address: str, startHour: datetime.datetime) -> None:
+    async def update_partial_latest_listings_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         queryData = {
-        'asset_contract_address': address,
-        "occurred_after": startHour,
+            'asset_contract_address': address,
+            'occurred_after': startDate,
         }
         tokensToReprocess = set()
         while True:
@@ -527,7 +527,6 @@ class TokenManager:
                     tokensToReprocess.add(asset['asset']['token_id'])
             queryData['cursor'] = responseJson['next']
             await asyncio.sleep(0.1)
-
         async with self.saver.create_transaction() as connection:
             query = (
                 LatestTokenListingsTable.select()
@@ -543,9 +542,10 @@ class TokenManager:
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
         currentDate = date_util.datetime_from_now()
-        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='latest_token_listing')
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='latest_token_listing', name=address)
         latestProcessedDate = latestUpdate.date
-        if currentDate > date_util.datetime_from_datetime(latestProcessedDate, hours=1):
+        if currentDate > date_util.datetime_from_datetime(dt=latestProcessedDate, hours=1):
             await self.update_full_latest_listings_for_collection(address=address)
         else:
-            await self.update_partial_latest_listings_for_collection(address=address, startHour=latestProcessedDate)
+            await self.update_partial_latest_listings_for_collection(address=address, startDate=latestProcessedDate)
+        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=currentDate)
