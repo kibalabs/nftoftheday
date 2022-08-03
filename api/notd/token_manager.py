@@ -517,7 +517,6 @@ class TokenManager:
     async def update_partial_latest_listings_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         openseaTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=startDate)
         logging.info(f'Got {len(openseaTokenIdsToReprocess)} changed opensea tokenIds')
-        print(openseaTokenIdsToReprocess)
         openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=openseaTokenIdsToReprocess)
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         async with self.saver.create_transaction() as connection:
