@@ -3,18 +3,18 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from core.util import chain_util
 from core.util import date_util
 from core.util.typing_util import JSON
 from pydantic import dataclasses
 
+COLLECTION_SPRITE_CLUB_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
+COLLECTION_GOBLINTOWN_ADDRESS = '0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e'
+COLLECTION_MDTP_ADDRESS = '0x8e720F90014fA4De02627f4A4e217B7e3942d5e8'
+
 GALLERY_COLLECTIONS = {
-    # Sprite Club
-    chain_util.normalize_address(value='0x2744fe5e7776bca0af1cdeaf3ba3d1f5cae515d3'),
-    # Goblin Town
-    chain_util.normalize_address(value='0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e'),
-    # MDTP
-    chain_util.normalize_address(value='0x8e720f90014fa4de02627f4a4e217b7e3942d5e8'),
+    COLLECTION_SPRITE_CLUB_ADDRESS,
+    COLLECTION_GOBLINTOWN_ADDRESS,
+    COLLECTION_MDTP_ADDRESS,
 }
 
 
@@ -269,6 +269,26 @@ class Airdrop:
 
 
 @dataclasses.dataclass
+class RetrievedTokenListing:
+    registryAddress: str
+    tokenId: str
+    offererAddress: str
+    startDate: datetime.datetime
+    endDate: datetime.datetime
+    isValueNative: bool
+    value: int
+    source: str
+    sourceId: str
+
+
+@dataclasses.dataclass
+class TokenListing(RetrievedTokenListing):
+    tokenListingId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
 class RetrievedTokenAttribute:
     registryAddress: str
     tokenId: str
@@ -290,20 +310,20 @@ class CollectionAttribute:
 
 
 @dataclasses.dataclass
-class RetrievedTokenListing:
+class TokenCustomization:
+    tokenCustomizationId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
     registryAddress: str
     tokenId: str
-    offererAddress: str
-    startDate: datetime.datetime
-    endDate: datetime.datetime
-    isValueNative: bool
-    value: int
-    source: str
-    sourceId: str
+    creatorAddress: str
+    blockNumber: int
+    signature: str
+    name: Optional[str]
+    description: Optional[str]
 
 
 @dataclasses.dataclass
-class TokenListing(RetrievedTokenListing):
-    tokenListingId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
+class GalleryToken:
+    tokenMetadata: TokenMetadata
+    tokenCustomization: Optional[TokenCustomization]

@@ -11,7 +11,9 @@ from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiSponsoredToken
+from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Airdrop
@@ -19,8 +21,10 @@ from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
+from notd.model import GalleryToken
 from notd.model import SponsoredToken
 from notd.model import Token
+from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
@@ -171,3 +175,30 @@ class ResponseBuilder:
             name=attribute.name,
             values=attribute.values
         ) for attribute in collectionAttributes]
+
+    async def get_token_customization_for_collection_token(self, registryAddress: str, tokenId: str) -> ApiTokenCustomization:
+        tokenCustomization = await self.retriever.get_token_customization_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+        return await self.token_customization_from_model(tokenCustomization=tokenCustomization)
+
+    async def token_customization_from_model(self, tokenCustomization: TokenCustomization) -> ApiTokenCustomization:
+        return ApiTokenCustomization(
+            tokenCustomizationId=tokenCustomization.tokenCustomizationId,
+            createdDate=tokenCustomization.createdDate,
+            updatedDate=tokenCustomization.updatedDate,
+            registryAddress=tokenCustomization.registryAddress,
+            tokenId=tokenCustomization.tokenId,
+            creatorAddress=tokenCustomization.creatorAddress,
+            blockNumber=tokenCustomization.blockNumber,
+            signature=tokenCustomization.signature,
+            name=tokenCustomization.name,
+            description=tokenCustomization.description,
+        )
+
+    async def gallery_token_from_model(self, galleryToken: GalleryToken) -> ApiGalleryToken:
+        return ApiGalleryToken(
+            collectionToken=(await self.collection_token_from_model(tokenMetadata=galleryToken.tokenMetadata)),
+            tokenCustomization=(await self.token_customization_from_model(tokenCustomization=galleryToken.tokenCustomization) if galleryToken.tokenCustomization else None),
+        )
+
+    async def gallery_tokens_from_models(self, galleryTokens: Sequence[GalleryToken]) -> Sequence[ApiGalleryToken]:
+        return await asyncio.gather(*[self.gallery_token_from_model(galleryToken=galleryToken) for galleryToken in galleryTokens])

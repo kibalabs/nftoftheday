@@ -250,6 +250,8 @@ class TokenMetadataProcessor():
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Failed to process metadata from {metadataUrl}: {type(exception)} {str(exception)}')
                 tokenMetadataDict = {}
+        if isinstance(tokenMetadataDict, list):
+            tokenMetadataDict = tokenMetadataDict[0]
         await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         if registryAddress in GALLERY_COLLECTIONS and retrievedTokenMetadata.imageUrl:

@@ -236,6 +236,9 @@ CREATE INDEX tbl_latest_updates_name ON tbl_latest_updates (name);
 
 
 CREATE TABLE tbl_latest_token_listings (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     offerer_address TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
@@ -268,3 +271,21 @@ CREATE INDEX tbl_token_attributes_updated_date ON tbl_token_attributes (updated_
 CREATE INDEX tbl_token_attributes_registry_address ON tbl_token_attributes (registry_address);
 CREATE INDEX tbl_token_attributes_name ON tbl_token_attributes (name);
 CREATE INDEX tbl_token_attributes_value ON tbl_token_attributes (value);
+
+
+CREATE TABLE tbl_token_customizations (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    token_id TEXT NOT NULL,
+    creator_address TEXT NOT NULL,
+    signature TEXT NOT NULL,
+    block_number INT NOT NULL,
+    name TEXT,
+    description TEXT
+);
+CREATE UNIQUE INDEX tbl_token_customizations_registry_address_token_id on tbl_token_customizations (registry_address, token_id);
+CREATE INDEX tbl_token_customizations_created_date ON tbl_token_customizations (created_date);
+CREATE INDEX tbl_token_customizations_updated_date ON tbl_token_customizations (updated_date);
+CREATE INDEX tbl_token_customizations_registry_address_token_id_creator_address on tbl_token_customizations (registry_address, token_id, creator_address);
