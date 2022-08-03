@@ -100,7 +100,7 @@ class TokenListingProcessor:
             await asyncio.sleep(0.25)
         return listings
 
-    async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
+    async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         queryData = {
             'asset_contract_address': address,
             'occurred_after': startDate,
@@ -109,14 +109,15 @@ class TokenListingProcessor:
         while True:
             response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
             responseJson = response.json()
-            print(f'Got {len(responseJson["asset_events"])} items')
+            logging.info(f'Got {len(responseJson["asset_events"])} items')
             for asset in responseJson['asset_events']:
                 if asset['asset'] and asset.get('event_type') != 'bid_entered':
                     tokensToReprocess.add(asset['asset']['token_id'])
-            if responseJson['next'] is None:
+            if responseJson.get('next'):
                 break
             queryData['cursor'] = responseJson['next']
             await asyncio.sleep(0.25)
+        tokensToReprocess = list(tokensToReprocess)
         return tokensToReprocess
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
