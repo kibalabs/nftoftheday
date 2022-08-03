@@ -111,7 +111,7 @@ class TokenListingProcessor:
             responseJson = response.json()
             logging.info(f'Got {len(responseJson["asset_events"])} items')
             for asset in responseJson['asset_events']:
-                if asset['asset'] and asset.get('event_type') != 'bid_entered':
+                if asset['asset'] and asset.get('event_type') not in ('bid_entered', 'bid_withdrawn', 'offer_entered', 'approve'):
                     tokensIdsToReprocess.add(asset['asset']['token_id'])
             if responseJson.get('next'):
                 break

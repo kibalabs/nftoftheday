@@ -511,18 +511,19 @@ class TokenManager:
             await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
 
     async def update_partial_latest_listings_for_collection(self, address: str, startDate: datetime.datetime) -> None:
-        tokensToReprocess = self.tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=startDate)
-        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=list(tokensToReprocess))
+        openseaTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=startDate)
+        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=openseaTokenIdsToReprocess)
         async with self.saver.create_transaction() as connection:
             query = (
                 LatestTokenListingsTable.select()
                     .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
                     .where(LatestTokenListingsTable.c.registryAddress == address)
-                    .where(LatestTokenListingsTable.c.tokenId.in_(tokensToReprocess))
+                    .where(LatestTokenListingsTable.c.tokenId.in_(openseaTokenIdsToReprocess))
+                    .where(LatestTokenListingsTable.c.source.in_(['opensea-seaport', 'opensea-wyvern']))
             )
             result = await self.retriever.database.execute(query=query, connection=connection)
-            latestTokenListingIdsToDelete = {row[0] for row in result}
-            await self.saver.delete_latest_token_listings(latestTokenListingIds=latestTokenListingIdsToDelete, connection=connection)
+            latestOpenseaTokenListingIdsToDelete = {row[0] for row in result}
+            await self.saver.delete_latest_token_listings(latestTokenListingIds=latestOpenseaTokenListingIdsToDelete, connection=connection)
             await self.saver.create_latest_token_listings(retrievedTokenListings=openseaListings, connection=connection)
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
