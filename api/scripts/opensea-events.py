@@ -41,18 +41,18 @@ async def test():
     await database.connect()
     tokensToReprocess = set()
     while True:
-        response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
+        response = await openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=600)
         responseJson = response.json()
-        if len(responseJson['data']) == 0:
-            break
         print(f'Got {len(responseJson["asset_events"])} items')
+        if len(responseJson['asset_events']) == 0:
+            break
         for asset in responseJson['asset_events']:
             if asset['asset'] and asset.get('event_type') != 'bid_entered':
                     data.append([asset.get('event_timestamp'), asset.get('asset').get('token_id'),asset.get('event_type')])
                     tokensToReprocess.add(asset['asset']['token_id'])
         
         queryData['cursor'] = responseJson['next']
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.5)
         
     pd.DataFrame(data=data,columns=col).to_csv(f'{startHour}.csv')
 

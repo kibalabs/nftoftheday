@@ -545,7 +545,7 @@ class TokenManager:
         currentDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='latest_token_listing')
         latestProcessedDate = latestUpdate.date
-        if currentDate > date_util.datetime_from_datetime(currentDate, hours=1):
+        if currentDate > date_util.datetime_from_datetime(latestProcessedDate, hours=1):
             await self.update_full_latest_listings_for_collection(address=address)
         else:
-            await self.update_partial_latest_listings_for_collection(address=address, startHour=currentDate)
+            await self.update_partial_latest_listings_for_collection(address=address, startHour=latestProcessedDate)
