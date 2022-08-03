@@ -97,7 +97,7 @@ class TokenListingProcessor:
                     sortedAssetListings = sorted(assetListings, key=lambda listing: listing.value, reverse=False)
                     listings.append(sortedAssetListings[0])
             # NOTE(krishan711): sleep to avoid opensea limits
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.25)
         return listings
     
     async def get_changed_opensea_listings_for_collection(self, address: str, startDate: datetime.datetime):
