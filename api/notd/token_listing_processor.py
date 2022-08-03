@@ -100,7 +100,7 @@ class TokenListingProcessor:
             await asyncio.sleep(0.25)
         return listings
     
-    async def get_changed_opensea_listings_for_collection(self, address: str, startDate: datetime.datetime):
+    async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
         queryData = {
             'asset_contract_address': address,
             'occurred_after': startDate,
@@ -117,8 +117,7 @@ class TokenListingProcessor:
                 break
             queryData['cursor'] = responseJson['next']
             await asyncio.sleep(0.25)
-        listings = await self.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=list(tokensToReprocess))
-        return listings, tokensToReprocess
+        return tokensToReprocess
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
         queryData = {
