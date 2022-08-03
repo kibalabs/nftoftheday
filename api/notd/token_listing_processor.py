@@ -31,7 +31,7 @@ class TokenListingProcessor:
             responseJson = response.json()
             for asset in responseJson['assets']:
                 assetListings = []
-                for sellOrder in (asset['sell_orders'] or []):
+                for sellOrder in (asset.get('sell_orders') or []):
                     side = sellOrder["side"]
                     if side != 1:
                         continue
