@@ -109,17 +109,21 @@ class TokenManager:
     async def update_token_metadatas_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
         if len(collectionTokenIds) == 0:
             return
-        if not shouldForce:
-            query = (
-                TokenMetadatasTable.select()
-                    .where(TokenMetadatasTable.c.updatedDate > date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
-                    .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(collectionTokenIds))
-            )
-            recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
-            recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
-            logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
-            collectionTokenIds = set(collectionTokenIds) - recentlyUpdatedTokenIds
-        messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIds]
+        collectionTokenIdsToProcess = set()
+        if shouldForce:
+            collectionTokenIdsToProcess = set(collectionTokenIds)
+        else:
+            for chunkedCollectionTokenIds in list_util.generate_chunks(lst=list(collectionTokenIds), chunkSize=1000):
+                query = (
+                    TokenMetadatasTable.select()
+                        .where(TokenMetadatasTable.c.updatedDate > date_util.datetime_from_now(days=-_TOKEN_UPDATE_MIN_DAYS))
+                        .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(chunkedCollectionTokenIds))
+                )
+                recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
+                recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
+                logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
+                collectionTokenIdsToProcess.update(set(chunkedCollectionTokenIds) - recentlyUpdatedTokenIds)
+        messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIdsToProcess]
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
@@ -512,26 +516,28 @@ class TokenManager:
 
     async def update_partial_latest_listings_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         openseaTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=startDate)
+        logging.info(f'Got {len(openseaTokenIdsToReprocess)} changed opensea tokenIds')
+        print(openseaTokenIdsToReprocess)
         openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=openseaTokenIdsToReprocess)
+        logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         async with self.saver.create_transaction() as connection:
-            query = (
+            existingOpenseaListingsQuery = (
                 LatestTokenListingsTable.select()
                     .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
                     .where(LatestTokenListingsTable.c.registryAddress == address)
                     .where(LatestTokenListingsTable.c.tokenId.in_(openseaTokenIdsToReprocess))
                     .where(LatestTokenListingsTable.c.source.in_(['opensea-seaport', 'opensea-wyvern']))
             )
-            result = await self.retriever.database.execute(query=query, connection=connection)
-            latestOpenseaTokenListingIdsToDelete = {row[0] for row in result}
-            await self.saver.delete_latest_token_listings(latestTokenListingIds=latestOpenseaTokenListingIdsToDelete, connection=connection)
+            existingOpenseaListingsResult = await self.retriever.database.execute(query=existingOpenseaListingsQuery, connection=connection)
+            openseaListingIdsToDelete = {row[0] for row in existingOpenseaListingsResult}
+            await self.saver.delete_latest_token_listings(latestTokenListingIds=openseaListingIdsToDelete, connection=connection)
             await self.saver.create_latest_token_listings(retrievedTokenListings=openseaListings, connection=connection)
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
         currentDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='update_latest_token_listings', name=address)
-        latestProcessedDate = latestUpdate.date
-        if currentDate > date_util.datetime_from_datetime(dt=latestProcessedDate, hours=1):
+        if currentDate > date_util.datetime_from_datetime(dt=latestUpdate.date, hours=1):
             await self.update_full_latest_listings_for_collection(address=address)
         else:
-            await self.update_partial_latest_listings_for_collection(address=address, startDate=latestProcessedDate)
+            await self.update_partial_latest_listings_for_collection(address=address, startDate=latestUpdate.date)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=currentDate)
