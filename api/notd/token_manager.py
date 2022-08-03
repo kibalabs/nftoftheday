@@ -519,14 +519,14 @@ class TokenManager:
         while True:
             response = await self.tokenListingProcessor.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
             responseJson = response.json()
-            if len(responseJson['data']) == 0:
-                break
             print(f'Got {len(responseJson["asset_events"])} items')
             for asset in responseJson['asset_events']:
                 if asset['asset'] and asset.get('event_type') != 'bid_entered':
                     tokensToReprocess.add(asset['asset']['token_id'])
+            if responseJson['next'] is None:
+                break
             queryData['cursor'] = responseJson['next']
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.25)
         async with self.saver.create_transaction() as connection:
             query = (
                 LatestTokenListingsTable.select()
