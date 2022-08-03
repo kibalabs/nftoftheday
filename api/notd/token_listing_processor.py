@@ -17,7 +17,7 @@ class TokenListingProcessor:
         self.requester = requester
         self.openseaRequester = openseaRequester
 
-    async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: str) -> List[RetrievedTokenListing]:
+    async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
         for index, chunkedTokenIs in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
             logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
@@ -31,7 +31,7 @@ class TokenListingProcessor:
             responseJson = response.json()
             for asset in responseJson['assets']:
                 assetListings = []
-                for sellOrder in (asset['sell_orders'] or []):
+                for sellOrder in (asset.get('sell_orders') or []):
                     side = sellOrder["side"]
                     if side != 1:
                         continue
@@ -61,7 +61,7 @@ class TokenListingProcessor:
                         sourceId=sourceId,
                     )
                     assetListings.append(listing)
-                for seaportSellOrder in (asset['seaport_sell_orders'] or []):
+                for seaportSellOrder in (asset.get('seaport_sell_orders') or []):
                     side = seaportSellOrder["side"]
                     if side != 'ask':
                         continue
@@ -97,8 +97,32 @@ class TokenListingProcessor:
                     sortedAssetListings = sorted(assetListings, key=lambda listing: listing.value, reverse=False)
                     listings.append(sortedAssetListings[0])
             # NOTE(krishan711): sleep to avoid opensea limits
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.25)
         return listings
+
+    async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
+        tokensIdsToReprocess = set()
+        index = 0
+        for eventType in ['created', 'successful', 'cancelled', 'transfer']:
+            queryData = {
+                'asset_contract_address': address,
+                'occurred_after': int(startDate.timestamp()),
+                'event_type': eventType,
+            }
+            while True:
+                logging.stat(f'RETRIEVE_CHANGED_LISTINGS_OPENSEA_{eventType}'.upper(), address, index)
+                index += 1
+                response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
+                responseJson = response.json()
+                logging.info(f'Got {len(responseJson["asset_events"])} events')
+                for event in responseJson['asset_events']:
+                    if event.get('asset'):
+                        tokensIdsToReprocess.add(event['asset']['token_id'])
+                await asyncio.sleep(0.25)
+                if not responseJson.get('next'):
+                    break
+                queryData['cursor'] = responseJson['next']
+        return list(tokensIdsToReprocess)
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
         queryData = {
