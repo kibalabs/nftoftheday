@@ -99,7 +99,7 @@ class TokenListingProcessor:
             # NOTE(krishan711): sleep to avoid opensea limits
             await asyncio.sleep(0.25)
         return listings
-    
+
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
         queryData = {
             'asset_contract_address': address,
