@@ -24,9 +24,9 @@ async def test():
     saver = Saver(database=database)
     requester = Requester()
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=None)
-    looksrareListing = await tokenListingProcessor.get_looks_rare_listings_for_collection(registryAddress='0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e')
     registryAddress = '0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e'
     endDate = date_util.datetime_from_now(minutes=-5)
+    await database.connect()
     queryData = {
         'isOrderAsk': 'true',
         'collection': registryAddress,
@@ -43,10 +43,10 @@ async def test():
             break
         for event in responseJson['data']:
             if event['startTime'] >=  int(endDate.timestamp()):
-                looksrareTokensToReprocess.add((event['collectionAddress'], event['tokenId']))
+                looksrareTokensToReprocess.add(event['tokenId'])
         queryData['pagination[cursor]'] = event['hash']
     
-    looksrareListing = await tokenListingProcessor.get_looksrare_listings_for_collection_tokens(registryAddress=registryAddress, tokenIds=list(looksrareTokensToReprocess))
+    looksrareListing = await tokenListingProcessor.get_looksrare_listings_for_tokens(registryAddress=registryAddress, tokenIds=list(looksrareTokensToReprocess))
     async with saver.create_transaction() as connection:
         existingLooksrareListingsQuery = (
             LatestTokenListingsTable.select()
@@ -60,7 +60,7 @@ async def test():
         await saver.delete_latest_token_listings(latestTokenListingIds=looksrareListingIdsToDelete, connection=connection)
         await saver.create_latest_token_listings(retrievedTokenListings=looksrareListing, connection=connection)
 
-
+    await database.disconnect()
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     asyncio.run(test())
