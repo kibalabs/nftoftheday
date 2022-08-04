@@ -220,7 +220,7 @@ class TokenListingProcessor:
                 tokenListingDict[listing.tokenId] = listing
             listings = list(tokenListingDict.values())
         return listings[0]
-    
+
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
             listings = await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
