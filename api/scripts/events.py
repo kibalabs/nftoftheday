@@ -25,7 +25,6 @@ async def test():
     requester = Requester()
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=None)
     looksrareListing = await tokenListingProcessor.get_looks_rare_listings_for_collection(registryAddress='0xbce3781ae7ca1a5e050bd9c4c77369867ebc307e')
-    # print(looksrareListing, len(looksrareListing))
     registryAddress = '0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e'
     endDate = date_util.datetime_from_now(minutes=-5)
     queryData = {

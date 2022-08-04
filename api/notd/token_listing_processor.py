@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 from collections import defaultdict
-from typing import Dict, Optional, Sequence
+from typing import Dict
 from typing import List
 
 from core import logging
