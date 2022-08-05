@@ -215,12 +215,12 @@ class TokenListingProcessor:
                 latestOrderHash = order['hash']
             queryData['pagination[cursor]'] = latestOrderHash
         tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
-        listings = []
+        listing = []
         if len(assetListings) > 0:
             for listing in assetListings:
                 tokenListingDict[listing.tokenId] = listing
-            listings = list(tokenListingDict.values())[0]
-            return listings
+            listing = list(tokenListingDict.values())[0]
+            return listing
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
