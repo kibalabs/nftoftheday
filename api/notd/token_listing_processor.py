@@ -179,7 +179,7 @@ class TokenListingProcessor:
             'tokenId': tokenId,
             'status[]': 'VALID',
             'pagination[first]': 100,
-            'sort': 'PRICE_DESC',
+            'sort': 'PRICE_ASC',
         }
         assetListing: Optional[RetrievedTokenListing] = None
         logging.stat('RETRIEVE_TOKEN_LISTING_LOOKSRARE', registryAddress, 0)
