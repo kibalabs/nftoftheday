@@ -550,8 +550,8 @@ class TokenManager:
     async def update_latest_listings_for_collection(self, address: str) -> None:
         currentDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='update_latest_token_listings', name=address)
-        # if currentDate > date_util.datetime_from_datetime(dt=latestUpdate.date, hours=1):
-        await self.update_full_latest_listings_for_collection(address=address)
-        # else:
-        #     await self.update_partial_latest_listings_for_collection(address=address, startDate=latestUpdate.date)
+        if currentDate > date_util.datetime_from_datetime(dt=latestUpdate.date, hours=1):
+            await self.update_full_latest_listings_for_collection(address=address)
+        else:
+            await self.update_partial_latest_listings_for_collection(address=address, startDate=latestUpdate.date)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=currentDate)
