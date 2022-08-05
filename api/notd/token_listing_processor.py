@@ -6,6 +6,7 @@ from typing import List
 
 from core import logging
 from core.requester import Requester
+from core.util import date_util
 from core.util import list_util
 
 from notd.model import RetrievedTokenListing
@@ -103,7 +104,7 @@ class TokenListingProcessor:
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         tokensIdsToReprocess = set()
         index = 0
-        for eventType in ['created', 'successful', 'cancelled', 'transfer']:
+        for eventType in ['created', 'cancelled']:
             queryData = {
                 'asset_contract_address': address,
                 'occurred_after': int(startDate.timestamp()),
@@ -114,7 +115,7 @@ class TokenListingProcessor:
                 index += 1
                 response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
                 responseJson = response.json()
-                logging.info(f'Got {len(responseJson["asset_events"])} events')
+                logging.info(f'Got {len(responseJson["asset_events"])} opensea events')
                 for event in responseJson['asset_events']:
                     if event.get('asset'):
                         tokensIdsToReprocess.add(event['asset']['token_id'])
@@ -170,7 +171,7 @@ class TokenListingProcessor:
             for listing in assetListings:
                 tokenListingDict[listing.tokenId] = listing
             listings = list(tokenListingDict.values())
-        return listings
+            return listings
 
     async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> RetrievedTokenListing:
         queryData = {
@@ -218,11 +219,38 @@ class TokenListingProcessor:
         if len(assetListings) > 0:
             for listing in assetListings:
                 tokenListingDict[listing.tokenId] = listing
-            listings = list(tokenListingDict.values())
-        return listings[0]
+            listings = list(tokenListingDict.values())[0]
+            return listings
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
             listings = await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
             await asyncio.sleep(0.1)
+        listings = [listing for listing in listings if listing is not None]
         return listings
+
+    async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
+        tokenIdsToReprocess = set()
+        for eventType in ["CANCEL_LIST", "LIST" ]:
+            queryData = {
+                'collection': address,
+                'type': eventType,
+                'pagination[first]': 150
+            }
+            latestEventId = None
+            flag = True
+            while flag:
+                response = await self.requester.get(url='https://api.looksrare.org/api/v1/events', dataDict=queryData)
+                responseJson = response.json()
+                logging.info(f'Got {len(responseJson["data"])} looksrare events')
+                if len(responseJson['data']) == 0 or not flag:
+                    break
+                for event in responseJson['data']:
+                    if date_util.datetime_from_string(event['createdAt'], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ') >= startDate:
+                        tokenIdsToReprocess.add(event.get('token').get('tokenId'))
+                    else:
+                        flag = False
+                        break
+                    latestEventId = event['id']
+                queryData['pagination[cursor]'] = latestEventId
+        return list(tokenIdsToReprocess)
