@@ -327,3 +327,4 @@ class TokenCustomization:
 class GalleryToken:
     tokenMetadata: TokenMetadata
     tokenCustomization: Optional[TokenCustomization]
+    tokenListing: Optional[TokenListing]

@@ -117,7 +117,21 @@ class ApiTokenCustomization(BaseModel):
     name: Optional[str]
     description: Optional[str]
 
+class ApiTokenListing(BaseModel):
+    tokenListingId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    offererAddress: str
+    startDate: datetime.datetime
+    endDate: datetime.datetime
+    isValueNative: bool
+    value: int
+    source: str
+    sourceId: str
 
 class ApiGalleryToken(BaseModel):
     collectionToken: ApiCollectionToken
     tokenCustomization: Optional[ApiTokenCustomization]
+    tokenListing: Optional[ApiTokenListing]
