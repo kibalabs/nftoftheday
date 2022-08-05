@@ -238,8 +238,8 @@ class TokenListingProcessor:
                 'pagination[first]': 150
             }
             latestEventId = None
-            flag = True
-            while flag:
+            hasReachedEnd = False
+            while not hasReachedEnd:
                 response = await self.requester.get(url='https://api.looksrare.org/api/v1/events', dataDict=queryData)
                 responseJson = response.json()
                 logging.info(f'Got {len(responseJson["data"])} looksrare events')
