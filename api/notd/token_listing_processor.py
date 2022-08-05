@@ -223,8 +223,9 @@ class TokenListingProcessor:
             return listing
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
+        listings = []
         for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
-            listings = await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
+            listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
             await asyncio.sleep(0.1)
         listings = [listing for listing in listings if listing is not None]
         return listings
