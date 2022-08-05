@@ -246,11 +246,10 @@ class TokenListingProcessor:
                 if len(responseJson['data']) == 0 or not flag:
                     break
                 for event in responseJson['data']:
-                    if date_util.datetime_from_string(event['createdAt'], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ') >= startDate:
-                        tokenIdsToReprocess.add(event.get('token').get('tokenId'))
-                    else:
-                        flag = False
+                    if date_util.datetime_from_string(event['createdAt'], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ') < startDate:
+                        hasReachedEnd = true
                         break
+                    tokenIdsToReprocess.add(event.get('token').get('tokenId'))
                     latestEventId = event['id']
                 queryData['pagination[cursor]'] = latestEventId
         return list(tokenIdsToReprocess)
