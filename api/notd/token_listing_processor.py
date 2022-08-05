@@ -247,7 +247,7 @@ class TokenListingProcessor:
                     break
                 for event in responseJson['data']:
                     if date_util.datetime_from_string(event['createdAt'], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ') < startDate:
-                        hasReachedEnd = true
+                        hasReachedEnd = True
                         break
                     tokenIdsToReprocess.add(event.get('token').get('tokenId'))
                     latestEventId = event['id']
