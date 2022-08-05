@@ -243,7 +243,7 @@ class TokenListingProcessor:
                 response = await self.requester.get(url='https://api.looksrare.org/api/v1/events', dataDict=queryData)
                 responseJson = response.json()
                 logging.info(f'Got {len(responseJson["data"])} looksrare events')
-                if len(responseJson['data']) == 0 or not flag:
+                if len(responseJson['data']) == 0:
                     break
                 for event in responseJson['data']:
                     if date_util.datetime_from_string(event['createdAt'], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ') < startDate:
