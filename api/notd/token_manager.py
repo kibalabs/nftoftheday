@@ -517,8 +517,12 @@ class TokenManager:
     async def update_partial_latest_listings_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         openseaTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=startDate)
         logging.info(f'Got {len(openseaTokenIdsToReprocess)} changed opensea tokenIds')
+        looksrareTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_looksrare_token_listings_for_collection(address=address, startDate=startDate)
+        logging.info(f'Got {len(looksrareTokenIdsToReprocess)} changed looksrare tokenIds')
         openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=openseaTokenIdsToReprocess)
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
+        looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_tokens(registryAddress=address, tokenIds=looksrareTokenIdsToReprocess)
+        logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
         async with self.saver.create_transaction() as connection:
             existingOpenseaListingsQuery = (
                 LatestTokenListingsTable.select()
@@ -529,8 +533,19 @@ class TokenManager:
             )
             existingOpenseaListingsResult = await self.retriever.database.execute(query=existingOpenseaListingsQuery, connection=connection)
             openseaListingIdsToDelete = {row[0] for row in existingOpenseaListingsResult}
-            await self.saver.delete_latest_token_listings(latestTokenListingIds=openseaListingIdsToDelete, connection=connection)
-            await self.saver.create_latest_token_listings(retrievedTokenListings=openseaListings, connection=connection)
+            existingLooksrareListingsQuery = (
+                LatestTokenListingsTable.select()
+                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                    .where(LatestTokenListingsTable.c.registryAddress == address)
+                    .where(LatestTokenListingsTable.c.tokenId.in_(looksrareTokenIdsToReprocess))
+                    .where(LatestTokenListingsTable.c.source == 'looksrare')
+            )
+            existingLooksrareListingsResult = await self.retriever.database.execute(query=existingLooksrareListingsQuery, connection=connection)
+            looksrareListingIdsToDelete = {row[0] for row in existingLooksrareListingsResult}
+            allListingIdsToDelete = openseaListingIdsToDelete | looksrareListingIdsToDelete
+            allListings = openseaListings + looksrareListings
+            await self.saver.delete_latest_token_listings(latestTokenListingIds=allListingIdsToDelete, connection=connection)
+            await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
         currentDate = date_util.datetime_from_now()
