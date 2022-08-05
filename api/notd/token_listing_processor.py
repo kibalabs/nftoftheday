@@ -132,7 +132,7 @@ class TokenListingProcessor:
             'collection': registryAddress,
             'status[]': 'VALID',
             'pagination[first]': 100,
-            'sort': 'PRICE_DESC',
+            'sort': 'PRICE_ASC',
         }
         assetListings: List[RetrievedTokenListing] = []
         index = 0
