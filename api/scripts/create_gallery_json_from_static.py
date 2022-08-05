@@ -9,11 +9,11 @@ from typing import Optional
 
 import asyncclick as click
 from core import logging
+from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
-from core.requester import Requester
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.model import Collection

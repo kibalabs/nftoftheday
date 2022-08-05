@@ -3,6 +3,7 @@ import datetime
 from collections import defaultdict
 from typing import Dict
 from typing import List
+from typing import Optional
 
 from core import logging
 from core.requester import Requester
@@ -166,14 +167,12 @@ class TokenListingProcessor:
                 latestOrderHash = order['hash']
             queryData['pagination[cursor]'] = latestOrderHash
         tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
-        listings = []
         if len(assetListings) > 0:
             for listing in assetListings:
                 tokenListingDict[listing.tokenId] = listing
-            listings = list(tokenListingDict.values())
-            return listings
+        return list(tokenListingDict.values())
 
-    async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> RetrievedTokenListing:
+    async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
         queryData = {
             'isOrderAsk': 'true',
             'collection': registryAddress,
@@ -214,13 +213,7 @@ class TokenListingProcessor:
                 assetListings.append(listing)
                 latestOrderHash = order['hash']
             queryData['pagination[cursor]'] = latestOrderHash
-        tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
-        listing = []
-        if len(assetListings) > 0:
-            for listing in assetListings:
-                tokenListingDict[listing.tokenId] = listing
-            listing = list(tokenListingDict.values())[0]
-            return listing
+        return assetListings[0] if len(assetListings) > 0 else None
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
