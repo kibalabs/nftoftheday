@@ -114,7 +114,7 @@ class GalleryManager:
         usesListings = isListed or minPrice or maxPrice
         usesOwnership = usesListings or ownerAddress
         if usesOwnership:
-            query = query.join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId), isouter=True)
+            query = query.join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
         if usesListings:
             query = query.where(TokenOwnershipsTable.c.ownerAddress == LatestTokenListingsTable.c.offererAddress)
         if minPrice:
