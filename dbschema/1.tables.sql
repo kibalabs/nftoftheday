@@ -38,8 +38,8 @@ CREATE INDEX tbl_token_transfers_is_swap ON tbl_token_transfers (is_swap);
 CREATE INDEX tbl_token_transfers_is_batch ON tbl_token_transfers (is_batch);
 CREATE INDEX tbl_token_transfers_is_outbound ON tbl_token_transfers (is_outbound);
 -- NOTE(krishan711): this is O(100m) rows and fills O(100k) per day
-ALTER TABLE tbl_token_transfers SET (autovacuum_vacuum_scale_factor = 0.001);
-ALTER TABLE tbl_token_transfers SET (autovacuum_analyze_scale_factor = 0.0001);
+ALTER TABLE tbl_token_transfers SET (autovacuum_vacuum_scale_factor = 0.01);
+ALTER TABLE tbl_token_transfers SET (autovacuum_analyze_scale_factor = 0.001);
 
 CREATE TABLE tbl_token_metadatas (
     id BIGSERIAL PRIMARY KEY,
@@ -65,8 +65,8 @@ CREATE INDEX tbl_token_metadatas_token_id ON tbl_token_metadatas (token_id);
 CREATE INDEX tbl_token_metadatas_updated_date ON tbl_token_metadatas (updated_date);
 CREATE INDEX tbl_token_metadatas_name ON tbl_token_metadatas (name);
 -- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
-ALTER TABLE tbl_token_metadatas SET (autovacuum_vacuum_scale_factor = 0.001);
-ALTER TABLE tbl_token_metadatas SET (autovacuum_analyze_scale_factor = 0.0001);
+ALTER TABLE tbl_token_metadatas SET (autovacuum_vacuum_scale_factor = 0.01);
+ALTER TABLE tbl_token_metadatas SET (autovacuum_analyze_scale_factor = 0.001);
 
 
 CREATE TABLE tbl_collections (
@@ -110,8 +110,8 @@ CREATE INDEX tbl_blocks_updated_date ON tbl_blocks (updated_date);
 CREATE INDEX tbl_blocks_block_hash ON tbl_blocks (block_hash);
 CREATE INDEX tbl_blocks_block_date ON tbl_blocks (block_date);
 -- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
-ALTER TABLE tbl_blocks SET (autovacuum_vacuum_scale_factor = 0.001);
-ALTER TABLE tbl_blocks SET (autovacuum_analyze_scale_factor = 0.0001);
+ALTER TABLE tbl_blocks SET (autovacuum_vacuum_scale_factor = 0.01);
+ALTER TABLE tbl_blocks SET (autovacuum_analyze_scale_factor = 0.001);
 
 
 CREATE TABLE tbl_token_ownerships (
@@ -137,8 +137,8 @@ CREATE INDEX tbl_token_ownerships_transfer_date ON tbl_token_ownerships (transfe
 CREATE INDEX tbl_token_ownerships_transfer_value ON tbl_token_ownerships (transfer_value);
 CREATE INDEX tbl_token_ownerships_transfer_transaction_hash ON tbl_token_ownerships (transfer_transaction_hash);
 -- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
-ALTER TABLE tbl_token_ownerships SET (autovacuum_vacuum_scale_factor = 0.001);
-ALTER TABLE tbl_token_ownerships SET (autovacuum_analyze_scale_factor = 0.0001);
+ALTER TABLE tbl_token_ownerships SET (autovacuum_vacuum_scale_factor = 0.01);
+ALTER TABLE tbl_token_ownerships SET (autovacuum_analyze_scale_factor = 0.001);
 
 
 CREATE TABLE tbl_token_multi_ownerships (
@@ -167,8 +167,8 @@ CREATE INDEX tbl_token_multi_ownerships_latest_transfer_date ON tbl_token_multi_
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_value ON tbl_token_multi_ownerships (latest_transfer_value);
 CREATE INDEX tbl_token_multi_ownerships_latest_transfer_transaction_hash ON tbl_token_multi_ownerships (latest_transfer_transaction_hash);
 -- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
-ALTER TABLE tbl_token_multi_ownerships SET (autovacuum_vacuum_scale_factor = 0.001);
-ALTER TABLE tbl_token_multi_ownerships SET (autovacuum_analyze_scale_factor = 0.0001);
+ALTER TABLE tbl_token_multi_ownerships SET (autovacuum_vacuum_scale_factor = 0.01);
+ALTER TABLE tbl_token_multi_ownerships SET (autovacuum_analyze_scale_factor = 0.001);
 
 
 CREATE TABLE tbl_collection_hourly_activities (
@@ -196,8 +196,8 @@ CREATE INDEX tbl_collection_hourly_activities_minimum_value ON tbl_collection_ho
 CREATE INDEX tbl_collection_hourly_activities_maximum_value ON tbl_collection_hourly_activities (maximum_value);
 CREATE INDEX tbl_collection_hourly_activities_average_value ON tbl_collection_hourly_activities (average_value);
 -- NOTE(krishan711): this is O(10m) rows and fills O(10k) per day
-ALTER TABLE tbl_collection_hourly_activities SET (autovacuum_vacuum_scale_factor = 0.001);
-ALTER TABLE tbl_collection_hourly_activities SET (autovacuum_analyze_scale_factor = 0.0001);
+ALTER TABLE tbl_collection_hourly_activities SET (autovacuum_vacuum_scale_factor = 0.01);
+ALTER TABLE tbl_collection_hourly_activities SET (autovacuum_analyze_scale_factor = 0.001);
 
 
 CREATE TABLE tbl_user_interactions (
