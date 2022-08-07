@@ -9,8 +9,8 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
-from api.notd.model import Lock
-from api.notd.store.schema import LocksTable
+from notd.model import Lock
+from notd.store.schema import LocksTable
 
 from notd.model import Block
 from notd.model import Collection
