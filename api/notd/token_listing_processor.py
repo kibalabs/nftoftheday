@@ -9,15 +9,17 @@ from core import logging
 from core.requester import Requester
 from core.util import date_util
 from core.util import list_util
+from notd.lock_manager import LockManager
 
 from notd.model import RetrievedTokenListing
 
 
 class TokenListingProcessor:
 
-    def __init__(self, requester: Requester, openseaRequester: Requester):
+    def __init__(self, requester: Requester, openseaRequester: Requester, lockManger: LockManager):
         self.requester = requester
         self.openseaRequester = openseaRequester
+        self.lockManager = lockManger
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
