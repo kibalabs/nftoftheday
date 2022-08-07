@@ -9,6 +9,8 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
+from api.notd.model import Lock
+from api.notd.store.schema import LocksTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -608,4 +610,30 @@ class Saver(CoreSaver):
 
     async def delete_token_customization(self, tokenCustomizationId: int, connection: Optional[DatabaseConnection] = None) -> None:
         query = TokenCustomizationsTable.delete().where(TokenCustomizationsTable.c.tokenCustomizationId == tokenCustomizationId)
+        await self._execute(query=query, connection=connection)
+
+    async def create_lock(self, name: str, timeoutSeconds: int, expiryTime: int, connection: Optional[DatabaseConnection] = None) -> Lock:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            LocksTable.c.createdDate.key: createdDate,
+            LocksTable.c.updatedDate.key: updatedDate,
+            LocksTable.c.name.key: name,
+            LocksTable.c.timeoutSeconds.key: timeoutSeconds,
+            LocksTable.c.expiryTime.key: expiryTime,
+        }
+        query = LocksTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        lockId = result.inserted_primary_key[0]
+        return Lock(
+            lockId=lockId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            name=name,
+            timeoutSeconds=timeoutSeconds,
+            expiryTime=expiryTime,
+        )
+
+    async def delete_lock(self, lockId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = LocksTable.delete().where(LocksTable.c.lockId == lockId)
         await self._execute(query=query, connection=connection)

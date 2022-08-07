@@ -330,6 +330,9 @@ class GalleryToken:
 
 @dataclasses.dataclass
 class Lock:
+    lockId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
     name: str
     timeoutSeconds: int
-    expirySeconds: int
+    expiryTime: int

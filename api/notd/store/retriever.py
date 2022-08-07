@@ -8,6 +8,9 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
+from notd.store.schema_conversions import locks_from_row
+from notd.model import Lock
+from notd.store.schema import LocksTable
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -296,3 +299,25 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'TokenCustomization with registry:{registryAddress} tokenId:{tokenId} not found')
         tokenCustomization = token_customization_from_row(row)
         return tokenCustomization
+
+    async def list_locks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Lock]:
+        query = LocksTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=LocksTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=LocksTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        locks = [locks_from_row(row) for row in result]
+        return locks
+
+    async def get_lock_by_name(self, name: str, connection: Optional[DatabaseConnection] = None) -> Lock:
+        query = LocksTable.select() \
+            .where(LocksTable.c.name == name)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Lock with name:{name} not found')
+        lock = locks_from_row(row)
+        return lock
