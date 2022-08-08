@@ -179,39 +179,39 @@ class TokenListingProcessor:
             return list(tokenListingDict.values())
 
     async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
-            queryData = {
-                'isOrderAsk': 'true',
-                'collection': registryAddress,
-                'tokenId': tokenId,
-                'status[]': 'VALID',
-                'pagination[first]': 100,
-                'sort': 'PRICE_ASC',
-            }
-            assetListing: Optional[RetrievedTokenListing] = None
-            logging.stat('RETRIEVE_TOKEN_LISTING_LOOKSRARE', registryAddress, 0)
-            response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
-            responseJson = response.json()
-            for order in responseJson['data']:
-                startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
-                endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
-                currentPrice = int(order["price"])
-                offererAddress = order['signer']
-                sourceId = order["hash"]
-                # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
-                isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-                assetListing = RetrievedTokenListing(
-                    registryAddress=order['collectionAddress'],
-                    tokenId=order['tokenId'],
-                    startDate=startDate,
-                    endDate=endDate,
-                    isValueNative=isValueNative,
-                    value=currentPrice,
-                    offererAddress=offererAddress,
-                    source='looksrare',
-                    sourceId=sourceId,
-                )
-                break
-            return assetListing
+        queryData = {
+            'isOrderAsk': 'true',
+            'collection': registryAddress,
+            'tokenId': tokenId,
+            'status[]': 'VALID',
+            'pagination[first]': 100,
+            'sort': 'PRICE_ASC',
+        }
+        assetListing: Optional[RetrievedTokenListing] = None
+        logging.stat('RETRIEVE_TOKEN_LISTING_LOOKSRARE', registryAddress, 0)
+        response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
+        responseJson = response.json()
+        for order in responseJson['data']:
+            startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
+            endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
+            currentPrice = int(order["price"])
+            offererAddress = order['signer']
+            sourceId = order["hash"]
+            # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
+            isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            assetListing = RetrievedTokenListing(
+                registryAddress=order['collectionAddress'],
+                tokenId=order['tokenId'],
+                startDate=startDate,
+                endDate=endDate,
+                isValueNative=isValueNative,
+                value=currentPrice,
+                offererAddress=offererAddress,
+                source='looksrare',
+                sourceId=sourceId,
+            )
+            break
+        return assetListing
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []

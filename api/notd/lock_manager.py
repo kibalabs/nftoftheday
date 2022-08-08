@@ -1,5 +1,4 @@
 from datetime import datetime
-import logging
 import time
 import contextlib
 from core.util import date_util
