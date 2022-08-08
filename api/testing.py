@@ -1,7 +1,7 @@
 import asyncio
 import os
 from core.requester import Requester
-from api.notd.model import COLLECTION_GOBLINTOWN_ADDRESS
+from notd.model import COLLECTION_GOBLINTOWN_ADDRESS
 from notd.store.saver import Saver
 from notd.store.retriever import Retriever
 from core.store.database import Database
