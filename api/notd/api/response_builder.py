@@ -4,6 +4,8 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
+from notd.api.models_v1 import ApiTokenListing
+from notd.model import TokenListing
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -194,10 +196,27 @@ class ResponseBuilder:
             description=tokenCustomization.description,
         )
 
+    async def token_listing_from_model(self, tokenListing: TokenListing) -> ApiTokenListing:
+        return ApiTokenListing(
+            tokenListingId=tokenListing.tokenListingId,
+            createdDate=tokenListing.createdDate,
+            updatedDate=tokenListing.updatedDate,
+            registryAddress=tokenListing.registryAddress,
+            tokenId=tokenListing.tokenId,
+            offererAddress=tokenListing.offererAddress,
+            startDate=tokenListing.startDate,
+            endDate=tokenListing.endDate,
+            isValueNative=tokenListing.isValueNative,
+            value=tokenListing.value,
+            source=tokenListing.source,
+            sourceId=tokenListing.sourceId,
+        )
+
     async def gallery_token_from_model(self, galleryToken: GalleryToken) -> ApiGalleryToken:
         return ApiGalleryToken(
             collectionToken=(await self.collection_token_from_model(tokenMetadata=galleryToken.tokenMetadata)),
             tokenCustomization=(await self.token_customization_from_model(tokenCustomization=galleryToken.tokenCustomization) if galleryToken.tokenCustomization else None),
+            tokenListing=(await self.token_listing_from_model(tokenListing=galleryToken.tokenListing) if galleryToken.tokenListing else None)
         )
 
     async def gallery_tokens_from_models(self, galleryTokens: Sequence[GalleryToken]) -> Sequence[ApiGalleryToken]:

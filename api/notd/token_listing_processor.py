@@ -9,6 +9,7 @@ from core import logging
 from core.requester import Requester
 from core.util import date_util
 from core.util import list_util
+from core.util import chain_util
 
 from notd.model import RetrievedTokenListing
 
@@ -48,7 +49,7 @@ class TokenListingProcessor:
                     startDate = datetime.datetime.utcfromtimestamp(sellOrder["listing_time"])
                     endDate = datetime.datetime.utcfromtimestamp(sellOrder["expiration_time"])
                     currentPrice = int(sellOrder["current_price"].split('.')[0])
-                    offererAddress = sellOrder["maker"]["address"]
+                    offererAddress = chain_util.normalize_address(sellOrder["maker"]["address"])
                     sourceId = sellOrder["order_hash"]
                     isValueNative = sellOrder["payment_token_contract"]["symbol"] == "ETH"
                     listing = RetrievedTokenListing(
@@ -89,7 +90,7 @@ class TokenListingProcessor:
                         endDate=endDate,
                         isValueNative=isValueNative,
                         value=currentPrice,
-                        offererAddress=offererAddress,
+                        offererAddress=chain_util.normalize_address(offererAddress),
                         source='opensea-seaport',
                         sourceId=sourceId,
                     )
@@ -148,7 +149,7 @@ class TokenListingProcessor:
                 startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
                 endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
                 currentPrice = int(order["price"])
-                offererAddress = order['signer']
+                offererAddress = chain_util.normalize_address(order['signer'])
                 sourceId = order["hash"]
                 # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
                 isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
