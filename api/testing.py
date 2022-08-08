@@ -21,7 +21,10 @@ async def run_async_opensea():
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManger = LockManager(retriever=retriever, saver=saver))
 
     await database.connect()
+    #This works
     await tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=COLLECTION_GOBLINTOWN_ADDRESS, startDate=date_util.datetime_from_now())
+
+    #This Fails
     await asyncio.gather(*[tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=date_util.datetime_from_now()) for address in GALLERY_COLLECTIONS])
     await database.disconnect()
 
