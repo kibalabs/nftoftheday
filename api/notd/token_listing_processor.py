@@ -106,7 +106,6 @@ class TokenListingProcessor:
             return listings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        print("here")
         async with self.lockManager.with_lock(name="opensea_request", timeoutSeconds=30, expirySeconds=600):
             tokensIdsToReprocess = set()
             index = 0
