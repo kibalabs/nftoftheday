@@ -1,5 +1,8 @@
 import time
+import contextlib
 from core.util import date_util
+from core.exceptions import NotFoundException
+
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
@@ -25,8 +28,11 @@ class LockManager:
 
     async def release_lock(self, name: str):
         lock = await self.retriever.get_lock_by_name(name=name)
+        if not lock:
+            raise NotFoundException
         await self.saver.delete_lock(lockId=lock.lockId)
 
+    @contextlib.contextmanager
     async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int):
         await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         try:
