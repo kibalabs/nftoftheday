@@ -64,7 +64,11 @@ class GalleryManager:
         row = result.first()
         if not row:
             raise NotFoundException(message=f'GalleryToken with registry:{registryAddress} tokenId:{tokenId} not found')
-        galleryToken = GalleryToken(tokenMetadata=token_metadata_from_row(row), tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None)
+        galleryToken = GalleryToken(
+            tokenMetadata=token_metadata_from_row(row),
+            tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
+            tokenListing=token_listing_from_row(row) if row[LatestTokenListingsTable.c.latestTokenListingId] else None,
+        )
         return galleryToken
 
 
