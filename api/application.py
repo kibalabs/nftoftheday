@@ -24,6 +24,7 @@ from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.gallery_manager import GalleryManager
+from notd.lock_manager import LockManager
 from notd.manager import NotdManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -66,7 +67,8 @@ collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClie
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
 collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
 openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
-tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester)
+lockManger = LockManager(retriever=retriever, saver=saver)
+tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManger=lockManger)
 tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
 tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenListingProcessor=tokenListingProcessor, tokenAttributeProcessor=tokenAttributeProcessor)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
