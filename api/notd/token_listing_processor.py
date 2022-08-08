@@ -179,7 +179,6 @@ class TokenListingProcessor:
             return list(tokenListingDict.values())
 
     async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
             queryData = {
                 'isOrderAsk': 'true',
                 'collection': registryAddress,
@@ -217,8 +216,9 @@ class TokenListingProcessor:
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
         for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
-            listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
-            await asyncio.sleep(0.1)
+            async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
+                listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
+                await asyncio.sleep(0.1)
         listings = [listing for listing in listings if listing is not None]
         return listings
 

@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 import time
 import contextlib
 from core.util import date_util
@@ -32,10 +33,12 @@ class LockManager:
             await self.saver.create_lock(name=name, timeoutSeconds=timeoutSeconds, expiryTime= datetime.timestamp(date_util.datetime_from_now())+expirySeconds)
 
     async def release_lock(self, name: str):
-        lock = await self.retriever.get_lock_by_name(name=name)
-        if not lock:
-            raise NotFoundException
-        await self.saver.delete_lock(lockId=lock.lockId)
+        try:
+            lock = await self.retriever.get_lock_by_name(name=name)
+        except NotFoundException:
+            lock = None
+        if lock:
+            await self.saver.delete_lock(lockId=lock.lockId)
 
     @contextlib.asynccontextmanager
     async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int):
