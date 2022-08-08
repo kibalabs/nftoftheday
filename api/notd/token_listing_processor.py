@@ -118,7 +118,7 @@ class TokenListingProcessor:
                 while True:
                     logging.stat(f'RETRIEVE_CHANGED_LISTINGS_OPENSEA_{eventType}'.upper(), address, index)
                     index += 1
-                    response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=600)
+                    response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
                     responseJson = response.json()
                     logging.info(f'Got {len(responseJson["asset_events"])} opensea events')
                     for event in responseJson['asset_events']:

@@ -27,7 +27,7 @@ class LockManager:
                 raise Exception
             else:
                 time.sleep(100)
-                self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
+                await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         else:
             await self.saver.create_lock(name=name, timeoutSeconds=timeoutSeconds, expiryTime= datetime.timestamp(date_util.datetime_from_now())+expirySeconds)
 
