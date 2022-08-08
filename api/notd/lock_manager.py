@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 import contextlib
 from core.util import date_util
@@ -14,17 +15,21 @@ class LockManager:
 
     async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int):
         startDate = date_util.datetime_from_now()
-        lock = await self.retriever.get_lock_by_name(name=name)
+        lock = None
+        try:
+            lock = await self.retriever.get_lock_by_name(name=name)
+        except NotFoundException:
+            pass
         if lock:
-            if lock.expiryTime < startDate:
+            if datetime.fromtimestamp(lock.expiryTime) < startDate:
                 await self.saver.delete_lock(lockId=lock.lockId)
-            elif date_util.datetime_from_now() > startDate + timeoutSeconds:
+            elif date_util.datetime_from_now() > date_util.datetime_from_datetime(dt=startDate, seconds=timeoutSeconds):
                 raise Exception
             else:
                 time.sleep(100)
                 self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         else:
-            await self.saver.create_lock(name=name, timeoutSeconds=timeoutSeconds, expiryTime=date_util.datetime_from_now()+expirySeconds)
+            await self.saver.create_lock(name=name, timeoutSeconds=timeoutSeconds, expiryTime= datetime.timestamp(date_util.datetime_from_now())+expirySeconds)
 
     async def release_lock(self, name: str):
         lock = await self.retriever.get_lock_by_name(name=name)
@@ -32,7 +37,7 @@ class LockManager:
             raise NotFoundException
         await self.saver.delete_lock(lockId=lock.lockId)
 
-    @contextlib.contextmanager
+    @contextlib.asynccontextmanager
     async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int):
         await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         try:

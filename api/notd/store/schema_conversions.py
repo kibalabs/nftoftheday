@@ -226,5 +226,5 @@ def locks_from_row(row: Mapping) -> Lock:
         updatedDate=row[LocksTable.c.updatedDate],
         name=row[LocksTable.c.name],
         timeoutSeconds=row[LocksTable.c.timeoutSeconds],
-        expiryTime=row[LocksTable.c.Time],
+        expiryTime=row[LocksTable.c.expiryTime],
     )

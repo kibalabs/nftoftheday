@@ -23,7 +23,7 @@ class TokenListingProcessor:
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
-        with await self.lockManager.with_lock(name="opensea_lock", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name="opensea_lock", timeoutSeconds=30, expirySeconds=120):
             for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
                 logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
                 queryData = {
@@ -106,7 +106,8 @@ class TokenListingProcessor:
             return listings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        with await self.lockManager.with_lock(name="opensea_request", timeoutSeconds=30, expirySeconds=120):
+        print("here")
+        async with self.lockManager.with_lock(name="opensea_request", timeoutSeconds=30, expirySeconds=600):
             tokensIdsToReprocess = set()
             index = 0
             for eventType in ['created', 'cancelled']:
@@ -118,7 +119,7 @@ class TokenListingProcessor:
                 while True:
                     logging.stat(f'RETRIEVE_CHANGED_LISTINGS_OPENSEA_{eventType}'.upper(), address, index)
                     index += 1
-                    response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
+                    response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=600)
                     responseJson = response.json()
                     logging.info(f'Got {len(responseJson["asset_events"])} opensea events')
                     for event in responseJson['asset_events']:
@@ -131,7 +132,7 @@ class TokenListingProcessor:
             return list(tokensIdsToReprocess)
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
-        with await self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
             queryData = {
                 'isOrderAsk': 'true',
                 'collection': registryAddress,
@@ -178,7 +179,7 @@ class TokenListingProcessor:
             return list(tokenListingDict.values())
 
     async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
-        with await self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
             queryData = {
                 'isOrderAsk': 'true',
                 'collection': registryAddress,
@@ -222,7 +223,7 @@ class TokenListingProcessor:
         return listings
 
     async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
-        with await self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
             tokenIdsToReprocess = set()
             for eventType in ["CANCEL_LIST", "LIST" ]:
                 queryData = {

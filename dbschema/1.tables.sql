@@ -296,9 +296,8 @@ CREATE TABLE tbl_locks (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     name TEXT NOT NULL,
     timeout_seconds NUMERIC(256, 0) NOT NULL,
-    expiry_time NUMERIC(256, 0) NOT NULL,
+    expiry_time NUMERIC(256, 0) NOT NULL
 );
-CREATE UNIQUE INDEX tbl_locks_registry_address_token_id on tbl_locks (registry_address, token_id);
 CREATE INDEX tbl_locks_created_date ON tbl_locks (created_date);
 CREATE INDEX tbl_locks_updated_date ON tbl_locks (updated_date);
 CREATE INDEX tbl_locks_name on tbl_locks (name);
