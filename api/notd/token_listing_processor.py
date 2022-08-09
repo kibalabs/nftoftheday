@@ -106,28 +106,29 @@ class TokenListingProcessor:
         return listings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        tokensIdsToReprocess = set()
-        index = 0
-        for eventType in ['created', 'cancelled']:
-            queryData = {
-                'asset_contract_address': address,
-                'occurred_after': int(startDate.timestamp()),
-                'event_type': eventType,
-            }
-            while True:
-                logging.stat(f'RETRIEVE_CHANGED_LISTINGS_OPENSEA_{eventType}'.upper(), address, index)
-                index += 1
-                response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
-                responseJson = response.json()
-                logging.info(f'Got {len(responseJson["asset_events"])} opensea events')
-                for event in responseJson['asset_events']:
-                    if event.get('asset'):
-                        tokensIdsToReprocess.add(event['asset']['token_id'])
-                await asyncio.sleep(0.25)
-                if not responseJson.get('next'):
-                    break
-                queryData['cursor'] = responseJson['next']
-        return list(tokensIdsToReprocess)
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=30, expirySeconds=60) as lock:
+            tokensIdsToReprocess = set()
+            index = 0
+            for eventType in ['created', 'cancelled']:
+                queryData = {
+                    'asset_contract_address': address,
+                    'occurred_after': int(startDate.timestamp()),
+                    'event_type': eventType,
+                }
+                while True:
+                    logging.stat(f'RETRIEVE_CHANGED_LISTINGS_OPENSEA_{eventType}'.upper(), address, index)
+                    index += 1
+                    response = await self.openseaRequester.get(url="https://api.opensea.io/api/v1/events", dataDict=queryData, timeout=30)
+                    responseJson = response.json()
+                    logging.info(f'Got {len(responseJson["asset_events"])} opensea events')
+                    for event in responseJson['asset_events']:
+                        if event.get('asset'):
+                            tokensIdsToReprocess.add(event['asset']['token_id'])
+                    await asyncio.sleep(0.25)
+                    if not responseJson.get('next'):
+                        break
+                    queryData['cursor'] = responseJson['next']
+            return list(tokensIdsToReprocess)
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
         queryData = {

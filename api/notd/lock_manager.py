@@ -1,8 +1,15 @@
 import asyncio
 from datetime import datetime
 import contextlib
+from typing import ContextManager
 from core.util import date_util
 from core.exceptions import NotFoundException
+from core.requester import Requester
+
+import asyncpg
+from core.exceptions import DuplicateValueException
+from notd.model import Lock
+
 
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -15,7 +22,7 @@ class LockManager:
         self.retriever = retriever
         self.saver = saver
 
-    async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int):
+    async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int) -> Lock:
         startDate = date_util.datetime_from_now()
         lock = None
         try:
@@ -23,7 +30,7 @@ class LockManager:
         except NotFoundException:
             pass
         if lock:
-            if datetime.fromtimestamp(lock.expiryTime) < startDate:
+            if lock.expiryDate < startDate:
                 await self.saver.delete_lock(lockId=lock.lockId)
             elif date_util.datetime_from_now() > date_util.datetime_from_datetime(dt=startDate, seconds=timeoutSeconds):
                 raise LockTimeoutException
@@ -31,11 +38,10 @@ class LockManager:
                 asyncio.sleep(1)
                 await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         else:
-            await self.saver.create_lock(name=name, expiryDate= datetime.timestamp(date_util.datetime_from_now())+expirySeconds)
-        
+            await self.saver.create_lock(name=name, expiryDate= date_util.datetime_from_now(seconds=expirySeconds))
         return lock
 
-    async def release_lock(self, name: str):
+    async def release_lock(self, name: str) -> None:
         try:
             lock = await self.retriever.get_lock_by_name(name=name)
         except NotFoundException:
@@ -44,9 +50,9 @@ class LockManager:
             await self.saver.delete_lock(lockId=lock.lockId)
 
     @contextlib.asynccontextmanager
-    async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int):
-        await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
+    async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int) -> ContextManager[Lock]:
         try:
+            await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
             yield
         finally:
             await self.release_lock(name=name)
