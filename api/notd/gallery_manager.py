@@ -1,4 +1,5 @@
 import contextlib
+import datetime
 import json
 from typing import Dict
 from typing import List
@@ -120,7 +121,7 @@ class GalleryManager:
         )
         usesListings = isListed or minPrice or maxPrice
         if usesListings:
-            query = query.where(LatestTokenListingsTable.c.latestTokenListingId.is_not(None))
+            query = query.where(LatestTokenListingsTable.c.endDate >= datetime.datetime.now())
         if minPrice:
             query = query.where(LatestTokenListingsTable.c.value >= minPrice)
         if maxPrice:
