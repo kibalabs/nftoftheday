@@ -337,4 +337,3 @@ class Lock:
     name: str
     timeoutSeconds: int
     expiryTime: int
-
