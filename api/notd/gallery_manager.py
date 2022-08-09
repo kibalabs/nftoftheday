@@ -120,7 +120,7 @@ class GalleryManager:
         )
         usesListings = isListed or minPrice or maxPrice
         if usesListings:
-            query = query.where(LatestTokenListingsTable.c.latestTokenListingId != None)
+            query = query.where(LatestTokenListingsTable.c.latestTokenListingId.is_not(None))
         if minPrice:
             query = query.where(LatestTokenListingsTable.c.value >= minPrice)
         if maxPrice:
