@@ -329,6 +329,7 @@ class GalleryToken:
     tokenCustomization: Optional[TokenCustomization]
     tokenListing: Optional[TokenListing]
 
+
 @dataclasses.dataclass
 class Lock:
     lockId: int
