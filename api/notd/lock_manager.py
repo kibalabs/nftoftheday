@@ -7,6 +7,8 @@ from core.exceptions import NotFoundException
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
+class LockTimeoutException:
+    pass
 
 class LockManager:
     def __init__(self, retriever: Retriever, saver: Saver) -> None:
@@ -24,7 +26,7 @@ class LockManager:
             if datetime.fromtimestamp(lock.expiryTime) < startDate:
                 await self.saver.delete_lock(lockId=lock.lockId)
             elif date_util.datetime_from_now() > date_util.datetime_from_datetime(dt=startDate, seconds=timeoutSeconds):
-                raise Exception
+                raise LockTimeoutException
             else:
                 asyncio.sleep(1)
                 await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
