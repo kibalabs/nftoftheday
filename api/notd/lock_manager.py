@@ -1,12 +1,8 @@
 import asyncio
 import contextlib
-from datetime import datetime
 from typing import ContextManager
 
-import asyncpg
-from core.exceptions import DuplicateValueException
 from core.exceptions import NotFoundException
-from core.requester import Requester
 from core.util import date_util
 
 from notd.model import Lock
@@ -14,7 +10,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
 
-class LockTimeoutException:
+class LockTimeoutException(BaseException):
     pass
 
 class LockManager:
