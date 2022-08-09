@@ -1,5 +1,5 @@
+import asyncio
 from datetime import datetime
-import time
 import contextlib
 from core.util import date_util
 from core.exceptions import NotFoundException
@@ -26,10 +26,12 @@ class LockManager:
             elif date_util.datetime_from_now() > date_util.datetime_from_datetime(dt=startDate, seconds=timeoutSeconds):
                 raise Exception
             else:
-                time.sleep(100)
+                asyncio.sleep(1)
                 await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         else:
-            await self.saver.create_lock(name=name, timeoutSeconds=timeoutSeconds, expiryTime= datetime.timestamp(date_util.datetime_from_now())+expirySeconds)
+            await self.saver.create_lock(name=name, expiryDate= datetime.timestamp(date_util.datetime_from_now())+expirySeconds)
+        
+        return lock
 
     async def release_lock(self, name: str):
         try:

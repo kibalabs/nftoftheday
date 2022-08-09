@@ -612,15 +612,14 @@ class Saver(CoreSaver):
         query = TokenCustomizationsTable.delete().where(TokenCustomizationsTable.c.tokenCustomizationId == tokenCustomizationId)
         await self._execute(query=query, connection=connection)
 
-    async def create_lock(self, name: str, timeoutSeconds: int, expiryTime: int, connection: Optional[DatabaseConnection] = None) -> Lock:
+    async def create_lock(self, name: str, expiryDate: int, connection: Optional[DatabaseConnection] = None) -> Lock:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
             LocksTable.c.createdDate.key: createdDate,
             LocksTable.c.updatedDate.key: updatedDate,
             LocksTable.c.name.key: name,
-            LocksTable.c.timeoutSeconds.key: timeoutSeconds,
-            LocksTable.c.expiryTime.key: expiryTime,
+            LocksTable.c.expiryDate.key: expiryDate,
         }
         query = LocksTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
@@ -630,8 +629,7 @@ class Saver(CoreSaver):
             createdDate=createdDate,
             updatedDate=updatedDate,
             name=name,
-            timeoutSeconds=timeoutSeconds,
-            expiryTime=expiryTime,
+            expiryDate=expiryDate,
         )
 
     async def delete_lock(self, lockId: int, connection: Optional[DatabaseConnection] = None) -> None:

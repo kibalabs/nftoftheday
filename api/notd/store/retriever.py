@@ -8,7 +8,7 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
-from notd.store.schema_conversions import locks_from_row
+from notd.store.schema_conversions import lock_from_row
 from notd.model import Lock
 from notd.store.schema import LocksTable
 
@@ -309,7 +309,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        locks = [locks_from_row(row) for row in result]
+        locks = [lock_from_row(row) for row in result]
         return locks
 
     async def get_lock_by_name(self, name: str, connection: Optional[DatabaseConnection] = None) -> Lock:
@@ -319,5 +319,5 @@ class Retriever(CoreRetriever):
         row = result.first()
         if not row:
             raise NotFoundException(message=f'Lock with name:{name} not found')
-        lock = locks_from_row(row)
+        lock = lock_from_row(row)
         return lock

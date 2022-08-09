@@ -219,12 +219,11 @@ def token_customization_from_row(row: Mapping) -> TokenCustomization:
         description=row[TokenCustomizationsTable.c.description],
     )
 
-def locks_from_row(row: Mapping) -> Lock:
+def lock_from_row(row: Mapping) -> Lock:
     return Lock(
         lockId=row[LocksTable.c.lockId],
         createdDate=row[LocksTable.c.createdDate],
         updatedDate=row[LocksTable.c.updatedDate],
         name=row[LocksTable.c.name],
-        timeoutSeconds=row[LocksTable.c.timeoutSeconds],
-        expiryTime=row[LocksTable.c.expiryTime],
+        expiryDate=row[LocksTable.c.expiryDate],
     )
