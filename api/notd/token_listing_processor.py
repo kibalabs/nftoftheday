@@ -79,7 +79,7 @@ class TokenListingProcessor:
                     startDate = datetime.datetime.utcfromtimestamp(seaportSellOrder["listing_time"])
                     endDate = datetime.datetime.utcfromtimestamp(seaportSellOrder["expiration_time"])
                     currentPrice = int(seaportSellOrder["current_price"].split('.')[0])
-                    offererAddress = seaportSellOrder["maker"]["address"]
+                    offererAddress = chain_util.normalize_address(seaportSellOrder["maker"]["address"])
                     sourceId = seaportSellOrder["order_hash"]
                     isValueNative = True
                     # NOTE(krishan711): should isValueNative and value be calculated using considerations?
@@ -90,7 +90,7 @@ class TokenListingProcessor:
                         endDate=endDate,
                         isValueNative=isValueNative,
                         value=currentPrice,
-                        offererAddress=chain_util.normalize_address(offererAddress),
+                        offererAddress=offererAddress,
                         source='opensea-seaport',
                         sourceId=sourceId,
                     )
@@ -190,7 +190,7 @@ class TokenListingProcessor:
             startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
             endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
             currentPrice = int(order["price"])
-            offererAddress = order['signer']
+            offererAddress = chain_util.normalize_address(order['signer'])
             sourceId = order["hash"]
             # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
             isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
