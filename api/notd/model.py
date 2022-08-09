@@ -336,5 +336,4 @@ class Lock:
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
     name: str
-    timeoutSeconds: int
-    expiryTime: int
+    expiryDate: datetime.datetime
