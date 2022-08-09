@@ -13,7 +13,6 @@ from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
 from web3 import Web3
-from notd.store.schema_conversions import token_listing_from_row
 
 from notd.api.endpoints_v1 import InQueryParam
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
@@ -30,6 +29,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema_conversions import token_customization_from_row
+from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
