@@ -1,4 +1,5 @@
 import contextlib
+import datetime
 import json
 from typing import Dict
 from typing import List
@@ -13,7 +14,6 @@ from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
 from web3 import Web3
-from notd.store.schema_conversions import token_listing_from_row
 
 from notd.api.endpoints_v1 import InQueryParam
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
@@ -30,6 +30,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema_conversions import token_customization_from_row
+from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
@@ -57,7 +58,7 @@ class GalleryManager:
             sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
                 .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                 .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
+                .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .where(TokenMetadatasTable.c.tokenId == tokenId)
         )
@@ -112,7 +113,7 @@ class GalleryManager:
             sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
                 .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                 .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
+                .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
                 .limit(limit)

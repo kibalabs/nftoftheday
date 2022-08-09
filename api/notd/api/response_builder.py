@@ -4,8 +4,6 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
-from notd.api.models_v1 import ApiTokenListing
-from notd.model import TokenListing
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -16,6 +14,7 @@ from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
+from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.model import Airdrop
@@ -27,6 +26,7 @@ from notd.model import GalleryToken
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenCustomization
+from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken

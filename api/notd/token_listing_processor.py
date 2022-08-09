@@ -7,9 +7,9 @@ from typing import Optional
 
 from core import logging
 from core.requester import Requester
+from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
-from core.util import chain_util
 
 from notd.model import RetrievedTokenListing
 
