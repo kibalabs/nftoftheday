@@ -9,6 +9,7 @@ from core import logging
 from core.requester import Requester
 from core.util import date_util
 from core.util import list_util
+from core.util import chain_util
 from notd.lock_manager import LockManager
 
 from notd.model import RetrievedTokenListing
@@ -16,14 +17,14 @@ from notd.model import RetrievedTokenListing
 
 class TokenListingProcessor:
 
-    def __init__(self, requester: Requester, openseaRequester: Requester, lockManger: LockManager):
+    def __init__(self, requester: Requester, openseaRequester: Requester, lockManager: LockManager):
         self.requester = requester
         self.openseaRequester = openseaRequester
-        self.lockManager = lockManger
+        self.lockManager = lockManager
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        listings = []
-        async with self.lockManager.with_lock(name="opensea_lock", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name='opensea-request', timeoutSeconds=30, expirySeconds=600):
+            listings = []
             for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
                 logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
                 queryData = {
@@ -51,7 +52,7 @@ class TokenListingProcessor:
                         startDate = datetime.datetime.utcfromtimestamp(sellOrder["listing_time"])
                         endDate = datetime.datetime.utcfromtimestamp(sellOrder["expiration_time"])
                         currentPrice = int(sellOrder["current_price"].split('.')[0])
-                        offererAddress = sellOrder["maker"]["address"]
+                        offererAddress = chain_util.normalize_address(sellOrder["maker"]["address"])
                         sourceId = sellOrder["order_hash"]
                         isValueNative = sellOrder["payment_token_contract"]["symbol"] == "ETH"
                         listing = RetrievedTokenListing(
@@ -92,7 +93,7 @@ class TokenListingProcessor:
                             endDate=endDate,
                             isValueNative=isValueNative,
                             value=currentPrice,
-                            offererAddress=offererAddress,
+                            offererAddress=chain_util.normalize_address(offererAddress),
                             source='opensea-seaport',
                             sourceId=sourceId,
                         )
@@ -106,7 +107,7 @@ class TokenListingProcessor:
             return listings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        async with self.lockManager.with_lock(name="opensea_request", timeoutSeconds=30, expirySeconds=600):
+        async with self.lockManager.with_lock(name='opensea-request', timeoutSeconds=30, expirySeconds=600):
             tokensIdsToReprocess = set()
             index = 0
             for eventType in ['created', 'cancelled']:
@@ -131,7 +132,7 @@ class TokenListingProcessor:
             return list(tokensIdsToReprocess)
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name='looksrare-request', timeoutSeconds=30, expirySeconds=600):
             queryData = {
                 'isOrderAsk': 'true',
                 'collection': registryAddress,
@@ -153,7 +154,7 @@ class TokenListingProcessor:
                     startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
                     endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
                     currentPrice = int(order["price"])
-                    offererAddress = order['signer']
+                    offererAddress = chain_util.normalize_address(order['signer'])
                     sourceId = order["hash"]
                     # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
                     isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -213,16 +214,16 @@ class TokenListingProcessor:
         return assetListing
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        listings = []
-        for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
-            async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name='looksrare-request', timeoutSeconds=30, expirySeconds=600):
+            listings = []
+            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
                 listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
                 await asyncio.sleep(0.1)
-        listings = [listing for listing in listings if listing is not None]
-        return listings
+            listings = [listing for listing in listings if listing is not None]
+            return listings
 
     async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
-        async with self.lockManager.with_lock(name="looksrare_request", timeoutSeconds=30, expirySeconds=120):
+        async with self.lockManager.with_lock(name='looksrare-request', timeoutSeconds=30, expirySeconds=600):
             tokenIdsToReprocess = set()
             for eventType in ["CANCEL_LIST", "LIST" ]:
                 queryData = {

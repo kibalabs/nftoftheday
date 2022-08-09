@@ -327,6 +327,7 @@ class TokenCustomization:
 class GalleryToken:
     tokenMetadata: TokenMetadata
     tokenCustomization: Optional[TokenCustomization]
+    tokenListing: Optional[TokenListing]
 
 @dataclasses.dataclass
 class Lock:
@@ -336,3 +337,4 @@ class Lock:
     name: str
     timeoutSeconds: int
     expiryTime: int
+
