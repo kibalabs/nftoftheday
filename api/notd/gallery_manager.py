@@ -123,9 +123,9 @@ class GalleryManager:
         if usesListings:
             query = query.where(LatestTokenListingsTable.c.latestTokenListingId.is_not(None))
         if minPrice:
-            query = query.where(LatestTokenListingsTable.c.value >= minPrice)
+            query = query.where(LatestTokenListingsTable.c.value >= sqlalchemy.func.cast(minPrice, sqlalchemy.Numeric(precision=256, scale=0)))
         if maxPrice:
-            query = query.where(LatestTokenListingsTable.c.value <= maxPrice)
+            query = query.where(LatestTokenListingsTable.c.value <= sqlalchemy.func.cast(maxPrice, sqlalchemy.Numeric(precision=256, scale=0)))
         if ownerAddress:
             query = query.where(TokenOwnershipsTable.c.ownerAddress == ownerAddress)
         if tokenIdIn:
