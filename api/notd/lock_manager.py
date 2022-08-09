@@ -35,7 +35,7 @@ class LockManager:
             elif date_util.datetime_from_now() > date_util.datetime_from_datetime(dt=startDate, seconds=timeoutSeconds):
                 raise LockTimeoutException
             else:
-                asyncio.sleep(1)
+                await asyncio.sleep(1)
                 await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         else:
             await self.saver.create_lock(name=name, expiryDate= date_util.datetime_from_now(seconds=expirySeconds))
