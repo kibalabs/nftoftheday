@@ -18,23 +18,24 @@ class LockManager:
         self.retriever = retriever
         self.saver = saver
 
-    async def _acquire_lock_if_available(self, name: str, timeoutSeconds: int, expirySeconds: int) -> Optional[Lock]:
-        lock = None
-        try:
-            lock = await self.retriever.get_lock_by_name(name=name)
-        except NotFoundException:
-            pass
-        if lock and lock.expiryDate < date_util.datetime_from_now():
-            await self.saver.delete_lock(lockId=lock.lockId)
+    async def _acquire_lock_if_available(self, name: str, expirySeconds: int) -> Optional[Lock]:
+        async with self.saver.create_transaction() as connection:
             lock = None
-        if not lock:
-            return await self.saver.create_lock(name=name, expiryDate=date_util.datetime_from_now(seconds=expirySeconds))
+            try:
+                lock = await self.retriever.get_lock_by_name(name=name, connection=connection)
+            except NotFoundException:
+                pass
+            if lock and lock.expiryDate < date_util.datetime_from_now():
+                await self.saver.delete_lock(lockId=lock.lockId, connection=connection)
+                lock = None
+            if not lock:
+                return await self.saver.create_lock(name=name, expiryDate=date_util.datetime_from_now(seconds=expirySeconds), connection=connection)
         return None
 
     async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int) -> Lock:
         endDate = date_util.datetime_from_now(seconds=timeoutSeconds)
         while date_util.datetime_from_now() < endDate:
-            lock = await self._acquire_lock_if_available(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
+            lock = await self._acquire_lock_if_available(name=name, expirySeconds=expirySeconds)
             if lock:
                 return lock
             await asyncio.sleep(0.1)
