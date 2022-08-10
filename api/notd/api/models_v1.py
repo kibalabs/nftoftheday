@@ -127,7 +127,7 @@ class ApiTokenListing(BaseModel):
     startDate: datetime.datetime
     endDate: datetime.datetime
     isValueNative: bool
-    value: int
+    value: str
     source: str
     sourceId: str
 
