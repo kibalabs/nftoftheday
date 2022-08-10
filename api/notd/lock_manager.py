@@ -18,7 +18,7 @@ class LockManager:
         self.retriever = retriever
         self.saver = saver
 
-    async def _acquire_lock_if_available(self, name: str, expirySeconds: int) -> Optional[Lock]:
+    async def _acquire_lock_if_available(self, name: str, timeoutSeconds: int, expirySeconds: int) -> Optional[Lock]:
         lock = None
         try:
             lock = await self.retriever.get_lock_by_name(name=name)
