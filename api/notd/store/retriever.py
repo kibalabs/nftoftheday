@@ -312,9 +312,17 @@ class Retriever(CoreRetriever):
         locks = [lock_from_row(row) for row in result]
         return locks
 
+    async def get_lock(self, lockId: int, connection: Optional[DatabaseConnection] = None) -> Lock:
+        query = LocksTable.select().where(LocksTable.c.lockId == lockId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Lock with id:{lockId} not found')
+        lock = lock_from_row(row)
+        return lock
+
     async def get_lock_by_name(self, name: str, connection: Optional[DatabaseConnection] = None) -> Lock:
-        query = LocksTable.select() \
-            .where(LocksTable.c.name == name)
+        query = LocksTable.select().where(LocksTable.c.name == name)
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:

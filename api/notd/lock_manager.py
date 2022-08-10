@@ -40,17 +40,17 @@ class LockManager:
             await asyncio.sleep(0.1)
         raise LockTimeoutException()
 
-    async def release_lock(self, name: str) -> None:
+    async def release_lock(self, lock: Lock) -> None:
         try:
-            lock = await self.retriever.get_lock_by_name(name=name)
+            lock = await self.retriever.get_lock(lockId=lock.lockId)
             await self.saver.delete_lock(lockId=lock.lockId)
         except NotFoundException:
             pass
 
     @contextlib.asynccontextmanager
     async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int) -> ContextManager[Lock]:
-        await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
+        lock = await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
         try:
             yield
         finally:
-            await self.release_lock(name=name)
+            await self.release_lock(lock=lock)
