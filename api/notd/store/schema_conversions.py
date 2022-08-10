@@ -219,6 +219,7 @@ def token_customization_from_row(row: Mapping) -> TokenCustomization:
         description=row[TokenCustomizationsTable.c.description],
     )
 
+
 def lock_from_row(row: Mapping) -> Lock:
     return Lock(
         lockId=row[LocksTable.c.lockId],
