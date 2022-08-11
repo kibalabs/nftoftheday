@@ -1,17 +1,15 @@
 import asyncio
 import logging
 import os
+from typing import Optional
 
 from core import logging
-from core.requester import Requester
 from core.store.database import Database
-from core.util import date_util
+from notd.lock_manager import LockTimeoutException
 
 from notd.lock_manager import LockManager
-from notd.model import COLLECTION_MDTP_ADDRESS, COLLECTION_SPRITE_CLUB_ADDRESS, COLLECTION_GOBLINTOWN_ADDRESS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.token_listing_processor import TokenListingProcessor
 from core.util.value_holder import RequestIdHolder
 
 openseaApiKey = os.environ['OPENSEA_API_KEY']
@@ -22,6 +20,11 @@ async def test_function(lockManager: LockManager, index: int):
         for i in range(20):
             await asyncio.sleep(0.1)
 
+async def test_acquire_function(lockManager: LockManager, index: int, timeoutSeconds: Optional[int] = 6, expirySeconds: Optional[int] = 1 ):
+    print(f'{index} trying to acquire lock')
+    await lockManager.acquire_lock(name='testing', timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
+    for i in range(20):
+            await asyncio.sleep(0.1)
 
 async def run_async_opensea():
     requestIdHolder = RequestIdHolder()
@@ -39,54 +42,27 @@ async def run_async_opensea():
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    requester = Requester()
-    openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     lockManager = LockManager(retriever=retriever, saver=saver)
-    tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManager = LockManager(retriever=retriever, saver=saver))
 
     await database.connect()
 
-    # Test for Timeout
-    async with lockManager.with_lock(name='test-opensea', timeoutSeconds=1, expirySeconds=1):
-        await asyncio.sleep(0.5)
-
     # Test for Expiry
-    async with lockManager.with_lock(name='test-opensea', timeoutSeconds=0.1, expirySeconds=1):
-        await asyncio.sleep(0.5)
+    await asyncio.gather(*[test_acquire_function(lockManager=lockManager, index=i, timeoutSeconds=5, expirySeconds=1) for i in range(1)])
+    
+    # # Test Release
+    lock = await retriever.get_lock_by_name(name='testing')
+    await lockManager.release_lock(lock=lock)
 
-    #Test for One function at a time
-    async with lockManager.with_lock(name='test-opensea', timeoutSeconds=3*10, expirySeconds=10*60):
-        await tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=COLLECTION_GOBLINTOWN_ADDRESS, startDate=date_util.start_of_day())
-
-    #Test for Two functions at a time
-    async with lockManager.with_lock(name='test-opensea', timeoutSeconds=3*10, expirySeconds=10*60):
-        await asyncio.gather(
-            tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=COLLECTION_GOBLINTOWN_ADDRESS, startDate=date_util.start_of_day()),
-            tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=COLLECTION_SPRITE_CLUB_ADDRESS, startDate=date_util.start_of_day()),
-        )
-
-    #Test for Three functions at a time
-    # await asyncio.gather(*[tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=date_util.datetime_from_now()) for address in GALLERY_COLLECTIONS])
-    async with lockManager.with_lock(name='test-opensea', timeoutSeconds=3*10, expirySeconds=10*60):
-        await asyncio.gather(
-            tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=COLLECTION_GOBLINTOWN_ADDRESS, startDate=date_util.start_of_day()),
-            tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=COLLECTION_SPRITE_CLUB_ADDRESS, startDate=date_util.start_of_day()),
-            tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=COLLECTION_MDTP_ADDRESS, startDate=date_util.start_of_day()),
-        )
-
-    #Test Acquire Lock
-    await asyncio.gather(
-        lockManager.acquire_lock(name='test-opensea', timeoutSeconds=10, expirySeconds=10),
-        lockManager.acquire_lock(name='test-opensea', timeoutSeconds=10, expirySeconds=10),
-    )
-
-    #Test Acquire Lock if Available
-    lock = await lockManager.acquire_lock(name='test-opensea', timeoutSeconds=10, expirySeconds=(10 * 60))
-    print(lock)
-    lock1 = await lockManager._acquire_lock_if_available(name='test-opensea', expirySeconds=10)
-    print(lock1)
-
+    # #Test Functions
+    await asyncio.gather(*[test_function(lockManager=lockManager, index=i) for i in range(1)])
+    await asyncio.gather(*[test_function(lockManager=lockManager, index=i) for i in range(2)])
     await asyncio.gather(*[test_function(lockManager=lockManager, index=i) for i in range(3)])
+
+    # Test for Timeout
+    try:
+        await asyncio.gather(*[test_acquire_function(lockManager=lockManager, index=i, timeoutSeconds=1, expirySeconds=1) for i in range(3)])
+    except LockTimeoutException:
+        logging.info(f"Test for Timeout done")
 
     await database.disconnect()
 
