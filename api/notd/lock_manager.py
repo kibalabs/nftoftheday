@@ -23,16 +23,16 @@ class LockManager:
         print('_acquire_lock_if_available')
         lock = None
         try:
-            lock = await self.retriever.get_lock_by_name(name=name, connection=connection)
+            lock = await self.retriever.get_lock_by_name(name=name)
         except NotFoundException:
             pass
         print('lock', lock is not None)
         if lock and lock.expiryDate < date_util.datetime_from_now():
-            await self.saver.delete_lock(lockId=lock.lockId, connection=connection)
+            await self.saver.delete_lock(lockId=lock.lockId)
             lock = None
         if not lock:
             try:
-                return await self.saver.create_lock(name=name, expiryDate=date_util.datetime_from_now(seconds=expirySeconds), connection=connection)
+                return await self.saver.create_lock(name=name, expiryDate=date_util.datetime_from_now(seconds=expirySeconds))
             except SavingException:
                 pass
         return None
