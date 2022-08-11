@@ -48,10 +48,6 @@ async def run_async_opensea():
 
     # Test for Expiry
     await asyncio.gather(*[test_acquire_function(lockManager=lockManager, index=i, timeoutSeconds=5, expirySeconds=1) for i in range(1)])
-    
-    # # Test Release
-    lock = await retriever.get_lock_by_name(name='testing')
-    await lockManager.release_lock(lock=lock)
 
     # #Test Functions
     await asyncio.gather(*[test_function(lockManager=lockManager, index=i) for i in range(1)])
@@ -63,6 +59,10 @@ async def run_async_opensea():
         await asyncio.gather(*[test_acquire_function(lockManager=lockManager, index=i, timeoutSeconds=1, expirySeconds=1) for i in range(3)])
     except LockTimeoutException:
         logging.info(f"Test for Timeout done")
+
+    # # Test Release
+    lock = await retriever.get_lock_by_name(name='testing')
+    await lockManager.release_lock(lock=lock)
 
     await database.disconnect()
 
