@@ -1,18 +1,22 @@
 import asyncio
 import contextlib
-from typing import ContextManager, Optional
+from typing import ContextManager
+from typing import Optional
 
+from core.exceptions import KibaException
 from core.exceptions import NotFoundException
-from core.util import date_util
 from core.store.saver import SavingException
+from core.util import date_util
 
 from notd.model import Lock
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
 
-class LockTimeoutException(BaseException):
-    pass
+class LockTimeoutException(KibaException):
+     def __init__(self) -> None:
+        super().__init__(message='Lock Timed out')
+
 
 class LockManager:
     def __init__(self, retriever: Retriever, saver: Saver) -> None:

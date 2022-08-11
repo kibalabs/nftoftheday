@@ -1,17 +1,16 @@
 import asyncio
-from dataclasses import dataclass
 import logging
 import os
 import sys
-from typing import Optional
 import unittest
-
-from core import logging
-from core.store.database import Database
-from core.util.value_holder import RequestIdHolder
-from core.exceptions import NotFoundException
+from dataclasses import dataclass
+from typing import Optional
 from unittest import IsolatedAsyncioTestCase
 
+from core import logging
+from core.exceptions import NotFoundException
+from core.store.database import Database
+from core.util.value_holder import RequestIdHolder
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.lock_manager import LockManager
@@ -39,7 +38,7 @@ class KibaAsyncTestCase(IsolatedAsyncioTestCase):
         super().__init__(methodName=methodName)
 
 
-class LockTestCase(KibaAsyncTestCase):
+class LockManagerTestCase(KibaAsyncTestCase):
 
     async def asyncSetUp(self) -> None:
         requestIdHolder = RequestIdHolder()
@@ -64,12 +63,13 @@ class LockTestCase(KibaAsyncTestCase):
         await self.database.disconnect()
         await super().asyncTearDown()
 
-class LockManagerTestCase(LockTestCase):
+class TestLockExpiry(LockManagerTestCase):
 
     # Test for Expiry
     async def test_expiry(self):
         await asyncio.gather(*[test_acquire_function(lockManager=self.lockManager, index=i, timeoutSeconds=5, expirySeconds=1) for i in range(1)])
 
+class TestWithLock(LockManagerTestCase):
     # #Test Functions
     async def test_functions(self):
         await asyncio.gather(*[test_function(lockManager=self.lockManager, index=i) for i in range(1)])
@@ -77,6 +77,7 @@ class LockManagerTestCase(LockTestCase):
         await asyncio.gather(*[test_function(lockManager=self.lockManager, index=i) for i in range(3)])
 
     # Test for Timeout
+class TestLockTimeout(LockManagerTestCase):
     async def test_timeout(self):
         try:
             await asyncio.gather(*[test_acquire_function(lockManager=self.lockManager, index=i, timeoutSeconds=1, expirySeconds=1) for i in range(3)])
@@ -84,6 +85,7 @@ class LockManagerTestCase(LockTestCase):
             logging.info(f"Test for Timeout done")
 
     # Test Release
+class TestReleaseLock(LockManagerTestCase):
     async def test_release(self):
         lock = await self.lockManager.acquire_lock(name='testing', timeoutSeconds=2, expirySeconds=1)
         try:
