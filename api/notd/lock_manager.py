@@ -21,21 +21,20 @@ class LockManager:
 
     async def _acquire_lock_if_available(self, name: str, expirySeconds: int) -> Optional[Lock]:
         print('_acquire_lock_if_available')
-        async with self.saver.create_transaction() as connection:
+        lock = None
+        try:
+            lock = await self.retriever.get_lock_by_name(name=name, connection=connection)
+        except NotFoundException:
+            pass
+        print('lock', lock is not None)
+        if lock and lock.expiryDate < date_util.datetime_from_now():
+            await self.saver.delete_lock(lockId=lock.lockId, connection=connection)
             lock = None
+        if not lock:
             try:
-                lock = await self.retriever.get_lock_by_name(name=name, connection=connection)
-            except NotFoundException:
+                return await self.saver.create_lock(name=name, expiryDate=date_util.datetime_from_now(seconds=expirySeconds), connection=connection)
+            except SavingException:
                 pass
-            print('lock', lock is not None)
-            if lock and lock.expiryDate < date_util.datetime_from_now():
-                await self.saver.delete_lock(lockId=lock.lockId, connection=connection)
-                lock = None
-            if not lock:
-                try:
-                    return await self.saver.create_lock(name=name, expiryDate=date_util.datetime_from_now(seconds=expirySeconds), connection=connection)
-                except SavingException:
-                    pass
         return None
 
     async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.25) -> Lock:
