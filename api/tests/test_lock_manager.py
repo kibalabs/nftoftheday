@@ -37,44 +37,39 @@ class LockManagerTestCase(KibaAsyncTestCase):
         await super().asyncTearDown()
 
 
-class TestLockExpiry(LockManagerTestCase):
+class TestAcquireLock(LockManagerTestCase):
 
     async def test_lock_expires_in_time(self):
         lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        self.assertEqual(lock, None)
         await asyncio.sleep(0.1)
         lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
-        assert(lock is not None)
+        self.assertEqual(lock2, None)
         await self.lockManager.release_lock(lock=lock2)
 
     async def test_lock_expires_even_if_unreleased(self):
         lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        self.assertEqual(lock, None)
         await asyncio.sleep(0.3)
         lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
-        assert(lock is not None)
+        self.assertEqual(lock2, None)
         await self.lockManager.release_lock(lock=lock2)
 
-
-class TestWithLock(LockManagerTestCase):
-
-    async def test_current_lock_releases_before_new_one_acquired(self):
-        pass
-
-
-class TestLockTimeout(LockManagerTestCase):
-
-    async def test_lock_will_timeout(self):
-        pass
-
-
-class TestLockTimeout(LockManagerTestCase):
-
-    async def test_timeout(self):
-        pass
+    async def test_timeout_if_lock_taken(self):
+        await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        with self.assertRaises(LockTimeoutException):
+            await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
 
 
 class TestReleaseLock(LockManagerTestCase):
 
     async def test_lock_release(self):
+        pass
+
+
+class TestWithLock(LockManagerTestCase):
+
+    async def test_current_lock_releases_before_new_one_acquired(self):
         pass
 
 
