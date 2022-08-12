@@ -55,10 +55,14 @@ class TestAcquireLock(LockManagerTestCase):
         self.assertNotEqual(lock2, None)
         await self.lockManager.release_lock(lock=lock2)
 
-    async def test_timeout_if_lock_taken(self):
+    async def test_timeout_exception_raised_if_lock_taken(self):
         await self.lockManager.acquire_lock(name='test', expirySeconds=1, timeoutSeconds=0, loopDelaySeconds=0.001)
         with self.assertRaises(LockTimeoutException):
             await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+
+    async def test_timeout_waits_if_lock_taken(self):
+        await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0, loopDelaySeconds=0.001)
+        await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=.11, loopDelaySeconds=0.001)
 
 
 class TestReleaseLock(LockManagerTestCase):
