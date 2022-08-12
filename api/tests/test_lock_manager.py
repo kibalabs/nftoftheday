@@ -93,8 +93,31 @@ class TestReleaseLock(LockManagerTestCase):
 
 class TestWithLock(LockManagerTestCase):
 
-    async def test_current_lock_releases_before_new_one_acquired(self):
+    async def test_acquire_lock(self):
+        async with self.lockManager.with_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001):
+            await asyncio.sleep(0.01)
+
+    async def test_acquire_and_release_lock(self):
+        async with self.lockManager.with_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001):
+            await asyncio.sleep(0.01)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+
+    async def test_acquire_different_locks(self):
         pass
+
+    async def test_lock_expires_in_time(self):
+        pass
+
+    async def test_lock_expires_even_if_unreleased(self):
+        pass
+
+    async def test_acquire_waits_for_timeout_if_lock_taken(self):
+        pass
+
+    async def test_timeout_exception_raised_if_lock_taken(self):
+        pass
+
 
 
 if __name__ == "__main__":

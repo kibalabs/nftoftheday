@@ -59,8 +59,8 @@ class LockManager:
         await self.saver.delete_lock(lockId=lock.lockId)
 
     @contextlib.asynccontextmanager
-    async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int) -> ContextManager[Lock]:
-        lock = await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds)
+    async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.05) -> ContextManager[Lock]:
+        lock = await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds, loopDelaySeconds=loopDelaySeconds)
         try:
             yield
         finally:
