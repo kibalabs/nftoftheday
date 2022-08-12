@@ -59,18 +59,6 @@ class TestLockTimeout(LockManagerTestCase):
                 self.lockManager.acquire_lock(name='testing', timeoutSeconds=1, expirySeconds=1),
                 self.lockManager.acquire_lock(name='testing', timeoutSeconds=0.1, expirySeconds=1)
             )
-   
-
-class TestLockTimeout(LockManagerTestCase):
-
-    async def test_timeout(self):
-        try:
-            await asyncio.gather(
-                self.lockManager.acquire_lock(lockManager=self.lockManager, timeoutSeconds=1, expirySeconds=1),
-                self.lockManager.acquire_lock(lockManager=self.lockManager, timeoutSeconds=0.1, expirySeconds=1)
-            )
-        except LockTimeoutException:
-            logging.info(f"Test for Timeout done")
 
 
 class TestReleaseLock(LockManagerTestCase):
