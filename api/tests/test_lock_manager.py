@@ -5,7 +5,6 @@ import sys
 import unittest
 from unittest import IsolatedAsyncioTestCase
 
-from core import logging
 from core.exceptions import NotFoundException
 from core.store.database import Database
 
@@ -39,6 +38,16 @@ class LockManagerTestCase(KibaAsyncTestCase):
 
 class TestAcquireLock(LockManagerTestCase):
 
+    async def test_acquire_lock(self):
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+
+    async def test_acquire_different_locks(self):
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+        lock2 = await self.lockManager.acquire_lock(name='test2', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock2, None)
+
     async def test_lock_expires_in_time(self):
         lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
         self.assertNotEqual(lock, None)
@@ -68,7 +77,18 @@ class TestAcquireLock(LockManagerTestCase):
 class TestReleaseLock(LockManagerTestCase):
 
     async def test_lock_release(self):
-        pass
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+        await self.lockManager.release_lock(lock=lock)
+
+    async def test_lock_release_fails_if_lost(self):
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+        lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=1, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+        with self.assertRaises(NotFoundException):
+            await self.lockManager.release_lock(lock=lock)
+        await self.lockManager.release_lock(lock=lock2)
 
 
 class TestWithLock(LockManagerTestCase):

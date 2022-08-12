@@ -55,11 +55,8 @@ class LockManager:
         raise LockTimeoutException()
 
     async def release_lock(self, lock: Lock) -> None:
-        try:
-            lock = await self.retriever.get_lock(lockId=lock.lockId)
-            await self.saver.delete_lock(lockId=lock.lockId)
-        except NotFoundException:
-            pass
+        lock = await self.retriever.get_lock(lockId=lock.lockId)
+        await self.saver.delete_lock(lockId=lock.lockId)
 
     @contextlib.asynccontextmanager
     async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int) -> ContextManager[Lock]:
