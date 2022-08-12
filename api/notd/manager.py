@@ -61,7 +61,7 @@ class NotdManager:
         self.workQueue = workQueue
         self.tokenManager = tokenManager
         self.requester = requester
-        self._tokenCache = dict()
+        self._tokenCache = {}
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey

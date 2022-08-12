@@ -14,23 +14,24 @@ from notd.store.saver import Saver
 
 
 class LockTimeoutException(KibaException):
-     def __init__(self) -> None:
-        super().__init__(message='Lock Timed out')
+
+    def __init__(self, message: Optional[str] = None) -> None:
+        message = message if message else 'Lock Timeout'
+        super().__init__(message=message)
 
 
 class LockManager:
+
     def __init__(self, retriever: Retriever, saver: Saver) -> None:
         self.retriever = retriever
         self.saver = saver
 
     async def _acquire_lock_if_available(self, name: str, expirySeconds: int) -> Optional[Lock]:
-        print('_acquire_lock_if_available')
         lock = None
         try:
             lock = await self.retriever.get_lock_by_name(name=name)
         except NotFoundException:
             pass
-        print('lock', lock is not None)
         if lock and lock.expiryDate < date_util.datetime_from_now():
             await self.saver.delete_lock(lockId=lock.lockId)
             lock = None
@@ -42,7 +43,6 @@ class LockManager:
         return None
 
     async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.25) -> Lock:
-        print('acquire_lock')
         endDate = date_util.datetime_from_now(seconds=timeoutSeconds)
         while date_util.datetime_from_now() < endDate:
             lock = await self._acquire_lock_if_available(name=name, expirySeconds=expirySeconds)

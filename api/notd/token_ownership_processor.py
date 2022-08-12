@@ -44,7 +44,7 @@ class TokenOwnershipProcessor:
         )
 
     async def calculate_token_multi_ownership(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenMultiOwnership]:
-        ownerships: Dict[str, RetrievedTokenMultiOwnership] = dict()
+        ownerships: Dict[str, RetrievedTokenMultiOwnership] = {}
         offset = 0
         limit = 500
         while True:
