@@ -77,7 +77,7 @@ class TestAcquireLock(LockManagerTestCase):
 class TestReleaseLock(LockManagerTestCase):
 
     async def test_lock_release(self):
-        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0.5, loopDelaySeconds=0.001)
         self.assertNotEqual(lock, None)
         await self.lockManager.release_lock(lock=lock)
 
@@ -104,19 +104,39 @@ class TestWithLock(LockManagerTestCase):
         self.assertNotEqual(lock, None)
 
     async def test_acquire_different_locks(self):
-        pass
+        async with self.lockManager.with_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001):
+            async with self.lockManager.with_lock(name='test2', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001):
+                await asyncio.sleep(0.01)
+            lock = await self.lockManager.acquire_lock(name='test2', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+            self.assertNotEqual(lock, None)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
 
     async def test_lock_expires_in_time(self):
-        pass
+        async with self.lockManager.with_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001):
+            await asyncio.sleep(0.02)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
 
     async def test_lock_expires_even_if_unreleased(self):
-        pass
+        async with self.lockManager.with_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001):
+            await asyncio.sleep(0.001)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
 
     async def test_acquire_waits_for_timeout_if_lock_taken(self):
-        pass
+        async with self.lockManager.with_lock(name='test', expirySeconds=0.5, timeoutSeconds=0, loopDelaySeconds=0.001):
+            await asyncio.sleep(0.001)
+            with self.assertRaises(LockTimeoutException):
+                lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+                self.assertNotEqual(lock, None)
 
     async def test_timeout_exception_raised_if_lock_taken(self):
-        pass
+        async with self.lockManager.with_lock(name='test', expirySeconds=0.5, timeoutSeconds=0, loopDelaySeconds=0.001):
+            await asyncio.sleep(0.001)
+            with self.assertRaises(LockTimeoutException):
+                async with self.lockManager.with_lock(name='test', expirySeconds=0.001, timeoutSeconds=0, loopDelaySeconds=0.001):
+                    await asyncio.sleep(0.01)
 
 
 
