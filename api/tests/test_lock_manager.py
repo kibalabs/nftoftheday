@@ -8,7 +8,9 @@ from unittest import IsolatedAsyncioTestCase
 from core.exceptions import NotFoundException
 from core.store.database import Database
 
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from notd.store.schema import LocksTable
 from notd.lock_manager import LockManager
 from notd.lock_manager import LockTimeoutException
 from notd.store.retriever import Retriever
@@ -24,6 +26,7 @@ class KibaAsyncTestCase(IsolatedAsyncioTestCase):
 class LockManagerTestCase(KibaAsyncTestCase):
 
     async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
         databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
         self.database = Database(connectionString=databaseConnectionString)
         self.saver = Saver(database=self.database)
@@ -32,6 +35,7 @@ class LockManagerTestCase(KibaAsyncTestCase):
         await self.database.connect()
 
     async def asyncTearDown(self) -> None:
+        await self.database.execute(query=LocksTable.delete())
         await self.database.disconnect()
         await super().asyncTearDown()
 
@@ -77,7 +81,7 @@ class TestAcquireLock(LockManagerTestCase):
 class TestReleaseLock(LockManagerTestCase):
 
     async def test_lock_release(self):
-        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0.5, loopDelaySeconds=0.001)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
         self.assertNotEqual(lock, None)
         await self.lockManager.release_lock(lock=lock)
 
@@ -137,7 +141,6 @@ class TestWithLock(LockManagerTestCase):
             with self.assertRaises(LockTimeoutException):
                 async with self.lockManager.with_lock(name='test', expirySeconds=0.001, timeoutSeconds=0, loopDelaySeconds=0.001):
                     await asyncio.sleep(0.01)
-
 
 
 if __name__ == "__main__":
