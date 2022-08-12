@@ -43,7 +43,7 @@ class LockManager:
                 pass
         return None
 
-    async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.25) -> Lock:
+    async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.05) -> Lock:
         currentDate = date_util.datetime_from_now()
         endDate = date_util.datetime_from_now(seconds=timeoutSeconds)
         while currentDate < endDate:

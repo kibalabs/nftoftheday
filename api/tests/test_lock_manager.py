@@ -40,25 +40,25 @@ class LockManagerTestCase(KibaAsyncTestCase):
 class TestAcquireLock(LockManagerTestCase):
 
     async def test_lock_expires_in_time(self):
-        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
-        self.assertEqual(lock, None)
-        await asyncio.sleep(0.1)
-        lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
-        self.assertEqual(lock2, None)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+        await asyncio.sleep(0.01)
+        lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock2, None)
         await self.lockManager.release_lock(lock=lock2)
 
     async def test_lock_expires_even_if_unreleased(self):
-        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
-        self.assertEqual(lock, None)
-        await asyncio.sleep(0.3)
-        lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
-        self.assertEqual(lock2, None)
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock, None)
+        await asyncio.sleep(0.011)
+        lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
+        self.assertNotEqual(lock2, None)
         await self.lockManager.release_lock(lock=lock2)
 
     async def test_timeout_if_lock_taken(self):
-        await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        await self.lockManager.acquire_lock(name='test', expirySeconds=1, timeoutSeconds=0, loopDelaySeconds=0.001)
         with self.assertRaises(LockTimeoutException):
-            await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+            await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0, loopDelaySeconds=0.001)
 
 
 class TestReleaseLock(LockManagerTestCase):
