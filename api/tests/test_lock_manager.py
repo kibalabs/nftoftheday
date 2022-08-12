@@ -76,6 +76,7 @@ class TestAcquireLock(LockManagerTestCase):
         await self.lockManager.acquire_lock(name='test', expirySeconds=0.5, timeoutSeconds=0, loopDelaySeconds=0.001)
         with self.assertRaises(LockTimeoutException):
             await self.lockManager.acquire_lock(name='test', expirySeconds=0.01, timeoutSeconds=0.0001, loopDelaySeconds=0.001)
+        await asyncio.sleep(0.5)
 
 
 class TestReleaseLock(LockManagerTestCase):
