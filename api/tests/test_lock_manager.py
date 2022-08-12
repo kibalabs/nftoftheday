@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import unittest
-
 from unittest import IsolatedAsyncioTestCase
 
 from core import logging
@@ -16,7 +15,6 @@ from notd.lock_manager import LockTimeoutException
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
-openseaApiKey = os.environ['OPENSEA_API_KEY']
 
 class KibaAsyncTestCase(IsolatedAsyncioTestCase):
 
@@ -41,47 +39,43 @@ class LockManagerTestCase(KibaAsyncTestCase):
 
 class TestLockExpiry(LockManagerTestCase):
 
-    async def test_expiry(self):
-        pass
+    async def test_lock_expires_in_time(self):
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        await asyncio.sleep(0.1)
+        lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        assert(lock is not None)
+        await self.lockManager.release_lock(lock=lock2)
+
+    async def test_lock_expires_even_if_unreleased(self):
+        lock = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        await asyncio.sleep(0.3)
+        lock2 = await self.lockManager.acquire_lock(name='test', expirySeconds=0.1, timeoutSeconds=0)
+        assert(lock is not None)
+        await self.lockManager.release_lock(lock=lock2)
 
 
 class TestWithLock(LockManagerTestCase):
 
-    async def test_current_lock_releases_before_new_one_acquired (self):
+    async def test_current_lock_releases_before_new_one_acquired(self):
         pass
 
 
 class TestLockTimeout(LockManagerTestCase):
 
     async def test_lock_will_timeout(self):
-        with self.assertRaises(LockTimeoutException) as lockTimeOut:
-            await asyncio.gather(
-                self.lockManager.acquire_lock(name='testing', timeoutSeconds=1, expirySeconds=1),
-                self.lockManager.acquire_lock(name='testing', timeoutSeconds=0.1, expirySeconds=1)
-            )
-   
+        pass
+
 
 class TestLockTimeout(LockManagerTestCase):
 
     async def test_timeout(self):
-        try:
-            await asyncio.gather(
-                self.lockManager.acquire_lock(lockManager=self.lockManager, timeoutSeconds=1, expirySeconds=1),
-                self.lockManager.acquire_lock(lockManager=self.lockManager, timeoutSeconds=0.1, expirySeconds=1)
-            )
-        except LockTimeoutException:
-            logging.info(f"Test for Timeout done")
+        pass
 
 
 class TestReleaseLock(LockManagerTestCase):
 
     async def test_lock_release(self):
-        lock = await self.lockManager.acquire_lock(name='testing', timeoutSeconds=2, expirySeconds=1)
-        try:
-            lock = await self.retriever.get_lock(lockId=lock.lockId)
-            await self.saver.delete_lock(lockId=lock.lockId)
-        except NotFoundException:
-            pass
+        pass
 
 
 if __name__ == "__main__":

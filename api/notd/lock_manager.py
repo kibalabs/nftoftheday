@@ -44,12 +44,14 @@ class LockManager:
         return None
 
     async def acquire_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.25) -> Lock:
+        currentDate = date_util.datetime_from_now()
         endDate = date_util.datetime_from_now(seconds=timeoutSeconds)
-        while date_util.datetime_from_now() < endDate:
+        while currentDate < endDate:
             lock = await self._acquire_lock_if_available(name=name, expirySeconds=expirySeconds)
             if lock:
                 return lock
             await asyncio.sleep(loopDelaySeconds)
+            currentDate = date_util.datetime_from_now()
         raise LockTimeoutException()
 
     async def release_lock(self, lock: Lock) -> None:
