@@ -8,13 +8,12 @@ from unittest import IsolatedAsyncioTestCase
 from core.exceptions import NotFoundException
 from core.store.database import Database
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.store.schema import LocksTable
 from notd.lock_manager import LockManager
 from notd.lock_manager import LockTimeoutException
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import LocksTable
 
 
 class KibaAsyncTestCase(IsolatedAsyncioTestCase):
