@@ -328,3 +328,12 @@ class GalleryToken:
     tokenMetadata: TokenMetadata
     tokenCustomization: Optional[TokenCustomization]
     tokenListing: Optional[TokenListing]
+
+
+@dataclasses.dataclass
+class Lock:
+    lockId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    name: str
+    expiryDate: datetime.datetime

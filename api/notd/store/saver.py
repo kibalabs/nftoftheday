@@ -14,6 +14,7 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
+from notd.model import Lock
 from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
@@ -26,6 +27,7 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
+from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
@@ -608,4 +610,28 @@ class Saver(CoreSaver):
 
     async def delete_token_customization(self, tokenCustomizationId: int, connection: Optional[DatabaseConnection] = None) -> None:
         query = TokenCustomizationsTable.delete().where(TokenCustomizationsTable.c.tokenCustomizationId == tokenCustomizationId)
+        await self._execute(query=query, connection=connection)
+
+    async def create_lock(self, name: str, expiryDate: datetime.datetime, connection: Optional[DatabaseConnection] = None) -> Lock:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            LocksTable.c.createdDate.key: createdDate,
+            LocksTable.c.updatedDate.key: updatedDate,
+            LocksTable.c.name.key: name,
+            LocksTable.c.expiryDate.key: expiryDate,
+        }
+        query = LocksTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        lockId = result.inserted_primary_key[0]
+        return Lock(
+            lockId=lockId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            name=name,
+            expiryDate=expiryDate,
+        )
+
+    async def delete_lock(self, lockId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = LocksTable.delete().where(LocksTable.c.lockId == lockId)
         await self._execute(query=query, connection=connection)

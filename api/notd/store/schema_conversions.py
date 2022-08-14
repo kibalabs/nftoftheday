@@ -4,6 +4,7 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
+from notd.model import Lock
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -16,6 +17,7 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
+from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
@@ -215,4 +217,14 @@ def token_customization_from_row(row: Mapping) -> TokenCustomization:
         blockNumber=row[TokenCustomizationsTable.c.blockNumber],
         name=row[TokenCustomizationsTable.c.name],
         description=row[TokenCustomizationsTable.c.description],
+    )
+
+
+def lock_from_row(row: Mapping) -> Lock:
+    return Lock(
+        lockId=row[LocksTable.c.lockId],
+        createdDate=row[LocksTable.c.createdDate],
+        updatedDate=row[LocksTable.c.updatedDate],
+        name=row[LocksTable.c.name],
+        expiryDate=row[LocksTable.c.expiryDate],
     )

@@ -50,17 +50,17 @@ class CollectionProcessor:
         try:
             doesSupportErc721Response = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC721})
             doesSupportErc721 = doesSupportErc721Response[0]
-        except BadRequestException as exception:
+        except BadRequestException:
             doesSupportErc721 = False
         try:
             doesSupportErc1155Response = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc165MetadataContractAbi, functionAbi=self.erc165SupportInterfaceUriFunctionAbi, arguments={'interfaceId': _INTERFACE_ID_ERC1155})
             doesSupportErc1155 = doesSupportErc1155Response[0]
-        except BadRequestException as exception:
+        except BadRequestException:
             doesSupportErc1155 = False
         try:
             tokenMetadataNameResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataNameFunctionAbi)
             collectionName = tokenMetadataNameResponse[0]
-        except BadRequestException as exception:
+        except BadRequestException:
             collectionName = None
         try:
             tokenMetadataSymbolResponse = await self.ethClient.call_function(toAddress=address, contractAbi=self.erc721MetdataContractAbi, functionAbi=self.erc721MetadataSymbolFunctionAbi)

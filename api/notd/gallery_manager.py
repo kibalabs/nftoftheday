@@ -97,7 +97,7 @@ class GalleryManager:
                 .order_by(TokenAttributesTable.c.name.asc(), TokenAttributesTable.c.value.asc())
         )
         result = await self.retriever.database.execute(query=query)
-        collectionAttributeNameMap: Dict[str, CollectionAttribute] = dict()
+        collectionAttributeNameMap: Dict[str, CollectionAttribute] = {}
         for name, value in result:
             collectionAttribute = collectionAttributeNameMap.get(name)
             if not collectionAttribute:

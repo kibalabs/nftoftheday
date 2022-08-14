@@ -1,2 +1,1 @@
-asyncclick==8.0.1.3
-kiba-build==0.1.5dev1
+kiba-build==0.1.5

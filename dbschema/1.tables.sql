@@ -289,3 +289,14 @@ CREATE UNIQUE INDEX tbl_token_customizations_registry_address_token_id on tbl_to
 CREATE INDEX tbl_token_customizations_created_date ON tbl_token_customizations (created_date);
 CREATE INDEX tbl_token_customizations_updated_date ON tbl_token_customizations (updated_date);
 CREATE INDEX tbl_token_customizations_registry_address_token_id_creator_address on tbl_token_customizations (registry_address, token_id, creator_address);
+
+CREATE TABLE tbl_locks (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    name TEXT NOT NULL,
+    expiry_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);
+CREATE UNIQUE INDEX tbl_locks_name on tbl_locks (name);
+CREATE INDEX tbl_locks_created_date ON tbl_locks (created_date);
+CREATE INDEX tbl_locks_updated_date ON tbl_locks (updated_date);

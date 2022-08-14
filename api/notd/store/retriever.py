@@ -12,6 +12,7 @@ from sqlalchemy.sql import Select
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
+from notd.model import Lock
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -24,6 +25,7 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
+from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
@@ -36,6 +38,7 @@ from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import latest_update_from_row
+from notd.store.schema_conversions import lock_from_row
 from notd.store.schema_conversions import token_attribute_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
@@ -296,3 +299,33 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'TokenCustomization with registry:{registryAddress} tokenId:{tokenId} not found')
         tokenCustomization = token_customization_from_row(row)
         return tokenCustomization
+
+    async def list_locks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Lock]:
+        query = LocksTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=LocksTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=LocksTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        locks = [lock_from_row(row) for row in result]
+        return locks
+
+    async def get_lock(self, lockId: int, connection: Optional[DatabaseConnection] = None) -> Lock:
+        query = LocksTable.select().where(LocksTable.c.lockId == lockId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Lock with id:{lockId} not found')
+        lock = lock_from_row(row)
+        return lock
+
+    async def get_lock_by_name(self, name: str, connection: Optional[DatabaseConnection] = None) -> Lock:
+        query = LocksTable.select().where(LocksTable.c.name == name)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Lock with name:{name} not found')
+        lock = lock_from_row(row)
+        return lock

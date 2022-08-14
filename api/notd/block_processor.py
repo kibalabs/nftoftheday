@@ -129,7 +129,7 @@ class BlockProcessor:
         return retrievedEvents
 
     async def _merge_erc1155_retrieved_events(self, erc1155RetrievedEvents: List[RetrievedEvent]) -> List[RetrievedEvent]:
-        firstEvents =  dict()
+        firstEvents = {}
         for event in erc1155RetrievedEvents:
             eventKey = (event.transactionHash, event.registryAddress, event.tokenId, event.fromAddress, event.toAddress, event.tokenType)
             firstEvent = firstEvents.get(eventKey)
