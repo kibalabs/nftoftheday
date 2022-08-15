@@ -19,7 +19,6 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-from .listing_manager import ListingManager
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -44,6 +43,8 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
+
+from .listing_manager import ListingManager
 
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap

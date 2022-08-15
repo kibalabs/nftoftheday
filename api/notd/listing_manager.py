@@ -56,6 +56,7 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import NoOwnershipException
 from notd.token_ownership_processor import TokenOwnershipProcessor
 
+
 class ListingManager:
     def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue,tokenListingProcessor: TokenListingProcessor) -> None:
         self.saver = saver
