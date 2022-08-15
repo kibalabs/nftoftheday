@@ -17,21 +17,20 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pablo import PabloClient
 
-from notd.ownership_manager import OwnershipManager
-from notd.collection_manager import CollectionManager
 from notd.activity_manager import ActivityManager
-from notd.attribute_manager import AttributeManager
-from notd.listing_manager import ListingManager
-
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.gallery_v1 import create_api as create_gallery_v1_api
 from notd.api.response_builder import ResponseBuilder
+from notd.attribute_manager import AttributeManager
 from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
+from notd.collection_manager import CollectionManager
 from notd.collection_processor import CollectionProcessor
 from notd.gallery_manager import GalleryManager
+from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager
+from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_attributes_processor import TokenAttributeProcessor
@@ -79,9 +78,9 @@ tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
 activityManager = ActivityManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionActivityProcessor=collectionActivityProcessor)
 attributeManager = AttributeManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenAttributeProcessor=tokenAttributeProcessor)
 collectionManager = CollectionManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor)
-ownershipManager = OwnershipManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor)
+ownershipManager = OwnershipManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionManager=collectionManager)
 listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenListingProcessor=tokenListingProcessor)
-tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor)
+tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver)

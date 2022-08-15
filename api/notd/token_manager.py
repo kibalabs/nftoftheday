@@ -12,6 +12,7 @@ from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
 
+from notd.collection_manager import CollectionManager
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
@@ -20,8 +21,6 @@ from notd.store.schema import TokenMetadatasTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
-from notd.collection_manager import CollectionManager
-
 
 _TOKEN_UPDATE_MIN_DAYS = 7
 

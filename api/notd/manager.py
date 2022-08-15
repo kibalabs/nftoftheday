@@ -372,7 +372,7 @@ class NotdManager:
         await self.listingManager.update_latest_listings_for_collection(address=address)
 
     async def get_collection_by_address(self, address: str) -> Collection:
-        return await self.tokenManager.get_collection_by_address(address=address)
+        return await self.collectionManager.get_collection_by_address(address=address)
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         return await self.tokenManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
