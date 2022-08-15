@@ -16,6 +16,7 @@ from notd.token_listing_processor import TokenListingProcessor
 
 
 class ListingManager:
+
     def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenListingProcessor: TokenListingProcessor) -> None:
         self.saver = saver
         self.retriever = retriever

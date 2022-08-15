@@ -14,6 +14,7 @@ from notd.token_attributes_processor import TokenAttributeProcessor
 
 
 class AttributeManager:
+
     def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, tokenAttributeProcessor: TokenAttributeProcessor) -> None:
         self.saver = saver
         self.retriever = retriever

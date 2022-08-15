@@ -331,9 +331,7 @@ class NotdManager:
         await self.collectionManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
-        collectionTokenIds = await self.collectionManager.update_collection_tokens(address=address, shouldForce=shouldForce)
-        await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
-        await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
+        await self.collectionManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.activityManager.update_activity_for_all_collections_deferred()
