@@ -12,8 +12,8 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import list_util
 
+from notd.collection_manager import CollectionManager
 from notd.messages import UpdateTokenOwnershipMessageContent
-from notd.model import Collection
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import Token
 from notd.store.retriever import Retriever
@@ -28,13 +28,13 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 
 class OwnershipManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, tokenOwnershipProcessor: TokenOwnershipProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, collectionManager: CollectionManager, tokenOwnershipProcessor: TokenOwnershipProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
         self.tokenQueue = tokenQueue
+        self.collectionManager = collectionManager
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
-
 
     async def update_token_ownerships_deferred(self, collectionTokenIds: List[Tuple[str, str]]) -> None:
         if len(collectionTokenIds) == 0:
@@ -47,8 +47,9 @@ class OwnershipManager:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
-    async def update_token_ownership(self, registryAddress: str, tokenId: str, collection: Collection):
+    async def update_token_ownership(self, registryAddress: str, tokenId: str):
         registryAddress = chain_util.normalize_address(value=registryAddress)
+        collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
         if collection.doesSupportErc721:
             await self._update_token_single_ownership(registryAddress=registryAddress, tokenId=tokenId)
         elif collection.doesSupportErc1155:

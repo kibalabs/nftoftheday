@@ -23,6 +23,7 @@ from core.util import date_util
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
 from notd.block_processor import BlockProcessor
+from notd.collection_manager import CollectionManager
 from notd.listing_manager import ListingManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
@@ -37,6 +38,7 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
+from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -46,9 +48,6 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
-
-from .collection_manager import CollectionManager
-from .ownership_manager import OwnershipManager
 
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
@@ -320,8 +319,7 @@ class NotdManager:
 
     async def update_token(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
-        collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
-        await self.ownershipManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
+        await self.ownershipManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
         await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)

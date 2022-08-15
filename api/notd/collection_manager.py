@@ -1,4 +1,5 @@
 import asyncio
+import random
 from typing import List
 
 from core import logging
@@ -37,7 +38,7 @@ class CollectionManager:
         address = chain_util.normalize_address(value=address)
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
 
-    async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = 0) -> Collection:
+    async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = (0.1 * random.randint(1, 10))) -> Collection:
         address = chain_util.normalize_address(value=address)
         try:
             collection = await self.retriever.get_collection_by_address(address=address)

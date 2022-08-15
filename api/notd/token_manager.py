@@ -1,5 +1,4 @@
 import asyncio
-import random
 from typing import List
 from typing import Tuple
 
@@ -21,19 +20,21 @@ from notd.store.schema import TokenMetadatasTable
 from notd.token_metadata_processor import TokenDoesNotExistException
 from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.collection_manager import CollectionManager
+
 
 _TOKEN_UPDATE_MIN_DAYS = 7
-_COLLECTION_UPDATE_MIN_DAYS = 30
 
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
         self.tokenQueue = tokenQueue
         self.tokenMetadataProcessor = tokenMetadataProcessor
+        self.collectionManager = collectionManager
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         registryAddress = chain_util.normalize_address(value=registryAddress)
@@ -99,7 +100,7 @@ class TokenManager:
             if len(recentlyUpdatedTokens) > 0:
                 logging.info('Skipping token because it has been updated recently.')
                 return
-        collection = await self._get_collection_by_address(address=registryAddress, shouldProcessIfNotFound=True, sleepSecondsBeforeProcess=0.1 * random.randint(1, 10))
+        collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
         except (TokenDoesNotExistException, TokenHasNoMetadataException) as exception:
