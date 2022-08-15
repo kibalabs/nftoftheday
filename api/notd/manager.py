@@ -20,6 +20,7 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 
+from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
 from notd.block_processor import BlockProcessor
 from notd.listing_manager import ListingManager
@@ -56,7 +57,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, requester: Requester, revueApiKey: str):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, requester: Requester, revueApiKey: str):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
@@ -64,6 +65,7 @@ class NotdManager:
         self.tokenManager = tokenManager
         self.listingManager = listingManager
         self.attributeManager = attributeManager
+        self.activityManager = activityManager
         self.requester = requester
         self._tokenCache = {}
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
@@ -328,16 +330,16 @@ class NotdManager:
         await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
     async def update_activity_for_all_collections_deferred(self) -> None:
-        await self.tokenManager.update_activity_for_all_collections_deferred()
+        await self.activityManager.update_activity_for_all_collections_deferred()
 
     async def update_activity_for_all_collections(self) -> None:
-        await self.tokenManager.update_activity_for_all_collections()
+        await self.activityManager.update_activity_for_all_collections()
 
     async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:
-        await self.tokenManager.update_activity_for_collection_deferred(registryAddress=registryAddress, startDate=startDate)
+        await self.activityManager.update_activity_for_collection_deferred(registryAddress=registryAddress, startDate=startDate)
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
-        await self.tokenManager.update_activity_for_collection(address=address, startDate=startDate)
+        await self.activityManager.update_activity_for_collection(address=address, startDate=startDate)
 
     async def update_token_attributes_for_all_collections_deferred(self) -> None:
         await self.attributeManager.update_token_attributes_for_all_collections_deferred()
