@@ -47,6 +47,9 @@ from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
 
+from .collection_manager import CollectionManager
+from .ownership_manager import OwnershipManager
+
 _REGISTRY_BLACKLIST = set([
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
     '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e', # zed.run
@@ -57,12 +60,14 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, requester: Requester, revueApiKey: str):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, requester: Requester, revueApiKey: str):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
         self.tokenManager = tokenManager
+        self.collectionManager = collectionManager
+        self.ownershipManager = ownershipManager
         self.listingManager = listingManager
         self.attributeManager = attributeManager
         self.activityManager = activityManager
@@ -304,30 +309,33 @@ class NotdManager:
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.ownershipManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str) -> None:
-        await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
+        await self.ownershipManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
-        await self.tokenManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId)
+        await self.ownershipManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
-        await self.tokenManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
+        await self.ownershipManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
 
     async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
-        await self.tokenManager.update_collection_deferred(address=address, shouldForce=shouldForce)
+        await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)
 
     async def update_collection(self, address: str, shouldForce: bool = False) -> None:
-        await self.tokenManager.update_collection(address=address, shouldForce=shouldForce)
+        await self.collectionManager.update_collection(address=address, shouldForce=shouldForce)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
-        await self.tokenManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
+        await self.collectionManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
-        await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
+        collectionTokenIds = await self.collectionManager.update_collection_tokens(address=address, shouldForce=shouldForce)
+        await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
+        await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
 
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.activityManager.update_activity_for_all_collections_deferred()
@@ -372,13 +380,16 @@ class NotdManager:
         return await self.tokenManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
 
     async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
-        return await self.tokenManager.list_collection_tokens(address=address)
+        return await self.collectionManager.list_collection_tokens(address=address)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
-        return await self.tokenManager.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress)
+        address = chain_util.normalize_address(value=address)
+        collection = await self.collectionManager.get_collection_by_address(address=address)
+        return await self.ownershipManager.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress, collection=collection)
 
     async def reprocess_owner_token_ownerships(self, accountAddress: str) -> None:
-        await self.tokenManager.reprocess_owner_token_ownerships(ownerAddress=accountAddress)
+        collectionTokenIds = await self.ownershipManager.reprocess_owner_token_ownerships(ownerAddress=accountAddress)
+        await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
