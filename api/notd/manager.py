@@ -19,6 +19,7 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from .listing_manager import ListingManager
 
 from notd.block_processor import BlockProcessor
 from notd.messages import ProcessBlockMessageContent
@@ -54,12 +55,13 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, requester: Requester, revueApiKey: str):
+    def __init__(self, blockProcessor: BlockProcessor, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenManager: TokenManager, listingManager: ListingManager, requester: Requester, revueApiKey: str):
         self.blockProcessor = blockProcessor
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
         self.tokenManager = tokenManager
+        self.listingManager = listingManager
         self.requester = requester
         self._tokenCache = {}
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
@@ -348,16 +350,16 @@ class NotdManager:
         await self.tokenManager.update_collection_token_attributes(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
-        await self.tokenManager.update_latest_listings_for_all_collections_deferred(delaySeconds=delaySeconds)
+        await self.listingManager.update_latest_listings_for_all_collections_deferred(delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_all_collections(self) -> None:
-        await self.tokenManager.update_latest_listings_for_all_collections()
+        await self.listingManager.update_latest_listings_for_all_collections()
 
     async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
-        await self.tokenManager.update_latest_listings_for_collection_deferred(address=address, delaySeconds=delaySeconds)
+        await self.listingManager.update_latest_listings_for_collection_deferred(address=address, delaySeconds=delaySeconds)
 
     async def update_latest_listings_for_collection(self, address: str) -> None:
-        await self.tokenManager.update_latest_listings_for_collection(address=address)
+        await self.listingManager.update_latest_listings_for_collection(address=address)
 
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.tokenManager.get_collection_by_address(address=address)
