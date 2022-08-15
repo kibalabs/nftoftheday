@@ -16,11 +16,10 @@ from notd.token_listing_processor import TokenListingProcessor
 
 
 class ListingManager:
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, tokenListingProcessor: TokenListingProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenListingProcessor: TokenListingProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
-        self.tokenQueue = tokenQueue
         self.tokenListingProcessor = tokenListingProcessor
 
     async def update_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:

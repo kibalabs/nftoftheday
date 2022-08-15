@@ -27,10 +27,9 @@ _TOKEN_UPDATE_MIN_DAYS = 7
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager):
         self.saver = saver
         self.retriever = retriever
-        self.workQueue = workQueue
         self.tokenQueue = tokenQueue
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.collectionManager = collectionManager

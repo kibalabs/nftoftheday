@@ -27,10 +27,9 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class CollectionManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
-        self.workQueue = workQueue
         self.tokenQueue = tokenQueue
         self.collectionProcessor = collectionProcessor
 

@@ -28,10 +28,9 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 
 class OwnershipManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, collectionManager: CollectionManager, tokenOwnershipProcessor: TokenOwnershipProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionManager: CollectionManager, tokenOwnershipProcessor: TokenOwnershipProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
-        self.workQueue = workQueue
         self.tokenQueue = tokenQueue
         self.collectionManager = collectionManager
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
