@@ -13,12 +13,9 @@ from core.util import date_util
 from notd.collection_processor import CollectionDoesNotExist
 from notd.collection_processor import CollectionProcessor
 from notd.messages import UpdateCollectionMessageContent
-from notd.messages import UpdateCollectionTokensMessageContent
-from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionsTable
-from notd.store.schema import TokenMetadatasTable
 
 from .model import Collection
 
