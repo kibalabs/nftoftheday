@@ -105,21 +105,3 @@ class CollectionManager:
                 await self.saver.update_collection(connection=connection, collectionId=collection.collectionId, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
             else:
                 await self.saver.create_collection(connection=connection, address=address, name=retrievedCollection.name, symbol=retrievedCollection.symbol, description=retrievedCollection.description, imageUrl=retrievedCollection.imageUrl, twitterUsername=retrievedCollection.twitterUsername, instagramUsername=retrievedCollection.instagramUsername, wikiUrl=retrievedCollection.wikiUrl, openseaSlug=retrievedCollection.openseaSlug, url=retrievedCollection.url, discordUrl=retrievedCollection.discordUrl, bannerImageUrl=retrievedCollection.bannerImageUrl, doesSupportErc721=retrievedCollection.doesSupportErc721, doesSupportErc1155=retrievedCollection.doesSupportErc1155)
-
-    async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
-        address = chain_util.normalize_address(value=address)
-        tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
-            StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
-        ])
-        collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
-        await self.update_collection_deferred(address=address, shouldForce=shouldForce)
-        return collectionTokenIds
-
-    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
-        address = chain_util.normalize_address(value=address)
-        await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
-
-    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
-        address = chain_util.normalize_address(value=address)
-        tokens = await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address)])
-        return tokens

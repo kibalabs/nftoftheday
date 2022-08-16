@@ -328,10 +328,10 @@ class NotdManager:
         await self.collectionManager.update_collection(address=address, shouldForce=shouldForce)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
-        await self.collectionManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
+        await self.tokenManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
 
     async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
-        await self.collectionManager.update_collection_tokens(address=address, shouldForce=shouldForce)
+        await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
     async def update_activity_for_all_collections_deferred(self) -> None:
         await self.activityManager.update_activity_for_all_collections_deferred()
@@ -376,7 +376,7 @@ class NotdManager:
         return await self.tokenManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
 
     async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
-        return await self.collectionManager.list_collection_tokens(address=address)
+        return await self.tokenManager.list_collection_tokens(address=address)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:
         address = chain_util.normalize_address(value=address)
@@ -425,9 +425,9 @@ class NotdManager:
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
         if not shouldSkipUpdatingOwnerships:
-            await self.tokenManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
+            await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
-            await self.tokenManager.update_collections_deferred(addresses=collectionAddresses)
+            await self.collectionManager.update_collections_deferred(addresses=collectionAddresses)
             await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
 
     @staticmethod

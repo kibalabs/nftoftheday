@@ -13,6 +13,7 @@ from core.util import date_util
 from core.util import list_util
 
 from notd.collection_manager import CollectionManager
+from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
@@ -133,3 +134,21 @@ class TokenManager:
                 if retrievedTokenMetadata is None:
                     retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
                 await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, resizableImageUrl=retrievedTokenMetadata.resizableImageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
+
+    async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
+        address = chain_util.normalize_address(value=address)
+        tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
+            StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
+        ])
+        collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
+        await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)
+        return collectionTokenIds
+
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
+        address = chain_util.normalize_address(value=address)
+        await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
+
+    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
+        address = chain_util.normalize_address(value=address)
+        tokens = await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address)])
+        return tokens
