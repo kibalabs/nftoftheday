@@ -1,6 +1,7 @@
+from typing import Optional
 from fastapi import APIRouter
 
-from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
+from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest, TwitterLoginCallbackResponse, TwitterLoginResponse
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
 from notd.api.endpoints_v1 import GetGalleryTokenResponse
@@ -15,6 +16,18 @@ from notd.gallery_manager import GalleryManager
 
 def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder) -> APIRouter:
     router = APIRouter()
+
+    @router.get('/twitter-login')
+    async def twitter_login(initialUrl: str, randomStateValue: str) -> TwitterLoginResponse:
+        await galleryManager.twitter_login(initialUrl=initialUrl, randomStateValue=randomStateValue)
+        return TwitterLoginResponse()
+
+    @router.get('/twitter-login-callback')
+    async def twitter_login_callback(state: str, code: Optional[str] = None, error: Optional[str] = None) -> TwitterLoginCallbackResponse:
+        await galleryManager.twitter_login_callback(state=state, code=code, error=error)
+        return TwitterLoginCallbackResponse()
+
+# http://localhost:5000/gallery/v1/twitter-login-callback?state=eyJpbml0aWFsVXJsIjogImh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hY2NvdW50cy8weDE4MDkwY0RBNDlCMjFkRUFmZkMyMWI0Rjg4NmFlZDNlQjc4N2QwMzIiLCAicmFuZG9tU3RhdGVWYWx1ZSI6ICJiMGM3Njc2Mi00ZGM0LTRlNjYtYTIyNi0yNjk5M2Y5OTI0ZTQifQ%3D%3D&code=SWZMY3JmVmFjb3NRUHdtdHBSdGJRS2JZLWVJMlFXYy1qN0k2aXFrMnAzdm1zOjE2NjA2MzkwODA1Nzk6MTowOmFjOjE
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}')
     async def get_gallery_token(registryAddress: str, tokenId: str) -> GetGalleryTokenResponse:

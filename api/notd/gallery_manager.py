@@ -1,3 +1,4 @@
+import base64
 import contextlib
 import datetime
 import json
@@ -32,6 +33,7 @@ from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
+from .twitter_authenticator import TwitterAuthenticator
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF'
@@ -40,10 +42,11 @@ SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dC
 
 class GalleryManager:
 
-    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver) -> None:
+    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver, twitterAuthenticator: TwitterAuthenticator) -> None:
         self.ethClient = ethClient
         self.retriever = retriever
         self.saver = saver
+        self.twitterAuthenticator = twitterAuthenticator
         with open('./contracts/SpriteClub.json', 'r') as contractJsonFile:
             self.spriteClubContract = json.load(contractJsonFile)
         with open('./contracts/SpriteClubStormdrop.json', 'r') as contractJsonFile:
@@ -52,6 +55,12 @@ class GalleryManager:
         with open('./contracts/SpriteClubStormdropIdMap.json', 'r') as contractJsonFile:
             self.spriteClubStormdropIdMap = json.load(contractJsonFile)
         self.web3 = Web3()
+
+    async def twitter_login(self, initialUrl: str, randomStateValue: str) -> None:
+        await self.twitterAuthenticator.login(initialUrl=initialUrl, randomStateValue=randomStateValue)
+
+    async def twitter_login_callback(self, state: str, code: Optional[str], error: Optional[str]) -> None:
+        await self.twitterAuthenticator.login_callback(state=state, code=code, error=error)
 
     async def get_gallery_token(self, registryAddress: str, tokenId: str) -> GalleryToken:
         query = (
@@ -72,7 +81,6 @@ class GalleryManager:
             tokenListing=token_listing_from_row(row) if row[LatestTokenListingsTable.c.latestTokenListingId] else None,
         )
         return galleryToken
-
 
     async def list_collection_token_airdrops(self, registryAddress: str, tokenId: str) -> List[Airdrop]:
         registryAddress = chain_util.normalize_address(registryAddress)

@@ -33,6 +33,7 @@ from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
+from notd.twitter_authenticator import TwitterAuthenticator
 
 requestIdHolder = RequestIdHolder()
 name = os.environ.get('NAME', 'notd-api')
@@ -73,7 +74,8 @@ tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
 tokenManager = TokenManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor, tokenMetadataProcessor=tokenMetadataProcessor, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionActivityProcessor=collectionActivityProcessor, tokenListingProcessor=tokenListingProcessor, tokenAttributeProcessor=tokenAttributeProcessor)
 notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
-galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver)
+twitterAuthenticator = TwitterAuthenticator()
+galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterAuthenticator=twitterAuthenticator)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=name, version=version, environment=environment))

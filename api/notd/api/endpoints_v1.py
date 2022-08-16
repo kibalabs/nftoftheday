@@ -218,3 +218,15 @@ class GetGalleryTokenRequest(BaseModel):
 
 class GetGalleryTokenResponse(BaseModel):
     galleryToken: ApiGalleryToken
+
+class TwitterLoginRequest(BaseModel):
+    pass
+
+class TwitterLoginResponse(BaseModel):
+    pass
+
+class TwitterLoginCallbackRequest(BaseModel):
+    pass
+
+class TwitterLoginCallbackResponse(BaseModel):
+    pass
