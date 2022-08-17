@@ -2,6 +2,7 @@ import base64
 import contextlib
 import datetime
 import json
+import urllib.parse as urlparse
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -17,23 +18,25 @@ from eth_account.messages import defunct_hash_message
 from web3 import Web3
 
 from notd.api.endpoints_v1 import InQueryParam
-from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
+from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS, GalleryUser
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import GalleryToken
+from notd.model import Signature
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import LatestTokenListingsTable
+from notd.store.schema import LatestTokenListingsTable, TwitterProfilesTable, UserProfilesTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema_conversions import token_customization_from_row
+from notd.store.schema_conversions import token_customization_from_row, twitter_profile_from_row, user_profile_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
-from .twitter_authenticator import TwitterAuthenticator
+
+from .twitter_manager import TwitterManager
 
 SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF'
@@ -42,11 +45,11 @@ SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dC
 
 class GalleryManager:
 
-    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver, twitterAuthenticator: TwitterAuthenticator) -> None:
+    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver, twitterManager: TwitterManager) -> None:
         self.ethClient = ethClient
         self.retriever = retriever
         self.saver = saver
-        self.twitterAuthenticator = twitterAuthenticator
+        self.twitterManager = twitterManager
         with open('./contracts/SpriteClub.json', 'r') as contractJsonFile:
             self.spriteClubContract = json.load(contractJsonFile)
         with open('./contracts/SpriteClubStormdrop.json', 'r') as contractJsonFile:
@@ -56,11 +59,12 @@ class GalleryManager:
             self.spriteClubStormdropIdMap = json.load(contractJsonFile)
         self.web3 = Web3()
 
-    async def twitter_login(self, initialUrl: str, randomStateValue: str) -> None:
-        await self.twitterAuthenticator.login(initialUrl=initialUrl, randomStateValue=randomStateValue)
+    async def twitter_login(self, account: str, signatureJson: str, initialUrl: str) -> None:
+        signature = Signature.from_dict(signatureDict=json.loads(urlparse.unquote(signatureJson)))
+        await self.twitterManager.login(account=account, signature=signature, initialUrl=initialUrl)
 
     async def twitter_login_callback(self, state: str, code: Optional[str], error: Optional[str]) -> None:
-        await self.twitterAuthenticator.login_callback(state=state, code=code, error=error)
+        await self.twitterManager.login_callback(state=state, code=code, error=error)
 
     async def get_gallery_token(self, registryAddress: str, tokenId: str) -> GalleryToken:
         query = (
@@ -114,7 +118,7 @@ class GalleryManager:
             collectionAttribute.values.append(value)
         return list(collectionAttributeNameMap.values())
 
-    async def query_collection_tokens(self, registryAddress: str, ownerAddress: Optional[str], minPrice: Optional[int], maxPrice: Optional[int], isListed: Optional[bool], tokenIdIn: Optional[List[str]], attributeFilters: Optional[List[InQueryParam]], limit: int, offset: int) -> Sequence[GalleryToken]:
+    async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None) -> Sequence[GalleryToken]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         # TODO(krishan711): this shouldn't join on single ownerships for erc1155
         query = (
@@ -207,3 +211,19 @@ class GalleryManager:
                 await self.saver.delete_token_customization(tokenCustomizationId=tokenCustomization.tokenCustomizationId)
             tokenCustomization = await self.saver.create_token_customization(registryAddress=registryAddress, tokenId=tokenId, creatorAddress=creatorAddress, signature=signature, blockNumber=blockNumber, name=name, description=description, connection=connection)
         return tokenCustomization
+
+    async def get_gallery_user(self, registryAddress: str, userAddress: str) -> GalleryUser:
+        userQuery = (
+            sqlalchemy.select(UserProfilesTable, TwitterProfilesTable)
+                .join(TwitterProfilesTable, UserProfilesTable.c.twitterId == TwitterProfilesTable.c.twitterId, isouter=True)
+                .where(UserProfilesTable.c.address == userAddress)
+        )
+        userResult = await self.retriever.database.execute(query=userQuery)
+        userRow = userResult.first()
+        galleryUser = GalleryUser(
+            address=userAddress,
+            registryAddress=registryAddress,
+            userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
+            twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
+        )
+        return galleryUser

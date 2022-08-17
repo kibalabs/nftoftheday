@@ -5,6 +5,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
+from notd.model import Signature
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -12,7 +13,10 @@ from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
 from notd.model import TokenTransfer
+from notd.model import TwitterCredential
+from notd.model import TwitterProfile
 from notd.model import UserInteraction
+from notd.model import UserProfile
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
@@ -25,7 +29,10 @@ from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema import TwitterCredentialsTable
+from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
+from notd.store.schema import UserProfilesTable
 
 
 def token_transfer_from_row(row: Mapping) -> TokenTransfer:
@@ -227,4 +234,45 @@ def lock_from_row(row: Mapping) -> Lock:
         updatedDate=row[LocksTable.c.updatedDate],
         name=row[LocksTable.c.name],
         expiryDate=row[LocksTable.c.expiryDate],
+    )
+
+
+def user_profile_from_row(row: Mapping) -> UserProfile:
+    return UserProfile(
+        userProfileId=row[UserProfilesTable.c.userProfileId],
+        createdDate=row[UserProfilesTable.c.createdDate],
+        updatedDate=row[UserProfilesTable.c.updatedDate],
+        address=row[UserProfilesTable.c.address],
+        twitterId=row[UserProfilesTable.c.twitterId],
+        discordId=row[UserProfilesTable.c.discordId],
+        signature=Signature.from_dict(signatureDict=row[UserProfilesTable.c.signature]),
+    )
+
+
+def twitter_credential_from_row(row: Mapping) -> TwitterCredential:
+    return TwitterCredential(
+        twitterCredentialId=row[TwitterCredentialsTable.c.twitterCredentialId],
+        createdDate=row[TwitterCredentialsTable.c.createdDate],
+        updatedDate=row[TwitterCredentialsTable.c.updatedDate],
+        twitterId=row[TwitterCredentialsTable.c.twitterId],
+        accessToken=row[TwitterCredentialsTable.c.accessToken],
+        refreshToken=row[TwitterCredentialsTable.c.refreshToken],
+        expiryDate=row[TwitterCredentialsTable.c.expiryDate],
+    )
+
+
+def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
+    return TwitterProfile(
+        twitterProfileId=row[TwitterProfilesTable.c.twitterProfileId],
+        createdDate=row[TwitterProfilesTable.c.createdDate],
+        updatedDate=row[TwitterProfilesTable.c.updatedDate],
+        twitterId=row[TwitterProfilesTable.c.twitterId],
+        username=row[TwitterProfilesTable.c.username],
+        name=row[TwitterProfilesTable.c.name],
+        description=row[TwitterProfilesTable.c.description],
+        isVerified=row[TwitterProfilesTable.c.isVerified],
+        pinnedTweetId=row[TwitterProfilesTable.c.pinnedTweetId],
+        followerCount=row[TwitterProfilesTable.c.followerCount],
+        followingCount=row[TwitterProfilesTable.c.followingCount],
+        tweetCount=row[TwitterProfilesTable.c.tweetCount],
     )

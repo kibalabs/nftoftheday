@@ -322,6 +322,7 @@ CREATE TABLE tbl_twitter_profiles (
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     twitter_id TEXT NOT NULL,
+    username TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     is_verified BOOLEAN NOT NULL,
@@ -331,6 +332,7 @@ CREATE TABLE tbl_twitter_profiles (
     tweet_count INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX tbl_twitter_profiles_twitter_id on tbl_twitter_profiles (twitter_id);
+CREATE UNIQUE INDEX tbl_twitter_profiles_username ON tbl_twitter_profiles (username);
 CREATE INDEX tbl_twitter_profiles_created_date ON tbl_twitter_profiles (created_date);
 CREATE INDEX tbl_twitter_profiles_updated_date ON tbl_twitter_profiles (updated_date);
 CREATE INDEX tbl_twitter_profiles_follower_count ON tbl_twitter_profiles (follower_count);
@@ -341,11 +343,11 @@ CREATE TABLE tbl_user_profiles (
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     address TEXT NOT NULL,
-    registry_address TEXT NOT NULL,
     twitter_id TEXT,
-    discord_id TEXT
+    discord_id TEXT,
+    signature JSON NOT NULL
 );
-CREATE UNIQUE INDEX tbl_user_profiles_address_registry_address on tbl_user_profiles (address, registry_address);
+CREATE UNIQUE INDEX tbl_user_profiles_address on tbl_user_profiles (address);
 CREATE INDEX tbl_user_profiles_created_date ON tbl_user_profiles (created_date);
 CREATE INDEX tbl_user_profiles_updated_date ON tbl_user_profiles (updated_date);
-CREATE INDEX tbl_user_profiles_registry_address_twitter_id ON tbl_user_profiles (registry_address, twitter_id);
+CREATE INDEX tbl_user_profiles_twitter_id ON tbl_user_profiles (twitter_id);
