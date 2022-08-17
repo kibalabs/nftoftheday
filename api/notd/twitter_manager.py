@@ -1,10 +1,6 @@
-
-
 import base64
-import hashlib
 import json
 import os
-import re
 import urllib.parse as urlparse
 import uuid
 from typing import Optional
@@ -17,7 +13,6 @@ from core.util import date_util
 from core.util import dict_util
 
 from notd.model import Signature
-from notd.model import UserProfile
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 

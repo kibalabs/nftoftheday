@@ -390,15 +390,6 @@ class Retriever(CoreRetriever):
         twitterProfile = twitter_profile_from_row(row)
         return twitterProfile
 
-    async def get_twitter_profile_by_username(self, username: str, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
-        query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.username == username)
-        result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
-        if not row:
-            raise NotFoundException(message=f'TwitterProfile with username:{username} not found')
-        twitterProfile = twitter_profile_from_row(row)
-        return twitterProfile
-
     async def get_twitter_profile_by_twitter_id(self, twitterId: str, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
         query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.twitterId == twitterId)
         result = await self.database.execute(query=query, connection=connection)

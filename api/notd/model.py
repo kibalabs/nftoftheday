@@ -2,7 +2,6 @@ import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Union
 
 from core.util import date_util
 from core.util.typing_util import JSON
