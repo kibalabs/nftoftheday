@@ -18,11 +18,11 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='gasPrice', name='gas_price', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='blockNumber', name='block_number', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='tokenType', name='token_type', type_=sqlalchemy.Text, nullable=False),
-    sqlalchemy.Column(key='isMultiAddress', name='is_multi_address', type_=sqlalchemy.BOOLEAN, nullable=False),
-    sqlalchemy.Column(key='isInterstitial', name='is_interstitial', type_=sqlalchemy.BOOLEAN, nullable=False),
-    sqlalchemy.Column(key='isSwap', name='is_swap', type_=sqlalchemy.BOOLEAN, nullable=False),
-    sqlalchemy.Column(key='isBatch', name='is_batch', type_=sqlalchemy.BOOLEAN, nullable=False),
-    sqlalchemy.Column(key='isOutbound', name='is_outbound', type_=sqlalchemy.BOOLEAN, nullable=False),
+    sqlalchemy.Column(key='isMultiAddress', name='is_multi_address', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='isInterstitial', name='is_interstitial', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='isSwap', name='is_swap', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='isBatch', name='is_batch', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='isOutbound', name='is_outbound', type_=sqlalchemy.Boolean, nullable=False),
 )
 
 
@@ -211,4 +211,49 @@ LocksTable = sqlalchemy.Table(
     sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='expiryDate', name='expiry_date', type_=sqlalchemy.DateTime, nullable=False),
+)
+
+
+
+TwitterCredentialsTable = sqlalchemy.Table(
+    'tbl_twitter_credentials',
+    metadata,
+    sqlalchemy.Column(key='twitterCredentialId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='twitterId', name='twitter_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='accessToken', name='access_token', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='refreshToken', name='refresh_token', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='expiryDate', name='expiry_date', type_=sqlalchemy.DateTime, nullable=False),
+)
+
+
+TwitterProfilesTable = sqlalchemy.Table(
+    'tbl_twitter_profiles',
+    metadata,
+    sqlalchemy.Column(key='twitterProfileId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='twitterId', name='twitter_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='username', name='username', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='isVerified', name='is_verified', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='pinnedTweetId', name='pinned_tweet_id', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='followerCount', name='follower_count', type_=sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column(key='followingCount', name='following_count', type_=sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column(key='tweetCount', name='tweet_count', type_=sqlalchemy.Integer, nullable=False),
+)
+
+
+UserProfilesTable = sqlalchemy.Table(
+    'tbl_user_profiles',
+    metadata,
+    sqlalchemy.Column(key='userProfileId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='address', name='address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='twitterId', name='twitter_id', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='discordId', name='discord_id', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.JSON, nullable=False),
 )

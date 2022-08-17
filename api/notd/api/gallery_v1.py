@@ -1,20 +1,35 @@
+from typing import Optional
+
 from fastapi import APIRouter
 
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
+from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
 from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
+from notd.api.endpoints_v1 import TwitterLoginCallbackResponse
+from notd.api.endpoints_v1 import TwitterLoginResponse
 from notd.api.response_builder import ResponseBuilder
 from notd.gallery_manager import GalleryManager
 
 
 def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder) -> APIRouter:
     router = APIRouter()
+
+    @router.get('/twitter-login')
+    async def twitter_login(account: str, signatureJson: str, initialUrl: str) -> TwitterLoginResponse:
+        await galleryManager.twitter_login(account=account, signatureJson=signatureJson, initialUrl=initialUrl)
+        return TwitterLoginResponse()
+
+    @router.get('/twitter-login-callback')
+    async def twitter_login_callback(state: str, code: Optional[str] = None, error: Optional[str] = None) -> TwitterLoginCallbackResponse:
+        await galleryManager.twitter_login_callback(state=state, code=code, error=error)
+        return TwitterLoginCallbackResponse()
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}')
     async def get_gallery_token(registryAddress: str, tokenId: str) -> GetGalleryTokenResponse:
@@ -52,5 +67,10 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def create_customization_for_collection_token(registryAddress: str, tokenId: str, request: CreateCustomizationForCollectionTokenRequest) -> CreateCustomizationForCollectionTokenResponse:
         tokenCustomization = await galleryManager.create_customization_for_collection_token(registryAddress=registryAddress, tokenId=tokenId, creatorAddress=request.creatorAddress, signature=request.signature, blockNumber=request.blockNumber,name=request.name, description=request.description)
         return CreateCustomizationForCollectionTokenResponse(tokenCustomization=(await responseBuilder.token_customization_from_model(tokenCustomization=tokenCustomization)))
+
+    @router.get('/collections/{registryAddress}/users/{userAddress}')
+    async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserResponse:
+        galleryUser = await galleryManager.get_gallery_user(registryAddress=registryAddress, userAddress=userAddress)
+        return GetGalleryCollectionUserResponse(galleryUser=(await responseBuilder.gallery_user_from_model(galleryUser=galleryUser)))
 
     return router

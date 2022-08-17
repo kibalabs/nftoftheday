@@ -290,6 +290,7 @@ CREATE INDEX tbl_token_customizations_created_date ON tbl_token_customizations (
 CREATE INDEX tbl_token_customizations_updated_date ON tbl_token_customizations (updated_date);
 CREATE INDEX tbl_token_customizations_registry_address_token_id_creator_address on tbl_token_customizations (registry_address, token_id, creator_address);
 
+
 CREATE TABLE tbl_locks (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -300,3 +301,53 @@ CREATE TABLE tbl_locks (
 CREATE UNIQUE INDEX tbl_locks_name on tbl_locks (name);
 CREATE INDEX tbl_locks_created_date ON tbl_locks (created_date);
 CREATE INDEX tbl_locks_updated_date ON tbl_locks (updated_date);
+
+
+CREATE TABLE tbl_twitter_credentials (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    twitter_id TEXT NOT NULL,
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    expiry_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);
+CREATE UNIQUE INDEX tbl_twitter_credentials_twitter_id on tbl_twitter_credentials (twitter_id);
+CREATE INDEX tbl_twitter_credentials_created_date ON tbl_twitter_credentials (created_date);
+CREATE INDEX tbl_twitter_credentials_updated_date ON tbl_twitter_credentials (updated_date);
+
+
+CREATE TABLE tbl_twitter_profiles (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    twitter_id TEXT NOT NULL,
+    username TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    is_verified BOOLEAN NOT NULL,
+    pinned_tweet_id TEXT,
+    follower_count INTEGER NOT NULL,
+    following_count INTEGER NOT NULL,
+    tweet_count INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX tbl_twitter_profiles_twitter_id on tbl_twitter_profiles (twitter_id);
+CREATE UNIQUE INDEX tbl_twitter_profiles_username ON tbl_twitter_profiles (username);
+CREATE INDEX tbl_twitter_profiles_created_date ON tbl_twitter_profiles (created_date);
+CREATE INDEX tbl_twitter_profiles_updated_date ON tbl_twitter_profiles (updated_date);
+CREATE INDEX tbl_twitter_profiles_follower_count ON tbl_twitter_profiles (follower_count);
+
+
+CREATE TABLE tbl_user_profiles (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    address TEXT NOT NULL,
+    twitter_id TEXT,
+    discord_id TEXT,
+    signature JSON NOT NULL
+);
+CREATE UNIQUE INDEX tbl_user_profiles_address on tbl_user_profiles (address);
+CREATE INDEX tbl_user_profiles_created_date ON tbl_user_profiles (created_date);
+CREATE INDEX tbl_user_profiles_updated_date ON tbl_user_profiles (updated_date);
+CREATE INDEX tbl_user_profiles_twitter_id ON tbl_user_profiles (twitter_id);

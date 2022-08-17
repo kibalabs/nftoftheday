@@ -11,6 +11,7 @@ from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryToken
+from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
@@ -218,3 +219,21 @@ class GetGalleryTokenRequest(BaseModel):
 
 class GetGalleryTokenResponse(BaseModel):
     galleryToken: ApiGalleryToken
+
+class TwitterLoginRequest(BaseModel):
+    pass
+
+class TwitterLoginResponse(BaseModel):
+    pass
+
+class TwitterLoginCallbackRequest(BaseModel):
+    pass
+
+class TwitterLoginCallbackResponse(BaseModel):
+    pass
+
+class GetGalleryCollectionUserRequest(BaseModel):
+    pass
+
+class GetGalleryCollectionUserResponse(BaseModel):
+    galleryUser: ApiGalleryUser

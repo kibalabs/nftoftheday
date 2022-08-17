@@ -20,7 +20,10 @@ from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
 from notd.model import TokenTransfer
+from notd.model import TwitterCredential
+from notd.model import TwitterProfile
 from notd.model import UserInteraction
+from notd.model import UserProfile
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
@@ -33,7 +36,10 @@ from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema import TwitterCredentialsTable
+from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
+from notd.store.schema import UserProfilesTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
@@ -46,7 +52,10 @@ from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
+from notd.store.schema_conversions import twitter_credential_from_row
+from notd.store.schema_conversions import twitter_profile_from_row
 from notd.store.schema_conversions import user_interaction_from_row
+from notd.store.schema_conversions import user_profile_from_row
 
 
 class Retriever(CoreRetriever):
@@ -329,3 +338,102 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'Lock with name:{name} not found')
         lock = lock_from_row(row)
         return lock
+
+    async def list_user_profiles(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[UserProfile]:
+        query = UserProfilesTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=UserProfilesTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=UserProfilesTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        userProfiles = [user_profile_from_row(row) for row in result]
+        return userProfiles
+
+    async def get_user_profile(self, userProfileId: int, connection: Optional[DatabaseConnection] = None) -> UserProfile:
+        query = UserProfilesTable.select().where(UserProfilesTable.c.userProfileId == userProfileId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'UserProfile with id:{userProfileId} not found')
+        userProfile = user_profile_from_row(row)
+        return userProfile
+
+    async def get_user_profile_by_address(self, address: str, connection: Optional[DatabaseConnection] = None) -> UserProfile:
+        query = UserProfilesTable.select().where(UserProfilesTable.c.address == address)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'UserProfile with address:{address} not found')
+        userProfile = user_profile_from_row(row)
+        return userProfile
+
+    async def list_twitter_profiles(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TwitterProfile]:
+        query = TwitterProfilesTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TwitterProfilesTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TwitterProfilesTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        twitterProfiles = [twitter_profile_from_row(row) for row in result]
+        return twitterProfiles
+
+    async def get_twitter_profile(self, twitterProfileId: int, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
+        query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.twitterProfileId == twitterProfileId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TwitterProfile with id:{twitterProfileId} not found')
+        twitterProfile = twitter_profile_from_row(row)
+        return twitterProfile
+
+    async def get_twitter_profile_by_twitter_id(self, twitterId: str, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
+        query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.twitterId == twitterId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TwitterProfile with twitterId:{twitterId} not found')
+        twitterProfile = twitter_profile_from_row(row)
+        return twitterProfile
+
+    async def get_twitter_profile_by_username(self, username: str, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
+        query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.username == username)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TwitterProfile with username:{username} not found')
+        twitterProfile = twitter_profile_from_row(row)
+        return twitterProfile
+
+    async def list_twitter_credentials(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TwitterCredential]:
+        query = TwitterCredentialsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TwitterCredentialsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TwitterCredentialsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        twitterCredentials = [twitter_credential_from_row(row) for row in result]
+        return twitterCredentials
+
+    async def get_twitter_credential(self, twitterCredentialId: int, connection: Optional[DatabaseConnection] = None) -> TwitterCredential:
+        query = TwitterCredentialsTable.select().where(TwitterCredentialsTable.c.twitterCredentialId == twitterCredentialId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TwitterCredential with id:{twitterCredentialId} not found')
+        twitterCredential = twitter_credential_from_row(row)
+        return twitterCredential
+
+    async def get_twitter_credential_by_twitter_id(self, twitterId: str, connection: Optional[DatabaseConnection] = None) -> TwitterCredential:
+        query = TwitterCredentialsTable.select().where(TwitterCredentialsTable.c.twitterId == twitterId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'TwitterCredential with twitterId:{twitterId} not found')
+        twitterCredential = twitter_credential_from_row(row)
+        return twitterCredential

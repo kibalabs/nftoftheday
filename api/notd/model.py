@@ -324,6 +324,72 @@ class TokenCustomization:
 
 
 @dataclasses.dataclass
+class Lock:
+    lockId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    name: str
+    expiryDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class Signature:
+    message: str
+    signature: str
+
+    def to_dict(self) -> Dict:
+        return {
+            'message': self.message,
+            'signature': self.signature,
+        }
+
+    @classmethod
+    def from_dict(cls, signatureDict: Dict):
+        return cls(
+            message=signatureDict['message'],
+            signature=signatureDict['signature'],
+        )
+
+
+@dataclasses.dataclass
+class UserProfile:
+    userProfileId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    address: str
+    twitterId: Optional[str]
+    discordId: Optional[str]
+    signature: Signature
+
+
+@dataclasses.dataclass
+class TwitterCredential:
+    twitterCredentialId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    twitterId: str
+    accessToken: str
+    refreshToken: str
+    expiryDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class TwitterProfile:
+    twitterProfileId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    twitterId: str
+    username: str
+    name: str
+    description: str
+    isVerified: bool
+    pinnedTweetId: Optional[str]
+    followerCount: int
+    followingCount: int
+    tweetCount: int
+
+
+@dataclasses.dataclass
 class GalleryToken:
     tokenMetadata: TokenMetadata
     tokenCustomization: Optional[TokenCustomization]
@@ -331,9 +397,8 @@ class GalleryToken:
 
 
 @dataclasses.dataclass
-class Lock:
-    lockId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
-    name: str
-    expiryDate: datetime.datetime
+class GalleryUser:
+    address: str
+    registryAddress: str
+    userProfile: Optional[UserProfile]
+    twitterProfile: Optional[TwitterProfile]

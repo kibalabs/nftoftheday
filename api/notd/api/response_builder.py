@@ -12,17 +12,21 @@ from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryToken
+from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
+from notd.api.models_v1 import ApiTwitterProfile
+from notd.api.models_v1 import ApiUserProfile
 from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import GalleryToken
+from notd.model import GalleryUser
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenCustomization
@@ -30,6 +34,8 @@ from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
+from notd.model import TwitterProfile
+from notd.model import UserProfile
 from notd.store.retriever import Retriever
 from notd.token_metadata_processor import TokenMetadataProcessor
 
@@ -221,3 +227,34 @@ class ResponseBuilder:
 
     async def gallery_tokens_from_models(self, galleryTokens: Sequence[GalleryToken]) -> Sequence[ApiGalleryToken]:
         return await asyncio.gather(*[self.gallery_token_from_model(galleryToken=galleryToken) for galleryToken in galleryTokens])
+
+    async def user_profile_from_model(self, userProfile: UserProfile) -> ApiUserProfile:
+        return ApiUserProfile(
+            address=userProfile.address,
+            twitterId=userProfile.twitterId,
+            discordId=userProfile.discordId,
+        )
+
+    async def twitter_profile_from_model(self, twitterProfile: TwitterProfile) -> ApiTwitterProfile:
+        return ApiTwitterProfile(
+            twitterId=twitterProfile.twitterId,
+            username=twitterProfile.username,
+            name=twitterProfile.name,
+            description=twitterProfile.description,
+            isVerified=twitterProfile.isVerified,
+            pinnedTweetId=twitterProfile.pinnedTweetId,
+            followerCount=twitterProfile.followerCount,
+            followingCount=twitterProfile.followingCount,
+            tweetCount=twitterProfile.tweetCount,
+        )
+
+    async def gallery_user_from_model(self, galleryUser: GalleryUser) -> ApiGalleryUser:
+        return ApiGalleryUser(
+            address=galleryUser.address,
+            registryAddress=galleryUser.registryAddress,
+            userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)),
+            twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)),
+        )
+
+    async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> Sequence[ApiGalleryUser]:
+        return await asyncio.gather(*[self.gallery_user_from_model(galleryUser=galleryUser) for galleryUser in galleryUsers])

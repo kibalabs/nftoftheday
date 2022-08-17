@@ -22,7 +22,10 @@ from notd.model import RetrievedTokenTransfer
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
+from notd.model import TwitterCredential
+from notd.model import TwitterProfile
 from notd.model import UserInteraction
+from notd.model import UserProfile
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
@@ -35,7 +38,10 @@ from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema import TwitterCredentialsTable
+from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
+from notd.store.schema import UserProfilesTable
 
 _EMPTY_STRING = '_EMPTY_STRING'
 _EMPTY_OBJECT = '_EMPTY_OBJECT'
@@ -634,4 +640,135 @@ class Saver(CoreSaver):
 
     async def delete_lock(self, lockId: int, connection: Optional[DatabaseConnection] = None) -> None:
         query = LocksTable.delete().where(LocksTable.c.lockId == lockId)
+        await self._execute(query=query, connection=connection)
+
+    async def create_user_profile(self, address: str, twitterId: Optional[str], discordId: Optional[str], signatureDict: Dict, connection: Optional[DatabaseConnection] = None) -> UserProfile:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            UserProfilesTable.c.createdDate.key: createdDate,
+            UserProfilesTable.c.updatedDate.key: updatedDate,
+            UserProfilesTable.c.address.key: address,
+            UserProfilesTable.c.twitterId.key: twitterId,
+            UserProfilesTable.c.discordId.key: discordId,
+            UserProfilesTable.c.signature.key: signatureDict,
+        }
+        query = UserProfilesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        userProfileId = result.inserted_primary_key[0]
+        return UserProfile(
+            userProfileId=userProfileId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            address=address,
+            twitterId=twitterId,
+            discordId=discordId,
+            signature=signatureDict,
+        )
+
+    async def update_user_profile(self, userProfileId: int, twitterId: Optional[str] = _EMPTY_STRING, discordId: Optional[str] = _EMPTY_STRING, signatureDict: Optional[Dict] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if twitterId != _EMPTY_STRING:
+            values[UserProfilesTable.c.twitterId.key] = twitterId
+        if discordId != _EMPTY_STRING:
+            values[UserProfilesTable.c.discordId.key] = discordId
+        if signatureDict is not None:
+            values[UserProfilesTable.c.signature.key] = signatureDict
+        if len(values) > 0:
+            values[UserProfilesTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = UserProfilesTable.update(UserProfilesTable.c.userProfileId == userProfileId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    async def create_twitter_credential(self, twitterId: str, accessToken: str, refreshToken: str, expiryDate: datetime.datetime, connection: Optional[DatabaseConnection] = None) -> TwitterCredential:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TwitterCredentialsTable.c.createdDate.key: createdDate,
+            TwitterCredentialsTable.c.updatedDate.key: updatedDate,
+            TwitterCredentialsTable.c.twitterId.key: twitterId,
+            TwitterCredentialsTable.c.accessToken.key: accessToken,
+            TwitterCredentialsTable.c.refreshToken.key: refreshToken,
+            TwitterCredentialsTable.c.expiryDate.key: expiryDate,
+        }
+        query = TwitterCredentialsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        twitterCredentialId = result.inserted_primary_key[0]
+        return TwitterCredential(
+            twitterCredentialId=twitterCredentialId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            twitterId=twitterId,
+            accessToken=accessToken,
+            refreshToken=refreshToken,
+            expiryDate=expiryDate,
+        )
+
+    async def update_twitter_credential(self, twitterCredentialId: int, accessToken: Optional[str] = None, refreshToken: Optional[str] = None, expiryDate: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if accessToken is not None:
+            values[TwitterCredentialsTable.c.accessToken.key] = accessToken
+        if refreshToken is not None:
+            values[TwitterCredentialsTable.c.refreshToken.key] = refreshToken
+        if expiryDate is not None:
+            values[TwitterCredentialsTable.c.expiryDate.key] = expiryDate
+        if len(values) > 0:
+            values[TwitterCredentialsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TwitterCredentialsTable.update(TwitterCredentialsTable.c.twitterCredentialId == twitterCredentialId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    async def create_twitter_profile(self, twitterId: str, username: str, name: str, description: str, isVerified: bool, pinnedTweetId: Optional[str], followerCount: int, followingCount: int, tweetCount: int, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TwitterProfilesTable.c.createdDate.key: createdDate,
+            TwitterProfilesTable.c.updatedDate.key: updatedDate,
+            TwitterProfilesTable.c.twitterId.key: twitterId,
+            TwitterProfilesTable.c.username.key: username,
+            TwitterProfilesTable.c.name.key: name,
+            TwitterProfilesTable.c.description.key: description,
+            TwitterProfilesTable.c.isVerified.key: isVerified,
+            TwitterProfilesTable.c.pinnedTweetId.key: pinnedTweetId,
+            TwitterProfilesTable.c.followerCount.key: followerCount,
+            TwitterProfilesTable.c.followingCount.key: followingCount,
+            TwitterProfilesTable.c.tweetCount.key: tweetCount,
+        }
+        query = TwitterProfilesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        twitterProfileId = result.inserted_primary_key[0]
+        return TwitterProfile(
+            twitterProfileId=twitterProfileId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            twitterId=twitterId,
+            username=username,
+            name=name,
+            description=description,
+            isVerified=isVerified,
+            pinnedTweetId=pinnedTweetId,
+            followerCount=followerCount,
+            followingCount=followingCount,
+            tweetCount=tweetCount,
+        )
+
+    async def update_twitter_profile(self, twitterProfileId: int, username: Optional[str] = None, name: Optional[str] = None, description: Optional[str] = None, isVerified: Optional[bool] = None, pinnedTweetId: Optional[str] = None, followerCount: Optional[int] = None, followingCount: Optional[int] = None, tweetCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if username is not None:
+            values[TwitterProfilesTable.c.username.key] = username
+        if name is not None:
+            values[TwitterProfilesTable.c.name.key] = name
+        if description is not None:
+            values[TwitterProfilesTable.c.description.key] = description
+        if isVerified is not None:
+            values[TwitterProfilesTable.c.isVerified.key] = isVerified
+        if pinnedTweetId is not None:
+            values[TwitterProfilesTable.c.pinnedTweetId.key] = pinnedTweetId
+        if followerCount is not None:
+            values[TwitterProfilesTable.c.followerCount.key] = followerCount
+        if followingCount is not None:
+            values[TwitterProfilesTable.c.followingCount.key] = followingCount
+        if tweetCount is not None:
+            values[TwitterProfilesTable.c.tweetCount.key] = tweetCount
+        if len(values) > 0:
+            values[TwitterProfilesTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TwitterProfilesTable.update(TwitterProfilesTable.c.twitterProfileId == twitterProfileId).values(values)
         await self._execute(query=query, connection=connection)

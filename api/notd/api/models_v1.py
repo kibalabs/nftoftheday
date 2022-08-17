@@ -117,6 +117,7 @@ class ApiTokenCustomization(BaseModel):
     name: Optional[str]
     description: Optional[str]
 
+
 class ApiTokenListing(BaseModel):
     tokenListingId: int
     createdDate: datetime.datetime
@@ -131,7 +132,33 @@ class ApiTokenListing(BaseModel):
     source: str
     sourceId: str
 
+
 class ApiGalleryToken(BaseModel):
     collectionToken: ApiCollectionToken
     tokenCustomization: Optional[ApiTokenCustomization]
     tokenListing: Optional[ApiTokenListing]
+
+
+class ApiUserProfile(BaseModel):
+    address: str
+    twitterId: Optional[str]
+    discordId: Optional[str]
+
+
+class ApiTwitterProfile(BaseModel):
+    twitterId: str
+    username: str
+    name: str
+    description: str
+    isVerified: bool
+    pinnedTweetId: Optional[str]
+    followerCount: int
+    followingCount: int
+    tweetCount: int
+
+
+class ApiGalleryUser(BaseModel):
+    address: str
+    registryAddress: str
+    userProfile: Optional[ApiUserProfile]
+    twitterProfile: Optional[ApiTwitterProfile]
