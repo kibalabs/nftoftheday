@@ -402,3 +402,11 @@ class GalleryUser:
     registryAddress: str
     userProfile: Optional[UserProfile]
     twitterProfile: Optional[TwitterProfile]
+    ownedTokenCount: int
+    joinDate: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass
+class GalleryUserRow:
+    galleryUser: GalleryUser
+    chosenOwnedTokens: List[TokenMetadata]

@@ -5,7 +5,7 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
-from notd.api.models_v1 import ApiAirdrop
+from notd.api.models_v1 import ApiAirdrop, ApiGalleryUserRow
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -20,7 +20,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
-from notd.model import Airdrop
+from notd.model import Airdrop, GalleryUserRow
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
@@ -252,9 +252,20 @@ class ResponseBuilder:
         return ApiGalleryUser(
             address=galleryUser.address,
             registryAddress=galleryUser.registryAddress,
-            userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)),
-            twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)),
+            userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)) if galleryUser.userProfile else None,
+            twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)) if galleryUser.twitterProfile else None,
+            ownedTokenCount=galleryUser.ownedTokenCount,
+            joinDate=galleryUser.joinDate,
         )
 
     async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> Sequence[ApiGalleryUser]:
         return await asyncio.gather(*[self.gallery_user_from_model(galleryUser=galleryUser) for galleryUser in galleryUsers])
+
+    async def gallery_user_row_from_model(self, galleryUserRow: GalleryUserRow) -> ApiGalleryUserRow:
+        return ApiGalleryUserRow(
+            galleryUser=(await self.gallery_user_from_model(galleryUserRow.galleryUser)),
+            chosenOwnedTokens=(await self.collection_tokens_from_models(tokenMetadatas=galleryUserRow.chosenOwnedTokens))
+        )
+
+    async def gallery_user_rows_from_models(self, galleryUserRows: Sequence[GalleryUserRow]) -> Sequence[ApiGalleryUserRow]:
+        return await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRows])

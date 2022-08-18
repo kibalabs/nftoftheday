@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from notd.api.models_v1 import ApiAirdrop
+from notd.api.models_v1 import ApiAirdrop, ApiGalleryUserRow
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -201,7 +201,6 @@ class QueryCollectionTokensRequest(BaseModel):
     ownerAddress: Optional[str]
 
 class QueryCollectionTokensResponse(BaseModel):
-    tokens: List[ApiCollectionToken]
     galleryTokens: List[ApiGalleryToken]
 
 class CreateCustomizationForCollectionTokenRequest(BaseModel):
@@ -237,3 +236,11 @@ class GetGalleryCollectionUserRequest(BaseModel):
 
 class GetGalleryCollectionUserResponse(BaseModel):
     galleryUser: ApiGalleryUser
+
+class QueryCollectionUsersRequest(BaseModel):
+    order: Optional[str]
+    limit: Optional[int]
+    offset: Optional[int]
+
+class QueryCollectionUsersResponse(BaseModel):
+    galleryUserRows: List[ApiGalleryUserRow]
