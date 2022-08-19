@@ -236,7 +236,7 @@ class GalleryManager:
             registryAddress=registryAddress,
             userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
             twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
-            ownedTokenCount=userRow['ownedTokenCount'],
+            ownedTokenCount=userRow['ownedTokenCount'] if userRow else 0,
             joinDate=joinDateRow['joinDate'] if joinDateRow else None,
         )
         return galleryUser
@@ -260,8 +260,21 @@ class GalleryManager:
         )
         if not order or order == 'TOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+        elif order == 'TOKENCOUNT_ASC':
+            usersQuery = usersQuery.order_by(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).asc(), joinDateQuery.c.joinDate.desc())
+        elif order == 'FOLLOWERCOUNT_DESC':
+            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.desc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+        elif order == 'FOLLOWERCOUNT_ASC':
+            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.asc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+        # NOTE(krishan711): joindate odering is inverse because its displayed as time ago so oldest is highest
+        elif order == 'JOINDATE_DESC':
+            usersQuery = usersQuery.order_by(joinDateQuery.c.joinDate.asc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+        elif order == 'JOINDATE_ASC':
+            usersQuery = usersQuery.order_by(joinDateQuery.c.joinDate.desc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
         else:
             raise BadRequestException('Unknown order')
+        print('order', order)
+        print('usersQuery', usersQuery)
         usersResult = await self.retriever.database.execute(query=usersQuery)
         userRows = list(usersResult)
         ownerAddresses = [userRow[TokenOwnershipsTable.c.ownerAddress] for userRow in userRows]
