@@ -1,8 +1,9 @@
 import datetime
-from typing import List
+from typing import Generic, List, TypeVar
 from typing import Optional
 
 from pydantic import BaseModel
+from pydantic.generics import GenericModel
 
 from notd.api.models_v1 import ApiAirdrop, ApiGalleryUserRow
 from notd.api.models_v1 import ApiCollection
@@ -237,10 +238,16 @@ class GetGalleryCollectionUserRequest(BaseModel):
 class GetGalleryCollectionUserResponse(BaseModel):
     galleryUser: ApiGalleryUser
 
+ApiListResponseItemType = TypeVar("ApiListResponseItemType")
+
+class ApiListResponse(GenericModel, Generic[ApiListResponseItemType]):
+    items: List[ApiListResponseItemType]
+    totalCount: int
+
 class QueryCollectionUsersRequest(BaseModel):
     order: Optional[str]
     limit: Optional[int]
     offset: Optional[int]
 
 class QueryCollectionUsersResponse(BaseModel):
-    galleryUserRows: List[ApiGalleryUserRow]
+    galleryUserRowListResponse: ApiListResponse[ApiGalleryUserRow]

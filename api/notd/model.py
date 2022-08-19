@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict
+from typing import Dict, Generic, TypeVar
 from typing import List
 from typing import Optional
 
@@ -16,6 +16,15 @@ GALLERY_COLLECTIONS = {
     COLLECTION_GOBLINTOWN_ADDRESS,
     COLLECTION_MDTP_ADDRESS,
 }
+
+ListResponseItemType = TypeVar("ListResponseItemType")
+
+
+@dataclasses.dataclass
+class ListResponse(Generic[ListResponseItemType]):
+    items: List[ListResponseItemType]
+    totalCount: int
+
 
 
 @dataclasses.dataclass

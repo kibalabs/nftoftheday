@@ -69,8 +69,8 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def query_collection_users(registryAddress: str, request: QueryCollectionUsersRequest) -> QueryCollectionUsersResponse:
         limit = request.limit if request.limit is not None else 20
         offset = request.offset if request.offset is not None else 0
-        galleryUserRows = await galleryManager.query_collection_users(registryAddress=registryAddress, order=request.order, limit=limit, offset=offset)
-        return QueryCollectionUsersResponse(galleryUserRows=(await responseBuilder.gallery_user_rows_from_models(galleryUserRows=galleryUserRows)))
+        galleryUserRowListResponse = await galleryManager.query_collection_users(registryAddress=registryAddress, order=request.order, limit=limit, offset=offset)
+        return QueryCollectionUsersResponse(galleryUserRowListResponse=(await responseBuilder.gallery_user_row_list_response_from_model(galleryUserRowListResponse=galleryUserRowListResponse)))
 
     @router.get('/collections/{registryAddress}/users/{userAddress}')
     async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserResponse:

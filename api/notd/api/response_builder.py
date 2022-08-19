@@ -4,6 +4,7 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
+from .endpoints_v1 import ApiListResponse
 
 from notd.api.models_v1 import ApiAirdrop, ApiGalleryUserRow
 from notd.api.models_v1 import ApiCollection
@@ -20,7 +21,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
-from notd.model import Airdrop, GalleryUserRow
+from notd.model import Airdrop, GalleryUserRow, ListResponse
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
@@ -269,3 +270,9 @@ class ResponseBuilder:
 
     async def gallery_user_rows_from_models(self, galleryUserRows: Sequence[GalleryUserRow]) -> Sequence[ApiGalleryUserRow]:
         return await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRows])
+
+    async def gallery_user_row_list_response_from_model(self, galleryUserRowListResponse: ListResponse[GalleryUserRow]) -> ApiListResponse[ApiGalleryUserRow]:
+        return ApiListResponse(
+            items=(await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRowListResponse.items])),
+            totalCount=galleryUserRowListResponse.totalCount,
+        )

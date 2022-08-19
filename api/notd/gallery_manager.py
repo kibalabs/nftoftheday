@@ -18,7 +18,7 @@ from eth_account.messages import defunct_hash_message
 from web3 import Web3
 
 from notd.api.endpoints_v1 import InQueryParam
-from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS, GalleryUser, GalleryUserRow, TokenMetadata
+from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS, GalleryUser, GalleryUserRow, ListResponse, TokenMetadata
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import GalleryToken
@@ -241,23 +241,22 @@ class GalleryManager:
         )
         return galleryUser
 
-    async def query_collection_users(self, registryAddress, order: Optional[str], limit: int, offset: int) -> List[GalleryUserRow]:
+    async def query_collection_users(self, registryAddress, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
         joinDateQuery = (
             sqlalchemy.select(TokenTransfersTable.c.toAddress.label("userAddress"), sqlalchemy.func.min(BlocksTable.c.blockDate).label("joinDate"))
             .join(TokenTransfersTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
             .where(TokenTransfersTable.c.registryAddress == registryAddress)
             .group_by(TokenTransfersTable.c.toAddress)
         ).subquery()
-        usersQuery = (
+        usersQueryBase = (
             sqlalchemy.select(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).label('ownedTokenCount'), TokenOwnershipsTable.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, joinDateQuery.c.joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == TokenOwnershipsTable.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
                 .join(joinDateQuery, joinDateQuery.c.userAddress == TokenOwnershipsTable.c.ownerAddress, isouter=True)
                 .where(TokenOwnershipsTable.c.registryAddress == registryAddress)
                 .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, TokenOwnershipsTable.c.ownerAddress, joinDateQuery.c.joinDate)
-                .limit(limit)
-                .offset(offset)
         )
+        usersQuery = usersQueryBase.limit(limit).offset(offset)
         if not order or order == 'TOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
         elif order == 'TOKENCOUNT_ASC':
@@ -273,10 +272,10 @@ class GalleryManager:
             usersQuery = usersQuery.order_by(joinDateQuery.c.joinDate.desc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
         else:
             raise BadRequestException('Unknown order')
-        print('order', order)
-        print('usersQuery', usersQuery)
         usersResult = await self.retriever.database.execute(query=usersQuery)
         userRows = list(usersResult)
+        userCountsResult = await self.retriever.database.execute(query=sqlalchemy.select(sqlalchemy.func.count()).select_from(usersQueryBase.subquery()))
+        (totalCount, ) = userCountsResult.first()
         ownerAddresses = [userRow[TokenOwnershipsTable.c.ownerAddress] for userRow in userRows]
         orderedTokensQuery = (
             sqlalchemy.select(TokenMetadatasTable.c.tokenMetadataId, TokenOwnershipsTable.c.ownerAddress, sqlalchemy.func.row_number().over(partition_by=TokenOwnershipsTable.c.ownerAddress, order_by=TokenOwnershipsTable.c.transferDate).label('tokenIndex'))
@@ -294,7 +293,7 @@ class GalleryManager:
         chosenTokens: Dict[str, List[TokenMetadata]] = defaultdict(list)
         for chosenTokenRow in chosenTokenRows:
             chosenTokens[chosenTokenRow['ownerAddress']].append(token_metadata_from_row(chosenTokenRow))
-        return [GalleryUserRow(
+        items = [GalleryUserRow(
             galleryUser=GalleryUser(
                 address=userRow[TokenOwnershipsTable.c.ownerAddress],
                 registryAddress=registryAddress,
@@ -305,3 +304,4 @@ class GalleryManager:
             ),
             chosenOwnedTokens=chosenTokens[userRow[TokenOwnershipsTable.c.ownerAddress]],
         ) for userRow in userRows]
+        return ListResponse(items=items, totalCount=totalCount)

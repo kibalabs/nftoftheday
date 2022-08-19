@@ -42,9 +42,7 @@ class TwitterManager:
             'userProfileId': userProfile.userProfileId,
             'initialUrl': urlparse.unquote(initialUrl),
         }
-        print('state', state)
         stateString = base64.b64encode(json.dumps(state).encode()).decode()
-        print('len(stateString)', len(stateString))
         scopes = ['offline.access', 'tweet.read', 'tweet.write', 'users.read', 'follows.read', 'follows.write']
         queryParams = {
             'response_type': 'code',
