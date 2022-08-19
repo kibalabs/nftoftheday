@@ -506,14 +506,14 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_single_wrapped_eth(self):
+    async def test_single_erc721_wrapped_eth(self):
         result = await self._process_block_transaction(blockNumber=15062698, transactionHash='0xf9983612a87aae12626cfc9eda9be47faf5b27db3f28f5211411277a42c45e50')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xf9983612a87aae12626cfc9eda9be47faf5b27db3f28f5211411277a42c45e50', registryAddress='0x61028F622CB6618cAC3DeB9ef0f0D5B9c6369C72', tokenId='1215', fromAddress='0xF636Ed552cFe6e61aaAaD3100139c6B34CB7DaB5', toAddress='0xA511A741d209e281846Bf652C1bdd7F04B5e6C74', operatorAddress='0xF636Ed552cFe6e61aaAaD3100139c6B34CB7DaB5', contractAddress='0x00000000006c3852cbEf3e08E8dF289169EdE581', amount=1, value=0, gasLimit=209487, gasPrice=9051488679, blockNumber=15062698, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
         ]
         self.assertEqual(result, expected)
 
-    async def test_erc1155_wrapped_eth(self):
+    async def test_single_erc1155_wrapped_eth(self):
         result = await self._process_block_transaction(blockNumber=15239862, transactionHash='0xc8bdadfdffd9816cd1dbd752efbc1deb25da539f2d9d9e8f329f44fc06c0ecc9')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xc8bdadfdffd9816cd1dbd752efbc1deb25da539f2d9d9e8f329f44fc06c0ecc9', registryAddress='0xec43E92046C1527586dFAF02031622C30AF9A1d6', tokenId='3955167169', fromAddress='0xcD32f12921fF1B5Ddb6b631Ee5A31aAb8ba314fC', toAddress='0x4A29367c5Ae9F84eF03E447D1f7deE8e6b16229D', operatorAddress='0x1E0049783F008A0085193E00003D00cd54003c71', contractAddress='0x00000000006c3852cbEf3e08E8dF289169EdE581', amount=1, value=0, gasLimit=224477, gasPrice=8653114726, blockNumber=15239862, tokenType='erc1155single', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
