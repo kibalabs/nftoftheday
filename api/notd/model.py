@@ -19,7 +19,8 @@ GALLERY_COLLECTIONS = {
     COLLECTION_MDTP_ADDRESS,
 }
 
-ListResponseItemType = TypeVar("ListResponseItemType")
+
+ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
 
 
 @dataclasses.dataclass
