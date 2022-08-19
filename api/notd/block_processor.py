@@ -6,7 +6,6 @@ from collections import defaultdict
 from typing import Dict
 from typing import List
 from typing import Tuple
-from ast import literal_eval
 
 from core import logging
 from core.util import chain_util
@@ -178,7 +177,6 @@ class BlockProcessor:
                 if len(decodedEventData) == 1:
                     event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['from']), HexBytes(decodedEventData[0]['args']['to']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
         if len(event['topics']) < 4:
-            print(event['transactionHash'].hex(), literal_eval(event["data"]))
             logging.debug('Ignoring event with less than 4 topics')
             return []
         print(transactionHash)
