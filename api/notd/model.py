@@ -1,7 +1,9 @@
 import datetime
 from typing import Dict
+from typing import Generic
 from typing import List
 from typing import Optional
+from typing import TypeVar
 
 from core.util import date_util
 from core.util.typing_util import JSON
@@ -16,6 +18,16 @@ GALLERY_COLLECTIONS = {
     COLLECTION_GOBLINTOWN_ADDRESS,
     COLLECTION_MDTP_ADDRESS,
 }
+
+
+ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
+
+
+@dataclasses.dataclass
+class ListResponse(Generic[ListResponseItemType]):
+    items: List[ListResponseItemType]
+    totalCount: int
+
 
 
 @dataclasses.dataclass
@@ -402,3 +414,11 @@ class GalleryUser:
     registryAddress: str
     userProfile: Optional[UserProfile]
     twitterProfile: Optional[TwitterProfile]
+    ownedTokenCount: int
+    joinDate: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass
+class GalleryUserRow:
+    galleryUser: GalleryUser
+    chosenOwnedTokens: List[TokenMetadata]

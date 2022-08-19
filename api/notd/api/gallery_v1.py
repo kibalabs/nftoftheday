@@ -10,6 +10,8 @@ from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
+from notd.api.endpoints_v1 import QueryCollectionUsersRequest
+from notd.api.endpoints_v1 import QueryCollectionUsersResponse
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import TwitterLoginCallbackResponse
@@ -52,11 +54,7 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         limit = request.limit if request.limit is not None else 20
         offset = request.offset if request.offset is not None else 0
         galleryTokens = await galleryManager.query_collection_tokens(registryAddress=registryAddress, ownerAddress=request.ownerAddress, minPrice=request.minPrice, maxPrice=request.maxPrice, isListed=request.isListed, tokenIdIn=request.tokenIdIn, attributeFilters=request.attributeFilters, limit=limit, offset=offset)
-        # NOTE(krishan711): remove tokens once gallery is updated
-        return QueryCollectionTokensResponse(
-            tokens=(await responseBuilder.collection_tokens_from_models(tokenMetadatas=[galleryToken.tokenMetadata for galleryToken in galleryTokens])),
-            galleryTokens=(await responseBuilder.gallery_tokens_from_models(galleryTokens=galleryTokens)),
-        )
+        return QueryCollectionTokensResponse(galleryTokens=(await responseBuilder.gallery_tokens_from_models(galleryTokens=galleryTokens)))
 
     @router.post('/collections/{registryAddress}/tokens/{tokenId}/submit-treasure-hunt')
     async def submit_treasure_hunt_for_collection_token(registryAddress: str, tokenId: str, request: SubmitTreasureHuntForCollectionTokenRequest) -> SubmitTreasureHuntForCollectionTokenResponse:
@@ -67,6 +65,14 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def create_customization_for_collection_token(registryAddress: str, tokenId: str, request: CreateCustomizationForCollectionTokenRequest) -> CreateCustomizationForCollectionTokenResponse:
         tokenCustomization = await galleryManager.create_customization_for_collection_token(registryAddress=registryAddress, tokenId=tokenId, creatorAddress=request.creatorAddress, signature=request.signature, blockNumber=request.blockNumber,name=request.name, description=request.description)
         return CreateCustomizationForCollectionTokenResponse(tokenCustomization=(await responseBuilder.token_customization_from_model(tokenCustomization=tokenCustomization)))
+
+    # TODO(krishan711): make this a GET request once we understand complex query params
+    @router.post('/collections/{registryAddress}/users/query')
+    async def query_collection_users(registryAddress: str, request: QueryCollectionUsersRequest) -> QueryCollectionUsersResponse:
+        limit = request.limit if request.limit is not None else 20
+        offset = request.offset if request.offset is not None else 0
+        galleryUserRowListResponse = await galleryManager.query_collection_users(registryAddress=registryAddress, order=request.order, limit=limit, offset=offset)
+        return QueryCollectionUsersResponse(galleryUserRowListResponse=(await responseBuilder.gallery_user_row_list_response_from_model(galleryUserRowListResponse=galleryUserRowListResponse)))
 
     @router.get('/collections/{registryAddress}/users/{userAddress}')
     async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserResponse:

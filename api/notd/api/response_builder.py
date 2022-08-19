@@ -13,6 +13,7 @@ from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
+from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
@@ -27,6 +28,8 @@ from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import GalleryToken
 from notd.model import GalleryUser
+from notd.model import GalleryUserRow
+from notd.model import ListResponse
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenCustomization
@@ -38,6 +41,8 @@ from notd.model import TwitterProfile
 from notd.model import UserProfile
 from notd.store.retriever import Retriever
 from notd.token_metadata_processor import TokenMetadataProcessor
+
+from .endpoints_v1 import ApiListResponse
 
 VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
 
@@ -252,9 +257,26 @@ class ResponseBuilder:
         return ApiGalleryUser(
             address=galleryUser.address,
             registryAddress=galleryUser.registryAddress,
-            userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)),
-            twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)),
+            userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)) if galleryUser.userProfile else None,
+            twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)) if galleryUser.twitterProfile else None,
+            ownedTokenCount=galleryUser.ownedTokenCount,
+            joinDate=galleryUser.joinDate,
         )
 
     async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> Sequence[ApiGalleryUser]:
         return await asyncio.gather(*[self.gallery_user_from_model(galleryUser=galleryUser) for galleryUser in galleryUsers])
+
+    async def gallery_user_row_from_model(self, galleryUserRow: GalleryUserRow) -> ApiGalleryUserRow:
+        return ApiGalleryUserRow(
+            galleryUser=(await self.gallery_user_from_model(galleryUserRow.galleryUser)),
+            chosenOwnedTokens=(await self.collection_tokens_from_models(tokenMetadatas=galleryUserRow.chosenOwnedTokens))
+        )
+
+    async def gallery_user_rows_from_models(self, galleryUserRows: Sequence[GalleryUserRow]) -> Sequence[ApiGalleryUserRow]:
+        return await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRows])
+
+    async def gallery_user_row_list_response_from_model(self, galleryUserRowListResponse: ListResponse[GalleryUserRow]) -> ApiListResponse[ApiGalleryUserRow]:
+        return ApiListResponse(
+            items=(await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRowListResponse.items])),
+            totalCount=galleryUserRowListResponse.totalCount,
+        )

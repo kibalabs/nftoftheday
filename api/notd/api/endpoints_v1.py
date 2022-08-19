@@ -1,8 +1,11 @@
 import datetime
+from typing import Generic
 from typing import List
 from typing import Optional
+from typing import TypeVar
 
 from pydantic import BaseModel
+from pydantic.generics import GenericModel
 
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -12,6 +15,7 @@ from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
+from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
@@ -201,7 +205,6 @@ class QueryCollectionTokensRequest(BaseModel):
     ownerAddress: Optional[str]
 
 class QueryCollectionTokensResponse(BaseModel):
-    tokens: List[ApiCollectionToken]
     galleryTokens: List[ApiGalleryToken]
 
 class CreateCustomizationForCollectionTokenRequest(BaseModel):
@@ -237,3 +240,17 @@ class GetGalleryCollectionUserRequest(BaseModel):
 
 class GetGalleryCollectionUserResponse(BaseModel):
     galleryUser: ApiGalleryUser
+
+ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
+
+class ApiListResponse(GenericModel, Generic[ApiListResponseItemType]):
+    items: List[ApiListResponseItemType]
+    totalCount: int
+
+class QueryCollectionUsersRequest(BaseModel):
+    order: Optional[str]
+    limit: Optional[int]
+    offset: Optional[int]
+
+class QueryCollectionUsersResponse(BaseModel):
+    galleryUserRowListResponse: ApiListResponse[ApiGalleryUserRow]
