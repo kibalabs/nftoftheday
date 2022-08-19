@@ -4,9 +4,8 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
-from .endpoints_v1 import ApiListResponse
 
-from notd.api.models_v1 import ApiAirdrop, ApiGalleryUserRow
+from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -14,6 +13,7 @@ from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
+from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
@@ -21,13 +21,15 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
-from notd.model import Airdrop, GalleryUserRow, ListResponse
+from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import GalleryToken
 from notd.model import GalleryUser
+from notd.model import GalleryUserRow
+from notd.model import ListResponse
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenCustomization
@@ -39,6 +41,8 @@ from notd.model import TwitterProfile
 from notd.model import UserProfile
 from notd.store.retriever import Retriever
 from notd.token_metadata_processor import TokenMetadataProcessor
+
+from .endpoints_v1 import ApiListResponse
 
 VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
 

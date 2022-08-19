@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter
 
-from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest, QueryCollectionUsersRequest, QueryCollectionUsersResponse
+from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
 from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
@@ -10,6 +10,8 @@ from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
+from notd.api.endpoints_v1 import QueryCollectionUsersRequest
+from notd.api.endpoints_v1 import QueryCollectionUsersResponse
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import TwitterLoginCallbackResponse

@@ -1,7 +1,9 @@
 import datetime
-from typing import Dict, Generic, TypeVar
+from typing import Dict
+from typing import Generic
 from typing import List
 from typing import Optional
+from typing import TypeVar
 
 from core.util import date_util
 from core.util.typing_util import JSON

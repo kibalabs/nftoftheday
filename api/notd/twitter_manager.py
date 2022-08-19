@@ -12,7 +12,8 @@ from core.requester import Requester
 from core.util import date_util
 from core.util import dict_util
 
-from notd.model import Signature, TwitterCredential
+from notd.model import Signature
+from notd.model import TwitterCredential
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 

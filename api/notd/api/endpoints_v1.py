@@ -1,11 +1,13 @@
 import datetime
-from typing import Generic, List, TypeVar
+from typing import Generic
+from typing import List
 from typing import Optional
+from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
-from notd.api.models_v1 import ApiAirdrop, ApiGalleryUserRow
+from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -13,6 +15,7 @@ from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
+from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
