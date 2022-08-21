@@ -31,15 +31,15 @@ from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import BlocksTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema import TokenTransfersTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
+from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
+from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
@@ -224,94 +224,82 @@ class GalleryManager:
 
     async def get_gallery_user(self, registryAddress: str, userAddress: str) -> GalleryUser:
         userQuery = (
-            sqlalchemy.select(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).label('ownedTokenCount'), UserProfilesTable, TwitterProfilesTable)
+            sqlalchemy.select(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).label('ownedTokenCount'), UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == TokenOwnershipsTable.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
+                .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == registryAddress, UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == userAddress), isouter=True)
                 .where(TokenOwnershipsTable.c.registryAddress == registryAddress)
                 .where(TokenOwnershipsTable.c.ownerAddress == userAddress)
-                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId)
+                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         userResult = await self.retriever.database.execute(query=userQuery)
         userRow = userResult.first()
-        joinDateQuery = (
-            sqlalchemy.select(sqlalchemy.func.min(BlocksTable.c.blockDate).label("joinDate"))
-            .join(TokenTransfersTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
-            .where(TokenTransfersTable.c.registryAddress == registryAddress)
-            .where(TokenTransfersTable.c.toAddress == userAddress)
-        )
-        joinDateResult = await self.retriever.database.execute(query=joinDateQuery)
-        joinDateRow = joinDateResult.first()
         galleryUser = GalleryUser(
             address=userAddress,
             registryAddress=registryAddress,
             userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
             twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
             ownedTokenCount=userRow['ownedTokenCount'] if userRow else 0,
-            joinDate=joinDateRow['joinDate'] if joinDateRow else None,
+            joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
         )
         return galleryUser
 
     async def query_collection_users(self, registryAddress, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
-        joinDateQuery = (
-            sqlalchemy.select(TokenTransfersTable.c.toAddress.label("userAddress"), sqlalchemy.func.min(BlocksTable.c.blockDate).label("joinDate"))
-            .join(TokenTransfersTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber)
-            .where(TokenTransfersTable.c.registryAddress == registryAddress)
-            .group_by(TokenTransfersTable.c.toAddress)
-        ).subquery()
+        ownedCountColumn = sqlalchemy.func.max(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex).label('ownedTokenCount')
         usersQueryBase = (
-            sqlalchemy.select(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).label('ownedTokenCount'), TokenOwnershipsTable.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, joinDateQuery.c.joinDate)
-                .join(UserProfilesTable, UserProfilesTable.c.address == TokenOwnershipsTable.c.ownerAddress, isouter=True)
+            sqlalchemy.select(ownedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+                .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
-                .join(joinDateQuery, joinDateQuery.c.userAddress == TokenOwnershipsTable.c.ownerAddress, isouter=True)
-                .where(TokenOwnershipsTable.c.registryAddress == registryAddress)
-                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, TokenOwnershipsTable.c.ownerAddress, joinDateQuery.c.joinDate)
+                .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
         if not order or order == 'TOKENCOUNT_DESC':
-            usersQuery = usersQuery.order_by(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+            usersQuery = usersQuery.order_by(ownedCountColumn.desc())
         elif order == 'TOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).asc(), joinDateQuery.c.joinDate.desc())
+            usersQuery = usersQuery.order_by(ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
         elif order == 'FOLLOWERCOUNT_DESC':
-            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.desc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.desc(), ownedCountColumn.desc())
         elif order == 'FOLLOWERCOUNT_ASC':
-            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.asc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
-        # NOTE(krishan711): joindate odering is inverse because its displayed as time ago so oldest is highest
+            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.asc(), ownedCountColumn.desc())
+        # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
         elif order == 'JOINDATE_DESC':
-            usersQuery = usersQuery.order_by(joinDateQuery.c.joinDate.asc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+            usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.asc(), ownedCountColumn.desc())
         elif order == 'JOINDATE_ASC':
-            usersQuery = usersQuery.order_by(joinDateQuery.c.joinDate.desc(), sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).desc())
+            usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc(), ownedCountColumn.desc())
         else:
             raise BadRequestException('Unknown order')
         usersResult = await self.retriever.database.execute(query=usersQuery)
         userRows = list(usersResult)
-        userCountsResult = await self.retriever.database.execute(query=sqlalchemy.select(sqlalchemy.func.count()).select_from(usersQueryBase.subquery()))
+        userCountsQuery = (
+            sqlalchemy.select(sqlalchemy.func.count(sqlalchemy.func.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+        )
+        userCountsResult = await self.retriever.database.execute(query=userCountsQuery)
         (totalCount, ) = userCountsResult.first()
-        ownerAddresses = [userRow[TokenOwnershipsTable.c.ownerAddress] for userRow in userRows]
-        orderedTokensQuery = (
-            sqlalchemy.select(TokenMetadatasTable.c.tokenMetadataId, TokenOwnershipsTable.c.ownerAddress, sqlalchemy.func.row_number().over(partition_by=TokenOwnershipsTable.c.ownerAddress, order_by=TokenOwnershipsTable.c.transferDate).label('tokenIndex'))
-                .join(TokenOwnershipsTable, sqlalchemy.and_(TokenOwnershipsTable.c.tokenId == TokenMetadatasTable.c.tokenId, TokenOwnershipsTable.c.registryAddress == TokenMetadatasTable.c.registryAddress))
-                .where(TokenMetadatasTable.c.registryAddress == registryAddress)
-        ).subquery()
+        ownerAddresses = [userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress] for userRow in userRows]
         chosenTokensQuery = (
-            sqlalchemy.select(TokenMetadatasTable, orderedTokensQuery.c.ownerAddress)
-                .join(orderedTokensQuery, orderedTokensQuery.c.tokenMetadataId == TokenMetadatasTable.c.tokenMetadataId)
-                .where(orderedTokensQuery.c.tokenIndex <= 5)
-                .where(orderedTokensQuery.c.ownerAddress.in_(ownerAddresses))
+            sqlalchemy.select(TokenMetadatasTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == TokenMetadatasTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.tokenId == TokenMetadatasTable.c.tokenId))
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex <= 5)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(ownerAddresses))
         )
         chosenTokensResult = await self.retriever.database.execute(query=chosenTokensQuery)
         chosenTokenRows = list(chosenTokensResult)
         chosenTokens: Dict[str, List[TokenMetadata]] = defaultdict(list)
         for chosenTokenRow in chosenTokenRows:
-            chosenTokens[chosenTokenRow['ownerAddress']].append(token_metadata_from_row(chosenTokenRow))
+            chosenTokens[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress].append(token_metadata_from_row(chosenTokenRow))
         items = [GalleryUserRow(
             galleryUser=GalleryUser(
-                address=userRow[TokenOwnershipsTable.c.ownerAddress],
+                address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
                 registryAddress=registryAddress,
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
                 ownedTokenCount=userRow['ownedTokenCount'],
-                joinDate=userRow['joinDate'],
+                joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
-            chosenOwnedTokens=chosenTokens[userRow[TokenOwnershipsTable.c.ownerAddress]],
+            chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=totalCount)

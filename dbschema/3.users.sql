@@ -32,3 +32,7 @@ GRANT INSERT, SELECT, UPDATE ON tbl_twitter_profiles TO notd_api;
 GRANT ALL ON SEQUENCE tbl_twitter_profiles_id_seq TO notd_api;
 GRANT INSERT, SELECT, UPDATE ON tbl_user_profiles TO notd_api;
 GRANT ALL ON SEQUENCE tbl_user_profiles_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE ON tbl_gallery_customers TO notd_api;
+GRANT ALL ON SEQUENCE tbl_gallery_customers_id_seq TO notd_api;
+ALTER MATERIALIZED VIEW mvw_user_registry_first_ownerships OWNER TO notd_api;
+ALTER MATERIALIZED VIEW mvw_user_registry_ordered_ownerships OWNER TO notd_api;

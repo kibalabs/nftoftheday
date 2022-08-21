@@ -266,6 +266,7 @@ CREATE TABLE tbl_token_attributes (
 );
 CREATE UNIQUE INDEX tbl_token_attributes_registry_address_token_id_name on tbl_token_attributes (registry_address, token_id, name);
 CREATE INDEX tbl_token_attributes_registry_address_token_id_name_value on tbl_token_attributes (registry_address, token_id, name, value);
+CREATE INDEX tbl_token_attributes_registry_address_name_value on tbl_token_attributes (registry_address, name, value);
 CREATE INDEX tbl_token_attributes_created_date ON tbl_token_attributes (created_date);
 CREATE INDEX tbl_token_attributes_updated_date ON tbl_token_attributes (updated_date);
 CREATE INDEX tbl_token_attributes_registry_address ON tbl_token_attributes (registry_address);
@@ -351,3 +352,13 @@ CREATE UNIQUE INDEX tbl_user_profiles_address on tbl_user_profiles (address);
 CREATE INDEX tbl_user_profiles_created_date ON tbl_user_profiles (created_date);
 CREATE INDEX tbl_user_profiles_updated_date ON tbl_user_profiles (updated_date);
 CREATE INDEX tbl_user_profiles_twitter_id ON tbl_user_profiles (twitter_id);
+
+
+CREATE TABLE tbl_gallery_customers (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    name TEXT NOT NULL,
+    registry_address TEXT NOT NULL
+)
+CREATE UNIQUE INDEX tbl_gallery_customers_registry_address on tbl_gallery_customers (registry_address);

@@ -18,6 +18,10 @@ class ReceiveNewBlocksMessageContent(MessageContent):
     _COMMAND = 'RECEIVE_NEW_BLOCKS'
 
 
+class RefreshViewsMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_VIEWS'
+
+
 class UpdateTokenMetadataMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_METADATA'
     registryAddress: str
