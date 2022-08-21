@@ -25,8 +25,9 @@ from notd.attribute_manager import AttributeManager
 from notd.block_processor import BlockProcessor
 from notd.collection_manager import CollectionManager
 from notd.listing_manager import ListingManager
-from notd.messages import ProcessBlockMessageContent, RefreshViewsMessageContent
+from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection

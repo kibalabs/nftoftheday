@@ -31,7 +31,6 @@ from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView, UserRegistryOrderedOwnershipsMaterializedView
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCustomizationsTable
@@ -39,6 +38,8 @@ from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
+from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
+from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
