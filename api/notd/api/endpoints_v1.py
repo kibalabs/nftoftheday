@@ -63,6 +63,12 @@ class ReceiveNewBlocksDeferredRequest(BaseModel):
 class ReceiveNewBlocksDeferredResponse(BaseModel):
     pass
 
+class RefreshViewsDeferredRequest(BaseModel):
+    pass
+
+class RefreshViewsDeferredResponse(BaseModel):
+    pass
+
 class UpdateLatestListingsAllCollectionsDeferredRequest(BaseModel):
     pass
 

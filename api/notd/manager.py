@@ -25,7 +25,7 @@ from notd.attribute_manager import AttributeManager
 from notd.block_processor import BlockProcessor
 from notd.collection_manager import CollectionManager
 from notd.listing_manager import ListingManager
-from notd.messages import ProcessBlockMessageContent
+from notd.messages import ProcessBlockMessageContent, RefreshViewsMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
@@ -386,6 +386,15 @@ class NotdManager:
     async def reprocess_owner_token_ownerships(self, accountAddress: str) -> None:
         collectionTokenIds = await self.ownershipManager.reprocess_owner_token_ownerships(ownerAddress=accountAddress)
         await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
+
+    async def refresh_views_deferred(self) -> None:
+        await self.workQueue.send_message(message=RefreshViewsMessageContent().to_message())
+
+    async def refresh_views(self) -> None:
+        async with self.saver.create_transaction() as connection:
+            await connection.execute(sqlalchemy.text('REFRESH MATERIALIZED VIEW CONCURRENTLY mvw_user_registry_first_ownerships;'))
+        async with self.saver.create_transaction() as connection:
+            await connection.execute(sqlalchemy.text('REFRESH MATERIALIZED VIEW CONCURRENTLY mvw_user_registry_ordered_ownerships;'))
 
     async def receive_new_blocks_deferred(self) -> None:
         await self.workQueue.send_message(message=ReceiveNewBlocksMessageContent().to_message())
