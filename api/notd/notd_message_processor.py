@@ -7,6 +7,7 @@ from core.util import date_util
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
@@ -35,6 +36,13 @@ class NotdMessageProcessor(MessageProcessor):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
             messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
+            await self.notdManager.receive_new_blocks()
+            return
+        if message.command == RefreshViewsMessageContent.get_command():
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
+                logging.info(f'Skipping {message.command} from more than 5 minutes ago')
+                return
+            messageContent = RefreshViewsMessageContent.parse_obj(message.content)
             await self.notdManager.receive_new_blocks()
             return
         if message.command == ReprocessBlocksMessageContent.get_command():

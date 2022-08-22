@@ -84,8 +84,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         return ReceiveNewBlocksDeferredResponse()
 
     @router.post('/refresh-views-deferred', response_model=ReceiveNewBlocksDeferredResponse)
-    async def refresh_views():
-        await notdManager.refresh_views()
+    async def refresh_views_deferred():
+        await notdManager.refresh_views_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
     @router.post('/collections/update-latest-listings-deferred', response_model=UpdateLatestListingsAllCollectionsDeferredResponse)
