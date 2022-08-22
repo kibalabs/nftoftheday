@@ -43,7 +43,7 @@ class NotdMessageProcessor(MessageProcessor):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
             messageContent = RefreshViewsMessageContent.parse_obj(message.content)
-            await self.notdManager.receive_new_blocks()
+            await self.notdManager.refresh_views()
             return
         if message.command == ReprocessBlocksMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
