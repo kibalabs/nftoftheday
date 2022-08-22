@@ -287,10 +287,9 @@ class GalleryManager:
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(ownerAddresses))
         )
         chosenTokensResult = await self.retriever.database.execute(query=chosenTokensQuery)
-        chosenTokenRows = list(chosenTokensResult)
         chosenTokens: Dict[str, List[TokenMetadata]] = defaultdict(list)
-        for chosenTokenRow in chosenTokenRows:
-            chosenTokens[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress].append(token_metadata_from_row(chosenTokenRow))
+        for chosenTokenRow in chosenTokensResult:
+            chosenTokens[chosenTokenRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]].append(token_metadata_from_row(chosenTokenRow))
         items = [GalleryUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],

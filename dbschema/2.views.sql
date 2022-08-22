@@ -11,7 +11,7 @@ CREATE INDEX mvw_user_registry_first_ownerships_registry_address ON mvw_user_reg
 
 CREATE MATERIALIZED VIEW mvw_user_registry_ordered_ownerships AS (
     SELECT tbl_token_metadatas.registry_address, tbl_token_metadatas.token_id, tbl_token_ownerships.owner_address, row_number() OVER (
-        PARTITION BY tbl_token_ownerships.owner_address ORDER BY tbl_token_ownerships.transfer_date
+        PARTITION BY tbl_token_ownerships.registry_address, tbl_token_ownerships.owner_address ORDER BY tbl_token_ownerships.transfer_date
     ) AS owner_token_index
     FROM tbl_token_metadatas
     JOIN tbl_token_ownerships ON tbl_token_ownerships.token_id = tbl_token_metadatas.token_id
