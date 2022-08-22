@@ -38,15 +38,15 @@ class BlockProcessorTestCase(KibaAsyncTestCase):
 
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
-        self.awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-        self.ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=self.awsRequester)
-        # self.requester = Requester()
-        # self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
+        # self.awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+        # self.ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=self.awsRequester)
+        self.requester = Requester()
+        self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
         self.blockProcessor = BlockProcessor(ethClient=self.ethClient)
 
     async def asyncTearDown(self) -> None:
-        await self.awsRequester.close_connections()
-        # await self.requester.close_connections()
+        # await self.awsRequester.close_connections()
+        await self.requester.close_connections()
         await super().asyncTearDown()
 
 
