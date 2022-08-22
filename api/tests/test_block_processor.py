@@ -38,15 +38,15 @@ class BlockProcessorTestCase(KibaAsyncTestCase):
 
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
-        # self.awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-        # self.ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=self.awsRequester)
-        self.requester = Requester()
-        self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
+        self.awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+        self.ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=self.awsRequester)
+        # self.requester = Requester()
+        # self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
         self.blockProcessor = BlockProcessor(ethClient=self.ethClient)
 
     async def asyncTearDown(self) -> None:
-        # await self.awsRequester.close_connections()
-        await self.requester.close_connections()
+        await self.awsRequester.close_connections()
+        # await self.requester.close_connections()
         await super().asyncTearDown()
 
 
@@ -272,8 +272,8 @@ class TestProcessBlock(BlockProcessorTestCase):
             ]
         )
         assert(result == expected)
-    
-    
+
+
 class TestProcessTransaction(BlockProcessorTestCase):
 
     async def _process_block_transaction(self, blockNumber: int, transactionHash: str) -> List[RetrievedTokenTransfer]:
@@ -297,10 +297,10 @@ class TestProcessTransaction(BlockProcessorTestCase):
         # 5 transfers each with (0.684/5)eth value with 0x27a as the receiver for each and multiple senders
         result = await self._process_block_transaction(blockNumber=14471751, transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954')
         expected = [
-            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='3729', fromAddress='0xB8b6aF171335Ce2E327Afd2ebEf1a2c46cd67B01', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False), 
-            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='3698', fromAddress='0x9c8BF4D407cff32eC725eb7D43E106163d182269', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False), 
-            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='3534', fromAddress='0x30d82b3cB565Da738383356fd17E9306692Bd5b2', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False), 
-            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='2539', fromAddress='0x1a63efB8E8b52e63F700038e17909Cf76AEf5415', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False), 
+            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='3729', fromAddress='0xB8b6aF171335Ce2E327Afd2ebEf1a2c46cd67B01', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False),
+            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='3698', fromAddress='0x9c8BF4D407cff32eC725eb7D43E106163d182269', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False),
+            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='3534', fromAddress='0x30d82b3cB565Da738383356fd17E9306692Bd5b2', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False),
+            RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='2539', fromAddress='0x1a63efB8E8b52e63F700038e17909Cf76AEf5415', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False),
             RetrievedTokenTransfer(transactionHash='0x7e2d9da491c020a15ed394899a1344560649ce9b07b7a195c425d7b218551954', registryAddress='0xAcfA101ECE167F1894150e090d9471aeE2dD3041', tokenId='130', fromAddress='0x40Fa37128A7d54DAB2392ACBC4f43827bc67bBE4', toAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', operatorAddress='0x27a45e97c01f30D3E3F7f76734BB8d8b9AF03Eb0', contractAddress='0x0000000035634B55f3D99B071B5A354f48e10BEF', amount=1, value=137880000000000000, gasLimit=963497, gasPrice=24985808182, blockNumber=14471751, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False)
         ]
         self.assertEqual(result, expected)
@@ -483,22 +483,22 @@ class TestProcessTransaction(BlockProcessorTestCase):
             RetrievedTokenTransfer(transactionHash='0x6332d565f96a1ae47ae403df47acc0d28fe11c409fb2e3cc4d1a96a1c5987ed8', registryAddress='0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B', tokenId='17028', fromAddress='0xB0c3666a6980D6cfBB97890564934e0d818A9e4A', toAddress='0xe7967e0ec15CB48939Fcf0BC5764c2a634349eCB', operatorAddress='0xB0c3666a6980D6cfBB97890564934e0d818A9e4A', contractAddress='0x13d8faF4A690f5AE52E2D2C52938d1167057B9af', amount=1, value=0, gasLimit=356881, gasPrice=72692865001, blockNumber=15014054, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
         ]
         self.assertEqual(result, expected)
-    
+
     async def test_contract_creation(self):
         result = await self._process_block_transaction(blockNumber=4313447, transactionHash='0x9aea97f9124ce28745206a721b955ca915d09fe9cb97210290b73465802ca44e')
         expected = [
-            RetrievedTokenTransfer(transactionHash='0x9aea97f9124ce28745206a721b955ca915d09fe9cb97210290b73465802ca44e', registryAddress='0xe46912A20A7E84da7f29Cdd6883AA71a7864F23f', tokenId='600000000000000000000000000', fromAddress='0xe46912A20A7E84da7f29Cdd6883AA71a7864F23f', toAddress='0x514bc174df04a4b04ae2Be81ee8c788c3796B06B', operatorAddress='0xc98588F01cCc612FE010ef7bF29d6748d4621b72', contractAddress='0x514bc174df04a4b04ae2be81ee8c788c3796b06b', amount=1, value=0, gasLimit=3066382, gasPrice=42000000000, blockNumber=4313447, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
+            RetrievedTokenTransfer(transactionHash='0x9aea97f9124ce28745206a721b955ca915d09fe9cb97210290b73465802ca44e', registryAddress='0xe46912A20A7E84da7f29Cdd6883AA71a7864F23f', tokenId='600000000000000000000000000', fromAddress='0xe46912A20A7E84da7f29Cdd6883AA71a7864F23f', toAddress='0x514bc174df04a4b04ae2Be81ee8c788c3796B06B', operatorAddress='0xc98588F01cCc612FE010ef7bF29d6748d4621b72', contractAddress='0x514bc174df04a4b04ae2Be81ee8c788c3796B06B', amount=1, value=0, gasLimit=3066382, gasPrice=42000000000, blockNumber=4313447, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
         ]
         self.assertEqual(result, expected)
 
-    async def test_contract_address_is_not_null(self):
+    async def test_contract_address_is_not_null_on_creation(self):
         result = await self._process_block_transaction(blockNumber=14853521, transactionHash='0x50815502f602b7c4251e2e3cf81430a18853f06bbd955e05f01cac7ce2f2dee4')
         expected = [
             RetrievedTokenTransfer(transactionHash='0x50815502f602b7c4251e2e3cf81430a18853f06bbd955e05f01cac7ce2f2dee4', registryAddress='0x16a60DcB59cDD61C09871B66e5eD63eD9d2870B4', tokenId='1', fromAddress='0x0000000000000000000000000000000000000000', toAddress='0x9e25E5db0624f89DB02D9504855a57815Af276Aa', operatorAddress='0x9e25E5db0624f89DB02D9504855a57815Af276Aa', contractAddress='0x16a60DcB59cDD61C09871B66e5eD63eD9d2870B4', amount=1, value=0, gasLimit=3815252, gasPrice=20081300411, blockNumber=14853521, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
         ]
         self.assertEqual(result, expected)
 
-    async def test_erc1155_contract_address_is_not_null(self):
+    async def test_erc1155_contract_address_is_not_null_on_creation(self):
         result = await self._process_block_transaction(blockNumber=15205924, transactionHash='0x6cc78d44fca7d1c7ef0715e54791c4eb68825ae04930adb9efa2030c32746848')
         expected = [
             RetrievedTokenTransfer(transactionHash='0x6cc78d44fca7d1c7ef0715e54791c4eb68825ae04930adb9efa2030c32746848', registryAddress='0xdd6a643bBdE396191F14D720570B8d546DfEc2b6', tokenId='1', fromAddress='0x0000000000000000000000000000000000000000', toAddress='0xa20274ad97EFA76295Adb83D74A9C75aF3fb47b2', operatorAddress='0xa20274ad97EFA76295Adb83D74A9C75aF3fb47b2', contractAddress='0xdd6a643bBdE396191F14D720570B8d546DfEc2b6', amount=1, value=0, gasLimit=2718320, gasPrice=21877111422, blockNumber=15205924, tokenType='erc1155single', isMultiAddress=False, isInterstitial=True, isSwap=False, isBatch=False, isOutbound=False),
@@ -506,7 +506,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_contract_address_is_not_null_with_batch_transfer(self):
+    async def test_contract_address_is_not_null_with_batch_transfer_on_creation(self):
         result = await self._process_block_transaction(blockNumber=13551758, transactionHash='0xd3ba86b8a69bdc1c35a9c0ed185f2e9f860f0ff4191f5de2af54f138341d0d3c')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xd3ba86b8a69bdc1c35a9c0ed185f2e9f860f0ff4191f5de2af54f138341d0d3c', registryAddress='0xdAF8a512327142f294d8aEc3Ea09b99e3b7411Bb', tokenId='0', fromAddress='0x0000000000000000000000000000000000000000', toAddress='0x9C141381bb923c79D51A019Ab2c58E547069B9d9', operatorAddress='0x9C141381bb923c79D51A019Ab2c58E547069B9d9', contractAddress='0xdAF8a512327142f294d8aEc3Ea09b99e3b7411Bb', amount=1, value=0, gasLimit=7000000, gasPrice=150000000000, blockNumber=13551758, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=False),
@@ -514,7 +514,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_contract_address_is_not_null_with_multi_address(self):
+    async def test_contract_address_is_not_null_with_multi_address_on_creation(self):
         result = await self._process_block_transaction(blockNumber=14536141, transactionHash='0xb8829c1d1170e6d33771be5fe19123404c2af11fd21d41ff67ec33919b04d63c')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xb8829c1d1170e6d33771be5fe19123404c2af11fd21d41ff67ec33919b04d63c', registryAddress='0x95ddF26D73DfBBFfc5A3D008BFDB3fEf71fb8A84', tokenId='1', fromAddress='0x0000000000000000000000000000000000000000', toAddress='0xB6D2ac64BDc24f76417b95b410ACf47cE31AdD07', operatorAddress='0xB6D2ac64BDc24f76417b95b410ACf47cE31AdD07', contractAddress='0x95ddF26D73DfBBFfc5A3D008BFDB3fEf71fb8A84', amount=1, value=0, gasLimit=12333401, gasPrice=41303999287, blockNumber=14536141, tokenType='erc721', isMultiAddress=True, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False),
