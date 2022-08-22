@@ -22,7 +22,7 @@ GALLERY_COLLECTIONS = {
 }
 
 
-ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
+ListResponseItemType = TypeVar("ListResponseItemType")
 
 
 @dataclasses.dataclass

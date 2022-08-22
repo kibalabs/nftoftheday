@@ -247,7 +247,7 @@ class GetGalleryCollectionUserRequest(BaseModel):
 class GetGalleryCollectionUserResponse(BaseModel):
     galleryUser: ApiGalleryUser
 
-ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
+ApiListResponseItemType = TypeVar("ApiListResponseItemType")
 
 class ApiListResponse(GenericModel, Generic[ApiListResponseItemType]):
     items: List[ApiListResponseItemType]
