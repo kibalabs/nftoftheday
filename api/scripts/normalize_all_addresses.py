@@ -30,11 +30,12 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
             start = currentBlockNumber
             end = min(currentBlockNumber + batchSize, endBlockNumber)
             logging.info(f'Working on {start} to {end}...')
-            query = ( TokenTransfersTable.select()
-                        .with_only_columns([TokenTransfersTable.c.operatorAddress, TokenTransfersTable.c.contractAddress])
-                        .where(TokenTransfersTable.c.blockNumber >= start)
-                        .where(TokenTransfersTable.c.blockNumber < end)
-                        )
+            query = ( 
+                TokenTransfersTable.select()
+                    .with_only_columns([TokenTransfersTable.c.operatorAddress, TokenTransfersTable.c.contractAddress])
+                    .where(TokenTransfersTable.c.blockNumber >= start)
+                    .where(TokenTransfersTable.c.blockNumber < end)
+                )
             result = await database.execute(query=query)
             for (operatorAddress, contractAddress) in result:
                 if normalize_address(operatorAddress) != operatorAddress:
