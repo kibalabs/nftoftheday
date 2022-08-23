@@ -1,7 +1,9 @@
 import datetime
 from typing import Dict
+from typing import Generic
 from typing import List
 from typing import Optional
+from typing import TypeVar
 
 from core.util import date_util
 from core.util.typing_util import JSON
@@ -10,12 +12,24 @@ from pydantic import dataclasses
 COLLECTION_SPRITE_CLUB_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 COLLECTION_GOBLINTOWN_ADDRESS = '0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e'
 COLLECTION_MDTP_ADDRESS = '0x8e720F90014fA4De02627f4A4e217B7e3942d5e8'
+COLLECTION_FISHYFAM_ADDRESS = '0x63FA29Fec10C997851CCd2466Dad20E51B17C8aF'
 
 GALLERY_COLLECTIONS = {
     COLLECTION_SPRITE_CLUB_ADDRESS,
     COLLECTION_GOBLINTOWN_ADDRESS,
     COLLECTION_MDTP_ADDRESS,
+    COLLECTION_FISHYFAM_ADDRESS,
 }
+
+
+ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
+
+
+@dataclasses.dataclass
+class ListResponse(Generic[ListResponseItemType]):
+    items: List[ListResponseItemType]
+    totalCount: int
+
 
 
 @dataclasses.dataclass
@@ -402,3 +416,11 @@ class GalleryUser:
     registryAddress: str
     userProfile: Optional[UserProfile]
     twitterProfile: Optional[TwitterProfile]
+    ownedTokenCount: int
+    joinDate: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass
+class GalleryUserRow:
+    galleryUser: GalleryUser
+    chosenOwnedTokens: List[TokenMetadata]

@@ -13,6 +13,7 @@ from core.util import date_util
 from core.util import dict_util
 
 from notd.model import Signature
+from notd.model import TwitterCredential
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
@@ -42,9 +43,7 @@ class TwitterManager:
             'userProfileId': userProfile.userProfileId,
             'initialUrl': urlparse.unquote(initialUrl),
         }
-        print('state', state)
         stateString = base64.b64encode(json.dumps(state).encode()).decode()
-        print('len(stateString)', len(stateString))
         scopes = ['offline.access', 'tweet.read', 'tweet.write', 'users.read', 'follows.read', 'follows.write']
         queryParams = {
             'response_type': 'code',
@@ -104,10 +103,27 @@ class TwitterManager:
         url = urlparse.urlunsplit(components=(urlParts.scheme, urlParts.netloc, urlParts.path, queryString, urlParts.fragment))
         raise FoundRedirectException(location=url)
 
+    async def refresh_twitter_credentials(self, twitterId: str) -> TwitterCredential:
+        async with self.saver.create_transaction() as connection:
+            twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=twitterId, connection=connection)
+            authHeader = BasicAuthentication(username=self.clientId, password=self.clientSecret)
+            params = {
+                'refresh_token': twitterCredential.refreshToken,
+                'grant_type': 'refresh_token',
+                'client_id': self.clientId,
+            }
+            response = await self.requester.post_form(url='https://api.twitter.com/2/oauth2/token', formDataDict=params, headers={'Authorization': f'Basic {authHeader.to_string()}'})
+            responseDict = response.json()
+            twitterCredential.accessToken = responseDict['access_token']
+            twitterCredential.refreshToken = responseDict['refresh_token']
+            twitterCredential.expiryDate = date_util.datetime_from_now(seconds=responseDict['expires_in'])
+            await self.saver.update_twitter_credential(twitterCredentialId=twitterCredential.twitterCredentialId, accessToken=twitterCredential.accessToken, refreshToken=twitterCredential.refreshToken, expiryDate=twitterCredential.expiryDate)
+        return twitterCredential
+
     async def update_twitter_profile(self, twitterId: str) -> None:
         twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=twitterId)
-        # if twitterCredential.expiryDate > date_util.datetime_from_now(seconds=-60):
-        #     await self.refresh_credentials(twitterId=twitterId)
+        if date_util.datetime_from_now(seconds=-60) > twitterCredential.expiryDate:
+            twitterCredential = await self.refresh_twitter_credentials(twitterId=twitterId)
         twitterProfile = None
         try:
             twitterProfile = await self.retriever.get_twitter_profile_by_twitter_id(twitterId=twitterId)

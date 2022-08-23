@@ -6,11 +6,11 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='tokenTransferId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='transactionHash', name='transaction_hash', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='fromAddress', name='from_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='toAddress', name='to_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='operatorAddress', name='operator_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='contractAddress', name='contract_address', type_=sqlalchemy.Text, nullable=True),
-    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='value', name='value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     # NOTE(krishan711): switch back to amount once its renamed
     sqlalchemy.Column(key='amount', name='amount_2', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
@@ -256,4 +256,22 @@ UserProfilesTable = sqlalchemy.Table(
     sqlalchemy.Column(key='twitterId', name='twitter_id', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='discordId', name='discord_id', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.JSON, nullable=False),
+)
+
+
+UserRegistryOrderedOwnershipsMaterializedView = sqlalchemy.Table(
+    'mvw_user_registry_ordered_ownerships',
+    metadata,
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerTokenIndex', name='owner_token_index', type_=sqlalchemy.Integer, nullable=False),
+)
+
+UserRegistryFirstOwnershipsMaterializedView = sqlalchemy.Table(
+    'mvw_user_registry_first_ownerships',
+    metadata,
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='joinDate', name='join_date', type_=sqlalchemy.DateTime, nullable=False),
 )

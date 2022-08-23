@@ -203,6 +203,13 @@ class BlockProcessor:
         
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent]) -> List[RetrievedTokenTransfer]:
+        contractAddress = transaction['to']
+        if not contractAddress:
+            # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
+            ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
+            contractAddress = ethTransactionReceipt['contractAddress']
+        contractAddress = chain_util.normalize_address(value=contractAddress)
+        transactionFromAddress = chain_util.normalize_address(value=transaction['from'])
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
         registryAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
@@ -215,7 +222,8 @@ class BlockProcessor:
             tokenKeyCount = tokenKeyCounts[tokenKey]
             tokenKeySeenCounts[tokenKey] += 1
             isInterstitial = tokenKeySeenCounts[tokenKey] < tokenKeyCount
-            isOutbound = retrievedEvent.fromAddress == transaction['from']
+            isOutbound = retrievedEvent.fromAddress == transactionFromAddress
+            operatorAddress = retrievedEvent.operatorAddress if retrievedEvent.operatorAddress else transactionFromAddress
             retrievedTokenTransfers += [
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
@@ -223,8 +231,8 @@ class BlockProcessor:
                     tokenId=retrievedEvent.tokenId,
                     fromAddress=retrievedEvent.fromAddress,
                     toAddress=retrievedEvent.toAddress,
-                    operatorAddress=retrievedEvent.operatorAddress if retrievedEvent.operatorAddress else transaction['from'],
-                    contractAddress=transaction['to'],
+                    operatorAddress=operatorAddress,
+                    contractAddress=contractAddress,
                     amount=retrievedEvent.amount,
                     value=retrievedEvent.wethValue or 0,
                     gasLimit=transaction['gas'],
