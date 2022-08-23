@@ -87,7 +87,7 @@ class BlockProcessor:
         erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
         for event in erc721events:
             retrievedEvents += await self._process_erc721_single_event(event=dict(event))
-            retrievedWethValues += await self.process_weth_value(event=dict(event))
+            # retrievedWethValues += await self.process_seaport_weth_value(event=dict(event))
         erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
         erc1155RetrievedEvents: List[RetrievedEvent] = []
         for event in erc1155events:
@@ -100,9 +100,9 @@ class BlockProcessor:
         retrievedEvents += await self._merge_erc1155_retrieved_events(erc1155RetrievedEvents=erc1155RetrievedEvents)
         transactionHashEventMap = defaultdict(list)
         for retrievedEvent in retrievedEvents:
-            for transactionHash, receiverAddress, wethValue in retrievedWethValues:
-                if retrievedEvent.transactionHash == transactionHash and retrievedEvent.fromAddress == receiverAddress:
-                    retrievedEvent.wethValue = wethValue
+            # for transactionHash, receiverAddress, wethValue in retrievedWethValues:
+            #     if retrievedEvent.transactionHash == transactionHash and retrievedEvent.fromAddress == receiverAddress:
+            #         retrievedEvent.wethValue = wethValue
             transactionHashEventMap[retrievedEvent.transactionHash].append(retrievedEvent)
         return transactionHashEventMap
 
@@ -192,13 +192,16 @@ class BlockProcessor:
         retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, wethValue=None, amount=1, tokenId=tokenId, tokenType='erc721')]
         return retrievedEvents
     
-    async def process_weth_value(self, event: LogReceipt):
-        transactionHash = event['transactionHash'].hex()
-        wethTransactionTuple =[]
-        if len(event['topics']) < 4:
-            wethValue = literal_eval(event['data'])
-            receiverAddress = chain_util.normalize_address(event["topics"][2].hex())
-            wethTransactionTuple = [(transactionHash, receiverAddress, wethValue)]
+    async def process_seaport_weth_value(self, transaction: TxData):
+        wethTransactionTuple = []
+        transactionHash = transaction['hash'].hex()
+        ethTransactionReceipt = await (self.get_transaction_receipt(transactionHash=transactionHash))
+        events = ethTransactionReceipt['logs']
+        for event in events:
+            if len(event['topics']) == 3:
+                wethValue = literal_eval(event['data'])
+                receiverAddress = chain_util.normalize_address(event["topics"][2].hex())
+                wethTransactionTuple += [(receiverAddress, wethValue)]
         return wethTransactionTuple
         
 
@@ -209,6 +212,8 @@ class BlockProcessor:
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             contractAddress = ethTransactionReceipt['contractAddress']
         contractAddress = chain_util.normalize_address(value=contractAddress)
+        if contractAddress == '0x00000000006c3852cbEf3e08E8dF289169EdE581':
+            retrievedWethValues = await self.process_seaport_weth_value(transaction=transaction)
         transactionFromAddress = chain_util.normalize_address(value=transaction['from'])
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
@@ -218,6 +223,9 @@ class BlockProcessor:
         isMultiAddress = len(registryAddresses) > 1
         tokenKeySeenCounts: Dict[Tuple(str, str), int] = defaultdict(int)
         for retrievedEvent in retrievedEvents:
+            for receiverAddress, wethValue in retrievedWethValues:
+                if retrievedEvent.fromAddress == receiverAddress:
+                    retrievedEvent.wethValue = wethValue
             tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
             tokenKeyCount = tokenKeyCounts[tokenKey]
             tokenKeySeenCounts[tokenKey] += 1
