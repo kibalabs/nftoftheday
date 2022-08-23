@@ -21,11 +21,9 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
     database = Database(connectionString=databaseConnectionString)
     dataColumns =['start', 'end', 'badOperatorCount', 'badContractCount']
     await database.connect()
-    with open('un_normalize_blocks.csv', mode='w') as un_normalize_blocks:
+    with open('un-normalizedBlocks.csv', mode='w') as blocksCsvFile:
         currentBlockNumber = startBlockNumber
-        employee_writer = csv.writer(un_normalize_blocks, delimiter=',')
-        writer = csv.DictWriter(un_normalize_blocks, fieldnames=dataColumns)
-        employee_writer
+        writer = csv.DictWriter(blocksCsvFile, fieldnames=dataColumns)
         while currentBlockNumber < endBlockNumber:
             badOperatorCount = 0
             badContractCount = 0
