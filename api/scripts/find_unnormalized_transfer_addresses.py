@@ -3,6 +3,7 @@ import os
 import sys
 
 import csv
+from typing import Optional
 import asyncclick as click
 from core import logging
 from core.store.database import Database
@@ -15,13 +16,15 @@ from notd.store.schema import TokenTransfersTable
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlockNumber', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
+@click.option('-o', '--output-filename', 'outputFilename', required=False, type=str)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
-async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int):
+async def find_unnormalized_transfer_addresses(startBlockNumber: int, endBlockNumber: int, outputFilename: Optional[str], batchSize: int):
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     dataColumns =['start', 'end', 'badOperatorCount', 'badContractCount']
     await database.connect()
-    with open('un-normalizedBlocks.csv', mode='w') as blocksCsvFile:
+    outputFilename = outputFilename or 'unnormalizedBlocks.csv'
+    with open(outputFilename, mode='w') as blocksCsvFile:
         currentBlockNumber = startBlockNumber
         writer = csv.DictWriter(blocksCsvFile, fieldnames=dataColumns)
         while currentBlockNumber < endBlockNumber:
@@ -48,4 +51,4 @@ async def fix_address(startBlockNumber: int, endBlockNumber: int, batchSize: int
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(fix_address())
+    asyncio.run(find_unnormalized_transfer_addresses())
