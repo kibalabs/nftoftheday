@@ -199,6 +199,18 @@ class BlockProcessor:
                 wethTransactionTuple += [(receiverAddress, wethValue)]
         return wethTransactionTuple
 
+    async def process_wyvern2_weth_value(self, transaction: TxData):
+        wethTransactionTuple = []
+        transactionHash = transaction['hash'].hex()
+        ethTransactionReceipt = await (self.get_transaction_receipt(transactionHash=transactionHash))
+        events = ethTransactionReceipt['logs']
+        for event in events:
+            if len(event['topics']) == 3:
+                wethValue = literal_eval(event['data'])
+                receiverAddress = chain_util.normalize_address(event["topics"][2].hex())
+                wethTransactionTuple += [(receiverAddress, wethValue)]
+        return wethTransactionTuple
+
     async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent]) -> List[RetrievedTokenTransfer]:
         contractAddress = transaction['to']
         if not contractAddress:
@@ -209,6 +221,8 @@ class BlockProcessor:
         retrievedWethValues = None
         if contractAddress == '0x00000000006c3852cbEf3e08E8dF289169EdE581':
             retrievedWethValues = await self.process_seaport_weth_value(transaction=transaction)
+        if contractAddress == '0x7f268357A8c2552623316e2562D90e642bB538E5':
+            retrievedWethValues = await self.process_wyvern2_weth_value(transaction=transaction)
         transactionFromAddress = chain_util.normalize_address(value=transaction['from'])
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
