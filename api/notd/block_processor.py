@@ -1,4 +1,3 @@
-from ast import literal_eval
 import dataclasses
 import datetime
 import json
@@ -188,16 +187,16 @@ class BlockProcessor:
         return retrievedEvents
 
     async def process_seaport_weth_value(self, transaction: TxData):
-        wethTransactionTuple = []
+        wethTransactionTuples = []
         transactionHash = transaction['hash'].hex()
         ethTransactionReceipt = await (self.get_transaction_receipt(transactionHash=transactionHash))
         events = ethTransactionReceipt['logs']
         for event in events:
             if len(event['topics']) == 3:
-                wethValue = literal_eval(event['data'])
+                wethValue = int(f'{event["data"]}',16)
                 receiverAddress = chain_util.normalize_address(event["topics"][2].hex())
-                wethTransactionTuple += [(receiverAddress, wethValue)]
-        return wethTransactionTuple
+                wethTransactionTuples += [(receiverAddress, wethValue)]
+        return wethTransactionTuples
 
     async def process_wyvern2_weth_value(self, transaction: TxData):
         wethTransactionTuple = []
@@ -206,7 +205,7 @@ class BlockProcessor:
         events = ethTransactionReceipt['logs']
         for event in events:
             if len(event['topics']) == 3:
-                wethValue = literal_eval(event['data'])
+                wethValue = int(f'{event["data"]}',16)
                 receiverAddress = chain_util.normalize_address(event["topics"][2].hex())
                 wethTransactionTuple += [(receiverAddress, wethValue)]
         return wethTransactionTuple
