@@ -192,15 +192,7 @@ class BlockProcessor:
             # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             contractAddress = ethTransactionReceipt['contractAddress']
-        if contractAddress == '0x00000000006c3852cbEf3e08E8dF289169EdE581':
-            #NOTE(Femi-Ogunkola): WETH are erc721 events with 3 topics(from, to, wad)
-            ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
-            ethTransactionLogs = ethTransactionReceipt['logs']
-            for log in ethTransactionLogs:
-                if len(log['topics']) == 3:
-                    toAddress = chain_util.normalize_address(log['topics'][2].hex())
-                    transactionWethValues[toAddress] = int(log["data"], 16)
-        if contractAddress == '0x7f268357A8c2552623316e2562D90e642bB538E5':
+        if contractAddress in ('0x00000000006c3852cbEf3e08E8dF289169EdE581', "0x7f268357A8c2552623316e2562D90e642bB538E5", "0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b"):
             #NOTE(Femi-Ogunkola): WETH are erc721 events with 3 topics(from, to, wad)
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             ethTransactionLogs = ethTransactionReceipt['logs']
@@ -234,7 +226,7 @@ class BlockProcessor:
                     operatorAddress=operatorAddress,
                     contractAddress=contractAddress,
                     amount=retrievedEvent.amount,
-                    value=transactionWethValues[retrievedEvent.fromAddress] or 0 if not isMultiAddress else 0,
+                    value=0,
                     gasLimit=transaction['gas'],
                     gasPrice=transaction['gasPrice'],
                     blockNumber=transaction['blockNumber'],
@@ -260,12 +252,12 @@ class BlockProcessor:
         for retrievedTokenTransfer in retrievedTokenTransfers:
             retrievedTokenTransfer.isSwap = isSwap
         # Only calculate value for remaining
-        wethBatchValue = {retrievedTokenTransfer.value for retrievedTokenTransfer in retrievedTokenTransfers if retrievedTokenTransfer.value != 0}
-        if len(wethBatchValue) == 1  and isBatch:
-            wethBatchValue = list(wethBatchValue)[0]
+        wethTransactionValue = {transactionWethValues[retrievedTokenTransfer.fromAddress] for retrievedTokenTransfer in retrievedTokenTransfers}
+        if len(wethTransactionValue) > 0 and not isMultiAddress:
+            wethTransactionValue = list(wethTransactionValue)[0]
             valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap]
             for retrievedTokenTransfer in valuedTransfers:
-                retrievedTokenTransfer.value = int(wethBatchValue / len(valuedTransfers))
+                retrievedTokenTransfer.value = int(wethTransactionValue / len(valuedTransfers))
         if transaction['value'] > 0 and not isMultiAddress:
             valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap and not isOutbound]
             for retrievedTokenTransfer in valuedTransfers:
