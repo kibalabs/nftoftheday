@@ -85,6 +85,7 @@ class GalleryManager:
                 .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .where(TokenMetadatasTable.c.tokenId == tokenId)
+                .order_by(sqlalchemy.func.coalesce(LatestTokenListingsTable.c.value, 0).asc())
         )
         result = await self.retriever.database.execute(query=query)
         row = result.first()
