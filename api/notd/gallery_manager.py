@@ -85,6 +85,7 @@ class GalleryManager:
                 .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .where(TokenMetadatasTable.c.tokenId == tokenId)
+                .order_by(sqlalchemy.func.coalesce(LatestTokenListingsTable.c.value, 0).asc())
         )
         result = await self.retriever.database.execute(query=query)
         row = result.first()
@@ -131,24 +132,39 @@ class GalleryManager:
 
     async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None) -> Sequence[GalleryToken]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
+        usesListings = isListed or minPrice or maxPrice
+        orderedListingsQuery = (
+            sqlalchemy.select(
+                LatestTokenListingsTable,
+                sqlalchemy.func.row_number().over(
+                    partition_by=sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress, LatestTokenListingsTable.c.tokenId),
+                    order_by=LatestTokenListingsTable.c.value.asc()
+                ).label('tokenListingIndex'),
+            )
+            .where(LatestTokenListingsTable.c.endDate >= datetime.datetime.now())
+        ).subquery()
+        lowestListingsQuery = (
+            sqlalchemy.select(orderedListingsQuery)
+            .where(orderedListingsQuery.c.tokenListingIndex == 1)
+        ).subquery()
+        listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
         # TODO(krishan711): this shouldn't join on single ownerships for erc1155
         query = (
-            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
+            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
                 .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                 .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
+                .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
                 .limit(limit)
                 .offset(offset)
         )
-        usesListings = isListed or minPrice or maxPrice
         if usesListings:
-            query = query.where(LatestTokenListingsTable.c.latestTokenListingId.is_not(None))
+            query = query.where(listingsQuery.c.latestTokenListingId.is_not(None))
         if minPrice:
-            query = query.where(LatestTokenListingsTable.c.value >= sqlalchemy.func.cast(minPrice, sqlalchemy.Numeric(precision=256, scale=0)))
+            query = query.where(listingsQuery.c.value >= sqlalchemy.func.cast(minPrice, sqlalchemy.Numeric(precision=256, scale=0)))
         if maxPrice:
-            query = query.where(LatestTokenListingsTable.c.value <= sqlalchemy.func.cast(maxPrice, sqlalchemy.Numeric(precision=256, scale=0)))
+            query = query.where(listingsQuery.c.value <= sqlalchemy.func.cast(maxPrice, sqlalchemy.Numeric(precision=256, scale=0)))
         if ownerAddress:
             query = query.where(TokenOwnershipsTable.c.ownerAddress == ownerAddress)
         if tokenIdIn:
@@ -164,7 +180,11 @@ class GalleryManager:
         result = await self.retriever.database.execute(query=query)
         galleryTokens = []
         for row in result:
-            galleryTokens.append(GalleryToken(tokenMetadata=token_metadata_from_row(row), tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None, tokenListing=token_listing_from_row(row) if row[LatestTokenListingsTable.c.latestTokenListingId] else None))
+            galleryTokens.append(GalleryToken(
+                tokenMetadata=token_metadata_from_row(row),
+                tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
+                tokenListing=token_listing_from_row(row, listingsQuery) if row[listingsQuery.c.latestTokenListingId] else None,
+            ))
         return galleryTokens
 
     async def submit_treasure_hunt_for_collection_token(self, registryAddress: str, tokenId: str, userAddress: str, signature: str) -> None:
