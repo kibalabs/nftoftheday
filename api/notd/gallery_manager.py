@@ -70,6 +70,7 @@ class GalleryManager:
         self.web3 = Web3()
 
     async def twitter_login(self, account: str, signatureJson: str, initialUrl: str) -> None:
+        # TODO(krishan711): validate the signatureJson
         signature = Signature.from_dict(signatureDict=json.loads(urlparse.unquote(signatureJson)))
         await self.twitterManager.login(account=account, signature=signature, initialUrl=initialUrl)
 
@@ -260,9 +261,9 @@ class GalleryManager:
         elif order == 'TOKENCOUNT_ASC':
             usersQuery = usersQuery.order_by(ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
         elif order == 'FOLLOWERCOUNT_DESC':
-            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.desc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(sqlalchemy.func.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())
         elif order == 'FOLLOWERCOUNT_ASC':
-            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.asc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(sqlalchemy.func.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())
         # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
         elif order == 'JOINDATE_DESC':
             usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.asc(), ownedCountColumn.desc())
@@ -302,3 +303,13 @@ class GalleryManager:
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=totalCount)
+
+    async def follow_gallery_user(self, registryAddress: str, userAddress: str, account: str, signatureMessage: str, signature: str) -> None:  # pylint: disable=unused-argument
+        # TODO(krishan711): validate signature
+        accountProfile = await self.retriever.get_user_profile_by_address(address=account)
+        if not accountProfile.twitterId:
+            raise BadRequestException('NO_TWITTER_ID')
+        userProfile = await self.retriever.get_user_profile_by_address(address=userAddress)
+        if not userProfile.twitterId:
+            raise BadRequestException('NO_TWITTER_ID')
+        await self.twitterManager.follow_user_from_user(userTwitterId=accountProfile.twitterId, targetTwitterId=userProfile.twitterId)

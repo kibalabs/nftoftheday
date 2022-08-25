@@ -247,6 +247,14 @@ class GetGalleryCollectionUserRequest(BaseModel):
 class GetGalleryCollectionUserResponse(BaseModel):
     galleryUser: ApiGalleryUser
 
+class FollowCollectionUserRequest(BaseModel):
+    account: str
+    signatureMessage: str
+    signature: str
+
+class FollowCollectionUserResponse(BaseModel):
+    pass
+
 ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
 
 class ApiListResponse(GenericModel, Generic[ApiListResponseItemType]):
