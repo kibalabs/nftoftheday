@@ -3,7 +3,7 @@ import datetime
 import json
 import textwrap
 from collections import defaultdict
-from typing import Dict, Optional
+from typing import Dict
 from typing import List
 from typing import Tuple
 
@@ -30,7 +30,6 @@ class RetrievedEvent:
     tokenId: str
     amount: int
     tokenType: str
-    wethValue: Optional[int]
 
 
 class BlockProcessor:
@@ -126,7 +125,7 @@ class BlockProcessor:
         data = [int(f'0x{elem}', 16) for elem in data]
         tokenId = data[0]
         amount = data[1]
-        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, wethValue=None, tokenType='erc1155single')]
+        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155single')]
         return retrievedEvents
 
     async def _merge_erc1155_retrieved_events(self, erc1155RetrievedEvents: List[RetrievedEvent]) -> List[RetrievedEvent]:
@@ -157,7 +156,7 @@ class BlockProcessor:
         lengthOfValue = data[3+lengthOfArray]
         amounts = data[4+lengthOfArray:4+lengthOfArray+lengthOfValue]
         dataDict = {tokenIds[i]: amounts[i] for i in range(len(tokenIds))}
-        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount, wethValue=None, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
+        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
         return retrievedEvents
 
     async def _process_erc721_single_event(self, event: LogReceipt) -> List[RetrievedTokenTransfer]:
@@ -183,32 +182,8 @@ class BlockProcessor:
         fromAddress = chain_util.normalize_address(event['topics'][1].hex())
         toAddress = chain_util.normalize_address(event['topics'][2].hex())
         tokenId = int.from_bytes(bytes(event['topics'][3]), 'big')
-        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, wethValue=None, amount=1, tokenId=tokenId, tokenType='erc721')]
+        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, amount=1, tokenId=tokenId, tokenType='erc721')]
         return retrievedEvents
-
-    async def process_seaport_weth_value(self, transaction: TxData):
-        wethTransactionTuples = []
-        transactionHash = transaction['hash'].hex()
-        ethTransactionReceipt = await (self.get_transaction_receipt(transactionHash=transactionHash))
-        events = ethTransactionReceipt['logs']
-        for event in events:
-            if len(event['topics']) == 3:
-                wethValue = int(f'{event["data"]}',16)
-                receiverAddress = chain_util.normalize_address(event["topics"][2].hex())
-                wethTransactionTuples += [(receiverAddress, wethValue)]
-        return wethTransactionTuples
-
-    async def process_wyvern2_weth_value(self, transaction: TxData):
-        wethTransactionTuple = []
-        transactionHash = transaction['hash'].hex()
-        ethTransactionReceipt = await (self.get_transaction_receipt(transactionHash=transactionHash))
-        events = ethTransactionReceipt['logs']
-        for event in events:
-            if len(event['topics']) == 3:
-                wethValue = int(f'{event["data"]}',16)
-                receiverAddress = chain_util.normalize_address(event["topics"][2].hex())
-                wethTransactionTuple += [(receiverAddress, wethValue)]
-        return wethTransactionTuple
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent]) -> List[RetrievedTokenTransfer]:
         contractAddress = transaction['to']
@@ -217,11 +192,6 @@ class BlockProcessor:
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             contractAddress = ethTransactionReceipt['contractAddress']
         contractAddress = chain_util.normalize_address(value=contractAddress)
-        retrievedWethValues = None
-        if contractAddress == '0x00000000006c3852cbEf3e08E8dF289169EdE581':
-            retrievedWethValues = await self.process_seaport_weth_value(transaction=transaction)
-        if contractAddress == '0x7f268357A8c2552623316e2562D90e642bB538E5':
-            retrievedWethValues = await self.process_wyvern2_weth_value(transaction=transaction)
         transactionFromAddress = chain_util.normalize_address(value=transaction['from'])
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
@@ -231,10 +201,6 @@ class BlockProcessor:
         isMultiAddress = len(registryAddresses) > 1
         tokenKeySeenCounts: Dict[Tuple(str, str), int] = defaultdict(int)
         for retrievedEvent in retrievedEvents:
-            if retrievedWethValues:
-                for receiverAddress, wethValue in retrievedWethValues:
-                    if retrievedEvent.fromAddress == receiverAddress:
-                        retrievedEvent.wethValue = wethValue
             tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
             tokenKeyCount = tokenKeyCounts[tokenKey]
             tokenKeySeenCounts[tokenKey] += 1
@@ -251,7 +217,7 @@ class BlockProcessor:
                     operatorAddress=operatorAddress,
                     contractAddress=contractAddress,
                     amount=retrievedEvent.amount,
-                    value=retrievedEvent.wethValue or 0,
+                    value=0,
                     gasLimit=transaction['gas'],
                     gasPrice=transaction['gasPrice'],
                     blockNumber=transaction['blockNumber'],
