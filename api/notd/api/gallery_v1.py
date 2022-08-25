@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter
 
-from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
+from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest, FollowCollectionUserRequest, FollowCollectionUserResponse
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
 from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
@@ -78,5 +78,10 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserResponse:
         galleryUser = await galleryManager.get_gallery_user(registryAddress=registryAddress, userAddress=userAddress)
         return GetGalleryCollectionUserResponse(galleryUser=(await responseBuilder.gallery_user_from_model(galleryUser=galleryUser)))
+
+    @router.post('/collections/{registryAddress}/users/{userAddress}/follow')
+    async def follow_gallery_user(registryAddress: str, userAddress: str, request: FollowCollectionUserRequest) -> FollowCollectionUserResponse:
+        await galleryManager.follow_gallery_user(registryAddress=registryAddress, userAddress=userAddress, account=request.account, signatureMessage=request.signatureMessage, signature=request.signature)
+        return FollowCollectionUserResponse()
 
     return router
