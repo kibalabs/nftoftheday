@@ -304,7 +304,7 @@ class GalleryManager:
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=totalCount)
 
-    async def follow_gallery_user(self, registryAddress: str, userAddress: str, account: str, signatureMessage: str, signature: str) -> None:
+    async def follow_gallery_user(self, registryAddress: str, userAddress: str, account: str, signatureMessage: str, signature: str) -> None:  # pylint: disable=unused-argument
         # TODO(krishan711): validate signature
         accountProfile = await self.retriever.get_user_profile_by_address(address=account)
         if not accountProfile.twitterId:
