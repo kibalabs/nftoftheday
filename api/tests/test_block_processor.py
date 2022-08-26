@@ -549,10 +549,10 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_seaport_single_erc721_wrapped_eth(self):
+    async def test_seaport_single_erc721_wrapped_eth_bid_accpeted(self):
         result = await self._process_block_transaction(blockNumber=15340935, transactionHash='0x62a77746c3da10e64a1040d40922bdedc5b246e6603408a027a33c2918e1d2f3')
         expected = [
-            RetrievedTokenTransfer(transactionHash='0x62a77746c3da10e64a1040d40922bdedc5b246e6603408a027a33c2918e1d2f3', registryAddress='0x209e639a0EC166Ac7a1A4bA41968fa967dB30221', tokenId='2994', fromAddress='0x53F1F693dc89d0112Cc3005852806D6Db7D5b59B', toAddress='0xC586CDAd3B043c50f10DFb4fd95139430Cb69716', operatorAddress='0xC586CDAd3B043c50f10DFb4fd95139430Cb69716', contractAddress='0x00000000006c3852cbEf3e08E8dF289169EdE581', amount=1, value=40725000000000000, gasLimit=191555, gasPrice=26639461196, blockNumber=15340935, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
+            RetrievedTokenTransfer(transactionHash='0x62a77746c3da10e64a1040d40922bdedc5b246e6603408a027a33c2918e1d2f3', registryAddress='0x209e639a0EC166Ac7a1A4bA41968fa967dB30221', tokenId='2994', fromAddress='0x53F1F693dc89d0112Cc3005852806D6Db7D5b59B', toAddress='0xC586CDAd3B043c50f10DFb4fd95139430Cb69716', operatorAddress='0xC586CDAd3B043c50f10DFb4fd95139430Cb69716', contractAddress='0x00000000006c3852cbEf3e08E8dF289169EdE581', amount=1, value=45000000000000000, gasLimit=191555, gasPrice=26639461196, blockNumber=15340935, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
         ]
         self.assertEqual(result, expected)
 
@@ -647,7 +647,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
             RetrievedTokenTransfer(transactionHash='0x2f04743be234acf0ea5930d2c368039bf7bb7e242594dca8e76d7cd74d80f337', registryAddress='0xDc31e48b66A1364BFea922bfc2972AB5C286F9fe', tokenId='1421', fromAddress='0x81aA6141923Ea42fCAa763d9857418224d9b025a', toAddress='0x2466997b691e9AB01477E8058F51c77011Ca1A7F', operatorAddress='0x81aA6141923Ea42fCAa763d9857418224d9b025a', contractAddress='0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b', amount=1, value=77777777777777776, gasLimit=1215511, gasPrice=127000000000, blockNumber=12115009, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=True)
         ]
         self.assertEqual(result, expected)
-
+    #TODO(Femi-Ogunkola): Should be Not interstial and isBatch
     async def test_wyvern1_is_interstitial_wrapped_eth(self):
         result = await self._process_block_transaction(blockNumber=12130564, transactionHash='0xabb39f0c44a72f9b1797e1dc4309139033b9eb7971f2aad911fad09bb6a655fd')
         expected = [
@@ -664,6 +664,8 @@ class TestProcessTransaction(BlockProcessorTestCase):
             RetrievedTokenTransfer(transactionHash='0xf63b564e0c9876183aa669bbab8fe15018ca445ead9449f50c03295c253252a2', registryAddress='0x6b47E7066C7db71Aa04A1D5872496fe05C4C331f', tokenId='257', fromAddress='0xaeBfd95F6d4DeA633487F4A17f4F866ad6B6AFCE', toAddress='0x6005cdca3E6AeF6aa9FF5a6301B09c770AA55783', operatorAddress='0x6005cdca3E6AeF6aa9FF5a6301B09c770AA55783', contractAddress='0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b', amount=1, value=0, gasLimit=582054, gasPrice=110000000000, blockNumber=12086797, tokenType='erc721', isMultiAddress=True, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
         ]
         self.assertEqual(result, expected)
+
+    # https://etherscan.io/tx/0x8a9fc226dd57aa5453aa4802e11beab3b0758da6e13efa0c11514e05f7933241
 
 if __name__ == '__main__':
    unittest.main()

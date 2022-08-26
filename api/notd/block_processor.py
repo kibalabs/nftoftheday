@@ -192,8 +192,9 @@ class BlockProcessor:
             # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             contractAddress = ethTransactionReceipt['contractAddress']
+        # NOTE(Femi-Ogunkola): The 3 opensea contracts seaport, wyvern2, wyvern1
+        # NOTE(Femi-Ogunkola): Limit to just weth
         if contractAddress in ('0x00000000006c3852cbEf3e08E8dF289169EdE581', "0x7f268357A8c2552623316e2562D90e642bB538E5", "0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b"):
-            #NOTE(Femi-Ogunkola): WETH are erc721 events with 3 topics(from, to, wad)
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             ethTransactionLogs = ethTransactionReceipt['logs']
             for log in ethTransactionLogs:
