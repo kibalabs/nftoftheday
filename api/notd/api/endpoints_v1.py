@@ -129,6 +129,12 @@ class GetCollectionRecentSalesRequest(BaseModel):
 class GetCollectionRecentSalesResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
 
+class GetCollectionRecentTransfersRequest(BaseModel):
+    pass
+
+class GetCollectionRecentTransfersResponse(BaseModel):
+    tokenTransfers: List[ApiTokenTransfer]
+
 class GetCollectionTokenRequest(BaseModel):
     pass
 

@@ -261,7 +261,7 @@ class GalleryManager:
             userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
             twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
             ownedTokenCount=userRow['ownedTokenCount'] if userRow else 0,
-            joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
+            joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate] if userRow else None,
         )
         return galleryUser
 

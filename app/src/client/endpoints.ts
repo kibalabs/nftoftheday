@@ -275,7 +275,6 @@ export class GetTokenRecentTransfersRequest extends RequestData {
   readonly limit?: number;
   readonly offset?: number;
 
-
   constructor(limit?: number, offset?: number) {
     super();
     this.limit = limit;
