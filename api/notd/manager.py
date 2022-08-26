@@ -171,6 +171,22 @@ class NotdManager:
         )
         return tokenTransfers
 
+    async def get_collection_recent_transfers(self, registryAddress: str, limit: int, offset: int, userAddress: Optional[str] = None) -> List[TokenTransfer]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
+        tokenTransfersQuery = (
+            sqlalchemy.select(TokenTransfersTable, BlocksTable)
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(TokenTransfersTable.c.registryAddress == registryAddress)
+            .order_by(TokenTransfersTable.c.blockNumber.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        if userAddress:
+            tokenTransfersQuery = tokenTransfersQuery.where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+        result = await self.retriever.database.execute(query=tokenTransfersQuery)
+        tokenTransfers = [token_transfer_from_row(row) for row in result]
+        return tokenTransfers
+
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
         address = chain_util.normalize_address(value=address)
         startDate = date_util.start_of_day()
