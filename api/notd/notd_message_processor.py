@@ -103,4 +103,5 @@ class NotdMessageProcessor(MessageProcessor):
                 return
             messageContent = UpdateListingsForCollection.parse_obj(message.content)
             await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
+            return
         raise KibaException(message='Message was unhandled')
