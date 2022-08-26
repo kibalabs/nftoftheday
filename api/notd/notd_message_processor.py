@@ -98,10 +98,9 @@ class NotdMessageProcessor(MessageProcessor):
             await self.notdManager.update_latest_listings_for_all_collections()
             return
         if message.command == UpdateListingsForCollection.get_command():
-            # if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
-            #     logging.info(f'Skipping {message.command} from more than 60 minutes ago')
-            #     return
-            # messageContent = UpdateListingsForCollection.parse_obj(message.content)
-            # await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
-            return
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
+                logging.info(f'Skipping {message.command} from more than 60 minutes ago')
+                return
+            messageContent = UpdateListingsForCollection.parse_obj(message.content)
+            await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
         raise KibaException(message='Message was unhandled')

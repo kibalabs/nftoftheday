@@ -7,12 +7,12 @@ import time
 import asyncclick as click
 from core import logging
 from core.aws_requester import AwsRequester
+from core.http.basic_authentication import BasicAuthentication
 from core.requester import Requester
 from core.slack_client import SlackClient
 from core.store.database import Database
 from core.util import list_util
 from core.web3.eth_client import RestEthClient
-from core.http.basic_authentication import BasicAuthentication
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor

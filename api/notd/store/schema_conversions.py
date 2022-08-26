@@ -1,4 +1,6 @@
-from typing import Any, Mapping, Optional
+from typing import Any
+from typing import Mapping
+from typing import Optional
 
 from notd.model import Block
 from notd.model import Collection
