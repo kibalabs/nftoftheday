@@ -55,7 +55,8 @@ class BlockProcessor:
         self.ierc721TransferEvent = self.ierc721Contract.events.Transfer()
         # TODO(krishan711): use the contract to get the signature hash instead of doing manually
         # self.contractFilter = self.ierc721Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
-        self.erc721TansferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
+        self.erc721TransferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
+        self.erc20TransferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
 
         with open('./contracts/IERC1155.json') as contractJsonFile:
             contractJson = json.load(contractJsonFile)
@@ -63,7 +64,7 @@ class BlockProcessor:
         self.ierc1155TransferEvent = self.ierc1155Contract.events.TransferSingle()
         # TODO(krishan711): use the contract to get the signature hash instead of doing manually
         # self.contractFilter = self.ierc1155Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
-        self.erc1155TansferEventSignatureHash = Web3.keccak(text='TransferSingle(address,address,address,uint256,uint256)').hex()
+        self.erc1155TransferEventSignatureHash = Web3.keccak(text='TransferSingle(address,address,address,uint256,uint256)').hex()
 
         with open('./contracts/IERC1155.json') as contractJsonFile:
             contractJson = json.load(contractJsonFile)
@@ -71,7 +72,7 @@ class BlockProcessor:
         self.ierc1155TransferEvent = self.ierc1155Contract.events.TransferBatch()
         # TODO(krishan711): use the contract to get the signature hash instead of doing manually
         # self.contractFilter = self.ierc1155Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
-        self.erc1155TansferBatchEventSignatureHash = Web3.keccak(text='TransferBatch(address,address,address,uint256[],uint256[])').hex()
+        self.erc1155TransferBatchEventSignatureHash = Web3.keccak(text='TransferBatch(address,address,address,uint256[],uint256[])').hex()
 
     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
         return await self.ethClient.get_transaction_receipt(transactionHash=transactionHash)
@@ -81,35 +82,52 @@ class BlockProcessor:
 
     async def _get_retrieved_events(self, blockNumber: int) -> Dict[str, List[RetrievedEvent]]:
         retrievedEvents: List[RetrievedEvent] = []
-        erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TansferEventSignatureHash])
+        transactionWethValues = []
+        erc20events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc20TransferEventSignatureHash])
+        for event in erc20events:
+            transactionWethValues.append(await self._process_erc20_event(event=dict(event)))
+        erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TransferEventSignatureHash])
         for event in erc721events:
             retrievedEvents += await self._process_erc721_single_event(event=dict(event))
-        erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferEventSignatureHash])
+        erc1155events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TransferEventSignatureHash])
         erc1155RetrievedEvents: List[RetrievedEvent] = []
         for event in erc1155events:
             erc1155RetrievedEvents += await self._process_erc1155_single_event(event=dict(event))
-        erc1155BatchEvents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TansferBatchEventSignatureHash])
+        erc1155BatchEvents = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc1155TransferBatchEventSignatureHash])
         for event in erc1155BatchEvents:
             erc1155RetrievedEvents += await self._process_erc1155_batch_event(event=dict(event))
         logging.info(f'Found {len(erc721events)} erc721, {len(erc1155events)} erc1155Single, {len(erc1155BatchEvents)} erc1155Batch events in block #{blockNumber}')
         # NOTE(krishan711): these need to be merged because of floor seeps e.g. https://etherscan.io/tx/0x88affc90581254ca2ceb04cefac281c4e704d457999c6a7135072a92a7befc8b
         retrievedEvents += await self._merge_erc1155_retrieved_events(erc1155RetrievedEvents=erc1155RetrievedEvents)
+        transactionWethValuesMap = defaultdict(int)
+        transactionWethValues= [elem for elem in transactionWethValues if len(elem)>0]
+        for (transactionHash, toAddress, value) in transactionWethValues:
+            transactionWethValuesMap[transactionHash] += value
         transactionHashEventMap = defaultdict(list)
         for retrievedEvent in retrievedEvents:
             transactionHashEventMap[retrievedEvent.transactionHash].append(retrievedEvent)
-        return transactionHashEventMap
+        return transactionHashEventMap, transactionWethValuesMap
 
     async def process_block(self, blockNumber: int) -> ProcessedBlock:
         # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
         # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
-        transactionHashEventMap = await self._get_retrieved_events(blockNumber=blockNumber)
+        transactionHashEventMap, transactionWethValuesMap = await self._get_retrieved_events(blockNumber=blockNumber)
         retrievedTokenTransfers: List[RetrievedTokenTransfer] = []
         for transaction in blockData['transactions']:
-            retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()])
+            retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()], transactionWethValues=transactionWethValuesMap)
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
+
+    async def _process_erc20_event(self, event: LogReceipt) -> Dict[str,int]:
+        # NOTE(Femi-Ogunkola): Limit to just weth
+        if len(event['topics']) == 3:
+            transactionHash = event['transactionHash'].hex()
+            toAddress = chain_util.normalize_address(event['topics'][2].hex())
+            wethValue =  int(event["data"], 16)
+            return (transactionHash, toAddress, wethValue)
+        return []
 
     async def _process_erc1155_single_event(self, event: LogReceipt) -> List[RetrievedEvent]:
         transactionHash = event['transactionHash'].hex()
@@ -185,22 +203,12 @@ class BlockProcessor:
         retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, amount=1, tokenId=tokenId, tokenType='erc721')]
         return retrievedEvents
 
-    async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent]) -> List[RetrievedTokenTransfer]:
+    async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent], transactionWethValues: Dict[str,int]) -> List[RetrievedTokenTransfer]:
         contractAddress = transaction['to']
-        transactionWethValues: Dict[str, int] = defaultdict(int)
         if not contractAddress:
             # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             contractAddress = ethTransactionReceipt['contractAddress']
-        # NOTE(Femi-Ogunkola): The 3 opensea contracts seaport, wyvern2, wyvern1
-        # NOTE(Femi-Ogunkola): Limit to just weth
-        if contractAddress in ('0x00000000006c3852cbEf3e08E8dF289169EdE581', "0x7f268357A8c2552623316e2562D90e642bB538E5", "0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b"):
-            ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
-            ethTransactionLogs = ethTransactionReceipt['logs']
-            for log in ethTransactionLogs:
-                if len(log['topics']) == 3:
-                    toAddress = chain_util.normalize_address(log['topics'][2].hex())
-                    transactionWethValues[toAddress] = int(log["data"], 16)
         contractAddress = chain_util.normalize_address(value=contractAddress)
         transactionFromAddress = chain_util.normalize_address(value=transaction['from'])
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
@@ -253,14 +261,11 @@ class BlockProcessor:
         for retrievedTokenTransfer in retrievedTokenTransfers:
             retrievedTokenTransfer.isSwap = isSwap
         # Only calculate value for remaining
-        wethTransactionValue = {transactionWethValues[retrievedTokenTransfer.fromAddress] for retrievedTokenTransfer in retrievedTokenTransfers}
-        if len(wethTransactionValue) > 0 and not isMultiAddress:
-            wethTransactionValue = list(wethTransactionValue)[0]
-            valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap]
-            for retrievedTokenTransfer in valuedTransfers:
-                retrievedTokenTransfer.value = int(wethTransactionValue / len(valuedTransfers))
-        if transaction['value'] > 0 and not isMultiAddress:
+        # wethTransactionValue = {transactionWethValues[retrievedTokenTransfer.fromAddress] for retrievedTokenTransfer in retrievedTokenTransfers}
+        # print(wethTransactionValue)
+        transactionValues = 0 #{transaction['value'] > 0 : transaction['value'], len(wethTransactionValue) > 0: list(wethTransactionValue)[0]}.get(True)
+        if transactionValues and not isMultiAddress:
             valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap and not isOutbound]
             for retrievedTokenTransfer in valuedTransfers:
-                retrievedTokenTransfer.value = int(transaction['value'] / len(valuedTransfers))
+                retrievedTokenTransfer.value = int(transactionValues / len(valuedTransfers))
         return retrievedTokenTransfers
