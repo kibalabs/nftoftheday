@@ -647,7 +647,8 @@ class TestProcessTransaction(BlockProcessorTestCase):
             RetrievedTokenTransfer(transactionHash='0x2f04743be234acf0ea5930d2c368039bf7bb7e242594dca8e76d7cd74d80f337', registryAddress='0xDc31e48b66A1364BFea922bfc2972AB5C286F9fe', tokenId='1420', fromAddress='0x81aA6141923Ea42fCAa763d9857418224d9b025a', toAddress='0x2466997b691e9AB01477E8058F51c77011Ca1A7F', operatorAddress='0x81aA6141923Ea42fCAa763d9857418224d9b025a', contractAddress='0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b', amount=1, value=77777777777777776, gasLimit=1215511, gasPrice=127000000000, blockNumber=12115009, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=True),
             RetrievedTokenTransfer(transactionHash='0x2f04743be234acf0ea5930d2c368039bf7bb7e242594dca8e76d7cd74d80f337', registryAddress='0xDc31e48b66A1364BFea922bfc2972AB5C286F9fe', tokenId='1421', fromAddress='0x81aA6141923Ea42fCAa763d9857418224d9b025a', toAddress='0x2466997b691e9AB01477E8058F51c77011Ca1A7F', operatorAddress='0x81aA6141923Ea42fCAa763d9857418224d9b025a', contractAddress='0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b', amount=1, value=77777777777777776, gasLimit=1215511, gasPrice=127000000000, blockNumber=12115009, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=True, isOutbound=True)
         ]
-        # self.assertEqual(result, expected)
+        self.assertEqual(result, expected)
+
     #TODO(Femi-Ogunkola): Should be Not interstial and isBatch
     async def test_wyvern1_is_interstitial_wrapped_eth_bid_accepted(self):
         result = await self._process_block_transaction(blockNumber=12130564, transactionHash='0xabb39f0c44a72f9b1797e1dc4309139033b9eb7971f2aad911fad09bb6a655fd')
