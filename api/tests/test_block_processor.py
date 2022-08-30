@@ -24,8 +24,7 @@ async def _get_transaction(ethClient: EthClientInterface, blockNumber: int, tran
 
 async def get_transaction_retrieved_events(blockProcessor: BlockProcessor, blockNumber: int, transactionHash: str):
     transactionHashEventMap, transactionWethValues = await blockProcessor._get_retrieved_events(blockNumber=blockNumber)
-    print(transactionWethValues[transactionHash])
-    return transactionHashEventMap[transactionHash], transactionWethValues[transactionHash]
+    return transactionHashEventMap[transactionHash], transactionWethValues
 
 class KibaAsyncTestCase(IsolatedAsyncioTestCase):
 
