@@ -15,10 +15,12 @@ from web3.types import HexBytes
 from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
+from notd.model import OPENSEA_MARKET_PLACE
 
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 
+WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
 @dataclasses.dataclass
 class RetrievedEvent:
@@ -118,10 +120,10 @@ class BlockProcessor:
 
     async def _process_erc20_event(self, event: LogReceipt) -> Dict[str,int]:
         # NOTE(Femi-Ogunkola): Limit to just weth
-        if len(event['topics']) == 3 and event['address'] == '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2':
+        if len(event['topics']) == 3 and event['address'] == WRAPPED_ETHER_ADDRESS:
             transactionHash = event['transactionHash'].hex()
             toAddress = chain_util.normalize_address(event['topics'][1].hex())
-            wethValue =  int(event["data"], 16)
+            wethValue = int(event["data"], 16)
             return [{transactionHash: (toAddress, wethValue)}]
         return []
 
@@ -259,18 +261,18 @@ class BlockProcessor:
             retrievedTokenTransfer.isSwap = isSwap
         # Calculate transaction value for either weth or eth
         addressWethValues = [wethValues[transactionHash] for wethValues in transactionWethValues if transactionHash in wethValues]
-        transactionWethValue = 0
+        transactionHashWethValue = 0
         for address, wethValue in addressWethValues:
             if address in nonInterstitialToAddresses:
-                transactionWethValue += wethValue
+                transactionHashWethValue += wethValue
         transactionValues = 0
         if transaction['value'] > 0:
             transactionValues = transaction['value']
-        elif transactionWethValue > 0:
-            transactionValues = transactionWethValue
+        elif transactionHashWethValue > 0:
+            transactionValues = transactionHashWethValue
         # Only calculate value for remaining
         if transactionValues and not isMultiAddress:
-            if contractAddress in ('0x00000000006c3852cbEf3e08E8dF289169EdE581', "0x7f268357A8c2552623316e2562D90e642bB538E5", "0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b"):
+            if contractAddress in OPENSEA_MARKET_PLACE:
                 valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap]
                 for retrievedTokenTransfer in valuedTransfers:
                     retrievedTokenTransfer.value = int(transactionValues / len(valuedTransfers))
