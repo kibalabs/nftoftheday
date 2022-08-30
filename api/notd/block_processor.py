@@ -257,7 +257,7 @@ class BlockProcessor:
         isSwap = len(nonInterstitialFromAddresses.intersection(nonInterstitialToAddresses)) > 0
         for retrievedTokenTransfer in retrievedTokenTransfers:
             retrievedTokenTransfer.isSwap = isSwap
-        # Calculate transaction value for either weth or eth 
+        # Calculate transaction value for either weth or eth
         addressWethValues = [wethValues[transactionHash] for wethValues in transactionWethValues if transactionHash in wethValues]
         transactionWethValue = 0
         for address, wethValue in addressWethValues:
