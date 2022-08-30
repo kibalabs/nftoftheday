@@ -15,8 +15,8 @@ from web3.types import HexBytes
 from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
-from notd.model import OPENSEA_MARKET_PLACE
 
+from notd.model import OPENSEA_MARKET_PLACE
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 
@@ -84,10 +84,6 @@ class BlockProcessor:
 
     async def _get_retrieved_events(self, blockNumber: int) -> Dict[str, List[RetrievedEvent]]:
         retrievedEvents: List[RetrievedEvent] = []
-        transactionWethValues = []
-        erc20events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc20TransferEventSignatureHash])
-        for event in erc20events:
-            transactionWethValues += (await self._process_erc20_event(event=dict(event)))
         erc721events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc721TransferEventSignatureHash])
         for event in erc721events:
             retrievedEvents += await self._process_erc721_single_event(event=dict(event))
@@ -104,13 +100,21 @@ class BlockProcessor:
         transactionHashEventMap = defaultdict(list)
         for retrievedEvent in retrievedEvents:
             transactionHashEventMap[retrievedEvent.transactionHash].append(retrievedEvent)
-        return transactionHashEventMap, transactionWethValues
+        return transactionHashEventMap
+
+    async def _get_transaction_weth_values(self, blockNumber: int) -> List[Dict[str, Tuple(str,int)]]:
+        transactionWethValues = []
+        erc20events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc20TransferEventSignatureHash])
+        for event in erc20events:
+            transactionWethValues += await self._process_erc20_event(event=dict(event))
+        return transactionWethValues
 
     async def process_block(self, blockNumber: int) -> ProcessedBlock:
         # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
         # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
-        transactionHashEventMap, transactionWethValues = await self._get_retrieved_events(blockNumber=blockNumber)
+        transactionHashEventMap = await self._get_retrieved_events(blockNumber=blockNumber)
+        transactionWethValues = await self._get_transaction_weth_values(blockNumber=blockNumber)
         retrievedTokenTransfers: List[RetrievedTokenTransfer] = []
         for transaction in blockData['transactions']:
             retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()], transactionWethValues=transactionWethValues)
@@ -118,7 +122,7 @@ class BlockProcessor:
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
 
-    async def _process_erc20_event(self, event: LogReceipt) -> Dict[str,int]:
+    async def _process_erc20_event(self, event: LogReceipt) -> List[Dict[str, Tuple(str,int)]]:
         # NOTE(Femi-Ogunkola): Limit to just weth
         if len(event['topics']) == 3 and event['address'] == WRAPPED_ETHER_ADDRESS:
             transactionHash = event['transactionHash'].hex()
@@ -272,6 +276,7 @@ class BlockProcessor:
             transactionValues = transactionHashWethValue
         # Only calculate value for remaining
         if transactionValues and not isMultiAddress:
+            # If contractAddress is a opensea market place isOutbound is still a valued transfer
             if contractAddress in OPENSEA_MARKET_PLACE:
                 valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap]
                 for retrievedTokenTransfer in valuedTransfers:

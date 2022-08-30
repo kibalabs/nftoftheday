@@ -1,9 +1,9 @@
 import asyncio
+import csv
 import os
 import sys
-
-import csv
 from typing import Optional
+
 import asyncclick as click
 from core import logging
 from core.store.database import Database
