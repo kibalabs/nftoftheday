@@ -554,7 +554,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_seaport_single_erc721_wrapped_eth_bid_accpeted(self):
+    async def test_seaport_single_erc721_wrapped_eth_bid_accepted(self):
         result = await self._process_block_transaction(blockNumber=15340935, transactionHash='0x62a77746c3da10e64a1040d40922bdedc5b246e6603408a027a33c2918e1d2f3')
         expected = [
             RetrievedTokenTransfer(transactionHash='0x62a77746c3da10e64a1040d40922bdedc5b246e6603408a027a33c2918e1d2f3', registryAddress='0x209e639a0EC166Ac7a1A4bA41968fa967dB30221', tokenId='2994', fromAddress='0x53F1F693dc89d0112Cc3005852806D6Db7D5b59B', toAddress='0xC586CDAd3B043c50f10DFb4fd95139430Cb69716', operatorAddress='0xC586CDAd3B043c50f10DFb4fd95139430Cb69716', contractAddress='0x00000000006c3852cbEf3e08E8dF289169EdE581', amount=1, value=45000000000000000, gasLimit=191555, gasPrice=26639461196, blockNumber=15340935, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
@@ -612,7 +612,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    async def test_wyvern2_is_mulltiple_address(self):
+    async def test_wyvern2_is_multiple_address(self):
         result = await self._process_block_transaction(blockNumber=14273670, transactionHash='0xc45b2d3c442010560abadf176cfa4196d8fff9890e19b2e5dcc46793e227fa74')
         expected =[
             RetrievedTokenTransfer(transactionHash='0xc45b2d3c442010560abadf176cfa4196d8fff9890e19b2e5dcc46793e227fa74', registryAddress='0x60F80121C31A0d46B5279700f9DF786054aa5eE5', tokenId='1082887', fromAddress='0x461e76A4fE9f27605d4097A646837c32F1ccc31c', toAddress='0x8Ff1501365640E92b8F44Dc9077Fc070eF76970B', operatorAddress='0x461e76A4fE9f27605d4097A646837c32F1ccc31c', contractAddress='0x7f268357A8c2552623316e2562D90e642bB538E5', amount=1, value=0, gasLimit=1171345, gasPrice=41538481614, blockNumber=14273670, tokenType='erc721', isMultiAddress=True, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True),
