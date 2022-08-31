@@ -653,7 +653,6 @@ class TestProcessTransaction(BlockProcessorTestCase):
         ]
         self.assertEqual(result, expected)
 
-    #TODO(Femi-Ogunkola): Should be Not interstial and isBatch
     async def test_wyvern1_is_interstitial_wrapped_eth_bid_accepted(self):
         result = await self._process_block_transaction(blockNumber=12130564, transactionHash='0xabb39f0c44a72f9b1797e1dc4309139033b9eb7971f2aad911fad09bb6a655fd')
         expected = [
