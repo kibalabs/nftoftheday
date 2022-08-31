@@ -208,7 +208,7 @@ class BlockProcessor:
             contractAddress = ethTransactionReceipt['contractAddress']
         contractAddress = chain_util.normalize_address(value=contractAddress)
         transactionFromAddress = chain_util.normalize_address(value=transaction['from'])
-        tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId) for retrievedEvent in retrievedEvents]
+        tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId, retrievedEvent.tokenType) for retrievedEvent in retrievedEvents]
         tokenKeyCounts = {tokenKey: tokenKeys.count(tokenKey) for tokenKey in tokenKeys}
         registryAddresses = {retrievedEvent.registryAddress for retrievedEvent in retrievedEvents}
         retrievedTokenTransfers: list[RetrievedTokenTransfer] = []
@@ -216,7 +216,7 @@ class BlockProcessor:
         isMultiAddress = len(registryAddresses) > 1
         tokenKeySeenCounts: Dict[Tuple(str, str), int] = defaultdict(int)
         for retrievedEvent in retrievedEvents:
-            tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId)
+            tokenKey = (retrievedEvent.registryAddress, retrievedEvent.tokenId, retrievedEvent.tokenType)
             tokenKeyCount = tokenKeyCounts[tokenKey]
             tokenKeySeenCounts[tokenKey] += 1
             isInterstitial = tokenKeySeenCounts[tokenKey] < tokenKeyCount
