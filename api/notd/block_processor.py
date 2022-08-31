@@ -16,7 +16,7 @@ from web3.types import LogReceipt
 from web3.types import TxData
 from web3.types import TxReceipt
 
-from notd.model import OPENSEA_MARKET_PLACE
+from notd.model import MARKETPLACE_ADDRESSES
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 
@@ -102,34 +102,29 @@ class BlockProcessor:
             transactionHashEventMap[retrievedEvent.transactionHash].append(retrievedEvent)
         return transactionHashEventMap
 
-    async def _get_transaction_weth_values(self, blockNumber: int) -> List[Dict[str, Tuple(str,int)]]:
-        transactionWethValues = []
+    async def _get_transaction_weth_values(self, blockNumber: int) -> List[Dict[str, int]]:
+        transactionHashWethValuesMap = defaultdict(list)
         erc20events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc20TransferEventSignatureHash])
         for event in erc20events:
-            transactionWethValues += await self._process_erc20_event(event=dict(event))
-        return transactionWethValues
+            if len(event['topics']) == 3 and event['address'] == WRAPPED_ETHER_ADDRESS:
+                transactionHash = event['transactionHash'].hex()
+                fromAddress = chain_util.normalize_address(event['topics'][1].hex())
+                wethValue = int(event["data"], 16)
+                transactionHashWethValuesMap[transactionHash] += [(fromAddress, wethValue)]
+        return transactionHashWethValuesMap
 
     async def process_block(self, blockNumber: int) -> ProcessedBlock:
         # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
         # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
         transactionHashEventMap = await self._get_retrieved_events(blockNumber=blockNumber)
-        transactionWethValues = await self._get_transaction_weth_values(blockNumber=blockNumber)
+        transactionHashWethValuesMap = await self._get_transaction_weth_values(blockNumber=blockNumber)
         retrievedTokenTransfers: List[RetrievedTokenTransfer] = []
         for transaction in blockData['transactions']:
-            retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()], transactionWethValues=transactionWethValues)
+            retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()], transactionHashWethValuesMap=transactionHashWethValuesMap[transaction['hash'].hex()])
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
-
-    async def _process_erc20_event(self, event: LogReceipt) -> List[Dict[str, Tuple(str,int)]]:
-        # NOTE(Femi-Ogunkola): Limit to just weth
-        if len(event['topics']) == 3 and event['address'] == WRAPPED_ETHER_ADDRESS:
-            transactionHash = event['transactionHash'].hex()
-            toAddress = chain_util.normalize_address(event['topics'][1].hex())
-            wethValue = int(event["data"], 16)
-            return [{transactionHash: (toAddress, wethValue)}]
-        return []
 
     async def _process_erc1155_single_event(self, event: LogReceipt) -> List[RetrievedEvent]:
         transactionHash = event['transactionHash'].hex()
@@ -205,9 +200,8 @@ class BlockProcessor:
         retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, amount=1, tokenId=tokenId, tokenType='erc721')]
         return retrievedEvents
 
-    async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent], transactionWethValues: List[Dict[str,int]]) -> List[RetrievedTokenTransfer]:
+    async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent], wethValues: List[tuple]) -> List[RetrievedTokenTransfer]:
         contractAddress = transaction['to']
-        transactionHash = transaction['hash'].hex()
         if not contractAddress:
             # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
@@ -264,25 +258,20 @@ class BlockProcessor:
         for retrievedTokenTransfer in retrievedTokenTransfers:
             retrievedTokenTransfer.isSwap = isSwap
         # Calculate transaction value for either weth or eth
-        addressWethValues = [wethValues[transactionHash] for wethValues in transactionWethValues if transactionHash in wethValues]
-        transactionHashWethValue = 0
-        for address, wethValue in addressWethValues:
-            if address in nonInterstitialToAddresses:
-                transactionHashWethValue += wethValue
-        transactionValues = 0
+        transactionValue = 0
         if transaction['value'] > 0:
-            transactionValues = transaction['value']
-        elif transactionHashWethValue > 0:
-            transactionValues = transactionHashWethValue
+            transactionValue = transaction['value']
+        elif len(wethValues) > 0:
+            for address, wethValue in wethValues:
+                if address in nonInterstitialToAddresses:
+                    transactionValue += wethValue
         # Only calculate value for remaining
-        if transactionValues and not isMultiAddress:
+        if transactionValue and not isMultiAddress:
             # If contractAddress is a opensea market place isOutbound is still a valued transfer
-            if contractAddress in OPENSEA_MARKET_PLACE:
+            if contractAddress in MARKETPLACE_ADDRESSES:
                 valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap]
-                for retrievedTokenTransfer in valuedTransfers:
-                    retrievedTokenTransfer.value = int(transactionValues / len(valuedTransfers))
             else:
                 valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap and not retrievedTokenTransfer.isOutbound]
-                for retrievedTokenTransfer in valuedTransfers:
-                    retrievedTokenTransfer.value = int(transactionValues / len(valuedTransfers))
+            for retrievedTokenTransfer in valuedTransfers:
+                retrievedTokenTransfer.value = int(transactionValue / len(valuedTransfers))
         return retrievedTokenTransfers
