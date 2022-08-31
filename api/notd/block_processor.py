@@ -102,7 +102,7 @@ class BlockProcessor:
             transactionHashEventMap[retrievedEvent.transactionHash].append(retrievedEvent)
         return transactionHashEventMap
 
-    async def _get_transaction_weth_values(self, blockNumber: int) -> List[Dict[str, int]]:
+    async def _get_transaction_weth_values(self, blockNumber: int) -> Dict[str, List[tuple]]:
         transactionHashWethValuesMap = defaultdict(list)
         erc20events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc20TransferEventSignatureHash])
         for event in erc20events:
