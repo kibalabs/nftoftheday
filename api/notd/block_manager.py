@@ -13,14 +13,12 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
-
 from notd.block_processor import BlockProcessor
 from notd.collection_manager import CollectionManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import ProcessedBlock
-
 from notd.model import TokenTransfer
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever

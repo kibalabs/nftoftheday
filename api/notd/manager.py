@@ -5,9 +5,7 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 
-
 import sqlalchemy
-
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter

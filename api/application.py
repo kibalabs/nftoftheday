@@ -16,13 +16,13 @@ from core.web3.eth_client import RestEthClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pablo import PabloClient
-from notd.block_manager import BlockManager
 
 from notd.activity_manager import ActivityManager
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.gallery_v1 import create_api as create_gallery_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.attribute_manager import AttributeManager
+from notd.block_manager import BlockManager
 from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
