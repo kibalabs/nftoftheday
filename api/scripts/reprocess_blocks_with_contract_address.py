@@ -72,7 +72,6 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
             )
             result = await retriever.database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
-            print(blocksToReprocess)
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
             for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=10):
                 await asyncio.gather(*[reprocess_block(notdManager=notdManager, blockNumber=blockNumber) for blockNumber in chunk])
