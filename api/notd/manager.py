@@ -4,12 +4,10 @@ import random
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Set
-from typing import Tuple
+
 
 import sqlalchemy
-from core import logging
-from core.exceptions import NotFoundException
+
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
@@ -25,15 +23,11 @@ from notd.attribute_manager import AttributeManager
 from notd.block_manager import BlockManager
 from notd.collection_manager import CollectionManager
 from notd.listing_manager import ListingManager
-from notd.messages import ProcessBlockMessageContent
-from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import RefreshViewsMessageContent
-from notd.messages import ReprocessBlocksMessageContent
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
-from notd.model import ProcessedBlock
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
