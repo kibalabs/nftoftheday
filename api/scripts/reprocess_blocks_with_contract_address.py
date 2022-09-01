@@ -5,6 +5,7 @@ import sys
 import time
 
 import asyncclick as click
+from core.http.basic_authentication import BasicAuthentication
 from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -36,8 +37,10 @@ async def reprocess_block(notdManager: NotdManager, blockNumber: int):
 @click.option('-e', '--end-block-number', 'endBlockNumber', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=1000)
 async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize: int):
+    databaseConnectionString2 = Database.create_psql_connection_string(username=os.environ["REMOTE_DB_USERNAME"], password=os.environ["REMOTE_DB_PASSWORD"], host=os.environ["REMOTE_DB_HOST"], port=os.environ["REMOTE_DB_PORT"], name=os.environ["REMOTE_DB_NAME"])
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
+    database2 = Database(connectionString=databaseConnectionString2)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
     requester = Requester()
@@ -51,6 +54,7 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
     notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=None, tokenManager=None, activityManager=None, attributeManager=None, collectionManager=None, ownershipManager=None, listingManager=None, requester=requester, revueApiKey=None)
 
     await database.connect()
+    await database2.connect()
     await slackClient.post(text=f'reprocess_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')
     try:
         currentBlockNumber = startBlockNumber
@@ -69,8 +73,9 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
                     .where(TokenTransfersTable.c.isOutbound == True)
                     .group_by(TokenTransfersTable.c.blockNumber)
             )
-            result = await database.execute(query=query)
+            result = await retriever.database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
+            print(blocksToReprocess)
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')
             for chunk in list_util.generate_chunks(lst=list(blocksToReprocess), chunkSize=10):
                 await asyncio.gather(*[reprocess_block(notdManager=notdManager, blockNumber=blockNumber) for blockNumber in chunk])
@@ -84,8 +89,9 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
         raise exception
     finally:
         await database.disconnect()
+        await database2.disconnect()
         await requester.close_connections()
-        await awsRequester.close_connections()
+        # await awsRequester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
