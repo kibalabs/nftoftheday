@@ -10,7 +10,7 @@ TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
     sqlalchemy.Column(key='fromAddress', name='from_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='toAddress', name='to_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='operatorAddress', name='operator_address', type_=sqlalchemy.Text, nullable=False),
-    sqlalchemy.Column(key='contractAddress', name='contract_address', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='contractAddress', name='contract_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='value', name='value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     # NOTE(krishan711): switch back to amount once its renamed
     sqlalchemy.Column(key='amount', name='amount_2', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),

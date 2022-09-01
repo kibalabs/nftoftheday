@@ -1,4 +1,6 @@
+from typing import Any
 from typing import Mapping
+from typing import Optional
 
 from notd.model import Block
 from notd.model import Collection
@@ -183,20 +185,21 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
     )
 
 
-def token_listing_from_row(row: Mapping) -> TokenListing:
+def token_listing_from_row(row: Mapping, table: Optional[Any] = None) -> TokenListing:
+    table = table if table is not None else LatestTokenListingsTable
     return TokenListing(
-        tokenListingId=row[LatestTokenListingsTable.c.latestTokenListingId],
-        createdDate=row[LatestTokenListingsTable.c.createdDate],
-        updatedDate=row[LatestTokenListingsTable.c.updatedDate],
-        registryAddress=row[LatestTokenListingsTable.c.registryAddress],
-        tokenId=row[LatestTokenListingsTable.c.tokenId],
-        offererAddress=row[LatestTokenListingsTable.c.offererAddress],
-        startDate=row[LatestTokenListingsTable.c.startDate],
-        endDate=row[LatestTokenListingsTable.c.endDate],
-        isValueNative=row[LatestTokenListingsTable.c.isValueNative],
-        value=row[LatestTokenListingsTable.c.value],
-        source=row[LatestTokenListingsTable.c.source],
-        sourceId=row[LatestTokenListingsTable.c.sourceId],
+        tokenListingId=row[table.c.latestTokenListingId],
+        createdDate=row[table.c.createdDate],
+        updatedDate=row[table.c.updatedDate],
+        registryAddress=row[table.c.registryAddress],
+        tokenId=row[table.c.tokenId],
+        offererAddress=row[table.c.offererAddress],
+        startDate=row[table.c.startDate],
+        endDate=row[table.c.endDate],
+        isValueNative=row[table.c.isValueNative],
+        value=row[table.c.value],
+        source=row[table.c.source],
+        sourceId=row[table.c.sourceId],
     )
 
 

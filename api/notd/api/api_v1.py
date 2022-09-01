@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
+from notd.api.endpoints_v1 import GetCollectionRecentTransfersResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
@@ -135,9 +136,23 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokenTransfers = await notdManager.get_collection_token_recent_transfers(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
         return GetTokenRecentTransfersResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
+    @router.get('/collections/{registryAddress}/tokens/{tokenId}/recent-sales', response_model=GetCollectionTokenRecentSalesResponse)
+    async def get_collection_token_recent_sales(registryAddress: str, tokenId: str, limit: Optional[int] = None, offset: Optional[int] = None):
+        limit = limit if limit is not None else 20
+        offset = offset if offset is not None else 0
+        tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
+        return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
+
+    @router.get('/collections/{registryAddress}/recent-transfers', response_model=GetCollectionRecentTransfersResponse)
+    async def get_collection_recent_transfers(registryAddress: str, userAddress: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None):
+        limit = limit if limit is not None else 50
+        offset = offset if offset is not None else 0
+        tokenTransfers = await notdManager.get_collection_recent_transfers(registryAddress=registryAddress, userAddress=userAddress, limit=limit, offset=offset)
+        return GetCollectionRecentTransfersResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
+
     @router.get('/collections/{registryAddress}/recent-sales', response_model=GetCollectionRecentSalesResponse)
     async def get_collection_recent_sales(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        limit = limit if limit is not None else 20
+        limit = limit if limit is not None else 50
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_recent_sales(registryAddress=registryAddress, limit=limit, offset=offset)
         return GetCollectionRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
@@ -151,13 +166,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def update_token(registryAddress: str, tokenId: str, request: UpdateCollectionTokenRequest):  # pylint: disable=unused-argument
         await notdManager.update_token_deferred(registryAddress=registryAddress, tokenId=tokenId)
         return UpdateCollectionTokenResponse()
-
-    @router.get('/collections/{registryAddress}/tokens/{tokenId}/recent-sales', response_model=GetCollectionTokenRecentSalesResponse)
-    async def get_collection_token_recent_sales(registryAddress: str, tokenId: str, limit: Optional[int] = None, offset: Optional[int] = None):
-        limit = limit if limit is not None else 20
-        offset = offset if offset is not None else 0
-        tokenTransfers = await notdManager.get_collection_token_recent_sales(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset)
-        return GetCollectionTokenRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
     @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)
     async def list_account_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None):

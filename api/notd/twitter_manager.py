@@ -148,3 +148,10 @@ class TwitterManager:
             await self.saver.update_twitter_profile(twitterProfileId=twitterProfile.twitterProfileId, username=username, name=name, description=description, isVerified=isVerified, pinnedTweetId=pinnedTweetId, followerCount=followerCount, followingCount=followingCount, tweetCount=tweetCount)
         else:
             await self.saver.create_twitter_profile(twitterId=twitterId, username=username, name=name, description=description, isVerified=isVerified, pinnedTweetId=pinnedTweetId, followerCount=followerCount, followingCount=followingCount, tweetCount=tweetCount)
+
+    async def follow_user_from_user(self, userTwitterId: str, targetTwitterId: str) -> None:
+        twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=userTwitterId)
+        if date_util.datetime_from_now(seconds=-60) > twitterCredential.expiryDate:
+            twitterCredential = await self.refresh_twitter_credentials(twitterId=userTwitterId)
+        dataDict = { 'target_user_id': targetTwitterId }
+        await self.requester.post_json(url=f'https://api.twitter.com/2/users/{userTwitterId}/following', dataDict=dataDict, headers={'Authorization': f'Bearer {twitterCredential.accessToken}'})

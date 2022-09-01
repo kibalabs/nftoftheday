@@ -23,8 +23,8 @@ class TokenListingProcessor:
         self.lockManager = lockManager
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
+        listings = []
         async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=(400 * 10), expirySeconds=(400 * 2)):
-            listings = []
             for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
                 logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
                 queryData = {
@@ -104,7 +104,7 @@ class TokenListingProcessor:
                         listings.append(sortedAssetListings[0])
                 # NOTE(krishan711): sleep to avoid opensea limits
                 await asyncio.sleep(0.25)
-            return listings
+        return listings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=(9 * 10), expirySeconds=(9 * 2)):
