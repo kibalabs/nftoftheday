@@ -19,8 +19,8 @@ from web3.types import TxReceipt
 from notd.model import MARKETPLACE_ADDRESSES
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
+from notd.model import WRAPPED_ETHER_ADDRESS
 
-WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
 @dataclasses.dataclass
 class RetrievedEvent:
@@ -102,7 +102,7 @@ class BlockProcessor:
             transactionHashEventMap[retrievedEvent.transactionHash].append(retrievedEvent)
         return transactionHashEventMap
 
-    async def _get_transaction_weth_values(self, blockNumber: int) -> Dict[str, List[tuple]]:
+    async def _get_transaction_weth_values(self, blockNumber: int) -> Dict[str, List[Tuple[str,int]]]:
         transactionHashWethValuesMap = defaultdict(list)
         erc20events = await self.ethClient.get_log_entries(startBlockNumber=blockNumber, endBlockNumber=blockNumber, topics=[self.erc20TransferEventSignatureHash])
         for event in erc20events:
@@ -110,7 +110,7 @@ class BlockProcessor:
                 transactionHash = event['transactionHash'].hex()
                 fromAddress = chain_util.normalize_address(event['topics'][1].hex())
                 wethValue = int(event["data"], 16)
-                transactionHashWethValuesMap[transactionHash] += [(fromAddress, wethValue)]
+                transactionHashWethValuesMap[transactionHash].append((fromAddress, wethValue))
         return transactionHashWethValuesMap
 
     async def process_block(self, blockNumber: int) -> ProcessedBlock:
@@ -121,7 +121,7 @@ class BlockProcessor:
         transactionHashWethValuesMap = await self._get_transaction_weth_values(blockNumber=blockNumber)
         retrievedTokenTransfers: List[RetrievedTokenTransfer] = []
         for transaction in blockData['transactions']:
-            retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()], wethValues=transactionHashWethValuesMap[transaction['hash'].hex()])
+            retrievedTokenTransfers += await self.process_transaction(transaction=transaction, retrievedEvents=transactionHashEventMap[transaction['hash'].hex()], transactionWethValues=transactionHashWethValuesMap[transaction['hash'].hex()])
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)
@@ -200,7 +200,7 @@ class BlockProcessor:
         retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, amount=1, tokenId=tokenId, tokenType='erc721')]
         return retrievedEvents
 
-    async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent], wethValues: List[tuple]) -> List[RetrievedTokenTransfer]:
+    async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent], transactionWethValues: List[Tuple[str,int]]) -> List[RetrievedTokenTransfer]:
         contractAddress = transaction['to']
         if not contractAddress:
             # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
@@ -261,17 +261,17 @@ class BlockProcessor:
         transactionValue = 0
         if transaction['value'] > 0:
             transactionValue = transaction['value']
-        elif len(wethValues) > 0:
-            for address, wethValue in wethValues:
+        elif len(transactionWethValues) > 0:
+            for address, wethValue in transactionWethValues:
                 if address in nonInterstitialToAddresses:
                     transactionValue += wethValue
         # Only calculate value for remaining
-        if transactionValue and not isMultiAddress:
+        if transactionValue > 0 and not isMultiAddress:
             # If contractAddress is a opensea market place isOutbound is still a valued transfer
-            if contractAddress in MARKETPLACE_ADDRESSES:
-                valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap]
-            else:
-                valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap and not retrievedTokenTransfer.isOutbound]
+            # if contractAddress in MARKETPLACE_ADDRESSES:
+            #     valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap]
+            # else:
+            valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap and (contractAddress in MARKETPLACE_ADDRESSES or not retrievedTokenTransfer.isOutbound)]
             for retrievedTokenTransfer in valuedTransfers:
                 retrievedTokenTransfer.value = int(transactionValue / len(valuedTransfers))
         return retrievedTokenTransfers
