@@ -17,9 +17,9 @@ from web3.types import TxData
 from web3.types import TxReceipt
 
 from notd.model import MARKETPLACE_ADDRESSES
+from notd.model import WRAPPED_ETHER_ADDRESS
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
-from notd.model import WRAPPED_ETHER_ADDRESS
 
 
 @dataclasses.dataclass

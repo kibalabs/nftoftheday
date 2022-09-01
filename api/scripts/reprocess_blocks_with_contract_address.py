@@ -5,9 +5,9 @@ import sys
 import time
 
 import asyncclick as click
-from core.http.basic_authentication import BasicAuthentication
 from core import logging
 from core.aws_requester import AwsRequester
+from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
@@ -16,9 +16,10 @@ from core.util import list_util
 from core.web3.eth_client import RestEthClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.model import MARKETPLACE_ADDRESSES
+from notd.block_manager import BlockManager
 from notd.block_processor import BlockProcessor
 from notd.manager import NotdManager
+from notd.model import MARKETPLACE_ADDRESSES
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenTransfersTable
@@ -49,7 +50,8 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
     # infuraRequester = Requester(headers={'Authorization': f'Basic {infuraAuth.to_string()}'})
     # ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
-    notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=None, tokenManager=None, activityManager=None, attributeManager=None, collectionManager=None, ownershipManager=None, listingManager=None, requester=requester, revueApiKey=None)
+    blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=None, blockProcessor=blockProcessor, tokenManager=None, collectionManager=None, ownershipManager=None)
+    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=None, blockManager=blockManager, tokenManager=None, activityManager=None, attributeManager=None, collectionManager=None, ownershipManager=None, listingManager=None, requester=requester, revueApiKey=None)
 
     await database.connect()
     await slackClient.post(text=f'reprocess_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')
