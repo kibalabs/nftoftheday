@@ -22,6 +22,7 @@ from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.gallery_v1 import create_api as create_gallery_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.attribute_manager import AttributeManager
+from notd.block_manager import BlockManager
 from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
@@ -82,7 +83,8 @@ collectionManager = CollectionManager(saver=saver, retriever=retriever, tokenQue
 ownershipManager = OwnershipManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor, collectionManager=collectionManager)
 listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenListingProcessor=tokenListingProcessor)
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager)
-notdManager = NotdManager(blockProcessor=blockProcessor, saver=saver, retriever=retriever, workQueue=workQueue, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  requester=requester, revueApiKey=revueApiKey)
+blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager)
+notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager)
