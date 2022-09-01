@@ -87,20 +87,19 @@ class RetrievedTokenTransfer:
     tokenId: str
     fromAddress: str
     toAddress: str
-    operatorAddress: Optional[str]
-    contractAddress: Optional[str]
-    amount: Optional[int]
+    operatorAddress: str
+    contractAddress: str
+    amount: int
     value: int
     gasLimit: int
     gasPrice: int
     blockNumber: int
-    tokenType: Optional[str]
-    # TODO(Femi-Ogunkola): Make non-optional w=once db is backfilled
-    isMultiAddress: Optional[bool]
-    isInterstitial: Optional[bool]
-    isSwap: Optional[bool]
-    isBatch: Optional[bool]
-    isOutbound: Optional[bool]
+    tokenType: str
+    isMultiAddress: bool
+    isInterstitial: bool
+    isSwap: bool
+    isBatch: bool
+    isOutbound: bool
 
 
 @dataclasses.dataclass(unsafe_hash=True)
