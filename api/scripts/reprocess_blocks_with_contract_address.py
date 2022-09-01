@@ -87,7 +87,7 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
     finally:
         await database.disconnect()
         await requester.close_connections()
-        # await awsRequester.close_connections()
+        await awsRequester.close_connections()
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
