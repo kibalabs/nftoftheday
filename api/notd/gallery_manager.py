@@ -70,6 +70,7 @@ class GalleryManager:
         self.web3 = Web3()
 
     async def twitter_login(self, account: str, signatureJson: str, initialUrl: str) -> None:
+        # TODO(krishan711): validate the signatureJson
         signature = Signature.from_dict(signatureDict=json.loads(urlparse.unquote(signatureJson)))
         await self.twitterManager.login(account=account, signature=signature, initialUrl=initialUrl)
 
@@ -84,6 +85,7 @@ class GalleryManager:
                 .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .where(TokenMetadatasTable.c.tokenId == tokenId)
+                .order_by(sqlalchemy.func.coalesce(LatestTokenListingsTable.c.value, 0).asc())
         )
         result = await self.retriever.database.execute(query=query)
         row = result.first()
@@ -130,24 +132,39 @@ class GalleryManager:
 
     async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None) -> Sequence[GalleryToken]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
+        usesListings = isListed or minPrice or maxPrice
+        orderedListingsQuery = (
+            sqlalchemy.select(
+                LatestTokenListingsTable,
+                sqlalchemy.func.row_number().over(
+                    partition_by=sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress, LatestTokenListingsTable.c.tokenId),
+                    order_by=LatestTokenListingsTable.c.value.asc()
+                ).label('tokenListingIndex'),
+            )
+            .where(LatestTokenListingsTable.c.endDate >= datetime.datetime.now())
+        ).subquery()
+        lowestListingsQuery = (
+            sqlalchemy.select(orderedListingsQuery)
+            .where(orderedListingsQuery.c.tokenListingIndex == 1)
+        ).subquery()
+        listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
         # TODO(krishan711): this shouldn't join on single ownerships for erc1155
         query = (
-            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
+            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
                 .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                 .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
+                .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
                 .limit(limit)
                 .offset(offset)
         )
-        usesListings = isListed or minPrice or maxPrice
         if usesListings:
-            query = query.where(LatestTokenListingsTable.c.latestTokenListingId.is_not(None))
+            query = query.where(listingsQuery.c.latestTokenListingId.is_not(None))
         if minPrice:
-            query = query.where(LatestTokenListingsTable.c.value >= sqlalchemy.func.cast(minPrice, sqlalchemy.Numeric(precision=256, scale=0)))
+            query = query.where(listingsQuery.c.value >= sqlalchemy.func.cast(minPrice, sqlalchemy.Numeric(precision=256, scale=0)))
         if maxPrice:
-            query = query.where(LatestTokenListingsTable.c.value <= sqlalchemy.func.cast(maxPrice, sqlalchemy.Numeric(precision=256, scale=0)))
+            query = query.where(listingsQuery.c.value <= sqlalchemy.func.cast(maxPrice, sqlalchemy.Numeric(precision=256, scale=0)))
         if ownerAddress:
             query = query.where(TokenOwnershipsTable.c.ownerAddress == ownerAddress)
         if tokenIdIn:
@@ -163,7 +180,11 @@ class GalleryManager:
         result = await self.retriever.database.execute(query=query)
         galleryTokens = []
         for row in result:
-            galleryTokens.append(GalleryToken(tokenMetadata=token_metadata_from_row(row), tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None, tokenListing=token_listing_from_row(row) if row[LatestTokenListingsTable.c.latestTokenListingId] else None))
+            galleryTokens.append(GalleryToken(
+                tokenMetadata=token_metadata_from_row(row),
+                tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
+                tokenListing=token_listing_from_row(row, listingsQuery) if row[listingsQuery.c.latestTokenListingId] else None,
+            ))
         return galleryTokens
 
     async def submit_treasure_hunt_for_collection_token(self, registryAddress: str, tokenId: str, userAddress: str, signature: str) -> None:
@@ -240,7 +261,7 @@ class GalleryManager:
             userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
             twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
             ownedTokenCount=userRow['ownedTokenCount'] if userRow else 0,
-            joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
+            joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate] if userRow else None,
         )
         return galleryUser
 
@@ -260,9 +281,9 @@ class GalleryManager:
         elif order == 'TOKENCOUNT_ASC':
             usersQuery = usersQuery.order_by(ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
         elif order == 'FOLLOWERCOUNT_DESC':
-            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.desc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(sqlalchemy.func.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())
         elif order == 'FOLLOWERCOUNT_ASC':
-            usersQuery = usersQuery.order_by(TwitterProfilesTable.c.followerCount.asc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(sqlalchemy.func.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())
         # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
         elif order == 'JOINDATE_DESC':
             usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.asc(), ownedCountColumn.desc())
@@ -302,3 +323,13 @@ class GalleryManager:
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=totalCount)
+
+    async def follow_gallery_user(self, registryAddress: str, userAddress: str, account: str, signatureMessage: str, signature: str) -> None:  # pylint: disable=unused-argument
+        # TODO(krishan711): validate signature
+        accountProfile = await self.retriever.get_user_profile_by_address(address=account)
+        if not accountProfile.twitterId:
+            raise BadRequestException('NO_TWITTER_ID')
+        userProfile = await self.retriever.get_user_profile_by_address(address=userAddress)
+        if not userProfile.twitterId:
+            raise BadRequestException('NO_TWITTER_ID')
+        await self.twitterManager.follow_user_from_user(userTwitterId=accountProfile.twitterId, targetTwitterId=userProfile.twitterId)
