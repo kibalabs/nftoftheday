@@ -66,6 +66,7 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
                     .filter(TokenTransfersTable.c.blockNumber >= start)
                     .filter(TokenTransfersTable.c.blockNumber < end)
                     .where(TokenTransfersTable.c.contractAddress.in_(MARKETPLACE_ADDRESSES))
+                    .where(TokenTransfersTable.c.isOutbound == True)
                     .group_by(TokenTransfersTable.c.blockNumber)
             )
             result = await database.execute(query=query)
