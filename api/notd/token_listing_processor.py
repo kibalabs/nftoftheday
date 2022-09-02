@@ -26,7 +26,7 @@ class TokenListingProcessor:
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=(len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=(1.5 * len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
             for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=_OPENSEA_API_LISTING_CHUNK_SIZE)):
                 logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
                 queryData = {
@@ -216,11 +216,11 @@ class TokenListingProcessor:
         return assetListing
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=(len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=(1.5 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
             listings = []
             for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
                 listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.25)
             listings = [listing for listing in listings if listing is not None]
             return listings
 

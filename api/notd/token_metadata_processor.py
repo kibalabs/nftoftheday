@@ -122,7 +122,9 @@ class TokenMetadataProcessor():
         if isinstance(description, list):
             description = description[0]
         imageUrl = tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data')
-        if isinstance(imageUrl, dict):
+        if isinstance(imageUrl, list) and len(imageUrl) > 0:
+            imageUrl = imageUrl[0]
+        elif isinstance(imageUrl, dict):
             imageDict = imageUrl
             imageUrl = imageDict.get('src')
             if not imageUrl:

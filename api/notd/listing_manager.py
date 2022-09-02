@@ -33,7 +33,7 @@ class ListingManager:
     async def update_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
         for index, registryAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=(60 * 0.2 * index))
+            await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=int(60 * 0.2 * index))
 
     async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
         await self.workQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
@@ -44,7 +44,7 @@ class ListingManager:
     async def refresh_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
         for index, registryAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.refresh_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=(60 * 5 * index))
+            await self.refresh_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=int(60 * 5 * index))
 
     async def refresh_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
         await self.workQueue.send_message(message=RefreshListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
@@ -111,7 +111,10 @@ class ListingManager:
         currentDate = date_util.datetime_from_now()
         latestFullUpdate = await self.retriever.get_latest_update_by_key_name(key='update_latest_token_listings', name=address)
         latestPartialUpdate = await self.retriever.get_latest_update_by_key_name(key='update_partial_latest_token_listings', name=address)
-        await self._update_partial_latest_listings_for_collection(address=address, startDate=max(latestFullUpdate.date, latestPartialUpdate.date))
+        try:
+            await self._update_partial_latest_listings_for_collection(address=address, startDate=max(latestFullUpdate.date, latestPartialUpdate.date))
+        except LockTimeoutException as exception:
+            raise MessageNeedsReprocessingException(delaySeconds=(60 * 10), originalException=exception)
         await self.saver.update_latest_update(latestUpdateId=latestPartialUpdate.latestUpdateId, date=currentDate)
 
     async def refresh_latest_listings_for_collection(self, address: str) -> None:
@@ -123,5 +126,5 @@ class ListingManager:
         try:
             await self._update_full_latest_listings_for_collection(address=address)
         except LockTimeoutException as exception:
-            raise MessageNeedsReprocessingException(delaySeconds=(60 * 5), originalException=exception)
+            raise MessageNeedsReprocessingException(delaySeconds=(60 * 10), originalException=exception)
         await self.saver.update_latest_update(latestUpdateId=latestFullUpdate.latestUpdateId, date=currentDate)
