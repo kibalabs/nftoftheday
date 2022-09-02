@@ -18,6 +18,7 @@ from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import TwitterLoginCallbackResponse
 from notd.api.endpoints_v1 import TwitterLoginResponse
+from notd.api.endpoints_v1 import UpdateAllTwitterUsersResponse
 from notd.api.response_builder import ResponseBuilder
 from notd.gallery_manager import GalleryManager
 
@@ -34,6 +35,12 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def twitter_login_callback(state: str, code: Optional[str] = None, error: Optional[str] = None) -> TwitterLoginCallbackResponse:
         await galleryManager.twitter_login_callback(state=state, code=code, error=error)
         return TwitterLoginCallbackResponse()
+    
+    @router.post('/update-all-twitter-user/')
+    async def update_all_twitter_users(registryAddress: str) -> UpdateAllTwitterUsersResponse:
+        await galleryManager.update_all_twitter_users(registryAddress=registryAddress)
+        return UpdateAllTwitterUsersResponse()
+
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}')
     async def get_gallery_token(registryAddress: str, tokenId: str) -> GetGalleryTokenResponse:

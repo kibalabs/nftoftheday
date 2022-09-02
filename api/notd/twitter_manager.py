@@ -8,9 +8,11 @@ from typing import Optional
 from core.exceptions import FoundRedirectException
 from core.exceptions import NotFoundException
 from core.http.basic_authentication import BasicAuthentication
+from core.store.retriever import StringFieldFilter
 from core.requester import Requester
 from core.util import date_util
 from core.util import dict_util
+from core.util import list_util
 
 from notd.model import Signature
 from notd.model import TwitterCredential
@@ -119,6 +121,20 @@ class TwitterManager:
             twitterCredential.expiryDate = date_util.datetime_from_now(seconds=responseDict['expires_in'])
             await self.saver.update_twitter_credential(twitterCredentialId=twitterCredential.twitterCredentialId, accessToken=twitterCredential.accessToken, refreshToken=twitterCredential.refreshToken, expiryDate=twitterCredential.expiryDate)
         return twitterCredential
+    
+    async def update_all_twitter_users(self) -> None:
+        twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId='kiba credentials')
+        twitterProfiles = await self.retriever.list_twitter_profiles(limit=10)
+        twitterIds = [twitterProfile.twitterId for twitterProfile in twitterProfiles]
+        chunkTwitterIds = list_util.generate_chunks(twitterIds, 100)
+        for ids in chunkTwitterIds:
+            dataDict = {
+                'ids': ids,
+                'expansions': 'pinned_tweet_id',
+                'user.fields': 'created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld',
+            }
+
+        pass
 
     async def update_twitter_profile(self, twitterId: str) -> None:
         twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=twitterId)

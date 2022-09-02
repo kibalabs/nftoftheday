@@ -261,6 +261,12 @@ class FollowCollectionUserRequest(BaseModel):
 class FollowCollectionUserResponse(BaseModel):
     pass
 
+class UpdateAllTwitterUsersRequest(BaseModel):
+    pass
+
+class UpdateAllTwitterUsersResponse(BaseModel):
+    pass
+
 ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
 
 class ApiListResponse(GenericModel, Generic[ApiListResponseItemType]):
