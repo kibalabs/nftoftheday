@@ -1,4 +1,5 @@
 from core import logging
+from core.exceptions import InternalServerErrorException
 from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
@@ -7,6 +8,8 @@ from core.util import date_util
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import RefreshListingsForAllCollections
+from notd.messages import RefreshListingsForCollection
 from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
@@ -91,17 +94,31 @@ class NotdMessageProcessor(MessageProcessor):
             await self.notdManager.update_collection_token_attributes(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
             return
         if message.command == UpdateListingsForAllCollections.get_command():
-            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
-                logging.info(f'Skipping {message.command} from more than 60 minutes ago')
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
+                logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
             messageContent = UpdateListingsForAllCollections.parse_obj(message.content)
             await self.notdManager.update_latest_listings_for_all_collections()
             return
         if message.command == UpdateListingsForCollection.get_command():
-            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
-                logging.info(f'Skipping {message.command} from more than 60 minutes ago')
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
+                logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
             messageContent = UpdateListingsForCollection.parse_obj(message.content)
             await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
+            return
+        if message.command == RefreshListingsForAllCollections.get_command():
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
+                logging.info(f'Skipping {message.command} from more than 60 minutes ago')
+                return
+            messageContent = RefreshListingsForAllCollections.parse_obj(message.content)
+            await self.notdManager.refresh_latest_listings_for_all_collections()
+            return
+        if message.command == RefreshListingsForCollection.get_command():
+            if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
+                logging.info(f'Skipping {message.command} from more than 60 minutes ago')
+                return
+            messageContent = RefreshListingsForCollection.parse_obj(message.content)
+            await self.notdManager.refresh_latest_listings_for_collection(address=messageContent.address)
             return
         raise KibaException(message='Message was unhandled')

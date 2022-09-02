@@ -14,6 +14,8 @@ from core.util import list_util
 from notd.lock_manager import LockManager
 from notd.model import RetrievedTokenListing
 
+_OPENSEA_API_LISTING_CHUNK_SIZE = 30
+_LOOKSRARE_API_LISTING_CHUNK_SIZE = 30
 
 class TokenListingProcessor:
 
@@ -24,8 +26,8 @@ class TokenListingProcessor:
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         listings = []
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=(400 * 10), expirySeconds=(400 * 2)):
-            for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=30)):
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=(len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
+            for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=_OPENSEA_API_LISTING_CHUNK_SIZE)):
                 logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, index)
                 queryData = {
                     'token_ids': chunkedTokenIds,
@@ -107,7 +109,7 @@ class TokenListingProcessor:
         return listings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=(9 * 10), expirySeconds=(9 * 2)):
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=10, expirySeconds=60):
             tokensIdsToReprocess = set()
             index = 0
             for eventType in ['created', 'cancelled']:
@@ -132,7 +134,7 @@ class TokenListingProcessor:
             return list(tokensIdsToReprocess)
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=(3 * 10), expirySeconds=(3 * 2), loopDelaySeconds=0.01):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=60):
             queryData = {
                 'isOrderAsk': 'true',
                 'collection': registryAddress,
@@ -178,7 +180,6 @@ class TokenListingProcessor:
                     tokenListingDict[listing.tokenId] = listing
             return list(tokenListingDict.values())
 
-
     async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
         queryData = {
             'isOrderAsk': 'true',
@@ -215,18 +216,18 @@ class TokenListingProcessor:
         return assetListing
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=(3 * 10), expirySeconds=(3 * 2), loopDelaySeconds=0.5):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=(len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
             listings = []
-            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=30):
+            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
                 listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
                 await asyncio.sleep(0.5)
             listings = [listing for listing in listings if listing is not None]
             return listings
 
     async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=(3 * 10), expirySeconds=(3 * 2)):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=60):
             tokenIdsToReprocess = set()
-            for eventType in ["CANCEL_LIST", "LIST" ]:
+            for eventType in ["CANCEL_LIST", "LIST"]:
                 queryData = {
                     'collection': address,
                     'type': eventType,

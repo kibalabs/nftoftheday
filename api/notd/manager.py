@@ -378,6 +378,18 @@ class NotdManager:
     async def update_latest_listings_for_collection(self, address: str) -> None:
         await self.listingManager.update_latest_listings_for_collection(address=address)
 
+    async def refresh_latest_listings_for_all_collections_deferred(self, delaySeconds: int = 0) -> None:
+        await self.listingManager.refresh_latest_listings_for_all_collections_deferred(delaySeconds=delaySeconds)
+
+    async def refresh_latest_listings_for_all_collections(self) -> None:
+        await self.listingManager.refresh_latest_listings_for_all_collections()
+
+    async def refresh_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
+        await self.listingManager.refresh_latest_listings_for_collection_deferred(address=address, delaySeconds=delaySeconds)
+
+    async def refresh_latest_listings_for_collection(self, address: str) -> None:
+        await self.listingManager.refresh_latest_listings_for_collection(address=address)
+
     async def get_collection_by_address(self, address: str) -> Collection:
         return await self.collectionManager.get_collection_by_address(address=address)
 
