@@ -133,6 +133,8 @@ class TwitterManager:
                 'expansions': 'pinned_tweet_id',
                 'user.fields': 'created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld',
             }
+            userResponse = await self.requester.get(url='https://api.twitter.com/2/users', dataDict=dataDict, headers={'Authorization': f'Bearer {twitterCredential.accessToken}'})
+            userResponseDict = userResponse.json()
 
         pass
 
