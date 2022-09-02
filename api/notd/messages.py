@@ -74,3 +74,12 @@ class UpdateListingsForAllCollections(MessageContent):
 class UpdateListingsForCollection(MessageContent):
     _COMMAND = 'UPDATE_LISTINGS_FOR_COLLECTION'
     address: str
+
+
+class RefreshListingsForAllCollections(MessageContent):
+    _COMMAND = 'REFRESH_LISTINGS_FOR_ALL_COLLECTIONS'
+
+
+class RefreshListingsForCollection(MessageContent):
+    _COMMAND = 'REFRESH_LISTINGS_FOR_COLLECTION'
+    address: str

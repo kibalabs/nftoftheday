@@ -75,6 +75,12 @@ class UpdateLatestListingsAllCollectionsDeferredRequest(BaseModel):
 class UpdateLatestListingsAllCollectionsDeferredResponse(BaseModel):
     pass
 
+class RefreshLatestListingsAllCollectionsDeferredRequest(BaseModel):
+    pass
+
+class RefreshLatestListingsAllCollectionsDeferredResponse(BaseModel):
+    pass
+
 class UpdateActivityForAllCollectionsDeferredRequest(BaseModel):
     pass
 

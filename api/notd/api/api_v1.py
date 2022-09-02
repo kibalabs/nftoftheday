@@ -17,6 +17,7 @@ from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
+from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
 from notd.api.endpoints_v1 import RetrieveMostTradedRequest
@@ -93,6 +94,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def update_latest_listings_for_all_collections_deferred():
         await notdManager.update_latest_listings_for_all_collections_deferred()
         return UpdateLatestListingsAllCollectionsDeferredResponse()
+
+    @router.post('/collections/refresh-latest-listings-deferred', response_model=RefreshLatestListingsAllCollectionsDeferredResponse)
+    async def refresh_latest_listings_for_all_collections_deferred():
+        await notdManager.refresh_latest_listings_for_all_collections_deferred()
+        return RefreshLatestListingsAllCollectionsDeferredResponse()
 
     @router.post('/collections/update-activity-deferred', response_model=UpdateActivityForAllCollectionsDeferredResponse)
     async def update_activity_for_all_collections_deferred():
