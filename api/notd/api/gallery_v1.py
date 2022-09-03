@@ -41,7 +41,6 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         await galleryManager.update_all_twitter_users_deferred(registryAddress=registryAddress)
         return UpdateAllTwitterUsersDeferredResponse()
 
-
     @router.get('/collections/{registryAddress}/tokens/{tokenId}')
     async def get_gallery_token(registryAddress: str, tokenId: str) -> GetGalleryTokenResponse:
         galleryToken = await galleryManager.get_gallery_token(registryAddress=registryAddress, tokenId=tokenId)

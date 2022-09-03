@@ -8,15 +8,14 @@ from typing import Optional
 from core.exceptions import FoundRedirectException
 from core.exceptions import NotFoundException
 from core.http.basic_authentication import BasicAuthentication
-from core.store.retriever import StringFieldFilter
+from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
+from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import dict_util
 from core.util import list_util
+
 from notd.messages import UpdateAllTwitterUsersMessageContent
-from core.queues.sqs_message_queue import SqsMessageQueue
-
-
 from notd.model import Signature
 from notd.model import TwitterCredential
 from notd.store.retriever import Retriever
