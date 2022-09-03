@@ -261,10 +261,10 @@ class FollowCollectionUserRequest(BaseModel):
 class FollowCollectionUserResponse(BaseModel):
     pass
 
-class UpdateAllTwitterUsersRequest(BaseModel):
+class UpdateAllTwitterUsersDeferredRequest(BaseModel):
     pass
 
-class UpdateAllTwitterUsersResponse(BaseModel):
+class UpdateAllTwitterUsersDeferredResponse(BaseModel):
     pass
 
 ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name

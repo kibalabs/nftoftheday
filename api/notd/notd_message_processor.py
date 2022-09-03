@@ -3,6 +3,8 @@ from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
+from notd.gallery_manager import GalleryManager
+from notd.messages import UpdateAllTwitterUsersMessageContent
 
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
@@ -23,8 +25,9 @@ from notd.messages import UpdateTokenOwnershipMessageContent
 
 class NotdMessageProcessor(MessageProcessor):
 
-    def __init__(self, notdManager: NotdManager):
+    def __init__(self, notdManager: NotdManager, galleryManager: GalleryManager):
         self.notdManager = notdManager
+        self.galleryManager = galleryManager
 
     async def process_message(self, message: SqsMessage) -> None:
         if message.command == ProcessBlockMessageContent.get_command():
@@ -103,5 +106,9 @@ class NotdMessageProcessor(MessageProcessor):
                 return
             messageContent = UpdateListingsForCollection.parse_obj(message.content)
             await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
+            return
+        if message.command == UpdateAllTwitterUsersMessageContent.get_command():
+            messageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)
+            await self.galleryManager.update_all_twitter_users()
             return
         raise KibaException(message='Message was unhandled')

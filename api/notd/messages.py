@@ -74,3 +74,6 @@ class UpdateListingsForAllCollections(MessageContent):
 class UpdateListingsForCollection(MessageContent):
     _COMMAND = 'UPDATE_LISTINGS_FOR_COLLECTION'
     address: str
+
+class UpdateAllTwitterUsersMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_ALL_TWITTER_USERS'

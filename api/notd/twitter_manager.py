@@ -13,6 +13,9 @@ from core.requester import Requester
 from core.util import date_util
 from core.util import dict_util
 from core.util import list_util
+from notd.messages import UpdateAllTwitterUsersMessageContent
+from core.queues.sqs_message_queue import SqsMessageQueue
+
 
 from notd.model import Signature
 from notd.model import TwitterCredential
@@ -22,10 +25,11 @@ from notd.store.saver import Saver
 
 class TwitterManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester):
+    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester, workQueue: SqsMessageQueue):
         self.saver = saver
         self.retriever = retriever
         self.requester = requester
+        self.workQueue = workQueue
         self.clientId = os.environ.get("TWITTER_OAUTH_CLIENT_ID")
         self.clientSecret = os.environ.get("TWITTER_OAUTH_CLIENT_SECRET")
         self.redirectUri = os.environ.get("TWITTER_OAUTH_REDIRECT_URI")
@@ -122,6 +126,9 @@ class TwitterManager:
             await self.saver.update_twitter_credential(twitterCredentialId=twitterCredential.twitterCredentialId, accessToken=twitterCredential.accessToken, refreshToken=twitterCredential.refreshToken, expiryDate=twitterCredential.expiryDate)
         return twitterCredential
     
+    async def update_all_twitter_users_deferred(self) -> None:
+        await self.workQueue.send_message(message=UpdateAllTwitterUsersMessageContent().to_message())
+
     async def update_all_twitter_users(self) -> None:
         twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId='kiba credentials')
         twitterProfiles = await self.retriever.list_twitter_profiles(limit=10)
@@ -135,7 +142,7 @@ class TwitterManager:
             }
             userResponse = await self.requester.get(url='https://api.twitter.com/2/users', dataDict=dataDict, headers={'Authorization': f'Bearer {twitterCredential.accessToken}'})
             userResponseDict = userResponse.json()
-
+            print(userResponseDict)
         pass
 
     async def update_twitter_profile(self, twitterId: str) -> None:
