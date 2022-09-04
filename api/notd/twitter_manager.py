@@ -3,23 +3,26 @@ import json
 import os
 import urllib.parse as urlparse
 import uuid
-from typing import Optional
+from typing import List, Optional
 
 from core.exceptions import FoundRedirectException
 from core.exceptions import NotFoundException
 from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
-from core.store.retriever import StringFieldFilter
 from core.util import date_util
 from core.util import dict_util
 from core.util import list_util
+from notd.store.schema import TwitterProfilesTable
+from notd.model import RetrievedTwitterProfile
 
 from notd.messages import UpdateAllTwitterUsersMessageContent
 from notd.model import Signature
 from notd.model import TwitterCredential
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+
+_TWITTER_BEARER_TOKEN=os.environ("TWITTER_BEARER_TOKEN")
 
 
 class TwitterManager:
@@ -124,25 +127,46 @@ class TwitterManager:
             twitterCredential.expiryDate = date_util.datetime_from_now(seconds=responseDict['expires_in'])
             await self.saver.update_twitter_credential(twitterCredentialId=twitterCredential.twitterCredentialId, accessToken=twitterCredential.accessToken, refreshToken=twitterCredential.refreshToken, expiryDate=twitterCredential.expiryDate)
         return twitterCredential
-    
+
     async def update_all_twitter_users_deferred(self) -> None:
         await self.workQueue.send_message(message=UpdateAllTwitterUsersMessageContent().to_message())
 
     async def update_all_twitter_users(self) -> None:
-        twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId='kiba credentials')
-        twitterProfiles = await self.retriever.list_twitter_profiles(limit=10)
-        twitterIds = [twitterProfile.twitterId for twitterProfile in twitterProfiles]
-        chunkTwitterIds = list_util.generate_chunks(twitterIds, 100)
-        for ids in chunkTwitterIds:
+        query = (
+            TwitterProfilesTable.select()
+            .with_only_columns([TwitterProfilesTable.c.twitterId])
+        )
+        result = await self.retriever.database.execute(query=query)
+        twitterIds = [row[0] for row in result]
+        chunkedIds = list_util.generate_chunks(twitterIds, 100)
+        for chunk in chunkedIds:
+            ids = ''.join(chunk)
             dataDict = {
-                'ids': ids,
+                'ids':  ids,
                 'expansions': 'pinned_tweet_id',
                 'user.fields': 'created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld',
             }
-            userResponse = await self.requester.get(url='https://api.twitter.com/2/users', dataDict=dataDict, headers={'Authorization': f'Bearer {twitterCredential.accessToken}'})
+            retrievedTwitterProfiles: List[RetrievedTwitterProfile] = []
+            userResponse = await self.requester.get(url='https://api.twitter.com/2/users', dataDict=dataDict, headers={'Authorization': f'Bearer {_TWITTER_BEARER_TOKEN}'})
             userResponseDict = userResponse.json()
-            print(userResponseDict)
-        pass
+            for userData in userResponseDict['data']:
+                retrievedTwitterProfiles += [
+                    RetrievedTwitterProfile(
+                        username=userData['username'],
+                        name=userData['name'],
+                        description=userData['description'],
+                        isVerified=userData['verified'],
+                        pinnedTweetId=userData.get('pinned_tweet_id'),
+                        followerCount=userData['public_metrics']['followers_count'],
+                        followingCount=userData['public_metrics']['following_count'],
+                        tweetCount=userData['public_metrics']['tweet_count'],
+                        twitterId=userData['id'],
+                    )
+                ]
+            for retrievedTwitterProfile in  retrievedTwitterProfiles:
+                twitterProfile = await self.retriever.get_twitter_profile_by_twitter_id(twitterId=retrievedTwitterProfile.twitterId)
+                await self.saver.update_twitter_profile(twitterProfileId=twitterProfile.twitterProfileId, username=retrievedTwitterProfile.username, name=retrievedTwitterProfile.name, description=retrievedTwitterProfile.description, isVerified=retrievedTwitterProfile.isVerified, pinnedTweetId=retrievedTwitterProfile.pinnedTweetId, followerCount=retrievedTwitterProfile.followerCount, followingCount=retrievedTwitterProfile.followingCount, tweetCount=retrievedTwitterProfile.tweetCount)
+
 
     async def update_twitter_profile(self, twitterId: str) -> None:
         twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=twitterId)

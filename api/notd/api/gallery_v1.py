@@ -35,7 +35,7 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def twitter_login_callback(state: str, code: Optional[str] = None, error: Optional[str] = None) -> TwitterLoginCallbackResponse:
         await galleryManager.twitter_login_callback(state=state, code=code, error=error)
         return TwitterLoginCallbackResponse()
-    
+
     @router.post('/update-all-twitter-user-deferred/')
     async def update_all_twitter_users(registryAddress: str) -> UpdateAllTwitterUsersDeferredResponse:
         await galleryManager.update_all_twitter_users_deferred(registryAddress=registryAddress)
