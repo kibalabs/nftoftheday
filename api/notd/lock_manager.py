@@ -52,7 +52,7 @@ class LockManager:
                 return lock
             await asyncio.sleep(loopDelaySeconds)
             currentDate = date_util.datetime_from_now()
-        raise LockTimeoutException()
+        raise LockTimeoutException(f'Failed to acquire lock:{name} after waiting:{timeoutSeconds}s')
 
     async def release_lock(self, lock: Lock) -> None:
         lock = await self.retriever.get_lock(lockId=lock.lockId)
