@@ -261,12 +261,6 @@ class FollowCollectionUserRequest(BaseModel):
 class FollowCollectionUserResponse(BaseModel):
     pass
 
-class UpdateAllTwitterUsersDeferredRequest(BaseModel):
-    pass
-
-class UpdateAllTwitterUsersDeferredResponse(BaseModel):
-    pass
-
 ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
 
 class ApiListResponse(GenericModel, Generic[ApiListResponseItemType]):
@@ -280,3 +274,9 @@ class QueryCollectionUsersRequest(BaseModel):
 
 class QueryCollectionUsersResponse(BaseModel):
     galleryUserRowListResponse: ApiListResponse[ApiGalleryUserRow]
+
+class UpdateAllTwitterUsersDeferredRequest(BaseModel):
+    pass
+
+class UpdateAllTwitterUsersDeferredResponse(BaseModel):
+    pass

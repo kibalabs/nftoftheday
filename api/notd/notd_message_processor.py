@@ -107,6 +107,7 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = UpdateListingsForCollection.parse_obj(message.content)
             await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
             return
+        
         if message.command == UpdateAllTwitterUsersMessageContent.get_command():
             messageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)
             await self.galleryManager.update_all_twitter_users()
