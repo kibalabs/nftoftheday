@@ -11,8 +11,10 @@ from typing import Sequence
 import sqlalchemy
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
+from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from core.util import list_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
 from web3 import Web3
@@ -21,6 +23,7 @@ from notd.api.endpoints_v1 import InQueryParam
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
+from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
@@ -31,8 +34,10 @@ from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsTable
@@ -333,3 +338,37 @@ class GalleryManager:
         if not userProfile.twitterId:
             raise BadRequestException('NO_TWITTER_ID')
         await self.twitterManager.follow_user_from_user(userTwitterId=accountProfile.twitterId, targetTwitterId=userProfile.twitterId)
+
+    async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> Sequence[GalleryOwnedCollection]:
+        volumeQuery = (
+            sqlalchemy.select(CollectionHourlyActivityTable.c.address, sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue).label('totalValue'))
+                .where(CollectionHourlyActivityTable.c.date > date_util.datetime_from_now(days=-14))
+                .group_by(CollectionHourlyActivityTable.c.address)
+        ).subquery()
+        collectionsQuery = (
+            sqlalchemy.select(TokenOwnershipsTable)
+                .join(volumeQuery, volumeQuery.c.address == TokenOwnershipsTable.c.registryAddress)
+                .where(TokenOwnershipsTable.c.ownerAddress == userAddress)
+                .where(TokenOwnershipsTable.c.registryAddress != registryAddress)
+                .order_by(volumeQuery.c.totalValue.desc(), TokenOwnershipsTable.c.transferDate.asc())
+        )
+        collectionsResult = await self.retriever.database.execute(query=collectionsQuery)
+        collectionTokenIds = [(row[TokenOwnershipsTable.c.registryAddress], row[TokenOwnershipsTable.c.tokenId]) for row in collectionsResult]
+        registryAddresses = list(dict.fromkeys([collectionTokenId[0] for collectionTokenId in collectionTokenIds]))
+        collections = await self.retriever.list_collections(fieldFilters=[StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=registryAddresses)])
+        collectionMap = {collection.address: collection for collection in collections}
+        collectionTokenMap: Dict[str, List[TokenMetadata]] = defaultdict(list)
+        for chunkedCollectionTokenIds in list_util.generate_chunks(lst=list(collectionTokenIds), chunkSize=1000):
+            tokensQuery = (
+                TokenMetadatasTable.select()
+                    .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(chunkedCollectionTokenIds))
+            )
+            tokens = await self.retriever.query_token_metadatas(query=tokensQuery)
+            for token in tokens:
+                collectionTokenMap[token.registryAddress].append(token)
+        return [
+            GalleryOwnedCollection(
+                collection=collectionMap[registryAddress],
+                tokenMetadatas=collectionTokenMap[registryAddress],
+            ) for registryAddress in registryAddresses
+        ]

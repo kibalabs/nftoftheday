@@ -442,3 +442,9 @@ class GalleryUser:
 class GalleryUserRow:
     galleryUser: GalleryUser
     chosenOwnedTokens: List[TokenMetadata]
+
+
+@dataclasses.dataclass
+class GalleryOwnedCollection:
+    collection: Collection
+    tokenMetadatas: List[TokenMetadata]

@@ -13,6 +13,7 @@ from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
@@ -266,6 +267,12 @@ class FollowCollectionUserRequest(BaseModel):
 
 class FollowCollectionUserResponse(BaseModel):
     pass
+
+class GetGalleryUserOwnedCollectionsRequest(BaseModel):
+    pass
+
+class GetGalleryUserOwnedCollectionsResponse(BaseModel):
+    ownedCollections: List[ApiGalleryOwnedCollection]
 
 ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
 

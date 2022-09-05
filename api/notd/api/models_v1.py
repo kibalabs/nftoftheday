@@ -169,3 +169,8 @@ class ApiGalleryUser(BaseModel):
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
     chosenOwnedTokens: List[ApiCollectionToken]
+
+
+class ApiGalleryOwnedCollection(BaseModel):
+    collection: ApiCollection
+    tokens: List[ApiCollectionToken]
