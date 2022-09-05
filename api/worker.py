@@ -54,7 +54,6 @@ async def main():
     accessKeySecret = os.environ['AWS_SECRET']
     twitterBearerToken=os.environ["TWITTER_BEARER_TOKEN"]
 
-
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
