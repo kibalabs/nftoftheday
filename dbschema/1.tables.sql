@@ -363,3 +363,12 @@ CREATE TABLE tbl_gallery_customers (
     registry_address TEXT NOT NULL
 )
 CREATE UNIQUE INDEX tbl_gallery_customers_registry_address on tbl_gallery_customers (registry_address);
+
+CREATE TABLE tbl_collection_total_activities (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    total_activities BIGINT NOT NULL
+)
+CREATE UNIQUE INDEX tbl_collection_total_activities_registry_address on tbl_collection_total_activities (registry_address);
