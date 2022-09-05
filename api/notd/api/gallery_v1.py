@@ -18,7 +18,6 @@ from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import TwitterLoginCallbackResponse
 from notd.api.endpoints_v1 import TwitterLoginResponse
-from notd.api.endpoints_v1 import UpdateAllTwitterUsersDeferredResponse
 from notd.api.response_builder import ResponseBuilder
 from notd.gallery_manager import GalleryManager
 
