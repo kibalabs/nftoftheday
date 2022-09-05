@@ -13,6 +13,7 @@ from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
+from notd.messages import UpdateAllTwitterUsersMessageContent
 from notd.messages import UpdateCollectionMessageContent
 from notd.messages import UpdateCollectionTokenAttributesMessageContent
 from notd.messages import UpdateCollectionTokensMessageContent
@@ -120,4 +121,7 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = RefreshListingsForCollection.parse_obj(message.content)
             await self.notdManager.refresh_latest_listings_for_collection(address=messageContent.address)
             return
+        if message.command == UpdateAllTwitterUsersMessageContent.get_command():
+            messageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)
+            await self.notdManager.update_all_twitter_users()
         raise KibaException(message='Message was unhandled')

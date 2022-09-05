@@ -30,6 +30,7 @@ from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
+from notd.api.endpoints_v1 import UpdateAllTwitterUsersDeferredResponse
 from notd.api.endpoints_v1 import UpdateCollectionRequest
 from notd.api.endpoints_v1 import UpdateCollectionResponse
 from notd.api.endpoints_v1 import UpdateCollectionTokenRequest
@@ -84,6 +85,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.receive_new_blocks_deferred()
         await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
+
+    @router.post('/update-all-twitter-users-deferred/')
+    async def update_all_twitter_users() -> UpdateAllTwitterUsersDeferredResponse:
+        await notdManager.update_all_twitter_users_deferred()
+        return UpdateAllTwitterUsersDeferredResponse()
 
     @router.post('/refresh-views-deferred', response_model=ReceiveNewBlocksDeferredResponse)
     async def refresh_views_deferred():
