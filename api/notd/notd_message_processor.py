@@ -124,4 +124,5 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateAllTwitterUsersMessageContent.get_command():
             messageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)
             await self.notdManager.update_all_twitter_users()
+            return
         raise KibaException(message='Message was unhandled')
