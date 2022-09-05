@@ -57,6 +57,11 @@ class UpdateActivityForCollectionMessageContent(MessageContent):
     startDate: datetime.datetime
 
 
+class UpdateTotalActivityForCollectionMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_COLLECTION_TOTAL_ACTIVITY'
+    address: str
+
+
 class UpdateTokenAttributesForAllCollectionsMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_ATTRIBUTES_FOR_ALL_COLLECTIONS'
 

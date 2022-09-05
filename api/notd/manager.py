@@ -356,6 +356,12 @@ class NotdManager:
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         await self.activityManager.update_activity_for_collection(address=address, startDate=startDate)
 
+    async def update_total_activity_for_collection(self, address: str) -> None:
+        await self.activityManager.update_total_activity_for_collection(address=address)
+
+    async def update_total_activity_for_all_collections(self) -> None:
+        await self.activityManager.update_total_activity_for_all_collections()
+
     async def update_token_attributes_for_all_collections_deferred(self) -> None:
         await self.attributeManager.update_token_attributes_for_all_collections_deferred()
 

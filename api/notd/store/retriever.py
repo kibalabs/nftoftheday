@@ -11,6 +11,7 @@ from sqlalchemy.sql import Select
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import TokenAttribute
@@ -26,6 +27,7 @@ from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionTotalActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -43,6 +45,7 @@ from notd.store.schema import UserProfilesTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import collection_total_activity_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import lock_from_row
 from notd.store.schema_conversions import token_attribute_from_row
@@ -213,6 +216,30 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         collectionActivities = [collection_activity_from_row(row) for row in result]
         return collectionActivities
+
+    async def list_collection_total_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionTotalActivity]:
+        query = CollectionTotalActivityTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=CollectionTotalActivityTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=CollectionTotalActivityTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        collectionTotalActivities = [collection_total_activity_from_row(row) for row in result]
+        return collectionTotalActivities
+
+    async def get_collection_total_activity_by_address(self, address: str, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
+        query = (
+            CollectionTotalActivityTable.select()
+            .where(CollectionTotalActivityTable.c.address == address)
+        )
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Total Activity  with address:{address} not found')
+        collectionTotalActivity = latest_update_from_row(row)
+        return collectionTotalActivity
 
     async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[UserInteraction]:
         query = UserInteractionsTable.select()

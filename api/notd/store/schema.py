@@ -130,6 +130,22 @@ CollectionHourlyActivityTable = sqlalchemy.Table(
 )
 
 
+CollectionTotalActivityTable = sqlalchemy.Table(
+    'tbl_collection_total_activities',
+    metadata,
+    sqlalchemy.Column(key='collectionTotalActivityId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='address', name='address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='transferCount', name='transfer_count', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='saleCount', name='sale_count', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='totalValue', name='total_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='minimumValue', name='minimum_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='maximumValue', name='maximum_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='averageValue', name='average_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+)
+
+
 UserInteractionsTable = sqlalchemy.Table(
     'tbl_user_interactions',
     metadata,

@@ -22,6 +22,7 @@ from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
+from notd.messages import UpdateTotalActivityForCollectionMessageContent
 
 
 class NotdMessageProcessor(MessageProcessor):
@@ -77,6 +78,10 @@ class NotdMessageProcessor(MessageProcessor):
                 return
             messageContent = UpdateActivityForAllCollectionsMessageContent.parse_obj(message.content)
             await self.notdManager.update_activity_for_all_collections()
+            return
+        if message.command == UpdateTotalActivityForCollectionMessageContent.get_command():
+            messageContent = UpdateTotalActivityForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_total_activity_for_collection(address=messageContent.address)
             return
         if message.command == UpdateActivityForCollectionMessageContent.get_command():
             messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)

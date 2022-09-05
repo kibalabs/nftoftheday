@@ -7,6 +7,7 @@ from core.util import date_util
 
 from notd.date_util import date_hour_from_datetime
 from notd.model import RetrievedCollectionHourlyActivity
+from notd.model import RetrievedCollectionTotalActivity
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
@@ -42,3 +43,24 @@ class CollectionActivityProcessor:
             transferCount += tokenTransfer.amount
         averageValue = totalValue / saleCount if saleCount > 0 else 0
         return RetrievedCollectionHourlyActivity(address=address, date=startDate, transferCount=transferCount, saleCount=saleCount, totalValue=totalValue, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
+
+    async def calculate_collection_total_activity(self, address: str):
+        address = chain_util.normalize_address(address)
+        collectionHourlyActivities = await self.retriever.list_collection_activities(
+          fieldFilters=[
+                StringFieldFilter(TokenTransfersTable.c.registryAddress.key, eq=address),
+            ],
+        )
+        saleCount = 0
+        transferCount = 0
+        totalValue = 0
+        minimumValue = 0
+        maximumValue = 0
+        for collectionHourlyActivity in collectionHourlyActivities:
+            totalValue += collectionHourlyActivity.totalValue
+            saleCount += collectionHourlyActivity.saleCount
+            transferCount += collectionHourlyActivity.transferCount
+            maximumValue = max(maximumValue, collectionHourlyActivity.maximumValue)
+            minimumValue = min(minimumValue, collectionHourlyActivity.minimumValue) if minimumValue > 0 else collectionHourlyActivity.minimumValue
+        averageValue = totalValue / saleCount if saleCount > 0 else 0
+        return RetrievedCollectionTotalActivity(address=address, totalValue=totalValue, saleCount=saleCount, transferCount=transferCount, maximumValue=maximumValue, minimumValue=minimumValue, averageValue=averageValue)

@@ -13,6 +13,7 @@ from sqlalchemy import JSON
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import RetrievedTokenAttribute
@@ -28,6 +29,7 @@ from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionTotalActivityTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -430,6 +432,57 @@ class Saver(CoreSaver):
         if len(values) > 0:
             values[CollectionHourlyActivityTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = CollectionHourlyActivityTable.update(CollectionHourlyActivityTable.c.collectionActivityId == collectionActivityId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    async def create_collection_total_activity(self, address: str, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            CollectionTotalActivityTable.c.createdDate.key: createdDate,
+            CollectionTotalActivityTable.c.updatedDate.key: updatedDate,
+            CollectionTotalActivityTable.c.address.key: address,
+            CollectionTotalActivityTable.c.transferCount.key: transferCount,
+            CollectionTotalActivityTable.c.saleCount.key: saleCount,
+            CollectionTotalActivityTable.c.totalValue.key: totalValue,
+            CollectionTotalActivityTable.c.minimumValue.key: minimumValue,
+            CollectionTotalActivityTable.c.maximumValue.key: maximumValue,
+            CollectionTotalActivityTable.c.averageValue.key: averageValue,
+        }
+        query = CollectionTotalActivityTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        collectionTotalActivityId = result.inserted_primary_key[0]
+        return CollectionTotalActivity(
+            collectionTotalActivityId=collectionTotalActivityId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            address=address,
+            transferCount=transferCount,
+            saleCount=saleCount,
+            totalValue=totalValue,
+            minimumValue=minimumValue,
+            maximumValue=maximumValue,
+            averageValue=averageValue,
+        )
+
+    async def update_collection_total_activity(self, collectionTotalActivityId: int, address: Optional[str], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if address is not None:
+            values[CollectionTotalActivityTable.c.address.key] = address
+        if transferCount is not None:
+            values[CollectionTotalActivityTable.c.transferCount.key] = transferCount
+        if saleCount is not None:
+            values[CollectionTotalActivityTable.c.saleCount.key] = saleCount
+        if totalValue is not None:
+            values[CollectionTotalActivityTable.c.totalValue.key] = totalValue
+        if minimumValue is not None:
+            values[CollectionTotalActivityTable.c.minimumValue.key] = minimumValue
+        if maximumValue is not None:
+            values[CollectionTotalActivityTable.c.maximumValue.key] = maximumValue
+        if averageValue is not None:
+            values[CollectionTotalActivityTable.c.averageValue.key] = averageValue
+        if len(values) > 0:
+            values[CollectionTotalActivityTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = CollectionTotalActivityTable.update(CollectionTotalActivityTable.c.collectionTotalActivityId == collectionTotalActivityId).values(values)
         await self._execute(query=query, connection=connection)
 
     async def create_user_interaction(self, date: datetime.datetime, userAddress: str, command: str, signature: str, message: JSON, connection: Optional[DatabaseConnection] = None) -> UserInteraction:

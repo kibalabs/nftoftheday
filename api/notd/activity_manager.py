@@ -15,6 +15,7 @@ from notd.date_util import date_hour_from_datetime
 from notd.date_util import generate_clock_hour_intervals
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
+from notd.messages import UpdateTotalActivityForCollectionMessageContent
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -91,3 +92,28 @@ class ActivityManager:
                     logging.info(f'Not creating activity with transferCount==0')
                 else:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
+
+    async def update_total_activity_for_all_collections(self) -> None:
+        processStartDate = date_util.datetime_from_now()
+        latestUpdate = await self.retriever.get_latest_update_by_key_name(key='total_collection_activities')
+        query =(
+            CollectionHourlyActivityTable.select()
+            .with_only_columns([CollectionHourlyActivityTable.c.address])
+            .filter(CollectionHourlyActivityTable.c.date >= latestUpdate.date)
+            .filter(CollectionHourlyActivityTable.c.date < processStartDate)
+        )
+        result = await self.retriever.database.execute(query=query)
+        changedAddresses = {row[0] for row in result}
+        messages = [UpdateTotalActivityForCollectionMessageContent(address=address).to_message() for address in changedAddresses]
+        await self.tokenQueue.send_messages(messages=messages)
+        await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=processStartDate)
+
+    async def update_total_activity_for_collection(self, address: str) -> None:
+        address = chain_util.normalize_address(address)
+        retrievedCollectionTotalActivity = await self.collectionActivityProcessor.calculate_collection_total_activity(address=address)
+        async with self.saver.create_transaction() as connection:
+            collectionTotalActivity = await self.retriever.get_collection_total_activity_by_address(address=address, connection=connection)
+            if collectionTotalActivity:
+                await self.saver.update_collection_total_activity(connection=connection, collectionActivityId=collectionTotalActivity.collectionTotalActivityId, address=address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)
+            else:
+                await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionTotalActivity.address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)

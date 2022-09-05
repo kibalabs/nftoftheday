@@ -5,6 +5,7 @@ from typing import Optional
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import Signature
@@ -152,6 +153,21 @@ def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
         updatedDate=row[CollectionHourlyActivityTable.c.updatedDate],
         address=row[CollectionHourlyActivityTable.c.address],
         date=row[CollectionHourlyActivityTable.c.date],
+        transferCount=row[CollectionHourlyActivityTable.c.transferCount],
+        saleCount=row[CollectionHourlyActivityTable.c.saleCount],
+        totalValue=row[CollectionHourlyActivityTable.c.totalValue],
+        minimumValue=row[CollectionHourlyActivityTable.c.minimumValue],
+        maximumValue=row[CollectionHourlyActivityTable.c.maximumValue],
+        averageValue=row[CollectionHourlyActivityTable.c.averageValue],
+    )
+
+
+def collection_total_activity_from_row(row: Mapping) -> CollectionTotalActivity:
+    return CollectionTotalActivity(
+        collectionTotalActivityId=row[CollectionHourlyActivityTable.c.collectionTotalActivityId],
+        createdDate=row[CollectionHourlyActivityTable.c.createdDate],
+        updatedDate=row[CollectionHourlyActivityTable.c.updatedDate],
+        address=row[CollectionHourlyActivityTable.c.address],
         transferCount=row[CollectionHourlyActivityTable.c.transferCount],
         saleCount=row[CollectionHourlyActivityTable.c.saleCount],
         totalValue=row[CollectionHourlyActivityTable.c.totalValue],
