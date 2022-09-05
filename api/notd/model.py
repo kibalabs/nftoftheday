@@ -402,10 +402,7 @@ class TwitterCredential:
 
 
 @dataclasses.dataclass
-class TwitterProfile:
-    twitterProfileId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
+class RetrievedTwitterProfile:
     twitterId: str
     username: str
     name: str
@@ -415,6 +412,13 @@ class TwitterProfile:
     followerCount: int
     followingCount: int
     tweetCount: int
+
+
+@dataclasses.dataclass
+class TwitterProfile(RetrievedTwitterProfile):
+    twitterProfileId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
 
 
 @dataclasses.dataclass

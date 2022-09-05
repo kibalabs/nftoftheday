@@ -287,3 +287,11 @@ class QueryCollectionUsersRequest(BaseModel):
 
 class QueryCollectionUsersResponse(BaseModel):
     galleryUserRowListResponse: ApiListResponse[ApiGalleryUserRow]
+
+
+class UpdateAllTwitterUsersDeferredRequest(BaseModel):
+    pass
+
+
+class UpdateAllTwitterUsersDeferredResponse(BaseModel):
+    pass
