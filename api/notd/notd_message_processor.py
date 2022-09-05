@@ -4,7 +4,6 @@ from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
 
-from notd.gallery_manager import GalleryManager
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
