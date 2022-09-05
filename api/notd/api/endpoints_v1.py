@@ -7,7 +7,7 @@ from typing import TypeVar
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
-from notd.api.models_v1 import ApiAirdrop
+from notd.api.models_v1 import ApiAirdrop, ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -266,6 +266,12 @@ class FollowCollectionUserRequest(BaseModel):
 
 class FollowCollectionUserResponse(BaseModel):
     pass
+
+class GetGalleryUserOwnedCollectionsRequest(BaseModel):
+    pass
+
+class GetGalleryUserOwnedCollectionsResponse(BaseModel):
+    ownedCollections: List[ApiGalleryOwnedCollection]
 
 ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
 

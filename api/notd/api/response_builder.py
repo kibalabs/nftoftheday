@@ -5,7 +5,7 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
-from notd.api.models_v1 import ApiAirdrop
+from notd.api.models_v1 import ApiAirdrop, ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -21,7 +21,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
-from notd.model import Airdrop
+from notd.model import Airdrop, GalleryOwnedCollection
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
@@ -280,3 +280,12 @@ class ResponseBuilder:
             items=(await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRowListResponse.items])),
             totalCount=galleryUserRowListResponse.totalCount,
         )
+
+    async def gallery_owned_collection_from_model(self, ownedCollection: GalleryOwnedCollection) -> ApiGalleryOwnedCollection:
+        return ApiGalleryOwnedCollection(
+            collection=(await self.collection_from_model(collection=ownedCollection.collection)) if ownedCollection.collection else None,
+            tokens=(await self.collection_tokens_from_models(tokenMetadatas=ownedCollection.tokenMetadatas)) if ownedCollection.tokenMetadatas else None,
+        )
+
+    async def gallery_owned_collections_from_models(self, ownedCollections: Sequence[GalleryOwnedCollection]) -> Sequence[ApiGalleryOwnedCollection]:
+        return await asyncio.gather(*[self.gallery_owned_collection_from_model(ownedCollection=ownedCollection) for ownedCollection in ownedCollections])
