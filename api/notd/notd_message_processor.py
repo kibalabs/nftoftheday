@@ -27,9 +27,8 @@ from notd.messages import UpdateTokenOwnershipMessageContent
 
 class NotdMessageProcessor(MessageProcessor):
 
-    def __init__(self, notdManager: NotdManager, galleryManager: GalleryManager):
+    def __init__(self, notdManager: NotdManager):
         self.notdManager = notdManager
-        self.galleryManager = galleryManager
 
     async def process_message(self, message: SqsMessage) -> None:
         if message.command == ProcessBlockMessageContent.get_command():
@@ -125,5 +124,5 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == UpdateAllTwitterUsersMessageContent.get_command():
             messageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)
-            await self.galleryManager.update_all_twitter_users()
+            await self.notdManager.update_all_twitter_users()
         raise KibaException(message='Message was unhandled')
