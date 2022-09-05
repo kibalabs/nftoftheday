@@ -86,7 +86,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.reprocess_old_blocks_deferred()
         return ReceiveNewBlocksDeferredResponse()
 
-    @router.post('/update-all-twitter-users-deferred/')
+    @router.post('/update-all-twitter-users-deferred')
     async def update_all_twitter_users() -> UpdateAllTwitterUsersDeferredResponse:
         await notdManager.update_all_twitter_users_deferred()
         return UpdateAllTwitterUsersDeferredResponse()
