@@ -136,9 +136,7 @@ class TwitterManager:
 
     async def update_all_twitter_users(self) -> None:
         allTwitterProfiles = await self.retriever.list_twitter_profiles()
-        twitterIdProfileMap: Dict[str, TwitterProfile] = defaultdict(TwitterProfile)
-        for twitterProfile in allTwitterProfiles:
-            twitterIdProfileMap[twitterProfile.twitterId] = twitterProfile
+        twitterIdProfileMap = {twitterProfile.twitterId: twitterProfile for twitterProfile in allTwitterProfiles}
         twitterIds = list(twitterIdProfileMap.keys())
         chunkedIds = list_util.generate_chunks(twitterIds, 100)
         for chunk in chunkedIds:
