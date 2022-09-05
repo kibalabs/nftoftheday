@@ -3,8 +3,6 @@ import json
 import os
 import urllib.parse as urlparse
 import uuid
-from collections import defaultdict
-from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -21,10 +19,8 @@ from notd.messages import UpdateAllTwitterUsersMessageContent
 from notd.model import RetrievedTwitterProfile
 from notd.model import Signature
 from notd.model import TwitterCredential
-from notd.model import TwitterProfile
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import TwitterProfilesTable
 
 
 class TwitterManager:
