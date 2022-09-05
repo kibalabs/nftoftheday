@@ -1,9 +1,10 @@
 import base64
+from collections import defaultdict
 import json
 import os
 import urllib.parse as urlparse
 import uuid
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from core.exceptions import FoundRedirectException
 from core.exceptions import NotFoundException
@@ -13,6 +14,7 @@ from core.requester import Requester
 from core.util import date_util
 from core.util import dict_util
 from core.util import list_util
+from notd.model import TwitterProfile
 from notd.store.schema import TwitterProfilesTable
 from notd.model import RetrievedTwitterProfile
 
@@ -22,16 +24,14 @@ from notd.model import TwitterCredential
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
-_TWITTER_BEARER_TOKEN=os.environ("TWITTER_BEARER_TOKEN")
-
-
 class TwitterManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester, workQueue: SqsMessageQueue):
+    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester, workQueue: SqsMessageQueue, twitterBearerToken: str):
         self.saver = saver
         self.retriever = retriever
         self.requester = requester
         self.workQueue = workQueue
+        self.twitterBearerToken = twitterBearerToken
         self.clientId = os.environ.get("TWITTER_OAUTH_CLIENT_ID")
         self.clientSecret = os.environ.get("TWITTER_OAUTH_CLIENT_SECRET")
         self.redirectUri = os.environ.get("TWITTER_OAUTH_REDIRECT_URI")
@@ -132,22 +132,21 @@ class TwitterManager:
         await self.workQueue.send_message(message=UpdateAllTwitterUsersMessageContent().to_message())
 
     async def update_all_twitter_users(self) -> None:
-        query = (
-            TwitterProfilesTable.select()
-            .with_only_columns([TwitterProfilesTable.c.twitterId])
-        )
-        result = await self.retriever.database.execute(query=query)
-        twitterIds = [row[0] for row in result]
+        allTwitterProfiles = await self.retriever.list_twitter_profiles()
+        twitterIdProfileMap: Dict[str, TwitterProfile] = defaultdict(TwitterProfile)
+        for twitterProfile in allTwitterProfiles:
+            twitterIdProfileMap[twitterProfile.twitterId] = twitterProfile
+        twitterIds = list(twitterIdProfileMap.keys())
         chunkedIds = list_util.generate_chunks(twitterIds, 100)
         for chunk in chunkedIds:
-            ids = ''.join(chunk)
+            ids = ','.join(chunk)
             dataDict = {
                 'ids':  ids,
                 'expansions': 'pinned_tweet_id',
                 'user.fields': 'created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld',
             }
             retrievedTwitterProfiles: List[RetrievedTwitterProfile] = []
-            userResponse = await self.requester.get(url='https://api.twitter.com/2/users', dataDict=dataDict, headers={'Authorization': f'Bearer {_TWITTER_BEARER_TOKEN}'})
+            userResponse = await self.requester.get(url='https://api.twitter.com/2/users', dataDict=dataDict, headers={'Authorization': f'Bearer {self.twitterBearerToken}'})
             userResponseDict = userResponse.json()
             for userData in userResponseDict['data']:
                 retrievedTwitterProfiles += [
@@ -164,7 +163,7 @@ class TwitterManager:
                     )
                 ]
             for retrievedTwitterProfile in  retrievedTwitterProfiles:
-                twitterProfile = await self.retriever.get_twitter_profile_by_twitter_id(twitterId=retrievedTwitterProfile.twitterId)
+                twitterProfile = twitterIdProfileMap[retrievedTwitterProfile.twitterId]
                 await self.saver.update_twitter_profile(twitterProfileId=twitterProfile.twitterProfileId, username=retrievedTwitterProfile.username, name=retrievedTwitterProfile.name, description=retrievedTwitterProfile.description, isVerified=retrievedTwitterProfile.isVerified, pinnedTweetId=retrievedTwitterProfile.pinnedTweetId, followerCount=retrievedTwitterProfile.followerCount, followingCount=retrievedTwitterProfile.followingCount, tweetCount=retrievedTwitterProfile.tweetCount)
 
 

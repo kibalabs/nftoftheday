@@ -333,9 +333,3 @@ class GalleryManager:
         if not userProfile.twitterId:
             raise BadRequestException('NO_TWITTER_ID')
         await self.twitterManager.follow_user_from_user(userTwitterId=accountProfile.twitterId, targetTwitterId=userProfile.twitterId)
-
-    async def update_all_twitter_users_deferred(self) -> None:
-        await self.twitterManager.update_all_twitter_users_deferred()
-
-    async def update_all_twitter_users(self) -> None:
-        await self.twitterManager.update_all_twitter_users()
