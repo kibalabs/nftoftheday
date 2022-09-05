@@ -133,8 +133,8 @@ class TokenMetadataProcessor():
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
-            name=str(name).replace('\u0000', ''),
-            description=str(description).replace('\u0000', '') if description else None,
+            name=str(name).encode('utf-8', 'namereplace').decode(),
+            description=str(description).encode('utf-8', 'namereplace').decode() if description else None,
             imageUrl=imageUrl,
             resizableImageUrl=None,
             animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
@@ -254,7 +254,7 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         if isinstance(tokenMetadataDict, list):
             tokenMetadataDict = tokenMetadataDict[0] if len(tokenMetadataDict) > 0 else {}
-        await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
+        # await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         if registryAddress in GALLERY_COLLECTIONS and retrievedTokenMetadata.imageUrl:
             image = await self.pabloClient.upload_image_url(url=retrievedTokenMetadata.imageUrl)
