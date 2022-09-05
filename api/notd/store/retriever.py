@@ -274,7 +274,7 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
-            raise NotFoundException(message=f'Latest Update  with key:{key} and name;{name} not found')
+            raise NotFoundException(message=f'Latest Update with key:{key} and name;{name} not found')
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
 

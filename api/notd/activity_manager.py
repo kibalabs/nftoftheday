@@ -2,6 +2,7 @@ import datetime
 from typing import Set
 from typing import Tuple
 
+from core.exceptions import NotFoundException
 from core import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter
@@ -9,6 +10,7 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
+from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.date_util import date_hour_from_datetime
@@ -93,6 +95,9 @@ class ActivityManager:
                 else:
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
+    async def update_total_activity_for_all_collections_deferred(self) -> None:
+        await self.workQueue.send_message(message=UpdateTotalActivityForAllCollectionsMessageContent().to_message())
+
     async def update_total_activity_for_all_collections(self) -> None:
         processStartDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='total_collection_activities')
@@ -112,8 +117,12 @@ class ActivityManager:
         address = chain_util.normalize_address(address)
         retrievedCollectionTotalActivity = await self.collectionActivityProcessor.calculate_collection_total_activity(address=address)
         async with self.saver.create_transaction() as connection:
-            collectionTotalActivity = await self.retriever.get_collection_total_activity_by_address(address=address, connection=connection)
+            collectionTotalActivity = None
+            try:
+                collectionTotalActivity = await self.retriever.get_collection_total_activity_by_address(address=address, connection=connection)
+            except NotFoundException:
+                pass
             if collectionTotalActivity:
                 await self.saver.update_collection_total_activity(connection=connection, collectionActivityId=collectionTotalActivity.collectionTotalActivityId, address=address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)
             else:
-                await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionTotalActivity.address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)
+                await self.saver.create_collection_total_activity(connection=connection, address=retrievedCollectionTotalActivity.address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)

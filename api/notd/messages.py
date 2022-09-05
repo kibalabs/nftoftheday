@@ -51,6 +51,10 @@ class UpdateActivityForAllCollectionsMessageContent(MessageContent):
     _COMMAND = 'UPDATE_ACTIVITY_FOR_ALL_COLLECTIONS'
 
 
+class UpdateTotalActivityForAllCollectionsMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOTAL_ACTIVITY_FOR_ALL_COLLECTIONS'
+
+
 class UpdateActivityForCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_COLLECTION_ACTIVITY'
     address: str

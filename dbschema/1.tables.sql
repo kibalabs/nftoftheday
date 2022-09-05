@@ -361,7 +361,7 @@ CREATE TABLE tbl_gallery_customers (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     name TEXT NOT NULL,
     registry_address TEXT NOT NULL
-)
+);
 CREATE UNIQUE INDEX tbl_gallery_customers_registry_address on tbl_gallery_customers (registry_address);
 
 CREATE TABLE tbl_collection_total_activities (
@@ -375,7 +375,7 @@ CREATE TABLE tbl_collection_total_activities (
     minimum_value NUMERIC(256, 0) NOT NULL,
     maximum_value NUMERIC(256, 0) NOT NULL,
     average_value NUMERIC(256, 0) NOT NULL
-)
+);
 CREATE UNIQUE INDEX tbl_collection_total_activities_address on tbl_collection_total_activities (address);
 CREATE INDEX tbl_collection_total_activities_created_date ON tbl_collection_total_activities (created_date);
 CREATE INDEX tbl_collection_total_activities_updated_date ON tbl_collection_total_activities (updated_date);

@@ -4,6 +4,7 @@ from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from notd.store.schema import CollectionHourlyActivityTable
 
 from notd.date_util import date_hour_from_datetime
 from notd.model import RetrievedCollectionHourlyActivity
@@ -48,7 +49,7 @@ class CollectionActivityProcessor:
         address = chain_util.normalize_address(address)
         collectionHourlyActivities = await self.retriever.list_collection_activities(
           fieldFilters=[
-                StringFieldFilter(TokenTransfersTable.c.registryAddress.key, eq=address),
+                StringFieldFilter(CollectionHourlyActivityTable.c.address.key, eq=address),
             ],
         )
         saleCount = 0
