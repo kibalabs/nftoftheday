@@ -2,21 +2,21 @@ import datetime
 from typing import Set
 from typing import Tuple
 
-from core.exceptions import NotFoundException
 from core import logging
+from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
-from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.date_util import date_hour_from_datetime
 from notd.date_util import generate_clock_hour_intervals
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
+from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 from notd.messages import UpdateTotalActivityForCollectionMessageContent
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -101,11 +101,10 @@ class ActivityManager:
     async def update_total_activity_for_all_collections(self) -> None:
         processStartDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='total_collection_activities')
-        query =(
+        query = (
             CollectionHourlyActivityTable.select()
             .with_only_columns([CollectionHourlyActivityTable.c.address])
             .filter(CollectionHourlyActivityTable.c.date >= latestUpdate.date)
-            .filter(CollectionHourlyActivityTable.c.date < processStartDate)
         )
         result = await self.retriever.database.execute(query=query)
         changedAddresses = {row[0] for row in result}

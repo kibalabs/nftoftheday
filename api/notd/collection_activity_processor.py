@@ -4,13 +4,13 @@ from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-from notd.store.schema import CollectionHourlyActivityTable
 
 from notd.date_util import date_hour_from_datetime
 from notd.model import RetrievedCollectionHourlyActivity
 from notd.model import RetrievedCollectionTotalActivity
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionHourlyActivityTable
 from notd.store.schema import TokenTransfersTable
 
 

@@ -3,7 +3,6 @@ from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
 from core.queues.model import SqsMessage
 from core.util import date_util
-from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
@@ -23,6 +22,7 @@ from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
+from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 from notd.messages import UpdateTotalActivityForCollectionMessageContent
 
 
