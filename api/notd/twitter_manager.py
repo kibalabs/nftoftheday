@@ -1,10 +1,12 @@
 import base64
-from collections import defaultdict
 import json
 import os
 import urllib.parse as urlparse
 import uuid
-from typing import Dict, List, Optional
+from collections import defaultdict
+from typing import Dict
+from typing import List
+from typing import Optional
 
 from core.exceptions import FoundRedirectException
 from core.exceptions import NotFoundException
@@ -14,15 +16,16 @@ from core.requester import Requester
 from core.util import date_util
 from core.util import dict_util
 from core.util import list_util
-from notd.model import TwitterProfile
-from notd.store.schema import TwitterProfilesTable
-from notd.model import RetrievedTwitterProfile
 
 from notd.messages import UpdateAllTwitterUsersMessageContent
+from notd.model import RetrievedTwitterProfile
 from notd.model import Signature
 from notd.model import TwitterCredential
+from notd.model import TwitterProfile
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TwitterProfilesTable
+
 
 class TwitterManager:
 

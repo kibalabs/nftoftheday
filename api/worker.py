@@ -13,7 +13,6 @@ from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from pablo import PabloClient
-from notd.twitter_manager import TwitterManager
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
@@ -34,6 +33,7 @@ from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
+from notd.twitter_manager import TwitterManager
 
 
 async def main():
