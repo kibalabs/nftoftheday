@@ -108,8 +108,11 @@ class ActivityManager:
         )
         result = await self.retriever.database.execute(query=query)
         changedAddresses = {row[0] for row in result}
-        messages = [UpdateTotalActivityForCollectionMessageContent(address=address).to_message() for address in changedAddresses]
-        await self.tokenQueue.send_messages(messages=messages)
+        # messages = [UpdateTotalActivityForCollectionMessageContent(address=address).to_message() for address in changedAddresses]
+        # await self.tokenQueue.send_messages(messages=messages)
+        for index, address in enumerate(changedAddresses):
+            print('address', address, index, len(changedAddresses))
+            await self.update_total_activity_for_collection(address=address)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=processStartDate)
 
     async def update_total_activity_for_collection(self, address: str) -> None:
@@ -122,6 +125,6 @@ class ActivityManager:
             except NotFoundException:
                 pass
             if collectionTotalActivity:
-                await self.saver.update_collection_total_activity(connection=connection, collectionActivityId=collectionTotalActivity.collectionTotalActivityId, address=address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)
+                await self.saver.update_collection_total_activity(connection=connection, collectionTotalActivityId=collectionTotalActivity.collectionTotalActivityId, address=address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)
             else:
                 await self.saver.create_collection_total_activity(connection=connection, address=retrievedCollectionTotalActivity.address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)

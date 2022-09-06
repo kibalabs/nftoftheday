@@ -34,7 +34,7 @@ from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import CollectionHourlyActivitiesTable
+from notd.store.schema import CollectionHourlyActivitiesTable, CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
@@ -340,17 +340,12 @@ class GalleryManager:
         await self.twitterManager.follow_user_from_user(userTwitterId=accountProfile.twitterId, targetTwitterId=userProfile.twitterId)
 
     async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> Sequence[GalleryOwnedCollection]:
-        volumeQuery = (
-            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalValue'))
-                .where(CollectionHourlyActivitiesTable.c.date > date_util.datetime_from_now(days=-14))
-                .group_by(CollectionHourlyActivitiesTable.c.address)
-        ).subquery()
         collectionsQuery = (
             sqlalchemy.select(TokenOwnershipsTable)
-                .join(volumeQuery, volumeQuery.c.address == TokenOwnershipsTable.c.registryAddress)
+                .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsTable.c.registryAddress)
                 .where(TokenOwnershipsTable.c.ownerAddress == userAddress)
                 .where(TokenOwnershipsTable.c.registryAddress != registryAddress)
-                .order_by(volumeQuery.c.totalValue.desc(), TokenOwnershipsTable.c.transferDate.asc())
+                .order_by(CollectionTotalActivitiesTable.c.totalValue.desc(), TokenOwnershipsTable.c.transferDate.asc())
         )
         collectionsResult = await self.retriever.database.execute(query=collectionsQuery)
         collectionTokenIds = [(row[TokenOwnershipsTable.c.registryAddress], row[TokenOwnershipsTable.c.tokenId]) for row in collectionsResult]
