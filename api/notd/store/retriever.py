@@ -237,8 +237,8 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
-            raise NotFoundException(message=f'Total Activity  with address:{address} not found')
-        collectionTotalActivity = latest_update_from_row(row)
+            raise NotFoundException(message=f'CollectionTotalActivity with address:{address} not found')
+        collectionTotalActivity = collection_total_activity_from_row(row)
         return collectionTotalActivity
 
     async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[UserInteraction]:
@@ -274,7 +274,7 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
-            raise NotFoundException(message=f'Latest Update with key:{key} and name;{name} not found')
+            raise NotFoundException(message=f'LatestUpdate with key:{key} and name;{name} not found')
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
 

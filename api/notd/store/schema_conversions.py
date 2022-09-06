@@ -22,6 +22,7 @@ from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
+from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -164,16 +165,16 @@ def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
 
 def collection_total_activity_from_row(row: Mapping) -> CollectionTotalActivity:
     return CollectionTotalActivity(
-        collectionTotalActivityId=row[CollectionHourlyActivitiesTable.c.collectionTotalActivityId],
-        createdDate=row[CollectionHourlyActivitiesTable.c.createdDate],
-        updatedDate=row[CollectionHourlyActivitiesTable.c.updatedDate],
-        address=row[CollectionHourlyActivitiesTable.c.address],
-        transferCount=row[CollectionHourlyActivitiesTable.c.transferCount],
-        saleCount=row[CollectionHourlyActivitiesTable.c.saleCount],
-        totalValue=row[CollectionHourlyActivitiesTable.c.totalValue],
-        minimumValue=row[CollectionHourlyActivitiesTable.c.minimumValue],
-        maximumValue=row[CollectionHourlyActivitiesTable.c.maximumValue],
-        averageValue=row[CollectionHourlyActivitiesTable.c.averageValue],
+        collectionTotalActivityId=row[CollectionTotalActivitiesTable.c.collectionTotalActivityId],
+        createdDate=row[CollectionTotalActivitiesTable.c.createdDate],
+        updatedDate=row[CollectionTotalActivitiesTable.c.updatedDate],
+        address=row[CollectionTotalActivitiesTable.c.address],
+        transferCount=row[CollectionTotalActivitiesTable.c.transferCount],
+        saleCount=row[CollectionTotalActivitiesTable.c.saleCount],
+        totalValue=row[CollectionTotalActivitiesTable.c.totalValue],
+        minimumValue=row[CollectionTotalActivitiesTable.c.minimumValue],
+        maximumValue=row[CollectionTotalActivitiesTable.c.maximumValue],
+        averageValue=row[CollectionTotalActivitiesTable.c.averageValue],
     )
 
 
