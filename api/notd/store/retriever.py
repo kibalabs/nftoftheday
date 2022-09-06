@@ -11,6 +11,7 @@ from sqlalchemy.sql import Select
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import TokenAttribute
@@ -25,7 +26,8 @@ from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
+from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -43,6 +45,7 @@ from notd.store.schema import UserProfilesTable
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import collection_total_activity_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import lock_from_row
 from notd.store.schema_conversions import token_attribute_from_row
@@ -203,16 +206,40 @@ class Retriever(CoreRetriever):
         return tokenOwnership
 
     async def list_collection_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
-        query = CollectionHourlyActivityTable.select()
+        query = CollectionHourlyActivitiesTable.select()
         if fieldFilters:
-            query = self._apply_field_filters(query=query, table=CollectionHourlyActivityTable, fieldFilters=fieldFilters)
+            query = self._apply_field_filters(query=query, table=CollectionHourlyActivitiesTable, fieldFilters=fieldFilters)
         if orders:
-            query = self._apply_orders(query=query, table=CollectionHourlyActivityTable, orders=orders)
+            query = self._apply_orders(query=query, table=CollectionHourlyActivitiesTable, orders=orders)
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
         collectionActivities = [collection_activity_from_row(row) for row in result]
         return collectionActivities
+
+    async def list_collection_total_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionTotalActivity]:
+        query = CollectionTotalActivitiesTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=CollectionTotalActivitiesTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=CollectionTotalActivitiesTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        collectionTotalActivities = [collection_total_activity_from_row(row) for row in result]
+        return collectionTotalActivities
+
+    async def get_collection_total_activity_by_address(self, address: str, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
+        query = (
+            CollectionTotalActivitiesTable.select()
+            .where(CollectionTotalActivitiesTable.c.address == address)
+        )
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'Total Activity  with address:{address} not found')
+        collectionTotalActivity = latest_update_from_row(row)
+        return collectionTotalActivity
 
     async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[UserInteraction]:
         query = UserInteractionsTable.select()
@@ -247,7 +274,7 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()
         if not row:
-            raise NotFoundException(message=f'Latest Update  with key:{key} and name;{name} not found')
+            raise NotFoundException(message=f'Latest Update with key:{key} and name;{name} not found')
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
 

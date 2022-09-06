@@ -39,6 +39,7 @@ from notd.api.endpoints_v1 import UpdateCollectionTokensRequest
 from notd.api.endpoints_v1 import UpdateCollectionTokensResponse
 from notd.api.endpoints_v1 import UpdateLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTokenAttributesForAllCollectionsDeferredResponse
+from notd.api.endpoints_v1 import UpdateTotalActivityForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import datetime
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
@@ -95,6 +96,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_views_deferred():
         await notdManager.refresh_views_deferred()
         return ReceiveNewBlocksDeferredResponse()
+
+    @router.post('/collections/update-total-activity-deferred', response_model=UpdateTotalActivityForAllCollectionsDeferredResponse)
+    async def update_total_activity_for_all_collections_deferred():
+        await notdManager.update_total_activity_for_all_collections_deferred()
+        return UpdateTotalActivityForAllCollectionsDeferredResponse()
 
     @router.post('/collections/update-latest-listings-deferred', response_model=UpdateLatestListingsAllCollectionsDeferredResponse)
     async def update_latest_listings_for_all_collections_deferred():

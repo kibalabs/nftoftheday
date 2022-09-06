@@ -34,7 +34,7 @@ from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
@@ -341,9 +341,9 @@ class GalleryManager:
 
     async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> Sequence[GalleryOwnedCollection]:
         volumeQuery = (
-            sqlalchemy.select(CollectionHourlyActivityTable.c.address, sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue).label('totalValue'))
-                .where(CollectionHourlyActivityTable.c.date > date_util.datetime_from_now(days=-14))
-                .group_by(CollectionHourlyActivityTable.c.address)
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalValue'))
+                .where(CollectionHourlyActivitiesTable.c.date > date_util.datetime_from_now(days=-14))
+                .group_by(CollectionHourlyActivitiesTable.c.address)
         ).subquery()
         collectionsQuery = (
             sqlalchemy.select(TokenOwnershipsTable)

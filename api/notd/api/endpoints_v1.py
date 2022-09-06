@@ -88,6 +88,12 @@ class UpdateActivityForAllCollectionsDeferredRequest(BaseModel):
 class UpdateActivityForAllCollectionsDeferredResponse(BaseModel):
     pass
 
+class UpdateTotalActivityForAllCollectionsDeferredRequest(BaseModel):
+    pass
+
+class UpdateTotalActivityForAllCollectionsDeferredResponse(BaseModel):
+    pass
+
 class SubscribeRequest(BaseModel):
     email: str
 

@@ -5,6 +5,7 @@ from typing import Optional
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import Signature
@@ -20,7 +21,7 @@ from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -147,17 +148,32 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
 
 def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
     return CollectionHourlyActivity(
-        collectionActivityId=row[CollectionHourlyActivityTable.c.collectionActivityId],
-        createdDate=row[CollectionHourlyActivityTable.c.createdDate],
-        updatedDate=row[CollectionHourlyActivityTable.c.updatedDate],
-        address=row[CollectionHourlyActivityTable.c.address],
-        date=row[CollectionHourlyActivityTable.c.date],
-        transferCount=row[CollectionHourlyActivityTable.c.transferCount],
-        saleCount=row[CollectionHourlyActivityTable.c.saleCount],
-        totalValue=row[CollectionHourlyActivityTable.c.totalValue],
-        minimumValue=row[CollectionHourlyActivityTable.c.minimumValue],
-        maximumValue=row[CollectionHourlyActivityTable.c.maximumValue],
-        averageValue=row[CollectionHourlyActivityTable.c.averageValue],
+        collectionActivityId=row[CollectionHourlyActivitiesTable.c.collectionActivityId],
+        createdDate=row[CollectionHourlyActivitiesTable.c.createdDate],
+        updatedDate=row[CollectionHourlyActivitiesTable.c.updatedDate],
+        address=row[CollectionHourlyActivitiesTable.c.address],
+        date=row[CollectionHourlyActivitiesTable.c.date],
+        transferCount=row[CollectionHourlyActivitiesTable.c.transferCount],
+        saleCount=row[CollectionHourlyActivitiesTable.c.saleCount],
+        totalValue=row[CollectionHourlyActivitiesTable.c.totalValue],
+        minimumValue=row[CollectionHourlyActivitiesTable.c.minimumValue],
+        maximumValue=row[CollectionHourlyActivitiesTable.c.maximumValue],
+        averageValue=row[CollectionHourlyActivitiesTable.c.averageValue],
+    )
+
+
+def collection_total_activity_from_row(row: Mapping) -> CollectionTotalActivity:
+    return CollectionTotalActivity(
+        collectionTotalActivityId=row[CollectionHourlyActivitiesTable.c.collectionTotalActivityId],
+        createdDate=row[CollectionHourlyActivitiesTable.c.createdDate],
+        updatedDate=row[CollectionHourlyActivitiesTable.c.updatedDate],
+        address=row[CollectionHourlyActivitiesTable.c.address],
+        transferCount=row[CollectionHourlyActivitiesTable.c.transferCount],
+        saleCount=row[CollectionHourlyActivitiesTable.c.saleCount],
+        totalValue=row[CollectionHourlyActivitiesTable.c.totalValue],
+        minimumValue=row[CollectionHourlyActivitiesTable.c.minimumValue],
+        maximumValue=row[CollectionHourlyActivitiesTable.c.maximumValue],
+        averageValue=row[CollectionHourlyActivitiesTable.c.averageValue],
     )
 
 

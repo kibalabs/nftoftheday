@@ -361,5 +361,27 @@ CREATE TABLE tbl_gallery_customers (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     name TEXT NOT NULL,
     registry_address TEXT NOT NULL
-)
+);
 CREATE UNIQUE INDEX tbl_gallery_customers_registry_address on tbl_gallery_customers (registry_address);
+
+CREATE TABLE tbl_collection_total_activities (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    address TEXT NOT NULL,
+    transfer_count NUMERIC(256, 0) NOT NULL,
+    sale_count NUMERIC(256, 0) NOT NULL,
+    total_value NUMERIC(256, 0) NOT NULL,
+    minimum_value NUMERIC(256, 0) NOT NULL,
+    maximum_value NUMERIC(256, 0) NOT NULL,
+    average_value NUMERIC(256, 0) NOT NULL
+);
+CREATE UNIQUE INDEX tbl_collection_total_activities_address on tbl_collection_total_activities (address);
+CREATE INDEX tbl_collection_total_activities_created_date ON tbl_collection_total_activities (created_date);
+CREATE INDEX tbl_collection_total_activities_updated_date ON tbl_collection_total_activities (updated_date);
+CREATE INDEX tbl_collection_total_activities_transfer_count ON tbl_collection_total_activities (transfer_count);
+CREATE INDEX tbl_collection_total_activities_sale_count ON tbl_collection_total_activities (sale_count);
+CREATE INDEX tbl_collection_total_activities_total_value ON tbl_collection_total_activities (total_value);
+CREATE INDEX tbl_collection_total_activities_minimum_value ON tbl_collection_total_activities (minimum_value);
+CREATE INDEX tbl_collection_total_activities_maximum_value ON tbl_collection_total_activities (maximum_value);
+CREATE INDEX tbl_collection_total_activities_average_value ON tbl_collection_total_activities (average_value);

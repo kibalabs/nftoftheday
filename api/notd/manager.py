@@ -35,7 +35,7 @@ from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
@@ -196,26 +196,26 @@ class NotdManager:
         holderCountResult = await self.retriever.database.execute(query=holderCountQuery)
         (itemCount, holderCount) = holderCountResult.first()
         allActivityQuery = (
-            CollectionHourlyActivityTable.select()
+            CollectionHourlyActivitiesTable.select()
             .with_only_columns([
-                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.saleCount),
-                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.transferCount),
-                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
+                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.saleCount),
+                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.transferCount),
+                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
             ])
-            .where(CollectionHourlyActivityTable.c.address == address)
+            .where(CollectionHourlyActivitiesTable.c.address == address)
         )
         allActivityResult = await self.retriever.database.execute(query=allActivityQuery)
         (saleCount, transferCount, totalTradeVolume) = allActivityResult.first()
         dayActivityQuery = (
-            CollectionHourlyActivityTable.select()
+            CollectionHourlyActivitiesTable.select()
             .with_only_columns([
-                sqlalchemy.func.sum(CollectionHourlyActivityTable.c.totalValue),
-                sqlalchemy.func.min(CollectionHourlyActivityTable.c.minimumValue),
-                sqlalchemy.func.max(CollectionHourlyActivityTable.c.maximumValue),
+                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
+                sqlalchemy.func.min(CollectionHourlyActivitiesTable.c.minimumValue),
+                sqlalchemy.func.max(CollectionHourlyActivitiesTable.c.maximumValue),
             ])
-            .where(CollectionHourlyActivityTable.c.address == address)
-            .where(CollectionHourlyActivityTable.c.date >= startDate)
-            .where(CollectionHourlyActivityTable.c.date < endDate)
+            .where(CollectionHourlyActivitiesTable.c.address == address)
+            .where(CollectionHourlyActivitiesTable.c.date >= startDate)
+            .where(CollectionHourlyActivitiesTable.c.date < endDate)
         )
         dayActivityResult = await self.retriever.database.execute(query=dayActivityQuery)
         (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityResult.first()
@@ -235,9 +235,9 @@ class NotdManager:
         endDate = date_util.datetime_from_now()
         startDate = date_util.datetime_from_datetime(dt=endDate, days=-90)
         collectionActivities = await self.retriever.list_collection_activities(fieldFilters=[
-            StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
-            DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, gte=startDate),
-            DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, lt=endDate),
+            StringFieldFilter(fieldName=CollectionHourlyActivitiesTable.c.address.key, eq=address),
+            DateFieldFilter(fieldName=CollectionHourlyActivitiesTable.c.date.key, gte=startDate),
+            DateFieldFilter(fieldName=CollectionHourlyActivitiesTable.c.date.key, lt=endDate),
         ])
         delta = datetime.timedelta(days=1)
         collectionActivitiesPerDay = []
@@ -355,6 +355,15 @@ class NotdManager:
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         await self.activityManager.update_activity_for_collection(address=address, startDate=startDate)
+
+    async def update_total_activity_for_collection(self, address: str) -> None:
+        await self.activityManager.update_total_activity_for_collection(address=address)
+
+    async def update_total_activity_for_all_collections_deferred(self) -> None:
+        await self.activityManager.update_total_activity_for_all_collections_deferred()
+
+    async def update_total_activity_for_all_collections(self) -> None:
+        await self.activityManager.update_total_activity_for_all_collections()
 
     async def update_token_attributes_for_all_collections_deferred(self) -> None:
         await self.attributeManager.update_token_attributes_for_all_collections_deferred()

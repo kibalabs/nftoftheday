@@ -266,6 +266,24 @@ class CollectionDailyActivity:
 
 
 @dataclasses.dataclass
+class RetrievedCollectionTotalActivity:
+    address: str
+    transferCount: int
+    saleCount: int
+    totalValue: int
+    minimumValue: int
+    maximumValue: int
+    averageValue: int
+
+
+@dataclasses.dataclass
+class CollectionTotalActivity(RetrievedCollectionTotalActivity):
+    collectionTotalActivityId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
 class UserInteraction:
     userInteractionId: int
     createdDate: datetime.datetime
