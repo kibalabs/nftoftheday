@@ -10,7 +10,7 @@ from notd.model import RetrievedCollectionHourlyActivity
 from notd.model import RetrievedCollectionTotalActivity
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import TokenTransfersTable
 
 
@@ -49,7 +49,7 @@ class CollectionActivityProcessor:
         address = chain_util.normalize_address(address)
         collectionHourlyActivities = await self.retriever.list_collection_activities(
           fieldFilters=[
-                StringFieldFilter(CollectionHourlyActivityTable.c.address.key, eq=address),
+                StringFieldFilter(CollectionHourlyActivitiesTable.c.address.key, eq=address),
             ],
         )
         saleCount = 0

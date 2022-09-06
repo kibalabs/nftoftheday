@@ -26,8 +26,8 @@ from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionHourlyActivityTable
-from notd.store.schema import CollectionTotalActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
+from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -206,11 +206,11 @@ class Retriever(CoreRetriever):
         return tokenOwnership
 
     async def list_collection_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
-        query = CollectionHourlyActivityTable.select()
+        query = CollectionHourlyActivitiesTable.select()
         if fieldFilters:
-            query = self._apply_field_filters(query=query, table=CollectionHourlyActivityTable, fieldFilters=fieldFilters)
+            query = self._apply_field_filters(query=query, table=CollectionHourlyActivitiesTable, fieldFilters=fieldFilters)
         if orders:
-            query = self._apply_orders(query=query, table=CollectionHourlyActivityTable, orders=orders)
+            query = self._apply_orders(query=query, table=CollectionHourlyActivitiesTable, orders=orders)
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
@@ -218,11 +218,11 @@ class Retriever(CoreRetriever):
         return collectionActivities
 
     async def list_collection_total_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionTotalActivity]:
-        query = CollectionTotalActivityTable.select()
+        query = CollectionTotalActivitiesTable.select()
         if fieldFilters:
-            query = self._apply_field_filters(query=query, table=CollectionTotalActivityTable, fieldFilters=fieldFilters)
+            query = self._apply_field_filters(query=query, table=CollectionTotalActivitiesTable, fieldFilters=fieldFilters)
         if orders:
-            query = self._apply_orders(query=query, table=CollectionTotalActivityTable, orders=orders)
+            query = self._apply_orders(query=query, table=CollectionTotalActivitiesTable, orders=orders)
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
@@ -231,8 +231,8 @@ class Retriever(CoreRetriever):
 
     async def get_collection_total_activity_by_address(self, address: str, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
         query = (
-            CollectionTotalActivityTable.select()
-            .where(CollectionTotalActivityTable.c.address == address)
+            CollectionTotalActivitiesTable.select()
+            .where(CollectionTotalActivitiesTable.c.address == address)
         )
         result = await self.database.execute(query=query, connection=connection)
         row = result.first()

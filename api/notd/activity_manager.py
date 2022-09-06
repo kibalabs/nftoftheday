@@ -21,7 +21,7 @@ from notd.messages import UpdateTotalActivityForCollectionMessageContent
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import TokenTransfersTable
 
 
@@ -83,8 +83,8 @@ class ActivityManager:
             collectionActivity = await self.retriever.list_collection_activities(
                 connection=connection,
                 fieldFilters=[
-                    StringFieldFilter(fieldName=CollectionHourlyActivityTable.c.address.key, eq=address),
-                    DateFieldFilter(fieldName=CollectionHourlyActivityTable.c.date.key, eq=startDate)
+                    StringFieldFilter(fieldName=CollectionHourlyActivitiesTable.c.address.key, eq=address),
+                    DateFieldFilter(fieldName=CollectionHourlyActivitiesTable.c.date.key, eq=startDate)
                 ]
             )
             if len(collectionActivity) > 0:
@@ -102,9 +102,9 @@ class ActivityManager:
         processStartDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='total_collection_activities')
         query = (
-            CollectionHourlyActivityTable.select()
-            .with_only_columns([CollectionHourlyActivityTable.c.address])
-            .filter(CollectionHourlyActivityTable.c.date >= latestUpdate.date)
+            CollectionHourlyActivitiesTable.select()
+            .with_only_columns([CollectionHourlyActivitiesTable.c.address.distinct()])
+            .filter(CollectionHourlyActivitiesTable.c.updatedDate >= latestUpdate.date)
         )
         result = await self.retriever.database.execute(query=query)
         changedAddresses = {row[0] for row in result}

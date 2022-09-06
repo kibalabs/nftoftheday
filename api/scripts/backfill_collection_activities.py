@@ -19,7 +19,7 @@ from notd.date_util import date_hour_from_datetime
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionHourlyActivityTable
+from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.token_manager import TokenManager
 
 
@@ -54,8 +54,8 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
         else:
             collectionHourlyActivities = await retriever.list_collection_activities(
                 fieldFilters=[
-                    DateFieldFilter(CollectionHourlyActivityTable.c.date.key, gte=date_hour_from_datetime(tokenTransfers[0].blockDate)),
-                    DateFieldFilter(CollectionHourlyActivityTable.c.date.key, lte=date_hour_from_datetime(tokenTransfers[-1].blockDate)),
+                    DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, gte=date_hour_from_datetime(tokenTransfers[0].blockDate)),
+                    DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, lte=date_hour_from_datetime(tokenTransfers[-1].blockDate)),
                 ],
             )
             processedPairs = {(collectionHourlyActivity.address, collectionHourlyActivity.date) for collectionHourlyActivity in collectionHourlyActivities}
