@@ -34,7 +34,8 @@ from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import CollectionHourlyActivitiesTable, CollectionTotalActivitiesTable
+from notd.store.schema import CollectionHourlyActivitiesTable
+from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionsTable
