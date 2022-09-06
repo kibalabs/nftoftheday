@@ -108,11 +108,8 @@ class ActivityManager:
         )
         result = await self.retriever.database.execute(query=query)
         changedAddresses = {row[0] for row in result}
-        # messages = [UpdateTotalActivityForCollectionMessageContent(address=address).to_message() for address in changedAddresses]
-        # await self.tokenQueue.send_messages(messages=messages)
-        for index, address in enumerate(changedAddresses):
-            print('address', address, index, len(changedAddresses))
-            await self.update_total_activity_for_collection(address=address)
+        messages = [UpdateTotalActivityForCollectionMessageContent(address=address).to_message() for address in changedAddresses]
+        await self.tokenQueue.send_messages(messages=messages)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=processStartDate)
 
     async def update_total_activity_for_collection(self, address: str) -> None:
