@@ -6,8 +6,8 @@ from notd.model import GmAccountRow, GmCollectionRow
 
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import AccountCollectionGmsTable, AccountGmsTable, TokenOwnershipsTable
-from notd.store.schema_conversions import account_gm_from_row
+from notd.store.schema import AccountCollectionGmsTable, AccountGmsTable, CollectionTotalActivitiesTable, TokenCollectionsTable, TokenOwnershipsTable
+from notd.store.schema_conversions import account_gm_from_row, collection_from_row
 
 
 class GmManager:
@@ -50,13 +50,38 @@ class GmManager:
         return []
 
     async def list_gm_collection_rows(self) -> Sequence[GmCollectionRow]:
-        # Want all the collections grouped by day, week, month
         todayCountQuery = (
             AccountCollectionGmsTable.select()
-            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.count(AccountCollectionGmsTable.c.userAddress)])
+            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountAddress).label('count')])
             .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-1))
             .group_by(AccountCollectionGmsTable.c.registryAddress)
+        ).subquery()
+        weekCountQuery = (
+            AccountCollectionGmsTable.select()
+            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountAddress).label('count')])
+            .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-7))
+            .group_by(AccountCollectionGmsTable.c.registryAddress)
+        ).subquery()
+        monthCountQuery = (
+            AccountCollectionGmsTable.select()
+            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountAddress).label('count')])
+            .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-30))
+            .group_by(AccountCollectionGmsTable.c.registryAddress)
+        ).subquery()
+        collectionRowsQuery = (
+            sqlalchemy.select(TokenCollectionsTable, monthCountQuery, weekCountQuery, todayCountQuery)
+            .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenCollectionsTable.c.address)
+            .join(monthCountQuery, monthCountQuery.c.registryAddress == TokenCollectionsTable.c.address)
+            .join(weekCountQuery, weekCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
+            .join(todayCountQuery, todayCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
+            .order_by(todayCountQuery.c.count.desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
         )
-        todayCountResult = await self.retriever.database.execute(query=todayCountQuery)
-
-        return []
+        collectionRowsResult = await self.retriever.database.execute(query=collectionRowsQuery)
+        return [
+            GmCollectionRow(
+                collection=collection_from_row(row=row),
+                todayCount=int(row[todayCountQuery.c.count]) if row[todayCountQuery.c.count] else 0,
+                weekCount=int(row[weekCountQuery.c.count]) if row[weekCountQuery.c.count] else 0,
+                monthCount=int(row[monthCountQuery.c.count]) if row[monthCountQuery.c.count] else 0,
+            ) for row in collectionRowsResult
+        ]

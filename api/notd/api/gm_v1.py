@@ -16,12 +16,12 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
 
     @router.get('/account-rows', response_model=ListGmAccountRowsResponse)
     async def list_gm_account_rows() -> ListGmAccountRowsResponse:
-        accountRows = await gmManager.list_gm_account_rows()
-        return ListGmAccountRowsResponse(accountRows=(await responseBuilder.gm_account_rows_from_models(accountRows=accountRows)))
+        gmAccountRows = await gmManager.list_gm_account_rows()
+        return ListGmAccountRowsResponse(accountRows=(await responseBuilder.gm_account_rows_from_models(gmAccountRows=gmAccountRows)))
 
     @router.get('/collection-rows', response_model=ListGmCollectionRowsResponse)
     async def list_gm_collection_rows() -> ListGmCollectionRowsResponse:
-        collectionRows = await gmManager.list_gm_collection_rows()
-        return ListGmCollectionRowsResponse(collectionRows=(await responseBuilder.gm_collection_rows_from_models(collectionRows=collectionRows)))
+        gmCollectionRows = await gmManager.list_gm_collection_rows()
+        return ListGmCollectionRowsResponse(collectionRows=(await responseBuilder.gm_collection_rows_from_models(gmCollectionRows=gmCollectionRows)))
 
     return router
