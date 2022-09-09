@@ -53,25 +53,59 @@ class GmManager:
                 await self.saver.create_account_collection_gm(accountAddress=account, registryAddress=registryAddress, date=todayDate, signatureMessage=signatureMessage, signature=signature, connection=connection)
 
     async def list_gm_account_rows(self) -> Sequence[GmAccountRow]:
-        # Want all the accounts with their latest row and a count of rows in week / month
-        return []
+        latestRowQuery = (
+            AccountGmsTable.select()
+            .with_only_columns([AccountGmsTable.c.address, sqlalchemy.func.max(AccountGmsTable.c.date).label('date')])
+            .where(AccountGmsTable.c.date.in_([date_util.start_of_day(), date_util.start_of_day(dt=date_util.datetime_from_now(days=-1))]))
+            .group_by(AccountGmsTable.c.address)
+        ).subquery()
+        weekCountQuery = (
+            AccountGmsTable.select()
+            .with_only_columns([AccountGmsTable.c.address, sqlalchemy.func.count(AccountGmsTable.c.accountGmId).label('count')])
+            .where(AccountGmsTable.c.date > date_util.datetime_from_now(days=-7))
+            .group_by(AccountGmsTable.c.address)
+        ).subquery()
+        monthCountQuery = (
+            AccountGmsTable.select()
+            .with_only_columns([AccountGmsTable.c.address, sqlalchemy.func.count(AccountGmsTable.c.accountGmId).label('count')])
+            .where(AccountGmsTable.c.date > date_util.datetime_from_now(days=-30))
+            .group_by(AccountGmsTable.c.address)
+        ).subquery()
+        accountRowsQuery = (
+            sqlalchemy.select(AccountGmsTable, weekCountQuery, monthCountQuery)
+            .join(weekCountQuery, weekCountQuery.c.address == AccountGmsTable.c.address)
+            .join(monthCountQuery, monthCountQuery.c.address == AccountGmsTable.c.address)
+            .where(sqlalchemy.tuple_(AccountGmsTable.c.address, AccountGmsTable.c.date).in_(latestRowQuery))
+            .order_by(AccountGmsTable.c.streakLength.desc(), monthCountQuery.c.count.desc())
+        )
+        accountRowsResult = await self.retriever.database.execute(query=accountRowsQuery)
+        accountRows = [
+            GmAccountRow(
+                address=row[AccountGmsTable.c.address],
+                streakLength=row[AccountGmsTable.c.streakLength],
+                lastDate=row[AccountGmsTable.c.date],
+                weekCount=int(row[weekCountQuery.c.count]),
+                monthCount=int(row[monthCountQuery.c.count]),
+            ) for row in accountRowsResult
+        ]
+        return accountRows
 
     async def list_gm_collection_rows(self) -> Sequence[GmCollectionRow]:
         todayCountQuery = (
             AccountCollectionGmsTable.select()
-            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountAddress).label('count')])
+            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('count')])
             .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-1))
             .group_by(AccountCollectionGmsTable.c.registryAddress)
         ).subquery()
         weekCountQuery = (
             AccountCollectionGmsTable.select()
-            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountAddress).label('count')])
+            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('count')])
             .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-7))
             .group_by(AccountCollectionGmsTable.c.registryAddress)
         ).subquery()
         monthCountQuery = (
             AccountCollectionGmsTable.select()
-            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountAddress).label('count')])
+            .with_only_columns([AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('count')])
             .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-30))
             .group_by(AccountCollectionGmsTable.c.registryAddress)
         ).subquery()
@@ -84,7 +118,7 @@ class GmManager:
             .order_by(todayCountQuery.c.count.desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
         )
         collectionRowsResult = await self.retriever.database.execute(query=collectionRowsQuery)
-        return [
+        collectionRows = [
             GmCollectionRow(
                 collection=collection_from_row(row=row),
                 todayCount=int(row[todayCountQuery.c.count]) if row[todayCountQuery.c.count] else 0,
@@ -92,3 +126,4 @@ class GmManager:
                 monthCount=int(row[monthCountQuery.c.count]) if row[monthCountQuery.c.count] else 0,
             ) for row in collectionRowsResult
         ]
+        return collectionRows
