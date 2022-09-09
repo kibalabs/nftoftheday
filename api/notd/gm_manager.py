@@ -1,13 +1,20 @@
 from typing import Sequence
-import sqlalchemy
-from core.util import date_util
-from core.util import chain_util
-from notd.model import GmAccountRow, GmCollectionRow
 
+import sqlalchemy
+from core.util import chain_util
+from core.util import date_util
+
+from notd.model import GmAccountRow
+from notd.model import GmCollectionRow
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import AccountCollectionGmsTable, AccountGmsTable, CollectionTotalActivitiesTable, TokenCollectionsTable, TokenOwnershipsTable
-from notd.store.schema_conversions import account_gm_from_row, collection_from_row
+from notd.store.schema import AccountCollectionGmsTable
+from notd.store.schema import AccountGmsTable
+from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import TokenCollectionsTable
+from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema_conversions import account_gm_from_row
+from notd.store.schema_conversions import collection_from_row
 
 
 class GmManager:

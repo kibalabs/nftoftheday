@@ -9,7 +9,9 @@ from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
-from notd.model import AccountCollectionGm, AccountGm, Collection
+from notd.model import AccountCollectionGm
+from notd.model import AccountGm
+from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
@@ -25,7 +27,9 @@ from notd.model import TwitterCredential
 from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
-from notd.store.schema import AccountCollectionGmsTable, AccountGmsTable, BlocksTable
+from notd.store.schema import AccountCollectionGmsTable
+from notd.store.schema import AccountGmsTable
+from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
@@ -42,7 +46,9 @@ from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
 from notd.store.schema import UserProfilesTable
-from notd.store.schema_conversions import account_collection_gm_from_row, account_gm_from_row, block_from_row
+from notd.store.schema_conversions import account_collection_gm_from_row
+from notd.store.schema_conversions import account_gm_from_row
+from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import collection_total_activity_from_row
