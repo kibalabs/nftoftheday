@@ -303,6 +303,7 @@ AccountGmsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='streakLength', name='streak_length', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='signatureMessage', name='signature_message', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.JSON, nullable=False),
+    
 )
 
 AccountCollectionGmsTable = sqlalchemy.Table(
