@@ -20,6 +20,7 @@ from pablo import PabloClient
 from notd.activity_manager import ActivityManager
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.gallery_v1 import create_api as create_gallery_v1_api
+from notd.api.gm_v1 import create_api as create_gm_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.attribute_manager import AttributeManager
 from notd.block_manager import BlockManager
@@ -28,6 +29,7 @@ from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
 from notd.collection_processor import CollectionProcessor
 from notd.gallery_manager import GalleryManager
+from notd.gm_manager import GmManager
 from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager
@@ -89,11 +91,13 @@ twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requ
 notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager)
+gmManager = GmManager(retriever=retriever, saver=saver)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=name, version=version, environment=environment))
 app.include_router(prefix='/v1', router=create_v1_api(notdManager=notdManager, responseBuilder=responseBuilder))
 app.include_router(prefix='/gallery/v1', router=create_gallery_v1_api(galleryManager=galleryManager, responseBuilder=responseBuilder))
+app.include_router(prefix='/gm/v1', router=create_gm_v1_api(gmManager=gmManager, responseBuilder=responseBuilder))
 app.add_middleware(ExceptionHandlingMiddleware)
 app.add_middleware(ServerHeadersMiddleware, name=name, version=version, environment=environment)
 app.add_middleware(LoggingMiddleware, requestIdHolder=requestIdHolder)
