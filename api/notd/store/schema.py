@@ -308,7 +308,7 @@ AccountGmsTable = sqlalchemy.Table(
 AccountCollectionGmsTable = sqlalchemy.Table(
     'tbl_account_collection_gms',
     metadata,
-    sqlalchemy.Column(key='accountGmId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='accountCollectionGmId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
