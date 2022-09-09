@@ -183,6 +183,7 @@ class ApiGmAccountRow(BaseModel):
     weekCount: int
     monthCount: int
 
+    
 class ApiGmCollectionRow(BaseModel):
     collection: ApiCollection
     todayCount: int
