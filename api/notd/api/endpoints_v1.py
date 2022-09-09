@@ -7,7 +7,7 @@ from typing import TypeVar
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
-from notd.api.models_v1 import ApiAirdrop
+from notd.api.models_v1 import ApiAirdrop, ApiGmAccountRow, ApiGmCollectionRow
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -301,3 +301,23 @@ class UpdateAllTwitterUsersDeferredRequest(BaseModel):
 
 class UpdateAllTwitterUsersDeferredResponse(BaseModel):
     pass
+
+class CreateGmRequest(BaseModel):
+    account: str
+    signatureMessage: str
+    signature: str
+
+class CreateGmResponse(BaseModel):
+    pass
+
+class ListGmAccountRowsRequest(BaseModel):
+    pass
+
+class ListGmAccountRowsResponse(BaseModel):
+    accountRows: List[ApiGmAccountRow]
+
+class ListGmCollectionRowsRequest(BaseModel):
+    pass
+
+class ListGmCollectionRowsResponse(BaseModel):
+    collectionRows: List[ApiGmCollectionRow]

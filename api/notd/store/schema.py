@@ -291,3 +291,29 @@ UserRegistryFirstOwnershipsMaterializedView = sqlalchemy.Table(
     sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='joinDate', name='join_date', type_=sqlalchemy.DateTime, nullable=False),
 )
+
+AccountGmsTable = sqlalchemy.Table(
+    'tbl_account_gms',
+    metadata,
+    sqlalchemy.Column(key='accountGmId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='address', name='address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='date', name='date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='streakLength', name='streak_length', type_=sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column(key='signatureMessage', name='signature_message', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.JSON, nullable=False),
+)
+
+AccountCollectionGmsTable = sqlalchemy.Table(
+    'tbl_account_collection_gms',
+    metadata,
+    sqlalchemy.Column(key='accountGmId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='accountAddress', name='account_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='date', name='date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='signatureMessage', name='signature_message', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.JSON, nullable=False),
+)

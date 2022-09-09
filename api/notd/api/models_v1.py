@@ -174,3 +174,17 @@ class ApiGalleryUserRow(BaseModel):
 class ApiGalleryOwnedCollection(BaseModel):
     collection: ApiCollection
     tokens: List[ApiCollectionToken]
+
+
+class ApiGmAccountRow(BaseModel):
+    address: str
+    lastDate: datetime.datetime
+    streakLength: int
+    weekCount: int
+    monthCount: int
+
+class ApiGmCollectionRow(BaseModel):
+    collection: ApiCollection
+    todayCount: int
+    weekCount: int
+    monthCount: int

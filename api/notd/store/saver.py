@@ -10,7 +10,7 @@ from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
 
-from notd.model import Block
+from notd.model import AccountCollectionGm, AccountGm, Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionTotalActivity
@@ -27,7 +27,7 @@ from notd.model import TwitterCredential
 from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
-from notd.store.schema import BlocksTable
+from notd.store.schema import AccountCollectionGmsTable, AccountGmsTable, BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
@@ -825,3 +825,55 @@ class Saver(CoreSaver):
             values[TwitterProfilesTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = TwitterProfilesTable.update(TwitterProfilesTable.c.twitterProfileId == twitterProfileId).values(values)
         await self._execute(query=query, connection=connection)
+
+    async def create_account_gm(self, address: str, date: datetime.datetime, streakLength: int, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountGm:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            AccountGmsTable.c.createdDate.key: createdDate,
+            AccountGmsTable.c.updatedDate.key: updatedDate,
+            AccountGmsTable.c.address.key: address,
+            AccountGmsTable.c.date.key: date,
+            AccountGmsTable.c.streakLength.key: streakLength,
+            AccountGmsTable.c.signatureMessage.key: signatureMessage,
+            AccountGmsTable.c.signature.key: signature,
+        }
+        query = AccountGmsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        accountGmId = result.inserted_primary_key[0]
+        return AccountGm(
+            accountGmId=accountGmId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            address=address,
+            date=date,
+            streakLength=streakLength,
+            signatureMessage=signatureMessage,
+            signature=signature,
+        )
+
+    async def create_account_collection_gm(self, registryAddress: str, accountAddress: str, date: datetime.datetime, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountCollectionGm:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            AccountCollectionGmsTable.c.createdDate.key: createdDate,
+            AccountCollectionGmsTable.c.updatedDate.key: updatedDate,
+            AccountCollectionGmsTable.c.registryAddress.key: registryAddress,
+            AccountCollectionGmsTable.c.accountAddress.key: accountAddress,
+            AccountCollectionGmsTable.c.date.key: date,
+            AccountCollectionGmsTable.c.signatureMessage.key: signatureMessage,
+            AccountCollectionGmsTable.c.signature.key: signature,
+        }
+        query = AccountCollectionGmsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        accountCollectionGmId = result.inserted_primary_key[0]
+        return AccountCollectionGm(
+            accountCollectionGmId=accountCollectionGmId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            accountAddress=accountAddress,
+            date=date,
+            signatureMessage=signatureMessage,
+            signature=signature,
+        )
