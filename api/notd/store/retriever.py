@@ -472,7 +472,7 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'TwitterCredential with twitterId:{twitterId} not found')
         twitterCredential = twitter_credential_from_row(row)
         return twitterCredential
-    
+
     async def list_collection_owner_count(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionOwnerCount]:
         query = TwitterCredentialsTable.select()
         if fieldFilters:
@@ -482,8 +482,8 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        CollectionOwnerCount = [collection_owner_count_from_row(row) for row in result]
-        return CollectionOwnerCount
+        collectionOwnerCount = [collection_owner_count_from_row(row) for row in result]
+        return collectionOwnerCount
 
     async def list_account_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[AccountGm]:
         query = AccountGmsTable.select()
