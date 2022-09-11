@@ -36,7 +36,7 @@ class GmManager:
 
     # TODO(krishan711): The structure of the response should be handled in api layer
     async def generate_gms(self) -> Generator[GmNotification, None, None]:
-        nextIndex = 0 #len(self.notifications)
+        nextIndex = len(self.notifications)
         while True:
             notificationCount = len(self.notifications)
             if notificationCount > nextIndex:
