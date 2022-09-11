@@ -386,11 +386,32 @@ CREATE INDEX tbl_collection_total_activities_minimum_value ON tbl_collection_tot
 CREATE INDEX tbl_collection_total_activities_maximum_value ON tbl_collection_total_activities (maximum_value);
 CREATE INDEX tbl_collection_total_activities_average_value ON tbl_collection_total_activities (average_value);
 
+<<<<<<< HEAD
 CREATE TABLE tbl_owners_collection_count (
+=======
+CREATE TABLE tbl_account_gms (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    address TEXT NOT NULL,
+    date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    streak_length INTEGER NOT NULL,
+    signature_message TEXT NOT NULL,
+    signature TEXT NOT NULL
+);
+CREATE UNIQUE INDEX tbl_account_gms_address_date on tbl_account_gms (address, date);
+CREATE INDEX tbl_account_gms_created_date ON tbl_account_gms (created_date);
+CREATE INDEX tbl_account_gms_updated_date ON tbl_account_gms (updated_date);
+CREATE INDEX tbl_account_gms_address ON tbl_account_gms (address);
+CREATE INDEX tbl_account_gms_date ON tbl_account_gms (date);
+
+CREATE TABLE tbl_account_collection_gms (
+>>>>>>> main
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     registry_address TEXT NOT NULL,
+<<<<<<< HEAD
     owner_address TEXT NOT NULL,
     token_count NUMERIC(256, 0) NOT NULL,
 );
@@ -398,3 +419,17 @@ CREATE UNIQUE INDEX tbl_owners_collection_count_owner_address_registry_address o
 CREATE INDEX tbl_owners_collection_count_created_date ON tbl_owners_collection_count (created_date);
 CREATE INDEX tbl_owners_collection_count_updated_date ON tbl_owners_collection_count (updated_date);
 CREATE INDEX tbl_owners_collection_count_transfer_count ON tbl_owners_collection_count (transfer_count);
+=======
+    account_address TEXT NOT NULL,
+    date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    signature_message TEXT NOT NULL,
+    signature TEXT NOT NULL
+);
+CREATE UNIQUE INDEX tbl_account_collection_gms_registry_address_account_address_date on tbl_account_collection_gms (registry_address, account_address, date);
+CREATE INDEX tbl_account_collection_gms_created_date ON tbl_account_collection_gms (created_date);
+CREATE INDEX tbl_account_collection_gms_updated_date ON tbl_account_collection_gms (updated_date);
+CREATE INDEX tbl_account_collection_gms_registry_address ON tbl_account_collection_gms (registry_address);
+CREATE INDEX tbl_account_collection_gms_account_address ON tbl_account_collection_gms (account_address);
+CREATE INDEX tbl_account_collection_gms_registry_address_date ON tbl_account_collection_gms (registry_address, date);
+CREATE INDEX tbl_account_collection_gms_date ON tbl_account_collection_gms (date);
+>>>>>>> main

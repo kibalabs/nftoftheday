@@ -11,6 +11,8 @@ from sqlalchemy.sql import Select
 from notd.model import CollectionOwnerCount
 from notd.store.schema_conversions import collection_owner_count_from_row
 
+from notd.model import AccountCollectionGm
+from notd.model import AccountGm
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionTotalActivity
@@ -27,6 +29,8 @@ from notd.model import TwitterCredential
 from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
+from notd.store.schema import AccountCollectionGmsTable
+from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
@@ -44,6 +48,8 @@ from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
 from notd.store.schema import UserProfilesTable
+from notd.store.schema_conversions import account_collection_gm_from_row
+from notd.store.schema_conversions import account_gm_from_row
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
@@ -478,3 +484,45 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         CollectionOwnerCount = [collection_owner_count_from_row(row) for row in result]
         return CollectionOwnerCount
+
+    async def list_account_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[AccountGm]:
+        query = AccountGmsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=AccountGmsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=AccountGmsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        accountGms = [account_gm_from_row(row) for row in result]
+        return accountGms
+
+    async def get_account_gm(self, accountGmId: int, connection: Optional[DatabaseConnection] = None) -> AccountGm:
+        query = AccountGmsTable.select().where(AccountGmsTable.c.accountGmId == accountGmId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'AccountGm with id:{accountGmId} not found')
+        accountGm = account_gm_from_row(row)
+        return accountGm
+
+    async def list_account_collection_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[AccountCollectionGm]:
+        query = AccountCollectionGmsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=AccountCollectionGmsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=AccountCollectionGmsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        accountCollectionGms = [account_collection_gm_from_row(row) for row in result]
+        return accountCollectionGms
+
+    async def get_account_collection_gm(self, accountCollectionGmId: int, connection: Optional[DatabaseConnection] = None) -> AccountCollectionGm:
+        query = AccountCollectionGmsTable.select().where(AccountCollectionGmsTable.c.accountCollectionGmId == accountCollectionGmId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'AccountCollectionGm with id:{accountCollectionGmId} not found')
+        accountCollectionGm = account_collection_gm_from_row(row)
+        return accountCollectionGm

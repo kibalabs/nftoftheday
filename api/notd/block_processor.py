@@ -1,12 +1,12 @@
 import dataclasses
 import datetime
 import json
-import textwrap
 from collections import defaultdict
 from typing import Dict
 from typing import List
 from typing import Tuple
 
+import eth_abi
 from core import logging
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
@@ -109,7 +109,7 @@ class BlockProcessor:
             if len(event['topics']) == 3 and event['address'] == WRAPPED_ETHER_ADDRESS:
                 transactionHash = event['transactionHash'].hex()
                 fromAddress = chain_util.normalize_address(event['topics'][1].hex())
-                wethValue = int(event["data"], 16)
+                (wethValue, ) = eth_abi.decode(["uint256"], event['data'])
                 transactionHashWethValuesMap[transactionHash].append((fromAddress, wethValue))
         return transactionHashWethValuesMap
 
@@ -135,11 +135,7 @@ class BlockProcessor:
         operatorAddress = chain_util.normalize_address(event['topics'][1].hex())
         fromAddress = chain_util.normalize_address(event['topics'][2].hex())
         toAddress = chain_util.normalize_address(event['topics'][3].hex())
-        data = event['data']
-        data = textwrap.wrap(data[2:], 64)
-        data = [int(f'0x{elem}', 16) for elem in data]
-        tokenId = data[0]
-        amount = data[1]
+        (tokenId, amount, ) = eth_abi.decode(["uint256", "uint256"], event['data'])
         retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155single')]
         return retrievedEvents
 
@@ -163,14 +159,15 @@ class BlockProcessor:
         operatorAddress = chain_util.normalize_address(event['topics'][1].hex())
         fromAddress = chain_util.normalize_address(event['topics'][2].hex())
         toAddress = chain_util.normalize_address(event['topics'][3].hex())
+        # The data structure seems to be:
+        # [<something>, <something>, tokenIdListSize, tokenId0, tokenId1..., tokenCountListSize, tokenCount0, tokenCount1, ...]
         data = event['data']
-        data = textwrap.wrap(data[2:], 64)
-        data = [int(f'0x{elem}',16) for elem in data]
-        lengthOfArray = data[2]
-        tokenIds = data[3:3+lengthOfArray]
-        lengthOfValue = data[3+lengthOfArray]
-        amounts = data[4+lengthOfArray:4+lengthOfArray+lengthOfValue]
-        dataDict = {tokenIds[i]: amounts[i] for i in range(len(tokenIds))}
+        dataLength = int(len(data) / 32)
+        dataParams: List[int] = eth_abi.decode(["uint256"] * dataLength, event['data'])
+        tokenCount = int((dataLength - 4) / 2)
+        tokenIds = dataParams[3: 3 + tokenCount]  # pylint: disable=unsubscriptable-object
+        amounts = dataParams[3 + tokenCount + 1:]  # pylint: disable=unsubscriptable-object
+        dataDict = {int(tokenIds[i]): int(amounts[i]) for i in range(len(tokenIds))}
         retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
         return retrievedEvents
 

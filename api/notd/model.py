@@ -467,6 +467,48 @@ class GalleryOwnedCollection:
     collection: Collection
     tokenMetadatas: List[TokenMetadata]
 
+
+@dataclasses.dataclass
+class AccountGm:
+    accountGmId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    address: str
+    date: datetime.datetime
+    streakLength: int
+    signatureMessage: str
+    signature: str
+
+
+@dataclasses.dataclass
+class AccountCollectionGm:
+    accountCollectionGmId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    accountAddress: str
+    date: datetime.datetime
+    signatureMessage: str
+    signature: str
+
+
+@dataclasses.dataclass
+class GmAccountRow:
+    address: str
+    lastDate: datetime.datetime
+    streakLength: int
+    weekCount: int
+    monthCount: int
+
+
+@dataclasses.dataclass
+class GmCollectionRow:
+    collection: Collection
+    todayCount: int
+    weekCount: int
+    monthCount: int
+
+
 @dataclasses.dataclass
 class CollectionOwnerCount:
     collectionOwnerCountId: int

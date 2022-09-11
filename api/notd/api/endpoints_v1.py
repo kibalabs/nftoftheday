@@ -17,6 +17,8 @@ from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
+from notd.api.models_v1 import ApiGmAccountRow
+from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
@@ -301,3 +303,29 @@ class UpdateAllTwitterUsersDeferredRequest(BaseModel):
 
 class UpdateAllTwitterUsersDeferredResponse(BaseModel):
     pass
+
+class CreateGmRequest(BaseModel):
+    account: str
+    signatureMessage: str
+    signature: str
+
+class CreateGmResponse(BaseModel):
+    pass
+
+class CreateAnonymousGmRequest(BaseModel):
+    pass
+
+class CreateAnonymousGmResponse(BaseModel):
+    pass
+
+class ListGmAccountRowsRequest(BaseModel):
+    pass
+
+class ListGmAccountRowsResponse(BaseModel):
+    accountRows: List[ApiGmAccountRow]
+
+class ListGmCollectionRowsRequest(BaseModel):
+    pass
+
+class ListGmCollectionRowsResponse(BaseModel):
+    collectionRows: List[ApiGmCollectionRow]

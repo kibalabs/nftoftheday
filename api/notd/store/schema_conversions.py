@@ -4,6 +4,8 @@ from typing import Optional
 from notd.model import CollectionOwnerCount
 from notd.store.schema import CollectionOwnerCountTable
 
+from notd.model import AccountCollectionGm
+from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -22,6 +24,8 @@ from notd.model import TwitterCredential
 from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
+from notd.store.schema import AccountCollectionGmsTable
+from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
@@ -299,6 +303,7 @@ def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
         tweetCount=row[TwitterProfilesTable.c.tweetCount],
     )
 
+
 def collection_owner_count_from_row(row: Mapping) -> CollectionOwnerCount:
     return CollectionOwnerCount(
         collectionOwnerCountId=row[CollectionOwnerCountTable.c.collectionOwnerCountId],
@@ -307,4 +312,31 @@ def collection_owner_count_from_row(row: Mapping) -> CollectionOwnerCount:
         registryAddress=row[CollectionOwnerCountTable.c.registryAddress],
         ownerAddress=row[CollectionOwnerCountTable.c.ownerAddress],
         tokenCount=row[CollectionOwnerCountTable.c.collectionOwnerCountId],
+
+    )
+
+
+def account_gm_from_row(row: Mapping) -> AccountGm:
+    return AccountGm(
+        accountGmId=row[AccountGmsTable.c.accountGmId],
+        createdDate=row[AccountGmsTable.c.createdDate],
+        updatedDate=row[AccountGmsTable.c.updatedDate],
+        address=row[AccountGmsTable.c.address],
+        date=row[AccountGmsTable.c.date],
+        streakLength=row[AccountGmsTable.c.streakLength],
+        signatureMessage=row[AccountGmsTable.c.signatureMessage],
+        signature=row[AccountGmsTable.c.signature],
+    )
+
+
+def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
+    return AccountCollectionGm(
+        accountCollectionGmId=row[AccountCollectionGmsTable.c.accountCollectionGmId],
+        createdDate=row[AccountCollectionGmsTable.c.createdDate],
+        updatedDate=row[AccountCollectionGmsTable.c.updatedDate],
+        registryAddress=row[AccountCollectionGmsTable.c.registryAddress],
+        accountAddress=row[AccountCollectionGmsTable.c.accountAddress],
+        date=row[AccountCollectionGmsTable.c.date],
+        signatureMessage=row[AccountCollectionGmsTable.c.signatureMessage],
+        signature=row[AccountCollectionGmsTable.c.signature],
     )

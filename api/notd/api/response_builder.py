@@ -15,6 +15,8 @@ from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
+from notd.api.models_v1 import ApiGmAccountRow
+from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
@@ -31,6 +33,8 @@ from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
+from notd.model import GmAccountRow
+from notd.model import GmCollectionRow
 from notd.model import ListResponse
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -291,3 +295,26 @@ class ResponseBuilder:
 
     async def gallery_owned_collections_from_models(self, ownedCollections: Sequence[GalleryOwnedCollection]) -> Sequence[ApiGalleryOwnedCollection]:
         return await asyncio.gather(*[self.gallery_owned_collection_from_model(ownedCollection=ownedCollection) for ownedCollection in ownedCollections])
+
+    async def gm_account_row_from_model(self, gmAccountRow: GmAccountRow) -> ApiGmAccountRow:
+        return ApiGmAccountRow(
+            address=gmAccountRow.address,
+            lastDate=gmAccountRow.lastDate,
+            streakLength=gmAccountRow.streakLength,
+            weekCount=gmAccountRow.weekCount,
+            monthCount=gmAccountRow.monthCount,
+        )
+
+    async def gm_account_rows_from_models(self, gmAccountRows: Sequence[GmAccountRow]) -> Sequence[ApiGmAccountRow]:
+        return await asyncio.gather(*[self.gm_account_row_from_model(gmAccountRow=gmAccountRow) for gmAccountRow in gmAccountRows])
+
+    async def gm_collection_row_from_model(self, gmCollectionRow: GmCollectionRow) -> ApiGmCollectionRow:
+        return ApiGmCollectionRow(
+            collection=(await self.collection_from_model(collection=gmCollectionRow.collection)),
+            todayCount=gmCollectionRow.todayCount,
+            weekCount=gmCollectionRow.weekCount,
+            monthCount=gmCollectionRow.monthCount,
+        )
+
+    async def gm_collection_rows_from_models(self, gmCollectionRows: Sequence[GmCollectionRow]) -> Sequence[ApiGmCollectionRow]:
+        return await asyncio.gather(*[self.gm_collection_row_from_model(gmCollectionRow=gmCollectionRow) for gmCollectionRow in gmCollectionRows])
