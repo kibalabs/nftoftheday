@@ -825,3 +825,35 @@ class Saver(CoreSaver):
             values[TwitterProfilesTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = TwitterProfilesTable.update(TwitterProfilesTable.c.twitterProfileId == twitterProfileId).values(values)
         await self._execute(query=query, connection=connection)
+
+    async def create_collection_owner_count(self, ownerAddress: str, registryAddress:str, tokenCount: int, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TwitterProfilesTable.c.createdDate.key: createdDate,
+            TwitterProfilesTable.c.updatedDate.key: updatedDate,
+            TwitterProfilesTable.c.ownerAddress.key: ownerAddress,
+            TwitterProfilesTable.c.registryAddress.key: registryAddress,
+            TwitterProfilesTable.c.tokenCount.key: tokenCount,
+            
+        }
+        query = TwitterProfilesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        twitterProfileId = result.inserted_primary_key[0]
+        return TwitterProfile(
+            twitterProfileId=twitterProfileId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            ownerAddress=ownerAddress,
+            registryAddress=registryAddress,
+            tokenCount=tokenCount,
+        )
+
+    async def update_collection_owner_count(self, twitterProfileId: int, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if tokenCount is not None:
+            values[TwitterProfilesTable.c.tokenCount.key] = tokenCount
+        if len(values) > 0:
+            values[TwitterProfilesTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TwitterProfilesTable.update(TwitterProfilesTable.c.twitterProfileId == twitterProfileId).values(values)
+        await self._execute(query=query, connection=connection)

@@ -1,6 +1,8 @@
 from typing import Any
 from typing import Mapping
 from typing import Optional
+from notd.model import CollectionOwnerCount
+from notd.store.schema import CollectionOwnerCountTable
 
 from notd.model import Block
 from notd.model import Collection
@@ -295,4 +297,14 @@ def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
         followerCount=row[TwitterProfilesTable.c.followerCount],
         followingCount=row[TwitterProfilesTable.c.followingCount],
         tweetCount=row[TwitterProfilesTable.c.tweetCount],
+    )
+
+def collection_owner_count_from_row(row: Mapping) -> CollectionOwnerCount:
+    return CollectionOwnerCount(
+        collectionOwnerCountId=row[CollectionOwnerCountTable.c.collectionOwnerCountId],
+        createdDate=row[CollectionOwnerCountTable.c.createdDate],
+        updatedDate=row[CollectionOwnerCountTable.c.updatedDate],
+        registryAddress=row[CollectionOwnerCountTable.c.registryAddress],
+        ownerAddress=row[CollectionOwnerCountTable.c.ownerAddress],
+        tokenCount=row[CollectionOwnerCountTable.c.collectionOwnerCountId],
     )

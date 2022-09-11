@@ -466,3 +466,12 @@ class GalleryUserRow:
 class GalleryOwnedCollection:
     collection: Collection
     tokenMetadatas: List[TokenMetadata]
+
+@dataclasses.dataclass
+class CollectionOwnerCount:
+    collectionOwnerCountId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    ownerAddress: str
+    tokenCount: int

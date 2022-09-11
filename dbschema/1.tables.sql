@@ -385,3 +385,16 @@ CREATE INDEX tbl_collection_total_activities_total_value ON tbl_collection_total
 CREATE INDEX tbl_collection_total_activities_minimum_value ON tbl_collection_total_activities (minimum_value);
 CREATE INDEX tbl_collection_total_activities_maximum_value ON tbl_collection_total_activities (maximum_value);
 CREATE INDEX tbl_collection_total_activities_average_value ON tbl_collection_total_activities (average_value);
+
+CREATE TABLE tbl_owners_collection_count (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    owner_address TEXT NOT NULL,
+    token_count NUMERIC(256, 0) NOT NULL,
+);
+CREATE UNIQUE INDEX tbl_owners_collection_count_owner_address_registry_address on tbl_owners_collection_count (owner_address, registry_address);
+CREATE INDEX tbl_owners_collection_count_created_date ON tbl_owners_collection_count (created_date);
+CREATE INDEX tbl_owners_collection_count_updated_date ON tbl_owners_collection_count (updated_date);
+CREATE INDEX tbl_owners_collection_count_transfer_count ON tbl_owners_collection_count (transfer_count);

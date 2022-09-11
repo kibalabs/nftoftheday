@@ -8,6 +8,8 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
+from notd.model import CollectionOwnerCount
+from notd.store.schema_conversions import collection_owner_count_from_row
 
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -464,3 +466,15 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'TwitterCredential with twitterId:{twitterId} not found')
         twitterCredential = twitter_credential_from_row(row)
         return twitterCredential
+    
+    async def list_collection_owner_count(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionOwnerCount]:
+        query = TwitterCredentialsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TwitterCredentialsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TwitterCredentialsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        CollectionOwnerCount = [collection_owner_count_from_row(row) for row in result]
+        return CollectionOwnerCount
