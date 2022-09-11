@@ -1,7 +1,6 @@
 import dataclasses
 import datetime
 import json
-import textwrap
 from collections import defaultdict
 from typing import Dict
 from typing import List
@@ -164,7 +163,7 @@ class BlockProcessor:
         # [<something>, <something>, tokenIdListSize, tokenId0, tokenId1..., tokenCountListSize, tokenCount0, tokenCount1, ...]
         data = event['data']
         dataLength = int(len(data) / 32)
-        dataParams = eth_abi.decode(["uint256"] * dataLength, event['data'])
+        dataParams: List[int] = eth_abi.decode(["uint256"] * dataLength, event['data'])
         tokenCount = int((dataLength - 4) / 2)
         tokenIds = dataParams[3: 3 + tokenCount]
         amounts = dataParams[3 + tokenCount + 1:]
