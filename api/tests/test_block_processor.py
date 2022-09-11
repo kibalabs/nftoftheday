@@ -42,15 +42,15 @@ class BlockProcessorTestCase(KibaAsyncTestCase):
 
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
-        # self.awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-        # self.ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=self.awsRequester)
-        self.requester = Requester()
-        self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
+        self.awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
+        self.ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=self.awsRequester)
+        # self.requester = Requester()
+        # self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
         self.blockProcessor = BlockProcessor(ethClient=self.ethClient)
 
     async def asyncTearDown(self) -> None:
-        # await self.awsRequester.close_connections()
-        await self.requester.close_connections()
+        await self.awsRequester.close_connections()
+        # await self.requester.close_connections()
         await super().asyncTearDown()
 
 
@@ -575,14 +575,14 @@ class TestProcessTransaction(BlockProcessorTestCase):
             RetrievedTokenTransfer(transactionHash='0xc8bdadfdffd9816cd1dbd752efbc1deb25da539f2d9d9e8f329f44fc06c0ecc9', registryAddress='0xec43E92046C1527586dFAF02031622C30AF9A1d6', tokenId='3955167169', fromAddress='0xcD32f12921fF1B5Ddb6b631Ee5A31aAb8ba314fC', toAddress='0x4A29367c5Ae9F84eF03E447D1f7deE8e6b16229D', operatorAddress='0x1E0049783F008A0085193E00003D00cd54003c71', contractAddress='0x00000000006c3852cbEf3e08E8dF289169EdE581', amount=1, value=320000000000000000, gasLimit=224477, gasPrice=8653114726, blockNumber=15239862, tokenType='erc1155single', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
         ]
         self.assertEqual(result, expected)
-    
+
     async def test_wyvern2_single_erc721_wrapped_eth_bid_accepted(self):
         result = await self._process_block_transaction(blockNumber=14959614, transactionHash='0xe67f354a1ba744859c6903064083071be789a1c242696366df8b37d47305337d')
         expected = [
             RetrievedTokenTransfer(transactionHash='0xe67f354a1ba744859c6903064083071be789a1c242696366df8b37d47305337d', registryAddress='0xcee7ff0C064643eAfFFDF0C2C0946980d33Aa267', tokenId='3', fromAddress='0x9f998BCBC23244bB92B3277DDCEBA31778B39227', toAddress='0xBAf4D6e428eA3f27282549Addc1643498601100E', operatorAddress='0x9B814233894Cd227f561B78Cc65891AA55C62Ad2', contractAddress='0x7f268357A8c2552623316e2562D90e642bB538E5', amount=1, value=1918000000000000000, gasLimit=450000, gasPrice=88000000000, blockNumber=14959614, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=False)
         ]
         self.assertEqual(result, expected)
-    
+
     async def test_wyvern2_single_erc1155_wrapped_eth_bid_accepted(self):
         result = await self._process_block_transaction(blockNumber=14831360, transactionHash='0xd51ac0749c237f73bb4011f165d906be805e6cf24f5623923073981bb103c8a6')
         expected = [
@@ -630,7 +630,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
             RetrievedTokenTransfer(transactionHash='0x2b040a638ed4adf02eec4ee6be260a54ec63fff2588261b14a6f31f1d4e5870b', registryAddress='0x2216d47494E516d8206B70FCa8585820eD3C4946', tokenId='10900', fromAddress='0x5fD36A4A4bCfE5EA059706a6a09c26b62be4059a', toAddress='0xBaaa8a2B6D22423392482C5a8d57527365fa959F', operatorAddress='0x5fD36A4A4bCfE5EA059706a6a09c26b62be4059a', contractAddress='0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b', amount=1, value=500000000000000000, gasLimit=314853, gasPrice=109000000000, blockNumber=12010577, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
         ]
         self.assertEqual(result, expected)
-    
+
     async def test_wyvern1_single_erc1155_wrapped_eth_bid_accepted(self):
         result = await self._process_block_transaction(blockNumber=13817661, transactionHash='0xb1d3b655f0ced4cfce94f8b1016c599f8e7ff6b675f25faf1102a35350853927')
         expected = [
@@ -683,7 +683,7 @@ class TestProcessTransaction(BlockProcessorTestCase):
             RetrievedTokenTransfer(transactionHash='0x35fdffab273e0eec0fdfabe624ce552739a083ac77e29ff4d616a125ffce703a', registryAddress='0xD73ACd7F5099fdd910215Dbff029185F21ffBCf0', tokenId='1514', fromAddress='0xAA647f877DeA58AaA42fFf73aA69E6dfc7f824D5', toAddress='0x2805307014Fe9Ed7188994A711bd39FD17b2b828', operatorAddress='0xAA647f877DeA58AaA42fFf73aA69E6dfc7f824D5', contractAddress='0x59728544B08AB483533076417FbBB2fD0B17CE3a', amount=1, value=60000000000000000, gasLimit=361210, gasPrice=74470543061, blockNumber=14139665, tokenType='erc721', isMultiAddress=False, isInterstitial=False, isSwap=False, isBatch=False, isOutbound=True)
         ]
         self.assertEqual(result, expected)
-    
+
     async def test_looksrare_single_erc1155_wrapped_eth_bid_accepted(self):
         result = await self._process_block_transaction(blockNumber=15170676, transactionHash='0x9e4a86d3a67dd6094ba79e45a64979ab7bc555046043a9d1f9570d5b7abb76c3')
         expected = [

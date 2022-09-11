@@ -165,8 +165,8 @@ class BlockProcessor:
         dataLength = int(len(data) / 32)
         dataParams: List[int] = eth_abi.decode(["uint256"] * dataLength, event['data'])
         tokenCount = int((dataLength - 4) / 2)
-        tokenIds = dataParams[3: 3 + tokenCount]
-        amounts = dataParams[3 + tokenCount + 1:]
+        tokenIds = dataParams[3: 3 + tokenCount]  # pylint: disable=unsubscriptable-object
+        amounts = dataParams[3 + tokenCount + 1:]  # pylint: disable=unsubscriptable-object
         dataDict = {int(tokenIds[i]): int(amounts[i]) for i in range(len(tokenIds))}
         retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=id, amount=amount, tokenType='erc1155batch') for (id, amount) in dataDict.items()]
         return retrievedEvents
