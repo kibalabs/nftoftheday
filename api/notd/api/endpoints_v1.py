@@ -312,6 +312,12 @@ class CreateGmRequest(BaseModel):
 class CreateGmResponse(BaseModel):
     pass
 
+class CreateAnonymousGmRequest(BaseModel):
+    pass
+
+class CreateAnonymousGmResponse(BaseModel):
+    pass
+
 class ListGmAccountRowsRequest(BaseModel):
     pass
 

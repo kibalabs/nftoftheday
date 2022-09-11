@@ -1,8 +1,14 @@
+import asyncio
+import json
+from typing import Generator
+from typing import List
+from typing import Optional
 from typing import Sequence
 
 import sqlalchemy
 from core.util import chain_util
 from core.util import date_util
+from pydantic import BaseModel
 
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
@@ -17,15 +23,36 @@ from notd.store.schema_conversions import account_gm_from_row
 from notd.store.schema_conversions import collection_from_row
 
 
+class GmNotification(BaseModel):
+    address: Optional[str]
+
+
 class GmManager:
 
     def __init__(self, retriever: Retriever, saver: Saver) -> None:
         self.retriever = retriever
         self.saver = saver
+        self.notifications: List[GmNotification] = []
+
+    # TODO(krishan711): The structure of the response should be handled in api layer
+    async def generate_gms(self) -> Generator[GmNotification, None, None]:
+        nextIndex = 0 #len(self.notifications)
+        while True:
+            notificationCount = len(self.notifications)
+            if notificationCount > nextIndex:
+                for index, item in enumerate(self.notifications[nextIndex: notificationCount]):
+                    outputString = f"id: {nextIndex + index}\ndata: {json.dumps(item.dict())}\n\n"
+                    yield outputString.encode()
+                nextIndex = notificationCount
+            await asyncio.sleep(0.3)
+
+    async def create_anonymous_gm(self) -> None:
+        self.notifications.append(GmNotification(address=None))
 
     async def create_gm(self, account: str, signatureMessage: str, signature: str) -> None:
         account = chain_util.normalize_address(value=account)
         # TODO(krishan711): validate signature
+        self.notifications.append(GmNotification(address=account))
         todayDate = date_util.start_of_day()
         latestAccountGmQuery = (
             AccountGmsTable.select()
@@ -56,9 +83,9 @@ class GmManager:
         latestRowQuery = (
             AccountGmsTable.select()
             .with_only_columns([AccountGmsTable.c.address, sqlalchemy.func.max(AccountGmsTable.c.date).label('date')])
-            .where(AccountGmsTable.c.date.in_([date_util.start_of_day(), date_util.start_of_day(dt=date_util.datetime_from_now(days=-1))]))
+            .where(AccountGmsTable.c.date >= date_util.start_of_day(dt=date_util.datetime_from_now(days=-7)))
             .group_by(AccountGmsTable.c.address)
-        ).subquery()
+        )
         weekCountQuery = (
             AccountGmsTable.select()
             .with_only_columns([AccountGmsTable.c.address, sqlalchemy.func.count(AccountGmsTable.c.accountGmId).label('count')])
@@ -76,7 +103,7 @@ class GmManager:
             .join(weekCountQuery, weekCountQuery.c.address == AccountGmsTable.c.address)
             .join(monthCountQuery, monthCountQuery.c.address == AccountGmsTable.c.address)
             .where(sqlalchemy.tuple_(AccountGmsTable.c.address, AccountGmsTable.c.date).in_(latestRowQuery))
-            .order_by(AccountGmsTable.c.streakLength.desc(), monthCountQuery.c.count.desc())
+            .order_by(AccountGmsTable.c.streakLength.desc(), AccountGmsTable.c.date.desc())
         )
         accountRowsResult = await self.retriever.database.execute(query=accountRowsQuery)
         accountRows = [
@@ -115,7 +142,7 @@ class GmManager:
             .join(monthCountQuery, monthCountQuery.c.registryAddress == TokenCollectionsTable.c.address)
             .join(weekCountQuery, weekCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .join(todayCountQuery, todayCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
-            .order_by(todayCountQuery.c.count.desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
+            .order_by(sqlalchemy.func.coalesce(todayCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(weekCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(monthCountQuery.c.count, 0).desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
         )
         collectionRowsResult = await self.retriever.database.execute(query=collectionRowsQuery)
         collectionRows = [
