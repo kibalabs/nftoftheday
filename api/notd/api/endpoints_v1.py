@@ -7,7 +7,8 @@ from typing import TypeVar
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
-from notd.api.models_v1 import ApiAccountGm, ApiAirdrop
+from notd.api.models_v1 import ApiAccountGm
+from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity

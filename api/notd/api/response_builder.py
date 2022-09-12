@@ -5,7 +5,8 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
-from notd.api.models_v1 import ApiAccountGm, ApiAirdrop
+from notd.api.models_v1 import ApiAccountGm
+from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
@@ -24,7 +25,8 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
-from notd.model import AccountGm, Airdrop
+from notd.model import AccountGm
+from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
