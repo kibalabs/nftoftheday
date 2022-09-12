@@ -9,8 +9,8 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
-from notd.model import CollectionOwnerCount
-from notd.store.schema import CollectionOwnerCountTable
+from notd.model import OwnerCollectionTokenCount
+from notd.store.schema import OwnerCollectionTokenCountTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -832,21 +832,21 @@ class Saver(CoreSaver):
         query = TwitterProfilesTable.update(TwitterProfilesTable.c.twitterProfileId == twitterProfileId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_collection_owner_count(self, ownerAddress: str, registryAddress:str, tokenCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionOwnerCount:
+    async def create_owner_collection_token_count(self, ownerAddress: str, registryAddress:str, tokenCount: int, connection: Optional[DatabaseConnection] = None) -> OwnerCollectionTokenCount:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
-            CollectionOwnerCountTable.c.createdDate.key: createdDate,
-            CollectionOwnerCountTable.c.updatedDate.key: updatedDate,
-            CollectionOwnerCountTable.c.ownerAddress.key: ownerAddress,
-            CollectionOwnerCountTable.c.registryAddress.key: registryAddress,
-            CollectionOwnerCountTable.c.tokenCount.key: tokenCount,
+            OwnerCollectionTokenCountTable.c.createdDate.key: createdDate,
+            OwnerCollectionTokenCountTable.c.updatedDate.key: updatedDate,
+            OwnerCollectionTokenCountTable.c.ownerAddress.key: ownerAddress,
+            OwnerCollectionTokenCountTable.c.registryAddress.key: registryAddress,
+            OwnerCollectionTokenCountTable.c.tokenCount.key: tokenCount,
         }
-        query = CollectionOwnerCountTable.insert().values(values)
+        query = OwnerCollectionTokenCountTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        collectionOwnerCountId = result.inserted_primary_key[0]
-        return CollectionOwnerCount(
-            collectionOwnerCountId=collectionOwnerCountId,
+        ownerCollectionTokenCountId = result.inserted_primary_key[0]
+        return OwnerCollectionTokenCount(
+            ownerCollectionTokenCountId=ownerCollectionTokenCountId,
             createdDate=createdDate,
             updatedDate=updatedDate,
             ownerAddress=ownerAddress,
@@ -854,13 +854,13 @@ class Saver(CoreSaver):
             tokenCount=tokenCount,
         )
 
-    async def update_collection_owner_count(self, collectionOwnerCountId: int, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_owner_collection_token_count(self, ownerCollectionTokenCountId: int, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if tokenCount is not None:
-            values[CollectionOwnerCountTable.c.tokenCount.key] = tokenCount
+            values[OwnerCollectionTokenCountTable.c.tokenCount.key] = tokenCount
         if len(values) > 0:
-            values[CollectionOwnerCountTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = CollectionOwnerCountTable.update(CollectionOwnerCountTable.c.collectionOwnerCountId == collectionOwnerCountId).values(values)
+            values[OwnerCollectionTokenCountTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = OwnerCollectionTokenCountTable.update(OwnerCollectionTokenCountTable.c.ownerCollectionTokenCountId == ownerCollectionTokenCountId).values(values)
         await self._execute(query=query, connection=connection)
 
     async def create_account_gm(self, address: str, date: datetime.datetime, streakLength: int, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountGm:

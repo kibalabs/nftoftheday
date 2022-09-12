@@ -1,8 +1,8 @@
 from typing import Any
 from typing import Mapping
 from typing import Optional
-from notd.model import CollectionOwnerCount
-from notd.store.schema import CollectionOwnerCountTable
+from notd.model import OwnerCollectionTokenCount
+from notd.store.schema import OwnerCollectionTokenCountTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -304,14 +304,14 @@ def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
     )
 
 
-def collection_owner_count_from_row(row: Mapping) -> CollectionOwnerCount:
-    return CollectionOwnerCount(
-        collectionOwnerCountId=row[CollectionOwnerCountTable.c.collectionOwnerCountId],
-        createdDate=row[CollectionOwnerCountTable.c.createdDate],
-        updatedDate=row[CollectionOwnerCountTable.c.updatedDate],
-        registryAddress=row[CollectionOwnerCountTable.c.registryAddress],
-        ownerAddress=row[CollectionOwnerCountTable.c.ownerAddress],
-        tokenCount=row[CollectionOwnerCountTable.c.collectionOwnerCountId],
+def owner_collection_token_count_from_row(row: Mapping) -> OwnerCollectionTokenCount:
+    return OwnerCollectionTokenCount(
+        ownerCollectionTokenCountId=row[OwnerCollectionTokenCountTable.c.ownerCollectionTokenCountId],
+        createdDate=row[OwnerCollectionTokenCountTable.c.createdDate],
+        updatedDate=row[OwnerCollectionTokenCountTable.c.updatedDate],
+        registryAddress=row[OwnerCollectionTokenCountTable.c.registryAddress],
+        ownerAddress=row[OwnerCollectionTokenCountTable.c.ownerAddress],
+        tokenCount=row[OwnerCollectionTokenCountTable.c.ownerCollectionTokenCountId],
 
     )
 

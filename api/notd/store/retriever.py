@@ -8,8 +8,8 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
-from notd.model import CollectionOwnerCount
-from notd.store.schema_conversions import collection_owner_count_from_row
+from notd.model import OwnerCollectionTokenCount
+from notd.store.schema_conversions import owner_collection_token_count_from_row
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -473,7 +473,7 @@ class Retriever(CoreRetriever):
         twitterCredential = twitter_credential_from_row(row)
         return twitterCredential
 
-    async def list_collection_owner_count(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionOwnerCount]:
+    async def list_owner_collection_token_count(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[OwnerCollectionTokenCount]:
         query = TwitterCredentialsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TwitterCredentialsTable, fieldFilters=fieldFilters)
@@ -482,7 +482,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        collectionOwnerCount = [collection_owner_count_from_row(row) for row in result]
+        collectionOwnerCount = [owner_collection_token_count_from_row(row) for row in result]
         return collectionOwnerCount
 
     async def list_account_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[AccountGm]:

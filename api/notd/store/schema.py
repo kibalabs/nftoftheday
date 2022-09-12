@@ -293,8 +293,8 @@ UserRegistryFirstOwnershipsMaterializedView = sqlalchemy.Table(
 )
 
 
-CollectionOwnerCountTable = sqlalchemy.Table(
-    'tbl_collection_owner_count',
+OwnerCollectionTokenCountTable = sqlalchemy.Table(
+    'tbl_owners_collection_count',
     metadata,
     sqlalchemy.Column(key='collectionOwnerCountId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),

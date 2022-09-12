@@ -510,8 +510,8 @@ class GmCollectionRow:
 
 
 @dataclasses.dataclass
-class CollectionOwnerCount:
-    collectionOwnerCountId: int
+class OwnerCollectionTokenCount:
+    ownerCollectionTokenCountId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
     registryAddress: str

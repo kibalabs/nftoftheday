@@ -10,15 +10,19 @@ from notd.model import GALLERY_COLLECTIONS
 from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.retriever import Retriever
+from notd.store.saver import Saver
 
 
 async def collection_overlaps(address: str):
-    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["REMOTE_DB_USERNAME"], password=os.environ["REMOTE_DB_PASSWORD"], host=os.environ["REMOTE_DB_HOST"], port=os.environ["REMOTE_DB_PORT"], name=os.environ["REMOTE_DB_NAME"])
-
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["REMOTE_DB_USERNAME"], password=os.environ["REMOTE_DB_PASSWORD"], host=os.environ["REMOTE_DB_HOST"], port=os.environ["REMOTE_DB_PORT"], name=os.environ["REMOTE_DB_NAME"])    
+    databaseConnectionString1 = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     # databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
+    database1 = Database(connectionString=databaseConnectionString1)
     retriever = Retriever(database=database)
+    saver = Saver(database=database1)
     await database.connect()
+    await database1.connect()
     subQuery = (
         UserRegistryOrderedOwnershipsMaterializedView.select()
         .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.distinct()])
@@ -33,9 +37,9 @@ async def collection_overlaps(address: str):
     )
     result = await retriever.database.execute(query=query)
     ownerRegistryPairs = list(result)
-    print(ownerRegistryPairs)
-    # with open('text.txt', 'w') as f:
-    #     f.write(str(registryOwnerMap))
+    async with saver.create_transaction() as connection:
+        for ownerAddress, registryAddress, tokenCount in ownerRegistryPairs:
+            await saver.create_owner_collection_token_count(ownerAddress=ownerAddress, registryAddress=registryAddress, tokenCount=tokenCount, connection=connection) 
     await database.disconnect()
 
 if __name__ == "__main__":
