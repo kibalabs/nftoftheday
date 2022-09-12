@@ -16,8 +16,8 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
 
     @router.post('/gm', response_model=CreateGmResponse)
     async def create_gm(request: CreateGmRequest) -> CreateGmResponse:
-        await gmManager.create_gm(account=request.account, signatureMessage=request.signatureMessage, signature=request.signature)
-        return CreateGmResponse()
+        accountGm = await gmManager.create_gm(account=request.account, signatureMessage=request.signatureMessage, signature=request.signature)
+        return CreateGmResponse(accountGm=(await responseBuilder.account_gm_from_model(accountGm=accountGm)))
 
     @router.post('/anonymous-gm', response_model=CreateAnonymousGmResponse)
     async def create_anonymous_gm() -> CreateAnonymousGmResponse:

@@ -5,6 +5,7 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
+from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
@@ -24,6 +25,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
+from notd.model import AccountGm
 from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
@@ -318,3 +320,11 @@ class ResponseBuilder:
 
     async def gm_collection_rows_from_models(self, gmCollectionRows: Sequence[GmCollectionRow]) -> Sequence[ApiGmCollectionRow]:
         return await asyncio.gather(*[self.gm_collection_row_from_model(gmCollectionRow=gmCollectionRow) for gmCollectionRow in gmCollectionRows])
+
+    async def account_gm_from_model(self, accountGm: AccountGm) -> ApiAccountGm:
+        return ApiAccountGm(
+            address=accountGm.address,
+            date=accountGm.date,
+            streakLength=accountGm.streakLength,
+            collectionCount=accountGm.collectionCount,
+        )

@@ -393,6 +393,7 @@ CREATE TABLE tbl_account_gms (
     address TEXT NOT NULL,
     date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     streak_length INTEGER NOT NULL,
+    collection_count INTEGER NOT NULL,
     signature_message TEXT NOT NULL,
     signature TEXT NOT NULL
 );

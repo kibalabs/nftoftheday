@@ -176,6 +176,13 @@ class ApiGalleryOwnedCollection(BaseModel):
     tokens: List[ApiCollectionToken]
 
 
+class ApiAccountGm(BaseModel):
+    address: str
+    date: datetime.datetime
+    streakLength: int
+    collectionCount: int
+
+
 class ApiGmAccountRow(BaseModel):
     address: str
     lastDate: datetime.datetime
