@@ -10,7 +10,7 @@ from core.util import chain_util
 from core.util import date_util
 from pydantic import BaseModel
 
-from notd.model import GmAccountRow
+from notd.model import AccountGm, GmAccountRow
 from notd.model import GmCollectionRow
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -44,12 +44,12 @@ class GmManager:
                     outputString = f"id: {nextIndex + index}\ndata: {json.dumps(item.dict())}\n\n"
                     yield outputString.encode()
                 nextIndex = notificationCount
-            await asyncio.sleep(0.3)
+            await asyncio.sleep(1)
 
     async def create_anonymous_gm(self) -> None:
         self.notifications.append(GmNotification(address=None))
 
-    async def create_gm(self, account: str, signatureMessage: str, signature: str) -> None:
+    async def create_gm(self, account: str, signatureMessage: str, signature: str) -> AccountGm:
         account = chain_util.normalize_address(value=account)
         # TODO(krishan711): validate signature
         self.notifications.append(GmNotification(address=account))
@@ -65,7 +65,7 @@ class GmManager:
         latestAccountGm = account_gm_from_row(row=latestAccountGmRow) if latestAccountGmRow else None
         if latestAccountGm and latestAccountGm.date >= todayDate:
             # NOTE(krishan711): could check here that this date has all the current collections
-            return
+            return latestAccountGm
         streakLength = latestAccountGm.streakLength + 1 if latestAccountGm and latestAccountGm.date == date_util.datetime_from_datetime(dt=todayDate, days=-1) else 1
         ownedCollectionsQuery = (
             TokenOwnershipsTable.select()
@@ -75,9 +75,10 @@ class GmManager:
         ownedCollectionsResult = await self.retriever.database.execute(query=ownedCollectionsQuery)
         ownedCollectionAddresses = {registryAddress for (registryAddress, ) in ownedCollectionsResult}
         async with self.saver.create_transaction() as connection:
-            await self.saver.create_account_gm(address=account, date=todayDate, streakLength=streakLength, signatureMessage=signatureMessage, signature=signature, connection=connection)
+            accountGm = await self.saver.create_account_gm(address=account, date=todayDate, streakLength=streakLength, collectionCount=len(ownedCollectionAddresses), signatureMessage=signatureMessage, signature=signature, connection=connection)
             for registryAddress in ownedCollectionAddresses:
                 await self.saver.create_account_collection_gm(accountAddress=account, registryAddress=registryAddress, date=todayDate, signatureMessage=signatureMessage, signature=signature, connection=connection)
+        return accountGm
 
     async def list_gm_account_rows(self) -> Sequence[GmAccountRow]:
         latestRowQuery = (

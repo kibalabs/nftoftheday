@@ -476,6 +476,7 @@ class AccountGm:
     address: str
     date: datetime.datetime
     streakLength: int
+    collectionCount: int
     signatureMessage: str
     signature: str
 
