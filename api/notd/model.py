@@ -509,6 +509,8 @@ class GmCollectionRow:
     weekCount: int
     monthCount: int
 
+
+@dataclasses.dataclass
 class LatestAccountGm:
     accountGm: AccountGm
-    accountCollectionGm: AccountCollectionGm
+    accountCollectionGms: List[AccountCollectionGm]

@@ -6,8 +6,6 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from api.notd.model import AccountCollectionGm, AccountGm
-
 
 class ApiCollection(BaseModel):
     address: str
@@ -200,5 +198,5 @@ class ApiGmCollectionRow(BaseModel):
     monthCount: int
 
 class ApiLatestAccountGm(BaseModel):
-    accountGm: AccountGm
-    accountCollectionGm: AccountCollectionGm
+    accountGm: ApiAccountGm
+    # accountCollectionGm: AccountCollectionGm

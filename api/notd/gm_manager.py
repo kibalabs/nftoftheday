@@ -9,6 +9,8 @@ import sqlalchemy
 from core.util import chain_util
 from core.util import date_util
 from pydantic import BaseModel
+from notd.store.schema_conversions import account_collection_gm_from_row
+from notd.model import AccountCollectionGm
 from notd.model import LatestAccountGm
 
 from notd.model import AccountGm
@@ -158,5 +160,23 @@ class GmManager:
         ]
         return collectionRows
 
-    async def get_latest_gm_for_address(self, address: str) -> Sequence[LatestAccountGm]:
-        pass
+    async def get_latest_gm_for_address(self, address: str) -> LatestAccountGm:
+        latestAccountGmQuery = (
+            AccountGmsTable.select()
+            .where(AccountGmsTable.c.address == address)
+            .order_by(AccountGmsTable.c.date.desc())
+            .limit(1)
+        )
+        latestAccountGmResult = await self.retriever.database.execute(query=latestAccountGmQuery)
+        latestAccountGmRow = latestAccountGmResult.first()
+        query = (
+            AccountCollectionGmsTable.select()
+            .where(AccountCollectionGmsTable.c.accountAddress == address)
+            .where(AccountCollectionGmsTable.c.date == latestAccountGmRow.date)
+        )
+        latestAccountCollectionGmResult = await self.retriever.database.execute(query=query)
+        latestAccountCollectionsGm = [account_collection_gm_from_row(row=row) for row in latestAccountCollectionGmResult]
+        return LatestAccountGm(
+            accountGm=latestAccountGmRow,
+            accountCollectionGms=latestAccountCollectionsGm
+        )
