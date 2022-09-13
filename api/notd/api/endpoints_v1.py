@@ -332,8 +332,8 @@ class ListGmCollectionRowsRequest(BaseModel):
 class ListGmCollectionRowsResponse(BaseModel):
     collectionRows: List[ApiGmCollectionRow]
 
-class GetLatestGmForAddressRequest(BaseModel):
+class GetLatestGmForAccountRequest(BaseModel):
     pass
 
-class GetLatestGmForAddressResponse(BaseModel):
+class GetLatestGmForAccountResponse(BaseModel):
     latestAccountGm: ApiLatestAccountGm

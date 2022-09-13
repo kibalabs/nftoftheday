@@ -161,7 +161,7 @@ class GmManager:
         ]
         return collectionRows
 
-    async def get_latest_gm_for_address(self, address: str) -> LatestAccountGm:
+    async def get_latest_gm_for_account(self, address: str) -> LatestAccountGm:
         latestAccountGmQuery = (
             AccountGmsTable.select()
             .where(AccountGmsTable.c.address == address)
