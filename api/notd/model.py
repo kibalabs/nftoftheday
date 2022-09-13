@@ -508,3 +508,7 @@ class GmCollectionRow:
     todayCount: int
     weekCount: int
     monthCount: int
+
+class LatestAccountGm:
+    accountGm: AccountGm
+    accountCollectionGm: AccountCollectionGm

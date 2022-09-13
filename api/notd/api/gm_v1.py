@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from starlette.requests import Request
 from starlette.responses import StreamingResponse
+from notd.api.endpoints_v1 import GetLatestGmForAddressResponse
 
 from notd.api.endpoints_v1 import CreateAnonymousGmResponse
 from notd.api.endpoints_v1 import CreateGmRequest
@@ -43,5 +44,10 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
         }
         # TODO(krishan711): gmManager shouldn't be dealing with the structure of the response
         return StreamingResponse(gmManager.generate_gms(), headers=sseHeaders)
+
+    @router.get('/accounts/{address}/latest-gm')
+    async def get_latest_gm_for_address(address: str) -> GetLatestGmForAddressResponse:
+        latestGm = await gmManager.get_latest_gm_for_address(address=address)
+        # return GetLatestGmForAddressResponse(latestGm=(await responseBuilder.gm_latest_gm_from_model(latestGm=latestGm)))
 
     return router

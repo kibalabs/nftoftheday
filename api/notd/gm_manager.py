@@ -9,6 +9,7 @@ import sqlalchemy
 from core.util import chain_util
 from core.util import date_util
 from pydantic import BaseModel
+from notd.model import LatestAccountGm
 
 from notd.model import AccountGm
 from notd.model import GmAccountRow
@@ -156,3 +157,6 @@ class GmManager:
             ) for row in collectionRowsResult
         ]
         return collectionRows
+
+    async def get_latest_gm_for_address(self, address: str) -> Sequence[LatestAccountGm]:
+        pass

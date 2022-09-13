@@ -6,6 +6,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
+from notd.api.models_v1 import ApiLatestAccountGm
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
@@ -330,3 +331,9 @@ class ListGmCollectionRowsRequest(BaseModel):
 
 class ListGmCollectionRowsResponse(BaseModel):
     collectionRows: List[ApiGmCollectionRow]
+
+class GetLatestGmForAddressRequest(BaseModel):
+    pass
+
+class GetLatestGmForAddressResponse(BaseModel):
+    latestGm: List[ApiLatestAccountGm]

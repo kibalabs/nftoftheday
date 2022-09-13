@@ -4,6 +4,8 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
+from notd.api.models_v1 import ApiLatestAccountGm
+from notd.model import LatestAccountGm
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
