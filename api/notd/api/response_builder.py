@@ -330,3 +330,9 @@ class ResponseBuilder:
             streakLength=accountGm.streakLength,
             collectionCount=accountGm.collectionCount,
         )
+
+    async def gm_latest_gm_from_model(self, latestGmForAddress: LatestAccountGm) -> ApiLatestAccountGm:
+        return ApiLatestAccountGm(
+            accountGm=latestGmForAddress.accountGm,
+            accountCollectionGms=latestGmForAddress.accountCollectionGms
+        )

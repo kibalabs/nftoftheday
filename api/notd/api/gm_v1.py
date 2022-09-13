@@ -48,6 +48,6 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
     @router.get('/accounts/{address}/latest-gm')
     async def get_latest_gm_for_address(address: str) -> GetLatestGmForAddressResponse:
         latestGmForAddress = await gmManager.get_latest_gm_for_address(address=address)
-        # return GetLatestGmForAddressResponse(latestGmForAddress=(await responseBuilder.gm_latest_gm_from_model(latestGm=latestGm)))
+        return GetLatestGmForAddressResponse(latestGmForAddress=(await responseBuilder.gm_latest_gm_from_model(latestGmForAddress=latestGmForAddress)))
 
     return router

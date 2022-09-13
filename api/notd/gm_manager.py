@@ -169,6 +169,7 @@ class GmManager:
         )
         latestAccountGmResult = await self.retriever.database.execute(query=latestAccountGmQuery)
         latestAccountGmRow = latestAccountGmResult.first()
+        latestAccountGm = account_gm_from_row(row=latestAccountGmRow)
         query = (
             AccountCollectionGmsTable.select()
             .where(AccountCollectionGmsTable.c.accountAddress == address)
@@ -177,6 +178,6 @@ class GmManager:
         latestAccountCollectionGmResult = await self.retriever.database.execute(query=query)
         latestAccountCollectionsGm = [account_collection_gm_from_row(row=row) for row in latestAccountCollectionGmResult]
         return LatestAccountGm(
-            accountGm=latestAccountGmRow,
+            accountGm=latestAccountGm,
             accountCollectionGms=latestAccountCollectionsGm
         )

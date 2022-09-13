@@ -191,6 +191,16 @@ class ApiGmAccountRow(BaseModel):
     monthCount: int
 
 
+class ApiAccountCollectionGm(BaseModel):
+    accountCollectionGmId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    accountAddress: str
+    date: datetime.datetime
+    signatureMessage: str
+    signature: str
+
 class ApiGmCollectionRow(BaseModel):
     collection: ApiCollection
     todayCount: int
@@ -199,4 +209,4 @@ class ApiGmCollectionRow(BaseModel):
 
 class ApiLatestAccountGm(BaseModel):
     accountGm: ApiAccountGm
-    # accountCollectionGm: AccountCollectionGm
+    accountCollectionGms: List[ApiAccountCollectionGm]
