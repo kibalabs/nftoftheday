@@ -336,4 +336,4 @@ class GetLatestGmForAddressRequest(BaseModel):
     pass
 
 class GetLatestGmForAddressResponse(BaseModel):
-    latestGmForAddress: ApiLatestAccountGm
+    latestAccountGm: ApiLatestAccountGm

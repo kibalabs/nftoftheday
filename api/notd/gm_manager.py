@@ -108,6 +108,7 @@ class GmManager:
             .join(monthCountQuery, monthCountQuery.c.address == AccountGmsTable.c.address)
             .where(sqlalchemy.tuple_(AccountGmsTable.c.address, AccountGmsTable.c.date).in_(latestRowQuery))
             .order_by(AccountGmsTable.c.streakLength.desc(), AccountGmsTable.c.date.desc())
+            .limit(500)
         )
         accountRowsResult = await self.retriever.database.execute(query=accountRowsQuery)
         accountRows = [
@@ -147,6 +148,7 @@ class GmManager:
             .join(weekCountQuery, weekCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .join(todayCountQuery, todayCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .order_by(sqlalchemy.func.coalesce(todayCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(weekCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(monthCountQuery.c.count, 0).desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
+            .limit(500)
         )
         collectionRowsResult = await self.retriever.database.execute(query=collectionRowsQuery)
         collectionRows = [
