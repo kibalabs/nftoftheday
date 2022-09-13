@@ -4,6 +4,7 @@ import os
 import sys
 from core.store.database import Database
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
+import csv
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.model import GALLERY_COLLECTIONS
@@ -37,9 +38,11 @@ async def collection_overlaps(address: str):
     )
     result = await retriever.database.execute(query=query)
     ownerRegistryPairs = list(result)
-    async with saver.create_transaction() as connection:
+    with open('result.csv', 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=['ownerAddress', 'registryAddress', 'tokenCount', 'overlaps_with'])
+        writer.writeheader()
         for ownerAddress, registryAddress, tokenCount in ownerRegistryPairs:
-            await saver.create_owner_collection_token_count(ownerAddress=ownerAddress, registryAddress=registryAddress, tokenCount=tokenCount, connection=connection) 
+            writer.writerow({"ownerAddress": ownerAddress, "registryAddress":registryAddress, "tokenCount":tokenCount, 'overlaps_with': 'sprite'})
     await database.disconnect()
 
 if __name__ == "__main__":
