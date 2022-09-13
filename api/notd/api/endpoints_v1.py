@@ -20,6 +20,7 @@ from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
+from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
@@ -330,3 +331,9 @@ class ListGmCollectionRowsRequest(BaseModel):
 
 class ListGmCollectionRowsResponse(BaseModel):
     collectionRows: List[ApiGmCollectionRow]
+
+class GetLatestGmForAccountRequest(BaseModel):
+    pass
+
+class GetLatestGmForAccountResponse(BaseModel):
+    latestAccountGm: ApiLatestAccountGm

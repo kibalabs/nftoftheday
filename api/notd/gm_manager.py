@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from notd.model import AccountGm
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
+from notd.model import LatestAccountGm
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import AccountCollectionGmsTable
@@ -20,6 +21,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema_conversions import account_collection_gm_from_row
 from notd.store.schema_conversions import account_gm_from_row
 from notd.store.schema_conversions import collection_from_row
 
@@ -106,6 +108,7 @@ class GmManager:
             .join(monthCountQuery, monthCountQuery.c.address == AccountGmsTable.c.address)
             .where(sqlalchemy.tuple_(AccountGmsTable.c.address, AccountGmsTable.c.date).in_(latestRowQuery))
             .order_by(AccountGmsTable.c.streakLength.desc(), AccountGmsTable.c.date.desc())
+            .limit(500)
         )
         accountRowsResult = await self.retriever.database.execute(query=accountRowsQuery)
         accountRows = [
@@ -145,6 +148,7 @@ class GmManager:
             .join(weekCountQuery, weekCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .join(todayCountQuery, todayCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .order_by(sqlalchemy.func.coalesce(todayCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(weekCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(monthCountQuery.c.count, 0).desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
+            .limit(500)
         )
         collectionRowsResult = await self.retriever.database.execute(query=collectionRowsQuery)
         collectionRows = [
@@ -156,3 +160,25 @@ class GmManager:
             ) for row in collectionRowsResult
         ]
         return collectionRows
+
+    async def get_latest_gm_for_account(self, address: str) -> LatestAccountGm:
+        latestAccountGmQuery = (
+            AccountGmsTable.select()
+            .where(AccountGmsTable.c.address == address)
+            .order_by(AccountGmsTable.c.date.desc())
+            .limit(1)
+        )
+        latestAccountGmResult = await self.retriever.database.execute(query=latestAccountGmQuery)
+        latestAccountGmRow = latestAccountGmResult.first()
+        latestAccountGm = account_gm_from_row(row=latestAccountGmRow)
+        query = (
+            AccountCollectionGmsTable.select()
+            .where(AccountCollectionGmsTable.c.accountAddress == address)
+            .where(AccountCollectionGmsTable.c.date == latestAccountGmRow.date)
+        )
+        latestAccountCollectionGmResult = await self.retriever.database.execute(query=query)
+        latestAccountCollectionsGm = [account_collection_gm_from_row(row=row) for row in latestAccountCollectionGmResult]
+        return LatestAccountGm(
+            accountGm=latestAccountGm,
+            accountCollectionGms=latestAccountCollectionsGm
+        )

@@ -508,3 +508,9 @@ class GmCollectionRow:
     todayCount: int
     weekCount: int
     monthCount: int
+
+
+@dataclasses.dataclass
+class LatestAccountGm:
+    accountGm: AccountGm
+    accountCollectionGms: List[AccountCollectionGm]
