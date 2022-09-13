@@ -333,7 +333,7 @@ class ResponseBuilder:
             collectionCount=accountGm.collectionCount,
         )
 
-    async def gm_account_collection_from_models(self, gmCollection: AccountCollectionGm) -> ApiAccountCollectionGm:
+    async def account_collection_gm_from_model(self, gmCollection: AccountCollectionGm) -> ApiAccountCollectionGm:
         return ApiAccountCollectionGm(
             accountCollectionGmId=gmCollection.accountCollectionGmId,
             createdDate=gmCollection.createdDate,
@@ -345,11 +345,11 @@ class ResponseBuilder:
             signature=gmCollection.signature,
         )
 
-    async def gm_account_collections_from_models(self, gmCollections: Sequence[AccountCollectionGm]) -> Sequence[ApiAccountCollectionGm]:
-        return await asyncio.gather(*[self.gm_account_collection_from_models(gmCollection=gmCollection) for gmCollection in gmCollections])
+    async def account_collection_gms_from_models(self, gmCollections: Sequence[AccountCollectionGm]) -> Sequence[ApiAccountCollectionGm]:
+        return await asyncio.gather(*[self.account_collection_gm_from_model(gmCollection=gmCollection) for gmCollection in gmCollections])
 
-    async def gm_latest_gm_from_model(self, latestAccountGm: LatestAccountGm) -> ApiLatestAccountGm:
+    async def latest_gm_from_model(self, latestAccountGm: LatestAccountGm) -> ApiLatestAccountGm:
         return ApiLatestAccountGm(
             accountGm=(await self.account_gm_from_model(accountGm=latestAccountGm.accountGm)),
-            accountCollectionGms=(await self.gm_account_collections_from_models(gmCollections=latestAccountGm.accountCollectionGms))
+            accountCollectionGms=(await self.account_collection_gms_from_models(gmCollections=latestAccountGm.accountCollectionGms))
         )
