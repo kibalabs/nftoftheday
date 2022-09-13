@@ -201,11 +201,13 @@ class ApiAccountCollectionGm(BaseModel):
     signatureMessage: str
     signature: str
 
+
 class ApiGmCollectionRow(BaseModel):
     collection: ApiCollection
     todayCount: int
     weekCount: int
     monthCount: int
+
 
 class ApiLatestAccountGm(BaseModel):
     accountGm: ApiAccountGm

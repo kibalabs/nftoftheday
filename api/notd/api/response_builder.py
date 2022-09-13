@@ -348,8 +348,8 @@ class ResponseBuilder:
     async def gm_account_collections_from_models(self, gmCollections: Sequence[AccountCollectionGm]) -> Sequence[ApiAccountCollectionGm]:
         return await asyncio.gather(*[self.gm_account_collection_from_models(gmCollection=gmCollection) for gmCollection in gmCollections])
 
-    async def gm_latest_gm_from_model(self, latestGmForAddress: LatestAccountGm) -> ApiLatestAccountGm:
+    async def gm_latest_gm_from_model(self, latestAccountGm: LatestAccountGm) -> ApiLatestAccountGm:
         return ApiLatestAccountGm(
-            accountGm=(await self.account_gm_from_model(accountGm=latestGmForAddress.accountGm)),
-            accountCollectionGms=(await self.gm_account_collections_from_models(gmCollections=latestGmForAddress.accountCollectionGms))
+            accountGm=(await self.account_gm_from_model(accountGm=latestAccountGm.accountGm)),
+            accountCollectionGms=(await self.gm_account_collections_from_models(gmCollections=latestAccountGm.accountCollectionGms))
         )
