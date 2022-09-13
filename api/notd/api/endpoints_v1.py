@@ -6,7 +6,6 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
-from notd.api.models_v1 import ApiLatestAccountGm
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
@@ -21,6 +20,7 @@ from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
+from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
@@ -336,4 +336,4 @@ class GetLatestGmForAddressRequest(BaseModel):
     pass
 
 class GetLatestGmForAddressResponse(BaseModel):
-    latestGm: List[ApiLatestAccountGm]
+    latestGmForAddress: ApiLatestAccountGm
