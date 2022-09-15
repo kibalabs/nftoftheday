@@ -324,6 +324,7 @@ def account_gm_from_row(row: Mapping) -> AccountGm:
         address=row[AccountGmsTable.c.address],
         date=row[AccountGmsTable.c.date],
         streakLength=row[AccountGmsTable.c.streakLength],
+        collectionCount=row[AccountGmsTable.c.collectionCount],
         signatureMessage=row[AccountGmsTable.c.signatureMessage],
         signature=row[AccountGmsTable.c.signature],
     )

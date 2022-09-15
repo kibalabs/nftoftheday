@@ -5,6 +5,8 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
+from notd.api.models_v1 import ApiAccountCollectionGm
+from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
@@ -17,6 +19,7 @@ from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
+from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
@@ -24,6 +27,8 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
+from notd.model import AccountCollectionGm
+from notd.model import AccountGm
 from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
@@ -35,6 +40,7 @@ from notd.model import GalleryUser
 from notd.model import GalleryUserRow
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
+from notd.model import LatestAccountGm
 from notd.model import ListResponse
 from notd.model import SponsoredToken
 from notd.model import Token
@@ -318,3 +324,32 @@ class ResponseBuilder:
 
     async def gm_collection_rows_from_models(self, gmCollectionRows: Sequence[GmCollectionRow]) -> Sequence[ApiGmCollectionRow]:
         return await asyncio.gather(*[self.gm_collection_row_from_model(gmCollectionRow=gmCollectionRow) for gmCollectionRow in gmCollectionRows])
+
+    async def account_gm_from_model(self, accountGm: AccountGm) -> ApiAccountGm:
+        return ApiAccountGm(
+            address=accountGm.address,
+            date=accountGm.date,
+            streakLength=accountGm.streakLength,
+            collectionCount=accountGm.collectionCount,
+        )
+
+    async def account_collection_gm_from_model(self, gmCollection: AccountCollectionGm) -> ApiAccountCollectionGm:
+        return ApiAccountCollectionGm(
+            accountCollectionGmId=gmCollection.accountCollectionGmId,
+            createdDate=gmCollection.createdDate,
+            updatedDate=gmCollection.updatedDate,
+            registryAddress=gmCollection.registryAddress,
+            accountAddress=gmCollection.accountAddress,
+            date=gmCollection.date,
+            signatureMessage=gmCollection.signatureMessage,
+            signature=gmCollection.signature,
+        )
+
+    async def account_collection_gms_from_models(self, gmCollections: Sequence[AccountCollectionGm]) -> Sequence[ApiAccountCollectionGm]:
+        return await asyncio.gather(*[self.account_collection_gm_from_model(gmCollection=gmCollection) for gmCollection in gmCollections])
+
+    async def latest_account_gm_from_model(self, latestAccountGm: LatestAccountGm) -> ApiLatestAccountGm:
+        return ApiLatestAccountGm(
+            accountGm=(await self.account_gm_from_model(accountGm=latestAccountGm.accountGm)),
+            accountCollectionGms=(await self.account_collection_gms_from_models(gmCollections=latestAccountGm.accountCollectionGms))
+        )

@@ -176,6 +176,13 @@ class ApiGalleryOwnedCollection(BaseModel):
     tokens: List[ApiCollectionToken]
 
 
+class ApiAccountGm(BaseModel):
+    address: str
+    date: datetime.datetime
+    streakLength: int
+    collectionCount: int
+
+
 class ApiGmAccountRow(BaseModel):
     address: str
     lastDate: datetime.datetime
@@ -184,8 +191,24 @@ class ApiGmAccountRow(BaseModel):
     monthCount: int
 
 
+class ApiAccountCollectionGm(BaseModel):
+    accountCollectionGmId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    accountAddress: str
+    date: datetime.datetime
+    signatureMessage: str
+    signature: str
+
+
 class ApiGmCollectionRow(BaseModel):
     collection: ApiCollection
     todayCount: int
     weekCount: int
     monthCount: int
+
+
+class ApiLatestAccountGm(BaseModel):
+    accountGm: ApiAccountGm
+    accountCollectionGms: List[ApiAccountCollectionGm]

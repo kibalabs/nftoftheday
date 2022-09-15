@@ -10,8 +10,10 @@ from core.util import chain_util
 from core.util import date_util
 from pydantic import BaseModel
 
+from notd.model import AccountGm
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
+from notd.model import LatestAccountGm
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import AccountCollectionGmsTable
@@ -19,6 +21,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema_conversions import account_collection_gm_from_row
 from notd.store.schema_conversions import account_gm_from_row
 from notd.store.schema_conversions import collection_from_row
 
@@ -44,12 +47,12 @@ class GmManager:
                     outputString = f"id: {nextIndex + index}\ndata: {json.dumps(item.dict())}\n\n"
                     yield outputString.encode()
                 nextIndex = notificationCount
-            await asyncio.sleep(0.3)
+            await asyncio.sleep(1)
 
     async def create_anonymous_gm(self) -> None:
         self.notifications.append(GmNotification(address=None))
 
-    async def create_gm(self, account: str, signatureMessage: str, signature: str) -> None:
+    async def create_gm(self, account: str, signatureMessage: str, signature: str) -> AccountGm:
         account = chain_util.normalize_address(value=account)
         # TODO(krishan711): validate signature
         self.notifications.append(GmNotification(address=account))
@@ -65,7 +68,7 @@ class GmManager:
         latestAccountGm = account_gm_from_row(row=latestAccountGmRow) if latestAccountGmRow else None
         if latestAccountGm and latestAccountGm.date >= todayDate:
             # NOTE(krishan711): could check here that this date has all the current collections
-            return
+            return latestAccountGm
         streakLength = latestAccountGm.streakLength + 1 if latestAccountGm and latestAccountGm.date == date_util.datetime_from_datetime(dt=todayDate, days=-1) else 1
         ownedCollectionsQuery = (
             TokenOwnershipsTable.select()
@@ -75,9 +78,10 @@ class GmManager:
         ownedCollectionsResult = await self.retriever.database.execute(query=ownedCollectionsQuery)
         ownedCollectionAddresses = {registryAddress for (registryAddress, ) in ownedCollectionsResult}
         async with self.saver.create_transaction() as connection:
-            await self.saver.create_account_gm(address=account, date=todayDate, streakLength=streakLength, signatureMessage=signatureMessage, signature=signature, connection=connection)
+            accountGm = await self.saver.create_account_gm(address=account, date=todayDate, streakLength=streakLength, collectionCount=len(ownedCollectionAddresses), signatureMessage=signatureMessage, signature=signature, connection=connection)
             for registryAddress in ownedCollectionAddresses:
                 await self.saver.create_account_collection_gm(accountAddress=account, registryAddress=registryAddress, date=todayDate, signatureMessage=signatureMessage, signature=signature, connection=connection)
+        return accountGm
 
     async def list_gm_account_rows(self) -> Sequence[GmAccountRow]:
         latestRowQuery = (
@@ -104,6 +108,7 @@ class GmManager:
             .join(monthCountQuery, monthCountQuery.c.address == AccountGmsTable.c.address)
             .where(sqlalchemy.tuple_(AccountGmsTable.c.address, AccountGmsTable.c.date).in_(latestRowQuery))
             .order_by(AccountGmsTable.c.streakLength.desc(), AccountGmsTable.c.date.desc())
+            .limit(500)
         )
         accountRowsResult = await self.retriever.database.execute(query=accountRowsQuery)
         accountRows = [
@@ -143,6 +148,7 @@ class GmManager:
             .join(weekCountQuery, weekCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .join(todayCountQuery, todayCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .order_by(sqlalchemy.func.coalesce(todayCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(weekCountQuery.c.count, 0).desc(), sqlalchemy.func.coalesce(monthCountQuery.c.count, 0).desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
+            .limit(500)
         )
         collectionRowsResult = await self.retriever.database.execute(query=collectionRowsQuery)
         collectionRows = [
@@ -154,3 +160,25 @@ class GmManager:
             ) for row in collectionRowsResult
         ]
         return collectionRows
+
+    async def get_latest_gm_for_account(self, address: str) -> LatestAccountGm:
+        latestAccountGmQuery = (
+            AccountGmsTable.select()
+            .where(AccountGmsTable.c.address == address)
+            .order_by(AccountGmsTable.c.date.desc())
+            .limit(1)
+        )
+        latestAccountGmResult = await self.retriever.database.execute(query=latestAccountGmQuery)
+        latestAccountGmRow = latestAccountGmResult.first()
+        latestAccountGm = account_gm_from_row(row=latestAccountGmRow)
+        query = (
+            AccountCollectionGmsTable.select()
+            .where(AccountCollectionGmsTable.c.accountAddress == address)
+            .where(AccountCollectionGmsTable.c.date == latestAccountGmRow.date)
+        )
+        latestAccountCollectionGmResult = await self.retriever.database.execute(query=query)
+        latestAccountCollectionsGm = [account_collection_gm_from_row(row=row) for row in latestAccountCollectionGmResult]
+        return LatestAccountGm(
+            accountGm=latestAccountGm,
+            accountCollectionGms=latestAccountCollectionsGm
+        )

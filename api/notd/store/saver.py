@@ -863,7 +863,7 @@ class Saver(CoreSaver):
         query = OwnerCollectionTokenCountTable.update(OwnerCollectionTokenCountTable.c.ownerCollectionTokenCountId == ownerCollectionTokenCountId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_account_gm(self, address: str, date: datetime.datetime, streakLength: int, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountGm:
+    async def create_account_gm(self, address: str, date: datetime.datetime, streakLength: int, collectionCount: int, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountGm:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -872,6 +872,7 @@ class Saver(CoreSaver):
             AccountGmsTable.c.address.key: address,
             AccountGmsTable.c.date.key: date,
             AccountGmsTable.c.streakLength.key: streakLength,
+            AccountGmsTable.c.collectionCount.key: collectionCount,
             AccountGmsTable.c.signatureMessage.key: signatureMessage,
             AccountGmsTable.c.signature.key: signature,
         }
@@ -885,6 +886,7 @@ class Saver(CoreSaver):
             address=address,
             date=date,
             streakLength=streakLength,
+            collectionCount=collectionCount,
             signatureMessage=signatureMessage,
             signature=signature,
         )

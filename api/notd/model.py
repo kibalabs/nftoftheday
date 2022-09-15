@@ -476,6 +476,7 @@ class AccountGm:
     address: str
     date: datetime.datetime
     streakLength: int
+    collectionCount: int
     signatureMessage: str
     signature: str
 
@@ -517,3 +518,8 @@ class OwnerCollectionTokenCount:
     registryAddress: str
     ownerAddress: str
     tokenCount: int
+
+
+class LatestAccountGm:
+    accountGm: AccountGm
+    accountCollectionGms: List[AccountCollectionGm]
