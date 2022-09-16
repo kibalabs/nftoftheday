@@ -17,17 +17,12 @@ from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 
 
 async def collection_overlaps():
-    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["REMOTE_DB_USERNAME"], password=os.environ["REMOTE_DB_PASSWORD"], host=os.environ["REMOTE_DB_HOST"], port=os.environ["REMOTE_DB_PORT"], name=os.environ["REMOTE_DB_NAME"])    
-    databaseConnectionString1 = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
-    # databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
+    databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
-    database1 = Database(connectionString=databaseConnectionString1)
     retriever = Retriever(database=database)
-    saver = Saver(database=database1)
+    saver = Saver(database=database)
     await database.connect()
-    await database1.connect()
     for address in GALLERY_COLLECTIONS:
-        print(address)
         subQuery = (
             UserRegistryOrderedOwnershipsMaterializedView.select()
             .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.distinct()])

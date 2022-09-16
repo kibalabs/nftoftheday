@@ -303,6 +303,7 @@ def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
         tweetCount=row[TwitterProfilesTable.c.tweetCount],
     )
 
+
 def account_gm_from_row(row: Mapping) -> AccountGm:
     return AccountGm(
         accountGmId=row[AccountGmsTable.c.accountGmId],
@@ -316,6 +317,7 @@ def account_gm_from_row(row: Mapping) -> AccountGm:
         signature=row[AccountGmsTable.c.signature],
     )
 
+
 def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
     return AccountCollectionGm(
         accountCollectionGmId=row[AccountCollectionGmsTable.c.accountCollectionGmId],
@@ -327,6 +329,7 @@ def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
         signatureMessage=row[AccountCollectionGmsTable.c.signatureMessage],
         signature=row[AccountCollectionGmsTable.c.signature],
     )
+
 
 def collection_overlap_from_row(row: Mapping) -> CollectionOverlap:
     return CollectionOverlap(
