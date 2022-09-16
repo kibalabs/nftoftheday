@@ -6,6 +6,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
+from notd.api.models_v1 import ApiCollectionOverlaps
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
@@ -337,3 +338,9 @@ class GetLatestGmForAccountRequest(BaseModel):
 
 class GetLatestGmForAccountResponse(BaseModel):
     latestAccountGm: ApiLatestAccountGm
+
+class GetCollectionOverlapsResponse(BaseModel):
+    collectionOverlaps: List[ApiCollectionOverlaps]
+
+class GetCollectionOverlapsRequest(BaseModel):
+    pass
