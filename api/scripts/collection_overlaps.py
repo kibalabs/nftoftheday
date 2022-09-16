@@ -1,18 +1,20 @@
 import asyncio
-from collections import defaultdict
+import csv
 import os
 import sys
+from collections import defaultdict
+
 from core.store.database import Database
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
-import csv
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.store.schema import TokenCollectionOverlapsTable
 from notd.model import GALLERY_COLLECTIONS
-from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
-from notd.store.schema import TokenOwnershipsTable
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenCollectionOverlapsTable
+from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
+
 
 async def collection_overlaps():
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["REMOTE_DB_USERNAME"], password=os.environ["REMOTE_DB_PASSWORD"], host=os.environ["REMOTE_DB_HOST"], port=os.environ["REMOTE_DB_PORT"], name=os.environ["REMOTE_DB_NAME"])    

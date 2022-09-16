@@ -8,14 +8,12 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
-from notd.model import CollectionOverlap
-from notd.store.schema import TokenCollectionOverlapsTable
-from notd.store.schema_conversions import collection_overlap_from_row
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -39,6 +37,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
@@ -54,6 +53,7 @@ from notd.store.schema_conversions import account_gm_from_row
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import collection_overlap_from_row
 from notd.store.schema_conversions import collection_total_activity_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import lock_from_row

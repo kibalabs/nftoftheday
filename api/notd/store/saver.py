@@ -9,14 +9,13 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
-from notd.model import CollectionOverlap
-from notd.store.schema import TokenCollectionOverlapsTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -40,6 +39,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
@@ -909,7 +909,7 @@ class Saver(CoreSaver):
             tokenCount=tokenCount,
             ownerCount=ownerCount,
         )
-    
+
     async def update_collection_overlap(self, collectionOverlapId: int, ownerCount: Optional[int] = None, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if ownerCount is not None:

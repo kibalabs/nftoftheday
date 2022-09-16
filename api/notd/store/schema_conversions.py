@@ -1,14 +1,13 @@
 from typing import Any
 from typing import Mapping
 from typing import Optional
-from notd.model import CollectionOverlap
-from notd.store.schema import TokenCollectionOverlapsTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -33,6 +32,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
