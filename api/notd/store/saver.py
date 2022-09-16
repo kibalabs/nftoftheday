@@ -886,7 +886,7 @@ class Saver(CoreSaver):
             signature=signature,
         )
 
-    async def create_collection_overlap(self, registryAddress: str, galleryAddress: str, ownerCount: int, tokenCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
+    async def create_collection_overlap(self, registryAddress: str, galleryAddress: str, ownerAddress: str, tokenCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -894,7 +894,7 @@ class Saver(CoreSaver):
             TokenCollectionOverlapsTable.c.updatedDate.key: updatedDate,
             TokenCollectionOverlapsTable.c.registryAddress.key: registryAddress,
             TokenCollectionOverlapsTable.c.galleryAddress.key: galleryAddress,
-            TokenCollectionOverlapsTable.c.ownerCount.key: ownerCount,
+            TokenCollectionOverlapsTable.c.ownerAddress.key: ownerAddress,
             TokenCollectionOverlapsTable.c.tokenCount.key: tokenCount,
         }
         query = TokenCollectionOverlapsTable.insert().values(values)
@@ -906,14 +906,12 @@ class Saver(CoreSaver):
             updatedDate=updatedDate,
             registryAddress=registryAddress,
             galleryAddress=galleryAddress,
+            ownerAddress=ownerAddress,
             tokenCount=tokenCount,
-            ownerCount=ownerCount,
         )
 
-    async def update_collection_overlap(self, collectionOverlapId: int, ownerCount: Optional[int] = None, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_overlap(self, collectionOverlapId: int, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
-        if ownerCount is not None:
-            values[TokenCollectionOverlapsTable.c.ownerCount.key] = ownerCount
         if tokenCount is not None:
             values[TokenCollectionOverlapsTable.c.tokenCount.key] = tokenCount
         if len(values) > 0:

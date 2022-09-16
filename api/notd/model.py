@@ -523,5 +523,5 @@ class CollectionOverlap:
     updatedDate: datetime.datetime
     registryAddress: str
     galleryAddress: str
-    ownerCount: int
+    ownerAddress: str
     tokenCount: int

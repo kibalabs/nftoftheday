@@ -335,6 +335,6 @@ def collection_overlap_from_row(row: Mapping) -> CollectionOverlap:
         updatedDate=row[TokenCollectionOverlapsTable.c.updatedDate],
         registryAddress=row[TokenCollectionOverlapsTable.c.registryAddress],
         galleryAddress=row[TokenCollectionOverlapsTable.c.galleryAddress],
-        ownerCount=row[TokenCollectionOverlapsTable.c.ownerCount],
+        ownerAddress=row[TokenCollectionOverlapsTable.c.ownerAddress],
         tokenCount=row[TokenCollectionOverlapsTable.c.tokenCount],
     )
