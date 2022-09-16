@@ -3,7 +3,7 @@ import datetime
 import json
 import urllib.parse as urlparse
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Tuple
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -18,10 +18,10 @@ from core.util import list_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
 from web3 import Web3
-from api.notd.model import CollectionOverlap
-from api.notd.store.schema import TokenCollectionOverlapsTable
+from notd.model import CollectionOverlap
+from notd.store.schema import TokenCollectionOverlapsTable
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
-from api.notd.store.schema_conversions import collection_overlap_from_row
+from notd.store.schema_conversions import collection_overlap_from_row
 
 
 from notd.api.endpoints_v1 import InQueryParam
@@ -372,16 +372,3 @@ class GalleryManager:
                 tokenMetadatas=collectionTokenMap[registryAddress],
             ) for registryAddress in registryAddresses
         ]
-    # select gallery_address, registry_address, count(owner_address), sum(token_count) from tbl_collection_overlaps 
-    # where gallery_address ='0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3' 
-    # group by registry_address, gallery_address  order by sum desc
-    async def get_collection_overlaps(self, galleryAddress: str) -> Sequence[CollectionOverlap]:
-        query = (
-            TokenCollectionOverlapsTable.select()
-            .where(TokenCollectionOverlapsTable.c.galleryAddress) == galleryAddress
-        )
-        result = await self.retriever.database.execute(query=query)
-        overlaps = [collection_overlap_from_row(row=row) for row in result]
-        print(overlaps)
-
-

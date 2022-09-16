@@ -212,13 +212,3 @@ class ApiGmCollectionRow(BaseModel):
 class ApiLatestAccountGm(BaseModel):
     accountGm: ApiAccountGm
     accountCollectionGms: List[ApiAccountCollectionGm]
-
-
-class ApiCollectionOverlaps(BaseModel):
-    collectionOverlapId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
-    registryAddress: str
-    galleryAddress: str
-    ownerAddress: str
-    tokenCount: int
