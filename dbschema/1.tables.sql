@@ -420,3 +420,20 @@ CREATE INDEX tbl_account_collection_gms_registry_address ON tbl_account_collecti
 CREATE INDEX tbl_account_collection_gms_account_address ON tbl_account_collection_gms (account_address);
 CREATE INDEX tbl_account_collection_gms_registry_address_date ON tbl_account_collection_gms (registry_address, date);
 CREATE INDEX tbl_account_collection_gms_date ON tbl_account_collection_gms (date);
+
+CREATE TABLE tbl_collection_overlaps (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    gallery_address TEXT NOT NULL,
+    owner_count NUMERIC(256, 0) NOT NULL,
+    token_count NUMERIC(256, 0) NOT NULL
+);
+CREATE UNIQUE INDEX tbl_collection_overlaps_registry_address_gallery_address_date on tbl_collection_overlaps (registry_address, gallery_address);
+CREATE INDEX tbl_collection_overlaps_created_date ON tbl_collection_overlaps (created_date);
+CREATE INDEX tbl_collection_overlaps_updated_date ON tbl_collection_overlaps (updated_date);
+CREATE INDEX tbl_collection_overlaps_registry_address ON tbl_collection_overlaps (registry_address);
+CREATE INDEX tbl_collection_overlaps_gallery_address ON tbl_collection_overlaps (gallery_address);
+CREATE INDEX tbl_collection_overlaps_owner_count ON tbl_collection_overlaps (owner_count);
+CREATE INDEX tbl_collection_overlaps_token_count ON tbl_collection_overlaps (token_count);

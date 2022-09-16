@@ -9,6 +9,8 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
+from notd.model import CollectionOverlap
+from notd.store.schema import TokenCollectionOverlapsTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -883,3 +885,38 @@ class Saver(CoreSaver):
             signatureMessage=signatureMessage,
             signature=signature,
         )
+
+    async def create_collection_overlap(self, registryAddress: str, galleryAddress: str, ownerCount: int, tokenCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            TokenCollectionOverlapsTable.c.createdDate.key: createdDate,
+            TokenCollectionOverlapsTable.c.updatedDate.key: updatedDate,
+            TokenCollectionOverlapsTable.c.registryAddress.key: registryAddress,
+            TokenCollectionOverlapsTable.c.galleryAddress.key: galleryAddress,
+            TokenCollectionOverlapsTable.c.ownerCount.key: ownerCount,
+            TokenCollectionOverlapsTable.c.tokenCount.key: tokenCount,
+        }
+        query = TokenCollectionOverlapsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        collectionOverlapId = result.inserted_primary_key[0]
+        return CollectionOverlap(
+            collectionOverlapId=collectionOverlapId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            galleryAddress=galleryAddress,
+            tokenCount=tokenCount,
+            ownerCount=ownerCount,
+        )
+    
+    async def update_collection_overlap(self, collectionOverlapId: int, ownerCount: Optional[int] = None, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if ownerCount is not None:
+            values[TokenCollectionOverlapsTable.c.ownerCount.key] = ownerCount
+        if tokenCount is not None:
+            values[TokenCollectionOverlapsTable.c.tokenCount.key] = tokenCount
+        if len(values) > 0:
+            values[TokenCollectionOverlapsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = TokenCollectionOverlapsTable.update(TokenCollectionOverlapsTable.c.collectionOverlapId == collectionOverlapId).values(values)
+        await self._execute(query=query, connection=connection)

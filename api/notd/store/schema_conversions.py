@@ -1,6 +1,8 @@
 from typing import Any
 from typing import Mapping
 from typing import Optional
+from notd.model import CollectionOverlap
+from notd.store.schema import TokenCollectionOverlapsTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -324,4 +326,15 @@ def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
         date=row[AccountCollectionGmsTable.c.date],
         signatureMessage=row[AccountCollectionGmsTable.c.signatureMessage],
         signature=row[AccountCollectionGmsTable.c.signature],
+    )
+
+def collection_overlap_from_row(row: Mapping) -> CollectionOverlap:
+    return CollectionOverlap(
+        collectionOverlapId=row[TokenCollectionOverlapsTable.c.collectionOverlapId],
+        createdDate=row[TokenCollectionOverlapsTable.c.createdDate],
+        updatedDate=row[TokenCollectionOverlapsTable.c.updatedDate],
+        registryAddress=row[TokenCollectionOverlapsTable.c.registryAddress],
+        galleryAddress=row[TokenCollectionOverlapsTable.c.galleryAddress],
+        ownerCount=row[TokenCollectionOverlapsTable.c.ownerCount],
+        tokenCount=row[TokenCollectionOverlapsTable.c.tokenCount],
     )

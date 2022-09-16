@@ -514,3 +514,14 @@ class GmCollectionRow:
 class LatestAccountGm:
     accountGm: AccountGm
     accountCollectionGms: List[AccountCollectionGm]
+
+
+@dataclasses.dataclass
+class CollectionOverlap:
+    collectionOverlapId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    galleryAddress: str
+    ownerCount: int
+    tokenCount: int

@@ -8,6 +8,9 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
+from notd.model import CollectionOverlap
+from notd.store.schema import TokenCollectionOverlapsTable
+from notd.store.schema_conversions import collection_overlap_from_row
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -512,3 +515,15 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'AccountCollectionGm with id:{accountCollectionGmId} not found')
         accountCollectionGm = account_collection_gm_from_row(row)
         return accountCollectionGm
+
+    async def list_collection_overlaps(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionOverlap]:
+        query = TokenCollectionOverlapsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenCollectionOverlapsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenCollectionOverlapsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        collectionOverlaps = [collection_overlap_from_row(row) for row in result]
+        return collectionOverlaps
