@@ -3,7 +3,7 @@ import datetime
 import json
 import urllib.parse as urlparse
 from collections import defaultdict
-from typing import Dict, Tuple
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -17,12 +17,8 @@ from core.util import date_util
 from core.util import list_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
-from web3 import Web3
-from notd.model import CollectionOverlap
-from notd.store.schema import TokenCollectionOverlapsTable
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
-from notd.store.schema_conversions import collection_overlap_from_row
-
+from web3 import Web3
 
 from notd.api.endpoints_v1 import InQueryParam
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
@@ -42,6 +38,7 @@ from notd.store.saver import Saver
 from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
@@ -50,6 +47,7 @@ from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
 from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
 from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
+from notd.store.schema_conversions import collection_overlap_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
@@ -372,3 +370,9 @@ class GalleryManager:
                 tokenMetadatas=collectionTokenMap[registryAddress],
             ) for registryAddress in registryAddresses
         ]
+    # select gallery_address, registry_address, count(owner_address), sum(token_count) from tbl_collection_overlaps
+    # where gallery_address ='0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
+    # group by registry_address, gallery_address
+    # order by sum desc    
+    async def get_collection_overlaps():
+        pass

@@ -428,7 +428,8 @@ CREATE TABLE tbl_collection_overlaps (
     registry_address TEXT NOT NULL,
     gallery_address TEXT NOT NULL,
     owner_address TEXT NOT NULL,
-    token_count NUMERIC(256, 0) NOT NULL
+    token_count NUMERIC(256, 0) NOT NULL,
+    gallery_count NUMERIC(256, 0) NOT NULL
 );
 CREATE UNIQUE INDEX tbl_collection_overlaps_registry_address_gallery_address_owner_address on tbl_collection_overlaps (registry_address, gallery_address, owner_address);
 CREATE INDEX tbl_collection_overlaps_created_date ON tbl_collection_overlaps (created_date);

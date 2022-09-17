@@ -525,3 +525,12 @@ class CollectionOverlap:
     galleryAddress: str
     ownerAddress: str
     tokenCount: int
+    galleryCount: int
+
+
+# @dataclasses.dataclass
+# class CollectionOverlap:
+#     galleryAddress: str
+#     registryAddress: str
+#     ownerCount: int
+#     tokenCount: int

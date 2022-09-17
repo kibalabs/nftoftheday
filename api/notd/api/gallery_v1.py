@@ -1,13 +1,13 @@
 from typing import Optional
 
 from fastapi import APIRouter
-from notd.api.endpoints_v1 import GetCollectionOverlapsResponse
 
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import FollowCollectionUserRequest
 from notd.api.endpoints_v1 import FollowCollectionUserResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
+from notd.api.endpoints_v1 import GetCollectionOverlapsResponse
 from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
 from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import GetGalleryUserOwnedCollectionsResponse
@@ -92,9 +92,9 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def get_gallery_user_owned_collections(registryAddress: str, userAddress: str) -> GetGalleryUserOwnedCollectionsResponse:
         ownedCollections = await galleryManager.get_gallery_user_owned_collections(registryAddress=registryAddress, userAddress=userAddress)
         return GetGalleryUserOwnedCollectionsResponse(ownedCollections=(await responseBuilder.gallery_owned_collections_from_models(ownedCollections=ownedCollections)))
-    
+
     @router.get('/collections/{galleryAddress}/overlaps')
-    async def get_collection_overlaps(galleryAddress: str) -> GetCollectionOverlapsResponse:
+    async def get_list_collection_overlaps(galleryAddress: str) -> GetCollectionOverlapsResponse:
         collectionOverlaps = await galleryManager.get_collection_overlaps(galleryAddress=galleryAddress)
         return GetCollectionOverlapsResponse()
 

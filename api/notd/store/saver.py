@@ -886,7 +886,7 @@ class Saver(CoreSaver):
             signature=signature,
         )
 
-    async def create_collection_overlap(self, registryAddress: str, galleryAddress: str, ownerAddress: str, tokenCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
+    async def create_collection_overlap(self, registryAddress: str, galleryAddress: str, ownerAddress: str, tokenCount: int, galleryCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -896,6 +896,7 @@ class Saver(CoreSaver):
             TokenCollectionOverlapsTable.c.galleryAddress.key: galleryAddress,
             TokenCollectionOverlapsTable.c.ownerAddress.key: ownerAddress,
             TokenCollectionOverlapsTable.c.tokenCount.key: tokenCount,
+            TokenCollectionOverlapsTable.c.galleryCount.key: galleryCount,
         }
         query = TokenCollectionOverlapsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
@@ -908,12 +909,15 @@ class Saver(CoreSaver):
             galleryAddress=galleryAddress,
             ownerAddress=ownerAddress,
             tokenCount=tokenCount,
+            galleryCount=galleryCount,
         )
 
-    async def update_collection_overlap(self, collectionOverlapId: int, tokenCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_overlap(self, collectionOverlapId: int, tokenCount: Optional[int] = None, galleryCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values = {}
         if tokenCount is not None:
             values[TokenCollectionOverlapsTable.c.tokenCount.key] = tokenCount
+        if galleryCount is not None:
+            values[TokenCollectionOverlapsTable.c.galleryCount.key] = galleryCount
         if len(values) > 0:
             values[TokenCollectionOverlapsTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = TokenCollectionOverlapsTable.update(TokenCollectionOverlapsTable.c.collectionOverlapId == collectionOverlapId).values(values)
