@@ -11,9 +11,11 @@ from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
+from notd.api.models_v1 import ApiCollectionOverlap
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
+from notd.api.models_v1 import ApiGalleryRegistryOverlap
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
@@ -33,8 +35,10 @@ from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
+from notd.model import CollectionOverlap
 from notd.model import CollectionStatistics
 from notd.model import GalleryOwnedCollection
+from notd.model import GalleryRegistryOverlap
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
@@ -353,3 +357,28 @@ class ResponseBuilder:
             accountGm=(await self.account_gm_from_model(accountGm=latestAccountGm.accountGm)),
             accountCollectionGms=(await self.account_collection_gms_from_models(gmCollections=latestAccountGm.accountCollectionGms))
         )
+
+    async def collection_overlap_from_model(self, collectionOverlap: CollectionOverlap) -> ApiCollectionOverlap:
+        return ApiCollectionOverlap(
+            collectionOverlapId=collectionOverlap.collectionOverlapId,
+            createdDate=collectionOverlap.createdDate,
+            updatedDate=collectionOverlap.updatedDate,
+            galleryAddress=collectionOverlap.galleryAddress,
+            galleryCount=collectionOverlap.galleryCount,
+            tokenCount=collectionOverlap.tokenCount,
+        )
+
+    async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> Sequence[ApiCollectionOverlap]:
+        return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])
+
+    async def gallery_registry_overlap_from_models(self, galleryRegistryOverlap: GalleryRegistryOverlap) -> GalleryRegistryOverlap:
+        return ApiGalleryRegistryOverlap(
+            galleryAddress=galleryRegistryOverlap.galleryAddress,
+            registryAddress=galleryRegistryOverlap.registryAddress,
+            tokenCount=galleryRegistryOverlap.tokenCount,
+            ownerCount=galleryRegistryOverlap.ownerCount,
+            collectionOverlaps=(await self.collection_overlaps_from_models(collectionOverlaps=galleryRegistryOverlap.collectionOverlaps) )
+        )
+
+    async def gallery_registry_overlaps_from_models(self, galleryRegistryOverlaps: Sequence[GalleryRegistryOverlap]) -> Sequence[ApiGalleryRegistryOverlap]:
+        return await asyncio.gather(*[self.gallery_registry_overlap_from_models(galleryRegistryOverlap=galleryRegistryOverlap) for galleryRegistryOverlap in galleryRegistryOverlaps])

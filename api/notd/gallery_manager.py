@@ -18,14 +18,14 @@ from core.util import list_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
 from web3 import Web3
-from notd.model import GalleryRegistryOverlap
-from notd.model import CollectionOverlap
 
 from notd.api.endpoints_v1 import InQueryParam
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
+from notd.model import CollectionOverlap
 from notd.model import GalleryOwnedCollection
+from notd.model import GalleryRegistryOverlap
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow

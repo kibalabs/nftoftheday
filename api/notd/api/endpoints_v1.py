@@ -15,13 +15,13 @@ from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
+from notd.api.models_v1 import ApiGalleryRegistryOverlap
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
-from notd.api.models_v1 import ApiGalleryRegistryOverlap
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenTransfer
@@ -343,4 +343,4 @@ class GetCollectionOverlapsRequest(BaseModel):
     pass
 
 class GetCollectionOverlapsResponse(BaseModel):
-    collectionOverlap: ApiGalleryRegistryOverlap
+    galleryRegistryOverlaps: List[ApiGalleryRegistryOverlap]

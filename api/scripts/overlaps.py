@@ -8,7 +8,8 @@ from core.store.database import Database
 from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.model import GALLERY_COLLECTIONS, COLLECTION_SPRITE_CLUB_ADDRESS
+from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
+from notd.model import GALLERY_COLLECTIONS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenOwnershipsTable
