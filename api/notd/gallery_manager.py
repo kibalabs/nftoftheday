@@ -17,8 +17,9 @@ from core.util import date_util
 from core.util import list_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
 from web3 import Web3
+from notd.model import GalleryRegistryOverlap
+from notd.model import CollectionOverlap
 
 from notd.api.endpoints_v1 import InQueryParam
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
@@ -370,9 +371,23 @@ class GalleryManager:
                 tokenMetadatas=collectionTokenMap[registryAddress],
             ) for registryAddress in registryAddresses
         ]
-    # select gallery_address, registry_address, count(owner_address), sum(token_count) from tbl_collection_overlaps
-    # where gallery_address ='0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
-    # group by registry_address, gallery_address
-    # order by sum desc    
-    async def get_collection_overlaps():
-        pass
+
+    async def get_collection_overlaps(self, galleryAddress: str):
+        query = (
+            TokenCollectionOverlapsTable.select()
+            .where(TokenCollectionOverlapsTable.c.galleryAddress == galleryAddress)
+        )
+        collectionOverlapsResult = await self.retriever.database.execute(query=query)
+        collectionOverlaps = [collection_overlap_from_row(row) for row in collectionOverlapsResult]
+        registryCollectionOverlapMap = defaultdict(list[CollectionOverlap])
+        for collectionOverlap in collectionOverlaps:
+            registryCollectionOverlapMap[collectionOverlap.registryAddress].append(collectionOverlap)
+        galleryRegistryOverlaps = []
+        for registryAddress, collectionOverlaps in registryCollectionOverlapMap.items():
+            galleryRegistryOverlaps += [GalleryRegistryOverlap(
+                galleryAddress=galleryAddress,
+                registryAddress=registryAddress,
+                ownerCount=len(collectionOverlaps),
+                tokenCount=sum(collectionOverlap.tokenCount for collectionOverlap in collectionOverlaps),
+                collectionOverlaps=collectionOverlaps)]
+        return galleryRegistryOverlaps

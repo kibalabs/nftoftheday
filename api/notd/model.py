@@ -528,9 +528,10 @@ class CollectionOverlap:
     galleryCount: int
 
 
-# @dataclasses.dataclass
-# class CollectionOverlap:
-#     galleryAddress: str
-#     registryAddress: str
-#     ownerCount: int
-#     tokenCount: int
+@dataclasses.dataclass
+class GalleryRegistryOverlap:
+    galleryAddress: str
+    registryAddress: str
+    ownerCount: str
+    tokenCount: int
+    collectionOverlaps: List[CollectionOverlap]
