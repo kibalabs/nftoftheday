@@ -9,6 +9,7 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
+from api.notd.model import RetrievedCollectionOverlap
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -886,39 +887,46 @@ class Saver(CoreSaver):
             signature=signature,
         )
 
-    async def create_collection_overlap(self, registryAddress: str, galleryAddress: str, ownerAddress: str, tokenCount: int, galleryCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
-        createdDate = date_util.datetime_from_now()
-        updatedDate = createdDate
-        values = {
+    @staticmethod
+    def _get_create_collection_overlaps_values(retrievedCollectionOverlap: RetrievedCollectionOverlap, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
             TokenCollectionOverlapsTable.c.createdDate.key: createdDate,
             TokenCollectionOverlapsTable.c.updatedDate.key: updatedDate,
-            TokenCollectionOverlapsTable.c.registryAddress.key: registryAddress,
-            TokenCollectionOverlapsTable.c.galleryAddress.key: galleryAddress,
-            TokenCollectionOverlapsTable.c.ownerAddress.key: ownerAddress,
-            TokenCollectionOverlapsTable.c.tokenCount.key: tokenCount,
-            TokenCollectionOverlapsTable.c.galleryCount.key: galleryCount,
+            TokenCollectionOverlapsTable.c.registryAddress.key: retrievedCollectionOverlap.registryAddress,
+            TokenCollectionOverlapsTable.c.galleryAddress.key: retrievedCollectionOverlap.galleryAddress,
+            TokenCollectionOverlapsTable.c.ownerAddress.key: retrievedCollectionOverlap.ownerAddress,
+            TokenCollectionOverlapsTable.c.tokenCount.key: retrievedCollectionOverlap.tokenCount,
+            TokenCollectionOverlapsTable.c.galleryCount.key: retrievedCollectionOverlap.galleryCount,
         }
+
+    async def create_collection_overlap(self, retrievedCollectionOverlap: RetrievedCollectionOverlap, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = self._get_create_collection_overlaps_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate)
         query = TokenCollectionOverlapsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
         collectionOverlapId = result.inserted_primary_key[0]
-        return CollectionOverlap(
-            collectionOverlapId=collectionOverlapId,
-            createdDate=createdDate,
-            updatedDate=updatedDate,
-            registryAddress=registryAddress,
-            galleryAddress=galleryAddress,
-            ownerAddress=ownerAddress,
-            tokenCount=tokenCount,
-            galleryCount=galleryCount,
-        )
+        return collectionOverlapId
 
-    async def update_collection_overlap(self, collectionOverlapId: int, tokenCount: Optional[int] = None, galleryCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values = {}
-        if tokenCount is not None:
-            values[TokenCollectionOverlapsTable.c.tokenCount.key] = tokenCount
-        if galleryCount is not None:
-            values[TokenCollectionOverlapsTable.c.galleryCount.key] = galleryCount
-        if len(values) > 0:
-            values[TokenCollectionOverlapsTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = TokenCollectionOverlapsTable.update(TokenCollectionOverlapsTable.c.collectionOverlapId == collectionOverlapId).values(values)
+    async def create_collection_overlaps(self, retrievedCollectionOverlaps: List[RetrievedCollectionOverlap], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedCollectionOverlaps) == 0:
+            return
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        latestCollectionOverlapsIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedCollectionOverlaps, chunkSize=100):
+            values = [self._get_create_latest_token_listing_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate) for retrievedCollectionOverlap in chunk]
+            query = TokenCollectionOverlapsTable.insert().values(values).returning(TokenCollectionOverlapsTable.c.collectionOverlapId)
+            rows = await self._execute(query=query, connection=connection)
+            latestCollectionOverlapsIds += [row[0] for row in rows]
+        return latestCollectionOverlapsIds
+
+    async def delete_collection_overlap(self, collectionOverlapId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenCollectionOverlapsTable.delete().where(TokenCollectionOverlapsTable.c.collectionOverlapId == collectionOverlapId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_collection_overlaps(self, collectionOverlapIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(collectionOverlapIds) == 0:
+            return
+        query = TokenCollectionOverlapsTable.delete().where(LatestTokenListingsTable.c.collectionOverlapId.in_(collectionOverlapIds))
         await self._execute(query=query, connection=connection)

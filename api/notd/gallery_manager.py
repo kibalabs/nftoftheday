@@ -25,7 +25,7 @@ from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
 from notd.model import GalleryOwnedCollection
-from notd.model import GalleryRegistryOverlap
+from notd.model import GalleryCollectionOverlap
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
@@ -372,7 +372,7 @@ class GalleryManager:
             ) for registryAddress in registryAddresses
         ]
 
-    async def get_collection_overlaps(self, galleryAddress: str):
+    async def list_collection_overlaps(self, galleryAddress: str):
         query = (
             TokenCollectionOverlapsTable.select()
             .where(TokenCollectionOverlapsTable.c.galleryAddress == galleryAddress)
@@ -382,12 +382,12 @@ class GalleryManager:
         registryCollectionOverlapMap = defaultdict(list[CollectionOverlap])
         for collectionOverlap in collectionOverlaps:
             registryCollectionOverlapMap[collectionOverlap.registryAddress].append(collectionOverlap)
-        galleryRegistryOverlaps = []
+        galleryCollectionOverlaps = []
         for registryAddress, collectionOverlaps in registryCollectionOverlapMap.items():
-            galleryRegistryOverlaps += [GalleryRegistryOverlap(
+            galleryCollectionOverlaps += [GalleryCollectionOverlap(
                 galleryAddress=galleryAddress,
                 registryAddress=registryAddress,
                 ownerCount=len(collectionOverlaps),
                 tokenCount=sum(collectionOverlap.tokenCount for collectionOverlap in collectionOverlaps),
                 collectionOverlaps=collectionOverlaps)]
-        return galleryRegistryOverlaps
+        return galleryCollectionOverlaps

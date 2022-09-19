@@ -15,7 +15,7 @@ from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
-from notd.api.models_v1 import ApiGalleryRegistryOverlap
+from notd.api.models_v1 import ApiGalleryCollectionOverlap
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
@@ -339,8 +339,8 @@ class GetLatestGmForAccountRequest(BaseModel):
 class GetLatestGmForAccountResponse(BaseModel):
     latestAccountGm: ApiLatestAccountGm
 
-class GetCollectionOverlapsRequest(BaseModel):
+class ListCollectionOverlapsRequest(BaseModel):
     pass
 
-class GetCollectionOverlapsResponse(BaseModel):
-    galleryRegistryOverlaps: List[ApiGalleryRegistryOverlap]
+class ListCollectionOverlapsResponse(BaseModel):
+    galleryCollectionOverlaps: List[ApiGalleryCollectionOverlap]

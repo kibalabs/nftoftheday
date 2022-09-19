@@ -517,7 +517,7 @@ class LatestAccountGm:
 
 
 @dataclasses.dataclass
-class CollectionOverlap:
+class RetrievedCollectionOverlap:
     collectionOverlapId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
@@ -529,7 +529,14 @@ class CollectionOverlap:
 
 
 @dataclasses.dataclass
-class GalleryRegistryOverlap:
+class CollectionOverlap(RetrievedCollectionOverlap):
+    collectionOverlapId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class GalleryCollectionOverlap:
     galleryAddress: str
     registryAddress: str
     ownerCount: str
