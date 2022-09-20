@@ -334,5 +334,4 @@ TokenCollectionOverlapsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='tokenCount', name='token_count', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='galleryCount', name='gallery_count', type_=sqlalchemy.Integer, nullable=False),
-
 )

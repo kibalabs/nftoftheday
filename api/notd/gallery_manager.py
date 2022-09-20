@@ -372,7 +372,7 @@ class GalleryManager:
             ) for registryAddress in registryAddresses
         ]
 
-    async def list_collection_overlaps(self, galleryAddress: str):
+    async def list_gallery_collection_overlaps(self, galleryAddress: str) -> List[GalleryCollectionOverlap]:
         query = (
             TokenCollectionOverlapsTable.select()
             .where(TokenCollectionOverlapsTable.c.galleryAddress == galleryAddress)

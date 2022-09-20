@@ -339,10 +339,10 @@ class GetLatestGmForAccountRequest(BaseModel):
 class GetLatestGmForAccountResponse(BaseModel):
     latestAccountGm: ApiLatestAccountGm
 
-class ListCollectionOverlapsRequest(BaseModel):
+class ListGalleryCollectionOverlapsRequest(BaseModel):
     pass
 
-class ListCollectionOverlapsResponse(BaseModel):
+class ListGalleryCollectionOverlapsResponse(BaseModel):
     galleryCollectionOverlaps: List[ApiGalleryCollectionOverlap]
 
 class RefreshCollectionOverlapsDeferredResponse(BaseModel):
