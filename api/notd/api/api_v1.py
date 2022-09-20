@@ -17,6 +17,7 @@ from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
+from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
@@ -206,6 +207,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def get_collection_daily_activities(registryAddress: str):
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
         return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
+
+    @router.get('/collections/{address}/refresh-overlaps-deferred', response_model=RefreshCollectionOverlapsDeferredResponse)
+    async def refresh_collection_overlaps(address: str):
+        await notdManager.refresh_collection_overlaps(address=address)
+        return RefreshCollectionOverlapsDeferredResponse()
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

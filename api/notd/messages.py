@@ -96,3 +96,10 @@ class RefreshListingsForAllCollections(MessageContent):
 class RefreshListingsForCollection(MessageContent):
     _COMMAND = 'REFRESH_LISTINGS_FOR_COLLECTION'
     address: str
+
+class RefreshCollectionOverlapMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_COLLECTION_OVERLAP'
+    registryAddress: str
+
+class RefreshAllCollectionOverlapMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_ALL_COLLECTION_OVERLAPS'

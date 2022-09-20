@@ -10,7 +10,6 @@ from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
 
-from notd.model import RetrievedCollectionOverlap
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Block
@@ -19,6 +18,7 @@ from notd.model import CollectionHourlyActivity
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
+from notd.model import RetrievedCollectionOverlap
 from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership

@@ -344,3 +344,9 @@ class ListCollectionOverlapsRequest(BaseModel):
 
 class ListCollectionOverlapsResponse(BaseModel):
     galleryCollectionOverlaps: List[ApiGalleryCollectionOverlap]
+
+class RefreshCollectionOverlapsDeferredResponse(BaseModel):
+    pass
+
+class RefreshCollectionOverlapsDeferredRequest(BaseModel):
+    pass

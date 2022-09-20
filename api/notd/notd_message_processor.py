@@ -7,6 +7,8 @@ from core.util import date_util
 from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
+from notd.messages import RefreshAllCollectionOverlapMessageContent
+from notd.messages import RefreshCollectionOverlapMessageContent
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollection
 from notd.messages import RefreshViewsMessageContent
@@ -137,5 +139,13 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == UpdateAllTwitterUsersMessageContent.get_command():
             messageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)
             await self.notdManager.update_all_twitter_users()
+            return
+        if message.command == RefreshAllCollectionOverlapMessageContent.get_command():
+            messageContent = RefreshAllCollectionOverlapMessageContent.parse_obj(message.content)
+            await self.notdManager.refresh_overlap_for_all_collections()
+            return
+        if message.command == RefreshCollectionOverlapMessageContent.get_command():
+            messageContent = RefreshCollectionOverlapMessageContent.parse_obj(message.content)
+            await self.notdManager.refresh_overlap_for_collection(registryAddress=messageContent.registryAddress)
             return
         raise KibaException(message='Message was unhandled')

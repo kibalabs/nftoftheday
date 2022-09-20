@@ -371,7 +371,7 @@ class ResponseBuilder:
     async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> Sequence[ApiCollectionOverlap]:
         return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])
 
-    async def gallery_registry_overlap_from_models(self, galleryCollectionOverlap: GalleryCollectionOverlap) -> GalleryCollectionOverlap:
+    async def gallery_collection_overlap_from_models(self, galleryCollectionOverlap: GalleryCollectionOverlap) -> GalleryCollectionOverlap:
         return ApiGalleryCollectionOverlap(
             galleryAddress=galleryCollectionOverlap.galleryAddress,
             registryAddress=galleryCollectionOverlap.registryAddress,
@@ -380,5 +380,5 @@ class ResponseBuilder:
             collectionOverlaps=(await self.collection_overlaps_from_models(collectionOverlaps=galleryCollectionOverlap.collectionOverlaps) )
         )
 
-    async def gallery_registry_overlaps_from_models(self, galleryCollectionOverlaps: Sequence[GalleryCollectionOverlap]) -> Sequence[ApiGalleryCollectionOverlap]:
-        return await asyncio.gather(*[self.gallery_registry_overlap_from_models(galleryCollectionOverlap=galleryCollectionOverlap) for galleryCollectionOverlap in galleryCollectionOverlaps])
+    async def gallery_collection_overlaps_from_models(self, galleryCollectionOverlaps: Sequence[GalleryCollectionOverlap]) -> Sequence[ApiGalleryCollectionOverlap]:
+        return await asyncio.gather(*[self.gallery_collection_overlap_from_models(galleryCollectionOverlap=galleryCollectionOverlap) for galleryCollectionOverlap in galleryCollectionOverlaps])
