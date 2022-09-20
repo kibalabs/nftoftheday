@@ -11,7 +11,7 @@ class CollectionOverlapProcessor():
     def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def calculate_collection_overlap(self, address):
+    async def calculate_collection_overlap(self, address: str):
         subQuery = (
         UserRegistryOrderedOwnershipsMaterializedView.select()
         .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.distinct()])
@@ -33,7 +33,6 @@ class CollectionOverlapProcessor():
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         galleryCountResult = await self.retriever.database.execute(query=galleryCountQuery)
-        galleryCountMap = dict(galleryCountResult)
-
-        retrievedCollectionOverlaps = [RetrievedCollectionOverlap(galleryAddress=address, registryAddress=registryAddress, ownerAddress=ownerAddress, tokenCount=tokenCount, galleryCount=galleryCountMap[ownerAddress]) for registryAddress, ownerAddress, tokenCount in result]
+        galleryCountMap = {owner:galleryCount for owner, galleryCount in galleryCountResult}
+        retrievedCollectionOverlaps = [RetrievedCollectionOverlap(galleryAddress=address, registryAddress=registryAddress, ownerAddress=ownerAddress, tokenCount=tokenCount, galleryCount=galleryCountMap[ownerAddress]) for ownerAddress, registryAddress, tokenCount in result]
         return retrievedCollectionOverlaps

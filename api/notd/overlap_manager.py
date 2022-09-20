@@ -38,6 +38,6 @@ class OverlapManager:
                 .where(TokenCollectionOverlapsTable.c.galleryAddress == registryAddress)
             )
             existingCollectionOverlapResult = await self.retriever.database.execute(query=existingCollectionOverlapQuery, connection=connection)
-            collectionOverlapIdsToDelete = list(existingCollectionOverlapResult)
+            collectionOverlapIdsToDelete = {row[0] for row in existingCollectionOverlapResult}
             await self.saver.delete_collection_overlaps(collectionOverlapIds=collectionOverlapIdsToDelete, connection=connection)
             await self.saver.create_collection_overlaps(retrievedCollectionOverlaps=retrievedCollectionOverlaps, connection=connection)

@@ -123,6 +123,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.update_token_attributes_for_all_collections_deferred()
         return UpdateTokenAttributesForAllCollectionsDeferredResponse()
 
+    @router.get('/collections/refresh-overlaps-deferred', response_model=RefreshCollectionOverlapsDeferredResponse)
+    async def refresh_overlap_for_all_collections_deferred():
+        await notdManager.refresh_overlap_for_all_collections_deferred()
+        return RefreshCollectionOverlapsDeferredResponse()
+
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
     async def get_collection_by_address(registryAddress: str):
         collection = await notdManager.get_collection_by_address(address=registryAddress)
@@ -207,11 +212,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def get_collection_daily_activities(registryAddress: str):
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
         return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
-
-    @router.get('/collections/refresh-overlaps-deferred', response_model=RefreshCollectionOverlapsDeferredResponse)
-    async def refresh_overlap_for_all_collections_deferred():
-        await notdManager.refresh_overlap_for_all_collections_deferred()
-        return RefreshCollectionOverlapsDeferredResponse()
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

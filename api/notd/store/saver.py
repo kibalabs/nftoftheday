@@ -927,5 +927,5 @@ class Saver(CoreSaver):
     async def delete_collection_overlaps(self, collectionOverlapIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(collectionOverlapIds) == 0:
             return
-        query = TokenCollectionOverlapsTable.delete().where(LatestTokenListingsTable.c.collectionOverlapId.in_(collectionOverlapIds))
+        query = TokenCollectionOverlapsTable.delete().where(TokenCollectionOverlapsTable.c.collectionOverlapId.in_(collectionOverlapIds))
         await self._execute(query=query, connection=connection)
