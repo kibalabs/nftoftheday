@@ -208,9 +208,9 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
         return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
 
-    @router.get('/collections/{address}/refresh-overlaps-deferred', response_model=RefreshCollectionOverlapsDeferredResponse)
-    async def refresh_collection_overlaps(address: str):
-        await notdManager.refresh_collection_overlaps(address=address)
+    @router.get('/collections/refresh-overlaps-deferred', response_model=RefreshCollectionOverlapsDeferredResponse)
+    async def refresh_overlap_for_all_collections_deferred():
+        await notdManager.refresh_overlap_for_all_collections_deferred()
         return RefreshCollectionOverlapsDeferredResponse()
 
     @router.post('/subscribe')

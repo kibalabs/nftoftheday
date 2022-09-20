@@ -224,6 +224,7 @@ class ApiCollectionOverlap(BaseModel):
     tokenCount: int
     galleryCount: int
 
+
 class ApiGalleryCollectionOverlap(BaseModel):
     galleryAddress: str
     registryAddress: str

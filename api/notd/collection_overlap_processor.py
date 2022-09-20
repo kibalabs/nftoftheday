@@ -2,16 +2,14 @@ from sqlalchemy.sql.expression import func as sqlalchemyfunc
 
 from notd.model import RetrievedCollectionOverlap
 from notd.store.retriever import Retriever
-from notd.store.saver import Saver
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 
 
 class CollectionOverlapProcessor():
 
-    def __init__(self, retriever: Retriever, saver: Saver) -> None:
+    def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
-        self.saver = saver
 
     async def calculate_collection_overlap(self, address):
         subQuery = (
