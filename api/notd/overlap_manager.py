@@ -1,5 +1,8 @@
+import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.util import chain_util
+from core.store.retriever import StringFieldFilter
+
 
 from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.messages import RefreshAllCollectionOverlapMessageContent
@@ -32,12 +35,11 @@ class OverlapManager:
         registryAddress = chain_util.normalize_address(registryAddress)
         retrievedCollectionOverlaps = await self.collectionOverlapProcessor.calculate_collection_overlap(address=registryAddress)
         async with self.saver.create_transaction() as connection:
-            existingCollectionOverlapQuery = (
-                TokenCollectionOverlapsTable.select()
-                .with_only_columns([TokenCollectionOverlapsTable.c.collectionOverlapId])
-                .where(TokenCollectionOverlapsTable.c.galleryAddress == registryAddress)
-            )
-            existingCollectionOverlapResult = await self.retriever.database.execute(query=existingCollectionOverlapQuery, connection=connection)
-            collectionOverlapIdsToDelete = {row[0] for row in existingCollectionOverlapResult}
+            currentCollectionOverlaps = await self.retriever.list_collection_overlaps(fieldFilters=[
+                StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.galleryAddress.key, eq=registryAddress),
+            ], connection=connection)
+            collectionOverlapIdsToDelete = {collectionOverlaps.collectionOverlapId for collectionOverlaps in currentCollectionOverlaps}
+            logging.info(f'Deleting {len(collectionOverlapIdsToDelete)} existing collection overlaps')
             await self.saver.delete_collection_overlaps(collectionOverlapIds=collectionOverlapIdsToDelete, connection=connection)
+            logging.info(f'Saving {len(retrievedCollectionOverlaps)} overlaps')
             await self.saver.create_collection_overlaps(retrievedCollectionOverlaps=retrievedCollectionOverlaps, connection=connection)
