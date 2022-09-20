@@ -10,7 +10,7 @@ from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
 
-from api.notd.model import RetrievedCollectionOverlap
+from notd.model import RetrievedCollectionOverlap
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Block
@@ -914,7 +914,7 @@ class Saver(CoreSaver):
         updatedDate = createdDate
         latestCollectionOverlapsIds = []
         for chunk in list_util.generate_chunks(lst=retrievedCollectionOverlaps, chunkSize=100):
-            values = [self._get_create_latest_token_listing_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate) for retrievedCollectionOverlap in chunk]
+            values = [self._get_create_collection_overlaps_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate) for retrievedCollectionOverlap in chunk]
             query = TokenCollectionOverlapsTable.insert().values(values).returning(TokenCollectionOverlapsTable.c.collectionOverlapId)
             rows = await self._execute(query=query, connection=connection)
             latestCollectionOverlapsIds += [row[0] for row in rows]

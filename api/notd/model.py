@@ -518,9 +518,6 @@ class LatestAccountGm:
 
 @dataclasses.dataclass
 class RetrievedCollectionOverlap:
-    collectionOverlapId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
     registryAddress: str
     galleryAddress: str
     ownerAddress: str
