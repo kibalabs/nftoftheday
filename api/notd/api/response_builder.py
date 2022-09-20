@@ -14,8 +14,8 @@ from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionOverlap
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryCollectionOverlap
+from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserRow
@@ -37,8 +37,8 @@ from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionOverlap
 from notd.model import CollectionStatistics
-from notd.model import GalleryOwnedCollection
 from notd.model import GalleryCollectionOverlap
+from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow

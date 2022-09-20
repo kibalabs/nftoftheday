@@ -1,20 +1,10 @@
-import datetime
-from typing import Set
-from typing import Tuple
-
-from core import logging
-from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
-from core.store.retriever import DateFieldFilter
-from core.store.retriever import StringFieldFilter
 from core.util import chain_util
-from core.util import date_util
-from core.util import list_util
-from api.notd.store.schema import TokenCollectionOverlapsTable
 
+from api.notd.store.schema import TokenCollectionOverlapsTable
+from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.collection_overlap_processor import CollectionOverlapProcessor
+
 
 class OverlapManager:
 

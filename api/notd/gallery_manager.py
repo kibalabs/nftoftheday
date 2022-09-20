@@ -24,8 +24,8 @@ from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
-from notd.model import GalleryOwnedCollection
 from notd.model import GalleryCollectionOverlap
+from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow

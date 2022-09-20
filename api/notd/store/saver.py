@@ -9,14 +9,13 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
-from api.notd.model import RetrievedCollectionOverlap
 
+from api.notd.model import RetrievedCollectionOverlap
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
-from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -899,7 +898,7 @@ class Saver(CoreSaver):
             TokenCollectionOverlapsTable.c.galleryCount.key: retrievedCollectionOverlap.galleryCount,
         }
 
-    async def create_collection_overlap(self, retrievedCollectionOverlap: RetrievedCollectionOverlap, connection: Optional[DatabaseConnection] = None) -> CollectionOverlap:
+    async def create_collection_overlap(self, retrievedCollectionOverlap: RetrievedCollectionOverlap, connection: Optional[DatabaseConnection] = None) -> int:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = self._get_create_collection_overlaps_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate)
