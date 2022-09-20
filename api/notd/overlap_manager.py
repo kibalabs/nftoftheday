@@ -1,6 +1,7 @@
 import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.util import chain_util
+from core.util import list_util
 from core.store.retriever import StringFieldFilter
 
 
@@ -40,6 +41,7 @@ class OverlapManager:
             ], connection=connection)
             collectionOverlapIdsToDelete = {collectionOverlaps.collectionOverlapId for collectionOverlaps in currentCollectionOverlaps}
             logging.info(f'Deleting {len(collectionOverlapIdsToDelete)} existing collection overlaps')
-            await self.saver.delete_collection_overlaps(collectionOverlapIds=collectionOverlapIdsToDelete, connection=connection)
+            for chunkedIds in list_util.generate_chunks(lst=list(collectionOverlapIdsToDelete), chunkSize=100):
+                await self.saver.delete_collection_overlaps(collectionOverlapIds=chunkedIds, connection=connection)
             logging.info(f'Saving {len(retrievedCollectionOverlaps)} overlaps')
             await self.saver.create_collection_overlaps(retrievedCollectionOverlaps=retrievedCollectionOverlaps, connection=connection)
