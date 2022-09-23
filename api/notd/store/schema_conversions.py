@@ -331,7 +331,7 @@ def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
 
 def account_ens_name_from_row(row: Mapping) -> AccountEnsName:
     return AccountEnsName(
-        accountEnsNameId=row[AccountEnsNamesTable.c.accountCollectionGmId],
+        accountEnsNameId=row[AccountEnsNamesTable.c.accountEnsNameId],
         createdDate=row[AccountEnsNamesTable.c.createdDate],
         updatedDate=row[AccountEnsNamesTable.c.updatedDate],
         accountAddress=row[AccountEnsNamesTable.c.accountAddress],

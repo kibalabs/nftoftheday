@@ -430,7 +430,7 @@ CREATE TABLE tbl_account_ens_names(
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     account_address TEXT NOT NULL,
-    ens_name TEXT,
+    ens_name TEXT
 );
 
 CREATE UNIQUE INDEX tbl_account_ens_names_ens_name_account_address on tbl_account_ens_names (ens_name, account_address);
