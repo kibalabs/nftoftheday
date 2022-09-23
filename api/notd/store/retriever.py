@@ -8,6 +8,9 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
+from api.notd.model import AccountEnsName
+from api.notd.store.schema import AccountEnsNamesTable
+from api.notd.store.schema_conversions import account_ens_name_from_row
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -511,4 +514,13 @@ class Retriever(CoreRetriever):
         if not row:
             raise NotFoundException(message=f'AccountCollectionGm with id:{accountCollectionGmId} not found')
         accountCollectionGm = account_collection_gm_from_row(row)
+        return accountCollectionGm
+    
+    async def get_account_ens_name_by_account_address(self, accountAddress: int, connection: Optional[DatabaseConnection] = None) -> AccountEnsName:
+        query = AccountEnsNamesTable.select().where(AccountEnsNamesTable.c.accountAddress == accountAddress)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.first()
+        if not row:
+            raise NotFoundException(message=f'AccountCollectionGm for accountAddress: {accountAddress} not found')
+        accountCollectionGm = account_ens_name_from_row(row)
         return accountCollectionGm

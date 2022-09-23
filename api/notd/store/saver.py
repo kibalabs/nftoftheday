@@ -9,6 +9,8 @@ from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
 from sqlalchemy import JSON
+from api.notd.model import AccountEnsName
+from api.notd.store.schema import AccountEnsNamesTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -883,3 +885,24 @@ class Saver(CoreSaver):
             signatureMessage=signatureMessage,
             signature=signature,
         )
+    
+    async def create_account_ens_name(self, accountAddress: str, ensName: Optional[str], connection: Optional[DatabaseConnection] = None) -> AccountEnsName:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            AccountEnsNamesTable.c.createdDate.key: createdDate,
+            AccountEnsNamesTable.c.updatedDate.key: updatedDate,
+            AccountEnsNamesTable.c.ensName.key: ensName,
+            AccountEnsNamesTable.c.accountAddress.key: accountAddress,
+        }
+        query = AccountEnsNamesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        accountEnsNameId = result.inserted_primary_key[0]
+        return AccountEnsName(
+            accountEnsNameId=accountEnsNameId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            ensName=ensName,
+            accountAddress=accountAddress,
+        )
+

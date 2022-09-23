@@ -1,6 +1,8 @@
 from typing import Any
 from typing import Mapping
 from typing import Optional
+from notd.model import AccountEnsName
+from notd.store.schema import AccountEnsNamesTable
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -324,4 +326,14 @@ def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
         date=row[AccountCollectionGmsTable.c.date],
         signatureMessage=row[AccountCollectionGmsTable.c.signatureMessage],
         signature=row[AccountCollectionGmsTable.c.signature],
+    )
+
+
+def account_ens_name_from_row(row: Mapping) -> AccountEnsName:
+    return AccountEnsName(
+        accountEnsNameId=row[AccountEnsNamesTable.c.accountCollectionGmId],
+        createdDate=row[AccountEnsNamesTable.c.createdDate],
+        updatedDate=row[AccountEnsNamesTable.c.updatedDate],
+        accountAddress=row[AccountEnsNamesTable.c.accountAddress],
+        ensName=row[AccountEnsNamesTable.c.ensName],
     )
