@@ -905,3 +905,7 @@ class Saver(CoreSaver):
             ensName=ensName,
             accountAddress=accountAddress,
         )
+
+    async def delete_account_ens_name(self, accountEnsNameId: int, connection: Optional[DatabaseConnection]) -> None:
+        query = AccountEnsNamesTable.delete().where(AccountEnsNamesTable.c.accountEnsNameId == accountEnsNameId)
+        await self._execute(query=query, connection=connection)
