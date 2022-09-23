@@ -885,7 +885,7 @@ class Saver(CoreSaver):
             signatureMessage=signatureMessage,
             signature=signature,
         )
-    
+
     async def create_account_ens_name(self, accountAddress: str, ensName: Optional[str], connection: Optional[DatabaseConnection] = None) -> AccountEnsName:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate

@@ -197,7 +197,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_owner_token_ownerships(accountAddress: str):
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
-    
+
     @router.get('/account/{accountAddress}/ens-name')
     async def get_account_ens_name(accountAddress: str) -> GetAccountEnsNameResponse:
         accountEnsName = await notdManager.get_account_ens_name(accountAddress=accountAddress)

@@ -457,6 +457,6 @@ class NotdManager:
 
     async def update_all_twitter_users(self) -> None:
         await self.twitterManager.update_all_twitter_users()
-    
+
     async def get_account_ens_name(self, accountAddress) -> Optional[AccountEnsName]:
         await self.ensManager.get_account_ens_name(accountAddress=accountAddress)

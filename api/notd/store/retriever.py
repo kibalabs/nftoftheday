@@ -515,7 +515,7 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'AccountCollectionGm with id:{accountCollectionGmId} not found')
         accountCollectionGm = account_collection_gm_from_row(row)
         return accountCollectionGm
-    
+
     async def get_account_ens_name_by_account_address(self, accountAddress: int, connection: Optional[DatabaseConnection] = None) -> AccountEnsName:
         query = AccountEnsNamesTable.select().where(AccountEnsNamesTable.c.accountAddress == accountAddress)
         result = await self.database.execute(query=query, connection=connection)
