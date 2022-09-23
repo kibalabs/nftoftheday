@@ -15,6 +15,8 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from api.notd.ens_manager import EnsManager
+from notd.model import AccountEnsName
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
@@ -53,7 +55,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, twitterManager: TwitterManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, twitterManager: TwitterManager, ensManager: EnsManager,requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -65,6 +67,7 @@ class NotdManager:
         self.activityManager = activityManager
         self.blockManager = blockManager
         self.twitterManager = twitterManager
+        self.ensManager = ensManager
         self.requester = requester
         self._tokenCache = {}
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
@@ -454,3 +457,6 @@ class NotdManager:
 
     async def update_all_twitter_users(self) -> None:
         await self.twitterManager.update_all_twitter_users()
+    
+    async def get_account_ens_name(self, accountAddress) -> AccountEnsName:
+        await self.ensManager.get_account_ens_name(accountAddress=accountAddress)
