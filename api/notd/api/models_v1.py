@@ -213,6 +213,7 @@ class ApiLatestAccountGm(BaseModel):
     accountGm: ApiAccountGm
     accountCollectionGms: List[ApiAccountCollectionGm]
 
+
 class ApiAccountEnsName(BaseModel):
     accountEnsNameId: int
     createdDate: datetime.datetime

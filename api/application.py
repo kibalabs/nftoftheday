@@ -17,7 +17,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pablo import PabloClient
 
-from api.notd.ens_manager import EnsManager
 from notd.account_ens_name_processor import AccountEnsNameProcessor
 from notd.activity_manager import ActivityManager
 from notd.api.api_v1 import create_api as create_v1_api
@@ -30,6 +29,7 @@ from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
 from notd.collection_processor import CollectionProcessor
+from notd.ens_manager import EnsManager
 from notd.gallery_manager import GalleryManager
 from notd.gm_manager import GmManager
 from notd.listing_manager import ListingManager

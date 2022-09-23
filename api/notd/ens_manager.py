@@ -14,7 +14,6 @@ class EnsManager:
         self.saver = saver
         self.accountEnsNameProcessor=accountEnsNameProcessor
 
-
     async def get_account_ens_name(self, accountAddress: str) -> Optional[AccountEnsName]:
         accountEnsName = await self.retriever.get_account_ens_name_by_account_address(accountAddress=accountAddress)
         if accountEnsName:
