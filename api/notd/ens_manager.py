@@ -24,7 +24,7 @@ class EnsManager:
             except NotFoundException:
                 accountEnsName = None
             if accountEnsName:
-                if accountEnsName.ensName and accountEnsName.updatedDate < date_util.datetime_from_now(days=-3):
+                if accountEnsName.ensName and accountEnsName.updatedDate > date_util.datetime_from_now(days=-3):
                     return accountEnsName
                 await self.saver.delete_account_ens_name(accountEnsNameId=accountEnsName.accountEnsNameId, connection=connection)
             ensName = await self.accountEnsNameProcessor.get_ens_name(accountAddress=accountAddress)
