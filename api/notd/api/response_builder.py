@@ -6,6 +6,7 @@ from typing import Sequence
 from core.exceptions import NotFoundException
 
 from notd.api.models_v1 import ApiAccountCollectionGm
+from notd.api.models_v1 import ApiAccountEnsName
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -28,6 +29,7 @@ from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
 from notd.model import AccountCollectionGm
+from notd.model import AccountEnsName
 from notd.model import AccountGm
 from notd.model import Airdrop
 from notd.model import Collection
@@ -352,4 +354,13 @@ class ResponseBuilder:
         return ApiLatestAccountGm(
             accountGm=(await self.account_gm_from_model(accountGm=latestAccountGm.accountGm)),
             accountCollectionGms=(await self.account_collection_gms_from_models(gmCollections=latestAccountGm.accountCollectionGms))
+        )
+
+    async def get_account_ens_name_from_model(self, accountEnsName: AccountEnsName) -> ApiAccountEnsName:
+        return ApiAccountEnsName(
+            accountEnsNameId=accountEnsName.accountEnsNameId,
+            createdDate=accountEnsName.createdDate,
+            updatedDate=accountEnsName.updatedDate,
+            accountAddress=accountEnsName.accountAddress,
+            ensName=accountEnsName.ensName,
         )

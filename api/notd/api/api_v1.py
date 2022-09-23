@@ -201,7 +201,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     @router.get('/account/{accountAddress}/ens-name')
     async def get_account_ens_name(accountAddress: str) -> GetAccountEnsNameResponse:
         accountEnsName = await notdManager.get_account_ens_name(accountAddress=accountAddress)
-        return GetAccountEnsNameResponse(accountEnsName=accountEnsName)
+        return GetAccountEnsNameResponse(accountEnsName=(await responseBuilder.get_account_ens_name_from_model(accountEnsName=accountEnsName)))
 
     @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
     async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest

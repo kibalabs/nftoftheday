@@ -3,6 +3,7 @@ from typing import Optional
 
 from core.exceptions import NotFoundException
 from core.util import date_util
+
 from notd.account_ens_name_processor import AccountEnsNameProcessor
 from notd.model import AccountEnsName
 from notd.store.retriever import Retriever
