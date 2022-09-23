@@ -8,11 +8,9 @@ from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
-from api.notd.model import AccountEnsName
-from api.notd.store.schema import AccountEnsNamesTable
-from api.notd.store.schema_conversions import account_ens_name_from_row
 
 from notd.model import AccountCollectionGm
+from notd.model import AccountEnsName
 from notd.model import AccountGm
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -31,6 +29,7 @@ from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import AccountCollectionGmsTable
+from notd.store.schema import AccountEnsNamesTable
 from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
@@ -50,6 +49,7 @@ from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
 from notd.store.schema import UserProfilesTable
 from notd.store.schema_conversions import account_collection_gm_from_row
+from notd.store.schema_conversions import account_ens_name_from_row
 from notd.store.schema_conversions import account_gm_from_row
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row

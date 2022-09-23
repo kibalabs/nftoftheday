@@ -13,7 +13,6 @@ from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from pablo import PabloClient
-from notd.ens_manager import EnsManager
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
@@ -22,6 +21,7 @@ from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
 from notd.collection_processor import CollectionProcessor
+from notd.ens_manager import EnsManager
 from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager

@@ -15,15 +15,15 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-from api.notd.ens_manager import EnsManager
-from notd.model import AccountEnsName
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
 from notd.block_manager import BlockManager
 from notd.collection_manager import CollectionManager
+from notd.ens_manager import EnsManager
 from notd.listing_manager import ListingManager
 from notd.messages import RefreshViewsMessageContent
+from notd.model import AccountEnsName
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
