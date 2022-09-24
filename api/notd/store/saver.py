@@ -906,6 +906,15 @@ class Saver(CoreSaver):
             accountAddress=accountAddress,
         )
 
+    async def update_account_ens_name(self, accountEnsNameId: int, ensName: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if ensName is not None:
+            values[AccountEnsNamesTable.c.ensName.key] = ensName
+        if len(values) > 0:
+            values[AccountEnsNamesTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = AccountEnsNamesTable.update(AccountEnsNamesTable.c.accountEnsNameId == accountEnsNameId).values(values)
+        await self._execute(query=query, connection=connection)
+
     async def delete_account_ens_name(self, accountEnsNameId: int, connection: Optional[DatabaseConnection]) -> None:
         query = AccountEnsNamesTable.delete().where(AccountEnsNamesTable.c.accountEnsNameId == accountEnsNameId)
         await self._execute(query=query, connection=connection)
