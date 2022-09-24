@@ -25,9 +25,9 @@ class EnsManager:
                 accountEnsName = None
             if not accountEnsName:
                 ensName = await self.accountEnsNameProcessor.get_ens_name(accountAddress=accountAddress)
-                accountEnsName = await self.saver.create_account_ens_name(accountAddress=accountAddress, ensName=ensName, connection=connection)     
+                accountEnsName = await self.saver.create_account_ens_name(accountAddress=accountAddress, ensName=ensName, connection=connection)  
             if accountEnsName.ensName and accountEnsName.updatedDate > date_util.datetime_from_now(days=-3):
-                    return accountEnsName
+                return accountEnsName
             ensName = await self.accountEnsNameProcessor.get_ens_name(accountAddress=accountAddress)
             await self.saver.update_account_ens_name(accountEnsNameId=accountEnsName.accountEnsNameId, ensName=ensName, connection=connection)
             return accountEnsName
