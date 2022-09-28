@@ -117,6 +117,21 @@ class TokenMetadataProcessor():
 
     @staticmethod
     async def _get_token_metadata_from_data(registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Dict[str, Any]) -> RetrievedTokenMetadata:
+        if not isinstance(tokenMetadataDict, dict):
+            return RetrievedTokenMetadata(
+                registryAddress=registryAddress,
+                tokenId=tokenId,
+                metadataUrl=None,
+                name=f'#{tokenId}',
+                description=None,
+                imageUrl=None,
+                resizableImageUrl=None,
+                animationUrl=None,
+                youtubeUrl=None,
+                backgroundColor=None,
+                frameImageUrl=None,
+                attributes=[],
+            )
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
