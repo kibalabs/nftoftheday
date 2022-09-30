@@ -519,10 +519,10 @@ class LatestAccountGm:
 @dataclasses.dataclass
 class RetrievedCollectionOverlap:
     registryAddress: str
-    galleryAddress: str
+    otherRegistryAddress: str
     ownerAddress: str
-    tokenCount: int
-    galleryCount: int
+    registryTokenCount: int
+    otherRegistryTokenCount: int
 
 
 @dataclasses.dataclass

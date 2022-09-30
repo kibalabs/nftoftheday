@@ -37,7 +37,7 @@ class OverlapManager:
         retrievedCollectionOverlaps = await self.collectionOverlapProcessor.calculate_collection_overlap(address=registryAddress)
         async with self.saver.create_transaction() as connection:
             currentCollectionOverlaps = await self.retriever.list_collection_overlaps(fieldFilters=[
-                StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.galleryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress),
             ], connection=connection)
             collectionOverlapIdsToDelete = {collectionOverlaps.collectionOverlapId for collectionOverlaps in currentCollectionOverlaps}
             logging.info(f'Deleting {len(collectionOverlapIdsToDelete)} existing collection overlaps')

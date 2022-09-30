@@ -892,10 +892,10 @@ class Saver(CoreSaver):
             TokenCollectionOverlapsTable.c.createdDate.key: createdDate,
             TokenCollectionOverlapsTable.c.updatedDate.key: updatedDate,
             TokenCollectionOverlapsTable.c.registryAddress.key: retrievedCollectionOverlap.registryAddress,
-            TokenCollectionOverlapsTable.c.galleryAddress.key: retrievedCollectionOverlap.galleryAddress,
+            TokenCollectionOverlapsTable.c.otherRegistryAddress.key: retrievedCollectionOverlap.otherRegistryAddress,
             TokenCollectionOverlapsTable.c.ownerAddress.key: retrievedCollectionOverlap.ownerAddress,
-            TokenCollectionOverlapsTable.c.tokenCount.key: retrievedCollectionOverlap.tokenCount,
-            TokenCollectionOverlapsTable.c.galleryCount.key: retrievedCollectionOverlap.galleryCount,
+            TokenCollectionOverlapsTable.c.registryTokenCount.key: retrievedCollectionOverlap.registryTokenCount,
+            TokenCollectionOverlapsTable.c.otherRegistryTokenCount.key: retrievedCollectionOverlap.otherRegistryTokenCount,
         }
 
     async def create_collection_overlap(self, retrievedCollectionOverlap: RetrievedCollectionOverlap, connection: Optional[DatabaseConnection] = None) -> int:

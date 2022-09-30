@@ -34,5 +34,13 @@ class CollectionOverlapProcessor():
         )
         galleryCountResult = await self.retriever.database.execute(query=galleryCountQuery)
         galleryCountMap = dict(list(galleryCountResult))
-        retrievedCollectionOverlaps = [RetrievedCollectionOverlap(galleryAddress=address, registryAddress=registryAddress, ownerAddress=ownerAddress, tokenCount=tokenCount, galleryCount=galleryCountMap[ownerAddress]) for ownerAddress, registryAddress, tokenCount in result]
+        retrievedCollectionOverlaps = [
+            RetrievedCollectionOverlap(
+                registryAddress=registryAddress,
+                otherRegistryAddress=address,
+                ownerAddress=ownerAddress,
+                otherRegistryTokenCount=tokenCount,
+                registryTokenCount=galleryCountMap[ownerAddress]
+                ) for ownerAddress,
+                registryAddress, tokenCount in result]
         return retrievedCollectionOverlaps
