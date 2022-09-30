@@ -59,7 +59,7 @@ class OwnershipManager:
 
     async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
         registryAddress = chain_util.normalize_address(value=registryAddress)
-        async with self.lockManager.with_lock(name=f"update-single-ownership-{registryAddress}-{tokenId}", timeoutSeconds=5, expirySeconds=60):
+        async with self.lockManager.with_lock(name=f"update-single-ownership-{registryAddress}-{tokenId}", timeoutSeconds=5, expirySeconds=300):
             async with self.saver.create_transaction() as connection:
                 try:
                     tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
@@ -97,7 +97,7 @@ class OwnershipManager:
             logging.info(f'Skipping updating token_multi_ownership because last record ({latestOwnership.updatedDate}) is newer that last transfer update ({latestTransfer.updatedDate})')
             return
         retrievedTokenMultiOwnerships = await self.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
-        async with self.lockManager.with_lock(name=f"update-multi-ownership-{registryAddress}-{tokenId}", timeoutSeconds=5, expirySeconds=60):
+        async with self.lockManager.with_lock(name=f"update-multi-ownership-{registryAddress}-{tokenId}", timeoutSeconds=5, expirySeconds=300):
             async with self.saver.create_transaction() as connection:
                 currentTokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(connection=connection, fieldFilters=[
                     StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
