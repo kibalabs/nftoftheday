@@ -15,6 +15,7 @@ from notd.lock_manager import LockManager
 
 from notd.collection_manager import CollectionManager
 from notd.messages import UpdateTokenOwnershipMessageContent
+from notd.model import Collection
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import Token
 from notd.store.retriever import Retriever
@@ -124,7 +125,7 @@ class OwnershipManager:
                     firstOwnership = list(existingOwnershipTuplesMap.values())[0]
                     await self.saver.update_token_multi_ownership(connection=connection, tokenMultiOwnershipId=firstOwnership.tokenMultiOwnershipId, ownerAddress=firstOwnership.ownerAddress)
 
-    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str, collection) -> List[Token]:
+    async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str, collection: Collection) -> List[Token]:
         address = chain_util.normalize_address(value=address)
         tokens = []
         if collection.doesSupportErc721:
