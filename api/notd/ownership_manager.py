@@ -57,8 +57,8 @@ class OwnershipManager:
             await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
     async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
         async with self.lockManager.with_lock(name=f"update-single-ownership-{registryAddress}-{tokenId}", timeoutSeconds=5, expirySeconds=60):
-            registryAddress = chain_util.normalize_address(value=registryAddress)
             async with self.saver.create_transaction() as connection:
                 try:
                     tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
@@ -79,24 +79,24 @@ class OwnershipManager:
         return (retrievedTokenMultiOwnership.registryAddress, retrievedTokenMultiOwnership.tokenId, retrievedTokenMultiOwnership.ownerAddress, retrievedTokenMultiOwnership.quantity, retrievedTokenMultiOwnership.averageTransferValue, retrievedTokenMultiOwnership.latestTransferDate, retrievedTokenMultiOwnership.latestTransferTransactionHash)
 
     async def _update_token_multi_ownership(self, registryAddress: str, tokenId: str) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
+        latestTransfers = await self.retriever.list_token_transfers(fieldFilters=[
+            StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+            StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+        ], orders=[Order(fieldName=BlocksTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
+        if len(latestTransfers) == 0:
+            return
+        latestTransfer = latestTransfers[0]
+        latestOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
+            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
+            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
+        ], orders=[Order(fieldName=TokenMultiOwnershipsTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
+        latestOwnership = latestOwnerships[0] if len(latestOwnerships) > 0 else None
+        if latestOwnership is not None and latestOwnership.updatedDate > latestTransfer.updatedDate:
+            logging.info(f'Skipping updating token_multi_ownership because last record ({latestOwnership.updatedDate}) is newer that last transfer update ({latestTransfer.updatedDate})')
+            return
+        retrievedTokenMultiOwnerships = await self.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
         async with self.lockManager.with_lock(name=f"update-multi-ownership-{registryAddress}-{tokenId}", timeoutSeconds=5, expirySeconds=60):
-            registryAddress = chain_util.normalize_address(value=registryAddress)
-            latestTransfers = await self.retriever.list_token_transfers(fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
-            ], orders=[Order(fieldName=BlocksTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
-            if len(latestTransfers) == 0:
-                return
-            latestTransfer = latestTransfers[0]
-            latestOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
-                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
-            ], orders=[Order(fieldName=TokenMultiOwnershipsTable.c.updatedDate.key, direction=Direction.DESCENDING)], limit=1)
-            latestOwnership = latestOwnerships[0] if len(latestOwnerships) > 0 else None
-            if latestOwnership is not None and latestOwnership.updatedDate > latestTransfer.updatedDate:
-                logging.info(f'Skipping updating token_multi_ownership because last record ({latestOwnership.updatedDate}) is newer that last transfer update ({latestTransfer.updatedDate})')
-                return
-            retrievedTokenMultiOwnerships = await self.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
             async with self.saver.create_transaction() as connection:
                 currentTokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(connection=connection, fieldFilters=[
                     StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
