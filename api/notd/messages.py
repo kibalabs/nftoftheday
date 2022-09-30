@@ -103,5 +103,5 @@ class RefreshCollectionOverlapMessageContent(MessageContent):
     registryAddress: str
 
 
-class RefreshAllCollectionOverlapMessageContent(MessageContent):
+class RefreshAllCollectionOverlapsMessageContent(MessageContent):
     _COMMAND = 'REFRESH_ALL_COLLECTION_OVERLAPS'

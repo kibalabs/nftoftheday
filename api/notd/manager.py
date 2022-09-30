@@ -463,8 +463,8 @@ class NotdManager:
     async def refresh_overlap_for_collection_deferred(self, registryAddress: str) -> None:
         await self.overlapManager.refresh_overlap_for_collection_deferred(registryAddress=registryAddress)
 
-    async def refresh_overlap_for_all_collections_deferred(self) -> None:
-        await self.overlapManager.refresh_overlap_for_all_collections_deferred()
+    async def refresh_overlaps_for_all_collections_deferred(self) -> None:
+        await self.overlapManager.refresh_overlaps_for_all_collections_deferred()
 
-    async def refresh_overlap_for_all_collections(self) -> None:
-        await self.overlapManager.refresh_overlap_for_all_collections()
+    async def refresh_overlaps_for_all_collections(self) -> None:
+        await self.overlapManager.refresh_overlaps_for_all_collections()

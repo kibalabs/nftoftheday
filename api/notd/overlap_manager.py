@@ -6,7 +6,7 @@ from core.store.retriever import StringFieldFilter
 
 
 from notd.collection_overlap_processor import CollectionOverlapProcessor
-from notd.messages import RefreshAllCollectionOverlapMessageContent
+from notd.messages import RefreshAllCollectionOverlapsMessageContent
 from notd.messages import RefreshCollectionOverlapMessageContent
 from notd.model import GALLERY_COLLECTIONS
 from notd.store.retriever import Retriever
@@ -22,10 +22,10 @@ class OverlapManager:
         self.collectionOverlapProcessor = collectionOverlapProcessor
         self.workQueue = workQueue
 
-    async def refresh_overlap_for_all_collections_deferred(self):
-        await self.workQueue.send_message(message=RefreshAllCollectionOverlapMessageContent().to_message())
+    async def refresh_overlaps_for_all_collections_deferred(self):
+        await self.workQueue.send_message(message=RefreshAllCollectionOverlapsMessageContent().to_message())
 
-    async def refresh_overlap_for_all_collections(self):
+    async def refresh_overlaps_for_all_collections(self):
         for registryAddress in GALLERY_COLLECTIONS:
             await self.refresh_overlap_for_collection_deferred(registryAddress=registryAddress)
 
