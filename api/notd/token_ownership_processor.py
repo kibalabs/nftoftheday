@@ -7,7 +7,6 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 
-from notd.lock_manager import LockManager
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenOwnership
 from notd.store.retriever import Retriever
