@@ -25,7 +25,7 @@ class TokenOwnershipProcessor:
         self.lockManager = lockManager
 
     async def calculate_token_single_ownership(self, registryAddress: str, tokenId: str)-> RetrievedTokenOwnership:
-        async with self.lockManager.with_lock(name='ownership-processor', timeoutSeconds=10, expirySeconds=60):
+        async with self.lockManager.with_lock(name='ownership-processor', timeoutSeconds=5, expirySeconds=60):
             print('here')
             tokenTransfers = await self.retriever.list_token_transfers(
                 fieldFilters=[
@@ -48,7 +48,7 @@ class TokenOwnershipProcessor:
             )
 
     async def calculate_token_multi_ownership(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenMultiOwnership]:
-        async with self.lockManager.with_lock(name='ownership-processor', timeoutSeconds=10, expirySeconds=60):
+        async with self.lockManager.with_lock(name='ownership-processor', timeoutSeconds=5, expirySeconds=60):
             ownerships: Dict[str, RetrievedTokenMultiOwnership] = {}
             offset = 0
             limit = 500
