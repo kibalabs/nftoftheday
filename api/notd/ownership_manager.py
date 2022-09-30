@@ -57,7 +57,7 @@ class OwnershipManager:
             await self._update_token_multi_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
     async def _update_token_single_ownership(self, registryAddress: str, tokenId: str) -> None:
-        async with self.lockManager.with_lock(name='ownership-processor', key=f"{registryAddress}, {tokenId}", timeoutSeconds=5, expirySeconds=60):
+        async with self.lockManager.with_lock(name=f"{registryAddress}, {tokenId}", timeoutSeconds=5, expirySeconds=60):
             registryAddress = chain_util.normalize_address(value=registryAddress)
             async with self.saver.create_transaction() as connection:
                 try:
@@ -79,7 +79,7 @@ class OwnershipManager:
         return (retrievedTokenMultiOwnership.registryAddress, retrievedTokenMultiOwnership.tokenId, retrievedTokenMultiOwnership.ownerAddress, retrievedTokenMultiOwnership.quantity, retrievedTokenMultiOwnership.averageTransferValue, retrievedTokenMultiOwnership.latestTransferDate, retrievedTokenMultiOwnership.latestTransferTransactionHash)
 
     async def _update_token_multi_ownership(self, registryAddress: str, tokenId: str) -> None:
-        async with self.lockManager.with_lock(name='ownership-processor', key=f"{registryAddress}, {tokenId}", timeoutSeconds=5, expirySeconds=60):
+        async with self.lockManager.with_lock(name=f"{registryAddress}-{tokenId}-lock", timeoutSeconds=5, expirySeconds=60):
             registryAddress = chain_util.normalize_address(value=registryAddress)
             latestTransfers = await self.retriever.list_token_transfers(fieldFilters=[
                 StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
