@@ -20,9 +20,8 @@ class NoOwnershipException(KibaException):
 
 class TokenOwnershipProcessor:
 
-    def __init__(self,retriever: Retriever, lockManager: LockManager):
+    def __init__(self,retriever: Retriever):
         self.retriever = retriever
-        self.lockManager = lockManager
 
     async def calculate_token_single_ownership(self, registryAddress: str, tokenId: str)-> RetrievedTokenOwnership:
         tokenTransfers = await self.retriever.list_token_transfers(
