@@ -2,7 +2,7 @@ import base64
 import json
 import urllib.parse
 from json.decoder import JSONDecodeError
-from typing import Any
+from typing import Any, Optional
 from typing import Dict
 
 from core import logging
@@ -39,6 +39,7 @@ class TokenDoesNotExistException(NotFoundException):
 
 class TokenHasNoMetadataException(NotFoundException):
     pass
+
 
 class TokenMetadataProcessor():
 
@@ -116,7 +117,10 @@ class TokenMetadataProcessor():
         return tokenMetadataDict
 
     @staticmethod
-    async def _get_token_metadata_from_data(registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Dict[str, Any]) -> RetrievedTokenMetadata:
+    def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> str:
+        return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://') if ipfsUrl else None
+
+    def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Dict[str, Any]) -> RetrievedTokenMetadata:
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
@@ -129,18 +133,21 @@ class TokenMetadataProcessor():
             imageUrl = imageDict.get('src')
             if not imageUrl:
                 logging.error(f'Failed to extract imageUrl from {imageDict}')
+        animationUrl = tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation')
+        youtubeUrl = tokenMetadataDict.get('youtube_url')
+        frameImageUrl = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
             metadataUrl=metadataUrl,
             name=str(name).replace('\u0000', '').encode('utf-8', 'namereplace').decode(),
             description=str(description).replace('\u0000', '').encode('utf-8', 'namereplace').decode() if description else None,
-            imageUrl=imageUrl,
+            imageUrl=self._clean_potential_ipfs_url(imageUrl),
             resizableImageUrl=None,
-            animationUrl=tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation'),
-            youtubeUrl=tokenMetadataDict.get('youtube_url'),
+            animationUrl=self._clean_potential_ipfs_url(animationUrl),
+            youtubeUrl=self._clean_potential_ipfs_url(youtubeUrl),
+            frameImageUrl=self._clean_potential_ipfs_url(frameImageUrl),
             backgroundColor=tokenMetadataDict.get('background_color'),
-            frameImageUrl=tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage'),
             attributes=tokenMetadataDict.get('attributes', []),
         )
         return retrievedTokenMetadata
@@ -230,6 +237,7 @@ class TokenMetadataProcessor():
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
+            tokenMetadataUri = self._clean_potential_ipfs_url(tokenMetadataUri)
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')
         if not tokenMetadataUri:
             tokenMetadataDict = {}
@@ -257,7 +265,7 @@ class TokenMetadataProcessor():
         await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         if not isinstance(tokenMetadataDict, dict):
             return self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        retrievedTokenMetadata = await self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
+        retrievedTokenMetadata = self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         if registryAddress in GALLERY_COLLECTIONS and retrievedTokenMetadata.imageUrl:
             image = await self.pabloClient.upload_image_url(url=retrievedTokenMetadata.imageUrl)
             retrievedTokenMetadata.resizableImageUrl = image.resizableUrl
