@@ -12,19 +12,20 @@ class CollectionOverlapProcessor():
         self.retriever = retriever
 
     async def calculate_collection_overlap(self, address: str):
-        subQuery = (
+        otherRegistrySubQuery = (
         UserRegistryOrderedOwnershipsMaterializedView.select()
         .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.distinct()])
         .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address)
         .subquery()
         )
-        query = (
+        otherRegistryQuery = (
             TokenOwnershipsTable.select()
             .with_only_columns([TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress, sqlalchemyfunc.count(TokenOwnershipsTable.c.tokenId)])
-            .where(TokenOwnershipsTable.c.ownerAddress.in_(subQuery.select()))
+            .where(TokenOwnershipsTable.c.ownerAddress.in_(otherRegistrySubQuery.select()))
+            .where(TokenOwnershipsTable.c.registryAddress != address)
             .group_by(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress)
         )
-        result = await self.retriever.database.execute(query=query)
+        otherRegistryResult = await self.retriever.database.execute(query=otherRegistryQuery)
         registryCountQuery = (
             UserRegistryOrderedOwnershipsMaterializedView.select()
             .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress,sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId)])
@@ -40,5 +41,5 @@ class CollectionOverlapProcessor():
                 ownerAddress=ownerAddress,
                 otherRegistryTokenCount=otherRegistryTokenCount,
                 registryTokenCount=registryCountMap[ownerAddress]
-            ) for ownerAddress, otherRegistryAddress, otherRegistryTokenCount in result]
+            ) for ownerAddress, otherRegistryAddress, otherRegistryTokenCount in otherRegistryResult]
         return retrievedCollectionOverlaps
