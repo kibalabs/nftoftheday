@@ -11,32 +11,31 @@ class CollectionOverlapProcessor():
     def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def calculate_collection_overlap(self, address: str):
+    async def calculate_collection_overlap(self, registryAddress: str):
         otherRegistrySubQuery = (
-        UserRegistryOrderedOwnershipsMaterializedView.select()
-        .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.distinct()])
-        .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address)
-        .subquery()
+            UserRegistryOrderedOwnershipsMaterializedView.select()
+            .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.distinct()])
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+            .subquery()
         )
         otherRegistryQuery = (
             TokenOwnershipsTable.select()
             .with_only_columns([TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress, sqlalchemyfunc.count(TokenOwnershipsTable.c.tokenId)])
             .where(TokenOwnershipsTable.c.ownerAddress.in_(otherRegistrySubQuery.select()))
-            .where(TokenOwnershipsTable.c.registryAddress != address)
             .group_by(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress)
         )
         otherRegistryResult = await self.retriever.database.execute(query=otherRegistryQuery)
         registryCountQuery = (
             UserRegistryOrderedOwnershipsMaterializedView.select()
             .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress,sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId)])
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address)
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         registryCountResult = await self.retriever.database.execute(query=registryCountQuery)
         registryCountMap = dict(list(registryCountResult))
         retrievedCollectionOverlaps = [
             RetrievedCollectionOverlap(
-                registryAddress=address,
+                registryAddress=registryAddress,
                 otherRegistryAddress=otherRegistryAddress,
                 ownerAddress=ownerAddress,
                 otherRegistryTokenCount=otherRegistryTokenCount,
