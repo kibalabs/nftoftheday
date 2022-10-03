@@ -1,9 +1,9 @@
 import logging
+
 from core.queues.sqs_message_queue import SqsMessageQueue
+from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import list_util
-from core.store.retriever import StringFieldFilter
-
 
 from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.messages import RefreshAllCollectionOverlapsMessageContent
@@ -36,6 +36,7 @@ class CollectionOverlapManager:
         registryAddress = chain_util.normalize_address(registryAddress)
         retrievedCollectionOverlaps = await self.collectionOverlapProcessor.calculate_collection_overlap(registryAddress=registryAddress)
         async with self.saver.create_transaction() as connection:
+            # TODO(krishan711): this would be more efficient if only changed ones are deleted and re-saved
             currentCollectionOverlaps = await self.retriever.list_collection_overlaps(fieldFilters=[
                 StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress),
             ], connection=connection)

@@ -20,6 +20,7 @@ from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
 from notd.block_manager import BlockManager
 from notd.collection_manager import CollectionManager
+from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.listing_manager import ListingManager
 from notd.messages import RefreshViewsMessageContent
 from notd.model import BaseSponsoredToken
@@ -31,7 +32,6 @@ from notd.model import Token
 from notd.model import TokenMetadata
 from notd.model import TokenTransfer
 from notd.model import TradedToken
-from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver

@@ -27,6 +27,7 @@ from notd.block_manager import BlockManager
 from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
+from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.gallery_manager import GalleryManager
@@ -34,7 +35,6 @@ from notd.gm_manager import GmManager
 from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager
-from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
