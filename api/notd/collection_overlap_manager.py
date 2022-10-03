@@ -34,7 +34,7 @@ class CollectionOverlapManager:
 
     async def refresh_overlap_for_collection(self, registryAddress: str) -> None:
         registryAddress = chain_util.normalize_address(registryAddress)
-        retrievedCollectionOverlaps = await self.collectionOverlapProcessor.calculate_collection_overlap(address=registryAddress)
+        retrievedCollectionOverlaps = await self.collectionOverlapProcessor.calculate_collection_overlap(registryAddress=registryAddress)
         async with self.saver.create_transaction() as connection:
             currentCollectionOverlaps = await self.retriever.list_collection_overlaps(fieldFilters=[
                 StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress),
