@@ -24,7 +24,6 @@ from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
-from notd.model import GalleryCollectionOverlap
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
@@ -372,22 +371,11 @@ class GalleryManager:
             ) for registryAddress in registryAddresses
         ]
 
-    async def list_gallery_collection_overlaps(self, galleryAddress: str) -> List[GalleryCollectionOverlap]:
+    async def list_gallery_collection_overlaps(self, registryAddress: str) -> List[CollectionOverlap]:
         query = (
             TokenCollectionOverlapsTable.select()
-            .where(TokenCollectionOverlapsTable.c.galleryAddress == galleryAddress)
+            .where(TokenCollectionOverlapsTable.c.registryAddress == registryAddress)
         )
         collectionOverlapsResult = await self.retriever.database.execute(query=query)
         collectionOverlaps = [collection_overlap_from_row(row) for row in collectionOverlapsResult]
-        registryCollectionOverlapMap = defaultdict(list[CollectionOverlap])
-        for collectionOverlap in collectionOverlaps:
-            registryCollectionOverlapMap[collectionOverlap.registryAddress].append(collectionOverlap)
-        galleryCollectionOverlaps = []
-        for registryAddress, collectionOverlaps in registryCollectionOverlapMap.items():
-            galleryCollectionOverlaps += [GalleryCollectionOverlap(
-                galleryAddress=galleryAddress,
-                registryAddress=registryAddress,
-                ownerCount=len(collectionOverlaps),
-                tokenCount=sum(collectionOverlap.tokenCount for collectionOverlap in collectionOverlaps),
-                collectionOverlaps=collectionOverlaps)]
-        return galleryCollectionOverlaps
+        return collectionOverlaps

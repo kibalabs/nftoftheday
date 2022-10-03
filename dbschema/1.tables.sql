@@ -431,7 +431,7 @@ CREATE TABLE tbl_collection_overlaps (
     registry_token_count NUMERIC(256, 0) NOT NULL,
     other_registry_token_count NUMERIC(256, 0) NOT NULL
 );
-CREATE UNIQUE INDEX tbl_collection_overlaps_registry_address_other_registry_address_owner_address on tbl_collection_overlaps (registry_address, other_registry_address, owner_address);
+CREATE UNIQUE INDEX tbl_collection_overlaps_owner_address_registry_address_other_registry_address on tbl_collection_overlaps (owner_address, registry_address, other_registry_address);
 CREATE INDEX tbl_collection_overlaps_created_date ON tbl_collection_overlaps (created_date);
 CREATE INDEX tbl_collection_overlaps_updated_date ON tbl_collection_overlaps (updated_date);
 CREATE INDEX tbl_collection_overlaps_registry_address_other_registry_address ON tbl_collection_overlaps (registry_address, other_registry_address);

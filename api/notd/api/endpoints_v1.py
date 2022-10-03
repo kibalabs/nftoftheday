@@ -6,6 +6,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
+from notd.api.models_v1 import ApiCollectionOverlap
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
@@ -14,7 +15,6 @@ from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiGalleryCollectionOverlap
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
@@ -343,7 +343,7 @@ class ListGalleryCollectionOverlapsRequest(BaseModel):
     pass
 
 class ListGalleryCollectionOverlapsResponse(BaseModel):
-    galleryCollectionOverlaps: List[ApiGalleryCollectionOverlap]
+    collectionOverlaps: List[ApiCollectionOverlap]
 
 class RefreshCollectionOverlapsDeferredResponse(BaseModel):
     pass

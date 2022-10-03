@@ -219,15 +219,7 @@ class ApiCollectionOverlap(BaseModel):
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
     registryAddress: str
-    galleryAddress: str
+    otherRegistryAddress: str
     ownerAddress: str
-    tokenCount: int
-    galleryCount: int
-
-
-class ApiGalleryCollectionOverlap(BaseModel):
-    galleryAddress: str
-    registryAddress: str
-    ownerCount: str
-    tokenCount: int
-    collectionOverlaps: List[ApiCollectionOverlap]
+    registryTokenCount: int
+    otherRegistryTokenCount: int

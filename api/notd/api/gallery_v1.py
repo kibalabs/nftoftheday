@@ -93,9 +93,9 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         ownedCollections = await galleryManager.get_gallery_user_owned_collections(registryAddress=registryAddress, userAddress=userAddress)
         return GetGalleryUserOwnedCollectionsResponse(ownedCollections=(await responseBuilder.gallery_owned_collections_from_models(ownedCollections=ownedCollections)))
 
-    @router.get('/collections/{galleryAddress}/overlaps')
-    async def list_gallery_collection_overlaps(galleryAddress: str) -> ListGalleryCollectionOverlapsResponse:
-        galleryCollectionOverlaps = await galleryManager.list_collection_overlaps(galleryAddress=galleryAddress)
-        return ListGalleryCollectionOverlapsResponse(galleryCollectionOverlaps=(await responseBuilder.gallery_collection_overlaps_from_models(galleryCollectionOverlaps=galleryCollectionOverlaps)))
+    @router.get('/collections/{registryAddress}/overlaps')
+    async def list_gallery_collection_overlaps(registryAddress: str) -> ListGalleryCollectionOverlapsResponse:
+        collectionOverlaps = await galleryManager.list_gallery_collection_overlaps(registryAddress=registryAddress)
+        return ListGalleryCollectionOverlapsResponse(collectionOverlaps=(await responseBuilder.collection_overlaps_from_models(collectionOverlaps=collectionOverlaps)))
 
     return router

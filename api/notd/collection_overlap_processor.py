@@ -25,22 +25,20 @@ class CollectionOverlapProcessor():
             .group_by(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress)
         )
         result = await self.retriever.database.execute(query=query)
-
-        galleryCountQuery = (
+        registryCountQuery = (
             UserRegistryOrderedOwnershipsMaterializedView.select()
             .with_only_columns([UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress,sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId)])
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address)
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
-        galleryCountResult = await self.retriever.database.execute(query=galleryCountQuery)
-        galleryCountMap = dict(list(galleryCountResult))
+        registryCountResult = await self.retriever.database.execute(query=registryCountQuery)
+        registryCountMap = dict(list(registryCountResult))
         retrievedCollectionOverlaps = [
             RetrievedCollectionOverlap(
-                registryAddress=registryAddress,
-                otherRegistryAddress=address,
+                registryAddress=address,
+                otherRegistryAddress=otherRegistryAddress,
                 ownerAddress=ownerAddress,
-                otherRegistryTokenCount=tokenCount,
-                registryTokenCount=galleryCountMap[ownerAddress]
-                ) for ownerAddress,
-                registryAddress, tokenCount in result]
+                otherRegistryTokenCount=otherRegistryTokenCount,
+                registryTokenCount=registryCountMap[ownerAddress]
+            ) for ownerAddress, otherRegistryAddress, otherRegistryTokenCount in result]
         return retrievedCollectionOverlaps

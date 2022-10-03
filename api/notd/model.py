@@ -530,12 +530,3 @@ class CollectionOverlap(RetrievedCollectionOverlap):
     collectionOverlapId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
-
-
-@dataclasses.dataclass
-class GalleryCollectionOverlap:
-    galleryAddress: str
-    registryAddress: str
-    ownerCount: str
-    tokenCount: int
-    collectionOverlaps: List[CollectionOverlap]

@@ -124,8 +124,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         return UpdateTokenAttributesForAllCollectionsDeferredResponse()
 
     @router.get('/collections/refresh-overlaps-deferred', response_model=RefreshCollectionOverlapsDeferredResponse)
-    async def refresh_overlap_for_all_collections_deferred():
-        await notdManager.refresh_overlap_for_all_collections_deferred()
+    async def refresh_overlaps_for_all_collections_deferred():
+        await notdManager.refresh_overlaps_for_all_collections_deferred()
         return RefreshCollectionOverlapsDeferredResponse()
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
