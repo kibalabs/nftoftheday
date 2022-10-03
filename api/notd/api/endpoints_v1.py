@@ -12,6 +12,7 @@ from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
+from notd.api.models_v1 import ApiCollectionOverlap
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
@@ -298,10 +299,8 @@ class QueryCollectionUsersRequest(BaseModel):
 class QueryCollectionUsersResponse(BaseModel):
     galleryUserRowListResponse: ApiListResponse[ApiGalleryUserRow]
 
-
 class UpdateAllTwitterUsersDeferredRequest(BaseModel):
     pass
-
 
 class UpdateAllTwitterUsersDeferredResponse(BaseModel):
     pass
@@ -337,3 +336,15 @@ class GetLatestGmForAccountRequest(BaseModel):
 
 class GetLatestGmForAccountResponse(BaseModel):
     latestAccountGm: ApiLatestAccountGm
+
+class ListGalleryCollectionOverlapsRequest(BaseModel):
+    pass
+
+class ListGalleryCollectionOverlapsResponse(BaseModel):
+    collectionOverlaps: List[ApiCollectionOverlap]
+
+class RefreshCollectionOverlapsDeferredResponse(BaseModel):
+    pass
+
+class RefreshCollectionOverlapsDeferredRequest(BaseModel):
+    pass

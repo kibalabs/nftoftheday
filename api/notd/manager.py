@@ -20,6 +20,7 @@ from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
 from notd.block_manager import BlockManager
 from notd.collection_manager import CollectionManager
+from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.listing_manager import ListingManager
 from notd.messages import RefreshViewsMessageContent
 from notd.model import BaseSponsoredToken
@@ -53,7 +54,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, twitterManager: TwitterManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -65,6 +66,7 @@ class NotdManager:
         self.activityManager = activityManager
         self.blockManager = blockManager
         self.twitterManager = twitterManager
+        self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
         self._tokenCache = {}
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
@@ -454,3 +456,15 @@ class NotdManager:
 
     async def update_all_twitter_users(self) -> None:
         await self.twitterManager.update_all_twitter_users()
+
+    async def refresh_overlap_for_collection(self, registryAddress: str) -> None:
+        await self.collectionOverlapManager.refresh_overlap_for_collection(registryAddress=registryAddress)
+
+    async def refresh_overlap_for_collection_deferred(self, registryAddress: str) -> None:
+        await self.collectionOverlapManager.refresh_overlap_for_collection_deferred(registryAddress=registryAddress)
+
+    async def refresh_overlaps_for_all_collections_deferred(self) -> None:
+        await self.collectionOverlapManager.refresh_overlaps_for_all_collections_deferred()
+
+    async def refresh_overlaps_for_all_collections(self) -> None:
+        await self.collectionOverlapManager.refresh_overlaps_for_all_collections()

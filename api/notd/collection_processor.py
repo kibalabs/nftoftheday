@@ -157,9 +157,9 @@ class CollectionProcessor:
                 logging.error(f'Failed to extract imageUrl from {imageDict}')
         retrievedCollection = RetrievedCollection(
             address=address,
-            name=name.encode('utf-8', 'namereplace').decode() if name else None,
-            symbol=symbol.encode('utf-8', 'namereplace').decode() if symbol else None,
-            description=description.encode('utf-8', 'namereplace').decode() if description else None,
+            name=name.replace('\u0000', '').encode('utf-8', 'namereplace').decode() if name else None,
+            symbol=symbol.replace('\u0000', '').encode('utf-8', 'namereplace').decode() if symbol else None,
+            description=description.replace('\u0000', '').encode('utf-8', 'namereplace').decode() if description else None,
             imageUrl=imageUrl,
             twitterUsername=twitterUsername,
             instagramUsername=instagramUsername,

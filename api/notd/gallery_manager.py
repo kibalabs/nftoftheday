@@ -23,6 +23,7 @@ from notd.api.endpoints_v1 import InQueryParam
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
+from notd.model import CollectionOverlap
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
@@ -37,6 +38,7 @@ from notd.store.saver import Saver
 from notd.store.schema import CollectionTotalActivitiesTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
@@ -367,3 +369,8 @@ class GalleryManager:
                 tokenMetadatas=collectionTokenMap[registryAddress],
             ) for registryAddress in registryAddresses
         ]
+
+    async def list_gallery_collection_overlaps(self, registryAddress: str) -> List[CollectionOverlap]:
+        return await self.retriever.list_collection_overlaps(fieldFilters=[
+            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress)]
+        )

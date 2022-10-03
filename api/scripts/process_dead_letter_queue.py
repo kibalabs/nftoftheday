@@ -1,9 +1,10 @@
 import asyncio
 import os
-import time
+import sys
 
 from core import logging
 from core.aws_requester import AwsRequester
+from core.http.basic_authentication import BasicAuthentication
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -14,6 +15,7 @@ from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from pablo import PabloClient
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
 from notd.block_manager import BlockManager
@@ -61,10 +63,14 @@ async def main():
     saver = Saver(database=database)
     retriever = Retriever(database=database)
     s3Manager = S3Manager(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
+    dlWorkQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue-dl')
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
-    awsRequester = AwsRequester(accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
-    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    # awsRequester = AwsRequester(accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
+    # ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    infuraAuth = BasicAuthentication(username='', password=os.environ["INFURA_PROJECT_SECRET"])
+    infuraRequester = Requester(headers={'Authorization': f'Basic {infuraAuth.to_string()}'})
+    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
@@ -89,27 +95,23 @@ async def main():
     notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, requester=requester, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
-    slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
-    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
+    slackClient = None #SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
+    workQueueProcessor = MessageQueueProcessor(queue=dlWorkQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
 
     await database.connect()
     await s3Manager.connect()
+    await dlWorkQueue.connect()
     await workQueue.connect()
     await tokenQueue.connect()
     try:
         while True:
             hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=3, longPollSeconds=1, shouldProcessInParallel=True)
-            if hasProcessedWork:
-                continue
-            hasProcessedToken = await tokenQueueProcessor.execute_batch(batchSize=10, longPollSeconds=1, shouldProcessInParallel=True)
-            if hasProcessedToken:
-                continue
-            logging.info('No message received.. sleeping')
-            time.sleep(60)
+            if not hasProcessedWork:
+                break
     finally:
         await database.disconnect()
         await s3Manager.disconnect()
+        await dlWorkQueue.disconnect()
         await workQueue.disconnect()
         await tokenQueue.disconnect()
         await requester.close_connections()

@@ -18,6 +18,7 @@ from notd.model import CollectionHourlyActivity
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
+from notd.model import RetrievedCollectionOverlap
 from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
@@ -38,6 +39,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
@@ -883,3 +885,47 @@ class Saver(CoreSaver):
             signatureMessage=signatureMessage,
             signature=signature,
         )
+
+    @staticmethod
+    def _get_create_collection_overlaps_values(retrievedCollectionOverlap: RetrievedCollectionOverlap, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
+            TokenCollectionOverlapsTable.c.createdDate.key: createdDate,
+            TokenCollectionOverlapsTable.c.updatedDate.key: updatedDate,
+            TokenCollectionOverlapsTable.c.registryAddress.key: retrievedCollectionOverlap.registryAddress,
+            TokenCollectionOverlapsTable.c.otherRegistryAddress.key: retrievedCollectionOverlap.otherRegistryAddress,
+            TokenCollectionOverlapsTable.c.ownerAddress.key: retrievedCollectionOverlap.ownerAddress,
+            TokenCollectionOverlapsTable.c.registryTokenCount.key: retrievedCollectionOverlap.registryTokenCount,
+            TokenCollectionOverlapsTable.c.otherRegistryTokenCount.key: retrievedCollectionOverlap.otherRegistryTokenCount,
+        }
+
+    async def create_collection_overlap(self, retrievedCollectionOverlap: RetrievedCollectionOverlap, connection: Optional[DatabaseConnection] = None) -> int:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = self._get_create_collection_overlaps_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate)
+        query = TokenCollectionOverlapsTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        collectionOverlapId = result.inserted_primary_key[0]
+        return collectionOverlapId
+
+    async def create_collection_overlaps(self, retrievedCollectionOverlaps: List[RetrievedCollectionOverlap], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedCollectionOverlaps) == 0:
+            return
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        latestCollectionOverlapsIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedCollectionOverlaps, chunkSize=100):
+            values = [self._get_create_collection_overlaps_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate) for retrievedCollectionOverlap in chunk]
+            query = TokenCollectionOverlapsTable.insert().values(values).returning(TokenCollectionOverlapsTable.c.collectionOverlapId)
+            rows = await self._execute(query=query, connection=connection)
+            latestCollectionOverlapsIds += [row[0] for row in rows]
+        return latestCollectionOverlapsIds
+
+    async def delete_collection_overlap(self, collectionOverlapId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenCollectionOverlapsTable.delete().where(TokenCollectionOverlapsTable.c.collectionOverlapId == collectionOverlapId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_collection_overlaps(self, collectionOverlapIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(collectionOverlapIds) == 0:
+            return
+        query = TokenCollectionOverlapsTable.delete().where(TokenCollectionOverlapsTable.c.collectionOverlapId.in_(collectionOverlapIds))
+        await self._execute(query=query, connection=connection)

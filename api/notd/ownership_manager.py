@@ -11,9 +11,9 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import list_util
-from notd.lock_manager import LockManager
 
 from notd.collection_manager import CollectionManager
+from notd.lock_manager import LockManager
 from notd.messages import UpdateTokenOwnershipMessageContent
 from notd.model import Collection
 from notd.model import RetrievedTokenMultiOwnership

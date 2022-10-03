@@ -7,6 +7,7 @@ from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
+from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -31,6 +32,7 @@ from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
 from notd.store.schema import TokenAttributesTable
+from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
@@ -301,6 +303,7 @@ def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
         tweetCount=row[TwitterProfilesTable.c.tweetCount],
     )
 
+
 def account_gm_from_row(row: Mapping) -> AccountGm:
     return AccountGm(
         accountGmId=row[AccountGmsTable.c.accountGmId],
@@ -314,6 +317,7 @@ def account_gm_from_row(row: Mapping) -> AccountGm:
         signature=row[AccountGmsTable.c.signature],
     )
 
+
 def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
     return AccountCollectionGm(
         accountCollectionGmId=row[AccountCollectionGmsTable.c.accountCollectionGmId],
@@ -324,4 +328,17 @@ def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
         date=row[AccountCollectionGmsTable.c.date],
         signatureMessage=row[AccountCollectionGmsTable.c.signatureMessage],
         signature=row[AccountCollectionGmsTable.c.signature],
+    )
+
+
+def collection_overlap_from_row(row: Mapping) -> CollectionOverlap:
+    return CollectionOverlap(
+        collectionOverlapId=row[TokenCollectionOverlapsTable.c.collectionOverlapId],
+        createdDate=row[TokenCollectionOverlapsTable.c.createdDate],
+        updatedDate=row[TokenCollectionOverlapsTable.c.updatedDate],
+        registryAddress=row[TokenCollectionOverlapsTable.c.registryAddress],
+        otherRegistryAddress=row[TokenCollectionOverlapsTable.c.otherRegistryAddress],
+        ownerAddress=row[TokenCollectionOverlapsTable.c.ownerAddress],
+        registryTokenCount=row[TokenCollectionOverlapsTable.c.registryTokenCount],
+        otherRegistryTokenCount=row[TokenCollectionOverlapsTable.c.otherRegistryTokenCount],
     )

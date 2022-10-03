@@ -11,6 +11,7 @@ from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
+from notd.api.models_v1 import ApiCollectionOverlap
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
@@ -33,6 +34,7 @@ from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
+from notd.model import CollectionOverlap
 from notd.model import CollectionStatistics
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
@@ -353,3 +355,18 @@ class ResponseBuilder:
             accountGm=(await self.account_gm_from_model(accountGm=latestAccountGm.accountGm)),
             accountCollectionGms=(await self.account_collection_gms_from_models(gmCollections=latestAccountGm.accountCollectionGms))
         )
+
+    async def collection_overlap_from_model(self, collectionOverlap: CollectionOverlap) -> ApiCollectionOverlap:
+        return ApiCollectionOverlap(
+            collectionOverlapId=collectionOverlap.collectionOverlapId,
+            createdDate=collectionOverlap.createdDate,
+            updatedDate=collectionOverlap.updatedDate,
+            registryAddress=collectionOverlap.registryAddress,
+            otherRegistryAddress=collectionOverlap.otherRegistryAddress,
+            ownerAddress=collectionOverlap.ownerAddress,
+            registryTokenCount=collectionOverlap.registryTokenCount,
+            otherRegistryTokenCount=collectionOverlap.otherRegistryTokenCount,
+        )
+
+    async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> Sequence[ApiCollectionOverlap]:
+        return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])

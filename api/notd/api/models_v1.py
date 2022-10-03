@@ -212,3 +212,11 @@ class ApiGmCollectionRow(BaseModel):
 class ApiLatestAccountGm(BaseModel):
     accountGm: ApiAccountGm
     accountCollectionGms: List[ApiAccountCollectionGm]
+
+
+class ApiCollectionOverlap(BaseModel):
+    registryAddress: str
+    otherRegistryAddress: str
+    ownerAddress: str
+    registryTokenCount: int
+    otherRegistryTokenCount: int
