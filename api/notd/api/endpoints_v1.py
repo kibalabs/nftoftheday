@@ -339,5 +339,8 @@ class GetLatestGmForAccountRequest(BaseModel):
 class GetLatestGmForAccountResponse(BaseModel):
     latestAccountGm: ApiLatestAccountGm
 
+class GetAccountEnsNameRequest(BaseModel):
+    pass
+
 class GetAccountEnsNameResponse(BaseModel):
     accountEnsName: ApiAccountEnsName
