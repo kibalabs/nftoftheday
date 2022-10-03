@@ -144,9 +144,7 @@ class TokenManager:
         ])
         collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
         await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)
-        # await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
-        for (registryAddress, tokenId) in collectionTokenIds:
-            await self.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
+        await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
         await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
