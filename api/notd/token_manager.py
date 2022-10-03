@@ -16,6 +16,7 @@ from notd.collection_manager import CollectionManager
 from notd.messages import UpdateCollectionTokensMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.model import TokenMetadata
+from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenMetadatasTable
@@ -28,12 +29,13 @@ _TOKEN_UPDATE_MIN_DAYS = 7
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager, ownershipManager: OwnershipManager):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
         self.tokenMetadataProcessor = tokenMetadataProcessor
         self.collectionManager = collectionManager
+        self.ownershipManager = ownershipManager
 
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         registryAddress = chain_util.normalize_address(value=registryAddress)
@@ -142,7 +144,8 @@ class TokenManager:
         ])
         collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
         await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)
-        return collectionTokenIds
+        await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
+        await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
 
     async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
         address = chain_util.normalize_address(value=address)
