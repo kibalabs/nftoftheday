@@ -215,9 +215,6 @@ class ApiLatestAccountGm(BaseModel):
 
 
 class ApiCollectionOverlap(BaseModel):
-    collectionOverlapId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
     registryAddress: str
     otherRegistryAddress: str
     ownerAddress: str

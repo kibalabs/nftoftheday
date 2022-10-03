@@ -373,4 +373,4 @@ class GalleryManager:
     async def list_gallery_collection_overlaps(self, registryAddress: str) -> List[CollectionOverlap]:
         return await self.retriever.list_collection_overlaps(fieldFilters=[
             StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress)]
-            )
+        )

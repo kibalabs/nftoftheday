@@ -23,6 +23,7 @@ from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
+from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.collection_processor import CollectionProcessor
 from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
@@ -37,7 +38,6 @@ from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
 from notd.twitter_manager import TwitterManager
-from notd.collection_overlap_processor import CollectionOverlapProcessor
 
 
 async def main():
