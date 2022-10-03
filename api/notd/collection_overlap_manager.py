@@ -14,7 +14,7 @@ from notd.store.saver import Saver
 from notd.store.schema import TokenCollectionOverlapsTable
 
 
-class OverlapManager:
+class CollectionOverlapManager:
 
     def __init__(self, retriever: Retriever, saver: Saver, workQueue: SqsMessageQueue, collectionOverlapProcessor: CollectionOverlapProcessor) -> None:
         self.retriever = retriever
