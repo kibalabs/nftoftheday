@@ -2,8 +2,9 @@ import base64
 import json
 import urllib.parse
 from json.decoder import JSONDecodeError
-from typing import Any, Optional
+from typing import Any
 from typing import Dict
+from typing import Optional
 
 from core import logging
 from core.exceptions import BadRequestException
