@@ -47,7 +47,6 @@ from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
 from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
 from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
-from notd.store.schema_conversions import collection_overlap_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
