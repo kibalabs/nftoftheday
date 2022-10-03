@@ -22,14 +22,14 @@ class OverlapManager:
         self.collectionOverlapProcessor = collectionOverlapProcessor
         self.workQueue = workQueue
 
-    async def refresh_overlaps_for_all_collections_deferred(self):
+    async def refresh_overlaps_for_all_collections_deferred(self) -> None:
         await self.workQueue.send_message(message=RefreshAllCollectionOverlapsMessageContent().to_message())
 
-    async def refresh_overlaps_for_all_collections(self):
+    async def refresh_overlaps_for_all_collections(self) -> None:
         for registryAddress in GALLERY_COLLECTIONS:
             await self.refresh_overlap_for_collection_deferred(registryAddress=registryAddress)
 
-    async def refresh_overlap_for_collection_deferred(self, registryAddress: str):
+    async def refresh_overlap_for_collection_deferred(self, registryAddress: str) -> None:
         await self.workQueue.send_message(message=RefreshCollectionOverlapMessageContent(registryAddress=registryAddress).to_message())
 
     async def refresh_overlap_for_collection(self, registryAddress: str) -> None:
