@@ -235,10 +235,10 @@ class TokenMetadataProcessor():
         for ipfsProviderPrefix in IPFS_PROVIDER_PREFIXES:
             if tokenMetadataUri.startswith(ipfsProviderPrefix):
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
+        tokenMetadataUri = self._clean_potential_ipfs_url(tokenMetadataUri)
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = tokenMetadataUri
         if tokenMetadataUri.startswith('ipfs://'):
-            tokenMetadataUri = self._clean_potential_ipfs_url(tokenMetadataUri)
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')
         if not tokenMetadataUri:
             tokenMetadataDict = {}
@@ -268,6 +268,10 @@ class TokenMetadataProcessor():
             return self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         retrievedTokenMetadata = self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         if registryAddress in GALLERY_COLLECTIONS and retrievedTokenMetadata.imageUrl:
-            image = await self.pabloClient.upload_image_url(url=retrievedTokenMetadata.imageUrl)
-            retrievedTokenMetadata.resizableImageUrl = image.resizableUrl
+            try:
+                image = await self.pabloClient.upload_image_url(url=retrievedTokenMetadata.imageUrl)
+                retrievedTokenMetadata.resizableImageUrl = image.resizableUrl
+            except BadRequestException:
+                # TODO(krishan711): this is ignoring "unsupported image format", find nicer way to ignore only this error
+                pass
         return retrievedTokenMetadata
