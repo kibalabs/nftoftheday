@@ -212,3 +212,11 @@ class ApiGmCollectionRow(BaseModel):
 class ApiLatestAccountGm(BaseModel):
     accountGm: ApiAccountGm
     accountCollectionGms: List[ApiAccountCollectionGm]
+
+
+class ApiAccountEnsName(BaseModel):
+    accountEnsNameId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    accountAddress: str
+    ensName: Optional[str]

@@ -3,6 +3,7 @@ from typing import Mapping
 from typing import Optional
 
 from notd.model import AccountCollectionGm
+from notd.model import AccountEnsName
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
@@ -23,6 +24,7 @@ from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import AccountCollectionGmsTable
+from notd.store.schema import AccountEnsNamesTable
 from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
@@ -324,4 +326,14 @@ def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
         date=row[AccountCollectionGmsTable.c.date],
         signatureMessage=row[AccountCollectionGmsTable.c.signatureMessage],
         signature=row[AccountCollectionGmsTable.c.signature],
+    )
+
+
+def account_ens_name_from_row(row: Mapping) -> AccountEnsName:
+    return AccountEnsName(
+        accountEnsNameId=row[AccountEnsNamesTable.c.accountEnsNameId],
+        createdDate=row[AccountEnsNamesTable.c.createdDate],
+        updatedDate=row[AccountEnsNamesTable.c.updatedDate],
+        accountAddress=row[AccountEnsNamesTable.c.accountAddress],
+        ensName=row[AccountEnsNamesTable.c.ensName],
     )

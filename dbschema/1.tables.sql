@@ -364,6 +364,7 @@ CREATE TABLE tbl_gallery_customers (
 );
 CREATE UNIQUE INDEX tbl_gallery_customers_registry_address on tbl_gallery_customers (registry_address);
 
+
 CREATE TABLE tbl_collection_total_activities (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -386,6 +387,7 @@ CREATE INDEX tbl_collection_total_activities_minimum_value ON tbl_collection_tot
 CREATE INDEX tbl_collection_total_activities_maximum_value ON tbl_collection_total_activities (maximum_value);
 CREATE INDEX tbl_collection_total_activities_average_value ON tbl_collection_total_activities (average_value);
 
+
 CREATE TABLE tbl_account_gms (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -402,6 +404,7 @@ CREATE INDEX tbl_account_gms_created_date ON tbl_account_gms (created_date);
 CREATE INDEX tbl_account_gms_updated_date ON tbl_account_gms (updated_date);
 CREATE INDEX tbl_account_gms_address ON tbl_account_gms (address);
 CREATE INDEX tbl_account_gms_date ON tbl_account_gms (date);
+
 
 CREATE TABLE tbl_account_collection_gms (
     id BIGSERIAL PRIMARY KEY,
@@ -420,3 +423,18 @@ CREATE INDEX tbl_account_collection_gms_registry_address ON tbl_account_collecti
 CREATE INDEX tbl_account_collection_gms_account_address ON tbl_account_collection_gms (account_address);
 CREATE INDEX tbl_account_collection_gms_registry_address_date ON tbl_account_collection_gms (registry_address, date);
 CREATE INDEX tbl_account_collection_gms_date ON tbl_account_collection_gms (date);
+
+
+CREATE TABLE tbl_account_ens_names(
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    account_address TEXT NOT NULL,
+    ens_name TEXT
+);
+
+CREATE UNIQUE INDEX tbl_account_ens_names_ens_name_account_address on tbl_account_ens_names (ens_name, account_address);
+CREATE INDEX tbl_account_ens_names_created_date ON tbl_account_ens_names (created_date);
+CREATE INDEX tbl_account_ens_names_updated_date ON tbl_account_ens_names (updated_date);
+CREATE INDEX tbl_account_ens_names_account_address ON tbl_account_ens_names (account_address);
+CREATE INDEX tbl_account_ens_names_registry_address ON tbl_account_ens_names (ens_name);

@@ -14,6 +14,7 @@ from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
 from pablo import PabloClient
 
+from notd.account_ens_name_processor import AccountEnsNameProcessor
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
 from notd.block_manager import BlockManager
@@ -21,6 +22,7 @@ from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
 from notd.collection_processor import CollectionProcessor
+from notd.ens_manager import EnsManager
 from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager
@@ -82,7 +84,9 @@ async def main():
     tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager)
     blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager)
     twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
-    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, requester=requester, revueApiKey=revueApiKey)
+    accountEnsNameProcessor = AccountEnsNameProcessor(ethClient=ethClient)
+    ensManager = EnsManager(retriever=retriever, saver=saver, accountEnsNameProcessor=accountEnsNameProcessor)
+    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, ensManager=ensManager, requester=requester, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')

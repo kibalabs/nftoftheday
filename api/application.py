@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pablo import PabloClient
 
+from notd.account_ens_name_processor import AccountEnsNameProcessor
 from notd.activity_manager import ActivityManager
 from notd.api.api_v1 import create_api as create_v1_api
 from notd.api.gallery_v1 import create_api as create_gallery_v1_api
@@ -28,6 +29,7 @@ from notd.block_processor import BlockProcessor
 from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.collection_manager import CollectionManager
 from notd.collection_processor import CollectionProcessor
+from notd.ens_manager import EnsManager
 from notd.gallery_manager import GalleryManager
 from notd.gm_manager import GmManager
 from notd.listing_manager import ListingManager
@@ -88,7 +90,9 @@ listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=work
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager)
 blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager)
 twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
-notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, requester=requester, revueApiKey=revueApiKey)
+accountEnsNameProcessor = AccountEnsNameProcessor(ethClient=ethClient)
+ensManager = EnsManager(retriever=retriever, saver=saver, accountEnsNameProcessor=accountEnsNameProcessor)
+notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, ensManager=ensManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager)
 gmManager = GmManager(retriever=retriever, saver=saver)

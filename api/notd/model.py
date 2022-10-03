@@ -514,3 +514,12 @@ class GmCollectionRow:
 class LatestAccountGm:
     accountGm: AccountGm
     accountCollectionGms: List[AccountCollectionGm]
+
+
+@dataclasses.dataclass
+class AccountEnsName:
+    accountEnsNameId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    accountAddress: str
+    ensName: Optional[str]

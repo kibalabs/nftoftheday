@@ -11,6 +11,7 @@ from core.util import list_util
 from sqlalchemy import JSON
 
 from notd.model import AccountCollectionGm
+from notd.model import AccountEnsName
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
@@ -30,6 +31,7 @@ from notd.model import TwitterProfile
 from notd.model import UserInteraction
 from notd.model import UserProfile
 from notd.store.schema import AccountCollectionGmsTable
+from notd.store.schema import AccountEnsNamesTable
 from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
@@ -883,3 +885,36 @@ class Saver(CoreSaver):
             signatureMessage=signatureMessage,
             signature=signature,
         )
+
+    async def create_account_ens_name(self, accountAddress: str, ensName: Optional[str], connection: Optional[DatabaseConnection] = None) -> AccountEnsName:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = {
+            AccountEnsNamesTable.c.createdDate.key: createdDate,
+            AccountEnsNamesTable.c.updatedDate.key: updatedDate,
+            AccountEnsNamesTable.c.ensName.key: ensName,
+            AccountEnsNamesTable.c.accountAddress.key: accountAddress,
+        }
+        query = AccountEnsNamesTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        accountEnsNameId = result.inserted_primary_key[0]
+        return AccountEnsName(
+            accountEnsNameId=accountEnsNameId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            ensName=ensName,
+            accountAddress=accountAddress,
+        )
+
+    async def update_account_ens_name(self, accountEnsNameId: int, ensName: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values = {}
+        if ensName is not None:
+            values[AccountEnsNamesTable.c.ensName.key] = ensName
+        if len(values) > 0:
+            values[AccountEnsNamesTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = AccountEnsNamesTable.update(AccountEnsNamesTable.c.accountEnsNameId == accountEnsNameId).values(values)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_account_ens_name(self, accountEnsNameId: int, connection: Optional[DatabaseConnection]) -> None:
+        query = AccountEnsNamesTable.delete().where(AccountEnsNamesTable.c.accountEnsNameId == accountEnsNameId)
+        await self._execute(query=query, connection=connection)

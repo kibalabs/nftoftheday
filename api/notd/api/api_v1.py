@@ -4,6 +4,7 @@ from typing import Optional
 from core.util import date_util
 from fastapi import APIRouter
 
+from notd.api.endpoints_v1 import GetAccountEnsNameResponse
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
@@ -196,6 +197,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_owner_token_ownerships(accountAddress: str):
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
+
+    @router.get('/account/{accountAddress}/ens-name')
+    async def get_account_ens_name(accountAddress: str) -> GetAccountEnsNameResponse:
+        accountEnsName = await notdManager.get_account_ens_name(accountAddress=accountAddress)
+        return GetAccountEnsNameResponse(accountEnsName=(await responseBuilder.get_account_ens_name_from_model(accountEnsName=accountEnsName)))
 
     @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
     async def get_collection_statistics(registryAddress: str):  # request: GetCollectionStatisticsRequest
