@@ -105,6 +105,7 @@ class ResponseBuilder:
             resizableImageUrl=tokenMetadata.resizableImageUrl,
             frameImageUrl=tokenMetadata.frameImageUrl,
             attributes=attributes,
+            # quantity=quantity,
         )
 
     async def collection_tokens_from_models(self, tokenMetadatas: Sequence[TokenMetadata]) -> Sequence[ApiCollectionToken]:

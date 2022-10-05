@@ -32,6 +32,7 @@ class ApiCollectionToken(BaseModel):
     resizableImageUrl: Optional[str]
     frameImageUrl: Optional[str]
     attributes: Optional[List[Dict[str, Union[str, int, float, None, bool]]]]
+    # quantity: Optional[int]
 
 
 class ApiTokenTransfer(BaseModel):
