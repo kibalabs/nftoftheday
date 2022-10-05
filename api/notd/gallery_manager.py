@@ -20,6 +20,7 @@ from eth_account.messages import defunct_hash_message
 from web3 import Web3
 
 from notd.api.endpoints_v1 import InQueryParam
+from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
@@ -42,6 +43,7 @@ from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
+from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
@@ -62,11 +64,12 @@ SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dC
 
 class GalleryManager:
 
-    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver, twitterManager: TwitterManager) -> None:
+    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver, twitterManager: TwitterManager, collectionManager: CollectionManager) -> None:
         self.ethClient = ethClient
         self.retriever = retriever
         self.saver = saver
         self.twitterManager = twitterManager
+        self.collectionManager = collectionManager
         with open('./contracts/SpriteClub.json', 'r') as contractJsonFile:
             self.spriteClubContract = json.load(contractJsonFile)
         with open('./contracts/SpriteClubStormdrop.json', 'r') as contractJsonFile:
@@ -85,25 +88,47 @@ class GalleryManager:
         await self.twitterManager.login_callback(state=state, code=code, error=error)
 
     async def get_gallery_token(self, registryAddress: str, tokenId: str) -> GalleryToken:
-        query = (
-            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
-                .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
-                .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
-                .where(TokenMetadatasTable.c.registryAddress == registryAddress)
-                .where(TokenMetadatasTable.c.tokenId == tokenId)
-                .order_by(sqlalchemy.func.coalesce(LatestTokenListingsTable.c.value, 0).asc())
-        )
-        result = await self.retriever.database.execute(query=query)
-        row = result.first()
-        if not row:
-            raise NotFoundException(message=f'GalleryToken with registry:{registryAddress} tokenId:{tokenId} not found')
-        galleryToken = GalleryToken(
-            tokenMetadata=token_metadata_from_row(row),
-            tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
-            tokenListing=token_listing_from_row(row) if row[LatestTokenListingsTable.c.latestTokenListingId] else None,
-        )
-        return galleryToken
+        collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
+        if collection.doesSupportErc721:
+            query = (
+                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
+                    .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
+                    .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
+                    .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
+                    .where(TokenMetadatasTable.c.registryAddress == registryAddress)
+                    .where(TokenMetadatasTable.c.tokenId == tokenId)
+                    .order_by(sqlalchemy.func.coalesce(LatestTokenListingsTable.c.value, 0).asc())
+            )
+            result = await self.retriever.database.execute(query=query)
+            row = result.first()
+            if not row:
+                raise NotFoundException(message=f'GalleryToken with registry:{registryAddress} tokenId:{tokenId} not found')
+            galleryToken = GalleryToken(
+                tokenMetadata=token_metadata_from_row(row),
+                tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
+                tokenListing=token_listing_from_row(row) if row[LatestTokenListingsTable.c.latestTokenListingId] else None,
+            )
+            return galleryToken
+        if collection.doesSupportErc1155:
+            query = (
+                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
+                    .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
+                    .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenMultiOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenMultiOwnershipsTable.c.tokenId))
+                    .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenMultiOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
+                    .where(TokenMetadatasTable.c.registryAddress == registryAddress)
+                    .where(TokenMetadatasTable.c.tokenId == tokenId)
+                    .order_by(sqlalchemy.func.coalesce(LatestTokenListingsTable.c.value, 0).asc())
+            )
+            result = await self.retriever.database.execute(query=query)
+            row = result.first()
+            if not row:
+                raise NotFoundException(message=f'GalleryToken with registry:{registryAddress} tokenId:{tokenId} not found')
+            galleryToken = GalleryToken(
+                tokenMetadata=token_metadata_from_row(row),
+                tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
+                tokenListing=token_listing_from_row(row) if row[LatestTokenListingsTable.c.latestTokenListingId] else None,
+            )
+            return galleryToken
 
     async def list_collection_token_airdrops(self, registryAddress: str, tokenId: str) -> List[Airdrop]:
         registryAddress = chain_util.normalize_address(registryAddress)
@@ -139,6 +164,7 @@ class GalleryManager:
 
     async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None) -> Sequence[GalleryToken]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
+        collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
         usesListings = isListed or minPrice or maxPrice
         orderedListingsQuery = (
             sqlalchemy.select(
@@ -155,17 +181,31 @@ class GalleryManager:
             .where(orderedListingsQuery.c.tokenListingIndex == 1)
         ).subquery()
         listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
-        # TODO(krishan711): this shouldn't join on single ownerships for erc1155
-        query = (
-            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
-                .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
-                .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
-                .where(TokenMetadatasTable.c.registryAddress == registryAddress)
-                .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
-                .limit(limit)
-                .offset(offset)
-        )
+        if collection.doesSupportErc721:
+            query = (
+                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
+                    .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
+                    .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
+                    .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
+                    .where(TokenMetadatasTable.c.registryAddress == registryAddress)
+                    .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+                    .limit(limit)
+                    .offset(offset)
+            )
+        elif collection.doesSupportErc1155:
+            query = (
+                sqlalchemy.select(TokenMetadatasTable)
+                # sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
+                    # .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
+                    # .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenMultiOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenMultiOwnershipsTable.c.tokenId))
+                    # .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId), isouter=True)
+                    .where(TokenMetadatasTable.c.registryAddress == registryAddress)
+                    .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+                    .limit(limit)
+                    .offset(offset)
+            )
+        else:
+            raise BadRequestException(message='Collection does not support NFTs')
         if usesListings:
             query = query.where(listingsQuery.c.latestTokenListingId.is_not(None))
         if minPrice:
@@ -189,8 +229,8 @@ class GalleryManager:
         for row in result:
             galleryTokens.append(GalleryToken(
                 tokenMetadata=token_metadata_from_row(row),
-                tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
-                tokenListing=token_listing_from_row(row, listingsQuery) if row[listingsQuery.c.latestTokenListingId] else None,
+                tokenCustomization=token_customization_from_row(row) if collection.doesSupportErc721 and row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
+                tokenListing=token_listing_from_row(row, listingsQuery) if collection.doesSupportErc721 and row[listingsQuery.c.latestTokenListingId] else None,
             ))
         return galleryTokens
 
