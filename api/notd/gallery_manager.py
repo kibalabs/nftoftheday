@@ -182,7 +182,6 @@ class GalleryManager:
         ).subquery()
         listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
         if collection.doesSupportErc721:
-            # TODO(krishan711): this shouldn't join on single ownerships for erc1155
             query = (
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
@@ -194,12 +193,11 @@ class GalleryManager:
                     .offset(offset)
             )
         elif collection.doesSupportErc1155:
-            # TODO(krishan711): this shouldn't join on single ownerships for erc1155
             query = (
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
-                    .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
+                    # .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     # .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenMultiOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenMultiOwnershipsTable.c.tokenId))
-                    .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId), isouter=True)
+                    # .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId), isouter=True)
                     .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                     .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
                     .limit(limit)
