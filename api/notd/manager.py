@@ -30,6 +30,7 @@ from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenMetadata
+from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
 from notd.ownership_manager import OwnershipManager
@@ -264,31 +265,32 @@ class NotdManager:
         return collectionActivitiesPerDay
 
     async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
+        return await self.get_collection_token_recent_transfers(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset, shouldIncludeSalesOnly=True)
+
+    async def get_collection_token_recent_transfers(self, registryAddress: str, tokenId: str, limit: int, offset: int, shouldIncludeSalesOnly: bool = False) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
+        filters = [
+            StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+            StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+        ]
+        if shouldIncludeSalesOnly:
+            filters.append(IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0))
         tokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
-                IntegerFieldFilter(fieldName=TokenTransfersTable.c.value.key, gt=0),
-            ],
+            fieldFilters=filters,
             orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
             limit=limit,
             offset=offset,
         )
         return tokenTransfers
 
-    async def get_collection_token_recent_transfers(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
-        registryAddress = chain_util.normalize_address(value=registryAddress)
-        tokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
-            ],
-            orders=[Order(fieldName=TokenTransfersTable.c.blockNumber.key, direction=Direction.DESCENDING)],
-            limit=limit,
-            offset=offset,
-        )
-        return tokenTransfers
+    async def get_collection_token_owners(self, registryAddress: str, tokenId: str) -> Sequence[TokenMultiOwnership]:
+        # TODO(krishan711): this assumes its called for an ERC-1155 so fix if we need it for 721 too
+        tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
+            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
+            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
+            IntegerFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, gt=0),
+        ], orders=[Order(fieldName=TokenMultiOwnershipsTable.c.quantity.key, direction=Direction.DESCENDING)])
+        return tokenMultiOwnerships
 
     async def list_account_tokens(self, accountAddress: str, limit: int, offset: int) -> List[Token]:
         tokenSingleOwnerships = await self.retriever.list_token_ownerships(

@@ -24,6 +24,7 @@ from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
+from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
@@ -49,6 +50,7 @@ from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenListing
 from notd.model import TokenMetadata
+from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
 from notd.model import TwitterProfile
@@ -83,7 +85,9 @@ class ResponseBuilder:
             openseaSlug=collection.openseaSlug,
             url=collection.url,
             discordUrl=collection.discordUrl,
-            bannerImageUrl=collection.bannerImageUrl
+            bannerImageUrl=collection.bannerImageUrl,
+            doesSupportErc721=collection.doesSupportErc721,
+            doesSupportErc1155=collection.doesSupportErc1155,
         )
 
     async def collection_token_from_registry_address_token_id(self, registryAddress: str, tokenId: str) -> ApiCollectionToken:
@@ -146,8 +150,19 @@ class ResponseBuilder:
             token=(await self.collection_token_from_registry_address_token_id(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId)),
         )
 
-    async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[TokenTransfer]:
+    async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[ApiTokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
+
+    async def token_ownership_from_model(self, tokenMultiOwnership: TokenMultiOwnership) -> ApiTokenOwnership:
+        return ApiTokenOwnership(
+            registryAddress=tokenMultiOwnership.registryAddress,
+            tokenId=tokenMultiOwnership.tokenId,
+            ownerAddress=tokenMultiOwnership.ownerAddress,
+            quantity=tokenMultiOwnership.quantity,
+        )
+
+    async def token_ownerships_from_models(self, tokenMultiOwnerships: Sequence[TokenMultiOwnership]) -> Sequence[ApiTokenOwnership]:
+        return await asyncio.gather(*[self.token_ownership_from_model(tokenMultiOwnership=tokenMultiOwnership) for tokenMultiOwnership in tokenMultiOwnerships])
 
     async def get_collection_statistics(self, collectionStatistics: CollectionStatistics) -> ApiCollectionStatistics:
         return ApiCollectionStatistics(
@@ -241,7 +256,8 @@ class ResponseBuilder:
         return ApiGalleryToken(
             collectionToken=(await self.collection_token_from_model(tokenMetadata=galleryToken.tokenMetadata)),
             tokenCustomization=(await self.token_customization_from_model(tokenCustomization=galleryToken.tokenCustomization) if galleryToken.tokenCustomization else None),
-            tokenListing=(await self.token_listing_from_model(tokenListing=galleryToken.tokenListing) if galleryToken.tokenListing else None)
+            tokenListing=(await self.token_listing_from_model(tokenListing=galleryToken.tokenListing) if galleryToken.tokenListing else None),
+            quantity=galleryToken.quantity
         )
 
     async def gallery_tokens_from_models(self, galleryTokens: Sequence[GalleryToken]) -> Sequence[ApiGalleryToken]:

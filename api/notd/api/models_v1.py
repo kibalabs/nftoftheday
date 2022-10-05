@@ -20,6 +20,8 @@ class ApiCollection(BaseModel):
     url: Optional[str]
     discordUrl: Optional[str]
     bannerImageUrl: Optional[str]
+    doesSupportErc721: bool
+    doesSupportErc1155: bool
 
 
 class ApiCollectionToken(BaseModel):
@@ -69,6 +71,13 @@ class ApiSponsoredToken(BaseModel):
     collection: ApiCollection
     date: datetime.datetime
     latestTransfer: Optional[ApiTokenTransfer]
+
+
+class ApiTokenOwnership(BaseModel):
+    registryAddress: str
+    tokenId: str
+    ownerAddress: str
+    quantity: int
 
 
 class ApiCollectionStatistics(BaseModel):
@@ -137,6 +146,7 @@ class ApiGalleryToken(BaseModel):
     collectionToken: ApiCollectionToken
     tokenCustomization: Optional[ApiTokenCustomization]
     tokenListing: Optional[ApiTokenListing]
+    quantity: int
 
 
 class ApiUserProfile(BaseModel):
