@@ -122,7 +122,6 @@ class GalleryManager:
             row = result.first()
             if not row:
                 raise NotFoundException(message=f'GalleryToken with registry:{registryAddress} tokenId:{tokenId} not found')
-            print('here')
             galleryToken = GalleryToken(
                 tokenMetadata=token_metadata_from_row(row),
                 tokenCustomization=token_customization_from_row(row) if collection.doesSupportErc721 else None,

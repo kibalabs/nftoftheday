@@ -251,7 +251,6 @@ class ResponseBuilder:
         )
 
     async def gallery_token_from_model(self, galleryToken: GalleryToken) -> ApiGalleryToken:
-        print(galleryToken)
         return ApiGalleryToken(
             collectionToken=(await self.collection_token_from_model(tokenMetadata=galleryToken.tokenMetadata)),
             tokenCustomization=(await self.token_customization_from_model(tokenCustomization=galleryToken.tokenCustomization) if galleryToken.tokenCustomization else None),
