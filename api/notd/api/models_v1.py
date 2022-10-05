@@ -137,6 +137,7 @@ class ApiGalleryToken(BaseModel):
     collectionToken: ApiCollectionToken
     tokenCustomization: Optional[ApiTokenCustomization]
     tokenListing: Optional[ApiTokenListing]
+    quantity: Optional[int]
 
 
 class ApiUserProfile(BaseModel):

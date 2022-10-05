@@ -238,10 +238,12 @@ class ResponseBuilder:
         )
 
     async def gallery_token_from_model(self, galleryToken: GalleryToken) -> ApiGalleryToken:
+        print(galleryToken)
         return ApiGalleryToken(
             collectionToken=(await self.collection_token_from_model(tokenMetadata=galleryToken.tokenMetadata)),
             tokenCustomization=(await self.token_customization_from_model(tokenCustomization=galleryToken.tokenCustomization) if galleryToken.tokenCustomization else None),
-            tokenListing=(await self.token_listing_from_model(tokenListing=galleryToken.tokenListing) if galleryToken.tokenListing else None)
+            tokenListing=(await self.token_listing_from_model(tokenListing=galleryToken.tokenListing) if galleryToken.tokenListing else None),
+            quantity=galleryToken.quantity
         )
 
     async def gallery_tokens_from_models(self, galleryTokens: Sequence[GalleryToken]) -> Sequence[ApiGalleryToken]:
