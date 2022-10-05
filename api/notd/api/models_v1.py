@@ -20,6 +20,8 @@ class ApiCollection(BaseModel):
     url: Optional[str]
     discordUrl: Optional[str]
     bannerImageUrl: Optional[str]
+    doesSupportErc721: bool
+    doesSupportErc1155: bool
 
 
 class ApiCollectionToken(BaseModel):

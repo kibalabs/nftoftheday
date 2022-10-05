@@ -85,7 +85,9 @@ class ResponseBuilder:
             openseaSlug=collection.openseaSlug,
             url=collection.url,
             discordUrl=collection.discordUrl,
-            bannerImageUrl=collection.bannerImageUrl
+            bannerImageUrl=collection.bannerImageUrl,
+            doesSupportErc721=collection.doesSupportErc721,
+            doesSupportErc1155=collection.doesSupportErc1155,
         )
 
     async def collection_token_from_registry_address_token_id(self, registryAddress: str, tokenId: str) -> ApiCollectionToken:
