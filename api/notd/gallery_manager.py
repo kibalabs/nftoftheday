@@ -18,10 +18,9 @@ from core.util import list_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
 from web3 import Web3
-from notd.collection_manager import CollectionManager
-from notd.store.schema import TokenMultiOwnershipsTable
 
 from notd.api.endpoints_v1 import InQueryParam
+from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
@@ -44,6 +43,7 @@ from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
+from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
@@ -165,23 +165,23 @@ class GalleryManager:
     async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None) -> Sequence[GalleryToken]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
+        usesListings = isListed or minPrice or maxPrice
+        orderedListingsQuery = (
+            sqlalchemy.select(
+                LatestTokenListingsTable,
+                sqlalchemy.func.row_number().over(
+                    partition_by=sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress, LatestTokenListingsTable.c.tokenId),
+                    order_by=LatestTokenListingsTable.c.value.asc()
+                ).label('tokenListingIndex'),
+            )
+            .where(LatestTokenListingsTable.c.endDate >= datetime.datetime.now())
+        ).subquery()
+        lowestListingsQuery = (
+            sqlalchemy.select(orderedListingsQuery)
+            .where(orderedListingsQuery.c.tokenListingIndex == 1)
+        ).subquery()
+        listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
         if collection.doesSupportErc721:
-            usesListings = isListed or minPrice or maxPrice
-            orderedListingsQuery = (
-                sqlalchemy.select(
-                    LatestTokenListingsTable,
-                    sqlalchemy.func.row_number().over(
-                        partition_by=sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress, LatestTokenListingsTable.c.tokenId),
-                        order_by=LatestTokenListingsTable.c.value.asc()
-                    ).label('tokenListingIndex'),
-                )
-                .where(LatestTokenListingsTable.c.endDate >= datetime.datetime.now())
-            ).subquery()
-            lowestListingsQuery = (
-                sqlalchemy.select(orderedListingsQuery)
-                .where(orderedListingsQuery.c.tokenListingIndex == 1)
-            ).subquery()
-            listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
             # TODO(krishan711): this shouldn't join on single ownerships for erc1155
             query = (
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
@@ -194,23 +194,7 @@ class GalleryManager:
                     .offset(offset)
             )
         elif collection.doesSupportErc1155:
-            usesListings = isListed or minPrice or maxPrice
-            orderedListingsQuery = (
-                sqlalchemy.select(
-                    LatestTokenListingsTable,
-                    sqlalchemy.func.row_number().over(
-                        partition_by=sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress, LatestTokenListingsTable.c.tokenId),
-                        order_by=LatestTokenListingsTable.c.value.asc()
-                    ).label('tokenListingIndex'),
-                )
-                .where(LatestTokenListingsTable.c.endDate >= datetime.datetime.now())
-            ).subquery()
-            lowestListingsQuery = (
-                sqlalchemy.select(orderedListingsQuery)
-                .where(orderedListingsQuery.c.tokenListingIndex == 1)
-            ).subquery()
-            listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
-            # # TODO(krishan711): this shouldn't join on single ownerships for erc1155
+            # TODO(krishan711): this shouldn't join on single ownerships for erc1155
             query = (
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
