@@ -281,6 +281,7 @@ UserRegistryOrderedOwnershipsMaterializedView = sqlalchemy.Table(
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='quantity', name='quantity', type_=sqlalchemy.Integer, nullable=False),
     sqlalchemy.Column(key='ownerTokenIndex', name='owner_token_index', type_=sqlalchemy.Integer, nullable=False),
 )
 
