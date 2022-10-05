@@ -444,6 +444,7 @@ class GalleryToken:
     tokenMetadata: TokenMetadata
     tokenCustomization: Optional[TokenCustomization]
     tokenListing: Optional[TokenListing]
+    quantity: int
 
 
 @dataclasses.dataclass
