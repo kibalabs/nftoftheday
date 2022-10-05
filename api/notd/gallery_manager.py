@@ -91,7 +91,7 @@ class GalleryManager:
         collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
         if collection.doesSupportErc721:
             query = (
-                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable)
+                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, LatestTokenListingsTable, sqlalchemy.Integer(1).label('tokenQuantity'))
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
                     .join(LatestTokenListingsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == LatestTokenListingsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == LatestTokenListingsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress, LatestTokenListingsTable.c.endDate >= datetime.datetime.now()), isouter=True)
@@ -111,7 +111,7 @@ class GalleryManager:
             return galleryToken
         if collection.doesSupportErc1155:
             query = (
-                sqlalchemy.select(TokenMetadatasTable, sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity))
+                sqlalchemy.select(TokenMetadatasTable, sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity).label('tokenQuantity'))
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenMultiOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenMultiOwnershipsTable.c.tokenId))
                     .where(TokenMetadatasTable.c.registryAddress == registryAddress)
@@ -126,8 +126,7 @@ class GalleryManager:
                 tokenMetadata=token_metadata_from_row(row),
                 tokenCustomization=token_customization_from_row(row) if collection.doesSupportErc721 else None,
                 tokenListing=token_listing_from_row(row) if collection.doesSupportErc721 else None,
-                quantity=row[-1] if collection.doesSupportErc1155 else 1
-
+                quantity=row['tokenQuantity']
             )
             return galleryToken
 
@@ -184,7 +183,7 @@ class GalleryManager:
         listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
         if collection.doesSupportErc721:
             query = (
-                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
+                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery, sqlalchemy.Integer(1).label('tokenQuantity'))
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
                     .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
@@ -195,7 +194,7 @@ class GalleryManager:
             )
         elif collection.doesSupportErc1155:
             query = (
-                sqlalchemy.select(TokenMetadatasTable, sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity))
+                sqlalchemy.select(TokenMetadatasTable, sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity).label('tokenQuantity'))
                 # sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
                     # .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenMultiOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenMultiOwnershipsTable.c.tokenId))
@@ -237,7 +236,7 @@ class GalleryManager:
                 tokenMetadata=token_metadata_from_row(row),
                 tokenCustomization=token_customization_from_row(row) if collection.doesSupportErc721 and row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
                 tokenListing=token_listing_from_row(row, listingsQuery) if collection.doesSupportErc721 and row[listingsQuery.c.latestTokenListingId] else None,
-                quantity=row[-1] if collection.doesSupportErc1155 else 1
+                quantity=row['tokenQuantity']
             ))
         return galleryTokens
 
