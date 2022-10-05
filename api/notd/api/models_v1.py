@@ -71,6 +71,13 @@ class ApiSponsoredToken(BaseModel):
     latestTransfer: Optional[ApiTokenTransfer]
 
 
+class ApiTokenOwnership(BaseModel):
+    registryAddress: str
+    tokenId: str
+    ownerAddress: str
+    quantity: int
+
+
 class ApiCollectionStatistics(BaseModel):
     itemCount: int
     holderCount: int
