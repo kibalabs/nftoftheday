@@ -289,12 +289,12 @@ class GalleryManager:
 
     async def get_gallery_user(self, registryAddress: str, userAddress: str) -> GalleryUser:
         userQuery = (
-            sqlalchemy.select(sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).label('ownedTokenCount'), UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
-                .join(UserProfilesTable, UserProfilesTable.c.address == TokenOwnershipsTable.c.ownerAddress, isouter=True)
+            sqlalchemy.select(UserRegistryFirstOwnershipsMaterializedView.c.joinDate, sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).label('ownedTokenCount'), UserProfilesTable, TwitterProfilesTable)
+                .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
-                .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == registryAddress, UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == userAddress), isouter=True)
-                .where(TokenOwnershipsTable.c.registryAddress == registryAddress)
-                .where(TokenOwnershipsTable.c.ownerAddress == userAddress)
+                .join(TokenOwnershipsTable, sqlalchemy.and_(TokenOwnershipsTable.c.registryAddress == UserRegistryFirstOwnershipsMaterializedView.c.registryAddress, TokenOwnershipsTable.c.ownerAddress == UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress), isouter=True)
+                .where(UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == registryAddress)
+                .where(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == userAddress)
                 .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         userResult = await self.retriever.database.execute(query=userQuery)
