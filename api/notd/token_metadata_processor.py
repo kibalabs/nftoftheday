@@ -271,7 +271,7 @@ class TokenMetadataProcessor():
             try:
                 image = await self.pabloClient.upload_image_url(url=retrievedTokenMetadata.imageUrl)
                 retrievedTokenMetadata.resizableImageUrl = image.resizableUrl
-            except BadRequestException:
+            except BadRequestException as exception:
                 # TODO(krishan711): this is ignoring "unsupported image format", find nicer way to ignore only this error
-                pass
+                logging.info(f'Skipping resizing image due to: {exception}')
         return retrievedTokenMetadata
