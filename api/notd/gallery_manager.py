@@ -11,6 +11,8 @@ from typing import Sequence
 import sqlalchemy
 from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
+from core.store.retriever import Direction
+from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
@@ -25,6 +27,7 @@ from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
+from notd.model import CollectionOverlapSummary
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
@@ -49,6 +52,7 @@ from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
 from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
 from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
+from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
@@ -407,7 +411,39 @@ class GalleryManager:
             ) for registryAddress in registryAddresses
         ]
 
-    async def list_gallery_collection_overlaps(self, registryAddress: str) -> List[CollectionOverlap]:
-        return await self.retriever.list_collection_overlaps(fieldFilters=[
-            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress)]
+    async def list_gallery_collection_overlaps(self, registryAddress: str, otherRegistryAddress: Optional[str]) -> List[CollectionOverlap]:
+        filters = [
+            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress),
+        ]
+        if otherRegistryAddress:
+            filters.append(StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.otherRegistryAddress.key, eq=otherRegistryAddress))
+        return await self.retriever.list_collection_overlaps(fieldFilters=filters, orders=[Order(fieldName=TokenCollectionOverlapsTable.c.otherRegistryTokenCount.key, direction=Direction.DESCENDING)])
+
+    async def list_gallery_collection_overlap_summaries(self, registryAddress: str) -> List[CollectionOverlapSummary]:
+        query = (
+            sqlalchemy.select(
+                TokenCollectionOverlapsTable.c.registryAddress,
+                TokenCollectionOverlapsTable.c.otherRegistryAddress,
+                TokenCollectionsTable,
+                sqlalchemy.func.count(TokenCollectionOverlapsTable.c.ownerAddress).label('ownerCount'),
+                sqlalchemy.func.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),
+                sqlalchemy.func.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),
+            )
+            .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+            .join(TokenCollectionsTable, TokenCollectionsTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+            .where(TokenCollectionOverlapsTable.c.registryAddress == registryAddress)
+            .order_by(CollectionTotalActivitiesTable.c.totalValue.desc())
+            .group_by(TokenCollectionOverlapsTable.c.registryAddress, TokenCollectionOverlapsTable.c.otherRegistryAddress, TokenCollectionsTable, CollectionTotalActivitiesTable.c.totalValue)
+            .limit(100)
         )
+        result = await self.retriever.database.execute(query=query)
+        rows = list(result)
+        return [
+            CollectionOverlapSummary(
+                registryAddress=row[TokenCollectionOverlapsTable.c.registryAddress],
+                otherCollection=collection_from_row(row=row),
+                ownerCount=row['ownerCount'],
+                registryTokenCount=row['registryTokenCount'],
+                otherRegistryTokenCount=row['otherRegistryTokenCount'],
+            ) for row in rows
+        ]

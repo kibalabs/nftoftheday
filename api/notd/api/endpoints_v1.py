@@ -13,6 +13,7 @@ from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionOverlap
+from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
@@ -74,6 +75,12 @@ class RefreshViewsDeferredRequest(BaseModel):
     pass
 
 class RefreshViewsDeferredResponse(BaseModel):
+    pass
+
+class RefreshCollectionOverlapsDeferredResponse(BaseModel):
+    pass
+
+class RefreshCollectionOverlapsDeferredRequest(BaseModel):
     pass
 
 class UpdateLatestListingsAllCollectionsDeferredRequest(BaseModel):
@@ -350,8 +357,8 @@ class ListGalleryCollectionOverlapsRequest(BaseModel):
 class ListGalleryCollectionOverlapsResponse(BaseModel):
     collectionOverlaps: List[ApiCollectionOverlap]
 
-class RefreshCollectionOverlapsDeferredResponse(BaseModel):
+class ListGalleryCollectionOverlapSummariesRequest(BaseModel):
     pass
 
-class RefreshCollectionOverlapsDeferredRequest(BaseModel):
-    pass
+class ListGalleryCollectionOverlapSummariesResponse(BaseModel):
+    collectionOverlapSummaries: List[ApiCollectionOverlapSummary]

@@ -12,6 +12,7 @@ from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionOverlap
+from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
@@ -36,6 +37,7 @@ from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionOverlap
+from notd.model import CollectionOverlapSummary
 from notd.model import CollectionStatistics
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
@@ -374,9 +376,6 @@ class ResponseBuilder:
 
     async def collection_overlap_from_model(self, collectionOverlap: CollectionOverlap) -> ApiCollectionOverlap:
         return ApiCollectionOverlap(
-            collectionOverlapId=collectionOverlap.collectionOverlapId,
-            createdDate=collectionOverlap.createdDate,
-            updatedDate=collectionOverlap.updatedDate,
             registryAddress=collectionOverlap.registryAddress,
             otherRegistryAddress=collectionOverlap.otherRegistryAddress,
             ownerAddress=collectionOverlap.ownerAddress,
@@ -386,3 +385,16 @@ class ResponseBuilder:
 
     async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> Sequence[ApiCollectionOverlap]:
         return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])
+
+
+    async def collection_overlap_summary_from_model(self, collectionOverlapSummary: CollectionOverlapSummary) -> ApiCollectionOverlapSummary:
+        return ApiCollectionOverlapSummary(
+            registryAddress=collectionOverlapSummary.registryAddress,
+            otherCollection=await self.collection_from_model(collection=collectionOverlapSummary.otherCollection),
+            ownerCount=collectionOverlapSummary.ownerCount,
+            registryTokenCount=collectionOverlapSummary.registryTokenCount,
+            otherRegistryTokenCount=collectionOverlapSummary.otherRegistryTokenCount,
+        )
+
+    async def collection_overlap_summaries_from_models(self, collectionOverlapSummaries: Sequence[CollectionOverlapSummary]) -> Sequence[ApiCollectionOverlapSummary]:
+        return await asyncio.gather(*[self.collection_overlap_summary_from_model(collectionOverlapSummary=collectionOverlapSummary) for collectionOverlapSummary in collectionOverlapSummaries])
