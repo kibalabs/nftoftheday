@@ -5,13 +5,14 @@ from typing import Sequence
 
 from core.exceptions import NotFoundException
 
-from notd.api.models_v1 import ApiAccountCollectionGm, ApiCollectionOverlapSummary
+from notd.api.models_v1 import ApiAccountCollectionGm
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionOverlap
+from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
@@ -29,13 +30,14 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
-from notd.model import AccountCollectionGm, CollectionOverlapSummary
+from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionOverlap
+from notd.model import CollectionOverlapSummary
 from notd.model import CollectionStatistics
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
