@@ -44,6 +44,8 @@ from tbl_gallery_customers)
 )
     )
 );
+
+
 CREATE UNIQUE INDEX mvw_user_registry_ordered_ownerships_registry_address_token_id_owner_address ON mvw_user_registry_ordered_ownerships (registry_address, token_id, owner_address);
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address ON mvw_user_registry_ordered_ownerships (registry_address);
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address_token_id ON mvw_user_registry_ordered_ownerships (registry_address, token_id);
