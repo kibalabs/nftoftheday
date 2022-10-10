@@ -12,6 +12,7 @@ from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import GetGalleryUserOwnedCollectionsResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapsResponse
+from notd.api.endpoints_v1 import ListGalleryCollectionOverlapSummariesResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
 from notd.api.endpoints_v1 import QueryCollectionUsersRequest
@@ -94,8 +95,13 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         return GetGalleryUserOwnedCollectionsResponse(ownedCollections=(await responseBuilder.gallery_owned_collections_from_models(ownedCollections=ownedCollections)))
 
     @router.get('/collections/{registryAddress}/overlaps')
-    async def list_gallery_collection_overlaps(registryAddress: str) -> ListGalleryCollectionOverlapsResponse:
-        collectionOverlaps = await galleryManager.list_gallery_collection_overlaps(registryAddress=registryAddress)
+    async def list_gallery_collection_overlaps(registryAddress: str, otherRegistryAddress: Optional[str]) -> ListGalleryCollectionOverlapsResponse:
+        collectionOverlaps = await galleryManager.list_gallery_collection_overlaps(registryAddress=registryAddress, otherRegistryAddress=otherRegistryAddress)
         return ListGalleryCollectionOverlapsResponse(collectionOverlaps=(await responseBuilder.collection_overlaps_from_models(collectionOverlaps=collectionOverlaps)))
+
+    @router.get('/collections/{registryAddress}/overlap-summaries')
+    async def list_gallery_collection_overlap_summaries(registryAddress: str) -> ListGalleryCollectionOverlapSummariesResponse:
+        collectionOverlapSummaries = await galleryManager.list_gallery_collection_overlap_summaries(registryAddress=registryAddress)
+        return ListGalleryCollectionOverlapSummariesResponse(collectionOverlapSummaries=(await responseBuilder.collection_overlap_summaries_from_models(collectionOverlapSummaries=collectionOverlapSummaries)))
 
     return router

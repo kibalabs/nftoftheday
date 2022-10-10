@@ -531,3 +531,12 @@ class CollectionOverlap(RetrievedCollectionOverlap):
     collectionOverlapId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class CollectionOverlapSummary:
+    registryAddress: str
+    otherCollection: Collection
+    ownerCount: int
+    registryTokenCount: int
+    otherRegistryTokenCount: int
