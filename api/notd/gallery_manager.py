@@ -181,7 +181,11 @@ class GalleryManager:
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery, sqlalchemy.literal(1).label('quantity'))
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                    .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
+                    .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, TokenOwnershipsTable.c.ownerAddress.in_(
+                        sqlalchemy.select(LatestTokenListingsTable.c.offererAddress).distinct()
+                        .where(LatestTokenListingsTable.c.tokenId == TokenMetadatasTable.c.tokenId)
+                        .where(LatestTokenListingsTable.c.registryAddress == TokenMetadatasTable.c.registryAddress)
+                    )), isouter=True)
                     .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                     .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
                     .limit(limit)
