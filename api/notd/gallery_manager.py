@@ -185,7 +185,7 @@ class GalleryManager:
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery, sqlalchemy.literal(1).label('quantity'))
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
-                    .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=bool(not usesListings))
+                    .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
                     .join(ownerQuery, sqlalchemy.and_(ownerQuery.c.registryAddress == listingsQuery.c.registryAddress, ownerQuery.c.tokenId == listingsQuery.c.tokenId, ownerQuery.c.ownerAddress == listingsQuery.c.offererAddress), isouter=True)
                     .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                     .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
