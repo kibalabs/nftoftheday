@@ -176,17 +176,12 @@ class GalleryManager:
             .where(orderedListingsQuery.c.tokenListingIndex == 1)
         ).subquery()
         listingsQuery = lowestListingsQuery #if usesListings else LatestTokenListingsTable
-        ownerQuery =(
-            sqlalchemy.select(TokenOwnershipsTable)
-            .where(TokenOwnershipsTable.c.registryAddress == registryAddress)
-        ).subquery()
         if collection.doesSupportErc721:
             query = (
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery, sqlalchemy.literal(1).label('quantity'))
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
                     .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId, listingsQuery.c.offererAddress == TokenOwnershipsTable.c.ownerAddress), isouter=True)
-                    .join(ownerQuery, sqlalchemy.and_(ownerQuery.c.registryAddress == listingsQuery.c.registryAddress, ownerQuery.c.tokenId == listingsQuery.c.tokenId, ownerQuery.c.ownerAddress == listingsQuery.c.offererAddress), isouter=True)
                     .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                     .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
                     .limit(limit)
@@ -194,14 +189,15 @@ class GalleryManager:
             )
         elif collection.doesSupportErc1155:
             query = (
-                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity).label('quantity'), listingsQuery)
+                sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity).label('quantity'))
+                # sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, listingsQuery)
                     .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenMultiOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenMultiOwnershipsTable.c.tokenId))
-                    .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId), isouter=True)
-                    .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId, ), isouter=True)
+                    .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
+                    # .join(listingsQuery, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == listingsQuery.c.registryAddress, TokenMetadatasTable.c.tokenId == listingsQuery.c.tokenId), isouter=True)
                     .where(TokenMetadatasTable.c.registryAddress == registryAddress)
-                    .where(TokenMultiOwnershipsTable.c.quantity >= 1)
+                    .where(TokenMultiOwnershipsTable.c.quantity > 0)
                     .order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
-                    .group_by(TokenMetadatasTable.c.tokenMetadataId, TokenCustomizationsTable.c.tokenCustomizationId, TokenMultiOwnershipsTable.c.registryAddress, listingsQuery, TokenMultiOwnershipsTable.c.tokenId)
+                    .group_by(TokenMetadatasTable.c.tokenMetadataId, TokenCustomizationsTable.c.tokenCustomizationId, TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
                     .limit(limit)
                     .offset(offset)
             )
