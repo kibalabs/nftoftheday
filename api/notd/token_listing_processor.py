@@ -175,10 +175,6 @@ class TokenListingProcessor:
                     assetListings.append(listing)
                     latestOrderHash = order['hash']
                 queryData['pagination[cursor]'] = latestOrderHash
-            tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
-            # for listing in assetListings:
-            #     if listing.tokenId not in tokenListingDict:
-            #         tokenListingDict[listing.tokenId] = listing
             return assetListings
 
     async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
