@@ -314,8 +314,8 @@ class NotdManager:
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
-    async def list_all_gallery_token_listings(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
-        return await self.listingManager.list_all_gallery_token_listings(registryAddress=registryAddress, tokenId=tokenId)
+    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+        return await self.listingManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})

@@ -222,7 +222,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
 
     @router.get('/collections/{registryAddress}/token/{tokenId}/listings')
     async def list_all_listings_for_collection_token(registryAddress: str, tokenId: str) -> ListAllListingsForCollectionTokenResponse:
-        tokenListings = await notdManager.list_all_gallery_token_listings(registryAddress=registryAddress, tokenId=tokenId)
+        tokenListings = await notdManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
         return ListAllListingsForCollectionTokenResponse(tokenListings=(await responseBuilder.token_listings_from_models(tokenListings=tokenListings)))
 
     @router.post('/subscribe')
