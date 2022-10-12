@@ -1,7 +1,5 @@
 import asyncio
 import datetime
-from collections import defaultdict
-from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -103,10 +101,11 @@ class TokenListingProcessor:
                     if len(assetListings) > 0:
                         # NOTE(krishan711): take the lowest one
                         sortedAssetListings = sorted(assetListings, key=lambda listing: listing.value, reverse=False)
-                        listings.append(sortedAssetListings[0])
+                        listings.append(sortedAssetListings)
                 # NOTE(krishan711): sleep to avoid opensea limits
                 await asyncio.sleep(0.25)
-        return listings
+        allListings = [item for sublist in listings for item in sublist]
+        return allListings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=10, expirySeconds=60):
@@ -174,11 +173,7 @@ class TokenListingProcessor:
                     assetListings.append(listing)
                     latestOrderHash = order['hash']
                 queryData['pagination[cursor]'] = latestOrderHash
-            tokenListingDict: Dict[str, RetrievedTokenListing] = defaultdict(RetrievedTokenListing)
-            for listing in assetListings:
-                if listing.tokenId not in tokenListingDict:
-                    tokenListingDict[listing.tokenId] = listing
-            return list(tokenListingDict.values())
+            return assetListings
 
     async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
         queryData = {
@@ -189,7 +184,7 @@ class TokenListingProcessor:
             'pagination[first]': 100,
             'sort': 'PRICE_ASC',
         }
-        assetListing: Optional[RetrievedTokenListing] = None
+        assetListings = []
         logging.stat('RETRIEVE_TOKEN_LISTING_LOOKSRARE', registryAddress, 0)
         response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
         responseJson = response.json()
@@ -201,7 +196,7 @@ class TokenListingProcessor:
             sourceId = order["hash"]
             # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
             isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-            assetListing = RetrievedTokenListing(
+            assetListings += [RetrievedTokenListing(
                 registryAddress=order['collectionAddress'],
                 tokenId=order['tokenId'],
                 startDate=startDate,
@@ -211,9 +206,8 @@ class TokenListingProcessor:
                 offererAddress=offererAddress,
                 source='looksrare',
                 sourceId=sourceId,
-            )
-            break
-        return assetListing
+            )]
+        return assetListings
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=(1.5 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
@@ -222,7 +216,8 @@ class TokenListingProcessor:
                 listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
                 await asyncio.sleep(0.25)
             listings = [listing for listing in listings if listing is not None]
-            return listings
+            allListings = [item for sublist in listings for item in sublist]
+            return allListings
 
     async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
         async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=60):

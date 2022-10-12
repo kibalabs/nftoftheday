@@ -249,7 +249,7 @@ CREATE TABLE tbl_latest_token_listings (
     source TEXT NOT NULL,
     source_id TEXT NOT NULL
 );
-CREATE UNIQUE INDEX tbl_latest_token_listings_source_registry_address_token_id_offerer_address ON tbl_latest_token_listings (source, registry_address, token_id, offerer_address);
+CREATE INDEX tbl_latest_token_listings_source_registry_address_token_id_offerer_address ON tbl_latest_token_listings (source, registry_address, token_id, offerer_address);
 CREATE INDEX tbl_latest_token_listings_registry_address_token_id_value ON tbl_latest_token_listings (registry_address, token_id, value);
 CREATE INDEX tbl_latest_token_listings_registry_address_token_id_offerer_address ON tbl_latest_token_listings (registry_address, token_id, offerer_address);
 CREATE INDEX tbl_latest_token_listings_created_date ON tbl_latest_token_listings (created_date);
