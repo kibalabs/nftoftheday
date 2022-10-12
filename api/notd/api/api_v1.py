@@ -3,6 +3,7 @@ from typing import Optional
 
 from core.util import date_util
 from fastapi import APIRouter
+from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
@@ -218,6 +219,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def get_collection_daily_activities(registryAddress: str):
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
         return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
+
+    @router.get('/collections/{registryAddress}/token/{tokenId}/listings')
+    async def list_all_listings_for_collection_token(registryAddress: str, tokenId: str) -> ListAllListingsForCollectionTokenResponse:
+        tokenListings = await notdManager.list_all_gallery_token_listings(registryAddress=registryAddress, tokenId=tokenId)
+        return ListAllListingsForCollectionTokenResponse(tokenListings=(await responseBuilder.token_listings_from_models(tokenListings=tokenListings)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

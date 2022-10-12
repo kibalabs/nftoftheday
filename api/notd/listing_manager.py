@@ -1,11 +1,15 @@
 import datetime
+from typing import List, Optional
 
 from core import logging
 from core.queues.message_queue_processor import MessageNeedsReprocessingException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-
+import sqlalchemy
+from notd.model import TokenListing
+from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema_conversions import token_listing_from_row
 from notd.lock_manager import LockTimeoutException
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollection
@@ -129,3 +133,15 @@ class ListingManager:
         except LockTimeoutException as exception:
             raise MessageNeedsReprocessingException(delaySeconds=(60 * 10), originalException=exception)
         await self.saver.update_latest_update(latestUpdateId=latestFullUpdate.latestUpdateId, date=currentDate)
+
+    async def list_all_collection_token_listings(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+        query = (
+            sqlalchemy.select(LatestTokenListingsTable)
+            .join(TokenOwnershipsTable, sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, LatestTokenListingsTable.c.tokenId == TokenOwnershipsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress))
+            .where(LatestTokenListingsTable.c.registryAddress == registryAddress)
+            .where(LatestTokenListingsTable.c.tokenId == tokenId)
+        )
+        result = await self.retriever.database.execute(query=query)
+        tokenListings = [token_listing_from_row(row) for row in result]
+        print(tokenListings)
+        return tokenListings

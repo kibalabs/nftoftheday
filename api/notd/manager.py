@@ -15,6 +15,7 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from notd.model import TokenListing
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
@@ -312,6 +313,9 @@ class NotdManager:
         tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
+
+    async def list_all_gallery_token_listings(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+        return await self.listingManager.list_all_gallery_token_listings(registryAddress=registryAddress, tokenId=tokenId)
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})

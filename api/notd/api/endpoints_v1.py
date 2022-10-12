@@ -6,6 +6,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
+from notd.api.models_v1 import ApiTokenListing
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
@@ -362,3 +363,9 @@ class ListGalleryCollectionOverlapSummariesRequest(BaseModel):
 
 class ListGalleryCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
+
+class ListAllListingsForCollectionTokenResponse(BaseModel):
+    tokenListings: List[ApiTokenListing]
+
+class ListAllListingsForCollectionTokenRequest(BaseModel):
+    pass
