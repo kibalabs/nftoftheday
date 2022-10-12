@@ -173,6 +173,7 @@ class ApiGalleryUser(BaseModel):
     userProfile: Optional[ApiUserProfile]
     twitterProfile: Optional[ApiTwitterProfile]
     ownedTokenCount: int
+    uniqueOwnedTokenCount: int
     joinDate: Optional[datetime.datetime]
 
 

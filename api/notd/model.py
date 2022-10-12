@@ -454,6 +454,7 @@ class GalleryUser:
     userProfile: Optional[UserProfile]
     twitterProfile: Optional[TwitterProfile]
     ownedTokenCount: int
+    uniqueOwnedTokenCount: int
     joinDate: Optional[datetime.datetime]
 
 
