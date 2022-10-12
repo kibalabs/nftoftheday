@@ -228,7 +228,7 @@ class GalleryManager:
         for row in result:
             galleryTokens.append(GalleryToken(
                 tokenMetadata=token_metadata_from_row(row),
-                tokenCustomization=token_customization_from_row(row) if collection.doesSupportErc721 and  row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
+                tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
                 tokenListing=token_listing_from_row(row, listingsQuery) if collection.doesSupportErc721 and row[listingsQuery.c.latestTokenListingId] else None,
                 quantity=row['quantity'],
             ))
