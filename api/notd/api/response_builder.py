@@ -292,6 +292,7 @@ class ResponseBuilder:
             userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)) if galleryUser.userProfile else None,
             twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)) if galleryUser.twitterProfile else None,
             ownedTokenCount=galleryUser.ownedTokenCount,
+            uniqueOwnedTokenCount=galleryUser.uniqueOwnedTokenCount,
             joinDate=galleryUser.joinDate,
         )
 

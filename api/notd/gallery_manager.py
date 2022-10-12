@@ -292,14 +292,17 @@ class GalleryManager:
         return tokenCustomization
 
     async def get_gallery_user(self, registryAddress: str, userAddress: str) -> GalleryUser:
+        ownedCountColumn = sqlalchemy.func.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')
+        uniqueOwnedCountColumn = sqlalchemy.func.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')
         userQuery = (
-            sqlalchemy.select(UserRegistryFirstOwnershipsMaterializedView.c.joinDate, sqlalchemy.func.count(TokenOwnershipsTable.c.tokenId).label('ownedTokenCount'), UserProfilesTable, TwitterProfilesTable)
-                .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress, isouter=True)
+            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+                .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
-                .join(TokenOwnershipsTable, sqlalchemy.and_(TokenOwnershipsTable.c.registryAddress == UserRegistryFirstOwnershipsMaterializedView.c.registryAddress, TokenOwnershipsTable.c.ownerAddress == UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress), isouter=True)
-                .where(UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == registryAddress)
-                .where(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == userAddress)
-                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+                .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == userAddress)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
+                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         userResult = await self.retriever.database.execute(query=userQuery)
         userRow = userResult.first()
@@ -309,18 +312,21 @@ class GalleryManager:
             userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
             twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
             ownedTokenCount=userRow['ownedTokenCount'] if userRow else 0,
+            uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'] if userRow else 0,
             joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate] if userRow else None,
         )
         return galleryUser
 
     async def query_collection_users(self, registryAddress, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
         ownedCountColumn = sqlalchemy.func.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')
+        uniqueOwnedCountColumn = sqlalchemy.func.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')
         usersQueryBase = (
-            sqlalchemy.select(ownedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
                 .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
                 .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
@@ -328,6 +334,10 @@ class GalleryManager:
             usersQuery = usersQuery.order_by(ownedCountColumn.desc())
         elif order == 'TOKENCOUNT_ASC':
             usersQuery = usersQuery.order_by(ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
+        elif order == 'UNIQUETOKENCOUNT_DESC':
+            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.desc())
+        elif order == 'UNIQUETOKENCOUNT_ASC':
+            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
         elif order == 'FOLLOWERCOUNT_DESC':
             usersQuery = usersQuery.order_by(sqlalchemy.func.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())
         elif order == 'FOLLOWERCOUNT_ASC':
@@ -366,6 +376,7 @@ class GalleryManager:
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
                 ownedTokenCount=userRow['ownedTokenCount'],
+                uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'],
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
