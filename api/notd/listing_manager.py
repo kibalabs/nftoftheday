@@ -1,25 +1,27 @@
 import datetime
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
+import sqlalchemy
 from core import logging
 from core.queues.message_queue_processor import MessageNeedsReprocessingException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-import sqlalchemy
-from notd.model import TokenListing
-from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema_conversions import token_listing_from_row
+
 from notd.lock_manager import LockTimeoutException
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollection
 from notd.messages import UpdateListingsForAllCollections
 from notd.messages import UpdateListingsForCollection
 from notd.model import GALLERY_COLLECTIONS
+from notd.model import TokenListing
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenMetadatasTable
+from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema_conversions import token_listing_from_row
 from notd.token_listing_processor import TokenListingProcessor
 
 

@@ -15,7 +15,6 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
-from notd.model import TokenListing
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
@@ -30,6 +29,7 @@ from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
 from notd.model import Token
+from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
