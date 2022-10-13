@@ -20,7 +20,6 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenMetadatasTable
-from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenOwnershipsView
 from notd.store.schema_conversions import token_listing_from_row
 from notd.token_listing_processor import TokenListingProcessor
