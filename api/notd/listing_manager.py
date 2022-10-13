@@ -8,6 +8,7 @@ from core.queues.message_queue_processor import MessageNeedsReprocessingExceptio
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
+from notd.store.schema import TokenOwnershipsView
 
 from notd.lock_manager import LockTimeoutException
 from notd.messages import RefreshListingsForAllCollections
@@ -139,11 +140,10 @@ class ListingManager:
     async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
         query = (
             sqlalchemy.select(LatestTokenListingsTable)
-            .join(TokenOwnershipsTable, sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, LatestTokenListingsTable.c.tokenId == TokenOwnershipsTable.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsTable.c.ownerAddress))
+            .join(TokenOwnershipsView, sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress == TokenOwnershipsView.c.registryAddress, LatestTokenListingsTable.c.tokenId == TokenOwnershipsView.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsView.c.ownerAddress))
             .where(LatestTokenListingsTable.c.registryAddress == registryAddress)
             .where(LatestTokenListingsTable.c.tokenId == tokenId)
         )
         result = await self.retriever.database.execute(query=query)
         tokenListings = [token_listing_from_row(row) for row in result]
-        print(tokenListings)
         return tokenListings
