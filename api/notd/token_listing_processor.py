@@ -39,7 +39,6 @@ class TokenListingProcessor:
                     response = await self.openseaRequester.get(url='https://api.opensea.io/api/v2/orders/ethereum/seaport/listings', dataDict=queryData, timeout=30)
                     responseJson = response.json()
                     for seaportSellOrder in (responseJson.get('orders') or []):
-                        print('seaportSellOrder', seaportSellOrder)
                         side = seaportSellOrder["side"]
                         if side != 'ask':
                             continue
