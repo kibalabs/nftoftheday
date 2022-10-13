@@ -18,4 +18,10 @@ class CollectionBadgeProcessor:
         if registryAddress == COLLECTION_RUDEBOYS_ADDRESS:
             processor = RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver)
             retrievedBadges = processor.get_all_badges()
+        if registryAddress == COLLECTION_GOBLINTOWN_ADDRESS:
+            pass
+        if registryAddress == COLLECTION_MDTP_ADDRESS:
+            pass
+        if registryAddress == COLLECTION_SPRITE_CLUB_ADDRESS:
+            pass
         return retrievedBadges
