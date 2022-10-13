@@ -174,9 +174,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokenMultiOwnerships = await notdManager.get_collection_token_owners(registryAddress=registryAddress, tokenId=tokenId)
         return GetCollectionTokenOwnershipsResponse(tokenOwnerships=(await responseBuilder.token_ownerships_from_models(tokenMultiOwnerships=tokenMultiOwnerships)))
 
-    @router.get('/collections/{registryAddress}/token/{tokenId}/listings')
+    @router.get('/collections/{registryAddress}/tokens/{tokenId}/listings')
     async def list_all_listings_for_collection_token(registryAddress: str, tokenId: str) -> ListAllListingsForCollectionTokenResponse:
-        print('here')
         tokenListings = await notdManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
         return ListAllListingsForCollectionTokenResponse(tokenListings=(await responseBuilder.token_listings_from_models(tokenListings=tokenListings)))
 
