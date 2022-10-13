@@ -174,6 +174,12 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokenMultiOwnerships = await notdManager.get_collection_token_owners(registryAddress=registryAddress, tokenId=tokenId)
         return GetCollectionTokenOwnershipsResponse(tokenOwnerships=(await responseBuilder.token_ownerships_from_models(tokenMultiOwnerships=tokenMultiOwnerships)))
 
+    @router.get('/collections/{registryAddress}/token/{tokenId}/listings')
+    async def list_all_listings_for_collection_token(registryAddress: str, tokenId: str) -> ListAllListingsForCollectionTokenResponse:
+        print('here')
+        tokenListings = await notdManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
+        return ListAllListingsForCollectionTokenResponse(tokenListings=(await responseBuilder.token_listings_from_models(tokenListings=tokenListings)))
+
     @router.get('/collections/{registryAddress}/recent-transfers', response_model=GetCollectionRecentTransfersResponse)
     async def get_collection_recent_transfers(registryAddress: str, userAddress: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None):
         limit = limit if limit is not None else 50
@@ -219,11 +225,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def get_collection_daily_activities(registryAddress: str):
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
         return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
-
-    @router.get('/collections/{registryAddress}/token/{tokenId}/listings')
-    async def list_all_listings_for_collection_token(registryAddress: str, tokenId: str) -> ListAllListingsForCollectionTokenResponse:
-        tokenListings = await notdManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
-        return ListAllListingsForCollectionTokenResponse(tokenListings=(await responseBuilder.token_listings_from_models(tokenListings=tokenListings)))
 
     @router.post('/subscribe')
     async def subscribe_email(request: SubscribeRequest):

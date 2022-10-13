@@ -8,7 +8,6 @@ from core.queues.message_queue_processor import MessageNeedsReprocessingExceptio
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
-from notd.store.schema import TokenOwnershipsView
 
 from notd.lock_manager import LockTimeoutException
 from notd.messages import RefreshListingsForAllCollections
@@ -22,6 +21,7 @@ from notd.store.saver import Saver
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import TokenOwnershipsView
 from notd.store.schema_conversions import token_listing_from_row
 from notd.token_listing_processor import TokenListingProcessor
 
