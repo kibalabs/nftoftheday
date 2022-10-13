@@ -143,6 +143,7 @@ class ListingManager:
             .join(TokenOwnershipsView, sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress == TokenOwnershipsView.c.registryAddress, LatestTokenListingsTable.c.tokenId == TokenOwnershipsView.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsView.c.ownerAddress))
             .where(LatestTokenListingsTable.c.registryAddress == registryAddress)
             .where(LatestTokenListingsTable.c.tokenId == tokenId)
+            .order_by(LatestTokenListingsTable.c.value.asc())
         )
         result = await self.retriever.database.execute(query=query)
         tokenListings = [token_listing_from_row(row) for row in result]
