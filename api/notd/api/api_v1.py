@@ -14,6 +14,7 @@ from notd.api.endpoints_v1 import GetCollectionTokenOwnershipsResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
 from notd.api.endpoints_v1 import GetTokenRecentTransfersResponse
+from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
@@ -172,6 +173,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def get_collection_token_owners(registryAddress: str, tokenId: str):
         tokenMultiOwnerships = await notdManager.get_collection_token_owners(registryAddress=registryAddress, tokenId=tokenId)
         return GetCollectionTokenOwnershipsResponse(tokenOwnerships=(await responseBuilder.token_ownerships_from_models(tokenMultiOwnerships=tokenMultiOwnerships)))
+
+    @router.get('/collections/{registryAddress}/tokens/{tokenId}/listings')
+    async def list_all_listings_for_collection_token(registryAddress: str, tokenId: str) -> ListAllListingsForCollectionTokenResponse:
+        tokenListings = await notdManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
+        return ListAllListingsForCollectionTokenResponse(tokenListings=(await responseBuilder.token_listings_from_models(tokenListings=tokenListings)))
 
     @router.get('/collections/{registryAddress}/recent-transfers', response_model=GetCollectionRecentTransfersResponse)
     async def get_collection_recent_transfers(registryAddress: str, userAddress: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None):

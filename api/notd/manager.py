@@ -29,6 +29,7 @@ from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
 from notd.model import Token
+from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
@@ -312,6 +313,9 @@ class NotdManager:
         tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
+
+    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+        return await self.listingManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
