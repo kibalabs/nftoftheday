@@ -25,6 +25,7 @@ from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
+from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
@@ -362,3 +363,9 @@ class ListGalleryCollectionOverlapSummariesRequest(BaseModel):
 
 class ListGalleryCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
+
+class ListAllListingsForCollectionTokenResponse(BaseModel):
+    tokenListings: List[ApiTokenListing]
+
+class ListAllListingsForCollectionTokenRequest(BaseModel):
+    pass

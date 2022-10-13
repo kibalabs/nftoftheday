@@ -254,6 +254,9 @@ class ResponseBuilder:
             sourceId=tokenListing.sourceId,
         )
 
+    async def token_listings_from_models(self, tokenListings: Sequence[TokenListing]) -> Sequence[ApiTokenListing]:
+        return await asyncio.gather(*[self.token_listing_from_model(tokenListing=tokenListing) for tokenListing in tokenListings])
+
     async def gallery_token_from_model(self, galleryToken: GalleryToken) -> ApiGalleryToken:
         return ApiGalleryToken(
             collectionToken=(await self.collection_token_from_model(tokenMetadata=galleryToken.tokenMetadata)),

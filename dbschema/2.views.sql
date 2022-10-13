@@ -11,7 +11,7 @@ CREATE INDEX mvw_user_registry_first_ownerships_registry_address ON mvw_user_reg
 
 CREATE MATERIALIZED VIEW mvw_user_registry_ordered_ownerships AS (
     (
-        SELECT tbl_token_metadatas.registry_address, tbl_token_metadatas.token_id, tbl_token_ownerships.owner_address, 1 as quantity, row_number() OVER (
+        SELECT tbl_token_metadatas.registry_address, tbl_token_metadatas.token_id, tbl_token_ownerships.owner_address, 1 AS quantity, row_number() OVER (
             PARTITION BY tbl_token_ownerships.registry_address, tbl_token_ownerships.owner_address
             ORDER BY tbl_token_ownerships.transfer_date ASC
         ) AS owner_token_index
@@ -35,3 +35,31 @@ CREATE UNIQUE INDEX mvw_user_registry_ordered_ownerships_registry_address_token_
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address ON mvw_user_registry_ordered_ownerships (registry_address);
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address_token_id ON mvw_user_registry_ordered_ownerships (registry_address, token_id);
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address_owner_address ON mvw_user_registry_ordered_ownerships (registry_address, owner_address);
+
+CREATE VIEW vw_token_ownerships AS
+(
+    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, transfer_value AS average_transfer_value, transfer_date AS latest_transfer_date, transfer_transaction_hash AS latest_transfer_transaction_hash, 1 AS quantity
+    FROM tbl_token_ownerships
+) UNION (
+    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, average_transfer_value, latest_transfer_date, latest_transfer_transaction_hash, quantity
+    FROM tbl_token_multi_ownerships
+);
+
+CREATE VIEW vw_token_best_listings AS
+(
+    SELECT *
+    FROM (
+        SELECT tbl_latest_token_listings.*, row_number() OVER (
+            PARTITION BY tbl_latest_token_listings.registry_address, tbl_latest_token_listings.token_id
+            ORDER BY tbl_latest_token_listings.value DESC
+        ) AS token_listing_index
+        FROM tbl_latest_token_listings
+        JOIN vw_token_ownerships ON
+            vw_token_ownerships.registry_address = tbl_latest_token_listings.registry_address
+            AND vw_token_ownerships.token_id = tbl_latest_token_listings.token_id
+            AND vw_token_ownerships.owner_address = tbl_latest_token_listings.offerer_address
+            AND vw_token_ownerships.quantity > 0
+        WHERE tbl_latest_token_listings.end_date > now()
+    ) as ordered_listings
+    WHERE ordered_listings.token_listing_index = 1
+);
