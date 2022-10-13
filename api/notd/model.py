@@ -547,7 +547,7 @@ class CollectionOverlapSummary:
 class RetrievedCollectionBadgeHolder:
     registryAddress: str
     ownerAddress: str
-    badgeKey: int
+    badgeKey: str
     achievedDate: datetime.datetime
 
 

@@ -18,7 +18,7 @@ from core.util import date_util
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
-from notd.badge_manager import CollectionBadgeManager
+from notd.collection_badge_manager import CollectionBadgeManager
 from notd.block_manager import BlockManager
 from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager

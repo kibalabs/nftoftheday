@@ -960,7 +960,7 @@ class Saver(CoreSaver):
         latestCollectionBadgeHolderIds = []
         for chunk in list_util.generate_chunks(lst=retrievedCollectionBadgeHolders, chunkSize=100):
             values = [self._get_create_collection_badge_holders_values(retrievedCollectionBadgeHolder=retrievedCollectionBadgeHolder, createdDate=createdDate, updatedDate=updatedDate) for retrievedCollectionBadgeHolder in chunk]
-            query = CollectionBadgeHoldersTable.insert().values(values).returning(CollectionBadgeHoldersTable.c.collectionOverlapId)
+            query = CollectionBadgeHoldersTable.insert().values(values).returning(CollectionBadgeHoldersTable.c.collectionBadgeHolderId)
             rows = await self._execute(query=query, connection=connection)
             latestCollectionBadgeHolderIds += [row[0] for row in rows]
         return latestCollectionBadgeHolderIds
