@@ -8,19 +8,11 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 
 
-class GalleryBadgeProcessor:
+class CollectionBadgeProcessor:
 
-    def __init__(self, retriever: Retriever, saver: Saver, registryAddress: str) -> None:
+    def __init__(self, retriever: Retriever, saver: Saver) -> None:
         self.retriever= retriever
         self.saver= saver
-        self.registryAddress = registryAddress
-        self.processor = {
-            self.registryAddress == COLLECTION_RUDEBOYS_ADDRESS : RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver),
-            self.registryAddress == COLLECTION_GOBLINTOWN_ADDRESS : None, # RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver),
-            self.registryAddress == COLLECTION_MDTP_ADDRESS : None, # RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver),
-            self.registryAddress == COLLECTION_SPRITE_CLUB_ADDRESS : None,# RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver),
-        }.get(True)
-
 
     def route_processor(self, registryAddress: str) -> None:
         processor = {

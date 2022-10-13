@@ -544,7 +544,7 @@ class CollectionOverlapSummary:
 
 
 @dataclasses.dataclass
-class RetrievedGalleryBadgeHolder:
+class RetrievedCollectionBadgeHolder:
     registryAddress: str
     ownerAddress: str
     badgeKey: int
@@ -552,7 +552,7 @@ class RetrievedGalleryBadgeHolder:
 
 
 @dataclasses.dataclass
-class GalleryBadgeHolder(RetrievedGalleryBadgeHolder):
-    galleryBadgeHolderId: int
+class CollectionBadgeHolder(RetrievedCollectionBadgeHolder):
+    collectionBadgeHolderId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime

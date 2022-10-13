@@ -6,10 +6,10 @@ from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
+from notd.model import CollectionBadgeHolder
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
-from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import Signature
@@ -27,9 +27,9 @@ from notd.model import UserProfile
 from notd.store.schema import AccountCollectionGmsTable
 from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
+from notd.store.schema import CollectionBadgeHoldersTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
-from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -346,13 +346,13 @@ def collection_overlap_from_row(row: Mapping) -> CollectionOverlap:
     )
 
 
-def gallery_badge_holder_from_row(row: Mapping) -> GalleryBadgeHolder:
-    return GalleryBadgeHolder(
-        galleryBadgeHolderId=row[GalleryBadgeHoldersTable.c.galleryBadgeHolderId],
-        createdDate=row[GalleryBadgeHoldersTable.c.createdDate],
-        updatedDate=row[GalleryBadgeHoldersTable.c.updatedDate],
-        registryAddress=row[GalleryBadgeHoldersTable.c.registryAddress],
-        ownerAddress=row[GalleryBadgeHoldersTable.c.ownerAddress],
-        badgeKey=row[GalleryBadgeHoldersTable.c.badgeKey],
-        achievedDate=row[GalleryBadgeHoldersTable.c.achievedDate],
+def collection_badge_holder_from_row(row: Mapping) -> CollectionBadgeHolder:
+    return CollectionBadgeHolder(
+        collectionBadgeHolderId=row[CollectionBadgeHoldersTable.c.collectionBadgeHolderId],
+        createdDate=row[CollectionBadgeHoldersTable.c.createdDate],
+        updatedDate=row[CollectionBadgeHoldersTable.c.updatedDate],
+        registryAddress=row[CollectionBadgeHoldersTable.c.registryAddress],
+        ownerAddress=row[CollectionBadgeHoldersTable.c.ownerAddress],
+        badgeKey=row[CollectionBadgeHoldersTable.c.badgeKey],
+        achievedDate=row[CollectionBadgeHoldersTable.c.achievedDate],
     )

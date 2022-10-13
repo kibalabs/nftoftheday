@@ -18,6 +18,7 @@ from core.util import date_util
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
+from notd.badge_manager import CollectionBadgeManager
 from notd.block_manager import BlockManager
 from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
@@ -56,7 +57,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, collectionBadgeManager: CollectionBadgeManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -67,6 +68,7 @@ class NotdManager:
         self.attributeManager = attributeManager
         self.activityManager = activityManager
         self.blockManager = blockManager
+        self.collectionBadgeManager = collectionBadgeManager
         self.twitterManager = twitterManager
         self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
@@ -474,3 +476,15 @@ class NotdManager:
 
     async def refresh_overlaps_for_all_collections(self) -> None:
         await self.collectionOverlapManager.refresh_overlaps_for_all_collections()
+
+    async def refresh_collection_badges_for_collection(self, registryAddress: str) -> None:
+        await self.collectionBadgeManager.refresh_collection_badges_for_collection(registryAddress=registryAddress)
+
+    async def refresh_collection_badges_for_collection_deferred(self, registryAddress: str) -> None:
+        await self.collectionBadgeManager.refresh_collection_badges_for_collection_deferred(registryAddress=registryAddress)
+
+    async def refresh_all_collection_badges_deferred(self) -> None:
+        await self.collectionBadgeManager.refresh_all_collection_badges_deferred()
+
+    async def refresh_all_collection_badges(self) -> None:
+        await self.collectionBadgeManager.refresh_all_collection_badges()
