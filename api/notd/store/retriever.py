@@ -531,7 +531,7 @@ class Retriever(CoreRetriever):
         collectionOverlaps = [collection_overlap_from_row(row) for row in result]
         return collectionOverlaps
 
-    async def list_gallery_badge(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[GalleryBadgeHolder]:
+    async def list_gallery_badge_holders(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[GalleryBadgeHolder]:
         query = GalleryBadgeHoldersTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=GalleryBadgeHoldersTable, fieldFilters=fieldFilters)

@@ -148,4 +148,12 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = RefreshCollectionOverlapMessageContent.parse_obj(message.content)
             await self.notdManager.refresh_overlap_for_collection(registryAddress=messageContent.registryAddress)
             return
+        # if message.command == RefreshAllCollectionOverlapsMessageContent.get_command():
+        #     messageContent = RefreshAllCollectionOverlapsMessageContent.parse_obj(message.content)
+        #     await self.notdManager.refresh_overlaps_for_all_collections()
+        #     return
+        # if message.command == RefreshCollectionOverlapMessageContent.get_command():
+        #     messageContent = RefreshCollectionOverlapMessageContent.parse_obj(message.content)
+        #     await self.notdManager.refresh_overlap_for_collection(registryAddress=messageContent.registryAddress)
+        #     return
         raise KibaException(message='Message was unhandled')

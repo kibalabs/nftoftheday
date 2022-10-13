@@ -965,12 +965,12 @@ class Saver(CoreSaver):
             latestGalleryBadgeHolderIds += [row[0] for row in rows]
         return latestGalleryBadgeHolderIds
 
-    async def delete_gallery_badge_holder(self, galleryBadgeHolder: int, connection: Optional[DatabaseConnection] = None) -> None:
-        query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolder == galleryBadgeHolder)
+    async def delete_gallery_badge_holder(self, galleryBadgeHolderId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId == galleryBadgeHolderId)
         await self._execute(query=query, connection=connection)
 
-    async def delete_gallery_badge_holders(self, galleryBadgeHolders: List[int], connection: Optional[DatabaseConnection] = None) -> None:
-        if len(galleryBadgeHolders) == 0:
+    async def delete_gallery_badge_holders(self, galleryBadgeHolderIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(galleryBadgeHolderIds) == 0:
             return
-        query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolder.in_(galleryBadgeHolders))
+        query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId.in_(galleryBadgeHolderIds))
         await self._execute(query=query, connection=connection)
