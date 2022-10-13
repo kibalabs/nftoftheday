@@ -113,6 +113,21 @@ TokenMultiOwnershipsTable = sqlalchemy.Table(
 )
 
 
+TokenOwnershipsView = sqlalchemy.Table(
+    'vw_token_ownerships',
+    metadata,
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='quantity', name='quantity', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='averageTransferValue', name='average_transfer_value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='latestTransferDate', name='latest_transfer_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='latestTransferTransactionHash', name='latest_transfer_transaction_hash', type_=sqlalchemy.Text, nullable=False),
+)
+
+
 CollectionHourlyActivitiesTable = sqlalchemy.Table(
     'tbl_collection_hourly_activities',
     metadata,
@@ -174,6 +189,24 @@ LatestUpdatesTable = sqlalchemy.Table(
 
 LatestTokenListingsTable = sqlalchemy.Table(
     'tbl_latest_token_listings',
+    metadata,
+    sqlalchemy.Column(key='latestTokenListingId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='offererAddress', name='offerer_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='startDate', name='start_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='endDate', name='end_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='isValueNative', name='is_value_native', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='value', name='value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='source', name='source', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='sourceId', name='source_id', type_=sqlalchemy.Text, nullable=False),
+)
+
+
+TokenBestListingsView = sqlalchemy.Table(
+    'vw_token_best_listings',
     metadata,
     sqlalchemy.Column(key='latestTokenListingId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
