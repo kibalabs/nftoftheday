@@ -2,10 +2,10 @@ from typing import List
 
 import sqlalchemy
 from core.util import date_util
-from notd.model import RetrievedCollectionBadgeHolder
-from notd.badge_processor import BadgeProcessor
 
+from notd.badge_processor import BadgeProcessor
 from notd.model import COLLECTION_RUDEBOYS_ADDRESS
+from notd.model import RetrievedCollectionBadgeHolder
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenMultiOwnershipsTable

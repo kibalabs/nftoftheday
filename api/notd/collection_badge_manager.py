@@ -41,9 +41,9 @@ class CollectionBadgeManager:
             currentCollectionBadgeHolders = await self.retriever.list_collection_badge_holders(fieldFilters=[
                 StringFieldFilter(fieldName=CollectionBadgeHoldersTable.c.registryAddress.key, eq=registryAddress),
             ], connection=connection)
-            collectionBadgesToDelete = {collectionBadgeHolders.collectionBadgeHolderId for collectionBadgeHolders in currentCollectionBadgeHolders}
-            logging.info(f'Deleting {len(collectionBadgesToDelete)} existing gallery badges')
-            for chunkedIds in list_util.generate_chunks(lst=list(collectionBadgesToDelete), chunkSize=100):
-                await self.saver.delete_collection_badge_holders(galleryBadgeHolderIds=chunkedIds, connection=connection)
+            collectionBadgeHoldersToDelete = {collectionBadgeHolders.collectionBadgeHolderId for collectionBadgeHolders in currentCollectionBadgeHolders}
+            logging.info(f'Deleting {len(collectionBadgeHoldersToDelete)} existing gallery badges')
+            for chunkedIds in list_util.generate_chunks(lst=list(collectionBadgeHoldersToDelete), chunkSize=100):
+                await self.saver.delete_collection_badge_holders(collectionBadgeHolderIds=chunkedIds, connection=connection)
             logging.info(f'Saving {len(retrievedCollectionBadgeHolders)} gallery badges')
             await self.saver.create_collection_badge_holders(retrievedCollectionBadgeHolders=retrievedCollectionBadgeHolders, connection=connection)
