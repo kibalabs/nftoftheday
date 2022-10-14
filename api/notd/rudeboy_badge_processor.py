@@ -3,7 +3,7 @@ from typing import List
 import sqlalchemy
 from core.util import date_util
 
-from notd.badge_processor import BadgeProcessor
+from notd.collection_badge_processor import CollectionBadgeProcessor
 from notd.model import COLLECTION_RUDEBOYS_ADDRESS
 from notd.model import RetrievedCollectionBadgeHolder
 from notd.store.retriever import Retriever
@@ -12,9 +12,8 @@ from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 
 RUDEBOYS_OWNER_ADDRESS = '0xAb3e5a900663ea8C573B8F893D540D331fbaB9F5'
-RUDEBOYS_ONE_OF_ONE_TOKENS = ['25']
 
-class RudeboysBadgeProcessor(BadgeProcessor):
+class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
     def __init__(self, retriever: Retriever, saver: Saver) -> None:
         self.retriever= retriever
@@ -49,5 +48,4 @@ class RudeboysBadgeProcessor(BadgeProcessor):
         )
         result = await self.retriever.database.execute(query=query)
         oneOfOneBadgeHolders = [RetrievedCollectionBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="ONE-OF-ONE", achievedDate=date_util.datetime_from_now()) for row in result]
-        # print(oneOfOneBadgeHolders, len(oneOfOneBadgeHolders))
         return oneOfOneBadgeHolders

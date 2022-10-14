@@ -1,9 +1,21 @@
-import abc
-from abc import ABC
+from typing import List
 
 
-class BadgeProcessor(ABC):
+from notd.model import COLLECTION_RUDEBOYS_ADDRESS
+from notd.model import RetrievedCollectionBadgeHolder
+from notd.rudeboy_badge_processor import RudeboysBadgeProcessor
+from notd.store.retriever import Retriever
+from notd.store.saver import Saver
 
-    @abc.abstractmethod
-    async def get_all_badges(self) -> None:
-        pass
+
+class BadgeProcessor:
+
+    def __init__(self, retriever: Retriever, saver: Saver) -> None:
+        self.retriever= retriever
+        self.saver= saver
+
+    def calculate_badges(self, registryAddress: str) -> List[RetrievedCollectionBadgeHolder]:
+        if registryAddress == COLLECTION_RUDEBOYS_ADDRESS:
+            processor = RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver)
+            retrievedBadges = processor.get_all_badges()
+        return retrievedBadges
