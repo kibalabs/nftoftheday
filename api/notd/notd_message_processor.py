@@ -152,7 +152,7 @@ class NotdMessageProcessor(MessageProcessor):
             return
         if message.command == RefreshAllUserBadgesMessageContent.get_command():
             messageContent = RefreshAllUserBadgesMessageContent.parse_obj(message.content)
-            await self.notdManager.refresh_all_users_badges()
+            await self.notdManager.refresh_user_badges_for_all_collections()
             return
         if message.command == RefreshUserBadgesForCollectionMessageContent.get_command():
             messageContent = RefreshUserBadgesForCollectionMessageContent.parse_obj(message.content)

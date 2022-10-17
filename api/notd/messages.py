@@ -108,9 +108,9 @@ class RefreshAllCollectionOverlapsMessageContent(MessageContent):
 
 
 class RefreshUserBadgesForCollectionMessageContent(MessageContent):
-    _COMMAND = 'REFRESH_USER_BADGE_FOR_COLLECTION'
+    _COMMAND = 'REFRESH_USER_BADGES_FOR_COLLECTION'
     registryAddress: str
 
 
 class RefreshAllUserBadgesMessageContent(MessageContent):
-    _COMMAND = 'REFRESH_ALL_USERS_BADGES'
+    _COMMAND = 'REFRESH_USER_BADGES_FOR_ALL_COLLECTION'
