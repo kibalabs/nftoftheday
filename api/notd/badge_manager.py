@@ -4,9 +4,9 @@ from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import list_util
+from notd.messages import RefreshUserBadgesForAllCollectionsMessageContent
 
 from notd.badge_processor import BadgeProcessor
-from notd.messages import RefreshAllUserBadgesMessageContent
 from notd.messages import RefreshUserBadgesForCollectionMessageContent
 from notd.model import GALLERY_COLLECTIONS
 from notd.store.retriever import Retriever
@@ -23,7 +23,7 @@ class BadgeManager:
         self.badgeProcessor = badgeProcessor
 
     async def refresh_user_badges_for_all_collections_deferred(self):
-        await self.workQueue.send_message(message=RefreshAllUserBadgesMessageContent().to_message())
+        await self.workQueue.send_message(message=RefreshUserBadgesForAllCollectionsMessageContent().to_message())
 
     async def refresh_user_badges_for_all_collections(self):
         for registryAddress in GALLERY_COLLECTIONS:
