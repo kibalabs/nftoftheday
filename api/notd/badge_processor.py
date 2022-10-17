@@ -14,8 +14,8 @@ class BadgeProcessor:
         self.retriever = retriever
         self.saver = saver
 
-    def calculate_badges(self, registryAddress: str) -> List[RetrievedCollectionBadgeHolder]:
+    async def calculate_badges(self, registryAddress: str) -> List[RetrievedCollectionBadgeHolder]:
         if registryAddress == COLLECTION_RUDEBOYS_ADDRESS:
             processor = RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver)
-            retrievedBadges = processor.calculate_all_badges()
+            retrievedBadges = await processor.calculate_all_badges()
         return retrievedBadges
