@@ -34,10 +34,8 @@ class BadgeManager:
 
     async def refresh_user_badges_for_collection(self, registryAddress: str):
         registryAddress = chain_util.normalize_address(registryAddress)
-        # NOTE(Femi-Ogunkola): Figure out how to map to rudeboy processor and get all the badge holders at once
         retrievedCollectionBadgeHolders = await self.badgeProcessor.calculate_badges(registryAddress=registryAddress)
         async with self.saver.create_transaction() as connection:
-            # TODO(krishan711): this would be more efficient if only changed ones are deleted and re-saved
             currentCollectionBadgeHolders = await self.retriever.list_collection_badge_holders(fieldFilters=[
                 StringFieldFilter(fieldName=CollectionBadgeHoldersTable.c.registryAddress.key, eq=registryAddress),
             ], connection=connection)

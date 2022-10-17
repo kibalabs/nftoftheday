@@ -112,5 +112,5 @@ class RefreshUserBadgesForCollectionMessageContent(MessageContent):
     registryAddress: str
 
 
-class RefreshAllUserBadgesMessageContent(MessageContent):
-    _COMMAND = 'REFRESH_USER_BADGES_FOR_ALL_COLLECTION'
+class RefreshUserBadgesForAllCollectionsMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_USER_BADGES_FOR_ALL_COLLECTIONS'

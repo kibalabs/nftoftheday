@@ -8,10 +8,10 @@ from notd.manager import NotdManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import RefreshAllCollectionOverlapsMessageContent
-from notd.messages import RefreshAllUserBadgesMessageContent
 from notd.messages import RefreshCollectionOverlapMessageContent
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollection
+from notd.messages import RefreshUserBadgesForAllCollectionsMessageContent
 from notd.messages import RefreshUserBadgesForCollectionMessageContent
 from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
@@ -150,8 +150,8 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = RefreshCollectionOverlapMessageContent.parse_obj(message.content)
             await self.notdManager.refresh_overlap_for_collection(registryAddress=messageContent.registryAddress)
             return
-        if message.command == RefreshAllUserBadgesMessageContent.get_command():
-            messageContent = RefreshAllUserBadgesMessageContent.parse_obj(message.content)
+        if message.command == RefreshUserBadgesForAllCollectionsMessageContent.get_command():
+            messageContent = RefreshUserBadgesForAllCollectionsMessageContent.parse_obj(message.content)
             await self.notdManager.refresh_user_badges_for_all_collections()
             return
         if message.command == RefreshUserBadgesForCollectionMessageContent.get_command():
