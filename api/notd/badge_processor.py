@@ -18,4 +18,5 @@ class BadgeProcessor:
         if registryAddress == COLLECTION_RUDEBOYS_ADDRESS:
             processor = RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver)
             retrievedBadges = await processor.calculate_all_badges()
-        return retrievedBadges
+            return retrievedBadges
+        return []
