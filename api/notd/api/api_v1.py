@@ -3,8 +3,6 @@ from typing import Optional
 
 from core.util import date_util
 from fastapi import APIRouter
-from notd.api.endpoints_v1 import RefreshUserBadgesForCollectionDeferredResponse
-from notd.api.endpoints_v1 import RefreshAllUserBadgesDeferredResponse
 
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
@@ -21,6 +19,7 @@ from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
+from notd.api.endpoints_v1 import RefreshAllUserBadgesDeferredResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
@@ -131,7 +130,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_overlaps_for_all_collections_deferred():
         await notdManager.refresh_overlaps_for_all_collections_deferred()
         return RefreshCollectionOverlapsDeferredResponse()
-    
+
     @router.post('/collections/refresh-user-badges-deferred', response_model=RefreshAllUserBadgesDeferredResponse)
     async def refresh_user_badges_for_all_collections_deferred():
         await notdManager.refresh_user_badges_for_all_collections_deferred()

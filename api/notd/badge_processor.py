@@ -1,6 +1,5 @@
 from typing import List
 
-
 from notd.model import COLLECTION_RUDEBOYS_ADDRESS
 from notd.model import RetrievedCollectionBadgeHolder
 from notd.rudeboy_badge_processor import RudeboysBadgeProcessor

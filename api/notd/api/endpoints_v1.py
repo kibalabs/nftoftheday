@@ -375,9 +375,3 @@ class RefreshAllUserBadgesDeferredResponse(BaseModel):
 
 class RefreshAllUserBadgesDeferredRequest(BaseModel):
     pass
-
-class RefreshUserBadgesForCollectionDeferredResponse(BaseModel):
-    pass
-
-class RefreshUserBadgesForCollectionDeferredRequest(BaseModel):
-    pass
