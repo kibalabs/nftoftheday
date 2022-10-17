@@ -39,7 +39,8 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         oneOfOneQuery = (
             sqlalchemy.select(TokenMultiOwnershipsTable.c.tokenId)
             .where(TokenMultiOwnershipsTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
-            .where(TokenMultiOwnershipsTable.c.quantity == 1)
+            .group_by(TokenMultiOwnershipsTable.c.tokenId)
+            .having(sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity) == 1)
         )
         query = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'))
