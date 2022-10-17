@@ -19,13 +19,13 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         self.retriever= retriever
         self.saver= saver
 
-    async def get_all_badges(self) -> None:
-        minterBadgeHolders = await self.get_minter_badge_holders()
-        oneOfOneBadgeHolders = await self.get_one_of_one_badge_holders()
+    async def calculate_all_badges(self) -> None:
+        minterBadgeHolders = await self.calculate_minter_badge_holders()
+        oneOfOneBadgeHolders = await self.calculate_one_of_one_badge_holders()
         allBadges = minterBadgeHolders + oneOfOneBadgeHolders
         return allBadges
 
-    async def get_minter_badge_holders(self) -> List[RetrievedCollectionBadgeHolder]:
+    async def calculate_minter_badge_holders(self) -> List[RetrievedCollectionBadgeHolder]:
         query = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'))
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
@@ -35,7 +35,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         minterBadgeHolders = [RetrievedCollectionBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="MINTER", achievedDate=date_util.datetime_from_now()) for row in result]
         return minterBadgeHolders
 
-    async def get_one_of_one_badge_holders(self) -> List[RetrievedCollectionBadgeHolder]:
+    async def calculate_one_of_one_badge_holders(self) -> List[RetrievedCollectionBadgeHolder]:
         oneOfOneQuery = (
             sqlalchemy.select(TokenMultiOwnershipsTable.c.tokenId)
             .where(TokenMultiOwnershipsTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)

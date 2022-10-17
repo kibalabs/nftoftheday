@@ -17,15 +17,15 @@ from notd.store.schema import CollectionBadgeHoldersTable
 class BadgeManager:
 
     def __init__(self, retriever: Retriever, saver: Saver, workQueue: SqsMessageQueue, badgeProcessor: BadgeProcessor) -> None:
-        self.retriever= retriever
-        self.saver= saver
-        self.workQueue= workQueue
-        self.badgeProcessor= badgeProcessor
+        self.retriever = retriever
+        self.saver = saver
+        self.workQueue = workQueue
+        self.badgeProcessor = badgeProcessor
 
-    async def refresh_all_users_badges_deferred(self):
+    async def refresh_user_badges_for_all_collections_deferred(self):
         await self.workQueue.send_message(message=RefreshAllUserBadgesMessageContent().to_message())
 
-    async def refresh_all_users_badges(self):
+    async def refresh_user_badges_for_all_collections(self):
         for registryAddress in GALLERY_COLLECTIONS:
             await self.refresh_user_badges_for_collection_deferred(registryAddress=registryAddress)
 

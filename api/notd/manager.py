@@ -483,8 +483,8 @@ class NotdManager:
     async def refresh_user_badges_for_collection_deferred(self, registryAddress: str) -> None:
         await self.badgeManager.refresh_user_badges_for_collection_deferred(registryAddress=registryAddress)
 
-    async def refresh_all_user_badges_deferred(self) -> None:
-        await self.badgeManager.refresh_all_users_badges_deferred()
+    async def refresh_user_badges_for_all_collections_deferred(self) -> None:
+        await self.badgeManager.refresh_user_badges_for_all_collections_deferred()
 
-    async def refresh_all_users_badges(self) -> None:
-        await self.badgeManager.refresh_all_users_badges()
+    async def refresh_user_badges_for_all_collections(self) -> None:
+        await self.badgeManager.refresh_user_badges_for_all_collections()

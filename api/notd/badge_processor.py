@@ -11,11 +11,11 @@ from notd.store.saver import Saver
 class BadgeProcessor:
 
     def __init__(self, retriever: Retriever, saver: Saver) -> None:
-        self.retriever= retriever
-        self.saver= saver
+        self.retriever = retriever
+        self.saver = saver
 
     def calculate_badges(self, registryAddress: str) -> List[RetrievedCollectionBadgeHolder]:
         if registryAddress == COLLECTION_RUDEBOYS_ADDRESS:
             processor = RudeboysBadgeProcessor(retriever=self.retriever, saver=self.saver)
-            retrievedBadges = processor.get_all_badges()
+            retrievedBadges = processor.calculate_all_badges()
         return retrievedBadges
