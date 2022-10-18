@@ -9,10 +9,10 @@ from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import RefreshAllCollectionOverlapsMessageContent
 from notd.messages import RefreshCollectionOverlapMessageContent
+from notd.messages import RefreshGalleryBadgeHoldersForAllCollectionsMessageContent
+from notd.messages import RefreshGalleryBadgeHoldersForCollectionMessageContent
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollection
-from notd.messages import RefreshUserBadgesForAllCollectionsMessageContent
-from notd.messages import RefreshUserBadgesForCollectionMessageContent
 from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
@@ -150,12 +150,12 @@ class NotdMessageProcessor(MessageProcessor):
             messageContent = RefreshCollectionOverlapMessageContent.parse_obj(message.content)
             await self.notdManager.refresh_overlap_for_collection(registryAddress=messageContent.registryAddress)
             return
-        if message.command == RefreshUserBadgesForAllCollectionsMessageContent.get_command():
-            messageContent = RefreshUserBadgesForAllCollectionsMessageContent.parse_obj(message.content)
-            await self.notdManager.refresh_user_badges_for_all_collections()
+        if message.command == RefreshGalleryBadgeHoldersForAllCollectionsMessageContent.get_command():
+            messageContent = RefreshGalleryBadgeHoldersForAllCollectionsMessageContent.parse_obj(message.content)
+            await self.notdManager.refresh_gallery_badge_holders_for_all_collections()
             return
-        if message.command == RefreshUserBadgesForCollectionMessageContent.get_command():
-            messageContent = RefreshUserBadgesForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.refresh_user_badges_for_collection(registryAddress=messageContent.registryAddress)
+        if message.command == RefreshGalleryBadgeHoldersForCollectionMessageContent.get_command():
+            messageContent = RefreshGalleryBadgeHoldersForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.refresh_gallery_badge_holders_for_collection(registryAddress=messageContent.registryAddress)
             return
         raise KibaException(message='Message was unhandled')

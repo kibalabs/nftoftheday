@@ -477,14 +477,14 @@ class NotdManager:
     async def refresh_overlaps_for_all_collections(self) -> None:
         await self.collectionOverlapManager.refresh_overlaps_for_all_collections()
 
-    async def refresh_user_badges_for_collection(self, registryAddress: str) -> None:
-        await self.badgeManager.refresh_user_badges_for_collection(registryAddress=registryAddress)
+    async def refresh_gallery_badge_holders_for_collection(self, registryAddress: str) -> None:
+        await self.badgeManager.refresh_gallery_badge_holders_for_collection(registryAddress=registryAddress)
 
-    async def refresh_user_badges_for_collection_deferred(self, registryAddress: str) -> None:
-        await self.badgeManager.refresh_user_badges_for_collection_deferred(registryAddress=registryAddress)
+    async def refresh_gallery_badge_holders_for_collection_deferred(self, registryAddress: str) -> None:
+        await self.badgeManager.refresh_gallery_badge_holders_for_collection_deferred(registryAddress=registryAddress)
 
-    async def refresh_user_badges_for_all_collections_deferred(self) -> None:
-        await self.badgeManager.refresh_user_badges_for_all_collections_deferred()
+    async def refresh_gallery_badge_holders_for_all_collections_deferred(self) -> None:
+        await self.badgeManager.refresh_gallery_badge_holders_for_all_collections_deferred()
 
-    async def refresh_user_badges_for_all_collections(self) -> None:
-        await self.badgeManager.refresh_user_badges_for_all_collections()
+    async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
+        await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()

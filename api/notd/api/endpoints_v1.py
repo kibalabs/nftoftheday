@@ -370,8 +370,8 @@ class ListAllListingsForCollectionTokenResponse(BaseModel):
 class ListAllListingsForCollectionTokenRequest(BaseModel):
     pass
 
-class RefreshUserBadgesForAllCollectionsDeferredResponse(BaseModel):
+class RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse(BaseModel):
     pass
 
-class RefreshUserBadgesForAllCollectionsDeferredRequest(BaseModel):
+class RefreshGalleryBadgeHoldersForAllCollectionsDeferredRequest(BaseModel):
     pass

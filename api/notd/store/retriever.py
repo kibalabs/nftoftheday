@@ -12,10 +12,10 @@ from sqlalchemy.sql import Select
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Collection
-from notd.model import CollectionBadgeHolder
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
+from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import TokenAttribute
@@ -32,9 +32,9 @@ from notd.model import UserProfile
 from notd.store.schema import AccountCollectionGmsTable
 from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
-from notd.store.schema import CollectionBadgeHoldersTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -54,10 +54,10 @@ from notd.store.schema_conversions import account_collection_gm_from_row
 from notd.store.schema_conversions import account_gm_from_row
 from notd.store.schema_conversions import block_from_row
 from notd.store.schema_conversions import collection_activity_from_row
-from notd.store.schema_conversions import collection_badge_holder_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import collection_overlap_from_row
 from notd.store.schema_conversions import collection_total_activity_from_row
+from notd.store.schema_conversions import gallery_badge_holder_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import lock_from_row
 from notd.store.schema_conversions import token_attribute_from_row
@@ -531,14 +531,14 @@ class Retriever(CoreRetriever):
         collectionOverlaps = [collection_overlap_from_row(row) for row in result]
         return collectionOverlaps
 
-    async def list_collection_badge_holders(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionBadgeHolder]:
-        query = CollectionBadgeHoldersTable.select()
+    async def list_gallery_badge_holders(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[GalleryBadgeHolder]:
+        query = GalleryBadgeHoldersTable.select()
         if fieldFilters:
-            query = self._apply_field_filters(query=query, table=CollectionBadgeHoldersTable, fieldFilters=fieldFilters)
+            query = self._apply_field_filters(query=query, table=GalleryBadgeHoldersTable, fieldFilters=fieldFilters)
         if orders:
-            query = self._apply_orders(query=query, table=CollectionBadgeHoldersTable, orders=orders)
+            query = self._apply_orders(query=query, table=GalleryBadgeHoldersTable, orders=orders)
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        galleryBadgeHolders = [collection_badge_holder_from_row(row) for row in result]
+        galleryBadgeHolders = [gallery_badge_holder_from_row(row) for row in result]
         return galleryBadgeHolders

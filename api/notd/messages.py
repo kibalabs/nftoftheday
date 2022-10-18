@@ -107,10 +107,10 @@ class RefreshAllCollectionOverlapsMessageContent(MessageContent):
     _COMMAND = 'REFRESH_ALL_COLLECTION_OVERLAPS'
 
 
-class RefreshUserBadgesForCollectionMessageContent(MessageContent):
+class RefreshGalleryBadgeHoldersForCollectionMessageContent(MessageContent):
     _COMMAND = 'REFRESH_USER_BADGES_FOR_COLLECTION'
     registryAddress: str
 
 
-class RefreshUserBadgesForAllCollectionsMessageContent(MessageContent):
+class RefreshGalleryBadgeHoldersForAllCollectionsMessageContent(MessageContent):
     _COMMAND = 'REFRESH_USER_BADGES_FOR_ALL_COLLECTIONS'

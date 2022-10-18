@@ -371,10 +371,10 @@ TokenCollectionOverlapsTable = sqlalchemy.Table(
 )
 
 
-CollectionBadgeHoldersTable = sqlalchemy.Table(
-    'tbl_collection_badge_holders',
+GalleryBadgeHoldersTable = sqlalchemy.Table(
+    'tbl_gallery_badge_holders',
     metadata,
-    sqlalchemy.Column(key='collectionBadgeHolderId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='galleryBadgeHolderId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),

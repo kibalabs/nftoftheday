@@ -5,5 +5,5 @@ from abc import ABC
 class CollectionBadgeProcessor(ABC):
 
     @abc.abstractmethod
-    async def calculate_all_badges(self) -> None:
+    async def calculate_all_gallery_badge_holders(self) -> None:
         pass

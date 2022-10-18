@@ -1,13 +1,13 @@
 from typing import List
 
 import sqlalchemy
-from core.util import date_util
 
 from notd.collection_badge_processor import CollectionBadgeProcessor
 from notd.model import COLLECTION_RUDEBOYS_ADDRESS
-from notd.model import RetrievedCollectionBadgeHolder
+from notd.model import RetrievedGalleryBadgeHolder
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import BlocksTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenTransfersTable
 
@@ -19,23 +19,24 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         self.retriever= retriever
         self.saver= saver
 
-    async def calculate_all_badges(self) -> None:
+    async def calculate_all_gallery_badge_holders(self) -> None:
         minterBadgeHolders = await self.calculate_minter_badge_holders()
         oneOfOneBadgeHolders = await self.calculate_one_of_one_badge_holders()
         allBadges = minterBadgeHolders + oneOfOneBadgeHolders
         return allBadges
 
-    async def calculate_minter_badge_holders(self) -> List[RetrievedCollectionBadgeHolder]:
+    async def calculate_minter_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         query = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'))
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'), BlocksTable.c.blockDate.label('achievedDate'))
+            .join(BlocksTable, TokenTransfersTable.c.blockNumber==BlocksTable.c.blockNumber)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(TokenTransfersTable.c.fromAddress == RUDEBOYS_OWNER_ADDRESS)
         )
         result = await self.retriever.database.execute(query=query)
-        minterBadgeHolders = [RetrievedCollectionBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="MINTER", achievedDate=date_util.datetime_from_now()) for row in result]
+        minterBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="MINTER", achievedDate=row.achievedDate) for row in result]
         return minterBadgeHolders
 
-    async def calculate_one_of_one_badge_holders(self) -> List[RetrievedCollectionBadgeHolder]:
+    async def calculate_one_of_one_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         oneOfOneQuery = (
             sqlalchemy.select(TokenMultiOwnershipsTable.c.tokenId)
             .where(TokenMultiOwnershipsTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
@@ -43,10 +44,11 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
             .having(sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity) == 1)
         )
         query = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'))
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'), BlocksTable.c.blockDate.label('achievedDate'))
+            .join(BlocksTable, TokenTransfersTable.c.blockNumber==BlocksTable.c.blockNumber)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(TokenTransfersTable.c.tokenId.in_(oneOfOneQuery.select()))
         )
         result = await self.retriever.database.execute(query=query)
-        oneOfOneBadgeHolders = [RetrievedCollectionBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="ONE-OF-ONE", achievedDate=date_util.datetime_from_now()) for row in result]
+        oneOfOneBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="ONE-OF-ONE", achievedDate=row.achievedDate) for row in result]
         return oneOfOneBadgeHolders
