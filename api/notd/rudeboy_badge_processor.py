@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 import sqlalchemy
@@ -28,7 +29,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
     async def calculate_minter_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         query = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'), BlocksTable.c.blockDate.label('achievedDate'))
-            .join(BlocksTable, TokenTransfersTable.c.blockNumber==BlocksTable.c.blockNumber)
+            .join(BlocksTable, TokenTransfersTable.c.blockNumber==BlocksTable.c.blockNumber, isouter=True)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(TokenTransfersTable.c.fromAddress == RUDEBOYS_OWNER_ADDRESS)
         )
@@ -45,7 +46,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         )
         query = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('toAddress'), BlocksTable.c.blockDate.label('achievedDate'))
-            .join(BlocksTable, TokenTransfersTable.c.blockNumber==BlocksTable.c.blockNumber)
+            .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(TokenTransfersTable.c.tokenId.in_(oneOfOneQuery.select()))
         )
