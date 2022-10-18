@@ -162,6 +162,7 @@ class GalleryManager:
         if collection.doesSupportErc721:
             query = (
                 sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, TokenBestListingsView, sqlalchemy.literal(1).label('quantity'))
+                    .join(TokenOwnershipsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsTable.c.tokenId))
                     .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                     .join(TokenBestListingsView, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenBestListingsView.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenBestListingsView.c.tokenId), isouter=True)
                     .where(TokenMetadatasTable.c.registryAddress == registryAddress)
