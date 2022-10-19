@@ -50,5 +50,5 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
             .where(TokenTransfersTable.c.tokenId.in_(oneOfOneQuery.select()))
         )
         result = await self.retriever.database.execute(query=query)
-        oneOfOneBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="ONE-OF-ONE", achievedDate=row.achievedDate) for row in result]
+        oneOfOneBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.toAddress, badgeKey="ONE_OF_ONE", achievedDate=row.achievedDate) for row in result]
         return oneOfOneBadgeHolders
