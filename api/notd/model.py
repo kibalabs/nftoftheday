@@ -541,3 +541,18 @@ class CollectionOverlapSummary:
     ownerCount: int
     registryTokenCount: int
     otherRegistryTokenCount: int
+
+
+@dataclasses.dataclass
+class RetrievedGalleryBadgeHolder:
+    registryAddress: str
+    ownerAddress: str
+    badgeKey: str
+    achievedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class GalleryBadgeHolder(RetrievedGalleryBadgeHolder):
+    galleryBadgeHolderId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime

@@ -441,3 +441,21 @@ CREATE INDEX tbl_collection_overlaps_registry_address ON tbl_collection_overlaps
 CREATE INDEX tbl_collection_overlaps_other_registry_address ON tbl_collection_overlaps (other_registry_address);
 CREATE INDEX tbl_collection_overlaps_owner_address ON tbl_collection_overlaps (owner_address);
 CREATE INDEX tbl_collection_overlaps_registry_token_count ON tbl_collection_overlaps (registry_token_count);
+
+
+CREATE TABLE tbl_gallery_badge_holders (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    owner_address TEXT NOT NULL,
+    badge_key TEXT NOT NULL,
+    achieved_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
+);
+CREATE INDEX tbl_gallery_badge_holders_owner_address_registry_address_badge_key on tbl_gallery_badge_holders (owner_address, registry_address, badge_key);
+CREATE INDEX tbl_gallery_badge_holders_created_date ON tbl_gallery_badge_holders (created_date);
+CREATE INDEX tbl_gallery_badge_holders_updated_date ON tbl_gallery_badge_holders (updated_date);
+CREATE INDEX tbl_gallery_badge_holders_registry_address ON tbl_gallery_badge_holders (registry_address);
+CREATE INDEX tbl_gallery_badge_holders_badge_key ON tbl_gallery_badge_holders (badge_key);
+CREATE INDEX tbl_gallery_badge_holders_owner_address ON tbl_gallery_badge_holders (owner_address);
+CREATE INDEX tbl_gallery_badge_holders_achieved_date ON tbl_gallery_badge_holders (achieved_date);

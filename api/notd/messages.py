@@ -105,3 +105,12 @@ class RefreshCollectionOverlapMessageContent(MessageContent):
 
 class RefreshAllCollectionOverlapsMessageContent(MessageContent):
     _COMMAND = 'REFRESH_ALL_COLLECTION_OVERLAPS'
+
+
+class RefreshGalleryBadgeHoldersForCollectionMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_GALLERY_BADGE_HOLDERS_FOR_COLLECTION'
+    registryAddress: str
+
+
+class RefreshGalleryBadgeHoldersForAllCollectionsMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_GALLERY_BADGE_HOLDERS_FOR_ALL_COLLECTIONS'

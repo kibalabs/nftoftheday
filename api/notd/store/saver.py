@@ -19,6 +19,7 @@ from notd.model import CollectionTotalActivity
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import RetrievedCollectionOverlap
+from notd.model import RetrievedGalleryBadgeHolder
 from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
@@ -35,6 +36,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -928,4 +930,47 @@ class Saver(CoreSaver):
         if len(collectionOverlapIds) == 0:
             return
         query = TokenCollectionOverlapsTable.delete().where(TokenCollectionOverlapsTable.c.collectionOverlapId.in_(collectionOverlapIds))
+        await self._execute(query=query, connection=connection)
+
+    @staticmethod
+    def _get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder: RetrievedGalleryBadgeHolder, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+        return {
+            GalleryBadgeHoldersTable.c.createdDate.key: createdDate,
+            GalleryBadgeHoldersTable.c.updatedDate.key: updatedDate,
+            GalleryBadgeHoldersTable.c.registryAddress.key: retrievedGalleryBadgeHolder.registryAddress,
+            GalleryBadgeHoldersTable.c.ownerAddress.key: retrievedGalleryBadgeHolder.ownerAddress,
+            GalleryBadgeHoldersTable.c.badgeKey.key: retrievedGalleryBadgeHolder.badgeKey,
+            GalleryBadgeHoldersTable.c.achievedDate.key: retrievedGalleryBadgeHolder.achievedDate,
+        }
+
+    async def create_gallery_badge_holder(self, retrievedGalleryBadgeHolder: RetrievedGalleryBadgeHolder, connection: Optional[DatabaseConnection] = None) -> int:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = self._get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder=retrievedGalleryBadgeHolder, createdDate=createdDate, updatedDate=updatedDate)
+        query = GalleryBadgeHoldersTable.insert().values(values)
+        result = await self._execute(query=query, connection=connection)
+        galleryBadgeHolderId = result.inserted_primary_key[0]
+        return galleryBadgeHolderId
+
+    async def create_gallery_badge_holders(self, retrievedGalleryBadgeHolders: List[RetrievedGalleryBadgeHolder], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedGalleryBadgeHolders) == 0:
+            return
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        latestGalleryBadgeHolderIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedGalleryBadgeHolders, chunkSize=100):
+            values = [self._get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder=retrievedGalleryBadgeHolder, createdDate=createdDate, updatedDate=updatedDate) for retrievedGalleryBadgeHolder in chunk]
+            query = GalleryBadgeHoldersTable.insert().values(values).returning(GalleryBadgeHoldersTable.c.galleryBadgeHolderId)
+            rows = await self._execute(query=query, connection=connection)
+            latestGalleryBadgeHolderIds += [row[0] for row in rows]
+        return latestGalleryBadgeHolderIds
+
+    async def delete_gallery_badge_holder(self, galleryBadgeHolderId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId == galleryBadgeHolderId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_gallery_badge_holders(self, galleryBadgeHolderIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(galleryBadgeHolderIds) == 0:
+            return
+        query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId.in_(galleryBadgeHolderIds))
         await self._execute(query=query, connection=connection)

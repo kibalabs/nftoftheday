@@ -42,5 +42,7 @@ GRANT INSERT, SELECT, UPDATE ON tbl_account_collection_gms TO notd_api;
 GRANT ALL ON SEQUENCE tbl_account_collection_gms_id_seq TO notd_api;
 GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_collection_overlaps TO notd_api;
 GRANT ALL ON SEQUENCE tbl_collection_overlaps_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_gallery_badge_holders TO notd_api;
+GRANT ALL ON SEQUENCE tbl_gallery_badge_holders_id_seq TO notd_api;
 ALTER MATERIALIZED VIEW mvw_user_registry_first_ownerships OWNER TO notd_api;
 ALTER MATERIALIZED VIEW mvw_user_registry_ordered_ownerships OWNER TO notd_api;
