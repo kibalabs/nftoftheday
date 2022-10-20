@@ -71,8 +71,7 @@ class GmManager:
             return latestAccountGm
         streakLength = latestAccountGm.streakLength + 1 if latestAccountGm and latestAccountGm.date == date_util.datetime_from_datetime(dt=todayDate, days=-1) else 1
         ownedCollectionsQuery = (
-            TokenOwnershipsView.select()
-            .with_only_columns([TokenOwnershipsView.c.registryAddress.distinct()])
+            sqlalchemy.select(TokenOwnershipsView.c.registryAddress.distinct())
             .where(TokenOwnershipsView.c.ownerAddress == account)
             .where(TokenOwnershipsView.c.quantity > 0)
         )
