@@ -47,6 +47,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import TokenOwnershipsView
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
 from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
@@ -377,14 +378,15 @@ class GalleryManager:
 
     async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> Sequence[GalleryOwnedCollection]:
         collectionsQuery = (
-            sqlalchemy.select(TokenOwnershipsTable)
-                .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsTable.c.registryAddress)
-                .where(TokenOwnershipsTable.c.ownerAddress == userAddress)
-                .where(TokenOwnershipsTable.c.registryAddress != registryAddress)
-                .order_by(CollectionTotalActivitiesTable.c.totalValue.desc(), TokenOwnershipsTable.c.transferDate.asc())
+            sqlalchemy.select(TokenOwnershipsView)
+                .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsView.c.registryAddress)
+                .where(TokenOwnershipsView.c.ownerAddress == userAddress)
+                .where(TokenOwnershipsView.c.registryAddress != registryAddress)
+                .where(TokenOwnershipsView.c.quantity > 0)
+                .order_by(CollectionTotalActivitiesTable.c.totalValue.desc(), TokenOwnershipsView.c.latestTransferDate.asc())
         )
         collectionsResult = await self.retriever.database.execute(query=collectionsQuery)
-        collectionTokenIds = [(row[TokenOwnershipsTable.c.registryAddress], row[TokenOwnershipsTable.c.tokenId]) for row in collectionsResult]
+        collectionTokenIds = [(row[TokenOwnershipsView.c.registryAddress], row[TokenOwnershipsView.c.tokenId]) for row in collectionsResult]
         registryAddresses = list(dict.fromkeys([collectionTokenId[0] for collectionTokenId in collectionTokenIds]))
         collections = await self.retriever.list_collections(fieldFilters=[StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=registryAddresses)])
         collectionMap = {collection.address: collection for collection in collections}
