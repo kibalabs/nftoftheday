@@ -291,7 +291,7 @@ class GetGalleryCollectionUserBadgeRequest(BaseModel):
     pass
 
 class GetGalleryCollectionUserBadgeResponse(BaseModel):
-    galleryUserBadges: ApiGalleryUserBadge
+    galleryUserBadge: ApiGalleryUserBadge
 
 class FollowCollectionUserRequest(BaseModel):
     account: str
