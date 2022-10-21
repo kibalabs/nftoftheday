@@ -303,7 +303,7 @@ class GalleryManager:
         )
         return galleryUser
 
-    async def get_gallery_user_badges(self, registryAddress: str, userAddress: str) -> Optional[List[GalleryBadgeHolder]]:
+    async def list_gallery_user_badges(self, registryAddress: str, userAddress: str) -> Optional[List[GalleryBadgeHolder]]:
         galleryUserBadgesQuery = (
             sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
                 .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
