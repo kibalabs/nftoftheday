@@ -2,7 +2,6 @@ import datetime
 from typing import List
 from typing import Optional
 
-import sqlalchemy
 from core import logging
 from core.queues.message_queue_processor import MessageNeedsReprocessingException
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -20,7 +19,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import OrderedTokenListingsView
 from notd.store.schema import TokenMetadatasTable
-from notd.store.schema import TokenOwnershipsView
+from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema_conversions import token_listing_from_row
 from notd.token_listing_processor import TokenListingProcessor
 
