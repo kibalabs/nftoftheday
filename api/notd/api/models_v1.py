@@ -167,7 +167,7 @@ class ApiTwitterProfile(BaseModel):
     tweetCount: int
 
 
-class ApiGalleryBadgeHolder(BaseModel):
+class ApiGalleryUserBadge(BaseModel):
     registryAddress: str
     ownerAddress: str
     badgeKey: str
@@ -187,7 +187,7 @@ class ApiGalleryUser(BaseModel):
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
     chosenOwnedTokens: List[ApiCollectionToken]
-    galleryBadgeHolders: List[ApiGalleryBadgeHolder]
+    galleryBadgeHolders: List[ApiGalleryUserBadge]
 
 
 class ApiGalleryOwnedCollection(BaseModel):

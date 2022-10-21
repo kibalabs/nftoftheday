@@ -6,7 +6,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
-from notd.api.models_v1 import ApiGalleryBadgeHolder
+from notd.api.models_v1 import ApiGalleryUserBadge
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
@@ -291,7 +291,7 @@ class ListGalleryUserBadgeRequest(BaseModel):
     pass
 
 class ListGalleryUserBadgesResponse(BaseModel):
-    galleryUserBadges: List[ApiGalleryBadgeHolder]
+    galleryUserBadges: List[ApiGalleryUserBadge]
 
 class FollowCollectionUserRequest(BaseModel):
     account: str
