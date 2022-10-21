@@ -180,7 +180,7 @@ class ApiGalleryUser(BaseModel):
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
     chosenOwnedTokens: List[ApiCollectionToken]
-
+    galleryBadgeHoldersIds: List[int]
 
 class ApiGalleryOwnedCollection(BaseModel):
     collection: ApiCollection
