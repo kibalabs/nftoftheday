@@ -302,7 +302,7 @@ class GalleryManager:
             joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate] if userRow else None,
         )
         return galleryUser
-    
+
     async def get_gallery_user_badge(self, registryAddress: str, userAddress: str) -> GalleryUserBadge:
         galleryUserBadgesQuery = (
             sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)

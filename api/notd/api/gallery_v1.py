@@ -86,7 +86,7 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         return GetGalleryCollectionUserResponse(galleryUser=(await responseBuilder.gallery_user_from_model(galleryUser=galleryUser)))
 
     @router.get('/collections/{registryAddress}/users/{userAddress}/badges')
-    async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserBadgeResponse:
+    async def get_gallery_user_badge(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserBadgeResponse:
         galleryUserBadge = await galleryManager.get_gallery_user_badge(registryAddress=registryAddress, userAddress=userAddress)
         return GetGalleryCollectionUserBadgeResponse(galleryUserBadge=(await responseBuilder.gallery_user_badge_from_model(galleryUserBadge=galleryUserBadge)))
 

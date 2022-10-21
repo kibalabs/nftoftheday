@@ -305,7 +305,7 @@ class ResponseBuilder:
 
     async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> Sequence[ApiGalleryUser]:
         return await asyncio.gather(*[self.gallery_user_from_model(galleryUser=galleryUser) for galleryUser in galleryUsers])
-    
+
     async def gallery_user_badge_from_model(self, galleryUserBadge: GalleryUserBadge) -> ApiGalleryUserBadge:
         return ApiGalleryUserBadge(
             address=galleryUserBadge.address,
@@ -315,7 +315,7 @@ class ResponseBuilder:
 
     async def gallery_user_badges_from_models(self, galleryUserBadges: Sequence[GalleryUserBadge]) -> Sequence[ApiGalleryUserBadge]:
         return await asyncio.gather(*[self.gallery_user_badge_from_model(galleryUserBadge=galleryUserBadge) for galleryUserBadge in galleryUserBadges])
-    
+
     async def gallery_badge_holder_from_model(self, galleryBadgeHolder: GalleryBadgeHolder) -> ApiGalleryBadgeHolder:
         return ApiGalleryBadgeHolder(
             registryAddress=galleryBadgeHolder.registryAddress,
