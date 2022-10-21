@@ -2,7 +2,6 @@ import datetime
 from typing import List
 from typing import Optional
 
-import sqlalchemy
 from core import logging
 from core.queues.message_queue_processor import MessageNeedsReprocessingException
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -18,9 +17,9 @@ from notd.model import GALLERY_COLLECTIONS
 from notd.model import TokenListing
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.store.schema import LatestTokenListingsTable
+from notd.store.schema import OrderedTokenListingsView
 from notd.store.schema import TokenMetadatasTable
-from notd.store.schema import TokenOwnershipsView
+from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema_conversions import token_listing_from_row
 from notd.token_listing_processor import TokenListingProcessor
 
@@ -138,12 +137,11 @@ class ListingManager:
 
     async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
         query = (
-            sqlalchemy.select(LatestTokenListingsTable)
-            .join(TokenOwnershipsView, sqlalchemy.and_(LatestTokenListingsTable.c.registryAddress == TokenOwnershipsView.c.registryAddress, LatestTokenListingsTable.c.tokenId == TokenOwnershipsView.c.tokenId, LatestTokenListingsTable.c.offererAddress == TokenOwnershipsView.c.ownerAddress))
-            .where(LatestTokenListingsTable.c.registryAddress == registryAddress)
-            .where(LatestTokenListingsTable.c.tokenId == tokenId)
-            .order_by(LatestTokenListingsTable.c.value.asc())
+            OrderedTokenListingsView.select()
+            .where(OrderedTokenListingsView.c.registryAddress == registryAddress)
+            .where(OrderedTokenListingsView.c.tokenId == tokenId)
+            .order_by(OrderedTokenListingsView.c.tokenListingIndex.asc())
         )
         result = await self.retriever.database.execute(query=query)
-        tokenListings = [token_listing_from_row(row) for row in result]
+        tokenListings = [token_listing_from_row(row, OrderedTokenListingsView) for row in result]
         return tokenListings

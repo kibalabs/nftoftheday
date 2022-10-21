@@ -2,7 +2,9 @@ import sqlalchemy
 
 metadata = sqlalchemy.MetaData()
 
-TokenTransfersTable = sqlalchemy.Table('tbl_token_transfers', metadata,
+TokenTransfersTable = sqlalchemy.Table(
+    'tbl_token_transfers',
+    metadata,
     sqlalchemy.Column(key='tokenTransferId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='transactionHash', name='transaction_hash', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
@@ -205,8 +207,8 @@ LatestTokenListingsTable = sqlalchemy.Table(
 )
 
 
-TokenBestListingsView = sqlalchemy.Table(
-    'vw_token_best_listings',
+OrderedTokenListingsView = sqlalchemy.Table(
+    'vw_ordered_token_listings',
     metadata,
     sqlalchemy.Column(key='latestTokenListingId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
@@ -220,6 +222,7 @@ TokenBestListingsView = sqlalchemy.Table(
     sqlalchemy.Column(key='value', name='value', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='source', name='source', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='sourceId', name='source_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='tokenListingIndex', name='token_listing_index', type_=sqlalchemy.Integer, nullable=False),
 )
 
 
@@ -314,7 +317,7 @@ UserRegistryOrderedOwnershipsMaterializedView = sqlalchemy.Table(
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
-    sqlalchemy.Column(key='quantity', name='quantity', type_=sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column(key='quantity', name='quantity', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
     sqlalchemy.Column(key='ownerTokenIndex', name='owner_token_index', type_=sqlalchemy.Integer, nullable=False),
 )
 
@@ -366,8 +369,8 @@ TokenCollectionOverlapsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='otherRegistryAddress', name='other_registry_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
-    sqlalchemy.Column(key='registryTokenCount', name='registry_token_count', type_=sqlalchemy.Integer, nullable=False),
-    sqlalchemy.Column(key='otherRegistryTokenCount', name='other_registry_token_count', type_=sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column(key='registryTokenCount', name='registry_token_count', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
+    sqlalchemy.Column(key='otherRegistryTokenCount', name='other_registry_token_count', type_=sqlalchemy.Numeric(precision=256, scale=0), nullable=False),
 )
 
 

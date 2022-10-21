@@ -45,21 +45,17 @@ CREATE VIEW vw_token_ownerships AS
     FROM tbl_token_multi_ownerships
 );
 
-CREATE VIEW vw_token_best_listings AS
+CREATE VIEW vw_ordered_token_listings AS
 (
-    SELECT *
-    FROM (
-        SELECT tbl_latest_token_listings.*, row_number() OVER (
-            PARTITION BY tbl_latest_token_listings.registry_address, tbl_latest_token_listings.token_id
-            ORDER BY tbl_latest_token_listings.value DESC
-        ) AS token_listing_index
-        FROM tbl_latest_token_listings
-        JOIN vw_token_ownerships ON
-            vw_token_ownerships.registry_address = tbl_latest_token_listings.registry_address
-            AND vw_token_ownerships.token_id = tbl_latest_token_listings.token_id
-            AND vw_token_ownerships.owner_address = tbl_latest_token_listings.offerer_address
-            AND vw_token_ownerships.quantity > 0
-        WHERE tbl_latest_token_listings.end_date > now()
-    ) as ordered_listings
-    WHERE ordered_listings.token_listing_index = 1
+    SELECT tbl_latest_token_listings.*, row_number() OVER (
+        PARTITION BY tbl_latest_token_listings.registry_address, tbl_latest_token_listings.token_id
+        ORDER BY tbl_latest_token_listings.value ASC
+    ) AS token_listing_index
+    FROM tbl_latest_token_listings
+    JOIN vw_token_ownerships ON
+        vw_token_ownerships.registry_address = tbl_latest_token_listings.registry_address
+        AND vw_token_ownerships.token_id = tbl_latest_token_listings.token_id
+        AND vw_token_ownerships.owner_address = tbl_latest_token_listings.offerer_address
+        AND vw_token_ownerships.quantity > 0
+    WHERE tbl_latest_token_listings.end_date > now()
 );
