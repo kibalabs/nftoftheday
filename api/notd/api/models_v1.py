@@ -182,6 +182,7 @@ class ApiGalleryUserRow(BaseModel):
     chosenOwnedTokens: List[ApiCollectionToken]
     galleryBadgeHoldersIds: List[int]
 
+
 class ApiGalleryOwnedCollection(BaseModel):
     collection: ApiCollection
     tokens: List[ApiCollectionToken]
