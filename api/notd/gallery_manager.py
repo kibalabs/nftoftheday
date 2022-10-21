@@ -2,9 +2,10 @@ import contextlib
 import json
 import urllib.parse as urlparse
 from collections import defaultdict
-from typing import Dict, Set
+from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
 from typing import Sequence
 
 import sqlalchemy
