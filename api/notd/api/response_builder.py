@@ -19,7 +19,6 @@ from notd.api.models_v1 import ApiGalleryBadgeHolder
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
-from notd.api.models_v1 import ApiGalleryUserBadge
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
@@ -45,7 +44,6 @@ from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
-from notd.model import GalleryUserBadge
 from notd.model import GalleryUserRow
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
@@ -305,16 +303,6 @@ class ResponseBuilder:
 
     async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> Sequence[ApiGalleryUser]:
         return await asyncio.gather(*[self.gallery_user_from_model(galleryUser=galleryUser) for galleryUser in galleryUsers])
-
-    async def gallery_user_badge_from_model(self, galleryUserBadge: GalleryUserBadge) -> ApiGalleryUserBadge:
-        return ApiGalleryUserBadge(
-            address=galleryUserBadge.address,
-            registryAddress=galleryUserBadge.registryAddress,
-            galleryBadgeHolders=(await self.gallery_badge_holders_from_models(galleryBadgeHolders=galleryUserBadge.galleryBadgeHolders))
-        )
-
-    async def gallery_user_badges_from_models(self, galleryUserBadges: Sequence[GalleryUserBadge]) -> Sequence[ApiGalleryUserBadge]:
-        return await asyncio.gather(*[self.gallery_user_badge_from_model(galleryUserBadge=galleryUserBadge) for galleryUserBadge in galleryUserBadges])
 
     async def gallery_badge_holder_from_model(self, galleryBadgeHolder: GalleryBadgeHolder) -> ApiGalleryBadgeHolder:
         return ApiGalleryBadgeHolder(

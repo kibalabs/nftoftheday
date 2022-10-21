@@ -553,13 +553,6 @@ class GalleryBadgeHolder(RetrievedGalleryBadgeHolder):
 
 
 @dataclasses.dataclass
-class GalleryUserBadge:
-    address: str
-    registryAddress: str
-    galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
-
-
-@dataclasses.dataclass
 class GalleryUserRow:
     galleryUser: GalleryUser
     chosenOwnedTokens: List[TokenMetadata]

@@ -184,12 +184,6 @@ class ApiGalleryUser(BaseModel):
     joinDate: Optional[datetime.datetime]
 
 
-class ApiGalleryUserBadge(BaseModel):
-    address: str
-    registryAddress: str
-    galleryBadgeHolders: List[ApiGalleryBadgeHolder]
-
-
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
     chosenOwnedTokens: List[ApiCollectionToken]

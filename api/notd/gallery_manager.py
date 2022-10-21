@@ -31,7 +31,6 @@ from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
-from notd.model import GalleryUserBadge
 from notd.model import GalleryUserRow
 from notd.model import ListResponse
 from notd.model import Signature
@@ -304,7 +303,7 @@ class GalleryManager:
         )
         return galleryUser
 
-    async def get_gallery_user_badge(self, registryAddress: str, userAddress: str) -> GalleryUserBadge:
+    async def get_gallery_user_badges(self, registryAddress: str, userAddress: str) -> List[GalleryBadgeHolder]:
         galleryUserBadgesQuery = (
             sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
                 .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
@@ -315,12 +314,8 @@ class GalleryManager:
         galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
         for galleryBadgeHolderRow in galleryUserBadgesResult:
             galleryBadgeHolders[userAddress].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
-        galleryUserBadge = GalleryUserBadge(
-            address=userAddress,
-            registryAddress=registryAddress,
-            galleryBadgeHolders=galleryBadgeHolders[userAddress]
-        )
-        return galleryUserBadge
+        galleryBadgeHolders=galleryBadgeHolders[userAddress]
+        return galleryBadgeHolders
 
     async def query_collection_users(self, registryAddress, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
         ownedCountColumn = sqlalchemy.func.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')

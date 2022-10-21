@@ -7,7 +7,7 @@ from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import FollowCollectionUserRequest
 from notd.api.endpoints_v1 import FollowCollectionUserResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
-from notd.api.endpoints_v1 import GetGalleryCollectionUserBadgeResponse
+from notd.api.endpoints_v1 import ListGalleryUserBadgesResponse
 from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
 from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import GetGalleryUserOwnedCollectionsResponse
@@ -86,9 +86,9 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         return GetGalleryCollectionUserResponse(galleryUser=(await responseBuilder.gallery_user_from_model(galleryUser=galleryUser)))
 
     @router.get('/collections/{registryAddress}/users/{userAddress}/badges')
-    async def get_gallery_user_badge(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserBadgeResponse:
-        galleryUserBadge = await galleryManager.get_gallery_user_badge(registryAddress=registryAddress, userAddress=userAddress)
-        return GetGalleryCollectionUserBadgeResponse(galleryUserBadge=(await responseBuilder.gallery_user_badge_from_model(galleryUserBadge=galleryUserBadge)))
+    async def get_gallery_user_badges(registryAddress: str, userAddress: str) -> ListGalleryUserBadgesResponse:
+        galleryUserBadges = await galleryManager.get_gallery_user_badges(registryAddress=registryAddress, userAddress=userAddress)
+        return ListGalleryUserBadgesResponse(galleryUserBadges=(await responseBuilder.gallery_badge_holders_from_models(galleryBadgeHolders=galleryUserBadges)))
 
     @router.post('/collections/{registryAddress}/users/{userAddress}/follow')
     async def follow_gallery_user(registryAddress: str, userAddress: str, request: FollowCollectionUserRequest) -> FollowCollectionUserResponse:
