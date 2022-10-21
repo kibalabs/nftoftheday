@@ -177,10 +177,17 @@ class ApiGalleryUser(BaseModel):
     joinDate: Optional[datetime.datetime]
 
 
+class ApiGalleryBadgeHolder(BaseModel):
+    registryAddress: str
+    ownerAddress: str
+    badgeKey: str
+    achievedDate: datetime.datetime
+
+
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
     chosenOwnedTokens: List[ApiCollectionToken]
-    galleryBadgeHoldersIds: List[int]
+    galleryBadgeHolders: List[ApiGalleryBadgeHolder]
 
 
 class ApiGalleryOwnedCollection(BaseModel):

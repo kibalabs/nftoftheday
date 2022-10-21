@@ -4,6 +4,8 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
+from notd.api.models_v1 import ApiGalleryBadgeHolder
+from notd.model import GalleryBadgeHolder
 
 from notd.api.models_v1 import ApiAccountCollectionGm
 from notd.api.models_v1 import ApiAccountGm
@@ -301,12 +303,23 @@ class ResponseBuilder:
 
     async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> Sequence[ApiGalleryUser]:
         return await asyncio.gather(*[self.gallery_user_from_model(galleryUser=galleryUser) for galleryUser in galleryUsers])
+    
+    async def gallery_badge_holder_from_model(self, galleryBadgeHolder: GalleryBadgeHolder) -> ApiGalleryBadgeHolder:
+        return ApiGalleryBadgeHolder(
+            registryAddress=galleryBadgeHolder.registryAddress,
+            ownerAddress=galleryBadgeHolder.ownerAddress,
+            badgeKey=galleryBadgeHolder.badgeKey,
+            achievedDate=galleryBadgeHolder.achievedDate,
+        )
+
+    async def gallery_badge_holders_from_models(self, galleryBadgeHolders: Sequence[GalleryBadgeHolder]) -> Sequence[ApiGalleryBadgeHolder]:
+        return await asyncio.gather(*[self.gallery_badge_holder_from_model(galleryBadgeHolder=galleryBadgeHolder) for galleryBadgeHolder in galleryBadgeHolders])
 
     async def gallery_user_row_from_model(self, galleryUserRow: GalleryUserRow) -> ApiGalleryUserRow:
         return ApiGalleryUserRow(
             galleryUser=(await self.gallery_user_from_model(galleryUserRow.galleryUser)),
             chosenOwnedTokens=(await self.collection_tokens_from_models(tokenMetadatas=galleryUserRow.chosenOwnedTokens)),
-            galleryBadgeHoldersIds=(galleryUserRow.galleryBadgeHoldersIds)
+            galleryBadgeHolders=(await self.gallery_badge_holders_from_models(galleryBadgeHolders=galleryUserRow.galleryBadgeHolders))
         )
 
     async def gallery_user_rows_from_models(self, galleryUserRows: Sequence[GalleryUserRow]) -> Sequence[ApiGalleryUserRow]:

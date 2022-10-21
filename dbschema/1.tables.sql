@@ -452,7 +452,7 @@ CREATE TABLE tbl_gallery_badge_holders (
     badge_key TEXT NOT NULL,
     achieved_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
-CREATE INDEX tbl_gallery_badge_holders_owner_address_registry_address_badge_key on tbl_gallery_badge_holders (owner_address, registry_address, badge_key);
+CREATE UNIQUE INDEX tbl_gallery_badge_holders_owner_address_registry_address_badge_key on tbl_gallery_badge_holders (owner_address, registry_address, badge_key);
 CREATE INDEX tbl_gallery_badge_holders_created_date ON tbl_gallery_badge_holders (created_date);
 CREATE INDEX tbl_gallery_badge_holders_updated_date ON tbl_gallery_badge_holders (updated_date);
 CREATE INDEX tbl_gallery_badge_holders_registry_address ON tbl_gallery_badge_holders (registry_address);
