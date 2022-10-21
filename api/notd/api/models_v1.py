@@ -167,6 +167,13 @@ class ApiTwitterProfile(BaseModel):
     tweetCount: int
 
 
+class ApiGalleryUserBadge(BaseModel):
+    registryAddress: str
+    ownerAddress: str
+    badgeKey: str
+    achievedDate: datetime.datetime
+
+
 class ApiGalleryUser(BaseModel):
     address: str
     registryAddress: str
@@ -180,7 +187,7 @@ class ApiGalleryUser(BaseModel):
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
     chosenOwnedTokens: List[ApiCollectionToken]
-    galleryBadgeHoldersIds: List[int]
+    galleryBadgeHolders: List[ApiGalleryUserBadge]
 
 
 class ApiGalleryOwnedCollection(BaseModel):
