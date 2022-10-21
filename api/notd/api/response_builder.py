@@ -4,10 +4,6 @@ from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
-from notd.api.models_v1 import ApiGalleryUserBadge
-from notd.model import GalleryUserBadge
-from notd.api.models_v1 import ApiGalleryBadgeHolder
-from notd.model import GalleryBadgeHolder
 
 from notd.api.models_v1 import ApiAccountCollectionGm
 from notd.api.models_v1 import ApiAccountGm
@@ -19,9 +15,11 @@ from notd.api.models_v1 import ApiCollectionOverlap
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiGalleryBadgeHolder
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
+from notd.api.models_v1 import ApiGalleryUserBadge
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
@@ -43,9 +41,11 @@ from notd.model import CollectionDailyActivity
 from notd.model import CollectionOverlap
 from notd.model import CollectionOverlapSummary
 from notd.model import CollectionStatistics
+from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
+from notd.model import GalleryUserBadge
 from notd.model import GalleryUserRow
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
