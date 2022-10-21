@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter
+from notd.api.endpoints_v1 import GetGalleryCollectionUserBadgeResponse
 
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
@@ -83,6 +84,11 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserResponse:
         galleryUser = await galleryManager.get_gallery_user(registryAddress=registryAddress, userAddress=userAddress)
         return GetGalleryCollectionUserResponse(galleryUser=(await responseBuilder.gallery_user_from_model(galleryUser=galleryUser)))
+
+    @router.get('/collections/{registryAddress}/users/{userAddress}/badges')
+    async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserBadgeResponse:
+        galleryUserBadge = await galleryManager.get_gallery_user_badge(registryAddress=registryAddress, userAddress=userAddress)
+        return GetGalleryCollectionUserBadgeResponse(galleryUserBadge=(await responseBuilder.gallery_user_badge_from_model(galleryUserBadge=galleryUserBadge)))
 
     @router.post('/collections/{registryAddress}/users/{userAddress}/follow')
     async def follow_gallery_user(registryAddress: str, userAddress: str, request: FollowCollectionUserRequest) -> FollowCollectionUserResponse:

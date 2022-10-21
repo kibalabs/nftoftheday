@@ -448,17 +448,6 @@ class GalleryToken:
 
 
 @dataclasses.dataclass
-class GalleryUser:
-    address: str
-    registryAddress: str
-    userProfile: Optional[UserProfile]
-    twitterProfile: Optional[TwitterProfile]
-    ownedTokenCount: int
-    uniqueOwnedTokenCount: int
-    joinDate: Optional[datetime.datetime]
-
-
-@dataclasses.dataclass
 class GalleryOwnedCollection:
     collection: Collection
     tokenMetadatas: List[TokenMetadata]
@@ -553,7 +542,25 @@ class GalleryBadgeHolder(RetrievedGalleryBadgeHolder):
 
 
 @dataclasses.dataclass
+class GalleryUser:
+    address: str
+    registryAddress: str
+    userProfile: Optional[UserProfile]
+    twitterProfile: Optional[TwitterProfile]
+    ownedTokenCount: int
+    uniqueOwnedTokenCount: int
+    joinDate: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass
+class GalleryUserBadge:
+    address: str
+    registryAddress: str
+    galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
+
+
+@dataclasses.dataclass
 class GalleryUserRow:
     galleryUser: GalleryUser
     chosenOwnedTokens: List[TokenMetadata]
-    galleryBadgeHolders: List[GalleryBadgeHolder]
+    galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]

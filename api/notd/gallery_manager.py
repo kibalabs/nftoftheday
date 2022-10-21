@@ -19,6 +19,7 @@ from core.util import list_util
 from core.web3.eth_client import EthClientInterface
 from eth_account.messages import defunct_hash_message
 from web3 import Web3
+from notd.model import GalleryUserBadge
 from notd.store.schema_conversions import gallery_badge_holder_from_row
 from notd.model import GalleryBadgeHolder
 from notd.store.schema import GalleryBadgeHoldersTable
@@ -301,6 +302,24 @@ class GalleryManager:
             joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate] if userRow else None,
         )
         return galleryUser
+    
+    async def get_gallery_user_badge(self, registryAddress: str, userAddress: str) -> GalleryUserBadge:
+        galleryUserBadgesQuery = (
+            sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+                .where(GalleryBadgeHoldersTable.c.ownerAddress == userAddress)
+        )
+        galleryUserBadgesResult = await self.retriever.database.execute(query=galleryUserBadgesQuery)
+        galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
+        for galleryBadgeHolderRow in galleryUserBadgesResult:
+            galleryBadgeHolders[userAddress].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
+        galleryUserBadge = GalleryUserBadge(
+            address=userAddress,
+            registryAddress=registryAddress,
+            galleryBadgeHolders=galleryBadgeHolders[userAddress]
+        )
+        return galleryUserBadge
 
     async def query_collection_users(self, registryAddress, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
         ownedCountColumn = sqlalchemy.func.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')
