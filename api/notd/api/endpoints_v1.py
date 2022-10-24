@@ -19,6 +19,7 @@ from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
+from notd.api.models_v1 import ApiGalleryUserBadge
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
@@ -285,6 +286,12 @@ class GetGalleryCollectionUserRequest(BaseModel):
 
 class GetGalleryCollectionUserResponse(BaseModel):
     galleryUser: ApiGalleryUser
+
+class ListGalleryUserBadgeRequest(BaseModel):
+    pass
+
+class ListGalleryUserBadgesResponse(BaseModel):
+    galleryUserBadges: List[ApiGalleryUserBadge]
 
 class FollowCollectionUserRequest(BaseModel):
     account: str

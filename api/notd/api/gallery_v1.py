@@ -13,6 +13,7 @@ from notd.api.endpoints_v1 import GetGalleryUserOwnedCollectionsResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapsResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapSummariesResponse
+from notd.api.endpoints_v1 import ListGalleryUserBadgesResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
 from notd.api.endpoints_v1 import QueryCollectionUsersRequest
@@ -83,6 +84,11 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def get_gallery_user(registryAddress: str, userAddress: str) -> GetGalleryCollectionUserResponse:
         galleryUser = await galleryManager.get_gallery_user(registryAddress=registryAddress, userAddress=userAddress)
         return GetGalleryCollectionUserResponse(galleryUser=(await responseBuilder.gallery_user_from_model(galleryUser=galleryUser)))
+
+    @router.get('/collections/{registryAddress}/users/{userAddress}/badges')
+    async def list_gallery_user_badges(registryAddress: str, userAddress: str) -> ListGalleryUserBadgesResponse:
+        galleryUserBadges = await galleryManager.list_gallery_user_badges(registryAddress=registryAddress, userAddress=userAddress)
+        return ListGalleryUserBadgesResponse(galleryUserBadges=(await responseBuilder.gallery_user_badges_from_models(galleryBadgeHolders=galleryUserBadges)))
 
     @router.post('/collections/{registryAddress}/users/{userAddress}/follow')
     async def follow_gallery_user(registryAddress: str, userAddress: str, request: FollowCollectionUserRequest) -> FollowCollectionUserResponse:

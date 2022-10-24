@@ -27,6 +27,7 @@ from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
 from notd.model import CollectionOverlapSummary
+from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
@@ -39,6 +40,7 @@ from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import OrderedTokenListingsView
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
@@ -53,6 +55,7 @@ from notd.store.schema import UserProfilesTable
 from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
 from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 from notd.store.schema_conversions import collection_from_row
+from notd.store.schema_conversions import gallery_badge_holder_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
@@ -300,6 +303,20 @@ class GalleryManager:
         )
         return galleryUser
 
+    async def list_gallery_user_badges(self, registryAddress: str, userAddress: str) -> Optional[List[GalleryBadgeHolder]]:
+        galleryUserBadgesQuery = (
+            sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+                .where(GalleryBadgeHoldersTable.c.ownerAddress == userAddress)
+        )
+        galleryUserBadgesResult = await self.retriever.database.execute(query=galleryUserBadgesQuery)
+        galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
+        for galleryBadgeHolderRow in galleryUserBadgesResult:
+            galleryBadgeHolders[userAddress].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
+        galleryBadges=galleryBadgeHolders[userAddress]
+        return galleryBadges
+
     async def query_collection_users(self, registryAddress, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
         ownedCountColumn = sqlalchemy.func.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')
         uniqueOwnedCountColumn = sqlalchemy.func.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')
@@ -352,6 +369,15 @@ class GalleryManager:
         chosenTokens: Dict[str, List[TokenMetadata]] = defaultdict(list)
         for chosenTokenRow in chosenTokensResult:
             chosenTokens[chosenTokenRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]].append(token_metadata_from_row(chosenTokenRow))
+        galleryBadgeHoldersQuery = (
+            sqlalchemy.select(GalleryBadgeHoldersTable)
+                .where(GalleryBadgeHoldersTable.c.registryAddress == registryAddress)
+                .where(GalleryBadgeHoldersTable.c.ownerAddress.in_(ownerAddresses))
+        )
+        galleryBadgeHoldersResult = await self.retriever.database.execute(query=galleryBadgeHoldersQuery)
+        galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
+        for galleryBadgeHolderRow in galleryBadgeHoldersResult:
+            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersTable.c.ownerAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
         items = [GalleryUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
@@ -363,6 +389,7 @@ class GalleryManager:
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
+            galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=totalCount)
 

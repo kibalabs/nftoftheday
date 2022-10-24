@@ -459,12 +459,6 @@ class GalleryUser:
 
 
 @dataclasses.dataclass
-class GalleryUserRow:
-    galleryUser: GalleryUser
-    chosenOwnedTokens: List[TokenMetadata]
-
-
-@dataclasses.dataclass
 class GalleryOwnedCollection:
     collection: Collection
     tokenMetadatas: List[TokenMetadata]
@@ -556,3 +550,10 @@ class GalleryBadgeHolder(RetrievedGalleryBadgeHolder):
     galleryBadgeHolderId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class GalleryUserRow:
+    galleryUser: GalleryUser
+    chosenOwnedTokens: List[TokenMetadata]
+    galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
