@@ -370,15 +370,14 @@ class GalleryManager:
         for chosenTokenRow in chosenTokensResult:
             chosenTokens[chosenTokenRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]].append(token_metadata_from_row(chosenTokenRow))
         galleryBadgeHoldersQuery = (
-            sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
-                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
-                .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
+            sqlalchemy.select(GalleryBadgeHoldersTable)
+                .where(GalleryBadgeHoldersTable.c.registryAddress == registryAddress)
                 .where(GalleryBadgeHoldersTable.c.ownerAddress.in_(ownerAddresses))
         )
         galleryBadgeHoldersResult = await self.retriever.database.execute(query=galleryBadgeHoldersQuery)
         galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
         for galleryBadgeHolderRow in galleryBadgeHoldersResult:
-            galleryBadgeHolders[galleryBadgeHolderRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
+            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersTable.c.ownerAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
         items = [GalleryUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
@@ -390,7 +389,7 @@ class GalleryManager:
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
-            galleryBadgeHolders=galleryBadgeHolders[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
+            galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=totalCount)
 

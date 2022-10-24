@@ -187,7 +187,7 @@ class ApiGalleryUser(BaseModel):
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
     chosenOwnedTokens: List[ApiCollectionToken]
-    galleryBadgeHolders: List[ApiGalleryUserBadge]
+    galleryUserBadges: List[ApiGalleryUserBadge]
 
 
 class ApiGalleryOwnedCollection(BaseModel):

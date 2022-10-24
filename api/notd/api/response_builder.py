@@ -319,7 +319,7 @@ class ResponseBuilder:
         return ApiGalleryUserRow(
             galleryUser=(await self.gallery_user_from_model(galleryUserRow.galleryUser)),
             chosenOwnedTokens=(await self.collection_tokens_from_models(tokenMetadatas=galleryUserRow.chosenOwnedTokens)),
-            galleryBadgeHolders=(await self.gallery_user_badges_from_models(galleryBadgeHolders=galleryUserRow.galleryBadgeHolders))
+            galleryUserBadges=(await self.gallery_user_badges_from_models(galleryBadgeHolders=galleryUserRow.galleryBadgeHolders) if galleryUserRow.galleryBadgeHolders else [])
         )
 
     async def gallery_user_rows_from_models(self, galleryUserRows: Sequence[GalleryUserRow]) -> Sequence[ApiGalleryUserRow]:
