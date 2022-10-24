@@ -6,7 +6,6 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
-from notd.api.models_v1 import ApiGalleryUserBadge
 
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
@@ -20,6 +19,7 @@ from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
+from notd.api.models_v1 import ApiGalleryUserBadge
 from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
