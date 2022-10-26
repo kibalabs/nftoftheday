@@ -13,6 +13,7 @@ from notd.api.models_v1 import ApiCollection
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionOverlap
+from notd.api.models_v1 import ApiCollectionOverlapOwner
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
@@ -370,6 +371,12 @@ class ListGalleryCollectionOverlapSummariesRequest(BaseModel):
 
 class ListGalleryCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
+
+class ListGalleryCollectionOverlapOwnersRequest(BaseModel):
+    pass
+
+class ListGalleryCollectionOverlapOwnersResponse(BaseModel):
+    collectionOverlapOwners: List[ApiCollectionOverlapOwner]
 
 class ListAllListingsForCollectionTokenResponse(BaseModel):
     tokenListings: List[ApiTokenListing]

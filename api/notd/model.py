@@ -1,4 +1,5 @@
 import datetime
+from typing import TYPE_CHECKING
 from typing import Dict
 from typing import Generic
 from typing import List
@@ -533,6 +534,15 @@ class CollectionOverlapSummary:
     registryAddress: str
     otherCollection: Collection
     ownerCount: int
+    registryTokenCount: int
+    otherRegistryTokenCount: int
+
+
+@dataclasses.dataclass
+class CollectionOverlapOwner:
+    registryAddress: str
+    otherCollection: Collection
+    ownerAddress: str
     registryTokenCount: int
     otherRegistryTokenCount: int
 
