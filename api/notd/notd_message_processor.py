@@ -1,7 +1,7 @@
 from core import logging
 from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
-from core.queues.model import SqsMessage
+from core.queues.model import Message
 from core.util import date_util
 
 from notd.manager import NotdManager
@@ -35,7 +35,7 @@ class NotdMessageProcessor(MessageProcessor):
     def __init__(self, notdManager: NotdManager):
         self.notdManager = notdManager
 
-    async def process_message(self, message: SqsMessage) -> None:
+    async def process_message(self, message: Message) -> None:
         if message.command == ProcessBlockMessageContent.get_command():
             messageContent = ProcessBlockMessageContent.parse_obj(message.content)
             await self.notdManager.process_block(blockNumber=messageContent.blockNumber, shouldSkipProcessingTokens=messageContent.shouldSkipProcessingTokens)

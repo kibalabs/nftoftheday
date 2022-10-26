@@ -135,7 +135,7 @@ class ListingManager:
             raise MessageNeedsReprocessingException(delaySeconds=(60 * 10), originalException=exception)
         await self.saver.update_latest_update(latestUpdateId=latestFullUpdate.latestUpdateId, date=currentDate)
 
-    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> List[TokenListing]:
         query = (
             OrderedTokenListingsView.select()
             .where(OrderedTokenListingsView.c.registryAddress == registryAddress)

@@ -127,7 +127,7 @@ class NotdManager:
         count = result.scalar()
         return count
 
-    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
+    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TradedToken:
         query = (
             TokenTransfersTable.select()
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
@@ -316,7 +316,7 @@ class NotdManager:
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
-    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> List[TokenListing]:
         return await self.listingManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
 
     async def subscribe_email(self, email: str) -> None:
