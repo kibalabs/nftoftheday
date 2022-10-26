@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from typing import Any
 from typing import Mapping
 from typing import Optional
 from typing import Union

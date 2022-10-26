@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 from typing import TYPE_CHECKING
 from typing import Dict
@@ -5,7 +6,6 @@ from typing import Generic
 from typing import List
 from typing import Optional
 from typing import TypeVar
-import dataclasses
 
 from core.util import date_util
 from core.util.typing_util import JSON
