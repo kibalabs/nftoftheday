@@ -5,7 +5,6 @@ from typing import Generic
 from typing import List
 from typing import Optional
 from typing import TypeVar
-import typing
 
 from core.util import date_util
 from core.util.typing_util import JSON
