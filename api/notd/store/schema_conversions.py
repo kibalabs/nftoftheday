@@ -1,9 +1,10 @@
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any
 from typing import Mapping
 from typing import Optional
+from typing import Union
 
-from sqlalchemy import Column, Table
-from sqlalchemy.engine import RowProxy
+from sqlalchemy import Column
+from sqlalchemy import Table
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -48,6 +49,11 @@ from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
 from notd.store.schema import UserProfilesTable
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import RowProxy
+else:
+    RowProxy = Any
 
 RowType = Union[Mapping[Column[Any], Any], RowProxy]  # type: ignore[misc]
 
