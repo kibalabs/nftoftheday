@@ -1,13 +1,14 @@
 import datetime
+import dataclasses
 from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Optional
 from typing import TypeVar
+import typing
 
 from core.util import date_util
 from core.util.typing_util import JSON
-from pydantic import dataclasses
 
 WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
@@ -135,15 +136,15 @@ class Token:
     registryAddress: str
     tokenId: str
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> JSON:
         return {
             'registryAddress': self.registryAddress,
             'tokenId': self.tokenId,
         }
 
     @classmethod
-    def from_dict(cls, tokenDict: Dict):
-        return cls(registryAddress=tokenDict['registryAddress'], tokenId=tokenDict['tokenId'])
+    def from_dict(cls, tokenDict: JSON):
+        return cls(registryAddress=str(tokenDict['registryAddress']), tokenId=str(tokenDict['tokenId']))
 
 
 @dataclasses.dataclass
@@ -151,7 +152,7 @@ class BaseSponsoredToken:
     date: datetime.datetime
     token: Token
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> JSON:
         return {
             'date': date_util.datetime_to_string(dt=self.date),
             'token': self.token.to_dict(),
@@ -383,7 +384,7 @@ class Signature:
     message: str
     signature: str
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> JSON:
         return {
             'message': self.message,
             'signature': self.signature,

@@ -109,7 +109,7 @@ async def main():
     await tokenQueue.connect()
     try:
         while True:
-            hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=3, longPollSeconds=1, shouldProcessInParallel=True)
+            hasProcessedWork = await workQueueProcessor.execute_batch(batchSize=1, longPollSeconds=1, shouldProcessInParallel=True)
             if not hasProcessedWork:
                 break
     finally:
