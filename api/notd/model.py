@@ -538,6 +538,15 @@ class CollectionOverlapSummary:
 
 
 @dataclasses.dataclass
+class CollectionOverlapOwner:
+    registryAddress: str
+    otherCollection: Collection
+    ownerAddress: str
+    registryTokenCount: int
+    otherRegistryTokenCount: int
+
+
+@dataclasses.dataclass
 class RetrievedGalleryBadgeHolder:
     registryAddress: str
     ownerAddress: str

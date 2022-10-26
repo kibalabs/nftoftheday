@@ -26,6 +26,7 @@ from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
+from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
 from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
@@ -465,6 +466,34 @@ class GalleryManager:
                 registryAddress=row[TokenCollectionOverlapsTable.c.registryAddress],
                 otherCollection=collection_from_row(row=row),
                 ownerCount=row['ownerCount'],
+                registryTokenCount=row['registryTokenCount'],
+                otherRegistryTokenCount=row['otherRegistryTokenCount'],
+            ) for row in rows
+        ]
+
+    async def list_gallery_collection_overlap_owners(self, registryAddress: str) -> List[CollectionOverlapOwner]:
+        query = (
+            sqlalchemy.select(
+                TokenCollectionOverlapsTable.c.registryAddress,
+                TokenCollectionOverlapsTable.c.otherRegistryAddress,
+                TokenCollectionOverlapsTable.c.ownerAddress,
+                TokenCollectionsTable,
+                sqlalchemy.func.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),
+                sqlalchemy.func.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),
+            )
+            .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+            .join(TokenCollectionsTable, TokenCollectionsTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+            .where(TokenCollectionOverlapsTable.c.registryAddress == registryAddress)
+            .order_by(CollectionTotalActivitiesTable.c.totalValue.desc())
+            .group_by(TokenCollectionOverlapsTable.c.registryAddress, TokenCollectionOverlapsTable.c.otherRegistryAddress, TokenCollectionsTable, CollectionTotalActivitiesTable.c.totalValue, TokenCollectionOverlapsTable.c.ownerAddress)
+        )
+        result = await self.retriever.database.execute(query=query)
+        rows = list(result)
+        return [
+            CollectionOverlapOwner(
+                registryAddress=row[TokenCollectionOverlapsTable.c.registryAddress],
+                otherCollection=collection_from_row(row=row),
+                ownerAddress=row[TokenCollectionOverlapsTable.c.ownerAddress],
                 registryTokenCount=row['registryTokenCount'],
                 otherRegistryTokenCount=row['otherRegistryTokenCount'],
             ) for row in rows

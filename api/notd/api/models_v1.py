@@ -247,3 +247,11 @@ class ApiCollectionOverlapSummary(BaseModel):
     ownerCount: int
     registryTokenCount: int
     otherRegistryTokenCount: int
+
+
+class ApiCollectionOverlapOwner(BaseModel):
+    registryAddress: str
+    otherCollection: ApiCollection
+    ownerAddress: str
+    registryTokenCount: int
+    otherRegistryTokenCount: int
