@@ -8,7 +8,7 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
-from sqlalchemy import select
+import sqlalchemy
 from sqlalchemy.sql import Select
 
 from notd.model import AccountCollectionGm, Block
@@ -103,7 +103,10 @@ class Retriever(CoreRetriever):
         return block
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
-        query = select([TokenTransfersTable, BlocksTable]).join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        query = typing.cast(Select, (
+            sqlalchemy.select([TokenTransfersTable, BlocksTable])
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+        ))
         if fieldFilters:
             for fieldFilter in fieldFilters:
                 if fieldFilter.fieldName in {BlocksTable.c.blockDate.key, BlocksTable.c.updatedDate.key}:

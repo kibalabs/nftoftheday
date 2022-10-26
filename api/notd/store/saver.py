@@ -58,6 +58,7 @@ _EMPTY_STRING = '_EMPTY_STRING'
 _EMPTY_OBJECT = '_EMPTY_OBJECT'
 
 CreateRecordDict = Dict[str, Union[str, int, float, None, bool, datetime.datetime]]
+UpdateRecordDict = Dict[str, Union[str, int, float, None, bool, datetime.datetime]]
 
 class Saver(CoreSaver):
 
@@ -135,7 +136,7 @@ class Saver(CoreSaver):
         )
 
     async def update_block(self, blockId: int, blockHash: Optional[str] = None, blockDate: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if blockHash is not None:
             values[BlocksTable.c.blockHash.key] = blockHash
         if blockDate is not None:
@@ -186,7 +187,7 @@ class Saver(CoreSaver):
         )
 
     async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, resizableImageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, frameImageUrl: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if metadataUrl is not None:
             values[TokenMetadatasTable.c.metadataUrl.key] = metadataUrl
         if name != _EMPTY_STRING:
@@ -257,7 +258,7 @@ class Saver(CoreSaver):
         )
 
     async def update_collection(self, collectionId: int, name: Optional[str] = _EMPTY_STRING, symbol: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, twitterUsername: Optional[str] = _EMPTY_STRING, instagramUsername: Optional[str] = _EMPTY_STRING, wikiUrl: Optional[str] = _EMPTY_STRING, openseaSlug: Optional[str] = _EMPTY_STRING, url: Optional[str] = _EMPTY_STRING, discordUrl: Optional[str] = _EMPTY_STRING, bannerImageUrl: Optional[str] = _EMPTY_STRING, doesSupportErc721: Optional[bool] = None, doesSupportErc1155: Optional[bool] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if name != _EMPTY_STRING:
             values[TokenCollectionsTable.c.name.key] = name
         if symbol != _EMPTY_STRING:
@@ -318,7 +319,7 @@ class Saver(CoreSaver):
         )
 
     async def update_token_ownership(self, tokenOwnershipId: int, ownerAddress: Optional[str] = None, transferDate: Optional[str] = None, transferValue: Optional[int] = None, transferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if ownerAddress is not None:
             values[TokenOwnershipsTable.c.ownerAddress.key] = ownerAddress
         if transferValue is not None:
@@ -368,7 +369,7 @@ class Saver(CoreSaver):
         return tokenMultiOwnershipIds
 
     async def update_token_multi_ownership(self, tokenMultiOwnershipId: int, ownerAddress: Optional[str] = None, quantity: Optional[int] = None, averageTransferValue: Optional[int] = None, latestTransferDate: Optional[str] = None, latestTransferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if ownerAddress is not None:
             values[TokenMultiOwnershipsTable.c.ownerAddress.key] = ownerAddress
         if quantity is not None:
@@ -423,7 +424,7 @@ class Saver(CoreSaver):
         )
 
     async def update_collection_hourly_activity(self, collectionActivityId: int, address: Optional[str], date: Optional[datetime.datetime], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if address is not None:
             values[CollectionHourlyActivitiesTable.c.address.key] = address
         if date is not None:
@@ -476,7 +477,7 @@ class Saver(CoreSaver):
         )
 
     async def update_collection_total_activity(self, collectionTotalActivityId: int, address: Optional[str], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if address is not None:
             values[CollectionTotalActivitiesTable.c.address.key] = address
         if transferCount is not None:
@@ -545,7 +546,7 @@ class Saver(CoreSaver):
         )
 
     async def update_latest_update(self, latestUpdateId: int, key: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, date: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if key is not None:
             values[LatestUpdatesTable.c.key.key] = key
         if name != _EMPTY_STRING:
@@ -627,7 +628,7 @@ class Saver(CoreSaver):
 
     async def create_latest_token_listings(self, retrievedTokenListings: List[RetrievedTokenListing], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenListings) == 0:
-            return
+            return []
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         latestTokenListingIds = []
@@ -731,7 +732,7 @@ class Saver(CoreSaver):
         )
 
     async def update_user_profile(self, userProfileId: int, twitterId: Optional[str] = _EMPTY_STRING, discordId: Optional[str] = _EMPTY_STRING, signatureDict: Optional[Dict] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if twitterId != _EMPTY_STRING:
             values[UserProfilesTable.c.twitterId.key] = twitterId
         if discordId != _EMPTY_STRING:
@@ -768,7 +769,7 @@ class Saver(CoreSaver):
         )
 
     async def update_twitter_credential(self, twitterCredentialId: int, accessToken: Optional[str] = None, refreshToken: Optional[str] = None, expiryDate: Optional[datetime.datetime] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if accessToken is not None:
             values[TwitterCredentialsTable.c.accessToken.key] = accessToken
         if refreshToken is not None:
@@ -815,7 +816,7 @@ class Saver(CoreSaver):
         )
 
     async def update_twitter_profile(self, twitterProfileId: int, username: Optional[str] = None, name: Optional[str] = None, description: Optional[str] = None, isVerified: Optional[bool] = None, pinnedTweetId: Optional[str] = None, followerCount: Optional[int] = None, followingCount: Optional[int] = None, tweetCount: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
-        values: Dict[str, Any] = {}
+        values: UpdateRecordDict = {}
         if username is not None:
             values[TwitterProfilesTable.c.username.key] = username
         if name is not None:
@@ -914,7 +915,7 @@ class Saver(CoreSaver):
 
     async def create_collection_overlaps(self, retrievedCollectionOverlaps: List[RetrievedCollectionOverlap], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedCollectionOverlaps) == 0:
-            return
+            return []
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         latestCollectionOverlapsIds = []
@@ -957,7 +958,7 @@ class Saver(CoreSaver):
 
     async def create_gallery_badge_holders(self, retrievedGalleryBadgeHolders: List[RetrievedGalleryBadgeHolder], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedGalleryBadgeHolders) == 0:
-            return
+            return []
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         latestGalleryBadgeHolderIds = []
