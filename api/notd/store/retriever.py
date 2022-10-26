@@ -1,15 +1,17 @@
 from typing import Optional
 from typing import Sequence
+import typing
 
 from core.exceptions import NotFoundException
 from core.store.database import DatabaseConnection
 from core.store.retriever import FieldFilter
+from core.store.retriever import DateFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 
-from notd.model import AccountCollectionGm
+from notd.model import AccountCollectionGm, Block
 from notd.model import AccountGm
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
@@ -75,7 +77,7 @@ from notd.store.schema_conversions import user_profile_from_row
 
 class Retriever(CoreRetriever):
 
-    async def list_blocks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
+    async def list_blocks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Block]:
         query = BlocksTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=BlocksTable, fieldFilters=fieldFilters)
@@ -90,7 +92,7 @@ class Retriever(CoreRetriever):
         blocks = [block_from_row(row) for row in result]
         return blocks
 
-    async def get_block_by_number(self, blockNumber: int, connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
+    async def get_block_by_number(self, blockNumber: int, connection: Optional[DatabaseConnection] = None) -> Block:
         query = BlocksTable.select() \
             .where(BlocksTable.c.blockNumber == blockNumber)
         result = await self.database.execute(query=query, connection=connection)
@@ -105,7 +107,7 @@ class Retriever(CoreRetriever):
         if fieldFilters:
             for fieldFilter in fieldFilters:
                 if fieldFilter.fieldName in {BlocksTable.c.blockDate.key, BlocksTable.c.updatedDate.key}:
-                    query = self._apply_date_field_filter(query=query, table=BlocksTable, fieldFilter=fieldFilter)
+                    query = self._apply_date_field_filter(query=query, table=BlocksTable, fieldFilter=typing.cast(DateFieldFilter, fieldFilter))
                 else:
                     query = self._apply_field_filter(query=query, table=TokenTransfersTable, fieldFilter=fieldFilter)
         if orders:

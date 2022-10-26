@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from typing import List, Optional
 from typing import Tuple
 
 import sqlalchemy
@@ -53,7 +53,7 @@ class TokenManager:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return tokenMetadata
 
-    async def update_token_metadatas_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: bool = False) -> None:
+    async def update_token_metadatas_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: Optional[bool] = False) -> None:
         if len(collectionTokenIds) == 0:
             return
         collectionTokenIdsToProcess = set()
@@ -73,7 +73,7 @@ class TokenManager:
         messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIdsToProcess]
         await self.tokenQueue.send_messages(messages=messages)
 
-    async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+    async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         if not shouldForce:
             recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
@@ -88,7 +88,7 @@ class TokenManager:
                 return
         await self.tokenQueue.send_message(message=UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
-    async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+    async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         if not shouldForce:
             recentlyUpdatedTokens = await self.retriever.list_token_metadatas(
@@ -137,7 +137,7 @@ class TokenManager:
                     retrievedTokenMetadata = TokenMetadataProcessor.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
                 await self.saver.create_token_metadata(connection=connection, registryAddress=retrievedTokenMetadata.registryAddress, tokenId=retrievedTokenMetadata.tokenId, metadataUrl=retrievedTokenMetadata.metadataUrl, name=retrievedTokenMetadata.name, description=retrievedTokenMetadata.description, imageUrl=retrievedTokenMetadata.imageUrl, resizableImageUrl=retrievedTokenMetadata.resizableImageUrl, animationUrl=retrievedTokenMetadata.animationUrl, youtubeUrl=retrievedTokenMetadata.youtubeUrl, backgroundColor=retrievedTokenMetadata.backgroundColor, frameImageUrl=retrievedTokenMetadata.frameImageUrl, attributes=retrievedTokenMetadata.attributes)
 
-    async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection_tokens(self, address: str, shouldForce: Optional[bool] = False) -> None:
         address = chain_util.normalize_address(value=address)
         tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
             StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
@@ -147,7 +147,7 @@ class TokenManager:
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
         await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
 
-    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False):
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: Optional[bool] = False):
         address = chain_util.normalize_address(value=address)
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 

@@ -57,10 +57,12 @@ from notd.store.schema import UserProfilesTable
 _EMPTY_STRING = '_EMPTY_STRING'
 _EMPTY_OBJECT = '_EMPTY_OBJECT'
 
+CreateRecordDict = Dict[str, Union[str, int, float, None, bool, datetime.datetime]]
+
 class Saver(CoreSaver):
 
     @staticmethod
-    def _get_create_token_transfer_values(retrievedTokenTransfer: RetrievedTokenTransfer) -> Dict[str, Union[str, int, float, None, bool]]:
+    def _get_create_token_transfer_values(retrievedTokenTransfer: RetrievedTokenTransfer) -> CreateRecordDict:
         return {
             TokenTransfersTable.c.transactionHash.key: retrievedTokenTransfer.transactionHash,
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
@@ -75,23 +77,23 @@ class Saver(CoreSaver):
             TokenTransfersTable.c.gasPrice.key: retrievedTokenTransfer.gasPrice,
             TokenTransfersTable.c.blockNumber.key: retrievedTokenTransfer.blockNumber,
             TokenTransfersTable.c.tokenType.key: retrievedTokenTransfer.tokenType,
-            TokenTransfersTable.c.isMultiAddress: retrievedTokenTransfer.isMultiAddress,
-            TokenTransfersTable.c.isInterstitial: retrievedTokenTransfer.isInterstitial,
-            TokenTransfersTable.c.isSwap: retrievedTokenTransfer.isSwap,
-            TokenTransfersTable.c.isBatch: retrievedTokenTransfer.isBatch,
-            TokenTransfersTable.c.isOutbound: retrievedTokenTransfer.isOutbound,
+            TokenTransfersTable.c.isMultiAddress.key: retrievedTokenTransfer.isMultiAddress,
+            TokenTransfersTable.c.isInterstitial.key: retrievedTokenTransfer.isInterstitial,
+            TokenTransfersTable.c.isSwap.key: retrievedTokenTransfer.isSwap,
+            TokenTransfersTable.c.isBatch.key: retrievedTokenTransfer.isBatch,
+            TokenTransfersTable.c.isOutbound.key: retrievedTokenTransfer.isOutbound,
         }
 
     async def create_token_transfer(self, retrievedTokenTransfer: RetrievedTokenTransfer, connection: Optional[DatabaseConnection] = None) -> int:
         values = self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer)
         query = TokenTransfersTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenTransferId = result.inserted_primary_key[0]
+        tokenTransferId = int(result.inserted_primary_key[0])
         return tokenTransferId
 
     async def create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenTransfers) == 0:
-            return
+            return []
         tokenTransferIds = []
         for chunk in list_util.generate_chunks(lst=retrievedTokenTransfers, chunkSize=100):
             values = [self._get_create_token_transfer_values(retrievedTokenTransfer=retrievedTokenTransfer) for retrievedTokenTransfer in chunk]
@@ -122,7 +124,7 @@ class Saver(CoreSaver):
         }
         query = BlocksTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        blockId = result.inserted_primary_key[0]
+        blockId = int(result.inserted_primary_key[0])
         return Block(
             blockId=blockId,
             createdDate=createdDate,
@@ -143,7 +145,7 @@ class Saver(CoreSaver):
         query = BlocksTable.update(BlocksTable.c.blockId == blockId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_metadata(self, tokenId: int, registryAddress: str, metadataUrl: str, name: Optional[str], description: Optional[str], imageUrl: Optional[str], resizableImageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], frameImageUrl: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
+    async def create_token_metadata(self, tokenId: str, registryAddress: str, metadataUrl: str, name: Optional[str], description: Optional[str], imageUrl: Optional[str], resizableImageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], frameImageUrl: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -164,7 +166,7 @@ class Saver(CoreSaver):
         }
         query = TokenMetadatasTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenMetadataId = result.inserted_primary_key[0]
+        tokenMetadataId = int(result.inserted_primary_key[0])
         return TokenMetadata(
             tokenMetadataId=tokenMetadataId,
             createdDate=createdDate,
@@ -233,7 +235,7 @@ class Saver(CoreSaver):
         }
         query = TokenCollectionsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        collectionId = result.inserted_primary_key[0]
+        collectionId = int(result.inserted_primary_key[0])
         return Collection(
             collectionId=collectionId,
             createdDate=createdDate,
@@ -302,7 +304,7 @@ class Saver(CoreSaver):
         }
         query = TokenOwnershipsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenOwnershipId = result.inserted_primary_key[0]
+        tokenOwnershipId = int(result.inserted_primary_key[0])
         return TokenOwnership(
             tokenOwnershipId=tokenOwnershipId,
             createdDate=createdDate,
@@ -331,7 +333,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_token_multi_ownership(creationDate: datetime.datetime, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> Dict[str, Union[str, int, float, None, bool, datetime.datetime]]:
+    def _get_create_token_multi_ownership(creationDate: datetime.datetime, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> CreateRecordDict:
         return {
             TokenMultiOwnershipsTable.c.createdDate.key: creationDate,
             TokenMultiOwnershipsTable.c.updatedDate.key: creationDate,
@@ -349,13 +351,13 @@ class Saver(CoreSaver):
         values = self._get_create_token_multi_ownership(creationDate=creationDate, retrievedTokenMultiOwnership=retrievedTokenMultiOwnership)
         query = TokenMultiOwnershipsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenTransferId = result.inserted_primary_key[0]
+        tokenTransferId = int(result.inserted_primary_key[0])
         return tokenTransferId
 
 
     async def create_token_multi_ownerships(self, retrievedTokenMultiOwnerships: List[RetrievedTokenMultiOwnership], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenMultiOwnerships) == 0:
-            return
+            return []
         creationDate = date_util.datetime_from_now()
         tokenMultiOwnershipIds = []
         for chunk in list_util.generate_chunks(lst=retrievedTokenMultiOwnerships, chunkSize=100):
@@ -405,7 +407,7 @@ class Saver(CoreSaver):
         }
         query = CollectionHourlyActivitiesTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        collectionActivityId = result.inserted_primary_key[0]
+        collectionActivityId = int(result.inserted_primary_key[0])
         return CollectionHourlyActivity(
             collectionActivityId=collectionActivityId,
             createdDate=createdDate,
@@ -459,7 +461,7 @@ class Saver(CoreSaver):
         }
         query = CollectionTotalActivitiesTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        collectionTotalActivityId = result.inserted_primary_key[0]
+        collectionTotalActivityId = int(result.inserted_primary_key[0])
         return CollectionTotalActivity(
             collectionTotalActivityId=collectionTotalActivityId,
             createdDate=createdDate,
@@ -508,7 +510,7 @@ class Saver(CoreSaver):
         }
         query = UserInteractionsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        userInteractionId = result.inserted_primary_key[0]
+        userInteractionId = int(result.inserted_primary_key[0])
         return UserInteraction(
             userInteractionId=userInteractionId,
             createdDate=createdDate,
@@ -532,7 +534,7 @@ class Saver(CoreSaver):
         }
         query = LatestUpdatesTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        latestUpdateId = result.inserted_primary_key[0]
+        latestUpdateId = int(result.inserted_primary_key[0])
         return LatestUpdate(
             latestUpdateId=latestUpdateId,
             createdDate=createdDate,
@@ -556,7 +558,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_token_attributes_values(retrievedTokenAttribute: RetrievedTokenAttribute, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+    def _get_create_token_attributes_values(retrievedTokenAttribute: RetrievedTokenAttribute, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
         return {
             TokenAttributesTable.c.createdDate.key: createdDate,
             TokenAttributesTable.c.updatedDate.key: updatedDate,
@@ -572,12 +574,12 @@ class Saver(CoreSaver):
         values = self._get_create_token_attributes_values(retrievedTokenAttribute=retrievedTokenAttribute, createdDate=createdDate, updatedDate=updatedDate)
         query = TokenAttributesTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenAttributeId = result.inserted_primary_key[0]
+        tokenAttributeId = int(result.inserted_primary_key[0])
         return tokenAttributeId
 
     async def create_token_attributes(self, retrievedTokenAttributes: List[RetrievedTokenAttribute], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenAttributes) == 0:
-            return
+            return []
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         tokenAttributeIds = []
@@ -599,7 +601,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_latest_token_listing_values(retrievedTokenListing: RetrievedTokenListing, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+    def _get_create_latest_token_listing_values(retrievedTokenListing: RetrievedTokenListing, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
         return {
             LatestTokenListingsTable.c.createdDate.key: createdDate,
             LatestTokenListingsTable.c.updatedDate.key: updatedDate,
@@ -620,7 +622,7 @@ class Saver(CoreSaver):
         values = self._get_create_latest_token_listing_values(retrievedTokenListing=retrievedTokenListing, createdDate=createdDate, updatedDate=updatedDate)
         query = LatestTokenListingsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        latestTokenListingId = result.inserted_primary_key[0]
+        latestTokenListingId = int(result.inserted_primary_key[0])
         return latestTokenListingId
 
     async def create_latest_token_listings(self, retrievedTokenListings: List[RetrievedTokenListing], connection: Optional[DatabaseConnection] = None) -> List[int]:
@@ -662,7 +664,7 @@ class Saver(CoreSaver):
         }
         query = TokenCustomizationsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        tokenCustomizationId = result.inserted_primary_key[0]
+        tokenCustomizationId = int(result.inserted_primary_key[0])
         return TokenCustomization(
             tokenCustomizationId=tokenCustomizationId,
             createdDate=createdDate,
@@ -691,7 +693,7 @@ class Saver(CoreSaver):
         }
         query = LocksTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        lockId = result.inserted_primary_key[0]
+        lockId = int(result.inserted_primary_key[0])
         return Lock(
             lockId=lockId,
             createdDate=createdDate,
@@ -717,7 +719,7 @@ class Saver(CoreSaver):
         }
         query = UserProfilesTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        userProfileId = result.inserted_primary_key[0]
+        userProfileId = int(result.inserted_primary_key[0])
         return UserProfile(
             userProfileId=userProfileId,
             createdDate=createdDate,
@@ -754,7 +756,7 @@ class Saver(CoreSaver):
         }
         query = TwitterCredentialsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        twitterCredentialId = result.inserted_primary_key[0]
+        twitterCredentialId = int(result.inserted_primary_key[0])
         return TwitterCredential(
             twitterCredentialId=twitterCredentialId,
             createdDate=createdDate,
@@ -796,7 +798,7 @@ class Saver(CoreSaver):
         }
         query = TwitterProfilesTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        twitterProfileId = result.inserted_primary_key[0]
+        twitterProfileId = int(result.inserted_primary_key[0])
         return TwitterProfile(
             twitterProfileId=twitterProfileId,
             createdDate=createdDate,
@@ -850,7 +852,7 @@ class Saver(CoreSaver):
         }
         query = AccountGmsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        accountGmId = result.inserted_primary_key[0]
+        accountGmId = int(result.inserted_primary_key[0])
         return AccountGm(
             accountGmId=accountGmId,
             createdDate=createdDate,
@@ -877,7 +879,7 @@ class Saver(CoreSaver):
         }
         query = AccountCollectionGmsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        accountCollectionGmId = result.inserted_primary_key[0]
+        accountCollectionGmId = int(result.inserted_primary_key[0])
         return AccountCollectionGm(
             accountCollectionGmId=accountCollectionGmId,
             createdDate=createdDate,
@@ -890,7 +892,7 @@ class Saver(CoreSaver):
         )
 
     @staticmethod
-    def _get_create_collection_overlaps_values(retrievedCollectionOverlap: RetrievedCollectionOverlap, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+    def _get_create_collection_overlaps_values(retrievedCollectionOverlap: RetrievedCollectionOverlap, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
         return {
             TokenCollectionOverlapsTable.c.createdDate.key: createdDate,
             TokenCollectionOverlapsTable.c.updatedDate.key: updatedDate,
@@ -907,7 +909,7 @@ class Saver(CoreSaver):
         values = self._get_create_collection_overlaps_values(retrievedCollectionOverlap=retrievedCollectionOverlap, createdDate=createdDate, updatedDate=updatedDate)
         query = TokenCollectionOverlapsTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        collectionOverlapId = result.inserted_primary_key[0]
+        collectionOverlapId = int(result.inserted_primary_key[0])
         return collectionOverlapId
 
     async def create_collection_overlaps(self, retrievedCollectionOverlaps: List[RetrievedCollectionOverlap], connection: Optional[DatabaseConnection] = None) -> List[int]:
@@ -934,7 +936,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder: RetrievedGalleryBadgeHolder, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> Dict[str, Union[str, int, float, None, bool]]:
+    def _get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder: RetrievedGalleryBadgeHolder, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
         return {
             GalleryBadgeHoldersTable.c.createdDate.key: createdDate,
             GalleryBadgeHoldersTable.c.updatedDate.key: updatedDate,
@@ -950,7 +952,7 @@ class Saver(CoreSaver):
         values = self._get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder=retrievedGalleryBadgeHolder, createdDate=createdDate, updatedDate=updatedDate)
         query = GalleryBadgeHoldersTable.insert().values(values)
         result = await self._execute(query=query, connection=connection)
-        galleryBadgeHolderId = result.inserted_primary_key[0]
+        galleryBadgeHolderId = int(result.inserted_primary_key[0])
         return galleryBadgeHolderId
 
     async def create_gallery_badge_holders(self, retrievedGalleryBadgeHolders: List[RetrievedGalleryBadgeHolder], connection: Optional[DatabaseConnection] = None) -> List[int]:

@@ -1,6 +1,5 @@
 import datetime
 from typing import List
-from typing import Optional
 
 from core import logging
 from core.queues.message_queue_processor import MessageNeedsReprocessingException

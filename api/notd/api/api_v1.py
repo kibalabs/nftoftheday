@@ -35,11 +35,8 @@ from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateAllTwitterUsersDeferredResponse
-from notd.api.endpoints_v1 import UpdateCollectionRequest
 from notd.api.endpoints_v1 import UpdateCollectionResponse
-from notd.api.endpoints_v1 import UpdateCollectionTokenRequest
 from notd.api.endpoints_v1 import UpdateCollectionTokenResponse
-from notd.api.endpoints_v1 import UpdateCollectionTokensRequest
 from notd.api.endpoints_v1 import UpdateCollectionTokensResponse
 from notd.api.endpoints_v1 import UpdateLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTokenAttributesForAllCollectionsDeferredResponse
@@ -205,7 +202,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         return GetCollectionTokenResponse(token=(await responseBuilder.collection_token_from_model(tokenMetadata=tokenMetadata)))
 
     @router.post('/collections/{registryAddress}/tokens/{tokenId}/update', response_model=UpdateCollectionTokenResponse)
-    async def update_token(registryAddress: str, tokenId: str, request: UpdateCollectionTokenRequest) -> UpdateCollectionTokenResponse:
+    async def update_token(registryAddress: str, tokenId: str) -> UpdateCollectionTokenResponse:
         await notdManager.update_token_deferred(registryAddress=registryAddress, tokenId=tokenId)
         return UpdateCollectionTokenResponse()
 

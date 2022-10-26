@@ -1,6 +1,9 @@
-from typing import Any
+from typing import Any, Union
 from typing import Mapping
 from typing import Optional
+
+from sqlalchemy import Column, Table
+from sqlalchemy.engine import RowProxy
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -46,8 +49,10 @@ from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
 from notd.store.schema import UserProfilesTable
 
+RowType = Union[Mapping[Column[Any], Any], RowProxy]  # type: ignore[misc]
 
-def token_transfer_from_row(row: Mapping) -> TokenTransfer:
+
+def token_transfer_from_row(row: RowType) -> TokenTransfer:
     return TokenTransfer(
         tokenTransferId=row[TokenTransfersTable.c.tokenTransferId],
         transactionHash=row[TokenTransfersTable.c.transactionHash],
@@ -73,7 +78,7 @@ def token_transfer_from_row(row: Mapping) -> TokenTransfer:
     )
 
 
-def block_from_row(row: Mapping) -> Block:
+def block_from_row(row: RowType) -> Block:
     return Block(
         blockId=row[BlocksTable.c.blockId],
         createdDate=row[BlocksTable.c.createdDate],
@@ -84,7 +89,7 @@ def block_from_row(row: Mapping) -> Block:
     )
 
 
-def token_metadata_from_row(row: Mapping) -> TokenMetadata:
+def token_metadata_from_row(row: RowType) -> TokenMetadata:
     return TokenMetadata(
         tokenMetadataId=row[TokenMetadatasTable.c.tokenMetadataId],
         createdDate=row[TokenMetadatasTable.c.createdDate],
@@ -104,7 +109,7 @@ def token_metadata_from_row(row: Mapping) -> TokenMetadata:
     )
 
 
-def collection_from_row(row: Mapping) -> Collection:
+def collection_from_row(row: RowType) -> Collection:
     return Collection(
         collectionId=row[TokenCollectionsTable.c.collectionId],
         createdDate=row[TokenCollectionsTable.c.createdDate],
@@ -126,7 +131,7 @@ def collection_from_row(row: Mapping) -> Collection:
     )
 
 
-def token_ownership_from_row(row: Mapping) -> TokenOwnership:
+def token_ownership_from_row(row: RowType) -> TokenOwnership:
     return TokenOwnership(
         tokenOwnershipId=row[TokenOwnershipsTable.c.tokenOwnershipId],
         createdDate=row[TokenOwnershipsTable.c.createdDate],
@@ -140,7 +145,7 @@ def token_ownership_from_row(row: Mapping) -> TokenOwnership:
     )
 
 
-def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
+def token_multi_ownership_from_row(row: RowType) -> TokenMultiOwnership:
     return TokenMultiOwnership(
         tokenMultiOwnershipId=row[TokenMultiOwnershipsTable.c.tokenMultiOwnershipId],
         createdDate=row[TokenMultiOwnershipsTable.c.createdDate],
@@ -155,7 +160,7 @@ def token_multi_ownership_from_row(row: Mapping) -> TokenMultiOwnership:
     )
 
 
-def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
+def collection_activity_from_row(row: RowType) -> CollectionHourlyActivity:
     return CollectionHourlyActivity(
         collectionActivityId=row[CollectionHourlyActivitiesTable.c.collectionActivityId],
         createdDate=row[CollectionHourlyActivitiesTable.c.createdDate],
@@ -171,7 +176,7 @@ def collection_activity_from_row(row: Mapping) -> CollectionHourlyActivity:
     )
 
 
-def collection_total_activity_from_row(row: Mapping) -> CollectionTotalActivity:
+def collection_total_activity_from_row(row: RowType) -> CollectionTotalActivity:
     return CollectionTotalActivity(
         collectionTotalActivityId=row[CollectionTotalActivitiesTable.c.collectionTotalActivityId],
         createdDate=row[CollectionTotalActivitiesTable.c.createdDate],
@@ -186,7 +191,7 @@ def collection_total_activity_from_row(row: Mapping) -> CollectionTotalActivity:
     )
 
 
-def user_interaction_from_row(row: Mapping) -> UserInteraction:
+def user_interaction_from_row(row: RowType) -> UserInteraction:
     return UserInteraction(
         userInteractionId=row[UserInteractionsTable.c.userInteractionId],
         createdDate=row[UserInteractionsTable.c.createdDate],
@@ -199,7 +204,7 @@ def user_interaction_from_row(row: Mapping) -> UserInteraction:
     )
 
 
-def latest_update_from_row(row: Mapping) -> LatestUpdate:
+def latest_update_from_row(row: RowType) -> LatestUpdate:
     return LatestUpdate(
         latestUpdateId=row[LatestUpdatesTable.c.latestUpdateId],
         createdDate=row[LatestUpdatesTable.c.createdDate],
@@ -210,7 +215,7 @@ def latest_update_from_row(row: Mapping) -> LatestUpdate:
     )
 
 
-def token_listing_from_row(row: Mapping, table: Optional[Any] = None) -> TokenListing:
+def token_listing_from_row(row: RowType, table: Optional[Table] = None) -> TokenListing:
     table = table if table is not None else LatestTokenListingsTable
     return TokenListing(
         tokenListingId=row[table.c.latestTokenListingId],
@@ -228,7 +233,7 @@ def token_listing_from_row(row: Mapping, table: Optional[Any] = None) -> TokenLi
     )
 
 
-def token_attribute_from_row(row: Mapping) -> TokenAttribute:
+def token_attribute_from_row(row: RowType) -> TokenAttribute:
     return TokenAttribute(
         tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
         createdDate=row[TokenAttributesTable.c.createdDate],
@@ -240,7 +245,7 @@ def token_attribute_from_row(row: Mapping) -> TokenAttribute:
     )
 
 
-def token_customization_from_row(row: Mapping) -> TokenCustomization:
+def token_customization_from_row(row: RowType) -> TokenCustomization:
     return TokenCustomization(
         tokenCustomizationId=row[TokenCustomizationsTable.c.tokenCustomizationId],
         createdDate=row[TokenCustomizationsTable.c.createdDate],
@@ -255,7 +260,7 @@ def token_customization_from_row(row: Mapping) -> TokenCustomization:
     )
 
 
-def lock_from_row(row: Mapping) -> Lock:
+def lock_from_row(row: RowType) -> Lock:
     return Lock(
         lockId=row[LocksTable.c.lockId],
         createdDate=row[LocksTable.c.createdDate],
@@ -265,7 +270,7 @@ def lock_from_row(row: Mapping) -> Lock:
     )
 
 
-def user_profile_from_row(row: Mapping) -> UserProfile:
+def user_profile_from_row(row: RowType) -> UserProfile:
     return UserProfile(
         userProfileId=row[UserProfilesTable.c.userProfileId],
         createdDate=row[UserProfilesTable.c.createdDate],
@@ -277,7 +282,7 @@ def user_profile_from_row(row: Mapping) -> UserProfile:
     )
 
 
-def twitter_credential_from_row(row: Mapping) -> TwitterCredential:
+def twitter_credential_from_row(row: RowType) -> TwitterCredential:
     return TwitterCredential(
         twitterCredentialId=row[TwitterCredentialsTable.c.twitterCredentialId],
         createdDate=row[TwitterCredentialsTable.c.createdDate],
@@ -289,7 +294,7 @@ def twitter_credential_from_row(row: Mapping) -> TwitterCredential:
     )
 
 
-def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
+def twitter_profile_from_row(row: RowType) -> TwitterProfile:
     return TwitterProfile(
         twitterProfileId=row[TwitterProfilesTable.c.twitterProfileId],
         createdDate=row[TwitterProfilesTable.c.createdDate],
@@ -306,7 +311,7 @@ def twitter_profile_from_row(row: Mapping) -> TwitterProfile:
     )
 
 
-def account_gm_from_row(row: Mapping) -> AccountGm:
+def account_gm_from_row(row: RowType) -> AccountGm:
     return AccountGm(
         accountGmId=row[AccountGmsTable.c.accountGmId],
         createdDate=row[AccountGmsTable.c.createdDate],
@@ -320,7 +325,7 @@ def account_gm_from_row(row: Mapping) -> AccountGm:
     )
 
 
-def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
+def account_collection_gm_from_row(row: RowType) -> AccountCollectionGm:
     return AccountCollectionGm(
         accountCollectionGmId=row[AccountCollectionGmsTable.c.accountCollectionGmId],
         createdDate=row[AccountCollectionGmsTable.c.createdDate],
@@ -333,7 +338,7 @@ def account_collection_gm_from_row(row: Mapping) -> AccountCollectionGm:
     )
 
 
-def collection_overlap_from_row(row: Mapping) -> CollectionOverlap:
+def collection_overlap_from_row(row: RowType) -> CollectionOverlap:
     return CollectionOverlap(
         collectionOverlapId=row[TokenCollectionOverlapsTable.c.collectionOverlapId],
         createdDate=row[TokenCollectionOverlapsTable.c.createdDate],
@@ -346,7 +351,7 @@ def collection_overlap_from_row(row: Mapping) -> CollectionOverlap:
     )
 
 
-def gallery_badge_holder_from_row(row: Mapping) -> GalleryBadgeHolder:
+def gallery_badge_holder_from_row(row: RowType) -> GalleryBadgeHolder:
     return GalleryBadgeHolder(
         galleryBadgeHolderId=row[GalleryBadgeHoldersTable.c.galleryBadgeHolderId],
         createdDate=row[GalleryBadgeHoldersTable.c.createdDate],

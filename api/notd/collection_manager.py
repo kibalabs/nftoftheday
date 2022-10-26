@@ -1,6 +1,6 @@
 import asyncio
 import random
-from typing import List
+from typing import List, Optional
 
 from core import logging
 from core.exceptions import NotFoundException
@@ -46,7 +46,7 @@ class CollectionManager:
             collection = await self.retriever.get_collection_by_address(address=address)
         return collection
 
-    async def update_collections_deferred(self, addresses: List[str], shouldForce: bool = False) -> None:
+    async def update_collections_deferred(self, addresses: List[str], shouldForce: Optional[bool] = False) -> None:
         if len(addresses) == 0:
             return
         if not shouldForce:
@@ -62,7 +62,7 @@ class CollectionManager:
         messages = [UpdateCollectionMessageContent(address=address).to_message() for address in addresses]
         await self.tokenQueue.send_messages(messages=messages)
 
-    async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection_deferred(self, address: str, shouldForce: Optional[bool] = False) -> None:
         address = chain_util.normalize_address(value=address)
         if not shouldForce:
             recentlyUpdatedCollections = await self.retriever.list_collections(
@@ -76,7 +76,7 @@ class CollectionManager:
                 return
         await self.tokenQueue.send_message(message=UpdateCollectionMessageContent(address=address).to_message())
 
-    async def update_collection(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection(self, address: str, shouldForce: Optional[bool] = False) -> None:
         address = chain_util.normalize_address(value=address)
         if not shouldForce:
             recentlyUpdatedCollections = await self.retriever.list_collections(
