@@ -73,7 +73,6 @@ class NotdManager:
         self.twitterManager = twitterManager
         self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
-        self._tokenCache = {}
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
@@ -125,7 +124,7 @@ class NotdManager:
             .where(BlocksTable.c.blockDate < endDate)
         )
         result = await self.retriever.database.execute(query=query)
-        count = result.scalar()
+        count = int(result.scalar())
         return count
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TradedToken:
