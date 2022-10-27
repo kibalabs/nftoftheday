@@ -10,7 +10,7 @@ from core.util import date_util
 from core.util import list_util
 from core.util.typing_util import JSON
 
-from notd.model import AccountCollectionGm, Signature
+from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
@@ -24,6 +24,7 @@ from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenTransfer
+from notd.model import Signature
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership

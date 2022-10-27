@@ -1,6 +1,5 @@
 
 import asyncio
-from typing import List
 from typing import Sequence
 
 from core.exceptions import NotFoundException
