@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from typing import List, Sequence
 from typing import Optional
 from typing import Tuple
 
@@ -54,7 +54,7 @@ class TokenManager:
             tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return tokenMetadata
 
-    async def update_token_metadatas_deferred(self, collectionTokenIds: List[Tuple[str, str]], shouldForce: Optional[bool] = False) -> None:
+    async def update_token_metadatas_deferred(self, collectionTokenIds: Sequence[Tuple[str, str]], shouldForce: Optional[bool] = False) -> None:
         if len(collectionTokenIds) == 0:
             return
         collectionTokenIdsToProcess = set()

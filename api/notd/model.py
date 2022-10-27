@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import datetime
 from typing import TYPE_CHECKING
@@ -146,8 +148,11 @@ class Token:
         }
 
     @classmethod
-    def from_dict(cls, tokenDict: JSON):
-        return cls(registryAddress=str(tokenDict['registryAddress']), tokenId=str(tokenDict['tokenId']))
+    def from_dict(cls, tokenDict: JSON) -> Token:
+        return cls(
+            registryAddress=str(tokenDict['registryAddress']),  # type: ignore[index, call-overload]
+            tokenId=str(tokenDict['tokenId']),  # type: ignore[index, call-overload]
+        )
 
 
 @dataclasses.dataclass
@@ -158,14 +163,14 @@ class BaseSponsoredToken:
     def to_dict(self) -> JSON:
         return {
             'date': date_util.datetime_to_string(dt=self.date),
-            'token': self.token.to_dict(),
+            'token': self.token.to_dict(),  # type: ignore[dict-item]
         }
 
     @classmethod
-    def from_dict(cls, sponsoredTokenDict: Dict):
+    def from_dict(cls, sponsoredTokenDict: JSON) -> BaseSponsoredToken:
         return cls(
-            date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
-            token=Token.from_dict(sponsoredTokenDict.get('token'))
+            date=date_util.datetime_from_string(str(sponsoredTokenDict['date'])),  # type: ignore[index, call-overload]
+            token=Token.from_dict(dict(sponsoredTokenDict['token']))  # type: ignore[index, call-overload, arg-type]
         )
 
 
@@ -394,10 +399,10 @@ class Signature:
         }
 
     @classmethod
-    def from_dict(cls, signatureDict: Dict):
+    def from_dict(cls, signatureDict: JSON) -> Signature:
         return cls(
-            message=signatureDict['message'],
-            signature=signatureDict['signature'],
+            message=str(signatureDict['message']),  # type: ignore[index, call-overload]
+            signature=str(signatureDict['signature']),  # type: ignore[index, call-overload]
         )
 
 
