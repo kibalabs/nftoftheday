@@ -149,11 +149,11 @@ class TokenManager:
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
         await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
 
-    async def update_collection_tokens_deferred(self, address: str, shouldForce: Optional[bool] = False):
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: Optional[bool] = False) -> None:
         address = chain_util.normalize_address(value=address)
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 
-    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
+    async def list_collection_tokens(self, address: str) -> Sequence[TokenMetadata]:
         address = chain_util.normalize_address(value=address)
         tokens = await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address)])
         return tokens

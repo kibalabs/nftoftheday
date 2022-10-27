@@ -104,7 +104,7 @@ class ResponseBuilder:
         return await self.collection_token_from_registry_address_token_id(registryAddress=tokenKey.registryAddress, tokenId=tokenKey.tokenId)
 
     async def collection_token_from_model(self, tokenMetadata: TokenMetadata) -> ApiCollectionToken:
-        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in tokenMetadata.attributes] if isinstance(tokenMetadata.attributes, list) else []
+        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in tokenMetadata.attributes] if isinstance(tokenMetadata.attributes, list) else []  # type: ignore[union-attr]
         return ApiCollectionToken(
             registryAddress=tokenMetadata.registryAddress,
             tokenId=tokenMetadata.tokenId,
@@ -123,7 +123,7 @@ class ResponseBuilder:
     async def collection_tokens_from_token_keys(self, tokenKeys: Sequence[Token]) -> Sequence[ApiCollectionToken]:
         return await asyncio.gather(*[self.collection_token_from_token_key(tokenKey=tokenKey) for tokenKey in tokenKeys])
 
-    async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> List[ApiCollectionToken]:
+    async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> Sequence[ApiCollectionToken]:
         tokenMetadatas = []
         for token in tokens:
             try:

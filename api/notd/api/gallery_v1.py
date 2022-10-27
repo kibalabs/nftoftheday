@@ -46,12 +46,12 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         return GetGalleryTokenResponse(galleryToken=(await responseBuilder.gallery_token_from_model(galleryToken=galleryToken)))
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}/airdrops', response_model=ListCollectionTokenAirdropsResponse)
-    async def list_collection_token_airdrops(registryAddress: str, tokenId: str):
+    async def list_collection_token_airdrops(registryAddress: str, tokenId: str) -> ListCollectionTokenAirdropsResponse:
         airdrops = await galleryManager.list_collection_token_airdrops(registryAddress=registryAddress, tokenId=tokenId)
         return ListCollectionTokenAirdropsResponse(airdrops=(await responseBuilder.airdrops_from_models(airdrops=airdrops)))
 
     @router.get('/collections/{registryAddress}/attributes', response_model=GetCollectionAttributesResponse)
-    async def get_collection_attributes(registryAddress: str):
+    async def get_collection_attributes(registryAddress: str) -> GetCollectionAttributesResponse:
         collectionAttributes = await galleryManager.get_collection_attributes(registryAddress=registryAddress)
         return GetCollectionAttributesResponse(attributes=(await responseBuilder.collection_attributes_from_models(collectionAttributes=collectionAttributes)))
 

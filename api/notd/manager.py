@@ -420,7 +420,7 @@ class NotdManager:
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         return await self.tokenManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
+    async def list_collection_tokens(self, address: str) -> Sequence[TokenMetadata]:
         return await self.tokenManager.list_collection_tokens(address=address)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:

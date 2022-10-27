@@ -13,9 +13,9 @@ class TokenAttributeProcessor:
         tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         tokenAttributes = []
         for attribute in tokenMetadata.attributes:
-            name = attribute.get('trait_type')
+            name = attribute.get('trait_type')  # type: ignore[union-attr]
             if not name:
                 continue
-            value = attribute.get('value')
+            value = attribute.get('value')  # type: ignore[union-attr]
             tokenAttributes += [RetrievedTokenAttribute(registryAddress=tokenMetadata.registryAddress, tokenId=tokenMetadata.tokenId, name=name, value=value)]
         return tokenAttributes

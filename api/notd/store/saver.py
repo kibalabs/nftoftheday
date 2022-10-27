@@ -8,9 +8,9 @@ from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver
 from core.util import date_util
 from core.util import list_util
-from sqlalchemy import JSON
+from core.util.typing_util import JSON
 
-from notd.model import AccountCollectionGm
+from notd.model import AccountCollectionGm, Signature
 from notd.model import AccountGm
 from notd.model import Block
 from notd.model import Collection
@@ -56,8 +56,8 @@ from notd.store.schema import UserProfilesTable
 _EMPTY_STRING = '_EMPTY_STRING'
 _EMPTY_OBJECT = '_EMPTY_OBJECT'
 
-CreateRecordDict = Dict[str, Union[str, int, float, None, bool, datetime.datetime]]
-UpdateRecordDict = Dict[str, Union[str, int, float, None, bool, datetime.datetime]]
+CreateRecordDict = Dict[str, Union[str, int, float, None, bool, datetime.datetime, JSON]]
+UpdateRecordDict = Dict[str, Union[str, int, float, None, bool, datetime.datetime, JSON]]
 
 class Saver(CoreSaver):
 
@@ -145,7 +145,7 @@ class Saver(CoreSaver):
         query = BlocksTable.update(BlocksTable.c.blockId == blockId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def create_token_metadata(self, tokenId: str, registryAddress: str, metadataUrl: str, name: Optional[str], description: Optional[str], imageUrl: Optional[str], resizableImageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], frameImageUrl: Optional[str], attributes: Union[None, Dict, List], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
+    async def create_token_metadata(self, tokenId: str, registryAddress: str, metadataUrl: Optional[str], name: Optional[str], description: Optional[str], imageUrl: Optional[str], resizableImageUrl: Optional[str], animationUrl: Optional[str], youtubeUrl: Optional[str], backgroundColor: Optional[str], frameImageUrl: Optional[str], attributes: Optional[JSON], connection: Optional[DatabaseConnection] = None) -> TokenMetadata:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -185,7 +185,7 @@ class Saver(CoreSaver):
             attributes=attributes,
         )
 
-    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, resizableImageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, frameImageUrl: Optional[str] = _EMPTY_STRING, attributes: Union[None, Dict, List] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_metadata(self, tokenMetadataId: int, metadataUrl: Optional[str] = None, name: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, resizableImageUrl: Optional[str] = _EMPTY_STRING, animationUrl: Optional[str] = _EMPTY_STRING, youtubeUrl: Optional[str] = _EMPTY_STRING, backgroundColor: Optional[str] = _EMPTY_STRING, frameImageUrl: Optional[str] = _EMPTY_STRING, attributes: Optional[JSON] = _EMPTY_OBJECT, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
         if metadataUrl is not None:
             values[TokenMetadatasTable.c.metadataUrl.key] = metadataUrl
@@ -317,7 +317,7 @@ class Saver(CoreSaver):
             transferTransactionHash=transferTransactionHash,
         )
 
-    async def update_token_ownership(self, tokenOwnershipId: int, ownerAddress: Optional[str] = None, transferDate: Optional[str] = None, transferValue: Optional[int] = None, transferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_token_ownership(self, tokenOwnershipId: int, ownerAddress: Optional[str] = None, transferDate: Optional[datetime.datetime] = None, transferValue: Optional[int] = None, transferTransactionHash: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
         if ownerAddress is not None:
             values[TokenOwnershipsTable.c.ownerAddress.key] = ownerAddress
@@ -706,7 +706,7 @@ class Saver(CoreSaver):
         query = LocksTable.delete().where(LocksTable.c.lockId == lockId)
         await self._execute(query=query, connection=connection)
 
-    async def create_user_profile(self, address: str, twitterId: Optional[str], discordId: Optional[str], signatureDict: Dict, connection: Optional[DatabaseConnection] = None) -> UserProfile:
+    async def create_user_profile(self, address: str, twitterId: Optional[str], discordId: Optional[str], signatureDict: JSON, connection: Optional[DatabaseConnection] = None) -> UserProfile:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values = {
@@ -727,10 +727,10 @@ class Saver(CoreSaver):
             address=address,
             twitterId=twitterId,
             discordId=discordId,
-            signature=signatureDict,
+            signature=Signature.from_dict(signatureDict),
         )
 
-    async def update_user_profile(self, userProfileId: int, twitterId: Optional[str] = _EMPTY_STRING, discordId: Optional[str] = _EMPTY_STRING, signatureDict: Optional[Dict] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_user_profile(self, userProfileId: int, twitterId: Optional[str] = _EMPTY_STRING, discordId: Optional[str] = _EMPTY_STRING, signatureDict: Optional[JSON] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
         if twitterId != _EMPTY_STRING:
             values[UserProfilesTable.c.twitterId.key] = twitterId

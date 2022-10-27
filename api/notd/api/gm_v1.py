@@ -35,14 +35,14 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
         return ListGmCollectionRowsResponse(collectionRows=(await responseBuilder.gm_collection_rows_from_models(gmCollectionRows=gmCollectionRows)))
 
     @router.route('/generate-gms')
-    async def sse() -> StreamingResponse:
+    async def sse() -> StreamingResponse:  # type: ignore[misc]
         sseHeaders = {
             'Content-type': 'text/event-stream',
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
         }
         # TODO(krishan711): gmManager shouldn't be dealing with the structure of the response
-        return StreamingResponse(gmManager.generate_gms(), headers=sseHeaders)
+        return StreamingResponse(gmManager.generate_gms(), headers=sseHeaders)  # type: ignore[arg-type]
 
     @router.get('/accounts/{address}/latest-gm')
     async def get_latest_gm_for_account(address: str) -> GetLatestGmForAccountResponse:
