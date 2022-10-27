@@ -3,7 +3,7 @@ import json
 import os
 import urllib.parse as urlparse
 import uuid
-from typing import List
+from typing import Dict, List
 from typing import Optional
 
 from core.exceptions import FoundRedirectException
@@ -31,11 +31,11 @@ class TwitterManager:
         self.requester = requester
         self.workQueue = workQueue
         self.twitterBearerToken = twitterBearerToken
-        self.clientId = os.environ.get("TWITTER_OAUTH_CLIENT_ID")
-        self.clientSecret = os.environ.get("TWITTER_OAUTH_CLIENT_SECRET")
-        self.redirectUri = os.environ.get("TWITTER_OAUTH_REDIRECT_URI")
+        self.clientId = os.environ["TWITTER_OAUTH_CLIENT_ID"]
+        self.clientSecret = os.environ["TWITTER_OAUTH_CLIENT_SECRET"]
+        self.redirectUri = os.environ["TWITTER_OAUTH_REDIRECT_URI"]
         self.tokenUrl = "https://api.twitter.com/2/oauth2/token"
-        self.codeChallenge = uuid.uuid4()
+        self.codeChallenge = str(uuid.uuid4())
 
     async def login(self, account: str, signature: Signature, initialUrl: str) -> None:
         userProfile = None
@@ -70,7 +70,7 @@ class TwitterManager:
             redirectQueryParams['error'] = error
         elif code:
             authHeader = BasicAuthentication(username=self.clientId, password=self.clientSecret)
-            params = {
+            params: Dict[str, str] = {
                 'code': code,
                 'grant_type': 'authorization_code',
                 'client_id': self.clientId,
@@ -106,7 +106,7 @@ class TwitterManager:
             redirectQueryParams['error'] = 'Response did not contain a code or error'
         urlParts = urlparse.urlparse(url=stateDict['initialUrl'])
         currentQuery = urlparse.parse_qs(urlParts.query)
-        queryString = urlparse.urlencode(dict_util.merge_dicts(currentQuery, redirectQueryParams), doseq=True)
+        queryString = urlparse.urlencode(dict_util.merge_dicts(currentQuery, redirectQueryParams), doseq=True)  # type: ignore[arg-type]
         url = urlparse.urlunsplit(components=(urlParts.scheme, urlParts.netloc, urlParts.path, queryString, urlParts.fragment))
         raise FoundRedirectException(location=url)
 
@@ -114,7 +114,7 @@ class TwitterManager:
         async with self.saver.create_transaction() as connection:
             twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=twitterId, connection=connection)
             authHeader = BasicAuthentication(username=self.clientId, password=self.clientSecret)
-            params = {
+            params: Dict[str, str] = {
                 'refresh_token': twitterCredential.refreshToken,
                 'grant_type': 'refresh_token',
                 'client_id': self.clientId,

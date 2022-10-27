@@ -1,6 +1,6 @@
 import asyncio
 import contextlib
-from typing import ContextManager
+from typing import AsyncIterator, ContextManager
 from typing import Optional
 
 from core.exceptions import KibaException
@@ -59,9 +59,9 @@ class LockManager:
         await self.saver.delete_lock(lockId=lock.lockId)
 
     @contextlib.asynccontextmanager
-    async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.05) -> ContextManager[Lock]:
+    async def with_lock(self, name: str, timeoutSeconds: int, expirySeconds: int, loopDelaySeconds: float = 0.05) -> AsyncIterator[Lock]:
         lock = await self.acquire_lock(name=name, timeoutSeconds=timeoutSeconds, expirySeconds=expirySeconds, loopDelaySeconds=loopDelaySeconds)
         try:
-            yield
+            yield lock
         finally:
             await self.release_lock(lock=lock)

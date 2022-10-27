@@ -1,8 +1,9 @@
 import base64
 import json
+import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
-from typing import Any
+from typing import Any, Mapping
 from typing import Dict
 from typing import Optional
 
@@ -13,6 +14,7 @@ from core.requester import Requester
 from core.requester import ResponseException
 from core.s3_manager import S3Manager
 from core.util import date_util
+from core.util.typing_util import JSON, JSON1
 from core.web3.eth_client import EthClientInterface
 from pablo import PabloClient
 from web3.main import Web3
@@ -58,7 +60,7 @@ class TokenMetadataProcessor():
         self.erc721MetadataNameFunctionAbi = [internalAbi for internalAbi in self.erc721MetadataContractAbi if internalAbi.get('name') == 'name'][0]
         with open('./contracts/CryptoPunksMetadata.json') as contractJsonFile:
             contractJson = json.load(contractJsonFile)
-        self.cryptoPunksContract = self.w3.eth.contract(address='0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2', abi=contractJson['abi'])
+        self.cryptoPunksContract = self.w3.eth.contract(address='0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2', abi=contractJson['abi'])  # type: ignore[call-overload]
         self.cryptoPunksAttributesFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkAttributes'][0]
         self.cryptoPunksImageSvgFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkImageSvg'][0]
         with open('./contracts/IERC1155MetadataURI.json') as contractJsonFile:
@@ -72,7 +74,7 @@ class TokenMetadataProcessor():
         self.erc165SupportInterfaceUriFunctionAbi = [internalAbi for internalAbi in self.erc165MetadataContractAbi if internalAbi.get('name') == 'supportsInterface'][0]
 
     @staticmethod
-    def get_default_token_metadata(registryAddress: str, tokenId: str):
+    def get_default_token_metadata(registryAddress: str, tokenId: str) -> RetrievedTokenMetadata:
         return RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
@@ -89,7 +91,7 @@ class TokenMetadataProcessor():
         )
 
     @staticmethod
-    def _resolve_data(dataString: str, registryAddress: str, tokenId: str) -> Dict:
+    def _resolve_data(dataString: str, registryAddress: str, tokenId: str) -> JSON:
         tokenMetadataJson = None
         if dataString.startswith('data:application/json;base64,'):
             bse64String = dataString.replace('data:application/json;base64,', '', 1)
@@ -118,10 +120,10 @@ class TokenMetadataProcessor():
         return tokenMetadataDict
 
     @staticmethod
-    def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> str:
+    def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> Optional[str]:
         return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://') if ipfsUrl else None
 
-    def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Dict[str, Any]) -> RetrievedTokenMetadata:
+    def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Mapping[str, JSON1]) -> RetrievedTokenMetadata:
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description = tokenMetadataDict.get('description')
         if isinstance(description, list):
@@ -157,7 +159,7 @@ class TokenMetadataProcessor():
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             # NOTE(krishan711): special case for CryptoPunks
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
-            attributes = [{'trait_type': 'Accessory', 'value': attribute.strip()} for attribute in attributesResponse[0].split(',')]
+            attributes: JSON = [{'trait_type': 'Accessory', 'value': attribute.strip()} for attribute in attributesResponse[0].split(',')]
             imageSvgResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksImageSvgFunctionAbi, arguments={'index': int(tokenId)})
             return RetrievedTokenMetadata(
                 registryAddress=registryAddress,
@@ -223,11 +225,13 @@ class TokenMetadataProcessor():
             if 'value could not be decoded as valid UTF8' in badRequestException.message:
                 raise TokenDoesNotExistException()
             raise badRequestException
-        if tokenMetadataUriResponse.startswith('https://api.opensea.io/api/v1/metadata/'):
-            tokenMetadataUri = f'https://api.opensea.io/api/v1/metadata/{registryAddress}/{tokenId}'
-        else:
-            hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
-            tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
+        tokenMetadataUri: Optional[str] = None
+        if tokenMetadataUriResponse:
+            if tokenMetadataUriResponse.startswith('https://api.opensea.io/api/v1/metadata/'):
+                tokenMetadataUri = f'https://api.opensea.io/api/v1/metadata/{registryAddress}/{tokenId}'
+            else:
+                hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
+                tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
         if len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
@@ -237,7 +241,7 @@ class TokenMetadataProcessor():
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
         tokenMetadataUri = self._clean_potential_ipfs_url(tokenMetadataUri)
         # NOTE(krishan711): save the url here before using ipfs gateways etc
-        metadataUrl = tokenMetadataUri
+        metadataUrl = typing.cast(str, tokenMetadataUri)
         if tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')
         if not tokenMetadataUri:
@@ -255,7 +259,7 @@ class TokenMetadataProcessor():
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
             except ResponseException as exception:
-                errorMessage = '' if exception.message.strip().startswith('<!DOCTYPE html') or exception.message.strip().startswith('<html') else exception.message
+                errorMessage = '' if exception.message and (exception.message.strip().startswith('<!DOCTYPE html') or exception.message.strip().startswith('<html')) else exception.message
                 logging.info(f'Response error while pulling metadata from {metadataUrl}: {exception.statusCode} {errorMessage}')
                 tokenMetadataDict = {}
             except Exception as exception:  # pylint: disable=broad-except

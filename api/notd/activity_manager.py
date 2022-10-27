@@ -1,6 +1,7 @@
 import datetime
 from typing import Set
 from typing import Tuple
+import typing
 
 from core import logging
 from core.exceptions import NotFoundException
@@ -55,7 +56,7 @@ class ActivityManager:
                     .where(TokenTransfersTable.c.blockNumber.in_(blockNumbers))
             )
             updatedTransfersResult = await self.retriever.database.execute(query=updatedTransfersQuery)
-            newRegistryDatePairs = {(registryAddress, date_hour_from_datetime(dt=date)) for (registryAddress, date) in updatedTransfersResult}
+            newRegistryDatePairs = {(registryAddress, date_hour_from_datetime(dt=typing.cast(datetime.datetime, date))) for (registryAddress, date) in updatedTransfersResult}
             registryDatePairs.update(newRegistryDatePairs)
         return registryDatePairs
 

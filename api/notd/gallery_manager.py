@@ -160,7 +160,7 @@ class GalleryManager:
             collectionAttribute.values.append(value)
         return list(collectionAttributeNameMap.values())
 
-    async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None) -> Sequence[GalleryToken]:
+    async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None) -> List[GalleryToken]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
         usesListings = isListed or minPrice or maxPrice
@@ -304,7 +304,7 @@ class GalleryManager:
         )
         return galleryUser
 
-    async def list_gallery_user_badges(self, registryAddress: str, userAddress: str) -> Sequence[GalleryBadgeHolder]:
+    async def list_gallery_user_badges(self, registryAddress: str, userAddress: str) -> List[GalleryBadgeHolder]:
         galleryUserBadgesQuery = (
             sqlalchemy.select([GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress])
                 .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
@@ -404,7 +404,7 @@ class GalleryManager:
             raise BadRequestException('NO_TWITTER_ID')
         await self.twitterManager.follow_user_from_user(userTwitterId=accountProfile.twitterId, targetTwitterId=userProfile.twitterId)
 
-    async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> Sequence[GalleryOwnedCollection]:
+    async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> List[GalleryOwnedCollection]:
         collectionsQuery = (
             sqlalchemy.select([TokenOwnershipsView])
                 .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsView.c.registryAddress)
@@ -434,7 +434,7 @@ class GalleryManager:
             ) for registryAddress in registryAddresses
         ]
 
-    async def list_gallery_collection_overlaps(self, registryAddress: str, otherRegistryAddress: Optional[str]) -> Sequence[CollectionOverlap]:
+    async def list_gallery_collection_overlaps(self, registryAddress: str, otherRegistryAddress: Optional[str]) -> List[CollectionOverlap]:
         filters = [
             StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, eq=registryAddress),
         ]

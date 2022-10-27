@@ -42,7 +42,7 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
             'Connection': 'keep-alive',
         }
         # TODO(krishan711): gmManager shouldn't be dealing with the structure of the response
-        return StreamingResponse(gmManager.generate_gms(), headers=sseHeaders)  # type: ignore[arg-type]
+        return StreamingResponse(gmManager.generate_gms(), headers=sseHeaders)
 
     @router.get('/accounts/{address}/latest-gm')
     async def get_latest_gm_for_account(address: str) -> GetLatestGmForAccountResponse:

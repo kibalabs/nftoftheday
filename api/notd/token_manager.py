@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import List, Optional
 from typing import Sequence
 from typing import Tuple
 
@@ -152,7 +152,7 @@ class TokenManager:
         address = chain_util.normalize_address(value=address)
         await self.tokenQueue.send_message(message=UpdateCollectionTokensMessageContent(address=address, shouldForce=shouldForce).to_message())
 
-    async def list_collection_tokens(self, address: str) -> Sequence[TokenMetadata]:
+    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
         address = chain_util.normalize_address(value=address)
         tokens = await self.retriever.list_token_metadatas(fieldFilters=[StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address)])
         return tokens

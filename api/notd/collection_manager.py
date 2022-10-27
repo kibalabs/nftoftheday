@@ -1,6 +1,6 @@
 import asyncio
 import random
-from typing import List
+from typing import List, Sequence
 from typing import Optional
 
 from core import logging
@@ -47,7 +47,7 @@ class CollectionManager:
             collection = await self.retriever.get_collection_by_address(address=address)
         return collection
 
-    async def update_collections_deferred(self, addresses: List[str], shouldForce: Optional[bool] = False) -> None:
+    async def update_collections_deferred(self, addresses: Sequence[str], shouldForce: Optional[bool] = False) -> None:
         if len(addresses) == 0:
             return
         if not shouldForce:
@@ -59,7 +59,7 @@ class CollectionManager:
             )
             recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
             logging.info(f'Skipping {len(recentlyUpdatedAddresses)} collections because they have been updated recently.')
-            addresses = set(addresses) - recentlyUpdatedAddresses
+            addresses = list(set(addresses) - recentlyUpdatedAddresses)
         messages = [UpdateCollectionMessageContent(address=address).to_message() for address in addresses]
         await self.tokenQueue.send_messages(messages=messages)
 

@@ -1,5 +1,5 @@
 import typing
-from typing import Optional
+from typing import List, Optional
 from typing import Sequence
 
 import sqlalchemy
@@ -78,7 +78,7 @@ from notd.store.schema_conversions import user_profile_from_row
 
 class Retriever(CoreRetriever):
 
-    async def list_blocks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Block]:
+    async def list_blocks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[Block]:
         query = BlocksTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=BlocksTable, fieldFilters=fieldFilters)
@@ -103,7 +103,7 @@ class Retriever(CoreRetriever):
         block = block_from_row(row)
         return block
 
-    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenTransfer]:
+    async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenTransfer]:
         query = typing.cast(Select, (
             sqlalchemy.select([TokenTransfersTable, BlocksTable])
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
@@ -128,12 +128,12 @@ class Retriever(CoreRetriever):
         tokenTransfers = [token_transfer_from_row(row) for row in result]
         return tokenTransfers
 
-    async def query_token_metadatas(self, query: Select, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenMetadata]:
+    async def query_token_metadatas(self, query: Select, connection: Optional[DatabaseConnection] = None) -> List[TokenMetadata]:
         result = await self.database.execute(query=query, connection=connection)
         tokenMetadatas = [token_metadata_from_row(row) for row in result]
         return tokenMetadatas
 
-    async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenMetadata]:
+    async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenMetadata]:
         query = TokenMetadatasTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenMetadatasTable, fieldFilters=fieldFilters)
@@ -154,7 +154,7 @@ class Retriever(CoreRetriever):
         tokenMetadata = token_metadata_from_row(row)
         return tokenMetadata
 
-    async def list_collections(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Collection]:
+    async def list_collections(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[Collection]:
         query = TokenCollectionsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenCollectionsTable, fieldFilters=fieldFilters)
@@ -176,7 +176,7 @@ class Retriever(CoreRetriever):
         collection = collection_from_row(row)
         return collection
 
-    async def list_token_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenOwnership]:
+    async def list_token_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenOwnership]:
         query = TokenOwnershipsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenOwnershipsTable, fieldFilters=fieldFilters)
@@ -199,7 +199,7 @@ class Retriever(CoreRetriever):
         tokenOwnership = token_ownership_from_row(row)
         return tokenOwnership
 
-    async def list_token_multi_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenMultiOwnership]:
+    async def list_token_multi_ownerships(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenMultiOwnership]:
         query = TokenMultiOwnershipsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenMultiOwnershipsTable, fieldFilters=fieldFilters)
@@ -223,7 +223,7 @@ class Retriever(CoreRetriever):
         tokenOwnership = token_multi_ownership_from_row(row)
         return tokenOwnership
 
-    async def list_collection_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionHourlyActivity]:
+    async def list_collection_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[CollectionHourlyActivity]:
         query = CollectionHourlyActivitiesTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=CollectionHourlyActivitiesTable, fieldFilters=fieldFilters)
@@ -235,7 +235,7 @@ class Retriever(CoreRetriever):
         collectionActivities = [collection_activity_from_row(row) for row in result]
         return collectionActivities
 
-    async def list_collection_total_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionTotalActivity]:
+    async def list_collection_total_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[CollectionTotalActivity]:
         query = CollectionTotalActivitiesTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=CollectionTotalActivitiesTable, fieldFilters=fieldFilters)
@@ -259,7 +259,7 @@ class Retriever(CoreRetriever):
         collectionTotalActivity = collection_total_activity_from_row(row)
         return collectionTotalActivity
 
-    async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[UserInteraction]:
+    async def list_user_interactions(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[UserInteraction]:
         query = UserInteractionsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=UserInteractionsTable, fieldFilters=fieldFilters)
@@ -271,7 +271,7 @@ class Retriever(CoreRetriever):
         userInteractions = [user_interaction_from_row(row) for row in result]
         return userInteractions
 
-    async def list_latest_updates(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[LatestUpdate]:
+    async def list_latest_updates(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[LatestUpdate]:
         query = LatestUpdatesTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=LatestUpdatesTable, fieldFilters=fieldFilters)
@@ -296,7 +296,7 @@ class Retriever(CoreRetriever):
         latestUpdate = latest_update_from_row(row)
         return latestUpdate
 
-    async def list_token_attributes(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenAttribute]:
+    async def list_token_attributes(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenAttribute]:
         query = TokenAttributesTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenAttributesTable, fieldFilters=fieldFilters)
@@ -308,7 +308,7 @@ class Retriever(CoreRetriever):
         tokenAttributes = [token_attribute_from_row(row) for row in result]
         return tokenAttributes
 
-    async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenListing]:
+    async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenListing]:
         query = LatestTokenListingsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=LatestTokenListingsTable, fieldFilters=fieldFilters)
@@ -331,7 +331,7 @@ class Retriever(CoreRetriever):
         latestTokenListing = token_listing_from_row(row)
         return latestTokenListing
 
-    async def list_token_customizations(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TokenCustomization]:
+    async def list_token_customizations(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenCustomization]:
         query = TokenCustomizationsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenCustomizationsTable, fieldFilters=fieldFilters)
@@ -354,7 +354,7 @@ class Retriever(CoreRetriever):
         tokenCustomization = token_customization_from_row(row)
         return tokenCustomization
 
-    async def list_locks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[Lock]:
+    async def list_locks(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[Lock]:
         query = LocksTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=LocksTable, fieldFilters=fieldFilters)
@@ -384,7 +384,7 @@ class Retriever(CoreRetriever):
         lock = lock_from_row(row)
         return lock
 
-    async def list_user_profiles(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[UserProfile]:
+    async def list_user_profiles(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[UserProfile]:
         query = UserProfilesTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=UserProfilesTable, fieldFilters=fieldFilters)
@@ -414,7 +414,7 @@ class Retriever(CoreRetriever):
         userProfile = user_profile_from_row(row)
         return userProfile
 
-    async def list_twitter_profiles(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TwitterProfile]:
+    async def list_twitter_profiles(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TwitterProfile]:
         query = TwitterProfilesTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TwitterProfilesTable, fieldFilters=fieldFilters)
@@ -453,7 +453,7 @@ class Retriever(CoreRetriever):
         twitterProfile = twitter_profile_from_row(row)
         return twitterProfile
 
-    async def list_twitter_credentials(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[TwitterCredential]:
+    async def list_twitter_credentials(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TwitterCredential]:
         query = TwitterCredentialsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TwitterCredentialsTable, fieldFilters=fieldFilters)
@@ -483,7 +483,7 @@ class Retriever(CoreRetriever):
         twitterCredential = twitter_credential_from_row(row)
         return twitterCredential
 
-    async def list_account_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[AccountGm]:
+    async def list_account_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[AccountGm]:
         query = AccountGmsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=AccountGmsTable, fieldFilters=fieldFilters)
@@ -504,7 +504,7 @@ class Retriever(CoreRetriever):
         accountGm = account_gm_from_row(row)
         return accountGm
 
-    async def list_account_collection_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[AccountCollectionGm]:
+    async def list_account_collection_gms(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[AccountCollectionGm]:
         query = AccountCollectionGmsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=AccountCollectionGmsTable, fieldFilters=fieldFilters)
@@ -525,7 +525,7 @@ class Retriever(CoreRetriever):
         accountCollectionGm = account_collection_gm_from_row(row)
         return accountCollectionGm
 
-    async def list_collection_overlaps(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[CollectionOverlap]:
+    async def list_collection_overlaps(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[CollectionOverlap]:
         query = TokenCollectionOverlapsTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenCollectionOverlapsTable, fieldFilters=fieldFilters)
@@ -537,7 +537,7 @@ class Retriever(CoreRetriever):
         collectionOverlaps = [collection_overlap_from_row(row) for row in result]
         return collectionOverlaps
 
-    async def list_gallery_badge_holders(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> Sequence[GalleryBadgeHolder]:
+    async def list_gallery_badge_holders(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[GalleryBadgeHolder]:
         query = GalleryBadgeHoldersTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=GalleryBadgeHoldersTable, fieldFilters=fieldFilters)

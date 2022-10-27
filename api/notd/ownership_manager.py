@@ -145,7 +145,7 @@ class OwnershipManager:
             tokens += [Token(registryAddress=tokenMultiOwnership.registryAddress, tokenId=tokenMultiOwnership.tokenId) for tokenMultiOwnership in tokenMultiOwnerships]
         return tokens
 
-    async def reprocess_owner_token_ownerships(self, ownerAddress: str) -> Sequence[Tuple[str, str]]:
+    async def reprocess_owner_token_ownerships(self, ownerAddress: str) -> List[Tuple[str, str]]:
         tokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=ownerAddress)])
         collectionTokenIds = list({(transfer.registryAddress, transfer.tokenId) for transfer in tokenTransfers})
         logging.info(f'Refreshing {len(collectionTokenIds)} ownerships')

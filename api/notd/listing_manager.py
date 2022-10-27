@@ -96,7 +96,7 @@ class ListingManager:
                     .where(LatestTokenListingsTable.c.source.in_(['opensea-seaport', 'opensea-wyvern']))
             )
             existingOpenseaListingsResult = await self.retriever.database.execute(query=existingOpenseaListingsQuery, connection=connection)
-            openseaListingIdsToDelete = {row[0] for row in existingOpenseaListingsResult}
+            openseaListingIdsToDelete = {int(row[0]) for row in existingOpenseaListingsResult}
             existingLooksrareListingsQuery = (
                 LatestTokenListingsTable.select()
                     .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
@@ -105,8 +105,8 @@ class ListingManager:
                     .where(LatestTokenListingsTable.c.source == 'looksrare')
             )
             existingLooksrareListingsResult = await self.retriever.database.execute(query=existingLooksrareListingsQuery, connection=connection)
-            looksrareListingIdsToDelete = {row[0] for row in existingLooksrareListingsResult}
-            allListingIdsToDelete = openseaListingIdsToDelete | looksrareListingIdsToDelete
+            looksrareListingIdsToDelete = {int(row[0]) for row in existingLooksrareListingsResult}
+            allListingIdsToDelete = list(openseaListingIdsToDelete | looksrareListingIdsToDelete)
             allListings = openseaListings + looksrareListings
             await self.saver.delete_latest_token_listings(latestTokenListingIds=allListingIdsToDelete, connection=connection)
             await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)

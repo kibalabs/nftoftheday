@@ -161,7 +161,7 @@ class NotdManager:
             transferCount=int(transferCount),
         )
 
-    async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> Sequence[TokenTransfer]:
+    async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
@@ -270,10 +270,10 @@ class NotdManager:
             currentDate += delta
         return collectionActivitiesPerDay
 
-    async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> Sequence[TokenTransfer]:
+    async def get_collection_token_recent_sales(self, registryAddress: str, tokenId: str, limit: int, offset: int) -> List[TokenTransfer]:
         return await self.get_collection_token_recent_transfers(registryAddress=registryAddress, tokenId=tokenId, limit=limit, offset=offset, shouldIncludeSalesOnly=True)
 
-    async def get_collection_token_recent_transfers(self, registryAddress: str, tokenId: str, limit: int, offset: int, shouldIncludeSalesOnly: bool = False) -> Sequence[TokenTransfer]:
+    async def get_collection_token_recent_transfers(self, registryAddress: str, tokenId: str, limit: int, offset: int, shouldIncludeSalesOnly: bool = False) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         filters: List[FieldFilter] = [
             StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
@@ -289,7 +289,7 @@ class NotdManager:
         )
         return tokenTransfers
 
-    async def get_collection_token_owners(self, registryAddress: str, tokenId: str) -> Sequence[TokenMultiOwnership]:
+    async def get_collection_token_owners(self, registryAddress: str, tokenId: str) -> List[TokenMultiOwnership]:
         # TODO(krishan711): this assumes its called for an ERC-1155 so fix if we need it for 721 too
         tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
             StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
@@ -420,7 +420,7 @@ class NotdManager:
     async def get_token_metadata_by_registry_address_token_id(self, registryAddress: str, tokenId: str) -> TokenMetadata:
         return await self.tokenManager.get_token_metadata_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def list_collection_tokens(self, address: str) -> Sequence[TokenMetadata]:
+    async def list_collection_tokens(self, address: str) -> List[TokenMetadata]:
         return await self.tokenManager.list_collection_tokens(address=address)
 
     async def list_collection_tokens_by_owner(self, address: str, ownerAddress: str) -> List[Token]:

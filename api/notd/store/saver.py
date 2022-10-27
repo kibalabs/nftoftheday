@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict
+from typing import Dict, Sequence
 from typing import List
 from typing import Optional
 from typing import Union
@@ -92,7 +92,7 @@ class Saver(CoreSaver):
         tokenTransferId = int(result.inserted_primary_key[0])
         return tokenTransferId
 
-    async def create_token_transfers(self, retrievedTokenTransfers: List[RetrievedTokenTransfer], connection: Optional[DatabaseConnection] = None) -> List[int]:
+    async def create_token_transfers(self, retrievedTokenTransfers: Sequence[RetrievedTokenTransfer], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenTransfers) == 0:
             return []
         tokenTransferIds = []
@@ -107,7 +107,7 @@ class Saver(CoreSaver):
         query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId == tokenTransferId)
         await self._execute(query=query, connection=connection)
 
-    async def delete_token_transfers(self, tokenTransferIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_token_transfers(self, tokenTransferIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(tokenTransferIds) == 0:
             return
         query = TokenTransfersTable.delete().where(TokenTransfersTable.c.tokenTransferId.in_(tokenTransferIds))
@@ -356,7 +356,7 @@ class Saver(CoreSaver):
         return tokenTransferId
 
 
-    async def create_token_multi_ownerships(self, retrievedTokenMultiOwnerships: List[RetrievedTokenMultiOwnership], connection: Optional[DatabaseConnection] = None) -> List[int]:
+    async def create_token_multi_ownerships(self, retrievedTokenMultiOwnerships: Sequence[RetrievedTokenMultiOwnership], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenMultiOwnerships) == 0:
             return []
         creationDate = date_util.datetime_from_now()
@@ -385,7 +385,7 @@ class Saver(CoreSaver):
         query = TokenMultiOwnershipsTable.update(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId == tokenMultiOwnershipId).values(values)
         await self._execute(query=query, connection=connection)
 
-    async def delete_token_multi_ownerships(self, tokenMultiOwnershipIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_token_multi_ownerships(self, tokenMultiOwnershipIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(tokenMultiOwnershipIds) == 0:
             return
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds))
@@ -578,7 +578,7 @@ class Saver(CoreSaver):
         tokenAttributeId = int(result.inserted_primary_key[0])
         return tokenAttributeId
 
-    async def create_token_attributes(self, retrievedTokenAttributes: List[RetrievedTokenAttribute], connection: Optional[DatabaseConnection] = None) -> List[int]:
+    async def create_token_attributes(self, retrievedTokenAttributes: Sequence[RetrievedTokenAttribute], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenAttributes) == 0:
             return []
         createdDate = date_util.datetime_from_now()
@@ -595,7 +595,7 @@ class Saver(CoreSaver):
         query = TokenAttributesTable.delete().where(TokenAttributesTable.c.tokenAttributeId == tokenAttributeId)
         await self._execute(query=query, connection=connection)
 
-    async def delete_token_attributes(self, tokenAttributeIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_token_attributes(self, tokenAttributeIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(tokenAttributeIds) == 0:
             return
         query = TokenAttributesTable.delete().where(TokenAttributesTable.c.tokenAttributeId.in_(tokenAttributeIds))
@@ -626,7 +626,7 @@ class Saver(CoreSaver):
         latestTokenListingId = int(result.inserted_primary_key[0])
         return latestTokenListingId
 
-    async def create_latest_token_listings(self, retrievedTokenListings: List[RetrievedTokenListing], connection: Optional[DatabaseConnection] = None) -> List[int]:
+    async def create_latest_token_listings(self, retrievedTokenListings: Sequence[RetrievedTokenListing], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedTokenListings) == 0:
             return []
         createdDate = date_util.datetime_from_now()
@@ -643,7 +643,7 @@ class Saver(CoreSaver):
         query = LatestTokenListingsTable.delete().where(LatestTokenListingsTable.c.latestTokenListingId == latestTokenListingId)
         await self._execute(query=query, connection=connection)
 
-    async def delete_latest_token_listings(self, latestTokenListingIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_latest_token_listings(self, latestTokenListingIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(latestTokenListingIds) == 0:
             return
         query = LatestTokenListingsTable.delete().where(LatestTokenListingsTable.c.latestTokenListingId.in_(latestTokenListingIds))
@@ -913,7 +913,7 @@ class Saver(CoreSaver):
         collectionOverlapId = int(result.inserted_primary_key[0])
         return collectionOverlapId
 
-    async def create_collection_overlaps(self, retrievedCollectionOverlaps: List[RetrievedCollectionOverlap], connection: Optional[DatabaseConnection] = None) -> List[int]:
+    async def create_collection_overlaps(self, retrievedCollectionOverlaps: Sequence[RetrievedCollectionOverlap], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedCollectionOverlaps) == 0:
             return []
         createdDate = date_util.datetime_from_now()
@@ -930,7 +930,7 @@ class Saver(CoreSaver):
         query = TokenCollectionOverlapsTable.delete().where(TokenCollectionOverlapsTable.c.collectionOverlapId == collectionOverlapId)
         await self._execute(query=query, connection=connection)
 
-    async def delete_collection_overlaps(self, collectionOverlapIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_collection_overlaps(self, collectionOverlapIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(collectionOverlapIds) == 0:
             return
         query = TokenCollectionOverlapsTable.delete().where(TokenCollectionOverlapsTable.c.collectionOverlapId.in_(collectionOverlapIds))
@@ -956,7 +956,7 @@ class Saver(CoreSaver):
         galleryBadgeHolderId = int(result.inserted_primary_key[0])
         return galleryBadgeHolderId
 
-    async def create_gallery_badge_holders(self, retrievedGalleryBadgeHolders: List[RetrievedGalleryBadgeHolder], connection: Optional[DatabaseConnection] = None) -> List[int]:
+    async def create_gallery_badge_holders(self, retrievedGalleryBadgeHolders: Sequence[RetrievedGalleryBadgeHolder], connection: Optional[DatabaseConnection] = None) -> List[int]:
         if len(retrievedGalleryBadgeHolders) == 0:
             return []
         createdDate = date_util.datetime_from_now()
@@ -973,7 +973,7 @@ class Saver(CoreSaver):
         query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId == galleryBadgeHolderId)
         await self._execute(query=query, connection=connection)
 
-    async def delete_gallery_badge_holders(self, galleryBadgeHolderIds: List[int], connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_gallery_badge_holders(self, galleryBadgeHolderIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(galleryBadgeHolderIds) == 0:
             return
         query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId.in_(galleryBadgeHolderIds))
