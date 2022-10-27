@@ -1,6 +1,6 @@
 import asyncio
 import contextlib
-from typing import AsyncIterator, ContextManager
+from typing import AsyncIterator
 from typing import Optional
 
 from core.exceptions import KibaException

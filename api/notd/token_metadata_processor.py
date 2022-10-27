@@ -3,8 +3,7 @@ import json
 import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
-from typing import Any, Mapping
-from typing import Dict
+from typing import Mapping
 from typing import Optional
 
 from core import logging
@@ -14,7 +13,8 @@ from core.requester import Requester
 from core.requester import ResponseException
 from core.s3_manager import S3Manager
 from core.util import date_util
-from core.util.typing_util import JSON, JSON1
+from core.util.typing_util import JSON
+from core.util.typing_util import JSON1
 from core.web3.eth_client import EthClientInterface
 from pablo import PabloClient
 from web3.main import Web3

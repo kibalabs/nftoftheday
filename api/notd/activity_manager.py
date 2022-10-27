@@ -1,7 +1,7 @@
 import datetime
+import typing
 from typing import Set
 from typing import Tuple
-import typing
 
 from core import logging
 from core.exceptions import NotFoundException

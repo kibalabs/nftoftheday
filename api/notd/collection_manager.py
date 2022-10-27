@@ -1,7 +1,7 @@
 import asyncio
 import random
-from typing import List, Sequence
 from typing import Optional
+from typing import Sequence
 
 from core import logging
 from core.exceptions import NotFoundException

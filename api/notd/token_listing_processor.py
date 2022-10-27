@@ -1,7 +1,9 @@
 import asyncio
 import datetime
-from typing import Dict, List, Sequence
+from typing import Dict
+from typing import List
 from typing import Optional
+from typing import Sequence
 
 from core import logging
 from core.requester import Requester

@@ -3,7 +3,8 @@ import json
 import os
 import urllib.parse as urlparse
 import uuid
-from typing import Dict, List
+from typing import Dict
+from typing import List
 from typing import Optional
 
 from core.exceptions import FoundRedirectException

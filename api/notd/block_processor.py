@@ -1,11 +1,12 @@
 import dataclasses
 import datetime
 import json
-from collections import defaultdict
-from typing import Dict, Optional
-from typing import List
-from typing import Tuple
 import typing
+from collections import defaultdict
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 import eth_abi
 from core import logging

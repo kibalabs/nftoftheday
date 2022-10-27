@@ -1,4 +1,5 @@
 from typing import List
+
 import sqlalchemy
 
 from notd.model import RetrievedCollectionOverlap
