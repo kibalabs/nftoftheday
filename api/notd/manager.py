@@ -6,11 +6,12 @@ from typing import Optional
 from typing import Sequence
 
 import sqlalchemy
+from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
-from core.store.retriever import FieldFilter
 from core.store.retriever import Direction
+from core.store.retriever import FieldFilter
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
@@ -98,7 +99,7 @@ class NotdManager:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=list(_REGISTRY_BLACKLIST)),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
@@ -140,7 +141,7 @@ class NotdManager:
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
-        (registryAddress, tokenId, transferCount) = result.first()
+        (registryAddress, tokenId, transferCount) = result.first()  # type: ignore[misc]
         query = (
             sqlalchemy.select([TokenTransfersTable, BlocksTable])
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
@@ -153,12 +154,14 @@ class NotdManager:
         )
         result = await self.retriever.database.execute(query=query)
         latestTransferRow = result.first()
+        if not latestTransferRow:
+            raise NotFoundException()
         return TradedToken(
             latestTransfer=token_transfer_from_row(latestTransferRow),
-            transferCount=transferCount,
+            transferCount=int(transferCount),
         )
 
-    async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
+    async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> Sequence[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[

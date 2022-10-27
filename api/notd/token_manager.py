@@ -1,6 +1,7 @@
 import asyncio
-from typing import List, Sequence
+from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 
 import sqlalchemy
