@@ -5,7 +5,6 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Union
 
 from core.store.database import DatabaseConnection
 from core.store.saver import Saver as CoreSaver

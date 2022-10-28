@@ -6,12 +6,12 @@ from typing import Sequence
 import sqlalchemy
 from core.exceptions import NotFoundException
 from core.store.database import DatabaseConnection
+from core.store.database import ResultType
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy.sql import Select
-from core.store.database import ResultType
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm

@@ -56,7 +56,6 @@ from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenListing
-from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
