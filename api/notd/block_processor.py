@@ -201,11 +201,11 @@ class BlockProcessor:
         return retrievedEvents
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent], transactionWethValues: List[Tuple[str, int]]) -> List[RetrievedTokenTransfer]:
-        contractAddress = str(transaction['to'])
+        contractAddress = str(transaction['to']) if transaction['to'] else None
         if not contractAddress:
             # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
-            contractAddress = str(ethTransactionReceipt['contractAddress'])
+            contractAddress = str(ethTransactionReceipt['contractAddress']) if ethTransactionReceipt['contractAddress'] else None
         contractAddress = chain_util.normalize_address(value=contractAddress)
         transactionFromAddress = chain_util.normalize_address(value=str(transaction['from']))
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId, retrievedEvent.tokenType) for retrievedEvent in retrievedEvents]
