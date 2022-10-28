@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from starlette.responses import StreamingResponse
 from starlette.requests import Request
+from starlette.responses import StreamingResponse
 
 from notd.api.endpoints_v1 import CreateAnonymousGmResponse
 from notd.api.endpoints_v1 import CreateGmRequest
