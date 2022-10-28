@@ -1,3 +1,5 @@
+from typing import List
+
 import sqlalchemy
 
 from notd.model import RetrievedCollectionOverlap
@@ -12,7 +14,7 @@ class CollectionOverlapProcessor():
     def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def calculate_collection_overlap(self, registryAddress: str):
+    async def calculate_collection_overlap(self, registryAddress: str) -> List[RetrievedCollectionOverlap]:
         otherRegistrySubQuery = (
             sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.distinct())
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
@@ -39,13 +41,13 @@ class CollectionOverlapProcessor():
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         registryCountResult = await self.retriever.database.execute(query=registryCountQuery)
-        registryCountMap = dict(list(registryCountResult))
+        registryCountMap = {ownerAddress: int(quantity) for (ownerAddress, quantity, ) in registryCountResult}
         retrievedCollectionOverlaps = [
             RetrievedCollectionOverlap(
                 registryAddress=registryAddress,
                 otherRegistryAddress=otherRegistryAddress,
                 ownerAddress=ownerAddress,
-                otherRegistryTokenCount=otherRegistryTokenCount,
+                otherRegistryTokenCount=int(otherRegistryTokenCount),
                 registryTokenCount=registryCountMap[ownerAddress],
             ) for ownerAddress, otherRegistryAddress, otherRegistryTokenCount in otherRegistryCounts]
         return retrievedCollectionOverlaps

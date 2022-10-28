@@ -1,7 +1,7 @@
 from core import logging
 from core.exceptions import KibaException
 from core.queues.message_queue_processor import MessageProcessor
-from core.queues.model import SqsMessage
+from core.queues.model import Message
 from core.util import date_util
 
 from notd.manager import NotdManager
@@ -35,127 +35,127 @@ class NotdMessageProcessor(MessageProcessor):
     def __init__(self, notdManager: NotdManager):
         self.notdManager = notdManager
 
-    async def process_message(self, message: SqsMessage) -> None:
+    async def process_message(self, message: Message) -> None:
         if message.command == ProcessBlockMessageContent.get_command():
-            messageContent = ProcessBlockMessageContent.parse_obj(message.content)
-            await self.notdManager.process_block(blockNumber=messageContent.blockNumber, shouldSkipProcessingTokens=messageContent.shouldSkipProcessingTokens)
+            processBlockMessageContent = ProcessBlockMessageContent.parse_obj(message.content)
+            await self.notdManager.process_block(blockNumber=processBlockMessageContent.blockNumber, shouldSkipProcessingTokens=processBlockMessageContent.shouldSkipProcessingTokens)
             return
         if message.command == ReceiveNewBlocksMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
-            messageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)
+            receiveNewBlocksMessageContent = ReceiveNewBlocksMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.receive_new_blocks()
             return
         if message.command == RefreshViewsMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
-            messageContent = RefreshViewsMessageContent.parse_obj(message.content)
+            refreshViewsMessageContent = RefreshViewsMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.refresh_views()
             return
         if message.command == ReprocessBlocksMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
-            messageContent = ReprocessBlocksMessageContent.parse_obj(message.content)
+            reprocessBlocksMessageContent = ReprocessBlocksMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.reprocess_old_blocks()
             return
         if message.command == UpdateTokenMetadataMessageContent.get_command():
-            messageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
-            await self.notdManager.update_token_metadata(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId, shouldForce=messageContent.shouldForce)
+            updateTokenMetadataMessageContent = UpdateTokenMetadataMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_metadata(registryAddress=updateTokenMetadataMessageContent.registryAddress, tokenId=updateTokenMetadataMessageContent.tokenId, shouldForce=updateTokenMetadataMessageContent.shouldForce)
             return
         if message.command == UpdateTokenOwnershipMessageContent.get_command():
-            messageContent = UpdateTokenOwnershipMessageContent.parse_obj(message.content)
-            await self.notdManager.update_token_ownership(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+            updateTokenOwnershipMessageContent = UpdateTokenOwnershipMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_ownership(registryAddress=updateTokenOwnershipMessageContent.registryAddress, tokenId=updateTokenOwnershipMessageContent.tokenId)
             return
         if message.command == UpdateCollectionMessageContent.get_command():
-            messageContent = UpdateCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection(address=messageContent.address, shouldForce=messageContent.shouldForce)
+            updateCollectionMessageContent = UpdateCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection(address=updateCollectionMessageContent.address, shouldForce=updateCollectionMessageContent.shouldForce)
             return
         if message.command == UpdateCollectionTokensMessageContent.get_command():
-            messageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection_tokens(address=messageContent.address, shouldForce=messageContent.shouldForce)
+            updateCollectionTokensMessageContent = UpdateCollectionTokensMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection_tokens(address=updateCollectionTokensMessageContent.address, shouldForce=updateCollectionTokensMessageContent.shouldForce)
             return
         if message.command == UpdateActivityForAllCollectionsMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
                 logging.info(f'Skipping {message.command} from more than 10 minutes ago')
                 return
-            messageContent = UpdateActivityForAllCollectionsMessageContent.parse_obj(message.content)
+            updateActivityForAllCollectionsMessageContent = UpdateActivityForAllCollectionsMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.update_activity_for_all_collections()
             return
         if message.command == UpdateActivityForCollectionMessageContent.get_command():
-            messageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_activity_for_collection(address=messageContent.address, startDate=messageContent.startDate)
+            updateActivityForCollectionMessageContent = UpdateActivityForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_activity_for_collection(address=updateActivityForCollectionMessageContent.address, startDate=updateActivityForCollectionMessageContent.startDate)
             return
         if message.command == UpdateTotalActivityForAllCollectionsMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 10)):
                 logging.info(f'Skipping {message.command} from more than 10 minutes ago')
                 return
-            messageContent = UpdateTotalActivityForAllCollectionsMessageContent.parse_obj(message.content)
+            updateTotalActivityForAllCollectionsMessageContent = UpdateTotalActivityForAllCollectionsMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.update_total_activity_for_all_collections()
             return
         if message.command == UpdateTotalActivityForCollectionMessageContent.get_command():
-            messageContent = UpdateTotalActivityForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.update_total_activity_for_collection(address=messageContent.address)
+            updateTotalActivityForCollectionMessageContent = UpdateTotalActivityForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_total_activity_for_collection(address=updateTotalActivityForCollectionMessageContent.address)
             return
         if message.command == UpdateTokenAttributesForAllCollectionsMessageContent.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
                 logging.info(f'Skipping {message.command} from more than 60 minutes ago')
                 return
-            messageContent = UpdateTokenAttributesForAllCollectionsMessageContent.parse_obj(message.content)
+            updateTokenAttributesForAllCollectionsMessageContent = UpdateTokenAttributesForAllCollectionsMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable, invalid-name
             await self.notdManager.update_token_attributes_for_all_collections()
             return
         if message.command == UpdateCollectionTokenAttributesMessageContent.get_command():
-            messageContent = UpdateCollectionTokenAttributesMessageContent.parse_obj(message.content)
-            await self.notdManager.update_collection_token_attributes(registryAddress=messageContent.registryAddress, tokenId=messageContent.tokenId)
+            updateCollectionTokenAttributesMessageContent = UpdateCollectionTokenAttributesMessageContent.parse_obj(message.content)
+            await self.notdManager.update_collection_token_attributes(registryAddress=updateCollectionTokenAttributesMessageContent.registryAddress, tokenId=updateCollectionTokenAttributesMessageContent.tokenId)
             return
         if message.command == UpdateListingsForAllCollections.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
-            messageContent = UpdateListingsForAllCollections.parse_obj(message.content)
+            updateListingsForAllCollections = UpdateListingsForAllCollections.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.update_latest_listings_for_all_collections()
             return
         if message.command == UpdateListingsForCollection.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
-            messageContent = UpdateListingsForCollection.parse_obj(message.content)
-            await self.notdManager.update_latest_listings_for_collection(address=messageContent.address)
+            updateListingsForCollection = UpdateListingsForCollection.parse_obj(message.content)
+            await self.notdManager.update_latest_listings_for_collection(address=updateListingsForCollection.address)
             return
         if message.command == RefreshListingsForAllCollections.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
                 logging.info(f'Skipping {message.command} from more than 60 minutes ago')
                 return
-            messageContent = RefreshListingsForAllCollections.parse_obj(message.content)
+            refreshListingsForAllCollections = RefreshListingsForAllCollections.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.refresh_latest_listings_for_all_collections()
             return
         if message.command == RefreshListingsForCollection.get_command():
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 60)):
                 logging.info(f'Skipping {message.command} from more than 60 minutes ago')
                 return
-            messageContent = RefreshListingsForCollection.parse_obj(message.content)
-            await self.notdManager.refresh_latest_listings_for_collection(address=messageContent.address)
+            refreshListingsForCollection = RefreshListingsForCollection.parse_obj(message.content)
+            await self.notdManager.refresh_latest_listings_for_collection(address=refreshListingsForCollection.address)
             return
         if message.command == UpdateAllTwitterUsersMessageContent.get_command():
-            messageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)
+            updateAllTwitterUsersMessageContent = UpdateAllTwitterUsersMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.update_all_twitter_users()
             return
         if message.command == RefreshAllCollectionOverlapsMessageContent.get_command():
-            messageContent = RefreshAllCollectionOverlapsMessageContent.parse_obj(message.content)
+            refreshAllCollectionOverlapsMessageContent = RefreshAllCollectionOverlapsMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
             await self.notdManager.refresh_overlaps_for_all_collections()
             return
         if message.command == RefreshCollectionOverlapMessageContent.get_command():
-            messageContent = RefreshCollectionOverlapMessageContent.parse_obj(message.content)
-            await self.notdManager.refresh_overlap_for_collection(registryAddress=messageContent.registryAddress)
+            refreshCollectionOverlapMessageContent = RefreshCollectionOverlapMessageContent.parse_obj(message.content)
+            await self.notdManager.refresh_overlap_for_collection(registryAddress=refreshCollectionOverlapMessageContent.registryAddress)
             return
         if message.command == RefreshGalleryBadgeHoldersForAllCollectionsMessageContent.get_command():
-            messageContent = RefreshGalleryBadgeHoldersForAllCollectionsMessageContent.parse_obj(message.content)
+            refreshGalleryBadgeHoldersForAllCollectionsMessageContent = RefreshGalleryBadgeHoldersForAllCollectionsMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable, invalid-name
             await self.notdManager.refresh_gallery_badge_holders_for_all_collections()
             return
         if message.command == RefreshGalleryBadgeHoldersForCollectionMessageContent.get_command():
-            messageContent = RefreshGalleryBadgeHoldersForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.refresh_gallery_badge_holders_for_collection(registryAddress=messageContent.registryAddress)
+            refreshGalleryBadgeHoldersForCollectionMessageContent = RefreshGalleryBadgeHoldersForCollectionMessageContent.parse_obj(message.content)  # pylint: disable=invalid-name
+            await self.notdManager.refresh_gallery_badge_holders_for_collection(registryAddress=refreshGalleryBadgeHoldersForCollectionMessageContent.registryAddress)
             return
         raise KibaException(message='Message was unhandled')

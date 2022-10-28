@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from starlette.requests import Request
 from starlette.responses import StreamingResponse
 
 from notd.api.endpoints_v1 import CreateAnonymousGmResponse
@@ -36,7 +35,7 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
         return ListGmCollectionRowsResponse(collectionRows=(await responseBuilder.gm_collection_rows_from_models(gmCollectionRows=gmCollectionRows)))
 
     @router.route('/generate-gms')
-    async def sse(rawRequest: Request):  # pylint: disable=unused-argument
+    async def sse() -> StreamingResponse:  # type: ignore[misc]
         sseHeaders = {
             'Content-type': 'text/event-stream',
             'Cache-Control': 'no-cache',

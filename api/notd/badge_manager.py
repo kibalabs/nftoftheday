@@ -22,17 +22,17 @@ class BadgeManager:
         self.workQueue = workQueue
         self.badgeProcessor = badgeProcessor
 
-    async def refresh_gallery_badge_holders_for_all_collections_deferred(self):
+    async def refresh_gallery_badge_holders_for_all_collections_deferred(self) -> None:
         await self.workQueue.send_message(message=RefreshGalleryBadgeHoldersForAllCollectionsMessageContent().to_message())
 
-    async def refresh_gallery_badge_holders_for_all_collections(self):
+    async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
         for registryAddress in GALLERY_COLLECTIONS:
             await self.refresh_gallery_badge_holders_for_collection_deferred(registryAddress=registryAddress)
 
-    async def refresh_gallery_badge_holders_for_collection_deferred(self, registryAddress: str):
+    async def refresh_gallery_badge_holders_for_collection_deferred(self, registryAddress: str) -> None:
         await self.workQueue.send_message(message=RefreshGalleryBadgeHoldersForCollectionMessageContent(registryAddress=registryAddress).to_message())
 
-    async def refresh_gallery_badge_holders_for_collection(self, registryAddress: str):
+    async def refresh_gallery_badge_holders_for_collection(self, registryAddress: str) -> None:
         registryAddress = chain_util.normalize_address(registryAddress)
         retrievedGalleryBadgeHolders = await self.badgeProcessor.calculate_all_gallery_badge_holders(registryAddress=registryAddress)
         async with self.saver.create_transaction() as connection:

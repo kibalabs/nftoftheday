@@ -88,7 +88,8 @@ async def reprocess_metadata(startId: Optional[int], endId: Optional[int], batch
         query = query.where(TokenMetadatasTable.c.tokenMetadataId < end)
         query = query.where(TokenMetadatasTable.c.updatedDate < datetime.datetime(2022, 2, 13))
         query = query.order_by(TokenMetadatasTable.c.tokenMetadataId.asc())
-        tokenMetadatasToChange = [token_metadata_from_row(row) for row in await database.execute(query=query)]
+        result = database.execute(query=query)
+        tokenMetadatasToChange = [token_metadata_from_row(row) for row in result.mappings()]
         logging.info(f'Working on {start} - {end}')
         logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
         await asyncio.gather(*[_reprocess_metadata_from_s3(tokenMetadataProcessor=tokenMetadataProcessor, s3Manager=s3Manager, tokenManger=tokenManger, tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatasToChange])

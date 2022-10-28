@@ -104,7 +104,7 @@ async def process_tokens_from_old_transfers(startBlockNumber: int, endBlockNumbe
              .where(TokenTransfersTable.c.blockNumber >= start)
              .where(TokenTransfersTable.c.blockNumber < end)
          )
-        result = await database.execute(query=query,)
+        result = await database.execute(query=query)
         tokensToProcess = set()
         collectionsToProcess = set()
         for (registryAddress, tokenId) in result:

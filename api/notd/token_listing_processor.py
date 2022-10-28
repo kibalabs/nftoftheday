@@ -1,13 +1,16 @@
 import asyncio
 import datetime
+from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
 
 from core import logging
 from core.requester import Requester
 from core.util import chain_util
 from core.util import date_util
 from core.util import list_util
+from core.util.typing_util import JSON1
 
 from notd.lock_manager import LockManager
 from notd.model import RetrievedTokenListing
@@ -22,16 +25,16 @@ class TokenListingProcessor:
         self.openseaRequester = openseaRequester
         self.lockManager = lockManager
 
-    async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
+    async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: Sequence[str]) -> List[RetrievedTokenListing]:
         listings = []
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=(1.5 * len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=int(1.5 * len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
             for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=_OPENSEA_API_LISTING_CHUNK_SIZE)):
-                nextPageId = None
+                nextPageId: Optional[str] = None
                 pageCount = 0
                 while True:
                     logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, float(f'{index}.{pageCount}'))
-                    queryData = {
-                        'token_ids': chunkedTokenIds,
+                    queryData: Dict[str, JSON1] = {
+                        'token_ids': chunkedTokenIds,  # type: ignore[dict-item]
                         'asset_contract_address': registryAddress,
                     }
                     if nextPageId:
@@ -87,7 +90,7 @@ class TokenListingProcessor:
             tokensIdsToReprocess = set()
             index = 0
             for eventType in ['created', 'cancelled']:
-                queryData = {
+                queryData: Dict[str, JSON1] = {
                     'asset_contract_address': address,
                     'occurred_after': int(startDate.timestamp()),
                     'event_type': eventType,
@@ -109,7 +112,7 @@ class TokenListingProcessor:
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
         async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=60):
-            queryData = {
+            queryData: Dict[str, JSON1] = {
                 'isOrderAsk': 'true',
                 'collection': registryAddress,
                 'status[]': 'VALID',
@@ -150,8 +153,8 @@ class TokenListingProcessor:
                 queryData['pagination[cursor]'] = latestOrderHash
             return assetListings
 
-    async def get_looksrare_listing_for_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenListing]:
-        queryData = {
+    async def get_looksrare_listings_for_token(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenListing]:
+        queryData: Dict[str, JSON1] = {
             'isOrderAsk': 'true',
             'collection': registryAddress,
             'tokenId': tokenId,
@@ -185,20 +188,20 @@ class TokenListingProcessor:
         return assetListings
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=(1.5 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=int(1.5 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
             listings = []
             for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
-                listings += await asyncio.gather(*[self.get_looksrare_listing_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
+                listings += await asyncio.gather(*[self.get_looksrare_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
                 await asyncio.sleep(0.25)
             listings = [listing for listing in listings if listing is not None]
             allListings = [item for sublist in listings for item in sublist]
             return allListings
 
-    async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime):
+    async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=60):
             tokenIdsToReprocess = set()
             for eventType in ["CANCEL_LIST", "LIST"]:
-                queryData = {
+                queryData: Dict[str, JSON1] = {
                     'collection': address,
                     'type': eventType,
                     'pagination[first]': 150

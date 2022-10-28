@@ -42,10 +42,10 @@ class CollectionActivityProcessor:
                 minimumValue = min(minimumValue, tokenTransfer.value) if minimumValue > 0 else tokenTransfer.value
                 maximumValue = max(maximumValue, tokenTransfer.value)
             transferCount += tokenTransfer.amount
-        averageValue = totalValue / saleCount if saleCount > 0 else 0
+        averageValue = int(totalValue / saleCount) if saleCount > 0 else 0
         return RetrievedCollectionHourlyActivity(address=address, date=startDate, transferCount=transferCount, saleCount=saleCount, totalValue=totalValue, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
 
-    async def calculate_collection_total_activity(self, address: str):
+    async def calculate_collection_total_activity(self, address: str) -> RetrievedCollectionTotalActivity:
         address = chain_util.normalize_address(address)
         collectionHourlyActivities = await self.retriever.list_collection_activities(
           fieldFilters=[
@@ -63,5 +63,5 @@ class CollectionActivityProcessor:
             transferCount += collectionHourlyActivity.transferCount
             maximumValue = max(maximumValue, collectionHourlyActivity.maximumValue)
             minimumValue = min(minimumValue, collectionHourlyActivity.minimumValue) if minimumValue > 0 else collectionHourlyActivity.minimumValue
-        averageValue = totalValue / saleCount if saleCount > 0 else 0
+        averageValue = int(totalValue / saleCount) if saleCount > 0 else 0
         return RetrievedCollectionTotalActivity(address=address, totalValue=totalValue, saleCount=saleCount, transferCount=transferCount, maximumValue=maximumValue, minimumValue=minimumValue, averageValue=averageValue)

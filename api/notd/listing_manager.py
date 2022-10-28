@@ -1,6 +1,5 @@
 import datetime
 from typing import List
-from typing import Optional
 
 from core import logging
 from core.queues.message_queue_processor import MessageNeedsReprocessingException
@@ -57,7 +56,7 @@ class ListingManager:
     async def _update_full_latest_listings_for_collection(self, address: str) -> None:
         tokenIdsQuery = (
             TokenMetadatasTable.select()
-            .with_only_columns([TokenMetadatasTable.c.tokenId])
+            .with_only_columns(TokenMetadatasTable.c.tokenId)
             .where(TokenMetadatasTable.c.registryAddress == address)
             .order_by(TokenMetadatasTable.c.tokenId.asc())
         )
@@ -91,23 +90,23 @@ class ListingManager:
         async with self.saver.create_transaction() as connection:
             existingOpenseaListingsQuery = (
                 LatestTokenListingsTable.select()
-                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                    .with_only_columns(LatestTokenListingsTable.c.latestTokenListingId)
                     .where(LatestTokenListingsTable.c.registryAddress == address)
                     .where(LatestTokenListingsTable.c.tokenId.in_(openseaTokenIdsToReprocess))
                     .where(LatestTokenListingsTable.c.source.in_(['opensea-seaport', 'opensea-wyvern']))
             )
             existingOpenseaListingsResult = await self.retriever.database.execute(query=existingOpenseaListingsQuery, connection=connection)
-            openseaListingIdsToDelete = {row[0] for row in existingOpenseaListingsResult}
+            openseaListingIdsToDelete = {int(row[0]) for row in existingOpenseaListingsResult}
             existingLooksrareListingsQuery = (
                 LatestTokenListingsTable.select()
-                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                    .with_only_columns(LatestTokenListingsTable.c.latestTokenListingId)
                     .where(LatestTokenListingsTable.c.registryAddress == address)
                     .where(LatestTokenListingsTable.c.tokenId.in_(looksrareTokenIdsToReprocess))
                     .where(LatestTokenListingsTable.c.source == 'looksrare')
             )
             existingLooksrareListingsResult = await self.retriever.database.execute(query=existingLooksrareListingsQuery, connection=connection)
-            looksrareListingIdsToDelete = {row[0] for row in existingLooksrareListingsResult}
-            allListingIdsToDelete = openseaListingIdsToDelete | looksrareListingIdsToDelete
+            looksrareListingIdsToDelete = {int(row[0]) for row in existingLooksrareListingsResult}
+            allListingIdsToDelete = list(openseaListingIdsToDelete | looksrareListingIdsToDelete)
             allListings = openseaListings + looksrareListings
             await self.saver.delete_latest_token_listings(latestTokenListingIds=allListingIdsToDelete, connection=connection)
             await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
@@ -135,7 +134,7 @@ class ListingManager:
             raise MessageNeedsReprocessingException(delaySeconds=(60 * 10), originalException=exception)
         await self.saver.update_latest_update(latestUpdateId=latestFullUpdate.latestUpdateId, date=currentDate)
 
-    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> List[TokenListing]:
         query = (
             OrderedTokenListingsView.select()
             .where(OrderedTokenListingsView.c.registryAddress == registryAddress)
@@ -143,5 +142,5 @@ class ListingManager:
             .order_by(OrderedTokenListingsView.c.tokenListingIndex.asc())
         )
         result = await self.retriever.database.execute(query=query)
-        tokenListings = [token_listing_from_row(row, OrderedTokenListingsView) for row in result]
+        tokenListings = [token_listing_from_row(row, OrderedTokenListingsView) for row in result.mappings()]
         return tokenListings

@@ -65,7 +65,7 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
             logging.info(f'Working on {start} to {end}...')
             query = (
                 TokenTransfersTable.select()
-                    .with_only_columns([TokenTransfersTable.c.blockNumber])
+                    .with_only_columns(TokenTransfersTable.c.blockNumber)
                     .filter(TokenTransfersTable.c.blockNumber >= start)
                     .filter(TokenTransfersTable.c.blockNumber < end)
                     .where(TokenTransfersTable.c.contractAddress.in_(MARKETPLACE_ADDRESSES))

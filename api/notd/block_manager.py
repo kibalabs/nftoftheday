@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Set
@@ -9,8 +10,8 @@ from core import logging
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import Direction
+from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
-from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
 from notd.block_processor import BlockProcessor
@@ -19,7 +20,7 @@ from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import ProcessedBlock
-from notd.model import TokenTransfer
+from notd.model import RetrievedTokenTransfer
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -61,7 +62,7 @@ class BlockManager:
             .where(BlocksTable.c.updatedDate - BlocksTable.c.blockDate < datetime.timedelta(minutes=15))
         )
         result = await self.retriever.database.execute(query=blocksToReprocessQuery)
-        blockNumbers = [blockNumber for (blockNumber, ) in result]
+        blockNumbers = [int(blockNumber) for (blockNumber, ) in result]
         logging.info(f'Scheduling messages for reprocessing {len(blockNumbers)} blocks')
         await self.process_blocks_deferred(blockNumbers=blockNumbers, shouldSkipProcessingTokens=True)
 
@@ -85,10 +86,10 @@ class BlockManager:
             await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
 
     @staticmethod
-    def _uniqueness_tuple_from_token_transfer(tokenTransfer: TokenTransfer) -> Tuple[str, str, str, str, str, int, int, int, str, bool, bool, bool, bool, bool, str]:
+    def _uniqueness_tuple_from_token_transfer(tokenTransfer: RetrievedTokenTransfer) -> Tuple[str, str, str, str, str, int, int, int, str, bool, bool, bool, bool, bool, str]:
         return (tokenTransfer.transactionHash, tokenTransfer.registryAddress, tokenTransfer.tokenId, tokenTransfer.fromAddress, tokenTransfer.toAddress, tokenTransfer.blockNumber, tokenTransfer.amount, tokenTransfer.value,tokenTransfer.tokenType, tokenTransfer.isMultiAddress, tokenTransfer.isInterstitial, tokenTransfer.isBatch, tokenTransfer.isSwap, tokenTransfer.isOutbound, tokenTransfer.contractAddress)
 
-    async def _save_processed_block(self, processedBlock: ProcessedBlock) -> Sequence[Tuple[str, str]]:
+    async def _save_processed_block(self, processedBlock: ProcessedBlock) -> List[Tuple[str, str]]:
         changedTokens: Set[Tuple[str, str]] = set()
         async with self.saver.create_transaction() as connection:
             try:
@@ -101,7 +102,7 @@ class BlockManager:
                 await self.saver.create_block(connection=connection, blockNumber=processedBlock.blockNumber, blockHash=processedBlock.blockHash, blockDate=processedBlock.blockDate)
             existingTokenTransfers = await self.retriever.list_token_transfers(
                 connection=connection,
-                fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber)],
+                fieldFilters=[IntegerFieldFilter(fieldName=TokenTransfersTable.c.blockNumber.key, eq=processedBlock.blockNumber)],
             )
             existingTuplesTransferMap = {self._uniqueness_tuple_from_token_transfer(tokenTransfer=tokenTransfer): tokenTransfer for tokenTransfer in existingTokenTransfers}
             existingTuples = set(existingTuplesTransferMap.keys())

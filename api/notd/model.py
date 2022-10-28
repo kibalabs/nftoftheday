@@ -1,5 +1,8 @@
+from __future__ import annotations
+
+import dataclasses
 import datetime
-from typing import Dict
+from typing import TYPE_CHECKING
 from typing import Generic
 from typing import List
 from typing import Optional
@@ -7,7 +10,9 @@ from typing import TypeVar
 
 from core.util import date_util
 from core.util.typing_util import JSON
-from pydantic import dataclasses
+
+if not TYPE_CHECKING:
+    from pydantic import dataclasses
 
 WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
@@ -135,15 +140,18 @@ class Token:
     registryAddress: str
     tokenId: str
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> JSON:
         return {
             'registryAddress': self.registryAddress,
             'tokenId': self.tokenId,
         }
 
     @classmethod
-    def from_dict(cls, tokenDict: Dict):
-        return cls(registryAddress=tokenDict['registryAddress'], tokenId=tokenDict['tokenId'])
+    def from_dict(cls, tokenDict: JSON) -> Token:
+        return cls(
+            registryAddress=str(tokenDict['registryAddress']),  # type: ignore[index, call-overload]
+            tokenId=str(tokenDict['tokenId']),  # type: ignore[index, call-overload]
+        )
 
 
 @dataclasses.dataclass
@@ -151,17 +159,17 @@ class BaseSponsoredToken:
     date: datetime.datetime
     token: Token
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> JSON:
         return {
             'date': date_util.datetime_to_string(dt=self.date),
-            'token': self.token.to_dict(),
+            'token': self.token.to_dict(),  # type: ignore[dict-item]
         }
 
     @classmethod
-    def from_dict(cls, sponsoredTokenDict: Dict):
+    def from_dict(cls, sponsoredTokenDict: JSON) -> BaseSponsoredToken:
         return cls(
-            date=date_util.datetime_from_string(sponsoredTokenDict.get('date')),
-            token=Token.from_dict(sponsoredTokenDict.get('token'))
+            date=date_util.datetime_from_string(str(sponsoredTokenDict['date'])),  # type: ignore[index, call-overload]
+            token=Token.from_dict(dict(sponsoredTokenDict['token']))  # type: ignore[index, call-overload, arg-type]
         )
 
 
@@ -383,17 +391,17 @@ class Signature:
     message: str
     signature: str
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> JSON:
         return {
             'message': self.message,
             'signature': self.signature,
         }
 
     @classmethod
-    def from_dict(cls, signatureDict: Dict):
+    def from_dict(cls, signatureDict: JSON) -> Signature:
         return cls(
-            message=signatureDict['message'],
-            signature=signatureDict['signature'],
+            message=str(signatureDict['message']),  # type: ignore[index, call-overload]
+            signature=str(signatureDict['signature']),  # type: ignore[index, call-overload]
         )
 
 

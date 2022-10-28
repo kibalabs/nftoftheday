@@ -6,10 +6,12 @@ from typing import Optional
 from typing import Sequence
 
 import sqlalchemy
+from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
+from core.store.retriever import FieldFilter
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
@@ -72,7 +74,6 @@ class NotdManager:
         self.twitterManager = twitterManager
         self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
-        self._tokenCache = {}
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
             sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
@@ -98,7 +99,7 @@ class NotdManager:
         highestPricedTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=_REGISTRY_BLACKLIST),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=list(_REGISTRY_BLACKLIST)),
             ],
             orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
             limit=1
@@ -117,32 +118,33 @@ class NotdManager:
 
     async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
-            TokenTransfersTable.select()
+            sqlalchemy.select(sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .with_only_columns([sqlalchemy.func.count()])
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
         )
         result = await self.retriever.database.execute(query=query)
-        count = result.scalar()
-        return count
+        row = result.first()
+        return int(row[0]) if row else 0
 
-    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
+    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TradedToken:
         query = (
-            TokenTransfersTable.select()
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()])
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
-            .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+            .where(TokenTransfersTable.c.registryAddress.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemy.func.count().desc())
+            .order_by(sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId).desc())
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
-        (registryAddress, tokenId, transferCount) = result.first()
+        row = result.first()
+        if not row:
+            raise NotFoundException()
+        (registryAddress, tokenId, transferCount) = row
         query = (
-            sqlalchemy.select([TokenTransfersTable, BlocksTable])
+            sqlalchemy.select(TokenTransfersTable, BlocksTable)
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
@@ -152,10 +154,12 @@ class NotdManager:
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
-        latestTransferRow = result.first()
+        latestTransferRow = result.mappings().first()
+        if not latestTransferRow:
+            raise NotFoundException()
         return TradedToken(
             latestTransfer=token_transfer_from_row(latestTransferRow),
-            transferCount=transferCount,
+            transferCount=int(transferCount),
         )
 
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
@@ -184,7 +188,7 @@ class NotdManager:
         if userAddress:
             tokenTransfersQuery = tokenTransfersQuery.where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
         result = await self.retriever.database.execute(query=tokenTransfersQuery)
-        tokenTransfers = [token_transfer_from_row(row) for row in result]
+        tokenTransfers = [token_transfer_from_row(row) for row in result.mappings()]
         return tokenTransfers
 
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
@@ -193,47 +197,56 @@ class NotdManager:
         endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         holderCountQuery = (
             TokenOwnershipsTable.select()
-            .with_only_columns([
+            .with_only_columns(
                 sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
                 sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
-            ])
+            )
             .where(TokenOwnershipsTable.c.registryAddress == address)
         )
         holderCountResult = await self.retriever.database.execute(query=holderCountQuery)
-        (itemCount, holderCount) = holderCountResult.first()
+        holderCountRow = holderCountResult.first()
+        if not holderCountRow:
+            raise NotFoundException()
+        (itemCount, holderCount) = holderCountRow
         allActivityQuery = (
             CollectionHourlyActivitiesTable.select()
-            .with_only_columns([
+            .with_only_columns(
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.saleCount),
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.transferCount),
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
-            ])
+            )
             .where(CollectionHourlyActivitiesTable.c.address == address)
         )
         allActivityResult = await self.retriever.database.execute(query=allActivityQuery)
-        (saleCount, transferCount, totalTradeVolume) = allActivityResult.first()
+        allActivityRow = allActivityResult.first()
+        if not allActivityRow:
+            raise NotFoundException()
+        (saleCount, transferCount, totalTradeVolume) = allActivityRow
         dayActivityQuery = (
             CollectionHourlyActivitiesTable.select()
-            .with_only_columns([
+            .with_only_columns(
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
                 sqlalchemy.func.min(CollectionHourlyActivitiesTable.c.minimumValue),
                 sqlalchemy.func.max(CollectionHourlyActivitiesTable.c.maximumValue),
-            ])
+            )
             .where(CollectionHourlyActivitiesTable.c.address == address)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .where(CollectionHourlyActivitiesTable.c.date < endDate)
         )
         dayActivityResult = await self.retriever.database.execute(query=dayActivityQuery)
-        (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityResult.first()
+        dayActivityRow = dayActivityResult.first()
+        if not dayActivityRow:
+            raise NotFoundException()
+        (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityRow
         return CollectionStatistics(
-            itemCount=itemCount,
-            holderCount=holderCount,
-            saleCount=saleCount or 0,
-            transferCount=transferCount or 0,
-            totalTradeVolume=totalTradeVolume or 0,
-            lowestSaleLast24Hours=lowestSaleLast24Hours or 0,
-            highestSaleLast24Hours=highestSaleLast24Hours or 0,
-            tradeVolume24Hours=tradeVolume24Hours or 0,
+            itemCount=int(itemCount),
+            holderCount=int(holderCount),
+            saleCount=int(saleCount or 0),
+            transferCount=int(transferCount or 0),
+            totalTradeVolume=int(totalTradeVolume or 0),
+            lowestSaleLast24Hours=int(lowestSaleLast24Hours or 0),
+            highestSaleLast24Hours=int(highestSaleLast24Hours or 0),
+            tradeVolume24Hours=int(tradeVolume24Hours or 0),
         )
 
     async def get_collection_daily_activities(self, address: str) -> List[CollectionDailyActivity]:
@@ -262,7 +275,7 @@ class NotdManager:
                         minimumValue = min(minimumValue, collectionActivity.minimumValue) if minimumValue > 0 else collectionActivity.minimumValue
                         maximumValue = max(maximumValue, collectionActivity.maximumValue)
                     transferCount += collectionActivity.transferCount
-            averageValue = totalValue / saleCount if saleCount > 0 else 0
+            averageValue = int(totalValue / saleCount) if saleCount > 0 else 0
             collectionActivitiesPerDay.append(CollectionDailyActivity(date=currentDate, transferCount=transferCount, saleCount=saleCount, totalValue=totalValue, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue))
             currentDate += delta
         return collectionActivitiesPerDay
@@ -272,7 +285,7 @@ class NotdManager:
 
     async def get_collection_token_recent_transfers(self, registryAddress: str, tokenId: str, limit: int, offset: int, shouldIncludeSalesOnly: bool = False) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
-        filters = [
+        filters: List[FieldFilter] = [
             StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
             StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
         ]
@@ -286,7 +299,7 @@ class NotdManager:
         )
         return tokenTransfers
 
-    async def get_collection_token_owners(self, registryAddress: str, tokenId: str) -> Sequence[TokenMultiOwnership]:
+    async def get_collection_token_owners(self, registryAddress: str, tokenId: str) -> List[TokenMultiOwnership]:
         # TODO(krishan711): this assumes its called for an ERC-1155 so fix if we need it for 721 too
         tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
             StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
@@ -306,7 +319,7 @@ class NotdManager:
         tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
-                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, ne=0),
+                IntegerFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, ne=0),
             ],
             orders=[Order(fieldName=TokenMultiOwnershipsTable.c.latestTransferDate.key, direction=Direction.DESCENDING)],
             limit=limit+offset,
@@ -316,42 +329,42 @@ class NotdManager:
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
-    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> Optional[List[TokenListing]]:
+    async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> List[TokenListing]:
         return await self.listingManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
 
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
 
-    async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+    async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
-    async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+    async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
-    async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
-        await self.ownershipManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+    async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
+        await self.ownershipManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token_ownership(self, registryAddress: str, tokenId: str) -> None:
         await self.ownershipManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def update_token_deferred(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+    async def update_token_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
         await self.ownershipManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def update_token(self, registryAddress: str, tokenId: str, shouldForce: bool = False) -> None:
+    async def update_token(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
         await self.ownershipManager.update_token_ownership(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def update_collection_deferred(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection_deferred(self, address: str, shouldForce: Optional[bool] = False) -> None:
         await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)
 
-    async def update_collection(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection(self, address: str, shouldForce: Optional[bool] = False) -> None:
         await self.collectionManager.update_collection(address=address, shouldForce=shouldForce)
 
-    async def update_collection_tokens_deferred(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection_tokens_deferred(self, address: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_collection_tokens_deferred(address=address, shouldForce=shouldForce)
 
-    async def update_collection_tokens(self, address: str, shouldForce: bool = False) -> None:
+    async def update_collection_tokens(self, address: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_collection_tokens(address=address, shouldForce=shouldForce)
 
     async def update_activity_for_all_collections_deferred(self) -> None:
@@ -360,8 +373,8 @@ class NotdManager:
     async def update_activity_for_all_collections(self) -> None:
         await self.activityManager.update_activity_for_all_collections()
 
-    async def update_activity_for_collection_deferred(self, registryAddress: str, startDate: datetime.datetime) -> None:
-        await self.activityManager.update_activity_for_collection_deferred(registryAddress=registryAddress, startDate=startDate)
+    async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
+        await self.activityManager.update_activity_for_collection_deferred(address=address, startDate=startDate)
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         await self.activityManager.update_activity_for_collection(address=address, startDate=startDate)

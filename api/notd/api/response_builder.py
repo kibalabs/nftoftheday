@@ -51,11 +51,11 @@ from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
 from notd.model import LatestAccountGm
 from notd.model import ListResponse
+from notd.model import RetrievedTokenMetadata
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenListing
-from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
@@ -67,6 +67,7 @@ from notd.token_metadata_processor import TokenMetadataProcessor
 from .endpoints_v1 import ApiListResponse
 
 VALID_ATTRIBUTE_FIELDS = {'trait_type', 'value'}
+VALID_VALUE_TYPES = {str, int, float, None, bool}
 
 
 class ResponseBuilder:
@@ -103,8 +104,8 @@ class ResponseBuilder:
     async def collection_token_from_token_key(self, tokenKey: Token) -> ApiCollectionToken:
         return await self.collection_token_from_registry_address_token_id(registryAddress=tokenKey.registryAddress, tokenId=tokenKey.tokenId)
 
-    async def collection_token_from_model(self, tokenMetadata: TokenMetadata) -> ApiCollectionToken:
-        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS} for attribute in tokenMetadata.attributes] if isinstance(tokenMetadata.attributes, list) else []
+    async def collection_token_from_model(self, tokenMetadata: RetrievedTokenMetadata) -> ApiCollectionToken:
+        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS and value is None or type(value) in VALID_VALUE_TYPES} for attribute in tokenMetadata.attributes] if isinstance(tokenMetadata.attributes, list) else []  # type: ignore[union-attr]
         return ApiCollectionToken(
             registryAddress=tokenMetadata.registryAddress,
             tokenId=tokenMetadata.tokenId,
@@ -117,14 +118,14 @@ class ResponseBuilder:
             attributes=attributes,
         )
 
-    async def collection_tokens_from_models(self, tokenMetadatas: Sequence[TokenMetadata]) -> Sequence[ApiCollectionToken]:
+    async def collection_tokens_from_models(self, tokenMetadatas: Sequence[RetrievedTokenMetadata]) -> List[ApiCollectionToken]:
         return await asyncio.gather(*[self.collection_token_from_model(tokenMetadata=tokenMetadata) for tokenMetadata in tokenMetadatas])
 
-    async def collection_tokens_from_token_keys(self, tokenKeys: Sequence[Token]) -> Sequence[ApiCollectionToken]:
+    async def collection_tokens_from_token_keys(self, tokenKeys: Sequence[Token]) -> List[ApiCollectionToken]:
         return await asyncio.gather(*[self.collection_token_from_token_key(tokenKey=tokenKey) for tokenKey in tokenKeys])
 
     async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> List[ApiCollectionToken]:
-        tokenMetadatas = []
+        tokenMetadatas: List[RetrievedTokenMetadata] = []
         for token in tokens:
             try:
                 tokenMetadatas += [await self.retriever.get_token_metadata_by_registry_address_token_id(registryAddress=token.registryAddress, tokenId=token.tokenId)]
@@ -156,7 +157,7 @@ class ResponseBuilder:
             token=(await self.collection_token_from_registry_address_token_id(registryAddress=tokenTransfer.registryAddress, tokenId=tokenTransfer.tokenId)),
         )
 
-    async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> Sequence[ApiTokenTransfer]:
+    async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> List[ApiTokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
 
     async def token_ownership_from_model(self, tokenMultiOwnership: TokenMultiOwnership) -> ApiTokenOwnership:
@@ -167,7 +168,7 @@ class ResponseBuilder:
             quantity=tokenMultiOwnership.quantity,
         )
 
-    async def token_ownerships_from_models(self, tokenMultiOwnerships: Sequence[TokenMultiOwnership]) -> Sequence[ApiTokenOwnership]:
+    async def token_ownerships_from_models(self, tokenMultiOwnerships: Sequence[TokenMultiOwnership]) -> List[ApiTokenOwnership]:
         return await asyncio.gather(*[self.token_ownership_from_model(tokenMultiOwnership=tokenMultiOwnership) for tokenMultiOwnership in tokenMultiOwnerships])
 
     async def get_collection_statistics(self, collectionStatistics: CollectionStatistics) -> ApiCollectionStatistics:
@@ -198,7 +199,7 @@ class ResponseBuilder:
             date=sponsoredToken.date,
         )
 
-    async def collection_activities_from_models(self, collectionActivities: Sequence[CollectionDailyActivity]) -> Sequence[ApiCollectionDailyActivity]:
+    async def collection_activities_from_models(self, collectionActivities: Sequence[CollectionDailyActivity]) -> List[ApiCollectionDailyActivity]:
         return [ApiCollectionDailyActivity(
             date=collectionActivity.date,
             totalValue=str(collectionActivity.totalValue),
@@ -209,7 +210,7 @@ class ResponseBuilder:
             averageValue=str(collectionActivity.averageValue)
         ) for collectionActivity in collectionActivities]
 
-    async def airdrops_from_models(self, airdrops: Sequence[Airdrop]) -> Sequence[ApiAirdrop]:
+    async def airdrops_from_models(self, airdrops: Sequence[Airdrop]) -> List[ApiAirdrop]:
         return [ApiAirdrop(
             token=await self.collection_token_from_token_key(tokenKey=airdrop.tokenKey),
             name=airdrop.name,
@@ -218,7 +219,7 @@ class ResponseBuilder:
             claimUrl=airdrop.claimUrl,
         ) for airdrop in airdrops]
 
-    async def collection_attributes_from_models(self, collectionAttributes: Sequence[CollectionAttribute]) -> Sequence[ApiCollectionAttribute]:
+    async def collection_attributes_from_models(self, collectionAttributes: Sequence[CollectionAttribute]) -> List[ApiCollectionAttribute]:
         return [ApiCollectionAttribute(
             name=attribute.name,
             values=attribute.values
@@ -258,7 +259,7 @@ class ResponseBuilder:
             sourceId=tokenListing.sourceId,
         )
 
-    async def token_listings_from_models(self, tokenListings: Sequence[TokenListing]) -> Sequence[ApiTokenListing]:
+    async def token_listings_from_models(self, tokenListings: Sequence[TokenListing]) -> List[ApiTokenListing]:
         return await asyncio.gather(*[self.token_listing_from_model(tokenListing=tokenListing) for tokenListing in tokenListings])
 
     async def gallery_token_from_model(self, galleryToken: GalleryToken) -> ApiGalleryToken:
@@ -269,7 +270,7 @@ class ResponseBuilder:
             quantity=galleryToken.quantity
         )
 
-    async def gallery_tokens_from_models(self, galleryTokens: Sequence[GalleryToken]) -> Sequence[ApiGalleryToken]:
+    async def gallery_tokens_from_models(self, galleryTokens: Sequence[GalleryToken]) -> List[ApiGalleryToken]:
         return await asyncio.gather(*[self.gallery_token_from_model(galleryToken=galleryToken) for galleryToken in galleryTokens])
 
     async def user_profile_from_model(self, userProfile: UserProfile) -> ApiUserProfile:
@@ -303,7 +304,7 @@ class ResponseBuilder:
             joinDate=galleryUser.joinDate,
         )
 
-    async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> Sequence[ApiGalleryUser]:
+    async def gallery_users_from_models(self, galleryUsers: Sequence[GalleryUser]) -> List[ApiGalleryUser]:
         return await asyncio.gather(*[self.gallery_user_from_model(galleryUser=galleryUser) for galleryUser in galleryUsers])
 
     async def gallery_user_badge_from_model(self, galleryBadgeHolder: GalleryBadgeHolder) -> ApiGalleryUserBadge:
@@ -314,7 +315,7 @@ class ResponseBuilder:
             achievedDate=galleryBadgeHolder.achievedDate,
         )
 
-    async def gallery_user_badges_from_models(self, galleryBadgeHolders: Sequence[GalleryBadgeHolder]) -> Sequence[ApiGalleryUserBadge]:
+    async def gallery_user_badges_from_models(self, galleryBadgeHolders: Sequence[GalleryBadgeHolder]) -> List[ApiGalleryUserBadge]:
         return await asyncio.gather(*[self.gallery_user_badge_from_model(galleryBadgeHolder=galleryBadgeHolder) for galleryBadgeHolder in galleryBadgeHolders])
 
     async def gallery_user_row_from_model(self, galleryUserRow: GalleryUserRow) -> ApiGalleryUserRow:
@@ -324,7 +325,7 @@ class ResponseBuilder:
             galleryUserBadges=(await self.gallery_user_badges_from_models(galleryBadgeHolders=galleryUserRow.galleryBadgeHolders) if galleryUserRow.galleryBadgeHolders else [])
         )
 
-    async def gallery_user_rows_from_models(self, galleryUserRows: Sequence[GalleryUserRow]) -> Sequence[ApiGalleryUserRow]:
+    async def gallery_user_rows_from_models(self, galleryUserRows: Sequence[GalleryUserRow]) -> List[ApiGalleryUserRow]:
         return await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRows])
 
     async def gallery_user_row_list_response_from_model(self, galleryUserRowListResponse: ListResponse[GalleryUserRow]) -> ApiListResponse[ApiGalleryUserRow]:
@@ -339,7 +340,7 @@ class ResponseBuilder:
             tokens=(await self.collection_tokens_from_models(tokenMetadatas=ownedCollection.tokenMetadatas)) if ownedCollection.tokenMetadatas else None,
         )
 
-    async def gallery_owned_collections_from_models(self, ownedCollections: Sequence[GalleryOwnedCollection]) -> Sequence[ApiGalleryOwnedCollection]:
+    async def gallery_owned_collections_from_models(self, ownedCollections: Sequence[GalleryOwnedCollection]) -> List[ApiGalleryOwnedCollection]:
         return await asyncio.gather(*[self.gallery_owned_collection_from_model(ownedCollection=ownedCollection) for ownedCollection in ownedCollections])
 
     async def gm_account_row_from_model(self, gmAccountRow: GmAccountRow) -> ApiGmAccountRow:
@@ -351,7 +352,7 @@ class ResponseBuilder:
             monthCount=gmAccountRow.monthCount,
         )
 
-    async def gm_account_rows_from_models(self, gmAccountRows: Sequence[GmAccountRow]) -> Sequence[ApiGmAccountRow]:
+    async def gm_account_rows_from_models(self, gmAccountRows: Sequence[GmAccountRow]) -> List[ApiGmAccountRow]:
         return await asyncio.gather(*[self.gm_account_row_from_model(gmAccountRow=gmAccountRow) for gmAccountRow in gmAccountRows])
 
     async def gm_collection_row_from_model(self, gmCollectionRow: GmCollectionRow) -> ApiGmCollectionRow:
@@ -362,7 +363,7 @@ class ResponseBuilder:
             monthCount=gmCollectionRow.monthCount,
         )
 
-    async def gm_collection_rows_from_models(self, gmCollectionRows: Sequence[GmCollectionRow]) -> Sequence[ApiGmCollectionRow]:
+    async def gm_collection_rows_from_models(self, gmCollectionRows: Sequence[GmCollectionRow]) -> List[ApiGmCollectionRow]:
         return await asyncio.gather(*[self.gm_collection_row_from_model(gmCollectionRow=gmCollectionRow) for gmCollectionRow in gmCollectionRows])
 
     async def account_gm_from_model(self, accountGm: AccountGm) -> ApiAccountGm:
@@ -385,7 +386,7 @@ class ResponseBuilder:
             signature=gmCollection.signature,
         )
 
-    async def account_collection_gms_from_models(self, gmCollections: Sequence[AccountCollectionGm]) -> Sequence[ApiAccountCollectionGm]:
+    async def account_collection_gms_from_models(self, gmCollections: Sequence[AccountCollectionGm]) -> List[ApiAccountCollectionGm]:
         return await asyncio.gather(*[self.account_collection_gm_from_model(gmCollection=gmCollection) for gmCollection in gmCollections])
 
     async def latest_account_gm_from_model(self, latestAccountGm: LatestAccountGm) -> ApiLatestAccountGm:
@@ -403,7 +404,7 @@ class ResponseBuilder:
             otherRegistryTokenCount=collectionOverlap.otherRegistryTokenCount,
         )
 
-    async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> Sequence[ApiCollectionOverlap]:
+    async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> List[ApiCollectionOverlap]:
         return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])
 
     async def collection_overlap_summary_from_model(self, collectionOverlapSummary: CollectionOverlapSummary) -> ApiCollectionOverlapSummary:
@@ -415,7 +416,7 @@ class ResponseBuilder:
             otherRegistryTokenCount=collectionOverlapSummary.otherRegistryTokenCount,
         )
 
-    async def collection_overlap_summaries_from_models(self, collectionOverlapSummaries: Sequence[CollectionOverlapSummary]) -> Sequence[ApiCollectionOverlapSummary]:
+    async def collection_overlap_summaries_from_models(self, collectionOverlapSummaries: Sequence[CollectionOverlapSummary]) -> List[ApiCollectionOverlapSummary]:
         return await asyncio.gather(*[self.collection_overlap_summary_from_model(collectionOverlapSummary=collectionOverlapSummary) for collectionOverlapSummary in collectionOverlapSummaries])
 
     async def collection_overlap_owner_from_model(self, collectionOverlapOwner: CollectionOverlapOwner) -> ApiCollectionOverlapOwner:
@@ -427,5 +428,5 @@ class ResponseBuilder:
             otherRegistryTokenCount=collectionOverlapOwner.otherRegistryTokenCount,
         )
 
-    async def collection_overlap_owners_from_models(self, collectionOverlapOwners: Sequence[CollectionOverlapOwner]) -> Sequence[ApiCollectionOverlapOwner]:
+    async def collection_overlap_owners_from_models(self, collectionOverlapOwners: Sequence[CollectionOverlapOwner]) -> List[ApiCollectionOverlapOwner]:
         return await asyncio.gather(*[self.collection_overlap_owner_from_model(collectionOverlapOwner=collectionOverlapOwner) for collectionOverlapOwner in collectionOverlapOwners])

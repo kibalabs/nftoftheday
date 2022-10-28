@@ -20,7 +20,7 @@ async def daily_new_registries():
     query = TokenTransfersTable.select()
     query = query.where(TokenTransfersTable.c.registryAddress.in_(
         TokenTransfersTable.select()
-        .with_only_columns([TokenTransfersTable.c.registryAddress])
+        .with_only_columns(TokenTransfersTable.c.registryAddress)
             .group_by(TokenTransfersTable.c.registryAddress)
             .having(sqlalchemyfunc.count(TokenTransfersTable.c.registryAddress) == 1)
 

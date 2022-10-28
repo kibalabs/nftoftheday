@@ -19,7 +19,7 @@ async def daily_new_registries():
     await database.connect()
     query = TokenTransfersTable.select()
     query = query.where(
-        TokenTransfersTable.c.blockDate.in_(TokenTransfersTable.select().with_only_columns([sqlalchemyfunc.min(TokenTransfersTable.c.blockDate)]).group_by(TokenTransfersTable.c.registryAddress)))
+        TokenTransfersTable.c.blockDate.in_(TokenTransfersTable.select().with_only_columns(sqlalchemyfunc.min(TokenTransfersTable.c.blockDate)).group_by(TokenTransfersTable.c.registryAddress)))
     query = query.where(sqlalchemyfunc.date(TokenTransfersTable.c.blockDate) == sqlalchemyfunc.current_date())
     rows = await database.fetch_all(query)
     for row in rows:

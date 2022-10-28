@@ -1,12 +1,14 @@
 import asyncio
 import datetime
 from typing import List
+from typing import Sequence
 from typing import Tuple
 
 from core import logging
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import Direction
+from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
@@ -38,18 +40,18 @@ class OwnershipManager:
         self.lockManager = lockManager
         self.tokenOwnershipProcessor = tokenOwnershipProcessor
 
-    async def update_token_ownerships_deferred(self, collectionTokenIds: List[Tuple[str, str]]) -> None:
+    async def update_token_ownerships_deferred(self, collectionTokenIds: Sequence[Tuple[str, str]]) -> None:
         if len(collectionTokenIds) == 0:
             return
-        collectionTokenIds = set(collectionTokenIds)
-        messages = [UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in collectionTokenIds]
+        uniqueCollectionTokenIds = set(collectionTokenIds)
+        messages = [UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in uniqueCollectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         await self.tokenQueue.send_message(message=UpdateTokenOwnershipMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
-    async def update_token_ownership(self, registryAddress: str, tokenId: str):
+    async def update_token_ownership(self, registryAddress: str, tokenId: str) -> None:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
         if collection.doesSupportErc721:
@@ -138,12 +140,12 @@ class OwnershipManager:
             tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
                 StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=address),
                 StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.ownerAddress.key, eq=ownerAddress),
-                StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, eq=0),
+                IntegerFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, eq=0),
             ])
             tokens += [Token(registryAddress=tokenMultiOwnership.registryAddress, tokenId=tokenMultiOwnership.tokenId) for tokenMultiOwnership in tokenMultiOwnerships]
         return tokens
 
-    async def reprocess_owner_token_ownerships(self, ownerAddress: str) -> None:
+    async def reprocess_owner_token_ownerships(self, ownerAddress: str) -> List[Tuple[str, str]]:
         tokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=ownerAddress)])
         collectionTokenIds = list({(transfer.registryAddress, transfer.tokenId) for transfer in tokenTransfers})
         logging.info(f'Refreshing {len(collectionTokenIds)} ownerships')
