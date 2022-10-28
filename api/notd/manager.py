@@ -241,12 +241,12 @@ class NotdManager:
         return CollectionStatistics(
             itemCount=int(itemCount),
             holderCount=int(holderCount),
-            saleCount=int(saleCount) or 0,
-            transferCount=int(transferCount) or 0,
-            totalTradeVolume=int(totalTradeVolume) or 0,
-            lowestSaleLast24Hours=int(lowestSaleLast24Hours) or 0,
-            highestSaleLast24Hours=int(highestSaleLast24Hours) or 0,
-            tradeVolume24Hours=int(tradeVolume24Hours) or 0,
+            saleCount=int(saleCount or 0),
+            transferCount=int(transferCount or 0),
+            totalTradeVolume=int(totalTradeVolume or 0),
+            lowestSaleLast24Hours=int(lowestSaleLast24Hours or 0),
+            highestSaleLast24Hours=int(highestSaleLast24Hours or 0),
+            tradeVolume24Hours=int(tradeVolume24Hours or 0),
         )
 
     async def get_collection_daily_activities(self, address: str) -> List[CollectionDailyActivity]:

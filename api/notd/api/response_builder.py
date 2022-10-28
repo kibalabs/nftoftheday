@@ -105,7 +105,7 @@ class ResponseBuilder:
         return await self.collection_token_from_registry_address_token_id(registryAddress=tokenKey.registryAddress, tokenId=tokenKey.tokenId)
 
     async def collection_token_from_model(self, tokenMetadata: RetrievedTokenMetadata) -> ApiCollectionToken:
-        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS and type(value) in VALID_VALUE_TYPES} for attribute in tokenMetadata.attributes] if isinstance(tokenMetadata.attributes, list) else []  # type: ignore[union-attr]
+        attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS and value is None or type(value) in VALID_VALUE_TYPES} for attribute in tokenMetadata.attributes] if isinstance(tokenMetadata.attributes, list) else []  # type: ignore[union-attr]
         return ApiCollectionToken(
             registryAddress=tokenMetadata.registryAddress,
             tokenId=tokenMetadata.tokenId,

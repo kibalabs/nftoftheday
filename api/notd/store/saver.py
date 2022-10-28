@@ -241,7 +241,7 @@ class Saver(CoreSaver):
             TokenCollectionsTable.c.doesSupportErc721.key: doesSupportErc721,
             TokenCollectionsTable.c.doesSupportErc1155.key: doesSupportErc1155,
         }
-        query = TokenCollectionsTable.insert().values(values).returning(TokenCollectionsTable.c.tokenCollectionId)
+        query = TokenCollectionsTable.insert().values(values).returning(TokenCollectionsTable.c.collectionId)
         result = await self._execute(query=query, connection=connection)
         collectionId = int(result.scalar_one())
         return Collection(
@@ -294,7 +294,7 @@ class Saver(CoreSaver):
             values[TokenCollectionsTable.c.doesSupportErc1155.key] = doesSupportErc1155
         if len(values) > 0:
             values[TokenCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
-        query = TokenCollectionsTable.update().where(TokenCollectionsTable.c.collectionId == collectionId).values(values).returning(TokenCollectionsTable.c.tokenCollectionId)
+        query = TokenCollectionsTable.update().where(TokenCollectionsTable.c.collectionId == collectionId).values(values).returning(TokenCollectionsTable.c.collectionId)
         await self._execute(query=query, connection=connection)
 
     async def create_token_ownership(self, registryAddress: str, tokenId: str, ownerAddress: str, transferValue: int, transferDate: datetime.datetime, transferTransactionHash: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
