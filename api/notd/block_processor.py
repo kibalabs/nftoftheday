@@ -10,6 +10,7 @@ from typing import Tuple
 
 import eth_abi
 from core import logging
+from core.exceptions import InternalServerErrorException
 from core.util import chain_util
 from core.web3.eth_client import EthClientInterface
 from web3 import Web3
@@ -206,6 +207,8 @@ class BlockProcessor:
             # NOTE(krishan711): for contract creations we have to get the contract address from the creation receipt
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transaction['hash'].hex())
             contractAddress = str(ethTransactionReceipt['contractAddress']) if ethTransactionReceipt['contractAddress'] else None
+        if not contractAddress:
+            raise InternalServerErrorException(f'Failed to identify contractAddress')
         contractAddress = chain_util.normalize_address(value=contractAddress)
         transactionFromAddress = chain_util.normalize_address(value=str(transaction['from']))
         tokenKeys = [(retrievedEvent.registryAddress, retrievedEvent.tokenId, retrievedEvent.tokenType) for retrievedEvent in retrievedEvents]
