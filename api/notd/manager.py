@@ -118,32 +118,33 @@ class NotdManager:
 
     async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
-            TokenTransfersTable.select()
+            sqlalchemy.select(sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .with_only_columns([sqlalchemy.func.count()])
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
         )
         result = await self.retriever.database.execute(query=query)
-        count = int(result.scalar())
-        return count
+        row = result.first()
+        return int(row[0]) if row else 0
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TradedToken:
         query = (
-            TokenTransfersTable.select()
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .with_only_columns([TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count()])
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
-            .where(TokenTransfersTable.c.registryAddress.notin_(_REGISTRY_BLACKLIST))
+            .where(TokenTransfersTable.c.registryAddress.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemy.func.count().desc())
+            .order_by(sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId).desc())
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
-        (registryAddress, tokenId, transferCount) = result.first()  # type: ignore[misc]
+        row = result.first()
+        if not row:
+            raise NotFoundException()
+        (registryAddress, tokenId, transferCount) = row
         query = (
-            sqlalchemy.select([TokenTransfersTable, BlocksTable])
+            sqlalchemy.select(TokenTransfersTable, BlocksTable)
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
@@ -153,7 +154,7 @@ class NotdManager:
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
-        latestTransferRow = result.first()
+        latestTransferRow = result.mappings().first()
         if not latestTransferRow:
             raise NotFoundException()
         return TradedToken(
@@ -177,7 +178,7 @@ class NotdManager:
     async def get_collection_recent_transfers(self, registryAddress: str, limit: int, offset: int, userAddress: Optional[str] = None) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
         tokenTransfersQuery = (
-            sqlalchemy.select([TokenTransfersTable, BlocksTable])
+            sqlalchemy.select(TokenTransfersTable, BlocksTable)
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(TokenTransfersTable.c.registryAddress == registryAddress)
             .order_by(TokenTransfersTable.c.blockNumber.desc())
@@ -187,7 +188,7 @@ class NotdManager:
         if userAddress:
             tokenTransfersQuery = tokenTransfersQuery.where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
         result = await self.retriever.database.execute(query=tokenTransfersQuery)
-        tokenTransfers = [token_transfer_from_row(row) for row in result]
+        tokenTransfers = [token_transfer_from_row(row) for row in result.mappings()]
         return tokenTransfers
 
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
@@ -196,38 +197,47 @@ class NotdManager:
         endDate = date_util.start_of_day(dt=date_util.datetime_from_datetime(dt=startDate, days=1))
         holderCountQuery = (
             TokenOwnershipsTable.select()
-            .with_only_columns([
+            .with_only_columns(
                 sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
                 sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
-            ])
+            )
             .where(TokenOwnershipsTable.c.registryAddress == address)
         )
         holderCountResult = await self.retriever.database.execute(query=holderCountQuery)
-        (itemCount, holderCount) = holderCountResult.first()  # type: ignore[misc]
+        holderCountRow = holderCountResult.first()
+        if not holderCountRow:
+            raise NotFoundException()
+        (itemCount, holderCount) = holderCountRow
         allActivityQuery = (
             CollectionHourlyActivitiesTable.select()
-            .with_only_columns([
+            .with_only_columns(
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.saleCount),
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.transferCount),
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
-            ])
+            )
             .where(CollectionHourlyActivitiesTable.c.address == address)
         )
         allActivityResult = await self.retriever.database.execute(query=allActivityQuery)
-        (saleCount, transferCount, totalTradeVolume) = allActivityResult.first()  # type: ignore[misc]
+        allActivityRow = allActivityResult.first()
+        if not allActivityRow:
+            raise NotFoundException()
+        (saleCount, transferCount, totalTradeVolume) = allActivityRow
         dayActivityQuery = (
             CollectionHourlyActivitiesTable.select()
-            .with_only_columns([
+            .with_only_columns(
                 sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
                 sqlalchemy.func.min(CollectionHourlyActivitiesTable.c.minimumValue),
                 sqlalchemy.func.max(CollectionHourlyActivitiesTable.c.maximumValue),
-            ])
+            )
             .where(CollectionHourlyActivitiesTable.c.address == address)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .where(CollectionHourlyActivitiesTable.c.date < endDate)
         )
         dayActivityResult = await self.retriever.database.execute(query=dayActivityQuery)
-        (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityResult.first()  # type: ignore[misc]
+        dayActivityRow = dayActivityResult.first()
+        if not dayActivityRow:
+            raise NotFoundException()
+        (tradeVolume24Hours, lowestSaleLast24Hours, highestSaleLast24Hours) = dayActivityRow
         return CollectionStatistics(
             itemCount=int(itemCount),
             holderCount=int(holderCount),

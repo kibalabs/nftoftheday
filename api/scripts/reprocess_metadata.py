@@ -36,7 +36,8 @@ async def reprocess_metadata(startId: int, endId: int, batchSize: int):
             query = query.where(TokenMetadatasTable.c.tokenMetadataId < end)
             query = query.where(TokenMetadatasTable.c.metadataUrl.startswith('data:'))
             query = query.where(TokenMetadatasTable.c.name == None)
-            tokenMetadatasToChange = [token_metadata_from_row(row) async for row in database.execute(query=query)]
+            result = database.execute(query=query)
+            tokenMetadatasToChange = [token_metadata_from_row(row) for row in result.mappings()]
             logging.info(f'Updating {len(tokenMetadatasToChange)} transfers...')
             for tokenMetadata in tokenMetadatasToChange:
                 try:

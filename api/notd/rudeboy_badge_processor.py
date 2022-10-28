@@ -27,30 +27,30 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
     async def calculate_minter_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         query = (
-            sqlalchemy.select([TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemy.func.min(BlocksTable.c.blockDate).label('achievedDate')])
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemy.func.min(BlocksTable.c.blockDate).label('achievedDate'))
             .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(TokenTransfersTable.c.fromAddress == RUDEBOYS_OWNER_ADDRESS)
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.toAddress)
         )
         result = await self.retriever.database.execute(query=query)
-        minterBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="MINTER", achievedDate=row.achievedDate) for row in result]
+        minterBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="MINTER", achievedDate=row.achievedDate) for row in result.mappings()]
         return minterBadgeHolders
 
     async def calculate_one_of_one_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         oneOfOneQuery = (
-            sqlalchemy.select([TokenMultiOwnershipsTable.c.tokenId])
+            sqlalchemy.select(TokenMultiOwnershipsTable.c.tokenId)
             .where(TokenMultiOwnershipsTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .group_by(TokenMultiOwnershipsTable.c.tokenId)
             .having(sqlalchemy.func.sum(TokenMultiOwnershipsTable.c.quantity) == 1)
         )
         query = (
-            sqlalchemy.select([TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemy.func.min(BlocksTable.c.blockDate).label('achievedDate')])
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemy.func.min(BlocksTable.c.blockDate).label('achievedDate'))
             .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
-            .where(TokenTransfersTable.c.tokenId.in_(oneOfOneQuery.select()))
+            .where(TokenTransfersTable.c.tokenId.in_(oneOfOneQuery))
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.toAddress)
         )
         result = await self.retriever.database.execute(query=query)
-        oneOfOneBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="ONE_OF_ONE", achievedDate=row.achievedDate) for row in result]
+        oneOfOneBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="ONE_OF_ONE", achievedDate=row.achievedDate) for row in result.mappings()]
         return oneOfOneBadgeHolders

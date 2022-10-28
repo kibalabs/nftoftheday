@@ -41,7 +41,7 @@ class ActivityManager:
     async def _get_transferred_collections_in_period(self, startDate: datetime.datetime, endDate: datetime.datetime) -> Set[Tuple[str, datetime.datetime]]:
         updatedBlocksQuery = (
             BlocksTable.select()
-                .with_only_columns([BlocksTable.c.blockNumber])
+                .with_only_columns(BlocksTable.c.blockNumber)
                 .where(BlocksTable.c.updatedDate >= startDate)
                 .where(BlocksTable.c.updatedDate <= endDate)
         )
@@ -52,7 +52,7 @@ class ActivityManager:
             updatedTransfersQuery = (
                 TokenTransfersTable.select()
                     .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-                    .with_only_columns([TokenTransfersTable.c.registryAddress, BlocksTable.c.blockDate])
+                    .with_only_columns(TokenTransfersTable.c.registryAddress, BlocksTable.c.blockDate)
                     .where(TokenTransfersTable.c.blockNumber.in_(blockNumbers))
             )
             updatedTransfersResult = await self.retriever.database.execute(query=updatedTransfersQuery)
@@ -104,7 +104,7 @@ class ActivityManager:
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='total_collection_activities')
         query = (
             CollectionHourlyActivitiesTable.select()
-            .with_only_columns([CollectionHourlyActivitiesTable.c.address.distinct()])
+            .with_only_columns(CollectionHourlyActivitiesTable.c.address.distinct())
             .filter(CollectionHourlyActivitiesTable.c.updatedDate >= latestUpdate.date)
         )
         result = await self.retriever.database.execute(query=query)

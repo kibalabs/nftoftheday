@@ -56,7 +56,7 @@ class ListingManager:
     async def _update_full_latest_listings_for_collection(self, address: str) -> None:
         tokenIdsQuery = (
             TokenMetadatasTable.select()
-            .with_only_columns([TokenMetadatasTable.c.tokenId])
+            .with_only_columns(TokenMetadatasTable.c.tokenId)
             .where(TokenMetadatasTable.c.registryAddress == address)
             .order_by(TokenMetadatasTable.c.tokenId.asc())
         )
@@ -90,7 +90,7 @@ class ListingManager:
         async with self.saver.create_transaction() as connection:
             existingOpenseaListingsQuery = (
                 LatestTokenListingsTable.select()
-                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                    .with_only_columns(LatestTokenListingsTable.c.latestTokenListingId)
                     .where(LatestTokenListingsTable.c.registryAddress == address)
                     .where(LatestTokenListingsTable.c.tokenId.in_(openseaTokenIdsToReprocess))
                     .where(LatestTokenListingsTable.c.source.in_(['opensea-seaport', 'opensea-wyvern']))
@@ -99,7 +99,7 @@ class ListingManager:
             openseaListingIdsToDelete = {int(row[0]) for row in existingOpenseaListingsResult}
             existingLooksrareListingsQuery = (
                 LatestTokenListingsTable.select()
-                    .with_only_columns([LatestTokenListingsTable.c.latestTokenListingId])
+                    .with_only_columns(LatestTokenListingsTable.c.latestTokenListingId)
                     .where(LatestTokenListingsTable.c.registryAddress == address)
                     .where(LatestTokenListingsTable.c.tokenId.in_(looksrareTokenIdsToReprocess))
                     .where(LatestTokenListingsTable.c.source == 'looksrare')
@@ -142,5 +142,5 @@ class ListingManager:
             .order_by(OrderedTokenListingsView.c.tokenListingIndex.asc())
         )
         result = await self.retriever.database.execute(query=query)
-        tokenListings = [token_listing_from_row(row, OrderedTokenListingsView) for row in result]
+        tokenListings = [token_listing_from_row(row, OrderedTokenListingsView) for row in result.mappings()]
         return tokenListings

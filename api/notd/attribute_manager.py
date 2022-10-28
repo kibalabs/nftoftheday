@@ -1,3 +1,4 @@
+import sqlalchemy
 from core import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
@@ -31,13 +32,12 @@ class AttributeManager:
         latestProcessedDate = latestUpdate.date
         logging.info(f'Finding changed tokens since {latestProcessedDate}')
         updatedTokenMetadatasQuery = (
-            TokenMetadatasTable.select()
-            .with_only_columns([TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId])
-            .where(TokenMetadatasTable.c.registryAddress.in_(GALLERY_COLLECTIONS))
+            sqlalchemy.select(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
+            .where(TokenMetadatasTable.c.registryAddress.in_(list(GALLERY_COLLECTIONS)))
             .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
         )
         updatedTokenMetadatasQueryResult = await self.retriever.database.execute(query=updatedTokenMetadatasQuery)
-        updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
+        updatedTokenMetadatas = set(list(updatedTokenMetadatasQueryResult))
         logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} changed tokens')
         messages = [UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
         await self.tokenQueue.send_messages(messages=messages)

@@ -53,7 +53,7 @@ async def reprocess_registry_blocks(registryAddress: str, startBlockNumber: int,
             logging.info(f'Working on {start} to {end}...')
             query = (
                 TokenTransfersTable.select()
-                    .with_only_columns([TokenTransfersTable.c.blockNumber])
+                    .with_only_columns(TokenTransfersTable.c.blockNumber)
                     .filter(TokenTransfersTable.c.blockNumber >= start)
                     .filter(TokenTransfersTable.c.blockNumber < end)
                     .where(TokenTransfersTable.c.registryAddress == registryAddress)

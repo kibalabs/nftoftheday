@@ -33,9 +33,9 @@ async def find_unnormalized_transfer_addresses(startBlockNumber: int, endBlockNu
             start = currentBlockNumber
             end = min(currentBlockNumber + batchSize, endBlockNumber)
             logging.info(f'Working on {start} to {end}...')
-            query = ( 
+            query = (
                 TokenTransfersTable.select()
-                    .with_only_columns([TokenTransfersTable.c.operatorAddress, TokenTransfersTable.c.contractAddress])
+                    .with_only_columns(TokenTransfersTable.c.operatorAddress, TokenTransfersTable.c.contractAddress)
                     .where(TokenTransfersTable.c.blockNumber >= start)
                     .where(TokenTransfersTable.c.blockNumber < end)
                 )

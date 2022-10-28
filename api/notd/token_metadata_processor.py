@@ -125,20 +125,20 @@ class TokenMetadataProcessor():
 
     def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Mapping[str, JSON1]) -> RetrievedTokenMetadata:
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
-        description = tokenMetadataDict.get('description')
-        if isinstance(description, list):
-            description = description[0]
-        imageUrl = tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data')
-        if isinstance(imageUrl, list) and len(imageUrl) > 0:
-            imageUrl = imageUrl[0]
-        elif isinstance(imageUrl, dict):
-            imageDict = imageUrl
+        description: Optional[str] = tokenMetadataDict.get('description')  # type: ignore[assignment]
+        if isinstance(description, list) and len(description) > 0:  # type: ignore[unreachable]
+            description = description[0]  # type: ignore[unreachable]
+        imageUrl: Optional[str] = tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data')  # type: ignore[assignment]
+        if isinstance(imageUrl, list) and len(imageUrl) > 0:  # type: ignore[unreachable]
+            imageUrl = imageUrl[0]  # type: ignore[unreachable]
+        elif isinstance(imageUrl, dict):  # type: ignore[unreachable]
+            imageDict = imageUrl  # type: ignore[unreachable]
             imageUrl = imageDict.get('src')
             if not imageUrl:
                 logging.error(f'Failed to extract imageUrl from {imageDict}')
-        animationUrl = tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation')
-        youtubeUrl = tokenMetadataDict.get('youtube_url')
-        frameImageUrl = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')
+        animationUrl: Optional[str] = tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation')  # type: ignore[assignment]
+        youtubeUrl: Optional[str] = tokenMetadataDict.get('youtube_url')  # type: ignore[assignment]
+        frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
@@ -150,8 +150,8 @@ class TokenMetadataProcessor():
             animationUrl=self._clean_potential_ipfs_url(animationUrl),
             youtubeUrl=self._clean_potential_ipfs_url(youtubeUrl),
             frameImageUrl=self._clean_potential_ipfs_url(frameImageUrl),
-            backgroundColor=tokenMetadataDict.get('background_color'),
-            attributes=tokenMetadataDict.get('attributes', []),
+            backgroundColor=tokenMetadataDict.get('background_color'),  # type: ignore[arg-type]
+            attributes=tokenMetadataDict.get('attributes', []),  # type: ignore[arg-type]
         )
         return retrievedTokenMetadata
 
@@ -212,18 +212,19 @@ class TokenMetadataProcessor():
             except BadRequestException as exception:
                 badRequestException = exception
         if badRequestException is not None:
-            if 'URI query for nonexistent token' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            if 'execution reverted' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            if 'out of gas' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            if 'stack limit reached' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            if 'Maybe the method does not exist on this contract' in badRequestException.message:
-                raise TokenDoesNotExistException()
-            if 'value could not be decoded as valid UTF8' in badRequestException.message:
-                raise TokenDoesNotExistException()
+            if badRequestException.message:
+                if 'URI query for nonexistent token' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'execution reverted' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'out of gas' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'stack limit reached' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'Maybe the method does not exist on this contract' in badRequestException.message:
+                    raise TokenDoesNotExistException()
+                if 'value could not be decoded as valid UTF8' in badRequestException.message:
+                    raise TokenDoesNotExistException()
             raise badRequestException
         tokenMetadataUri: Optional[str] = None
         if tokenMetadataUriResponse:
@@ -231,8 +232,8 @@ class TokenMetadataProcessor():
                 tokenMetadataUri = f'https://api.opensea.io/api/v1/metadata/{registryAddress}/{tokenId}'
             else:
                 hexId = hex(int(tokenId)).replace('0x', '').rjust(64, '0')
-                tokenMetadataUri = tokenMetadataUriResponse.replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
-        if len(tokenMetadataUri.strip()) == 0:
+                tokenMetadataUri = typing.cast(str, tokenMetadataUriResponse).replace('0x{id}', hexId).replace('{id}', hexId).replace('\x00', '')
+        if tokenMetadataUri and len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
             raise TokenHasNoMetadataException()
@@ -242,8 +243,9 @@ class TokenMetadataProcessor():
         tokenMetadataUri = self._clean_potential_ipfs_url(tokenMetadataUri)
         # NOTE(krishan711): save the url here before using ipfs gateways etc
         metadataUrl = typing.cast(str, tokenMetadataUri)
-        if tokenMetadataUri.startswith('ipfs://'):
+        if tokenMetadataUri and tokenMetadataUri.startswith('ipfs://'):
             tokenMetadataUri = tokenMetadataUri.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')
+        tokenMetadataDict: JSON = {}
         if not tokenMetadataUri:
             tokenMetadataDict = {}
         elif tokenMetadataUri.startswith('data:'):
@@ -266,7 +268,7 @@ class TokenMetadataProcessor():
                 logging.info(f'Failed to process metadata from {metadataUrl}: {type(exception)} {str(exception)}')
                 tokenMetadataDict = {}
         if isinstance(tokenMetadataDict, list):
-            tokenMetadataDict = tokenMetadataDict[0] if len(tokenMetadataDict) > 0 else {}
+            tokenMetadataDict = tokenMetadataDict[0] if len(tokenMetadataDict) > 0 else {}  # type: ignore[assignment]
         await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         if not isinstance(tokenMetadataDict, dict):
             return self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)

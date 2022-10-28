@@ -55,7 +55,7 @@ class BlockManager:
 
     async def reprocess_old_blocks(self) -> None:
         blocksToReprocessQuery = (
-            sqlalchemy.select([BlocksTable.c.blockNumber])
+            sqlalchemy.select(BlocksTable.c.blockNumber)
             # NOTE(krishan711): this first condition is only here to prevent a huge amount of work, update once all old blocks have been reprocessed
             .where(BlocksTable.c.createdDate > datetime.datetime(2022, 10, 6, 0, 0, 0))
             .where(BlocksTable.c.createdDate < date_util.datetime_from_now(minutes=-15))

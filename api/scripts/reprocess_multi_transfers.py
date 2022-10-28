@@ -56,19 +56,23 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
         end = min(currentBlockNumber + batchSize, endBlock)
         logging.info(f'Working on {start} to {end}...')
         async with saver.create_transaction() as connection:
-            multiTransferSubquery = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.transactionHash]) \
-                        .filter(TokenTransfersTable.c.blockNumber >= start) \
-                        .filter(TokenTransfersTable.c.blockNumber < end) \
-                        .group_by(TokenTransfersTable.c.transactionHash) \
-                        .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1) \
-                        .subquery()
-            query = TokenTransfersTable.select() \
-                        .with_only_columns([TokenTransfersTable.c.blockNumber])\
-                        .where(sqlalchemy.or_(
-                            TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(multiTransferSubquery)),
-                            TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85')
-                        )
+            multiTransferSubquery = (
+                TokenTransfersTable.select()
+                .with_only_columns(TokenTransfersTable.c.transactionHash)
+                .filter(TokenTransfersTable.c.blockNumber >= start)
+                .filter(TokenTransfersTable.c.blockNumber < end)
+                .group_by(TokenTransfersTable.c.transactionHash)
+                .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1)
+                .subquery()
+            )
+            query = (
+                TokenTransfersTable.select()
+                .with_only_columns(TokenTransfersTable.c.blockNumber)
+                .where(sqlalchemy.or_(
+                    TokenTransfersTable.c.transactionHash.in_(sqlalchemy.select(multiTransferSubquery)),
+                    TokenTransfersTable.c.registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85')
+                )
+            )
             result = await database.execute(query=query)
             blocksToReprocess = {row[0] for row in result}
             logging.info(f'Reprocessing {len(blocksToReprocess)} blocks')

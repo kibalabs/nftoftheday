@@ -6,6 +6,7 @@ from typing import Union
 
 from sqlalchemy import Column
 from sqlalchemy import Table
+from sqlalchemy.engine import RowMapping
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -51,320 +52,313 @@ from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserInteractionsTable
 from notd.store.schema import UserProfilesTable
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine import RowProxy
-else:
-    RowProxy = Any
 
-RowType = Union[Mapping[Column[Any], Any], RowProxy]  # type: ignore[misc]
-
-
-def token_transfer_from_row(row: RowType) -> TokenTransfer:
+def token_transfer_from_row(rowMapping: RowMapping) -> TokenTransfer:
     return TokenTransfer(
-        tokenTransferId=row[TokenTransfersTable.c.tokenTransferId],
-        transactionHash=row[TokenTransfersTable.c.transactionHash],
-        registryAddress=row[TokenTransfersTable.c.registryAddress],
-        tokenId=row[TokenTransfersTable.c.tokenId],
-        fromAddress=row[TokenTransfersTable.c.fromAddress],
-        toAddress=row[TokenTransfersTable.c.toAddress],
-        operatorAddress=row[TokenTransfersTable.c.operatorAddress],
-        contractAddress=row[TokenTransfersTable.c.contractAddress],
-        value=row[TokenTransfersTable.c.value],
-        amount=row[TokenTransfersTable.c.amount],
-        gasLimit=row[TokenTransfersTable.c.gasLimit],
-        gasPrice=row[TokenTransfersTable.c.gasPrice],
-        blockNumber=row[TokenTransfersTable.c.blockNumber],
-        tokenType=row[TokenTransfersTable.c.tokenType],
-        isMultiAddress=row[TokenTransfersTable.c.isMultiAddress],
-        isInterstitial=row[TokenTransfersTable.c.isInterstitial],
-        isSwap=row[TokenTransfersTable.c.isSwap],
-        isBatch=row[TokenTransfersTable.c.isBatch],
-        isOutbound=row[TokenTransfersTable.c.isOutbound],
-        blockDate=row[BlocksTable.c.blockDate],
-        updatedDate=row[BlocksTable.c.updatedDate],
+        tokenTransferId=rowMapping[TokenTransfersTable.c.tokenTransferId],
+        transactionHash=rowMapping[TokenTransfersTable.c.transactionHash],
+        registryAddress=rowMapping[TokenTransfersTable.c.registryAddress],
+        tokenId=rowMapping[TokenTransfersTable.c.tokenId],
+        fromAddress=rowMapping[TokenTransfersTable.c.fromAddress],
+        toAddress=rowMapping[TokenTransfersTable.c.toAddress],
+        operatorAddress=rowMapping[TokenTransfersTable.c.operatorAddress],
+        contractAddress=rowMapping[TokenTransfersTable.c.contractAddress],
+        value=rowMapping[TokenTransfersTable.c.value],
+        amount=rowMapping[TokenTransfersTable.c.amount],
+        gasLimit=rowMapping[TokenTransfersTable.c.gasLimit],
+        gasPrice=rowMapping[TokenTransfersTable.c.gasPrice],
+        blockNumber=rowMapping[TokenTransfersTable.c.blockNumber],
+        tokenType=rowMapping[TokenTransfersTable.c.tokenType],
+        isMultiAddress=rowMapping[TokenTransfersTable.c.isMultiAddress],
+        isInterstitial=rowMapping[TokenTransfersTable.c.isInterstitial],
+        isSwap=rowMapping[TokenTransfersTable.c.isSwap],
+        isBatch=rowMapping[TokenTransfersTable.c.isBatch],
+        isOutbound=rowMapping[TokenTransfersTable.c.isOutbound],
+        blockDate=rowMapping[BlocksTable.c.blockDate],
+        updatedDate=rowMapping[BlocksTable.c.updatedDate],
     )
 
 
-def block_from_row(row: RowType) -> Block:
+def block_from_row(rowMapping: RowMapping) -> Block:
     return Block(
-        blockId=row[BlocksTable.c.blockId],
-        createdDate=row[BlocksTable.c.createdDate],
-        updatedDate=row[BlocksTable.c.updatedDate],
-        blockNumber=row[BlocksTable.c.blockNumber],
-        blockHash=row[BlocksTable.c.blockHash],
-        blockDate=row[BlocksTable.c.blockDate],
+        blockId=rowMapping[BlocksTable.c.blockId],
+        createdDate=rowMapping[BlocksTable.c.createdDate],
+        updatedDate=rowMapping[BlocksTable.c.updatedDate],
+        blockNumber=rowMapping[BlocksTable.c.blockNumber],
+        blockHash=rowMapping[BlocksTable.c.blockHash],
+        blockDate=rowMapping[BlocksTable.c.blockDate],
     )
 
 
-def token_metadata_from_row(row: RowType) -> TokenMetadata:
+def token_metadata_from_row(rowMapping: RowMapping) -> TokenMetadata:
     return TokenMetadata(
-        tokenMetadataId=row[TokenMetadatasTable.c.tokenMetadataId],
-        createdDate=row[TokenMetadatasTable.c.createdDate],
-        updatedDate=row[TokenMetadatasTable.c.updatedDate],
-        registryAddress=row[TokenMetadatasTable.c.registryAddress],
-        tokenId=row[TokenMetadatasTable.c.tokenId],
-        metadataUrl=row[TokenMetadatasTable.c.metadataUrl],
-        name=row[TokenMetadatasTable.c.name],
-        imageUrl=row[TokenMetadatasTable.c.imageUrl],
-        resizableImageUrl=row[TokenMetadatasTable.c.resizableImageUrl],
-        animationUrl=row[TokenMetadatasTable.c.animationUrl],
-        youtubeUrl=row[TokenMetadatasTable.c.youtubeUrl],
-        backgroundColor=row[TokenMetadatasTable.c.backgroundColor],
-        frameImageUrl=row[TokenMetadatasTable.c.frameImageUrl],
-        description=row[TokenMetadatasTable.c.description],
-        attributes=row[TokenMetadatasTable.c.attributes],
+        tokenMetadataId=rowMapping[TokenMetadatasTable.c.tokenMetadataId],
+        createdDate=rowMapping[TokenMetadatasTable.c.createdDate],
+        updatedDate=rowMapping[TokenMetadatasTable.c.updatedDate],
+        registryAddress=rowMapping[TokenMetadatasTable.c.registryAddress],
+        tokenId=rowMapping[TokenMetadatasTable.c.tokenId],
+        metadataUrl=rowMapping[TokenMetadatasTable.c.metadataUrl],
+        name=rowMapping[TokenMetadatasTable.c.name],
+        imageUrl=rowMapping[TokenMetadatasTable.c.imageUrl],
+        resizableImageUrl=rowMapping[TokenMetadatasTable.c.resizableImageUrl],
+        animationUrl=rowMapping[TokenMetadatasTable.c.animationUrl],
+        youtubeUrl=rowMapping[TokenMetadatasTable.c.youtubeUrl],
+        backgroundColor=rowMapping[TokenMetadatasTable.c.backgroundColor],
+        frameImageUrl=rowMapping[TokenMetadatasTable.c.frameImageUrl],
+        description=rowMapping[TokenMetadatasTable.c.description],
+        attributes=rowMapping[TokenMetadatasTable.c.attributes],
     )
 
 
-def collection_from_row(row: RowType) -> Collection:
+def collection_from_row(rowMapping: RowMapping) -> Collection:
     return Collection(
-        collectionId=row[TokenCollectionsTable.c.collectionId],
-        createdDate=row[TokenCollectionsTable.c.createdDate],
-        updatedDate=row[TokenCollectionsTable.c.updatedDate],
-        address=row[TokenCollectionsTable.c.address],
-        name=row[TokenCollectionsTable.c.name],
-        symbol=row[TokenCollectionsTable.c.symbol],
-        description=row[TokenCollectionsTable.c.description],
-        imageUrl=row[TokenCollectionsTable.c.imageUrl],
-        twitterUsername=row[TokenCollectionsTable.c.twitterUsername],
-        instagramUsername=row[TokenCollectionsTable.c.instagramUsername],
-        wikiUrl=row[TokenCollectionsTable.c.wikiUrl],
-        openseaSlug=row[TokenCollectionsTable.c.openseaSlug],
-        url=row[TokenCollectionsTable.c.url],
-        discordUrl=row[TokenCollectionsTable.c.discordUrl],
-        bannerImageUrl=row[TokenCollectionsTable.c.bannerImageUrl],
-        doesSupportErc721=row[TokenCollectionsTable.c.doesSupportErc721],
-        doesSupportErc1155=row[TokenCollectionsTable.c.doesSupportErc1155],
+        collectionId=rowMapping[TokenCollectionsTable.c.collectionId],
+        createdDate=rowMapping[TokenCollectionsTable.c.createdDate],
+        updatedDate=rowMapping[TokenCollectionsTable.c.updatedDate],
+        address=rowMapping[TokenCollectionsTable.c.address],
+        name=rowMapping[TokenCollectionsTable.c.name],
+        symbol=rowMapping[TokenCollectionsTable.c.symbol],
+        description=rowMapping[TokenCollectionsTable.c.description],
+        imageUrl=rowMapping[TokenCollectionsTable.c.imageUrl],
+        twitterUsername=rowMapping[TokenCollectionsTable.c.twitterUsername],
+        instagramUsername=rowMapping[TokenCollectionsTable.c.instagramUsername],
+        wikiUrl=rowMapping[TokenCollectionsTable.c.wikiUrl],
+        openseaSlug=rowMapping[TokenCollectionsTable.c.openseaSlug],
+        url=rowMapping[TokenCollectionsTable.c.url],
+        discordUrl=rowMapping[TokenCollectionsTable.c.discordUrl],
+        bannerImageUrl=rowMapping[TokenCollectionsTable.c.bannerImageUrl],
+        doesSupportErc721=rowMapping[TokenCollectionsTable.c.doesSupportErc721],
+        doesSupportErc1155=rowMapping[TokenCollectionsTable.c.doesSupportErc1155],
     )
 
 
-def token_ownership_from_row(row: RowType) -> TokenOwnership:
+def token_ownership_from_row(rowMapping: RowMapping) -> TokenOwnership:
     return TokenOwnership(
-        tokenOwnershipId=row[TokenOwnershipsTable.c.tokenOwnershipId],
-        createdDate=row[TokenOwnershipsTable.c.createdDate],
-        updatedDate=row[TokenOwnershipsTable.c.updatedDate],
-        registryAddress=row[TokenOwnershipsTable.c.registryAddress],
-        tokenId=row[TokenOwnershipsTable.c.tokenId],
-        ownerAddress=row[TokenOwnershipsTable.c.ownerAddress],
-        transferValue=row[TokenOwnershipsTable.c.transferValue],
-        transferDate=row[TokenOwnershipsTable.c.transferDate],
-        transferTransactionHash=row[TokenOwnershipsTable.c.transferTransactionHash],
+        tokenOwnershipId=rowMapping[TokenOwnershipsTable.c.tokenOwnershipId],
+        createdDate=rowMapping[TokenOwnershipsTable.c.createdDate],
+        updatedDate=rowMapping[TokenOwnershipsTable.c.updatedDate],
+        registryAddress=rowMapping[TokenOwnershipsTable.c.registryAddress],
+        tokenId=rowMapping[TokenOwnershipsTable.c.tokenId],
+        ownerAddress=rowMapping[TokenOwnershipsTable.c.ownerAddress],
+        transferValue=rowMapping[TokenOwnershipsTable.c.transferValue],
+        transferDate=rowMapping[TokenOwnershipsTable.c.transferDate],
+        transferTransactionHash=rowMapping[TokenOwnershipsTable.c.transferTransactionHash],
     )
 
 
-def token_multi_ownership_from_row(row: RowType) -> TokenMultiOwnership:
+def token_multi_ownership_from_row(rowMapping: RowMapping) -> TokenMultiOwnership:
     return TokenMultiOwnership(
-        tokenMultiOwnershipId=row[TokenMultiOwnershipsTable.c.tokenMultiOwnershipId],
-        createdDate=row[TokenMultiOwnershipsTable.c.createdDate],
-        updatedDate=row[TokenMultiOwnershipsTable.c.updatedDate],
-        registryAddress=row[TokenMultiOwnershipsTable.c.registryAddress],
-        tokenId=row[TokenMultiOwnershipsTable.c.tokenId],
-        ownerAddress=row[TokenMultiOwnershipsTable.c.ownerAddress],
-        quantity=row[TokenMultiOwnershipsTable.c.quantity],
-        averageTransferValue=row[TokenMultiOwnershipsTable.c.averageTransferValue],
-        latestTransferDate=row[TokenMultiOwnershipsTable.c.latestTransferDate],
-        latestTransferTransactionHash=row[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
+        tokenMultiOwnershipId=rowMapping[TokenMultiOwnershipsTable.c.tokenMultiOwnershipId],
+        createdDate=rowMapping[TokenMultiOwnershipsTable.c.createdDate],
+        updatedDate=rowMapping[TokenMultiOwnershipsTable.c.updatedDate],
+        registryAddress=rowMapping[TokenMultiOwnershipsTable.c.registryAddress],
+        tokenId=rowMapping[TokenMultiOwnershipsTable.c.tokenId],
+        ownerAddress=rowMapping[TokenMultiOwnershipsTable.c.ownerAddress],
+        quantity=rowMapping[TokenMultiOwnershipsTable.c.quantity],
+        averageTransferValue=rowMapping[TokenMultiOwnershipsTable.c.averageTransferValue],
+        latestTransferDate=rowMapping[TokenMultiOwnershipsTable.c.latestTransferDate],
+        latestTransferTransactionHash=rowMapping[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
     )
 
 
-def collection_activity_from_row(row: RowType) -> CollectionHourlyActivity:
+def collection_activity_from_row(rowMapping: RowMapping) -> CollectionHourlyActivity:
     return CollectionHourlyActivity(
-        collectionActivityId=row[CollectionHourlyActivitiesTable.c.collectionActivityId],
-        createdDate=row[CollectionHourlyActivitiesTable.c.createdDate],
-        updatedDate=row[CollectionHourlyActivitiesTable.c.updatedDate],
-        address=row[CollectionHourlyActivitiesTable.c.address],
-        date=row[CollectionHourlyActivitiesTable.c.date],
-        transferCount=row[CollectionHourlyActivitiesTable.c.transferCount],
-        saleCount=row[CollectionHourlyActivitiesTable.c.saleCount],
-        totalValue=row[CollectionHourlyActivitiesTable.c.totalValue],
-        minimumValue=row[CollectionHourlyActivitiesTable.c.minimumValue],
-        maximumValue=row[CollectionHourlyActivitiesTable.c.maximumValue],
-        averageValue=row[CollectionHourlyActivitiesTable.c.averageValue],
+        collectionActivityId=rowMapping[CollectionHourlyActivitiesTable.c.collectionActivityId],
+        createdDate=rowMapping[CollectionHourlyActivitiesTable.c.createdDate],
+        updatedDate=rowMapping[CollectionHourlyActivitiesTable.c.updatedDate],
+        address=rowMapping[CollectionHourlyActivitiesTable.c.address],
+        date=rowMapping[CollectionHourlyActivitiesTable.c.date],
+        transferCount=rowMapping[CollectionHourlyActivitiesTable.c.transferCount],
+        saleCount=rowMapping[CollectionHourlyActivitiesTable.c.saleCount],
+        totalValue=rowMapping[CollectionHourlyActivitiesTable.c.totalValue],
+        minimumValue=rowMapping[CollectionHourlyActivitiesTable.c.minimumValue],
+        maximumValue=rowMapping[CollectionHourlyActivitiesTable.c.maximumValue],
+        averageValue=rowMapping[CollectionHourlyActivitiesTable.c.averageValue],
     )
 
 
-def collection_total_activity_from_row(row: RowType) -> CollectionTotalActivity:
+def collection_total_activity_from_row(rowMapping: RowMapping) -> CollectionTotalActivity:
     return CollectionTotalActivity(
-        collectionTotalActivityId=row[CollectionTotalActivitiesTable.c.collectionTotalActivityId],
-        createdDate=row[CollectionTotalActivitiesTable.c.createdDate],
-        updatedDate=row[CollectionTotalActivitiesTable.c.updatedDate],
-        address=row[CollectionTotalActivitiesTable.c.address],
-        transferCount=row[CollectionTotalActivitiesTable.c.transferCount],
-        saleCount=row[CollectionTotalActivitiesTable.c.saleCount],
-        totalValue=row[CollectionTotalActivitiesTable.c.totalValue],
-        minimumValue=row[CollectionTotalActivitiesTable.c.minimumValue],
-        maximumValue=row[CollectionTotalActivitiesTable.c.maximumValue],
-        averageValue=row[CollectionTotalActivitiesTable.c.averageValue],
+        collectionTotalActivityId=rowMapping[CollectionTotalActivitiesTable.c.collectionTotalActivityId],
+        createdDate=rowMapping[CollectionTotalActivitiesTable.c.createdDate],
+        updatedDate=rowMapping[CollectionTotalActivitiesTable.c.updatedDate],
+        address=rowMapping[CollectionTotalActivitiesTable.c.address],
+        transferCount=rowMapping[CollectionTotalActivitiesTable.c.transferCount],
+        saleCount=rowMapping[CollectionTotalActivitiesTable.c.saleCount],
+        totalValue=rowMapping[CollectionTotalActivitiesTable.c.totalValue],
+        minimumValue=rowMapping[CollectionTotalActivitiesTable.c.minimumValue],
+        maximumValue=rowMapping[CollectionTotalActivitiesTable.c.maximumValue],
+        averageValue=rowMapping[CollectionTotalActivitiesTable.c.averageValue],
     )
 
 
-def user_interaction_from_row(row: RowType) -> UserInteraction:
+def user_interaction_from_row(rowMapping: RowMapping) -> UserInteraction:
     return UserInteraction(
-        userInteractionId=row[UserInteractionsTable.c.userInteractionId],
-        createdDate=row[UserInteractionsTable.c.createdDate],
-        updatedDate=row[UserInteractionsTable.c.updatedDate],
-        date=row[UserInteractionsTable.c.date],
-        userAddress=row[UserInteractionsTable.c.userAddress],
-        command=row[UserInteractionsTable.c.command],
-        signature=row[UserInteractionsTable.c.signature],
-        message=row[UserInteractionsTable.c.message],
+        userInteractionId=rowMapping[UserInteractionsTable.c.userInteractionId],
+        createdDate=rowMapping[UserInteractionsTable.c.createdDate],
+        updatedDate=rowMapping[UserInteractionsTable.c.updatedDate],
+        date=rowMapping[UserInteractionsTable.c.date],
+        userAddress=rowMapping[UserInteractionsTable.c.userAddress],
+        command=rowMapping[UserInteractionsTable.c.command],
+        signature=rowMapping[UserInteractionsTable.c.signature],
+        message=rowMapping[UserInteractionsTable.c.message],
     )
 
 
-def latest_update_from_row(row: RowType) -> LatestUpdate:
+def latest_update_from_row(rowMapping: RowMapping) -> LatestUpdate:
     return LatestUpdate(
-        latestUpdateId=row[LatestUpdatesTable.c.latestUpdateId],
-        createdDate=row[LatestUpdatesTable.c.createdDate],
-        updatedDate=row[LatestUpdatesTable.c.updatedDate],
-        key=row[LatestUpdatesTable.c.key],
-        name=row[LatestUpdatesTable.c.name],
-        date=row[LatestUpdatesTable.c.date],
+        latestUpdateId=rowMapping[LatestUpdatesTable.c.latestUpdateId],
+        createdDate=rowMapping[LatestUpdatesTable.c.createdDate],
+        updatedDate=rowMapping[LatestUpdatesTable.c.updatedDate],
+        key=rowMapping[LatestUpdatesTable.c.key],
+        name=rowMapping[LatestUpdatesTable.c.name],
+        date=rowMapping[LatestUpdatesTable.c.date],
     )
 
 
-def token_listing_from_row(row: RowType, table: Optional[Table] = None) -> TokenListing:
+def token_listing_from_row(rowMapping: RowMapping, table: Optional[Table] = None) -> TokenListing:
     table = table if table is not None else LatestTokenListingsTable
     return TokenListing(
-        tokenListingId=row[table.c.latestTokenListingId],
-        createdDate=row[table.c.createdDate],
-        updatedDate=row[table.c.updatedDate],
-        registryAddress=row[table.c.registryAddress],
-        tokenId=row[table.c.tokenId],
-        offererAddress=row[table.c.offererAddress],
-        startDate=row[table.c.startDate],
-        endDate=row[table.c.endDate],
-        isValueNative=row[table.c.isValueNative],
-        value=row[table.c.value],
-        source=row[table.c.source],
-        sourceId=row[table.c.sourceId],
+        tokenListingId=rowMapping[table.c.latestTokenListingId],
+        createdDate=rowMapping[table.c.createdDate],
+        updatedDate=rowMapping[table.c.updatedDate],
+        registryAddress=rowMapping[table.c.registryAddress],
+        tokenId=rowMapping[table.c.tokenId],
+        offererAddress=rowMapping[table.c.offererAddress],
+        startDate=rowMapping[table.c.startDate],
+        endDate=rowMapping[table.c.endDate],
+        isValueNative=rowMapping[table.c.isValueNative],
+        value=rowMapping[table.c.value],
+        source=rowMapping[table.c.source],
+        sourceId=rowMapping[table.c.sourceId],
     )
 
 
-def token_attribute_from_row(row: RowType) -> TokenAttribute:
+def token_attribute_from_row(rowMapping: RowMapping) -> TokenAttribute:
     return TokenAttribute(
-        tokenAttributeId=row[TokenAttributesTable.c.tokenAttributeId],
-        createdDate=row[TokenAttributesTable.c.createdDate],
-        updatedDate=row[TokenAttributesTable.c.updatedDate],
-        registryAddress=row[TokenAttributesTable.c.registryAddress],
-        tokenId=row[TokenAttributesTable.c.tokenId],
-        name=row[TokenAttributesTable.c.name],
-        value=row[TokenAttributesTable.c.value],
+        tokenAttributeId=rowMapping[TokenAttributesTable.c.tokenAttributeId],
+        createdDate=rowMapping[TokenAttributesTable.c.createdDate],
+        updatedDate=rowMapping[TokenAttributesTable.c.updatedDate],
+        registryAddress=rowMapping[TokenAttributesTable.c.registryAddress],
+        tokenId=rowMapping[TokenAttributesTable.c.tokenId],
+        name=rowMapping[TokenAttributesTable.c.name],
+        value=rowMapping[TokenAttributesTable.c.value],
     )
 
 
-def token_customization_from_row(row: RowType) -> TokenCustomization:
+def token_customization_from_row(rowMapping: RowMapping) -> TokenCustomization:
     return TokenCustomization(
-        tokenCustomizationId=row[TokenCustomizationsTable.c.tokenCustomizationId],
-        createdDate=row[TokenCustomizationsTable.c.createdDate],
-        updatedDate=row[TokenCustomizationsTable.c.updatedDate],
-        registryAddress=row[TokenCustomizationsTable.c.registryAddress],
-        tokenId=row[TokenCustomizationsTable.c.tokenId],
-        creatorAddress=row[TokenCustomizationsTable.c.creatorAddress],
-        signature=row[TokenCustomizationsTable.c.signature],
-        blockNumber=row[TokenCustomizationsTable.c.blockNumber],
-        name=row[TokenCustomizationsTable.c.name],
-        description=row[TokenCustomizationsTable.c.description],
+        tokenCustomizationId=rowMapping[TokenCustomizationsTable.c.tokenCustomizationId],
+        createdDate=rowMapping[TokenCustomizationsTable.c.createdDate],
+        updatedDate=rowMapping[TokenCustomizationsTable.c.updatedDate],
+        registryAddress=rowMapping[TokenCustomizationsTable.c.registryAddress],
+        tokenId=rowMapping[TokenCustomizationsTable.c.tokenId],
+        creatorAddress=rowMapping[TokenCustomizationsTable.c.creatorAddress],
+        signature=rowMapping[TokenCustomizationsTable.c.signature],
+        blockNumber=rowMapping[TokenCustomizationsTable.c.blockNumber],
+        name=rowMapping[TokenCustomizationsTable.c.name],
+        description=rowMapping[TokenCustomizationsTable.c.description],
     )
 
 
-def lock_from_row(row: RowType) -> Lock:
+def lock_from_row(rowMapping: RowMapping) -> Lock:
     return Lock(
-        lockId=row[LocksTable.c.lockId],
-        createdDate=row[LocksTable.c.createdDate],
-        updatedDate=row[LocksTable.c.updatedDate],
-        name=row[LocksTable.c.name],
-        expiryDate=row[LocksTable.c.expiryDate],
+        lockId=rowMapping[LocksTable.c.lockId],
+        createdDate=rowMapping[LocksTable.c.createdDate],
+        updatedDate=rowMapping[LocksTable.c.updatedDate],
+        name=rowMapping[LocksTable.c.name],
+        expiryDate=rowMapping[LocksTable.c.expiryDate],
     )
 
 
-def user_profile_from_row(row: RowType) -> UserProfile:
+def user_profile_from_row(rowMapping: RowMapping) -> UserProfile:
     return UserProfile(
-        userProfileId=row[UserProfilesTable.c.userProfileId],
-        createdDate=row[UserProfilesTable.c.createdDate],
-        updatedDate=row[UserProfilesTable.c.updatedDate],
-        address=row[UserProfilesTable.c.address],
-        twitterId=row[UserProfilesTable.c.twitterId],
-        discordId=row[UserProfilesTable.c.discordId],
-        signature=Signature.from_dict(signatureDict=row[UserProfilesTable.c.signature]),
+        userProfileId=rowMapping[UserProfilesTable.c.userProfileId],
+        createdDate=rowMapping[UserProfilesTable.c.createdDate],
+        updatedDate=rowMapping[UserProfilesTable.c.updatedDate],
+        address=rowMapping[UserProfilesTable.c.address],
+        twitterId=rowMapping[UserProfilesTable.c.twitterId],
+        discordId=rowMapping[UserProfilesTable.c.discordId],
+        signature=Signature.from_dict(signatureDict=rowMapping[UserProfilesTable.c.signature]),
     )
 
 
-def twitter_credential_from_row(row: RowType) -> TwitterCredential:
+def twitter_credential_from_row(rowMapping: RowMapping) -> TwitterCredential:
     return TwitterCredential(
-        twitterCredentialId=row[TwitterCredentialsTable.c.twitterCredentialId],
-        createdDate=row[TwitterCredentialsTable.c.createdDate],
-        updatedDate=row[TwitterCredentialsTable.c.updatedDate],
-        twitterId=row[TwitterCredentialsTable.c.twitterId],
-        accessToken=row[TwitterCredentialsTable.c.accessToken],
-        refreshToken=row[TwitterCredentialsTable.c.refreshToken],
-        expiryDate=row[TwitterCredentialsTable.c.expiryDate],
+        twitterCredentialId=rowMapping[TwitterCredentialsTable.c.twitterCredentialId],
+        createdDate=rowMapping[TwitterCredentialsTable.c.createdDate],
+        updatedDate=rowMapping[TwitterCredentialsTable.c.updatedDate],
+        twitterId=rowMapping[TwitterCredentialsTable.c.twitterId],
+        accessToken=rowMapping[TwitterCredentialsTable.c.accessToken],
+        refreshToken=rowMapping[TwitterCredentialsTable.c.refreshToken],
+        expiryDate=rowMapping[TwitterCredentialsTable.c.expiryDate],
     )
 
 
-def twitter_profile_from_row(row: RowType) -> TwitterProfile:
+def twitter_profile_from_row(rowMapping: RowMapping) -> TwitterProfile:
     return TwitterProfile(
-        twitterProfileId=row[TwitterProfilesTable.c.twitterProfileId],
-        createdDate=row[TwitterProfilesTable.c.createdDate],
-        updatedDate=row[TwitterProfilesTable.c.updatedDate],
-        twitterId=row[TwitterProfilesTable.c.twitterId],
-        username=row[TwitterProfilesTable.c.username],
-        name=row[TwitterProfilesTable.c.name],
-        description=row[TwitterProfilesTable.c.description],
-        isVerified=row[TwitterProfilesTable.c.isVerified],
-        pinnedTweetId=row[TwitterProfilesTable.c.pinnedTweetId],
-        followerCount=row[TwitterProfilesTable.c.followerCount],
-        followingCount=row[TwitterProfilesTable.c.followingCount],
-        tweetCount=row[TwitterProfilesTable.c.tweetCount],
+        twitterProfileId=rowMapping[TwitterProfilesTable.c.twitterProfileId],
+        createdDate=rowMapping[TwitterProfilesTable.c.createdDate],
+        updatedDate=rowMapping[TwitterProfilesTable.c.updatedDate],
+        twitterId=rowMapping[TwitterProfilesTable.c.twitterId],
+        username=rowMapping[TwitterProfilesTable.c.username],
+        name=rowMapping[TwitterProfilesTable.c.name],
+        description=rowMapping[TwitterProfilesTable.c.description],
+        isVerified=rowMapping[TwitterProfilesTable.c.isVerified],
+        pinnedTweetId=rowMapping[TwitterProfilesTable.c.pinnedTweetId],
+        followerCount=rowMapping[TwitterProfilesTable.c.followerCount],
+        followingCount=rowMapping[TwitterProfilesTable.c.followingCount],
+        tweetCount=rowMapping[TwitterProfilesTable.c.tweetCount],
     )
 
 
-def account_gm_from_row(row: RowType) -> AccountGm:
+def account_gm_from_row(rowMapping: RowMapping) -> AccountGm:
     return AccountGm(
-        accountGmId=row[AccountGmsTable.c.accountGmId],
-        createdDate=row[AccountGmsTable.c.createdDate],
-        updatedDate=row[AccountGmsTable.c.updatedDate],
-        address=row[AccountGmsTable.c.address],
-        date=row[AccountGmsTable.c.date],
-        streakLength=row[AccountGmsTable.c.streakLength],
-        collectionCount=row[AccountGmsTable.c.collectionCount],
-        signatureMessage=row[AccountGmsTable.c.signatureMessage],
-        signature=row[AccountGmsTable.c.signature],
+        accountGmId=rowMapping[AccountGmsTable.c.accountGmId],
+        createdDate=rowMapping[AccountGmsTable.c.createdDate],
+        updatedDate=rowMapping[AccountGmsTable.c.updatedDate],
+        address=rowMapping[AccountGmsTable.c.address],
+        date=rowMapping[AccountGmsTable.c.date],
+        streakLength=rowMapping[AccountGmsTable.c.streakLength],
+        collectionCount=rowMapping[AccountGmsTable.c.collectionCount],
+        signatureMessage=rowMapping[AccountGmsTable.c.signatureMessage],
+        signature=rowMapping[AccountGmsTable.c.signature],
     )
 
 
-def account_collection_gm_from_row(row: RowType) -> AccountCollectionGm:
+def account_collection_gm_from_row(rowMapping: RowMapping) -> AccountCollectionGm:
     return AccountCollectionGm(
-        accountCollectionGmId=row[AccountCollectionGmsTable.c.accountCollectionGmId],
-        createdDate=row[AccountCollectionGmsTable.c.createdDate],
-        updatedDate=row[AccountCollectionGmsTable.c.updatedDate],
-        registryAddress=row[AccountCollectionGmsTable.c.registryAddress],
-        accountAddress=row[AccountCollectionGmsTable.c.accountAddress],
-        date=row[AccountCollectionGmsTable.c.date],
-        signatureMessage=row[AccountCollectionGmsTable.c.signatureMessage],
-        signature=row[AccountCollectionGmsTable.c.signature],
+        accountCollectionGmId=rowMapping[AccountCollectionGmsTable.c.accountCollectionGmId],
+        createdDate=rowMapping[AccountCollectionGmsTable.c.createdDate],
+        updatedDate=rowMapping[AccountCollectionGmsTable.c.updatedDate],
+        registryAddress=rowMapping[AccountCollectionGmsTable.c.registryAddress],
+        accountAddress=rowMapping[AccountCollectionGmsTable.c.accountAddress],
+        date=rowMapping[AccountCollectionGmsTable.c.date],
+        signatureMessage=rowMapping[AccountCollectionGmsTable.c.signatureMessage],
+        signature=rowMapping[AccountCollectionGmsTable.c.signature],
     )
 
 
-def collection_overlap_from_row(row: RowType) -> CollectionOverlap:
+def collection_overlap_from_row(rowMapping: RowMapping) -> CollectionOverlap:
     return CollectionOverlap(
-        collectionOverlapId=row[TokenCollectionOverlapsTable.c.collectionOverlapId],
-        createdDate=row[TokenCollectionOverlapsTable.c.createdDate],
-        updatedDate=row[TokenCollectionOverlapsTable.c.updatedDate],
-        registryAddress=row[TokenCollectionOverlapsTable.c.registryAddress],
-        otherRegistryAddress=row[TokenCollectionOverlapsTable.c.otherRegistryAddress],
-        ownerAddress=row[TokenCollectionOverlapsTable.c.ownerAddress],
-        registryTokenCount=row[TokenCollectionOverlapsTable.c.registryTokenCount],
-        otherRegistryTokenCount=row[TokenCollectionOverlapsTable.c.otherRegistryTokenCount],
+        collectionOverlapId=rowMapping[TokenCollectionOverlapsTable.c.collectionOverlapId],
+        createdDate=rowMapping[TokenCollectionOverlapsTable.c.createdDate],
+        updatedDate=rowMapping[TokenCollectionOverlapsTable.c.updatedDate],
+        registryAddress=rowMapping[TokenCollectionOverlapsTable.c.registryAddress],
+        otherRegistryAddress=rowMapping[TokenCollectionOverlapsTable.c.otherRegistryAddress],
+        ownerAddress=rowMapping[TokenCollectionOverlapsTable.c.ownerAddress],
+        registryTokenCount=rowMapping[TokenCollectionOverlapsTable.c.registryTokenCount],
+        otherRegistryTokenCount=rowMapping[TokenCollectionOverlapsTable.c.otherRegistryTokenCount],
     )
 
 
-def gallery_badge_holder_from_row(row: RowType) -> GalleryBadgeHolder:
+def gallery_badge_holder_from_row(rowMapping: RowMapping) -> GalleryBadgeHolder:
     return GalleryBadgeHolder(
-        galleryBadgeHolderId=row[GalleryBadgeHoldersTable.c.galleryBadgeHolderId],
-        createdDate=row[GalleryBadgeHoldersTable.c.createdDate],
-        updatedDate=row[GalleryBadgeHoldersTable.c.updatedDate],
-        registryAddress=row[GalleryBadgeHoldersTable.c.registryAddress],
-        ownerAddress=row[GalleryBadgeHoldersTable.c.ownerAddress],
-        badgeKey=row[GalleryBadgeHoldersTable.c.badgeKey],
-        achievedDate=row[GalleryBadgeHoldersTable.c.achievedDate],
+        galleryBadgeHolderId=rowMapping[GalleryBadgeHoldersTable.c.galleryBadgeHolderId],
+        createdDate=rowMapping[GalleryBadgeHoldersTable.c.createdDate],
+        updatedDate=rowMapping[GalleryBadgeHoldersTable.c.updatedDate],
+        registryAddress=rowMapping[GalleryBadgeHoldersTable.c.registryAddress],
+        ownerAddress=rowMapping[GalleryBadgeHoldersTable.c.ownerAddress],
+        badgeKey=rowMapping[GalleryBadgeHoldersTable.c.badgeKey],
+        achievedDate=rowMapping[GalleryBadgeHoldersTable.c.achievedDate],
     )

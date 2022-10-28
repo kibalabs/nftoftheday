@@ -11,6 +11,7 @@ from core.store.retriever import FieldFilter
 from core.store.retriever import Order
 from core.store.retriever import Retriever as CoreRetriever
 from sqlalchemy.sql import Select
+from core.store.database import ResultType
 
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
@@ -91,24 +92,24 @@ class Retriever(CoreRetriever):
         if offset:
             query = query.offset(offset)
         result = await self.database.execute(query=query, connection=connection)
-        blocks = [block_from_row(row) for row in result]
+        blocks = [block_from_row(row) for row in result.mappings()]
         return blocks
 
     async def get_block_by_number(self, blockNumber: int, connection: Optional[DatabaseConnection] = None) -> Block:
         query = BlocksTable.select() \
             .where(BlocksTable.c.blockNumber == blockNumber)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'Block with blockNumber:{blockNumber} not found')
         block = block_from_row(row)
         return block
 
     async def list_token_transfers(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, offset: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenTransfer]:
-        query = typing.cast(Select, (
-            sqlalchemy.select([TokenTransfersTable, BlocksTable])
+        query = (
+            sqlalchemy.select(TokenTransfersTable, BlocksTable)
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-        ))
+        )
         if fieldFilters:
             for fieldFilter in fieldFilters:
                 if fieldFilter.fieldName in {BlocksTable.c.blockDate.key, BlocksTable.c.updatedDate.key}:
@@ -126,12 +127,12 @@ class Retriever(CoreRetriever):
         if offset:
             query = query.offset(offset)
         result = await self.database.execute(query=query, connection=connection)
-        tokenTransfers = [token_transfer_from_row(row) for row in result]
+        tokenTransfers = [token_transfer_from_row(row) for row in result.mappings()]
         return tokenTransfers
 
-    async def query_token_metadatas(self, query: Select, connection: Optional[DatabaseConnection] = None) -> List[TokenMetadata]:
+    async def query_token_metadatas(self, query: Select[ResultType], connection: Optional[DatabaseConnection] = None) -> List[TokenMetadata]:
         result = await self.database.execute(query=query, connection=connection)
-        tokenMetadatas = [token_metadata_from_row(row) for row in result]
+        tokenMetadatas = [token_metadata_from_row(row) for row in result.mappings()]
         return tokenMetadatas
 
     async def list_token_metadatas(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenMetadata]:
@@ -149,7 +150,7 @@ class Retriever(CoreRetriever):
             .where(TokenMetadatasTable.c.registryAddress == registryAddress) \
             .where(TokenMetadatasTable.c.tokenId == tokenId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TokenMetadata with registry:{registryAddress} tokenId:{tokenId} not found')
         tokenMetadata = token_metadata_from_row(row)
@@ -164,14 +165,14 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenCollections = [collection_from_row(row) for row in result]
+        tokenCollections = [collection_from_row(row) for row in result.mappings()]
         return tokenCollections
 
     async def get_collection_by_address(self, address: str, connection: Optional[DatabaseConnection] = None) -> Collection:
         query = TokenCollectionsTable.select() \
             .where(TokenCollectionsTable.c.address == address)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'Collection with registry:{address} not found')
         collection = collection_from_row(row)
@@ -186,7 +187,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenOwnerships = [token_ownership_from_row(row) for row in result]
+        tokenOwnerships = [token_ownership_from_row(row) for row in result.mappings()]
         return tokenOwnerships
 
     async def get_token_ownership_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenOwnership:
@@ -194,7 +195,7 @@ class Retriever(CoreRetriever):
             .where(TokenOwnershipsTable.c.registryAddress == registryAddress) \
             .where(TokenOwnershipsTable.c.tokenId == tokenId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TokenOwnership with registry:{registryAddress} tokenId:{tokenId} not found')
         tokenOwnership = token_ownership_from_row(row)
@@ -209,7 +210,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenOwnerships = [token_multi_ownership_from_row(row) for row in result]
+        tokenOwnerships = [token_multi_ownership_from_row(row) for row in result.mappings()]
         return tokenOwnerships
 
     async def get_token_multi_ownership_by_registry_address_token_id_owner_address(self, registryAddress: str, tokenId: str, ownerAddress: str, connection: Optional[DatabaseConnection] = None) -> TokenMultiOwnership:  # pylint: disable=invalid-name
@@ -218,7 +219,7 @@ class Retriever(CoreRetriever):
             .where(TokenMultiOwnershipsTable.c.tokenId == tokenId) \
             .where(TokenMultiOwnershipsTable.c.ownerAddress == ownerAddress)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TokenMultiOwnership with registry:{registryAddress} tokenId:{tokenId} ownerAddress:{ownerAddress} not found')
         tokenOwnership = token_multi_ownership_from_row(row)
@@ -233,7 +234,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        collectionActivities = [collection_activity_from_row(row) for row in result]
+        collectionActivities = [collection_activity_from_row(row) for row in result.mappings()]
         return collectionActivities
 
     async def list_collection_total_activities(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[CollectionTotalActivity]:
@@ -245,7 +246,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        collectionTotalActivities = [collection_total_activity_from_row(row) for row in result]
+        collectionTotalActivities = [collection_total_activity_from_row(row) for row in result.mappings()]
         return collectionTotalActivities
 
     async def get_collection_total_activity_by_address(self, address: str, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
@@ -254,7 +255,7 @@ class Retriever(CoreRetriever):
             .where(CollectionTotalActivitiesTable.c.address == address)
         )
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'CollectionTotalActivity with address:{address} not found')
         collectionTotalActivity = collection_total_activity_from_row(row)
@@ -269,7 +270,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        userInteractions = [user_interaction_from_row(row) for row in result]
+        userInteractions = [user_interaction_from_row(row) for row in result.mappings()]
         return userInteractions
 
     async def list_latest_updates(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[LatestUpdate]:
@@ -281,7 +282,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        latestUpdates = [latest_update_from_row(row) for row in result]
+        latestUpdates = [latest_update_from_row(row) for row in result.mappings()]
         return latestUpdates
 
     async def get_latest_update_by_key_name(self, key: str, name: Optional[str] = None, connection: Optional[DatabaseConnection] = None) -> LatestUpdate:
@@ -291,7 +292,7 @@ class Retriever(CoreRetriever):
             .where(LatestUpdatesTable.c.name == name)
         )
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'LatestUpdate with key:{key} and name;{name} not found')
         latestUpdate = latest_update_from_row(row)
@@ -306,7 +307,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenAttributes = [token_attribute_from_row(row) for row in result]
+        tokenAttributes = [token_attribute_from_row(row) for row in result.mappings()]
         return tokenAttributes
 
     async def list_latest_token_listings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenListing]:
@@ -318,7 +319,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        latestTokenListings = [token_listing_from_row(row) for row in result]
+        latestTokenListings = [token_listing_from_row(row) for row in result.mappings()]
         return latestTokenListings
 
     async def get_token_listing_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenListing:
@@ -326,7 +327,7 @@ class Retriever(CoreRetriever):
             .where(LatestTokenListingsTable.c.registryAddress == registryAddress) \
             .where(LatestTokenListingsTable.c.tokenId == tokenId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'LatestTokenListings with registry:{registryAddress} tokenId:{tokenId} not found')
         latestTokenListing = token_listing_from_row(row)
@@ -341,7 +342,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenCustomizations = [token_customization_from_row(row) for row in result]
+        tokenCustomizations = [token_customization_from_row(row) for row in result.mappings()]
         return tokenCustomizations
 
     async def get_token_customization_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> TokenCustomization:
@@ -349,7 +350,7 @@ class Retriever(CoreRetriever):
             .where(TokenCustomizationsTable.c.registryAddress == registryAddress) \
             .where(TokenCustomizationsTable.c.tokenId == tokenId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TokenCustomization with registry:{registryAddress} tokenId:{tokenId} not found')
         tokenCustomization = token_customization_from_row(row)
@@ -364,13 +365,13 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        locks = [lock_from_row(row) for row in result]
+        locks = [lock_from_row(row) for row in result.mappings()]
         return locks
 
     async def get_lock(self, lockId: int, connection: Optional[DatabaseConnection] = None) -> Lock:
         query = LocksTable.select().where(LocksTable.c.lockId == lockId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'Lock with id:{lockId} not found')
         lock = lock_from_row(row)
@@ -379,7 +380,7 @@ class Retriever(CoreRetriever):
     async def get_lock_by_name(self, name: str, connection: Optional[DatabaseConnection] = None) -> Lock:
         query = LocksTable.select().where(LocksTable.c.name == name)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'Lock with name:{name} not found')
         lock = lock_from_row(row)
@@ -394,13 +395,13 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        userProfiles = [user_profile_from_row(row) for row in result]
+        userProfiles = [user_profile_from_row(row) for row in result.mappings()]
         return userProfiles
 
     async def get_user_profile(self, userProfileId: int, connection: Optional[DatabaseConnection] = None) -> UserProfile:
         query = UserProfilesTable.select().where(UserProfilesTable.c.userProfileId == userProfileId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'UserProfile with id:{userProfileId} not found')
         userProfile = user_profile_from_row(row)
@@ -409,7 +410,7 @@ class Retriever(CoreRetriever):
     async def get_user_profile_by_address(self, address: str, connection: Optional[DatabaseConnection] = None) -> UserProfile:
         query = UserProfilesTable.select().where(UserProfilesTable.c.address == address)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'UserProfile with address:{address} not found')
         userProfile = user_profile_from_row(row)
@@ -424,13 +425,13 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        twitterProfiles = [twitter_profile_from_row(row) for row in result]
+        twitterProfiles = [twitter_profile_from_row(row) for row in result.mappings()]
         return twitterProfiles
 
     async def get_twitter_profile(self, twitterProfileId: int, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
         query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.twitterProfileId == twitterProfileId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TwitterProfile with id:{twitterProfileId} not found')
         twitterProfile = twitter_profile_from_row(row)
@@ -439,7 +440,7 @@ class Retriever(CoreRetriever):
     async def get_twitter_profile_by_twitter_id(self, twitterId: str, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
         query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.twitterId == twitterId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TwitterProfile with twitterId:{twitterId} not found')
         twitterProfile = twitter_profile_from_row(row)
@@ -448,7 +449,7 @@ class Retriever(CoreRetriever):
     async def get_twitter_profile_by_username(self, username: str, connection: Optional[DatabaseConnection] = None) -> TwitterProfile:
         query = TwitterProfilesTable.select().where(TwitterProfilesTable.c.username == username)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TwitterProfile with username:{username} not found')
         twitterProfile = twitter_profile_from_row(row)
@@ -463,13 +464,13 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        twitterCredentials = [twitter_credential_from_row(row) for row in result]
+        twitterCredentials = [twitter_credential_from_row(row) for row in result.mappings()]
         return twitterCredentials
 
     async def get_twitter_credential(self, twitterCredentialId: int, connection: Optional[DatabaseConnection] = None) -> TwitterCredential:
         query = TwitterCredentialsTable.select().where(TwitterCredentialsTable.c.twitterCredentialId == twitterCredentialId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TwitterCredential with id:{twitterCredentialId} not found')
         twitterCredential = twitter_credential_from_row(row)
@@ -478,7 +479,7 @@ class Retriever(CoreRetriever):
     async def get_twitter_credential_by_twitter_id(self, twitterId: str, connection: Optional[DatabaseConnection] = None) -> TwitterCredential:
         query = TwitterCredentialsTable.select().where(TwitterCredentialsTable.c.twitterId == twitterId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'TwitterCredential with twitterId:{twitterId} not found')
         twitterCredential = twitter_credential_from_row(row)
@@ -493,13 +494,13 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        accountGms = [account_gm_from_row(row) for row in result]
+        accountGms = [account_gm_from_row(row) for row in result.mappings()]
         return accountGms
 
     async def get_account_gm(self, accountGmId: int, connection: Optional[DatabaseConnection] = None) -> AccountGm:
         query = AccountGmsTable.select().where(AccountGmsTable.c.accountGmId == accountGmId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'AccountGm with id:{accountGmId} not found')
         accountGm = account_gm_from_row(row)
@@ -514,13 +515,13 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        accountCollectionGms = [account_collection_gm_from_row(row) for row in result]
+        accountCollectionGms = [account_collection_gm_from_row(row) for row in result.mappings()]
         return accountCollectionGms
 
     async def get_account_collection_gm(self, accountCollectionGmId: int, connection: Optional[DatabaseConnection] = None) -> AccountCollectionGm:
         query = AccountCollectionGmsTable.select().where(AccountCollectionGmsTable.c.accountCollectionGmId == accountCollectionGmId)
         result = await self.database.execute(query=query, connection=connection)
-        row = result.first()
+        row = result.mappings().first()
         if not row:
             raise NotFoundException(message=f'AccountCollectionGm with id:{accountCollectionGmId} not found')
         accountCollectionGm = account_collection_gm_from_row(row)
@@ -535,7 +536,7 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        collectionOverlaps = [collection_overlap_from_row(row) for row in result]
+        collectionOverlaps = [collection_overlap_from_row(row) for row in result.mappings()]
         return collectionOverlaps
 
     async def list_gallery_badge_holders(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[GalleryBadgeHolder]:
@@ -547,5 +548,5 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        galleryBadgeHolders = [gallery_badge_holder_from_row(row) for row in result]
+        galleryBadgeHolders = [gallery_badge_holder_from_row(row) for row in result.mappings()]
         return galleryBadgeHolders

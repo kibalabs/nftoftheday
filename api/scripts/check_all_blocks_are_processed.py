@@ -29,11 +29,13 @@ async def check_all_processed(startBlockNumber: int, endBlockNumber: int, batchS
         end = min(currentBlockNumber + batchSize, endBlockNumber)
         logging.info(f'Working on {start} - {end}...')
         async with database.transaction():
-            query = TokenTransfersTable.select() \
-                .with_only_columns([TokenTransfersTable.c.blockNumber]) \
-                .filter(TokenTransfersTable.c.blockNumber >= start) \
-                .filter(TokenTransfersTable.c.blockNumber < end) \
+            query = (
+                TokenTransfersTable.select()
+                .with_only_columns(TokenTransfersTable.c.blockNumber)
+                .filter(TokenTransfersTable.c.blockNumber >= start)
+                .filter(TokenTransfersTable.c.blockNumber < end)
                 .distinct(TokenTransfersTable.c.blockNumber)
+            )
             processedBlocks = [row[0] for row in await database.fetch_all(query)]
         unprocessedBlocks = set(range(start, end)) - set(processedBlocks)
         logging.info(f'Processing {len(unprocessedBlocks)} blocks in {start} - {end}')
