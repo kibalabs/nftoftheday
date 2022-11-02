@@ -222,3 +222,53 @@ class TokenListingProcessor:
                         latestEventId = event['id']
                     queryData['pagination[cursor]'] = latestEventId
             return list(tokenIdsToReprocess)
+
+    async def get_rarible_listings_for_collection(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
+        assetListings: List[RetrievedTokenListing] = []
+        for tokenId in tokenIds:
+            queryData: Dict[str, JSON1] = {
+                "platform": "RARIBLE",
+                "itemId": f"ETHEREUM:{registryAddress}:{tokenId}",
+                "status": "ACTIVE",
+                "size": 100
+                
+            }
+            index = 0
+            pageCount = 0
+            while True:
+                logging.stat('RETRIEVE_LISTINGS_RARIBLE', registryAddress, index)
+                response = await self.requester.get(url='https://api.rarible.org/v0.1/orders/sell/byItem', dataDict=queryData, timeout=30)
+                responseJson = response.json()
+                continuation = responseJson.get("continuation")
+                for order in responseJson['orders']:
+                    if '.' in order["createdAt"]:
+                        startDate = date_util.datetime_from_string(order["createdAt"].replace("Z", ""))
+                    else:
+                        startDate = date_util.datetime_from_string(order["createdAt"].replace("Z",".000"))
+                    startDate = date_util.datetime_from_now()
+                    endDate =  date_util.datetime_from_now().replace(tzinfo=None) #datetime.datetime.utcfromtimestamp(order["endTime"])
+                    currentPrice = int(float(order["makePrice"])* 1000000000000000000)
+                    maker = order['maker']
+                    signer = maker.split(":")[1]
+                    offererAddress = chain_util.normalize_address(signer)
+                    sourceId = order["salt"]
+                    # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
+                    isValueNative = order['take']["type"]['@type'] == "ETH"
+                    listing = RetrievedTokenListing(
+                        registryAddress=registryAddress,
+                        tokenId=order['make']['type']['tokenId'],
+                        startDate=startDate,
+                        endDate=endDate,
+                        isValueNative=isValueNative,
+                        value=currentPrice,
+                        offererAddress=offererAddress,
+                        source=order['platform'],
+                        sourceId=sourceId,
+                    )
+                    assetListings.append(listing)
+                if continuation:
+                    queryData['continuation'] = continuation
+                    pageCount += 1
+                else:
+                    break
+        return assetListings

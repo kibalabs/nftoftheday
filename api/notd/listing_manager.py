@@ -66,7 +66,9 @@ class ListingManager:
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_collection(registryAddress=address)
         logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
-        allListings = openseaListings + looksrareListings
+        raribleListings = await self.tokenListingProcessor.get_rarible_listings_for_collection(registryAddress=address, tokenIds=tokenIds)
+        logging.info(f'Retrieved {len(raribleListings)} raribleListings')
+        allListings = openseaListings + looksrareListings + raribleListings
         # TODO(krishan711): change this to not delete existing. should add / remove / update changed only
         async with self.saver.create_transaction() as connection:
             currentLatestTokenListings = await self.retriever.list_latest_token_listings(fieldFilters=[
