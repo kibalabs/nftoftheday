@@ -234,7 +234,7 @@ class TokenListingProcessor:
                     "platform": "RARIBLE",
                     "itemId": f"ETHEREUM:{registryAddress}:{tokenId}",
                     "status": "ACTIVE",
-                    "size": 100
+                    "size": 150
                 }
                 index = 0
                 pageCount = 0
@@ -281,7 +281,7 @@ class TokenListingProcessor:
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
                 'type': ["CANCEL_LIST", "LIST"],
-                'size': 100,
+                'size': 150,
                 'sort': "LATEST_FIRST"
             }
             cursor = None

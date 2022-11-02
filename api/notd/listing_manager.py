@@ -91,7 +91,7 @@ class ListingManager:
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_tokens(registryAddress=address, tokenIds=looksrareTokenIdsToReprocess)
         logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
-        raribleListings = await self.tokenListingProcessor.get_rarible_listings_for_tokens(registryAddress=address, tokenIds=openseaTokenIdsToReprocess)
+        raribleListings = await self.tokenListingProcessor.get_rarible_listings_for_tokens(registryAddress=address, tokenIds=raribleTokenIdsToReprocess)
         logging.info(f'Retrieved {len(raribleListings)} raribleListings')
         async with self.saver.create_transaction() as connection:
             existingOpenseaListingsQuery = (
