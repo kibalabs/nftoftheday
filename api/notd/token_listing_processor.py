@@ -21,6 +21,11 @@ _LOOKSRARE_API_LISTING_CHUNK_SIZE = 30
 SECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 MILLISECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
+def _parse_date_string(dateString: str) -> datetime.datetime:
+    if '.' in dateString:
+        return date_util.datetime_from_string(dateString, dateFormat=MILLISECONDS_DATETIME_FORMAT)
+    return date_util.datetime_from_string(dateString, dateFormat=SECONDS_DATETIME_FORMAT)
+
 class TokenListingProcessor:
 
     def __init__(self, requester: Requester, openseaRequester: Requester, lockManager: LockManager):
@@ -211,7 +216,9 @@ class TokenListingProcessor:
                 }
                 latestEventId = None
                 hasReachedEnd = False
+                page = 0
                 while not hasReachedEnd:
+                    logging.stat(f'RETRIEVE_CHANGED_LISTINGS_LOOKSRARE_{eventType}'.upper(), address, page)
                     response = await self.requester.get(url='https://api.looksrare.org/api/v1/events', dataDict=queryData)
                     responseJson = response.json()
                     logging.info(f'Got {len(responseJson["data"])} looksrare events')
@@ -224,56 +231,61 @@ class TokenListingProcessor:
                         tokenIdsToReprocess.add(event.get('token').get('tokenId'))
                         latestEventId = event['id']
                     queryData['pagination[cursor]'] = latestEventId
+                    page += 1
             return list(tokenIdsToReprocess)
 
     async def get_rarible_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=100, expirySeconds=150):
-            assetListings: List[RetrievedTokenListing] = []
-            for tokenId in tokenIds:
-                queryData: Dict[str, JSON1] = {
-                    "platform": "RARIBLE",
-                    "itemId": f"ETHEREUM:{registryAddress}:{tokenId}",
-                    "status": "ACTIVE",
-                    "size": 150
-                }
-                index = 0
-                pageCount = 0
-                while True:
-                    logging.stat('RETRIEVE_LISTINGS_RARIBLE', registryAddress, index)
-                    response = await self.requester.get(url='https://api.rarible.org/v0.1/orders/sell/byItem', dataDict=queryData, timeout=30)
-                    responseJson = response.json()
-                    continuation = responseJson.get("continuation")
-                    for order in responseJson['orders']:
-                        if '.' in order["createdAt"]:
-                            createdAt = date_util.datetime_from_string(order["createdAt"], dateFormat=MILLISECONDS_DATETIME_FORMAT)
-                        else:
-                            createdAt = date_util.datetime_from_string(order["createdAt"], dateFormat=SECONDS_DATETIME_FORMAT)
-                        startedAt = date_util.datetime_from_string(order.get('startedAt'), dateFormat=SECONDS_DATETIME_FORMAT) if order.get('startedAt') else createdAt
-                        endedAt = date_util.datetime_from_string(order.get('endedAt'), dateFormat=SECONDS_DATETIME_FORMAT) if order.get('endedAt') else date_util.datetime_from_datetime(dt=startedAt, weeks=52*3)
-                        currentPrice = int(float(order["makePrice"]) * 1000000000000000000)
-                        maker = order['maker']
-                        makerAddress = maker.split(":")[1]
-                        offererAddress = chain_util.normalize_address(makerAddress)
-                        sourceId = order["salt"]
-                        isValueNative = order['take']["type"]['@type'] == "ETH"
-                        listing = RetrievedTokenListing(
-                            registryAddress=registryAddress,
-                            tokenId=order['make']['type']['tokenId'],
-                            startDate=startedAt,
-                            endDate=endedAt,
-                            isValueNative=isValueNative,
-                            value=currentPrice,
-                            offererAddress=offererAddress,
-                            source="rarible",
-                            sourceId=sourceId,
-                        )
-                        assetListings.append(listing)
-                    if continuation:
-                        queryData['continuation'] = continuation
-                        pageCount += 1
-                    else:
-                        break
-            return assetListings
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(1.5 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
+            listings = []
+            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
+                listings += await asyncio.gather(*[self.get_rarible_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
+                await asyncio.sleep(0.25)
+            listings = [listing for listing in listings if listing is not None]
+            allListings = [item for sublist in listings for item in sublist]
+            return allListings
+
+    async def get_rarible_listings_for_token(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenListing]:
+        assetListings: List[RetrievedTokenListing] = []
+        queryData: Dict[str, JSON1] = {
+            'platform': 'RARIBLE',
+            'itemId': f'ETHEREUM:{registryAddress}:{tokenId}',
+            'status': 'ACTIVE',
+            'size': 150
+        }
+        index = 0
+        pageCount = 0
+        while True:
+            logging.stat('RETRIEVE_LISTINGS_RARIBLE', registryAddress, float(f'{tokenId}.{index}'))
+            response = await self.requester.get(url='https://api.rarible.org/v0.1/orders/sell/byItem', dataDict=queryData, timeout=30)
+            responseJson = response.json()
+            for order in responseJson['orders']:
+                createdDate = _parse_date_string(dateString=order['createdAt'])
+                startDate = _parse_date_string(dateString=order['startedAt']) if order.get('startedAt') else createdDate
+                endDate = _parse_date_string(dateString=order['endedAt']) if order.get('endedAt') else date_util.datetime_from_datetime(dt=startDate, weeks=52*3)
+                currentPrice = int(float(order['makePrice']) * 1000000000000000000)
+                maker = order['maker']
+                makerAddress = maker.split(':')[1]
+                offererAddress = chain_util.normalize_address(makerAddress)
+                sourceId = order['salt']
+                isValueNative = order['take']['type']['@type'] == 'ETH'
+                listing = RetrievedTokenListing(
+                    registryAddress=registryAddress,
+                    tokenId=order['make']['type']['tokenId'],
+                    startDate=startDate,
+                    endDate=endDate,
+                    isValueNative=isValueNative,
+                    value=currentPrice,
+                    offererAddress=offererAddress,
+                    source='rarible',
+                    sourceId=sourceId,
+                )
+                assetListings.append(listing)
+            continuationId = responseJson.get('continuation')
+            if not continuationId:
+                break
+            queryData['continuation'] = continuationId
+            pageCount += 1
+        return assetListings
 
     async def get_changed_rarible_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=60):
@@ -281,27 +293,31 @@ class TokenListingProcessor:
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
                 'type': ["CANCEL_LIST", "LIST"],
-                'size': 150,
+                'size': 25,
                 'sort': "LATEST_FIRST"
             }
             cursor = None
             hasReachedEnd = False
+            page = 0
             while not hasReachedEnd:
-                response = await self.requester.get(url='https://api.rarible.org/v0.1/activities/byCollection', dataDict=queryData)
+                logging.stat(f'RETRIEVE_CHANGED_LISTINGS_RARIBLE'.upper(), address, page)
+                response = await self.requester.get(url='https://api.rarible.org/v0.1/activities/byCollection', dataDict=queryData, timeout=60)
                 responseJson = response.json()
                 logging.info(f'Got {len(responseJson["activities"])} rarible events')
                 if len(responseJson['activities']) == 0:
                     break
                 for activity in responseJson['activities']:
-                    if activity["source"] == "RARIBLE":
-                        if '.' in activity["date"]:
-                            activityDate = date_util.datetime_from_string(activity["date"], dateFormat=MILLISECONDS_DATETIME_FORMAT)
-                        else:
-                            activityDate = date_util.datetime_from_string(activity["date"], dateFormat=SECONDS_DATETIME_FORMAT)
-                        if activityDate < startDate:
-                            hasReachedEnd = True
-                            break
-                        tokenIdsToReprocess.add(activity.get('make').get('tokenId'))
-                cursor = responseJson['cursor']
+                    if activity["source"] != "RARIBLE":
+                        continue
+                    activityDate = _parse_date_string(dateString=activity["lastUpdatedAt"])
+                    if activityDate < startDate:
+                        hasReachedEnd = True
+                        break
+                    tokenIdsToReprocess.add(activity.get('make').get('tokenId'))
+                cursor = responseJson.get('cursor')
+                if not cursor:
+                    break
+                await asyncio.sleep(0.25)
                 queryData['cursor'] = cursor
+                page += 1
             return list(tokenIdsToReprocess)
