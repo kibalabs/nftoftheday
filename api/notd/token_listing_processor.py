@@ -281,7 +281,7 @@ class TokenListingProcessor:
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
                 'type': ["CANCEL_LIST", "LIST"],
-                'size': 150,
+                'size': 100,
                 'sort': "LATEST_FIRST"
             }
             cursor = None
