@@ -66,7 +66,7 @@ class ListingManager:
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_collection(registryAddress=address)
         logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
-        raribleListings = await self.tokenListingProcessor.get_rarible_listings_for_collection(registryAddress=address, tokenIds=tokenIds)
+        raribleListings = await self.tokenListingProcessor.get_rarible_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
         logging.info(f'Retrieved {len(raribleListings)} raribleListings')
         allListings = openseaListings + looksrareListings + raribleListings
         # TODO(krishan711): change this to not delete existing. should add / remove / update changed only
@@ -85,10 +85,14 @@ class ListingManager:
         logging.info(f'Got {len(openseaTokenIdsToReprocess)} changed opensea tokenIds')
         looksrareTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_looksrare_token_listings_for_collection(address=address, startDate=startDate)
         logging.info(f'Got {len(looksrareTokenIdsToReprocess)} changed looksrare tokenIds')
+        raribleTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_rarible_token_listings_for_collection(address=address, startDate=startDate)
+        logging.info(f'Got {len(raribleTokenIdsToReprocess)} changed rarible tokenIds')
         openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=openseaTokenIdsToReprocess)
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_tokens(registryAddress=address, tokenIds=looksrareTokenIdsToReprocess)
         logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
+        raribleListings = await self.tokenListingProcessor.get_rarible_listings_for_tokens(registryAddress=address, tokenIds=openseaTokenIdsToReprocess)
+        logging.info(f'Retrieved {len(raribleListings)} raribleListings')
         async with self.saver.create_transaction() as connection:
             existingOpenseaListingsQuery = (
                 LatestTokenListingsTable.select()
@@ -108,8 +112,17 @@ class ListingManager:
             )
             existingLooksrareListingsResult = await self.retriever.database.execute(query=existingLooksrareListingsQuery, connection=connection)
             looksrareListingIdsToDelete = {int(row[0]) for row in existingLooksrareListingsResult}
-            allListingIdsToDelete = list(openseaListingIdsToDelete | looksrareListingIdsToDelete)
-            allListings = openseaListings + looksrareListings
+            existingRaribleListingsQuery = (
+                LatestTokenListingsTable.select()
+                    .with_only_columns(LatestTokenListingsTable.c.latestTokenListingId)
+                    .where(LatestTokenListingsTable.c.registryAddress == address)
+                    .where(LatestTokenListingsTable.c.tokenId.in_(looksrareTokenIdsToReprocess))
+                    .where(LatestTokenListingsTable.c.source == 'rarible')
+            )
+            existingRaribleListingsResult = await self.retriever.database.execute(query=existingRaribleListingsQuery, connection=connection)
+            raribleListingIdsToDelete = {int(row[0]) for row in existingRaribleListingsResult}
+            allListingIdsToDelete = list(openseaListingIdsToDelete | looksrareListingIdsToDelete | raribleListingIdsToDelete)
+            allListings = openseaListings + looksrareListings + raribleListings
             await self.saver.delete_latest_token_listings(latestTokenListingIds=allListingIdsToDelete, connection=connection)
             await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
 
