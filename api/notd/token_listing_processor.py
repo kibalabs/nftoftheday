@@ -18,6 +18,9 @@ from notd.model import RetrievedTokenListing
 _OPENSEA_API_LISTING_CHUNK_SIZE = 30
 _LOOKSRARE_API_LISTING_CHUNK_SIZE = 30
 
+SECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+MILLISECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+
 class TokenListingProcessor:
 
     def __init__(self, requester: Requester, openseaRequester: Requester, lockManager: LockManager):
@@ -215,7 +218,7 @@ class TokenListingProcessor:
                     if len(responseJson['data']) == 0:
                         break
                     for event in responseJson['data']:
-                        if date_util.datetime_from_string(event['createdAt'], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ') < startDate:
+                        if date_util.datetime_from_string(event['createdAt'], dateFormat=MILLISECONDS_DATETIME_FORMAT) < startDate:
                             hasReachedEnd = True
                             break
                         tokenIdsToReprocess.add(event.get('token').get('tokenId'))
@@ -242,23 +245,22 @@ class TokenListingProcessor:
                     continuation = responseJson.get("continuation")
                     for order in responseJson['orders']:
                         if '.' in order["createdAt"]:
-                            startDate = date_util.datetime_from_string(order["createdAt"], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ')
+                            createdAt = date_util.datetime_from_string(order["createdAt"], dateFormat=MILLISECONDS_DATETIME_FORMAT)
                         else:
-                            startDate = date_util.datetime_from_string(order["createdAt"],dateFormat='%Y-%m-%dT%H:%M:%SZ')
-                        #NOTE GET SOLUTION TO END DATE
-                        endDate =  date_util.datetime_from_now().replace(tzinfo=None) #datetime.datetime.utcfromtimestamp(order["endTime"])
-                        currentPrice = int(float(order["makePrice"])* 1000000000000000000)
+                            createdAt = date_util.datetime_from_string(order["createdAt"], dateFormat=SECONDS_DATETIME_FORMAT)
+                        startedAt = date_util.datetime_from_string(order.get('startedAt'), dateFormat=SECONDS_DATETIME_FORMAT) if order.get('startedAt') else createdAt
+                        endedAt = date_util.datetime_from_string(order.get('endedAt'), dateFormat=SECONDS_DATETIME_FORMAT) if order.get('endedAt') else date_util.datetime_from_datetime(dt=startedAt, weeks=52*3)
+                        currentPrice = int(float(order["makePrice"]) * 1000000000000000000)
                         maker = order['maker']
-                        signer = maker.split(":")[1]
-                        offererAddress = chain_util.normalize_address(signer)
+                        makerAddress = maker.split(":")[1]
+                        offererAddress = chain_util.normalize_address(makerAddress)
                         sourceId = order["salt"]
-                        # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
                         isValueNative = order['take']["type"]['@type'] == "ETH"
                         listing = RetrievedTokenListing(
                             registryAddress=registryAddress,
                             tokenId=order['make']['type']['tokenId'],
-                            startDate=startDate,
-                            endDate=endDate,
+                            startDate=startedAt,
+                            endDate=endedAt,
                             isValueNative=isValueNative,
                             value=currentPrice,
                             offererAddress=offererAddress,
@@ -290,16 +292,16 @@ class TokenListingProcessor:
                 logging.info(f'Got {len(responseJson["activities"])} rarible events')
                 if len(responseJson['activities']) == 0:
                     break
-                for event in responseJson['activities']:
-                    if event["source"] == "RARIBLE":
-                        if '.' in event["date"]:
-                            eventDate = date_util.datetime_from_string(event["date"], dateFormat='%Y-%m-%dT%H:%M:%S.%fZ')
+                for activity in responseJson['activities']:
+                    if activity["source"] == "RARIBLE":
+                        if '.' in activity["date"]:
+                            activityDate = date_util.datetime_from_string(activity["date"], dateFormat=MILLISECONDS_DATETIME_FORMAT)
                         else:
-                            eventDate = date_util.datetime_from_string(event["date"],dateFormat='%Y-%m-%dT%H:%M:%SZ')
-                        if eventDate < startDate:
+                            activityDate = date_util.datetime_from_string(activity["date"],dateFormat=SECONDS_DATETIME_FORMAT)
+                        if activityDate < startDate:
                             hasReachedEnd = True
                             break
-                        tokenIdsToReprocess.add(event.get('make').get('tokenId'))
+                        tokenIdsToReprocess.add(activity.get('make').get('tokenId'))
                 cursor = responseJson['cursor']
                 queryData['cursor'] = cursor
             return list(tokenIdsToReprocess)
