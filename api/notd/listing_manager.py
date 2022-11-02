@@ -62,23 +62,23 @@ class ListingManager:
         )
         tokenIdsQueryResult = await self.retriever.database.execute(query=tokenIdsQuery)
         tokenIds = [tokenId for (tokenId, ) in tokenIdsQueryResult]
-        # openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
-        # logging.info(f'Retrieved {len(openseaListings)} openseaListings')
-        # looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_collection(registryAddress=address)
-        # logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
+        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
+        logging.info(f'Retrieved {len(openseaListings)} openseaListings')
+        looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_collection(registryAddress=address)
+        logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
         raribleListings = await self.tokenListingProcessor.get_rarible_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
         logging.info(f'Retrieved {len(raribleListings)} raribleListings')
-        # allListings = openseaListings + looksrareListings + raribleListings
-        # # TODO(krishan711): change this to not delete existing. should add / remove / update changed only
-        # async with self.saver.create_transaction() as connection:
-        #     currentLatestTokenListings = await self.retriever.list_latest_token_listings(fieldFilters=[
-        #         StringFieldFilter(fieldName=LatestTokenListingsTable.c.registryAddress.key, eq=address)
-        #     ], connection=connection)
-        #     currentLatestTokenListingIds = [latestTokenListing.tokenListingId for latestTokenListing in currentLatestTokenListings]
-        #     logging.info(f'Deleting {len(currentLatestTokenListingIds)} existing listings')
-        #     await self.saver.delete_latest_token_listings(latestTokenListingIds=currentLatestTokenListingIds, connection=connection)
-        #     logging.info(f'Saving {len(allListings)} listings')
-        #     await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
+        allListings = openseaListings + looksrareListings + raribleListings
+        # TODO(krishan711): change this to not delete existing. should add / remove / update changed only
+        async with self.saver.create_transaction() as connection:
+            currentLatestTokenListings = await self.retriever.list_latest_token_listings(fieldFilters=[
+                StringFieldFilter(fieldName=LatestTokenListingsTable.c.registryAddress.key, eq=address)
+            ], connection=connection)
+            currentLatestTokenListingIds = [latestTokenListing.tokenListingId for latestTokenListing in currentLatestTokenListings]
+            logging.info(f'Deleting {len(currentLatestTokenListingIds)} existing listings')
+            await self.saver.delete_latest_token_listings(latestTokenListingIds=currentLatestTokenListingIds, connection=connection)
+            logging.info(f'Saving {len(allListings)} listings')
+            await self.saver.create_latest_token_listings(retrievedTokenListings=allListings, connection=connection)
 
     async def _update_partial_latest_listings_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         openseaTokenIdsToReprocess = await self.tokenListingProcessor.get_changed_opensea_token_listings_for_collection(address=address, startDate=startDate)

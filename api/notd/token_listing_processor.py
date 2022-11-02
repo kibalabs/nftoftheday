@@ -297,7 +297,7 @@ class TokenListingProcessor:
                         if '.' in activity["date"]:
                             activityDate = date_util.datetime_from_string(activity["date"], dateFormat=MILLISECONDS_DATETIME_FORMAT)
                         else:
-                            activityDate = date_util.datetime_from_string(activity["date"],dateFormat=SECONDS_DATETIME_FORMAT)
+                            activityDate = date_util.datetime_from_string(activity["date"], dateFormat=SECONDS_DATETIME_FORMAT)
                         if activityDate < startDate:
                             hasReachedEnd = True
                             break
