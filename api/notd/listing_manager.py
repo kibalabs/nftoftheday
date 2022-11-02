@@ -116,7 +116,7 @@ class ListingManager:
                 LatestTokenListingsTable.select()
                     .with_only_columns(LatestTokenListingsTable.c.latestTokenListingId)
                     .where(LatestTokenListingsTable.c.registryAddress == address)
-                    .where(LatestTokenListingsTable.c.tokenId.in_(looksrareTokenIdsToReprocess))
+                    .where(LatestTokenListingsTable.c.tokenId.in_(raribleTokenIdsToReprocess))
                     .where(LatestTokenListingsTable.c.source == 'rarible')
             )
             existingRaribleListingsResult = await self.retriever.database.execute(query=existingRaribleListingsQuery, connection=connection)
