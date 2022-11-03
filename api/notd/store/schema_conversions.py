@@ -360,6 +360,7 @@ def gallery_badge_holder_from_row(rowMapping: RowMapping) -> GalleryBadgeHolder:
         achievedDate=rowMapping[GalleryBadgeHoldersTable.c.achievedDate],
     )
 
+
 def gallery_assigned_badge_holder_from_row(rowMapping: RowMapping) -> GalleryAssignedBadgeHolder:
     return GalleryAssignedBadgeHolder(
         galleryAssignedBadgeHolderId=rowMapping[GalleryAssignedBadgeHoldersTable.c.galleryAssignedBadgeHolderId],
