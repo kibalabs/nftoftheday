@@ -504,7 +504,10 @@ class GalleryManager:
             StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.registryAddress.key, eq=registryAddress),
             StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.badgeKey.key, eq=badgeKey),
         ])
-        retrieveAssignedGalleryBadgeHolder = retrieveAssignedGalleryBadgeHolders[0]
+        if len(retrieveAssignedGalleryBadgeHolders) > 1:
+            retrieveAssignedGalleryBadgeHolder = retrieveAssignedGalleryBadgeHolders[0]
+        else:
+            retrieveAssignedGalleryBadgeHolder = None
         async with self.saver.create_transaction() as connection:
             if retrieveAssignedGalleryBadgeHolder:
                 await self.saver.update_gallery_assigned_badge_holder(retrieveAssignedGalleryBadgeHolder.galleryAssignedBadgeHolderId, achievedDate=achievedDate, signatureDict=signatureJson, connection=connection)

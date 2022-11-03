@@ -390,11 +390,11 @@ class RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse(BaseModel):
 class RefreshGalleryBadgeHoldersForAllCollectionsDeferredRequest(BaseModel):
     pass
 
-class CollectionAssignBadgeResponse:
+class CollectionAssignBadgeResponse(BaseModel):
     pass
 
-class CollectionAssignBadgeRequest:
+class CollectionAssignBadgeRequest(BaseModel):
     ownerAddress: str
     badgeKey: str
     achievedDate: Optional[datetime.datetime]
-    signatureJson: str
+    signatureJson: dict
