@@ -62,9 +62,9 @@ CREATE VIEW vw_ordered_token_listings AS
 
 CREATE VIEW vw_badge_holder AS
 (
-    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, badge_key, achieved_date
+    SELECT id, created_date, updated_date, registry_address, owner_address, badge_key, achieved_date, '{"message": "KibaLabs", "signautre": "KBL"}' as signature
     FROM tbl_gallery_badge_holders
-) UNION (
-    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, badge_key, achieved_date
+) UNION ALL(
+    SELECT id, created_date, updated_date, registry_address, owner_address, badge_key, achieved_date, signature
     FROM tbl_gallery_assigned_badge_holders
 );
