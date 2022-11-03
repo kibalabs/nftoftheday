@@ -123,7 +123,7 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     @router.post('/collections/{registryAddress}/assign-badge-holder')
     async def assign_badge_holder(registryAddress: str, request: CollectionAssignBadgeRequest) -> CollectionAssignBadgeResponse:
         achievedDate = request.achievedDate.replace(tzinfo=None) if request.achievedDate else date_util.start_of_day()
-        await galleryManager.assign_badge_holder(registryAddress=registryAddress, ownerAddress=request.ownerAddress, badgeKey=request.badgeKey, achievedDate=achievedDate, signature=request.signatureJson)
+        await galleryManager.assign_badge_holder(registryAddress=registryAddress, ownerAddress=request.ownerAddress, badgeKey=request.badgeKey, achievedDate=achievedDate, signatureJson=request.signatureJson)
         return CollectionAssignBadgeResponse()
 
     return router

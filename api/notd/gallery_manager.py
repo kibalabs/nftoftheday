@@ -498,14 +498,14 @@ class GalleryManager:
             ) for row in result.mappings()
         ]
 
-    async def assign_badge_holder(self, registryAddress: str, ownerAddress: str, badgeKey: str, achievedDate: datetime.datetime, signatureJson: str):
+    async def assign_badge_holder(self, registryAddress: str, ownerAddress: str, badgeKey: str, achievedDate: datetime.datetime, signatureJson: str) -> None:
         retrieveAssignedGalleryBadgeHolders = await self.retriever.list_gallery_assigned_badge_holders(fieldFilters=[
             StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.ownerAddress.key, eq=ownerAddress),
             StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.registryAddress.key, eq=registryAddress),
             StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.badgeKey.key, eq=badgeKey),
         ])
         retrieveAssignedGalleryBadgeHolder = retrieveAssignedGalleryBadgeHolders[0]
-        async with self.saver.create_transaction as connection:
+        async with self.saver.create_transaction() as connection:
             if retrieveAssignedGalleryBadgeHolder:
                 await self.saver.update_gallery_assigned_badge_holder(retrieveAssignedGalleryBadgeHolder.galleryAssignedBadgeHolderId, achievedDate=achievedDate, signatureDict=signatureJson, connection=connection)
             else:
