@@ -2,8 +2,12 @@ from typing import Optional
 
 from fastapi import APIRouter
 
+from core.util import date_util
+
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
 from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
+from notd.api.endpoints_v1 import CollectionAssignBadgeRequest
+from notd.api.endpoints_v1 import CollectionAssignBadgeResponse
 from notd.api.endpoints_v1 import FollowCollectionUserRequest
 from notd.api.endpoints_v1 import FollowCollectionUserResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
@@ -115,5 +119,11 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def list_gallery_collection_overlap_owners(registryAddress: str) -> ListGalleryCollectionOverlapOwnersResponse:
         collectionOverlapOwners = await galleryManager.list_gallery_collection_overlap_owners(registryAddress=registryAddress)
         return ListGalleryCollectionOverlapOwnersResponse(collectionOverlapOwners=(await responseBuilder.collection_overlap_owners_from_models(collectionOverlapOwners=collectionOverlapOwners)))
+
+    @router.post('/collections/{registryAddress}/assign-badge-holder')
+    async def assign_badge_holder(registryAddress: str, request: CollectionAssignBadgeRequest) -> CollectionAssignBadgeResponse:
+        achievedDate = request.achievedDate.replace(tzinfo=None) if request.achievedDate else date_util.start_of_day()
+        await galleryManager.assign_badge_holder(registryAddress=registryAddress, ownerAddress=request.ownerAddress, badgeKey=request.badgeKey, achievedDate=achievedDate, signature=request.signatureJson)
+        return CollectionAssignBadgeResponse()
 
     return router

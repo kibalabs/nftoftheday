@@ -18,6 +18,7 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionTotalActivity
+from notd.model import GalleryAssignedBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import RetrievedCollectionOverlap
@@ -39,6 +40,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryAssignedBadgeHoldersTable
 from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
@@ -983,4 +985,41 @@ class Saver(CoreSaver):
         if len(galleryBadgeHolderIds) == 0:
             return
         query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId.in_(galleryBadgeHolderIds)).returning(GalleryBadgeHoldersTable.c.galleryBadgeHolderId)
+        await self._execute(query=query, connection=connection)
+
+    async def create_gallery_assigned_badge_holder(self, registryAddress: str, ownerAddress: Optional[str], badgeKey: Optional[str], achievedDate: Optional[datetime.datetime], signatureDict: JSON, connection: Optional[DatabaseConnection] = None) -> GalleryAssignedBadgeHolder:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values: CreateRecordDict = {
+            GalleryAssignedBadgeHoldersTable.c.createdDate.key: createdDate,
+            GalleryAssignedBadgeHoldersTable.c.updatedDate.key: updatedDate,
+            GalleryAssignedBadgeHoldersTable.c.registryAddress.key: registryAddress,
+            GalleryAssignedBadgeHoldersTable.c.ownerAddress.key: ownerAddress,
+            GalleryAssignedBadgeHoldersTable.c.badgeKey.key: badgeKey,
+            GalleryAssignedBadgeHoldersTable.c.achievedDate.key: achievedDate,
+            GalleryAssignedBadgeHoldersTable.c.signature.key: signatureDict,
+        }
+        query = GalleryAssignedBadgeHoldersTable.insert().values(values).returning(GalleryAssignedBadgeHoldersTable.c.galleryAssignedBadgeHolderId)
+        result = await self._execute(query=query, connection=connection)
+        galleryAssignedBadgeHolderId = int(result.scalar_one())
+        return GalleryAssignedBadgeHolder(
+            galleryAssignedBadgeHolderId=galleryAssignedBadgeHolderId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            ownerAddress=ownerAddress,
+            badgeKey=badgeKey,
+            achievedDate=achievedDate,
+            signature=Signature.from_dict(signatureDict),
+        )
+
+    async def update_gallery_assigned_badge_holder(self, galleryAssignedBadgeHolderId: int, achievedDate: Optional[datetime.datetime] = None, signatureDict: Optional[JSON] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values: UpdateRecordDict = {}
+        if achievedDate is not None:
+            values[GalleryAssignedBadgeHoldersTable.c.achievedDate.key] = achievedDate
+        if signatureDict is not None:
+            values[GalleryAssignedBadgeHoldersTable.c.signature.key] = signatureDict
+        if len(values) > 0:
+            values[GalleryAssignedBadgeHoldersTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = GalleryAssignedBadgeHoldersTable.update().where(GalleryAssignedBadgeHoldersTable.c.galleryAssignedBadgeHolderId == galleryAssignedBadgeHolderId).values(values).returning(GalleryAssignedBadgeHoldersTable.c.galleryAssignedBadgeHolderId)
         await self._execute(query=query, connection=connection)

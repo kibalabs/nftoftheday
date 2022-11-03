@@ -10,6 +10,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
+from notd.model import GalleryAssignedBadgeHolder
 from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -30,6 +31,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryAssignedBadgeHoldersTable
 from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
@@ -356,4 +358,16 @@ def gallery_badge_holder_from_row(rowMapping: RowMapping) -> GalleryBadgeHolder:
         ownerAddress=rowMapping[GalleryBadgeHoldersTable.c.ownerAddress],
         badgeKey=rowMapping[GalleryBadgeHoldersTable.c.badgeKey],
         achievedDate=rowMapping[GalleryBadgeHoldersTable.c.achievedDate],
+    )
+
+def gallery_assigned_badge_holder_from_row(rowMapping: RowMapping) -> GalleryAssignedBadgeHolder:
+    return GalleryAssignedBadgeHolder(
+        galleryAssignedBadgeHolderId=rowMapping[GalleryAssignedBadgeHoldersTable.c.galleryAssignedBadgeHolderId],
+        createdDate=rowMapping[GalleryAssignedBadgeHoldersTable.c.createdDate],
+        updatedDate=rowMapping[GalleryAssignedBadgeHoldersTable.c.updatedDate],
+        registryAddress=rowMapping[GalleryAssignedBadgeHoldersTable.c.registryAddress],
+        ownerAddress=rowMapping[GalleryAssignedBadgeHoldersTable.c.ownerAddress],
+        badgeKey=rowMapping[GalleryAssignedBadgeHoldersTable.c.badgeKey],
+        achievedDate=rowMapping[GalleryAssignedBadgeHoldersTable.c.achievedDate],
+        signature=rowMapping[GalleryAssignedBadgeHoldersTable.c.signature],
     )

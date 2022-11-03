@@ -385,3 +385,29 @@ GalleryBadgeHoldersTable = sqlalchemy.Table(
     sqlalchemy.Column(key='badgeKey', name='badge_key', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='achievedDate', name='achieved_date', type_=sqlalchemy.DateTime, nullable=False),
 )
+
+
+GalleryAssignedBadgeHoldersTable = sqlalchemy.Table(
+    'tbl_gallery_assigned_badge_holders',
+    metadata,
+    sqlalchemy.Column(key='galleryAssignedBadgeHolderId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='badgeKey', name='badge_key', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='achievedDate', name='achieved_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='signature', name='signature', type_=sqlalchemy.JSON, nullable=False),
+)
+
+GalleryBadgeHolderView = sqlalchemy.Table(
+    'vw_badge_holder',
+    metadata,
+    sqlalchemy.Column(key='galleryAssignedBadgeHolderId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='ownerAddress', name='owner_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='badgeKey', name='badge_key', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='achievedDate', name='achieved_date', type_=sqlalchemy.DateTime, nullable=False),
+)

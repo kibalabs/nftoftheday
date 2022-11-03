@@ -2,6 +2,7 @@ import contextlib
 import json
 import urllib.parse as urlparse
 from collections import defaultdict
+import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -40,6 +41,8 @@ from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryBadgeHolderView
+from notd.store.schema import GalleryAssignedBadgeHoldersTable
 from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import OrderedTokenListingsView
 from notd.store.schema import TokenAttributesTable
@@ -304,10 +307,10 @@ class GalleryManager:
 
     async def list_gallery_user_badges(self, registryAddress: str, userAddress: str) -> List[GalleryBadgeHolder]:
         galleryUserBadgesQuery = (
-            sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
-                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
+            sqlalchemy.select(GalleryBadgeHolderView, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHolderView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHolderView.c.ownerAddress))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
-                .where(GalleryBadgeHoldersTable.c.ownerAddress == userAddress)
+                .where(GalleryBadgeHolderView.c.ownerAddress == userAddress)
         )
         galleryUserBadgesResult = await self.retriever.database.execute(query=galleryUserBadgesQuery)
         galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
@@ -494,3 +497,16 @@ class GalleryManager:
                 otherRegistryTokenCount=row['otherRegistryTokenCount'],
             ) for row in result.mappings()
         ]
+
+    async def assign_badge_holder(self, registryAddress: str, ownerAddress: str, badgeKey: str, achievedDate: datetime.datetime, signatureJson: str):
+        retrieveAssignedGalleryBadgeHolders = await self.retriever.list_gallery_assigned_badge_holders(fieldFilters=[
+            StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.ownerAddress.key, eq=ownerAddress),
+            StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.registryAddress.key, eq=registryAddress),
+            StringFieldFilter(fieldName=GalleryAssignedBadgeHoldersTable.c.badgeKey.key, eq=badgeKey),
+        ])
+        retrieveAssignedGalleryBadgeHolder = retrieveAssignedGalleryBadgeHolders[0]
+        async with self.saver.create_transaction as connection:
+            if retrieveAssignedGalleryBadgeHolder:
+                await self.saver.update_gallery_assigned_badge_holder(retrieveAssignedGalleryBadgeHolder.galleryAssignedBadgeHolderId, achievedDate=achievedDate, signatureDict=signatureJson, connection=connection)
+            else:
+                await self.saver.create_gallery_assigned_badge_holder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey=badgeKey, achievedDate=achievedDate, signatureDict=signatureJson, connection=connection)

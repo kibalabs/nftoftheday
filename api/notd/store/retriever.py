@@ -20,6 +20,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
+from notd.model import GalleryAssignedBadgeHolder
 from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -39,6 +40,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryAssignedBadgeHoldersTable
 from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
@@ -62,6 +64,7 @@ from notd.store.schema_conversions import collection_activity_from_row
 from notd.store.schema_conversions import collection_from_row
 from notd.store.schema_conversions import collection_overlap_from_row
 from notd.store.schema_conversions import collection_total_activity_from_row
+from notd.store.schema_conversions import gallery_assigned_badge_holder_from_row
 from notd.store.schema_conversions import gallery_badge_holder_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import lock_from_row
@@ -550,3 +553,15 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         galleryBadgeHolders = [gallery_badge_holder_from_row(row) for row in result.mappings()]
         return galleryBadgeHolders
+
+    async def list_gallery_assigned_badge_holders(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[GalleryAssignedBadgeHolder]:
+        query = GalleryAssignedBadgeHoldersTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=GalleryAssignedBadgeHoldersTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=GalleryAssignedBadgeHoldersTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        galleryAssignedBadgeHolders = [gallery_assigned_badge_holder_from_row(row) for row in result.mappings()]
+        return galleryAssignedBadgeHolders

@@ -59,3 +59,12 @@ CREATE VIEW vw_ordered_token_listings AS
         AND vw_token_ownerships.quantity > 0
     WHERE tbl_latest_token_listings.end_date > now()
 );
+
+CREATE VIEW vw_badge_holder AS
+(
+    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, badge_key, achieved_date
+    FROM tbl_gallery_badge_holders
+) UNION (
+    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, badge_key, achieved_date
+    FROM tbl_gallery_assigned_badge_holders
+);

@@ -570,6 +570,14 @@ class GalleryBadgeHolder(RetrievedGalleryBadgeHolder):
 
 
 @dataclasses.dataclass
+class GalleryAssignedBadgeHolder(RetrievedGalleryBadgeHolder):
+    galleryAssignedBadgeHolderId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    signature: Signature
+
+
+@dataclasses.dataclass
 class GalleryUserRow:
     galleryUser: GalleryUser
     chosenOwnedTokens: List[TokenMetadata]
