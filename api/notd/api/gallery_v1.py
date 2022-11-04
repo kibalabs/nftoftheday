@@ -120,10 +120,10 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         collectionOverlapOwners = await galleryManager.list_gallery_collection_overlap_owners(registryAddress=registryAddress)
         return ListGalleryCollectionOverlapOwnersResponse(collectionOverlapOwners=(await responseBuilder.collection_overlap_owners_from_models(collectionOverlapOwners=collectionOverlapOwners)))
 
-    @router.post('/collections/{registryAddress}/assign-badge-holder')
-    async def assign_badge_holder(registryAddress: str, request: CollectionAssignBadgeRequest) -> CollectionAssignBadgeResponse:
+    @router.post('/collections/{registryAddress}/user/{userAddress}/assign-badge-holder')
+    async def assign_badge_holder(registryAddress: str, userAddress: str, request: CollectionAssignBadgeRequest) -> CollectionAssignBadgeResponse:
         achievedDate = request.achievedDate.replace(tzinfo=None) if request.achievedDate else date_util.start_of_day()
-        await galleryManager.assign_badge_holder(registryAddress=registryAddress, ownerAddress=request.ownerAddress, badgeKey=request.badgeKey, achievedDate=achievedDate, signatureJson=request.signatureJson)
+        await galleryManager.assign_badge_holder(registryAddress=registryAddress, ownerAddress=userAddress, badgeKey=request.badgeKey, achievedDate=achievedDate, signatureJson=request.signatureJson)
         return CollectionAssignBadgeResponse()
 
     return router

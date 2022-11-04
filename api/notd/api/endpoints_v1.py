@@ -395,7 +395,6 @@ class CollectionAssignBadgeResponse(BaseModel):
     pass
 
 class CollectionAssignBadgeRequest(BaseModel):
-    ownerAddress: str
     badgeKey: str
     achievedDate: Optional[datetime.datetime]
     signatureJson: Dict[str, str]
