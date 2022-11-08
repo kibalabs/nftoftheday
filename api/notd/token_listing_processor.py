@@ -293,7 +293,7 @@ class TokenListingProcessor:
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
                 'type': ["CANCEL_LIST", "LIST"],
-                'size': 25,
+                'size': 50,
                 'sort': "LATEST_FIRST"
             }
             cursor = None
@@ -307,12 +307,12 @@ class TokenListingProcessor:
                 if len(responseJson['activities']) == 0:
                     break
                 for activity in responseJson['activities']:
-                    if activity["source"] != "RARIBLE":
-                        continue
                     activityDate = _parse_date_string(dateString=activity["lastUpdatedAt"])
                     if activityDate < startDate:
                         hasReachedEnd = True
                         break
+                    if activity["source"] != "RARIBLE":
+                        continue
                     tokenIdsToReprocess.add(activity.get('make').get('tokenId'))
                 cursor = responseJson.get('cursor')
                 if not cursor:
