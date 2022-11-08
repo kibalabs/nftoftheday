@@ -22,7 +22,7 @@ class CollectionDoesNotExist(NotFoundException):
 
 class CollectionProcessor:
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, openseaApiKey: str, s3Manager: S3Manager, bucketName: str):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, openseaApiKey: str, s3Manager: S3Manager, bucketName: str) -> None:
         self.requester = requester
         self.ethClient = ethClient
         self.openseaApiKey = openseaApiKey

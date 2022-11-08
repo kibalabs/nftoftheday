@@ -131,7 +131,7 @@ class TokenMetadataProcessor():
         imageUrl: Optional[str] = tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data')  # type: ignore[assignment]
         if isinstance(imageUrl, list) and len(imageUrl) > 0:  # type: ignore[unreachable]
             imageUrl = imageUrl[0]  # type: ignore[unreachable]
-        elif isinstance(imageUrl, dict):  # type: ignore[unreachable]
+        elif isinstance(imageUrl, dict):
             imageDict = imageUrl  # type: ignore[unreachable]
             imageUrl = imageDict.get('src')
             if not imageUrl:
