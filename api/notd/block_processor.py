@@ -39,7 +39,7 @@ class RetrievedEvent:
 
 class BlockProcessor:
 
-    def __init__(self, ethClient: EthClientInterface):
+    def __init__(self, ethClient: EthClientInterface) -> None:
         self.w3 = Web3()
         self.ethClient = ethClient
 
