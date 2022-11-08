@@ -1,2 +1,2 @@
-kiba-core[types, database-types]==0.4.1.dev11
-kiba-build==0.1.6.dev3
+kiba-core[types, database-types]==0.5.0
+kiba-build==0.1.6
