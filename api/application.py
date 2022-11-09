@@ -6,7 +6,7 @@ from core.api.middleware.database_connection_middleware import DatabaseConnectio
 from core.api.middleware.exception_handling_middleware import ExceptionHandlingMiddleware
 from core.api.middleware.logging_middleware import LoggingMiddleware
 from core.api.middleware.server_headers_middleware import ServerHeadersMiddleware
-from core.aws_requester import AwsRequester
+from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
 from core.s3_manager import S3Manager
@@ -62,7 +62,10 @@ openseaApiKey = os.environ['OPENSEA_API_KEY']
 revueApiKey = os.environ['REVUE_API_KEY']
 accessKeyId = os.environ['AWS_KEY']
 accessKeySecret = os.environ['AWS_SECRET']
-twitterBearerToken=os.environ["TWITTER_BEARER_TOKEN"]
+twitterBearerToken = os.environ["TWITTER_BEARER_TOKEN"]
+ethNodeUsername = os.environ["ETH_NODE_USERNAME"]
+ethNodePassword = os.environ["ETH_NODE_PASSWORD"]
+ethNodeUrl = os.environ["ETH_NODE_URL"]
 
 databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
 database = Database(connectionString=databaseConnectionString)
@@ -71,8 +74,9 @@ retriever = Retriever(database=database)
 s3Manager = S3Manager(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
 workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
 tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
-awsRequester = AwsRequester(accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
-ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+ethNodeAuth = BasicAuthentication(username=ethNodeUsername, password=ethNodePassword)
+ethNodeRequester = Requester(headers={'Authorization': f'Basic {ethNodeAuth.to_string()}'})
+ethClient = RestEthClient(url=ethNodeUrl, requester=ethNodeRequester)
 blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
 pabloClient = PabloClient(requester=requester)
@@ -133,6 +137,6 @@ async def shutdown():
     await s3Manager.disconnect()
     await workQueue.disconnect()
     await tokenQueue.disconnect()
-    await awsRequester.close_connections()
     await openseaRequester.close_connections()
     await requester.close_connections()
+    await ethNodeRequester.close_connections()

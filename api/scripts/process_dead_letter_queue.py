@@ -3,7 +3,6 @@ import os
 import sys
 
 from core import logging
-from core.aws_requester import AwsRequester
 from core.http.basic_authentication import BasicAuthentication
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
@@ -58,7 +57,10 @@ async def main():
     revueApiKey = os.environ['REVUE_API_KEY']
     accessKeyId = os.environ['AWS_KEY']
     accessKeySecret = os.environ['AWS_SECRET']
-    twitterBearerToken=os.environ["TWITTER_BEARER_TOKEN"]
+    twitterBearerToken = os.environ["TWITTER_BEARER_TOKEN"]
+    ethNodeUsername = os.environ["INFURA_NODE_USERNAME"]
+    ethNodePassword = os.environ["INFURA_NODE_PASSWORD"]
+    ethNodeUrl = os.environ["INFURA_NODE_URL"]
 
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
@@ -68,11 +70,9 @@ async def main():
     dlWorkQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue-dl')
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
-    # awsRequester = AwsRequester(accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
-    # ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
-    infuraAuth = BasicAuthentication(username='', password=os.environ["INFURA_PROJECT_SECRET"])
-    infuraRequester = Requester(headers={'Authorization': f'Basic {infuraAuth.to_string()}'})
-    ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
+    ethNodeAuth = BasicAuthentication(username=ethNodeUsername, password=ethNodePassword)
+    ethNodeRequester = Requester(headers={'Authorization': f'Basic {ethNodeAuth.to_string()}'})
+    ethClient = RestEthClient(url=ethNodeUrl, requester=ethNodeRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
@@ -119,6 +119,7 @@ async def main():
         await workQueue.disconnect()
         await tokenQueue.disconnect()
         await requester.close_connections()
+        await ethNodeRequester.close_connections()
 
 if __name__ == '__main__':
     asyncio.run(main())

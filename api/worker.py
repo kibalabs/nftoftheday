@@ -3,7 +3,7 @@ import os
 import time
 
 from core import logging
-from core.aws_requester import AwsRequester
+from core.http.basic_authentication import BasicAuthentication
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -56,7 +56,10 @@ async def main():
     revueApiKey = os.environ['REVUE_API_KEY']
     accessKeyId = os.environ['AWS_KEY']
     accessKeySecret = os.environ['AWS_SECRET']
-    twitterBearerToken=os.environ["TWITTER_BEARER_TOKEN"]
+    twitterBearerToken = os.environ["TWITTER_BEARER_TOKEN"]
+    ethNodeUsername = os.environ["ETH_NODE_USERNAME"]
+    ethNodePassword = os.environ["ETH_NODE_PASSWORD"]
+    ethNodeUrl = os.environ["ETH_NODE_URL"]
 
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
@@ -65,8 +68,9 @@ async def main():
     s3Manager = S3Manager(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
-    awsRequester = AwsRequester(accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
-    ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=awsRequester)
+    ethNodeAuth = BasicAuthentication(username=ethNodeUsername, password=ethNodePassword)
+    ethNodeRequester = Requester(headers={'Authorization': f'Basic {ethNodeAuth.to_string()}'})
+    ethClient = RestEthClient(url=ethNodeUrl, requester=ethNodeRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
@@ -88,7 +92,7 @@ async def main():
     tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager, ownershipManager=ownershipManager)
     blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager)
     twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
-    badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver) 
+    badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
     badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
     notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, requester=requester, revueApiKey=revueApiKey)
 
@@ -117,6 +121,7 @@ async def main():
         await workQueue.disconnect()
         await tokenQueue.disconnect()
         await requester.close_connections()
+        await ethNodeRequester.close_connections()
 
 if __name__ == '__main__':
     asyncio.run(main())
