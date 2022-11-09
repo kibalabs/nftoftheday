@@ -389,3 +389,12 @@ class RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse(BaseModel):
 
 class RefreshGalleryBadgeHoldersForAllCollectionsDeferredRequest(BaseModel):
     pass
+
+class CollectionAssignBadgeResponse(BaseModel):
+    pass
+
+class CollectionAssignBadgeRequest(BaseModel):
+    badgeKey: str
+    achievedDate: datetime.datetime
+    assignerAddress: str
+    signature: str

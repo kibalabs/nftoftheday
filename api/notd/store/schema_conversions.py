@@ -10,6 +10,7 @@ from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionOverlap
 from notd.model import CollectionTotalActivity
+from notd.model import GalleryBadgeAssignment
 from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
@@ -30,7 +31,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
-from notd.store.schema import GalleryBadgeHoldersTable
+from notd.store.schema import GalleryBadgeAssignmentsTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
@@ -349,11 +350,27 @@ def collection_overlap_from_row(rowMapping: RowMapping) -> CollectionOverlap:
 
 def gallery_badge_holder_from_row(rowMapping: RowMapping) -> GalleryBadgeHolder:
     return GalleryBadgeHolder(
-        galleryBadgeHolderId=rowMapping[GalleryBadgeHoldersTable.c.galleryBadgeHolderId],
-        createdDate=rowMapping[GalleryBadgeHoldersTable.c.createdDate],
-        updatedDate=rowMapping[GalleryBadgeHoldersTable.c.updatedDate],
-        registryAddress=rowMapping[GalleryBadgeHoldersTable.c.registryAddress],
-        ownerAddress=rowMapping[GalleryBadgeHoldersTable.c.ownerAddress],
-        badgeKey=rowMapping[GalleryBadgeHoldersTable.c.badgeKey],
-        achievedDate=rowMapping[GalleryBadgeHoldersTable.c.achievedDate],
+        # NOTE(krishan711):
+        galleryBadgeHolderId=rowMapping['id'],
+        createdDate=rowMapping['createdDate'],
+        updatedDate=rowMapping['updatedDate'],
+        registryAddress=rowMapping['registryAddress'],
+        ownerAddress=rowMapping['ownerAddress'],
+        badgeKey=rowMapping['badgeKey'],
+        achievedDate=rowMapping['achievedDate'],
+    )
+
+
+def gallery_badge_assignment_from_row(rowMapping: RowMapping) -> GalleryBadgeAssignment:
+    return GalleryBadgeAssignment(
+        galleryBadgeAssignmentId=rowMapping[GalleryBadgeAssignmentsTable.c.galleryBadgeAssignmentId],
+        createdDate=rowMapping[GalleryBadgeAssignmentsTable.c.createdDate],
+        updatedDate=rowMapping[GalleryBadgeAssignmentsTable.c.updatedDate],
+        registryAddress=rowMapping[GalleryBadgeAssignmentsTable.c.registryAddress],
+        ownerAddress=rowMapping[GalleryBadgeAssignmentsTable.c.ownerAddress],
+        badgeKey=rowMapping[GalleryBadgeAssignmentsTable.c.badgeKey],
+        achievedDate=rowMapping[GalleryBadgeAssignmentsTable.c.achievedDate],
+        assignerAddress=rowMapping[GalleryBadgeAssignmentsTable.c.assignerAddress],
+        signatureMessage=rowMapping[GalleryBadgeAssignmentsTable.c.signatureMessage],
+        signature=rowMapping[GalleryBadgeAssignmentsTable.c.signature],
     )

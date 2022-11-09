@@ -1,4 +1,5 @@
 import contextlib
+import datetime
 import json
 import urllib.parse as urlparse
 from collections import defaultdict
@@ -20,6 +21,7 @@ from eth_account.messages import defunct_hash_message
 from web3 import Web3
 
 from notd.api.endpoints_v1 import InQueryParam
+from notd.badge_manager import BadgeManager
 from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import Airdrop
@@ -40,7 +42,7 @@ from notd.model import TokenMetadata
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import CollectionTotalActivitiesTable
-from notd.store.schema import GalleryBadgeHoldersTable
+from notd.store.schema import GalleryBadgeHoldersView
 from notd.store.schema import OrderedTokenListingsView
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
@@ -61,22 +63,20 @@ from notd.store.schema_conversions import token_listing_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import twitter_profile_from_row
 from notd.store.schema_conversions import user_profile_from_row
+from notd.twitter_manager import TwitterManager
 
-from .twitter_manager import TwitterManager
-
-SPRITE_CLUB_REGISTRY_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
 SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF'
-
 
 
 class GalleryManager:
 
-    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver, twitterManager: TwitterManager, collectionManager: CollectionManager) -> None:
+    def __init__(self, ethClient: EthClientInterface, retriever: Retriever, saver: Saver, twitterManager: TwitterManager, collectionManager: CollectionManager, badgeManager: BadgeManager) -> None:
         self.ethClient = ethClient
         self.retriever = retriever
         self.saver = saver
         self.twitterManager = twitterManager
         self.collectionManager = collectionManager
+        self.badgeManager = badgeManager
         with open('./contracts/SpriteClub.json', 'r') as contractJsonFile:
             self.spriteClubContract = json.load(contractJsonFile)
         with open('./contracts/SpriteClubStormdrop.json', 'r') as contractJsonFile:
@@ -130,7 +130,7 @@ class GalleryManager:
     async def list_collection_token_airdrops(self, registryAddress: str, tokenId: str) -> List[Airdrop]:
         registryAddress = chain_util.normalize_address(registryAddress)
         tokenKey = Token(registryAddress=registryAddress, tokenId=tokenId)
-        if registryAddress == SPRITE_CLUB_REGISTRY_ADDRESS:
+        if registryAddress == COLLECTION_SPRITE_CLUB_ADDRESS:
             claimedTokenId = (await self.ethClient.call_function(toAddress=SPRITE_CLUB_STORMDROP_REGISTRY_ADDRESS, contractAbi=self.spriteClubStormdropContract['abi'], functionAbi=self.spriteClubStormdropClaimedFunctionAbi, arguments={'': int(tokenId)}))[0]
             isClaimed = claimedTokenId > 0
             claimTokenId = claimedTokenId or self.spriteClubStormdropIdMap[tokenId]
@@ -304,10 +304,10 @@ class GalleryManager:
 
     async def list_gallery_user_badges(self, registryAddress: str, userAddress: str) -> List[GalleryBadgeHolder]:
         galleryUserBadgesQuery = (
-            sqlalchemy.select(GalleryBadgeHoldersTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
-                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersTable.c.ownerAddress))
+            sqlalchemy.select(GalleryBadgeHoldersView, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+                .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == GalleryBadgeHoldersView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress == GalleryBadgeHoldersView.c.ownerAddress))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
-                .where(GalleryBadgeHoldersTable.c.ownerAddress == userAddress)
+                .where(GalleryBadgeHoldersView.c.ownerAddress == userAddress)
         )
         galleryUserBadgesResult = await self.retriever.database.execute(query=galleryUserBadgesQuery)
         galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
@@ -369,14 +369,14 @@ class GalleryManager:
         for chosenTokenRow in chosenTokensResult.mappings():
             chosenTokens[chosenTokenRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]].append(token_metadata_from_row(chosenTokenRow))
         galleryBadgeHoldersQuery = (
-            sqlalchemy.select(GalleryBadgeHoldersTable)
-                .where(GalleryBadgeHoldersTable.c.registryAddress == registryAddress)
-                .where(GalleryBadgeHoldersTable.c.ownerAddress.in_(ownerAddresses))
+            sqlalchemy.select(GalleryBadgeHoldersView)
+                .where(GalleryBadgeHoldersView.c.registryAddress == registryAddress)
+                .where(GalleryBadgeHoldersView.c.ownerAddress.in_(ownerAddresses))
         )
         galleryBadgeHoldersResult = await self.retriever.database.execute(query=galleryBadgeHoldersQuery)
         galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
         for galleryBadgeHolderRow in galleryBadgeHoldersResult.mappings():
-            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersTable.c.ownerAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
+            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersView.c.ownerAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
         items = [GalleryUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
@@ -494,3 +494,6 @@ class GalleryManager:
                 otherRegistryTokenCount=row['otherRegistryTokenCount'],
             ) for row in result.mappings()
         ]
+
+    async def assign_badge(self, registryAddress: str, ownerAddress: str, badgeKey: str, assignerAddress: str, achievedDate: datetime.datetime, signature: str) -> None:
+        await self.badgeManager.assign_badge(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey=badgeKey, assignerAddress=assignerAddress, achievedDate=achievedDate, signature=signature)

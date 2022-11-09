@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 import datetime
 from typing import TYPE_CHECKING
 from typing import Any
@@ -18,6 +19,7 @@ from notd.model import Block
 from notd.model import Collection
 from notd.model import CollectionHourlyActivity
 from notd.model import CollectionTotalActivity
+from notd.model import GalleryBadgeAssignment
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import RetrievedCollectionOverlap
@@ -39,6 +41,7 @@ from notd.store.schema import AccountGmsTable
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import GalleryBadgeAssignmentsTable
 from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
@@ -984,3 +987,33 @@ class Saver(CoreSaver):
             return
         query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId.in_(galleryBadgeHolderIds)).returning(GalleryBadgeHoldersTable.c.galleryBadgeHolderId)
         await self._execute(query=query, connection=connection)
+
+    async def create_gallery_badge_assignment(self, registryAddress: str, ownerAddress: str,  assignerAddress: str, badgeKey: str, achievedDate: datetime.datetime, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> GalleryBadgeAssignment:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values: CreateRecordDict = {
+            GalleryBadgeAssignmentsTable.c.createdDate.key: createdDate,
+            GalleryBadgeAssignmentsTable.c.updatedDate.key: updatedDate,
+            GalleryBadgeAssignmentsTable.c.registryAddress.key: registryAddress,
+            GalleryBadgeAssignmentsTable.c.ownerAddress.key: ownerAddress,
+            GalleryBadgeAssignmentsTable.c.assignerAddress.key: assignerAddress,
+            GalleryBadgeAssignmentsTable.c.badgeKey.key: badgeKey,
+            GalleryBadgeAssignmentsTable.c.achievedDate.key: achievedDate,
+            GalleryBadgeAssignmentsTable.c.signatureMessage.key: signatureMessage,
+            GalleryBadgeAssignmentsTable.c.signature.key: signature,
+        }
+        query = GalleryBadgeAssignmentsTable.insert().values(values).returning(GalleryBadgeAssignmentsTable.c.galleryBadgeAssignmentId)
+        result = await self._execute(query=query, connection=connection)
+        galleryBadgeAssignmentId = int(result.scalar_one())
+        return GalleryBadgeAssignment(
+            galleryBadgeAssignmentId=galleryBadgeAssignmentId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            ownerAddress=ownerAddress,
+            assignerAddress=assignerAddress,
+            badgeKey=badgeKey,
+            achievedDate=achievedDate,
+            signatureMessage=signatureMessage,
+            signature=signature,
+        )
