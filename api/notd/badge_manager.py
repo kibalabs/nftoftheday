@@ -1,16 +1,24 @@
+import datetime
+import json
 import logging
 
+from core.exceptions import BadRequestException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
+from core.util import date_util
 from core.util import list_util
+from eth_account.messages import defunct_hash_message
+from web3.auto import w3
 
 from notd.badge_processor import BadgeProcessor
 from notd.messages import RefreshGalleryBadgeHoldersForAllCollectionsMessageContent
 from notd.messages import RefreshGalleryBadgeHoldersForCollectionMessageContent
+from notd.model import GALLERY_COLLECTION_ADMINS
 from notd.model import GALLERY_COLLECTIONS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import GalleryBadgeAssignmentsTable
 from notd.store.schema import GalleryBadgeHoldersTable
 
 
@@ -45,3 +53,33 @@ class BadgeManager:
                 await self.saver.delete_gallery_badge_holders(galleryBadgeHolderIds=chunkedIds, connection=connection)
             logging.info(f'Saving {len(retrievedGalleryBadgeHolders)} gallery badges')
             await self.saver.create_gallery_badge_holders(retrievedGalleryBadgeHolders=retrievedGalleryBadgeHolders, connection=connection)
+
+    async def assign_badge(self, registryAddress: str, ownerAddress: str, badgeKey: str, assignerAddress: str, achievedDate: datetime.datetime, signature: str) -> None:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
+        assignerAddress = chain_util.normalize_address(value=assignerAddress)
+        if registryAddress not in GALLERY_COLLECTION_ADMINS:
+            raise BadRequestException('Registry has no admins')
+        if assignerAddress not in set(GALLERY_COLLECTION_ADMINS[registryAddress]):
+            raise BadRequestException('Signer is not an admin')
+        command = 'ASSIGN_BADGE'
+        message = {
+            'registryAddress': registryAddress,
+            'ownerAddress': ownerAddress,
+            'badgeKey': badgeKey,
+            'assignerAddress': assignerAddress,
+            'achievedDate': date_util.datetime_to_string(achievedDate),
+        }
+        signatureMessage = json.dumps({ 'command': command, 'message': message }, indent=2, ensure_ascii=False)
+        messageHash = defunct_hash_message(text=signatureMessage)
+        signer = w3.eth.account.recoverHash(message_hash=messageHash, signature=signature)
+        if signer != assignerAddress:
+            raise BadRequestException('Invalid signature')
+        async with self.saver.create_transaction() as connection:
+            retrieveAssignedGalleryBadgeHolders = await self.retriever.list_gallery_badge_assignments(fieldFilters=[
+                StringFieldFilter(fieldName=GalleryBadgeAssignmentsTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=GalleryBadgeAssignmentsTable.c.ownerAddress.key, eq=ownerAddress),
+                StringFieldFilter(fieldName=GalleryBadgeAssignmentsTable.c.badgeKey.key, eq=badgeKey),
+            ], connection=connection)
+            if len(retrieveAssignedGalleryBadgeHolders) > 1:
+                raise BadRequestException('Badge already assigned')
+            await self.saver.create_gallery_badge_assignment(registryAddress=registryAddress, ownerAddress=ownerAddress, assignerAddress=assignerAddress, badgeKey=badgeKey, achievedDate=achievedDate, signatureMessage=signatureMessage, signature=signature, connection=connection)

@@ -2,12 +2,10 @@ from typing import Optional
 
 from fastapi import APIRouter
 
-from core.util import date_util
-
-from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
-from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import CollectionAssignBadgeRequest
 from notd.api.endpoints_v1 import CollectionAssignBadgeResponse
+from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenRequest
+from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import FollowCollectionUserRequest
 from notd.api.endpoints_v1 import FollowCollectionUserResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
@@ -95,6 +93,12 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         galleryUserBadges = await galleryManager.list_gallery_user_badges(registryAddress=registryAddress, userAddress=userAddress)
         return ListGalleryUserBadgesResponse(galleryUserBadges=(await responseBuilder.gallery_user_badges_from_models(galleryBadgeHolders=galleryUserBadges)))
 
+    @router.post('/collections/{registryAddress}/user/{userAddress}/badges/assign')
+    async def assign_badge(registryAddress: str, userAddress: str, request: CollectionAssignBadgeRequest) -> CollectionAssignBadgeResponse:
+        achievedDate = request.achievedDate.replace(tzinfo=None)
+        await galleryManager.assign_badge(registryAddress=registryAddress, ownerAddress=userAddress, badgeKey=request.badgeKey, assignerAddress=request.assignerAddress, achievedDate=achievedDate, signature=request.signature)
+        return CollectionAssignBadgeResponse()
+
     @router.post('/collections/{registryAddress}/users/{userAddress}/follow')
     async def follow_gallery_user(registryAddress: str, userAddress: str, request: FollowCollectionUserRequest) -> FollowCollectionUserResponse:
         await galleryManager.follow_gallery_user(registryAddress=registryAddress, userAddress=userAddress, account=request.account, signatureMessage=request.signatureMessage, signature=request.signature)
@@ -119,11 +123,5 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def list_gallery_collection_overlap_owners(registryAddress: str) -> ListGalleryCollectionOverlapOwnersResponse:
         collectionOverlapOwners = await galleryManager.list_gallery_collection_overlap_owners(registryAddress=registryAddress)
         return ListGalleryCollectionOverlapOwnersResponse(collectionOverlapOwners=(await responseBuilder.collection_overlap_owners_from_models(collectionOverlapOwners=collectionOverlapOwners)))
-
-    @router.post('/collections/{registryAddress}/user/{userAddress}/assign-badge-holder')
-    async def assign_badge_holder(registryAddress: str, userAddress: str, request: CollectionAssignBadgeRequest) -> CollectionAssignBadgeResponse:
-        achievedDate = request.achievedDate.replace(tzinfo=None) if request.achievedDate else date_util.start_of_day()
-        await galleryManager.assign_badge_holder(registryAddress=registryAddress, ownerAddress=userAddress, badgeKey=request.badgeKey, achievedDate=achievedDate, signatureJson=request.signatureJson)
-        return CollectionAssignBadgeResponse()
 
     return router

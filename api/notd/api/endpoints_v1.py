@@ -1,7 +1,6 @@
 import datetime
 from typing import Generic
 from typing import List
-from typing import Dict
 from typing import Optional
 from typing import TypeVar
 
@@ -396,5 +395,6 @@ class CollectionAssignBadgeResponse(BaseModel):
 
 class CollectionAssignBadgeRequest(BaseModel):
     badgeKey: str
-    achievedDate: Optional[datetime.datetime]
-    signatureJson: Dict[str, str]
+    achievedDate: datetime.datetime
+    assignerAddress: str
+    signature: str

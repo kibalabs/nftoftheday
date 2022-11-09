@@ -460,7 +460,7 @@ CREATE INDEX tbl_gallery_badge_holders_badge_key ON tbl_gallery_badge_holders (b
 CREATE INDEX tbl_gallery_badge_holders_owner_address ON tbl_gallery_badge_holders (owner_address);
 CREATE INDEX tbl_gallery_badge_holders_achieved_date ON tbl_gallery_badge_holders (achieved_date);
 
-CREATE TABLE tbl_gallery_assigned_badge_holders (
+CREATE TABLE tbl_gallery_badge_assignments (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -468,12 +468,15 @@ CREATE TABLE tbl_gallery_assigned_badge_holders (
     owner_address TEXT NOT NULL,
     badge_key TEXT NOT NULL,
     achieved_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    signature JSON NOT NULL
+    assigner_address TEXT NOT NULL,
+    signature_message TEXT NOT NULL,
+    signature TEXT NOT NULL
 );
-CREATE UNIQUE INDEX tbl_gallery_assigned_badge_holders_owner_address_registry_address_badge_key on tbl_gallery_assigned_badge_holders (owner_address, registry_address, badge_key);
-CREATE INDEX tbl_gallery_assigned_badge_holders_created_date ON tbl_gallery_assigned_badge_holders (created_date);
-CREATE INDEX tbl_gallery_assigned_badge_holders_updated_date ON tbl_gallery_assigned_badge_holders (updated_date);
-CREATE INDEX tbl_gallery_assigned_badge_holders_registry_address ON tbl_gallery_assigned_badge_holders (registry_address);
-CREATE INDEX tbl_gallery_assigned_badge_holders_badge_key ON tbl_gallery_assigned_badge_holders (badge_key);
-CREATE INDEX tbl_gallery_assigned_badge_holders_owner_address ON tbl_gallery_assigned_badge_holders (owner_address);
-CREATE INDEX tbl_gallery_assigned_badge_holders_achieved_date ON tbl_gallery_badge_assigned_holders (achieved_date);
+CREATE UNIQUE INDEX tbl_gallery_badge_assignments_owner_address_registry_address_badge_key on tbl_gallery_badge_assignments (owner_address, registry_address, badge_key);
+CREATE INDEX tbl_gallery_badge_assignments_created_date ON tbl_gallery_badge_assignments (created_date);
+CREATE INDEX tbl_gallery_badge_assignments_updated_date ON tbl_gallery_badge_assignments (updated_date);
+CREATE INDEX tbl_gallery_badge_assignments_registry_address ON tbl_gallery_badge_assignments (registry_address);
+CREATE INDEX tbl_gallery_badge_assignments_assigner_address ON tbl_gallery_badge_assignments (assigner_address);
+CREATE INDEX tbl_gallery_badge_assignments_badge_key ON tbl_gallery_badge_assignments (badge_key);
+CREATE INDEX tbl_gallery_badge_assignments_owner_address ON tbl_gallery_badge_assignments (owner_address);
+CREATE INDEX tbl_gallery_badge_assignments_achieved_date ON tbl_gallery_badge_assignments (achieved_date);

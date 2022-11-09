@@ -41,6 +41,11 @@ GALLERY_COLLECTIONS = {
     COLLECTION_RUDEBOYS_ADDRESS,
 }
 
+GALLERY_COLLECTION_ADMINS = {
+    COLLECTION_RUDEBOYS_ADDRESS: [
+        '0xCE11D6fb4f1e006E5a348230449Dc387fde850CC',
+    ],
+}
 
 ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
 
@@ -570,11 +575,13 @@ class GalleryBadgeHolder(RetrievedGalleryBadgeHolder):
 
 
 @dataclasses.dataclass
-class GalleryAssignedBadgeHolder(RetrievedGalleryBadgeHolder):
-    galleryAssignedBadgeHolderId: int
+class GalleryBadgeAssignment(RetrievedGalleryBadgeHolder):
+    galleryBadgeAssignmentId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
-    signature: Signature
+    assignerAddress: str
+    signatureMessage: str
+    signature: str
 
 
 @dataclasses.dataclass

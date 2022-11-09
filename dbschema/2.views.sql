@@ -60,11 +60,11 @@ CREATE VIEW vw_ordered_token_listings AS
     WHERE tbl_latest_token_listings.end_date > now()
 );
 
-CREATE VIEW vw_badge_holder AS
+CREATE VIEW vw_gallery_badge_holders AS
 (
-    SELECT id, created_date, updated_date, registry_address, owner_address, badge_key, achieved_date, '{"message": "KibaLabs", "signautre": "KBL"}' as signature
+    SELECT id, created_date, updated_date, registry_address, owner_address, badge_key, achieved_date
     FROM tbl_gallery_badge_holders
 ) UNION ALL(
-    SELECT id, created_date, updated_date, registry_address, owner_address, badge_key, achieved_date, signature
-    FROM tbl_gallery_assigned_badge_holders
+    SELECT id, created_date, updated_date, registry_address, owner_address, badge_key, achieved_date
+    FROM tbl_gallery_badge_assignments
 );

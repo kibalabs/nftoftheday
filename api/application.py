@@ -94,11 +94,11 @@ collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retri
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager, ownershipManager=ownershipManager)
 blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager)
 twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
-badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver) 
+badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
 badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
 notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
-galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager, collectionManager=collectionManager)
+galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager, collectionManager=collectionManager, badgeManager=badgeManager)
 gmManager = GmManager(retriever=retriever, saver=saver)
 
 app = FastAPI()
