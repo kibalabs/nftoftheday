@@ -4,11 +4,12 @@ import sys
 import unittest
 from unittest import IsolatedAsyncioTestCase
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from core.http.basic_authentication import BasicAuthentication
 from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.web3.eth_client import RestEthClient
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_processor import CollectionProcessor
 from notd.model import RetrievedCollection
 
@@ -24,14 +25,18 @@ class CollectionProcessorTestCase(KibaAsyncTestCase):
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
         self.s3Manager = S3Manager(region='us-east-1', accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-        self.requester = Requester()
-        self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
+        ethNodeUsername = os.environ["ETH_NODE_USERNAME"]
+        ethNodePassword = os.environ["ETH_NODE_PASSWORD"]
+        ethNodeUrl = os.environ["ETH_NODE_URL"]
+        ethNodeAuth = BasicAuthentication(username=ethNodeUsername, password=ethNodePassword)
+        self.ethNodeRequester = Requester(headers={'Authorization': f'Basic {ethNodeAuth.to_string()}'})
+        self.ethClient = RestEthClient(url=ethNodeUrl, requester=self.ethNodeRequester)
         self.openseaApiKey = os.environ['OPENSEA_API_KEY']
         self.bucket = os.environ['S3_BUCKET']
         self.collectionProcessor = CollectionProcessor(requester=self.requester, ethClient=self.ethClient, s3Manager=self.s3Manager, openseaApiKey=self.openseaApiKey, bucketName=self.bucket)
 
     async def asyncTearDown(self) -> None:
-        await self.requester.close_connections()
+        await self.ethNodeRequester.close_connections()
         await self.s3Manager.disconnect()
         await super().asyncTearDown()
 

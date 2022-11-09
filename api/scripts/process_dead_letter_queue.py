@@ -119,6 +119,7 @@ async def main():
         await workQueue.disconnect()
         await tokenQueue.disconnect()
         await requester.close_connections()
+        await ethNodeRequester.close_connections()
 
 if __name__ == '__main__':
     asyncio.run(main())

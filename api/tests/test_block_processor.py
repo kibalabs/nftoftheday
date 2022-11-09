@@ -5,7 +5,7 @@ import unittest
 from typing import List
 from unittest import IsolatedAsyncioTestCase
 
-from core.aws_requester import AwsRequester
+from core.http.basic_authentication import BasicAuthentication
 from core.requester import Requester
 from core.web3.eth_client import EthClientInterface
 from core.web3.eth_client import RestEthClient
@@ -42,15 +42,16 @@ class BlockProcessorTestCase(KibaAsyncTestCase):
 
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
-        self.awsRequester = AwsRequester(accessKeyId=os.environ['AWS_KEY'], accessKeySecret=os.environ['AWS_SECRET'])
-        self.ethClient = RestEthClient(url='https://nd-foldvvlb25awde7kbqfvpgvrrm.ethereum.managedblockchain.eu-west-1.amazonaws.com', requester=self.awsRequester)
-        # self.requester = Requester()
-        # self.ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=self.requester)
+        ethNodeUsername = os.environ["ETH_NODE_USERNAME"]
+        ethNodePassword = os.environ["ETH_NODE_PASSWORD"]
+        ethNodeUrl = os.environ["ETH_NODE_URL"]
+        ethNodeAuth = BasicAuthentication(username=ethNodeUsername, password=ethNodePassword)
+        self.ethNodeRequester = Requester(headers={'Authorization': f'Basic {ethNodeAuth.to_string()}'})
+        self.ethClient = RestEthClient(url=ethNodeUrl, requester=self.ethNodeRequester)
         self.blockProcessor = BlockProcessor(ethClient=self.ethClient)
 
     async def asyncTearDown(self) -> None:
-        await self.awsRequester.close_connections()
-        # await self.requester.close_connections()
+        await self.ethNodeRequester.close_connections()
         await super().asyncTearDown()
 
 
