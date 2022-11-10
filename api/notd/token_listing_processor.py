@@ -95,7 +95,7 @@ class TokenListingProcessor:
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=10, expirySeconds=max(60, secondsSinceStartDate / 100)):
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=10, expirySeconds=max(60, int(secondsSinceStartDate / 100))):
             tokensIdsToReprocess = set()
             index = 0
             for eventType in ['created', 'cancelled']:
@@ -217,7 +217,7 @@ class TokenListingProcessor:
 
     async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=max(60, secondsSinceStartDate / 100)):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=max(60, int(secondsSinceStartDate / 100))):
             tokenIdsToReprocess = set()
             for eventType in ["CANCEL_LIST", "LIST"]:
                 queryData: Dict[str, JSON1] = {
@@ -300,7 +300,7 @@ class TokenListingProcessor:
 
     async def get_changed_rarible_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(60, secondsSinceStartDate / 100)):
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(60, int(secondsSinceStartDate / 100))):
             tokenIdsToReprocess = set()
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
