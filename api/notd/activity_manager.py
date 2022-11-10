@@ -13,8 +13,6 @@ from core.util import date_util
 from core.util import list_util
 
 from notd.collection_activity_processor import CollectionActivityProcessor
-from notd.date_util import date_hour_from_datetime
-from notd.date_util import generate_clock_hour_intervals
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
 from notd.messages import UpdateActivityForCollectionMessageContent
 from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
@@ -56,14 +54,14 @@ class ActivityManager:
                     .where(TokenTransfersTable.c.blockNumber.in_(blockNumbers))
             )
             updatedTransfersResult = await self.retriever.database.execute(query=updatedTransfersQuery)
-            newRegistryDatePairs = {(registryAddress, date_hour_from_datetime(dt=typing.cast(datetime.datetime, date))) for (registryAddress, date) in updatedTransfersResult}
+            newRegistryDatePairs = {(registryAddress, date_util.date_hour_from_datetime(dt=typing.cast(datetime.datetime, date))) for (registryAddress, date) in updatedTransfersResult}
             registryDatePairs.update(newRegistryDatePairs)
         return registryDatePairs
 
     async def update_activity_for_all_collections(self) -> None:
         processStartDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='hourly_collection_activities')
-        for periodStartDate, periodEndDate in generate_clock_hour_intervals(startDate=latestUpdate.date, endDate=processStartDate):
+        for periodStartDate, periodEndDate in date_util.generate_clock_hour_intervals(startDate=latestUpdate.date, endDate=processStartDate):
             logging.info(f'Finding transferred collections between {periodStartDate} and {periodEndDate}')
             registryDatePairs = await self._get_transferred_collections_in_period(startDate=periodStartDate, endDate=periodEndDate)
             logging.info(f'Scheduling processing for {len(registryDatePairs)} registryDatePairs')
@@ -73,12 +71,12 @@ class ActivityManager:
 
     async def update_activity_for_collection_deferred(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
-        startDate = date_hour_from_datetime(startDate)
+        startDate = date_util.date_hour_from_datetime(startDate)
         await self.tokenQueue.send_message(message=UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message())
 
     async def update_activity_for_collection(self, address: str, startDate: datetime.datetime) -> None:
         address = chain_util.normalize_address(address)
-        startDate = date_hour_from_datetime(startDate)
+        startDate = date_util.date_hour_from_datetime(startDate)
         retrievedCollectionActivity = await self.collectionActivityProcessor.calculate_collection_hourly_activity(address=address, startDate=startDate)
         async with self.saver.create_transaction() as connection:
             collectionActivity = await self.retriever.list_collection_activities(
