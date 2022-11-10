@@ -35,7 +35,7 @@ class TokenListingProcessor:
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: Sequence[str]) -> List[RetrievedTokenListing]:
         listings = []
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=int(1.5 * len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=int(10 * len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
             for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=_OPENSEA_API_LISTING_CHUNK_SIZE)):
                 nextPageId: Optional[str] = None
                 pageCount = 0
@@ -94,7 +94,8 @@ class TokenListingProcessor:
         return listings
 
     async def get_changed_opensea_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=10, expirySeconds=60):
+        secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=10, expirySeconds=max(60, int(secondsSinceStartDate / 100))):
             tokensIdsToReprocess = set()
             index = 0
             for eventType in ['created', 'cancelled']:
@@ -119,7 +120,7 @@ class TokenListingProcessor:
             return list(tokensIdsToReprocess)
 
     async def get_looksrare_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=60):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=120):
             queryData: Dict[str, JSON1] = {
                 'isOrderAsk': 'true',
                 'collection': registryAddress,
@@ -159,9 +160,10 @@ class TokenListingProcessor:
                     assetListings.append(listing)
                     latestOrderHash = order['hash']
                 queryData['pagination[cursor]'] = latestOrderHash
+                await asyncio.sleep(0.1)
             return assetListings
 
-    async def get_looksrare_listings_for_token(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenListing]:
+    async def _get_looksrare_listings_for_token(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenListing]:
         queryData: Dict[str, JSON1] = {
             'isOrderAsk': 'true',
             'collection': registryAddress,
@@ -170,43 +172,52 @@ class TokenListingProcessor:
             'pagination[first]': 100,
             'sort': 'PRICE_ASC',
         }
-        assetListings = []
-        logging.stat('RETRIEVE_TOKEN_LISTING_LOOKSRARE', registryAddress, 0)
-        response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
-        responseJson = response.json()
-        for order in responseJson['data']:
-            startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
-            endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
-            currentPrice = int(order["price"])
-            offererAddress = chain_util.normalize_address(order['signer'])
-            sourceId = order["hash"]
-            # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
-            isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-            assetListings += [RetrievedTokenListing(
-                registryAddress=order['collectionAddress'],
-                tokenId=order['tokenId'],
-                startDate=startDate,
-                endDate=endDate,
-                isValueNative=isValueNative,
-                value=currentPrice,
-                offererAddress=offererAddress,
-                source='looksrare',
-                sourceId=sourceId,
-            )]
+        assetListings: List[RetrievedTokenListing] = []
+        index = 0
+        while True:
+            logging.stat('RETRIEVE_TOKEN_LISTINGS_LOOKSRARE', registryAddress, index)
+            index += 1
+            response = await self.requester.get(url='https://api.looksrare.org/api/v1/orders', dataDict=queryData, timeout=30)
+            responseJson = response.json()
+            if len(responseJson['data']) == 0:
+                break
+            for order in responseJson['data']:
+                startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
+                endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
+                currentPrice = int(order["price"])
+                offererAddress = chain_util.normalize_address(order['signer'])
+                sourceId = order["hash"]
+                # NOTE(Femi-Ogunkola): LooksRare seems to send eth listings with weth currency address
+                isValueNative = order["currencyAddress"] == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                listing = RetrievedTokenListing(
+                    registryAddress=order['collectionAddress'],
+                    tokenId=order['tokenId'],
+                    startDate=startDate,
+                    endDate=endDate,
+                    isValueNative=isValueNative,
+                    value=currentPrice,
+                    offererAddress=offererAddress,
+                    source='looksrare',
+                    sourceId=sourceId,
+                )
+                assetListings.append(listing)
+                latestOrderHash = order['hash']
+            queryData['pagination[cursor]'] = latestOrderHash
+            await asyncio.sleep(0.1)
         return assetListings
 
     async def get_looksrare_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=int(1.5 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=int(10 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
             listings = []
             for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
-                listings += await asyncio.gather(*[self.get_looksrare_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
-                await asyncio.sleep(0.25)
+                listings += await asyncio.gather(*[self._get_looksrare_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
             listings = [listing for listing in listings if listing is not None]
             allListings = [item for sublist in listings for item in sublist]
             return allListings
 
     async def get_changed_looksrare_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=60):
+        secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
+        async with self.lockManager.with_lock(name='looksrare-requester', timeoutSeconds=10, expirySeconds=max(60, int(secondsSinceStartDate / 100))):
             tokenIdsToReprocess = set()
             for eventType in ["CANCEL_LIST", "LIST"]:
                 queryData: Dict[str, JSON1] = {
@@ -234,17 +245,7 @@ class TokenListingProcessor:
                     page += 1
             return list(tokenIdsToReprocess)
 
-    async def get_rarible_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(1.5 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
-            listings = []
-            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
-                listings += await asyncio.gather(*[self.get_rarible_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
-                await asyncio.sleep(0.25)
-            listings = [listing for listing in listings if listing is not None]
-            allListings = [item for sublist in listings for item in sublist]
-            return allListings
-
-    async def get_rarible_listings_for_token(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenListing]:
+    async def _get_rarible_listings_for_token(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenListing]:
         assetListings: List[RetrievedTokenListing] = []
         queryData: Dict[str, JSON1] = {
             'platform': 'RARIBLE',
@@ -283,12 +284,23 @@ class TokenListingProcessor:
             continuationId = responseJson.get('continuation')
             if not continuationId:
                 break
+            await asyncio.sleep(0.25)
             queryData['continuation'] = continuationId
             pageCount += 1
         return assetListings
 
+    async def get_rarible_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(10 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
+            listings = []
+            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
+                listings += await asyncio.gather(*[self._get_rarible_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
+            listings = [listing for listing in listings if listing is not None]
+            allListings = [item for sublist in listings for item in sublist]
+            return allListings
+
     async def get_changed_rarible_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=60):
+        secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(60, int(secondsSinceStartDate / 100))):
             tokenIdsToReprocess = set()
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",

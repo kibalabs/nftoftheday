@@ -11,11 +11,11 @@ from core.store.retriever import DateFieldFilter
 from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
+from core.util import date_util
 from core.util import list_util
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.collection_activity_processor import CollectionActivityProcessor
-from notd.date_util import date_hour_from_datetime
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -54,12 +54,12 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
         else:
             collectionHourlyActivities = await retriever.list_collection_activities(
                 fieldFilters=[
-                    DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, gte=date_hour_from_datetime(tokenTransfers[0].blockDate)),
-                    DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, lte=date_hour_from_datetime(tokenTransfers[-1].blockDate)),
+                    DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, gte=date_util.date_hour_from_datetime(tokenTransfers[0].blockDate)),
+                    DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, lte=date_util.date_hour_from_datetime(tokenTransfers[-1].blockDate)),
                 ],
             )
             processedPairs = {(collectionHourlyActivity.address, collectionHourlyActivity.date) for collectionHourlyActivity in collectionHourlyActivities}
-            registryDatePairs = {(tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers if (tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) not in processedPairs}
+            registryDatePairs = {(tokenTransfer.registryAddress, date_util.date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers if (tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) not in processedPairs}
             print(f'Processing {len(registryDatePairs)} pairs from {len(tokenTransfers)} transfers')
             # messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
             # await tokenQueue.send_messages(messages=messages)

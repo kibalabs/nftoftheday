@@ -5,7 +5,6 @@ from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
 
-from notd.date_util import date_hour_from_datetime
 from notd.model import RetrievedCollectionHourlyActivity
 from notd.model import RetrievedCollectionTotalActivity
 from notd.store.retriever import Retriever
@@ -21,7 +20,7 @@ class CollectionActivityProcessor:
 
     async def calculate_collection_hourly_activity(self, address: str, startDate: datetime.datetime) -> RetrievedCollectionHourlyActivity:
         address = chain_util.normalize_address(address)
-        startDate = date_hour_from_datetime(startDate)
+        startDate = date_util.date_hour_from_datetime(startDate)
         tokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[
                 StringFieldFilter(TokenTransfersTable.c.registryAddress.key, eq=address),
