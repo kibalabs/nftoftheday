@@ -22,12 +22,10 @@ class CollectionDoesNotExist(NotFoundException):
 
 class CollectionProcessor:
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, openseaApiKey: str, s3Manager: S3Manager, bucketName: str) -> None:
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, openseaApiKey: str) -> None:
         self.requester = requester
         self.ethClient = ethClient
         self.openseaApiKey = openseaApiKey
-        self.s3Manager = s3Manager
-        self.bucketName = bucketName
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetdataContractJson = json.load(contractJsonFile)
         self.erc721MetdataContractAbi = erc721MetdataContractJson['abi']
@@ -85,7 +83,6 @@ class CollectionProcessor:
                     collectionMetadata = json.loads(collectionMetadata)
                 if not isinstance(collectionMetadata, dict):
                     raise InternalServerErrorException(f'Bad response type from collection metadata: {type(collectionMetadata)}')
-                await self.s3Manager.write_file(content=str.encode(json.dumps(collectionMetadata)), targetPath=f'{self.bucketName}/collection-metadatas/{address}/{date_util.datetime_from_now()}.json')
             except Exception as exception:  # pylint: disable=broad-except
                 logging.info(f'Error loading collection from metadata uri for address {address}: {str(exception)}')
                 collectionMetadata = None

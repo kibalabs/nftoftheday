@@ -11,7 +11,6 @@ from core.exceptions import BadRequestException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.requester import ResponseException
-from core.s3_manager import S3Manager
 from core.util import date_util
 from core.util.typing_util import JSON
 from core.util.typing_util import JSON1
@@ -46,11 +45,9 @@ class TokenHasNoMetadataException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, s3Manager: S3Manager, bucketName: str, pabloClient: PabloClient):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, pabloClient: PabloClient):
         self.requester = requester
         self.ethClient = ethClient
-        self.s3Manager = s3Manager
-        self.bucketName = bucketName
         self.pabloClient = pabloClient
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
@@ -269,7 +266,6 @@ class TokenMetadataProcessor():
                 tokenMetadataDict = {}
         if isinstance(tokenMetadataDict, list):
             tokenMetadataDict = tokenMetadataDict[0] if len(tokenMetadataDict) > 0 else {}  # type: ignore[assignment]
-        await self.s3Manager.write_file(content=str.encode(json.dumps(tokenMetadataDict)), targetPath=f'{self.bucketName}/token-metadatas/{registryAddress}/{tokenId}/{date_util.datetime_from_now()}.json')
         if not isinstance(tokenMetadataDict, dict):
             return self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
         retrievedTokenMetadata = self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
