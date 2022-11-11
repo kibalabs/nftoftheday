@@ -173,7 +173,7 @@ class GalleryManager:
                 .limit(limit)
                 .offset(offset)
         )
-        order = order or 'QUANTITY_ASC'
+        order = order or 'TOKENID_ASC'
         if  order == "TOKENID_ASC":
             query = query.order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         elif order == "TOKENID_DESC":
