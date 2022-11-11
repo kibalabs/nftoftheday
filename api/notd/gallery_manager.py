@@ -173,18 +173,19 @@ class GalleryManager:
                 .limit(limit)
                 .offset(offset)
         )
-        if not order or order == "TOKENID_ASC":
+        order = order or 'TOKENID_ASC'
+        if  order == "TOKENID_ASC":
             query = query.order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         elif order == "TOKENID_DESC":
             query = query.order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).desc())
         elif order == "QUANTITY_ASC":
-            query = query.order_by( TokenOwnershipsView.c.quantity.asc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+            query = query.order_by(sqlalchemy.func.sum(TokenOwnershipsView.c.quantity).asc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         elif order == "QUANTITY_DESC":
-            query = query.order_by(TokenOwnershipsView.c.quantity.desc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+            query = query.order_by(sqlalchemy.func.sum(TokenOwnershipsView.c.quantity).desc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         elif order == "PRICE_ASC":
-            query = query.order_by(OrderedTokenListingsView.c.value.asc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+            query = query.order_by(sqlalchemy.nulls_last(sqlalchemy.cast(OrderedTokenListingsView.c.value, sqlalchemy.NUMERIC).asc()), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         elif order == "PRICE_DESC":
-            query = query.order_by(OrderedTokenListingsView.c.value.desc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+            query = query.order_by(sqlalchemy.nulls_last(sqlalchemy.cast(OrderedTokenListingsView.c.value, sqlalchemy.NUMERIC).desc()), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         else:
             raise BadRequestException('Unknown order')
         if usesListings:
