@@ -185,6 +185,8 @@ class GalleryManager:
             query = query.order_by(OrderedTokenListingsView.c.value.asc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         elif order == "PRICE_DESC":
             query = query.order_by(OrderedTokenListingsView.c.value.desc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+        else:
+            raise BadRequestException('Unknown order')
         if usesListings:
             query = query.where(OrderedTokenListingsView.c.latestTokenListingId.is_not(None))
         if minPrice:
