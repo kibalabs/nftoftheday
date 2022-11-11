@@ -7,8 +7,6 @@ from core.exceptions import InternalServerErrorException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.requester import ResponseException
-from core.s3_manager import S3Manager
-from core.util import date_util
 from core.web3.eth_client import EthClientInterface
 from httpx import ReadTimeout
 
