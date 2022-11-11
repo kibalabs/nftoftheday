@@ -250,6 +250,7 @@ class QueryCollectionTokensRequest(BaseModel):
     tokenIdIn: Optional[List[str]]
     attributeFilters: Optional[List[InQueryParam]]
     ownerAddress: Optional[str]
+    order: Optional[str]
 
 class QueryCollectionTokensResponse(BaseModel):
     galleryTokens: List[ApiGalleryToken]
