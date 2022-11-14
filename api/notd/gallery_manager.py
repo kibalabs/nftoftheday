@@ -158,7 +158,7 @@ class GalleryManager:
 
     async def query_collection_tokens(self, registryAddress: str, limit: int, offset: int, ownerAddress: Optional[str] = None, minPrice: Optional[int] = None, maxPrice: Optional[int] = None, isListed: Optional[bool] = None, tokenIdIn: Optional[List[str]] = None, attributeFilters: Optional[List[InQueryParam]] = None, order: Optional[str] = None) -> List[GalleryToken]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
-        collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
+        await self.collectionManager.get_collection_by_address(address=registryAddress)
         usesListings = isListed or minPrice or maxPrice
         query = (
             sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, OrderedTokenListingsView, sqlalchemy.func.sum(TokenOwnershipsView.c.quantity).label('quantity'))
