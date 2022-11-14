@@ -9,7 +9,6 @@ from core.api.middleware.server_headers_middleware import ServerHeadersMiddlewar
 from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
-from core.s3_manager import S3Manager
 from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
