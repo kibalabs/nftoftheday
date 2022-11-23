@@ -144,16 +144,16 @@ def token_ownership_from_row(rowMapping: RowMapping) -> TokenOwnership:
 
 def token_multi_ownership_from_row(rowMapping: RowMapping) -> TokenMultiOwnership:
     return TokenMultiOwnership(
-        tokenMultiOwnershipId=rowMapping[TokenMultiOwnershipsTable.c.tokenMultiOwnershipId],
-        createdDate=rowMapping[TokenMultiOwnershipsTable.c.createdDate],
-        updatedDate=rowMapping[TokenMultiOwnershipsTable.c.updatedDate],
-        registryAddress=rowMapping[TokenMultiOwnershipsTable.c.registryAddress],
-        tokenId=rowMapping[TokenMultiOwnershipsTable.c.tokenId],
-        ownerAddress=rowMapping[TokenMultiOwnershipsTable.c.ownerAddress],
-        quantity=rowMapping[TokenMultiOwnershipsTable.c.quantity],
-        averageTransferValue=rowMapping[TokenMultiOwnershipsTable.c.averageTransferValue],
-        latestTransferDate=rowMapping[TokenMultiOwnershipsTable.c.latestTransferDate],
-        latestTransferTransactionHash=rowMapping[TokenMultiOwnershipsTable.c.latestTransferTransactionHash],
+        tokenMultiOwnershipId=rowMapping[TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.name],
+        createdDate=rowMapping[TokenMultiOwnershipsTable.c.createdDate.name],
+        updatedDate=rowMapping[TokenMultiOwnershipsTable.c.updatedDate.name],
+        registryAddress=rowMapping[TokenMultiOwnershipsTable.c.registryAddress.name],
+        tokenId=rowMapping[TokenMultiOwnershipsTable.c.tokenId.name],
+        ownerAddress=rowMapping[TokenMultiOwnershipsTable.c.ownerAddress.name],
+        quantity=rowMapping[TokenMultiOwnershipsTable.c.quantity.name],
+        averageTransferValue=rowMapping[TokenMultiOwnershipsTable.c.averageTransferValue.name],
+        latestTransferDate=rowMapping[TokenMultiOwnershipsTable.c.latestTransferDate.name],
+        latestTransferTransactionHash=rowMapping[TokenMultiOwnershipsTable.c.latestTransferTransactionHash.name],
     )
 
 
@@ -350,7 +350,7 @@ def collection_overlap_from_row(rowMapping: RowMapping) -> CollectionOverlap:
 
 def gallery_badge_holder_from_row(rowMapping: RowMapping) -> GalleryBadgeHolder:
     return GalleryBadgeHolder(
-        # NOTE(krishan711):
+        # NOTE(krishan711): update this
         galleryBadgeHolderId=rowMapping['id'],
         createdDate=rowMapping['createdDate'],
         updatedDate=rowMapping['updatedDate'],

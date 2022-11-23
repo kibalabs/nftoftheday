@@ -379,19 +379,16 @@ class ListGalleryCollectionOverlapOwnersRequest(BaseModel):
 class ListGalleryCollectionOverlapOwnersResponse(BaseModel):
     collectionOverlapOwners: List[ApiCollectionOverlapOwner]
 
-class ListAllListingsForCollectionTokenResponse(BaseModel):
-    tokenListings: List[ApiTokenListing]
-
 class ListAllListingsForCollectionTokenRequest(BaseModel):
     pass
 
-class RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse(BaseModel):
-    pass
+class ListAllListingsForCollectionTokenResponse(BaseModel):
+    tokenListings: List[ApiTokenListing]
 
 class RefreshGalleryBadgeHoldersForAllCollectionsDeferredRequest(BaseModel):
     pass
 
-class CollectionAssignBadgeResponse(BaseModel):
+class RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse(BaseModel):
     pass
 
 class CollectionAssignBadgeRequest(BaseModel):
@@ -399,3 +396,14 @@ class CollectionAssignBadgeRequest(BaseModel):
     achievedDate: datetime.datetime
     assignerAddress: str
     signature: str
+
+class CollectionAssignBadgeResponse(BaseModel):
+    pass
+
+class CalculateCommonOwnersRequest(BaseModel):
+    registryAddresses: List[str]
+    tokenIds: List[str]
+    date: Optional[datetime.datetime]
+
+class CalculateCommonOwnersResponse(BaseModel):
+    ownerAddresses: List[str]
