@@ -12,6 +12,7 @@ from core.util import date_util
 from core.util import list_util
 from core.util.typing_util import JSON1
 
+from notd.collection_manager import CollectionManager
 from notd.lock_manager import LockManager
 from notd.model import RetrievedTokenListing
 
@@ -28,10 +29,56 @@ def _parse_date_string(dateString: str) -> datetime.datetime:
 
 class TokenListingProcessor:
 
-    def __init__(self, requester: Requester, openseaRequester: Requester, lockManager: LockManager):
+    def __init__(self, requester: Requester, openseaRequester: Requester, lockManager: LockManager, collectionManger: CollectionManager):
         self.requester = requester
         self.openseaRequester = openseaRequester
         self.lockManager = lockManager
+        self.collectionManger = collectionManger
+
+    async def get_opensea_listings_for_collection(self, registryAddress: str) -> List[RetrievedTokenListing]:
+        listings = []
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=240):
+            collection = await self.collectionManger.get_collection_by_address(address=registryAddress)
+            collectionOpenseaSlug = collection.openseaSlug
+            nextPageId: Optional[str] = None
+            pageCount = 0
+            while True:
+                logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, float(f'{pageCount}'))
+                queryData: Dict[str, JSON1] = {
+                }
+                if nextPageId:
+                    queryData['next'] = nextPageId
+                response = await self.openseaRequester.get(url=f'https://api.opensea.io/v2/listings/collection/{collectionOpenseaSlug}/all', dataDict=queryData,timeout=30)
+                responseJson = response.json()
+                for openseaListing in (responseJson.get('listings') or []):
+                    startDate = datetime.datetime.utcfromtimestamp(int(openseaListing['protocol_data']["parameters"]["startTime"]))
+                    endDate = datetime.datetime.utcfromtimestamp(int(openseaListing['protocol_data']["parameters"]["endTime"]))
+                    currentPrice = int(openseaListing["price"]['current']['value'])
+                    offererAddress = openseaListing["protocol_data"]["parameters"]['offerer']
+                    sourceId = openseaListing["order_hash"]
+                    tokenId =openseaListing["protocol_data"]["parameters"]['offer'][0]['identifierOrCriteria']
+                    isValueNative = True
+                    # NOTE(krishan711): should isValueNative and value be calculated using considerations?
+                    listing = RetrievedTokenListing(
+                        registryAddress=registryAddress,
+                        tokenId=tokenId,
+                        startDate=startDate,
+                        endDate=endDate,
+                        isValueNative=isValueNative,
+                        value=currentPrice,
+                        offererAddress=chain_util.normalize_address(offererAddress),
+                        source='opensea',
+                        sourceId=sourceId,
+                    )
+                    listings.append(listing)
+                # NOTE(krishan711): sleep to avoid opensea limits
+                await asyncio.sleep(0.2)
+                if responseJson.get('next'):
+                    nextPageId = responseJson.get('next')
+                    pageCount += 1
+                else:
+                    break
+            return listings
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: Sequence[str]) -> List[RetrievedTokenListing]:
         listings = []

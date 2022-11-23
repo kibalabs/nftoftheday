@@ -62,7 +62,7 @@ class ListingManager:
         )
         tokenIdsQueryResult = await self.retriever.database.execute(query=tokenIdsQuery)
         tokenIds = [tokenId for (tokenId, ) in tokenIdsQueryResult]
-        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
+        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_collection(registryAddress=address)
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_collection(registryAddress=address)
         logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
