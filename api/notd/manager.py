@@ -1,11 +1,14 @@
 import datetime
 import json
 import random
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from collections import defaultdict
 
 import sqlalchemy
+from core.exceptions import InternalServerErrorException
 from core.exceptions import NotFoundException
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
@@ -45,7 +48,9 @@ from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenTransfersTable
+from notd.store.schema import TokenOwnershipsView
 from notd.store.schema_conversions import token_transfer_from_row
+from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.token_manager import TokenManager
 from notd.twitter_manager import TwitterManager
 
@@ -300,13 +305,16 @@ class NotdManager:
         return tokenTransfers
 
     async def get_collection_token_owners(self, registryAddress: str, tokenId: str) -> List[TokenMultiOwnership]:
-        # TODO(krishan711): this assumes its called for an ERC-1155 so fix if we need it for 721 too
-        tokenMultiOwnerships = await self.retriever.list_token_multi_ownerships(fieldFilters=[
-            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.registryAddress.key, eq=registryAddress),
-            StringFieldFilter(fieldName=TokenMultiOwnershipsTable.c.tokenId.key, eq=tokenId),
-            IntegerFieldFilter(fieldName=TokenMultiOwnershipsTable.c.quantity.key, gt=0),
-        ], orders=[Order(fieldName=TokenMultiOwnershipsTable.c.quantity.key, direction=Direction.DESCENDING)])
-        return tokenMultiOwnerships
+        query = (
+            TokenOwnershipsView.select()
+            .where(TokenOwnershipsView.c.registryAddress == registryAddress)
+            .where(TokenOwnershipsView.c.tokenId == tokenId)
+            .where(TokenOwnershipsView.c.quantity > 0)
+            .order_by(TokenMultiOwnershipsTable.c.quantity.desc())
+        )
+        result = await self.retriever.database.execute(query=query)
+        tokenOwnerships = [token_multi_ownership_from_row(row) for row in result.mappings()]
+        return tokenOwnerships
 
     async def list_account_tokens(self, accountAddress: str, limit: int, offset: int) -> List[Token]:
         tokenSingleOwnerships = await self.retriever.list_token_ownerships(
@@ -328,6 +336,24 @@ class NotdManager:
         tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
+
+    async def calculate_common_owners(self, registryAddresses: List[str], tokenIds: List[str], date: Optional[datetime.datetime] = None) -> List[str]:
+        ownershipCountsMap: Dict[str, List[int]] = defaultdict(lambda: [0] * (len(registryAddresses)))
+        for index, _ in enumerate(registryAddresses):
+            collection = await self.collectionManager.get_collection_by_address(address=registryAddresses[index])
+            if collection.doesSupportErc721:
+                singleOwnership = await self.ownershipManager.tokenOwnershipProcessor.calculate_token_single_ownership(registryAddress=registryAddresses[index], tokenId=tokenIds[index], date=date)
+                ownershipCountsMap[singleOwnership.ownerAddress][index] = 1
+            elif collection.doesSupportErc1155:
+                ownerships = await self.ownershipManager.tokenOwnershipProcessor.calculate_token_multi_ownership(registryAddress=registryAddresses[index], tokenId=tokenIds[index], date=date)
+                for multiOwnership in ownerships:
+                    if multiOwnership.quantity > 0:
+                        ownershipCountsMap[multiOwnership.ownerAddress][index] = multiOwnership.quantity
+            else:
+                raise InternalServerErrorException('Failed to calculate ownership for non-ERC721/ERC1155 collection')
+        ownershipMinimumsMap = {ownerAddress: min(ownershipCounts) for ownerAddress, ownershipCounts in ownershipCountsMap.items()}
+        filteredOwnershipMinimumsMap = {ownerAddress: ownershipMinimum for ownerAddress, ownershipMinimum in ownershipMinimumsMap.items() if ownershipMinimum > 0}
+        return list(filteredOwnershipMinimumsMap.keys())
 
     async def list_all_listings_for_collection_token(self, registryAddress: str, tokenId: str) -> List[TokenListing]:
         return await self.listingManager.list_all_listings_for_collection_token(registryAddress=registryAddress, tokenId=tokenId)
