@@ -15,6 +15,7 @@ from core.util.typing_util import JSON1
 from notd.collection_manager import CollectionManager
 from notd.lock_manager import LockManager
 from notd.model import RetrievedTokenListing
+from notd.utils.datetime_util import datetime_from_timestamp
 
 _OPENSEA_API_LISTING_CHUNK_SIZE = 30
 _LOOKSRARE_API_LISTING_CHUNK_SIZE = 30
@@ -45,6 +46,7 @@ class TokenListingProcessor:
             while True:
                 logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, float(f'{pageCount}'))
                 queryData: Dict[str, JSON1] = {
+                    "type": "basic",
                     "limit": 100
                 }
                 if nextPageId:
@@ -52,8 +54,8 @@ class TokenListingProcessor:
                 response = await self.openseaRequester.get(url=f'https://api.opensea.io/v2/listings/collection/{collectionOpenseaSlug}/all', dataDict=queryData,timeout=30)
                 responseJson = response.json()
                 for openseaListing in (responseJson.get('listings') or []):
-                    startDate = datetime.datetime.utcfromtimestamp(int(openseaListing['protocol_data']["parameters"]["startTime"]))
-                    endDate = datetime.datetime.utcfromtimestamp(int(openseaListing['protocol_data']["parameters"]["endTime"]))
+                    startDate = datetime_from_timestamp(int(openseaListing['protocol_data']["parameters"]["startTime"]))
+                    endDate = datetime_from_timestamp(int(openseaListing['protocol_data']["parameters"]["endTime"]))
                     currentPrice = int(openseaListing["price"]['current']['value'])
                     offererAddress = openseaListing["protocol_data"]["parameters"]['offerer']
                     sourceId = openseaListing["order_hash"]
