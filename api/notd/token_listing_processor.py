@@ -45,6 +45,7 @@ class TokenListingProcessor:
             while True:
                 logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, float(f'{pageCount}'))
                 queryData: Dict[str, JSON1] = {
+                    "limit": 100
                 }
                 if nextPageId:
                     queryData['next'] = nextPageId
