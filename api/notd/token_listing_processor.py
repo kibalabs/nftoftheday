@@ -15,13 +15,15 @@ from core.util.typing_util import JSON1
 from notd.collection_manager import CollectionManager
 from notd.lock_manager import LockManager
 from notd.model import RetrievedTokenListing
-from notd.utils.datetime_util import datetime_from_timestamp
 
 _OPENSEA_API_LISTING_CHUNK_SIZE = 30
 _LOOKSRARE_API_LISTING_CHUNK_SIZE = 30
 
 SECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 MILLISECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+
+def _timestamp_to_datetime(timestamp: int) -> datetime.datetime:
+    return datetime.datetime.utcfromtimestamp(timestamp)
 
 def _parse_date_string(dateString: str) -> datetime.datetime:
     if '.' in dateString:
@@ -54,8 +56,8 @@ class TokenListingProcessor:
                 response = await self.openseaRequester.get(url=f'https://api.opensea.io/v2/listings/collection/{collectionOpenseaSlug}/all', dataDict=queryData,timeout=30)
                 responseJson = response.json()
                 for openseaListing in (responseJson.get('listings') or []):
-                    startDate = datetime_from_timestamp(int(openseaListing['protocol_data']["parameters"]["startTime"]))
-                    endDate = datetime_from_timestamp(int(openseaListing['protocol_data']["parameters"]["endTime"]))
+                    startDate = _timestamp_to_datetime(timestamp=int(openseaListing['protocol_data']["parameters"]["startTime"]))
+                    endDate = _timestamp_to_datetime(timestamp=int(openseaListing['protocol_data']["parameters"]["endTime"]))
                     currentPrice = int(openseaListing["price"]['current']['value'])
                     offererAddress = openseaListing["protocol_data"]["parameters"]['offerer']
                     sourceId = openseaListing["order_hash"]
