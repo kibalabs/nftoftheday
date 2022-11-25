@@ -4,10 +4,10 @@ from typing import List
 from typing import Optional
 
 from core.exceptions import KibaException
-from core.store.retriever import Direction
-from core.store.retriever import Order
 from core.store.retriever import DateFieldFilter
+from core.store.retriever import Direction
 from core.store.retriever import FieldFilter
+from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 

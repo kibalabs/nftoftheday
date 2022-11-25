@@ -10,11 +10,11 @@ from core.util import chain_util
 from core.util import date_util
 from pydantic import BaseModel
 
+from notd.delegation_manager import DelegationManager
 from notd.model import AccountGm
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
 from notd.model import LatestAccountGm
-from notd.delegation_manager import DelegationManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import AccountCollectionGmsTable

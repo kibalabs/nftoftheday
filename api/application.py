@@ -31,8 +31,8 @@ from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.collection_processor import CollectionProcessor
-from notd.gallery_manager import GalleryManager
 from notd.delegation_manager import DelegationManager
+from notd.gallery_manager import GalleryManager
 from notd.gm_manager import GmManager
 from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager

@@ -4,6 +4,8 @@ from typing import Optional
 from core.util import date_util
 from fastapi import APIRouter
 
+from notd.api.endpoints_v1 import CalculateCommonOwnersRequest
+from notd.api.endpoints_v1 import CalculateCommonOwnersResponse
 from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
@@ -41,8 +43,6 @@ from notd.api.endpoints_v1 import UpdateCollectionTokensResponse
 from notd.api.endpoints_v1 import UpdateLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTokenAttributesForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTotalActivityForAllCollectionsDeferredResponse
-from notd.api.endpoints_v1 import CalculateCommonOwnersRequest
-from notd.api.endpoints_v1 import CalculateCommonOwnersResponse
 from notd.api.endpoints_v1 import datetime
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager

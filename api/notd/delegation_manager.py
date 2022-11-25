@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import json
-from typing import Optional
-from typing import List
 import dataclasses
+import json
+import typing
+from typing import List
+from typing import Optional
 
 from core.exceptions import BadRequestException
-from core.web3.eth_client import EthClientInterface
 from core.util import chain_util
+from core.web3.eth_client import EthClientInterface
 from web3.auto import w3
 
 
@@ -18,7 +19,7 @@ class DelegationType:
     TOKEN = 'TOKEN'
 
     @classmethod
-    def from_raw(cls, value: int) -> DelegationType:
+    def from_raw(cls, value: int) -> str:
         if value == 0:
             return DelegationType.NONE
         if value == 1:
@@ -35,7 +36,7 @@ class Delegation:
     vaultAddress: str
     delegateAddress: str
     contractAddress: Optional[str]
-    tokenId: str
+    tokenId: Optional[str]
 
 
 DEPOSIT_CASH_ADDRESS = '0x00000000000076A84feF008CDAbe6409d2FE638B'
@@ -58,7 +59,7 @@ class DelegationManager:
                 vaultAddress=chain_util.normalize_address(vaultAddressRaw),
                 delegateAddress=chain_util.normalize_address(delegateAddressRaw),
                 contractAddress=None if contractAddressRaw == chain_util.BURN_ADDRESS else chain_util.normalize_address(contractAddressRaw),
-                tokenId=None if tokenIdRaw == 0 else tokenIdRaw,
+                tokenId=None if tokenIdRaw == 0 else typing.cast(str, tokenIdRaw),
             )
             if delegation.delegationType != DelegationType.NONE:
                 delegations.append(delegation)

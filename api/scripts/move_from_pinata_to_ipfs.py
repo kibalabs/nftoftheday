@@ -10,13 +10,13 @@ from core.requester import Requester
 from core.s3_manager import S3Manager
 from core.store.database import Database
 from core.web3.eth_client import RestEthClient
-
-from contracts import create_contract_store
 from mdtp.image_manager import ImageManager
 from mdtp.ipfs_manager import IpfsManager
 from mdtp.manager import MdtpManager
 from mdtp.store.retriever import Retriever
 from mdtp.store.saver import Saver
+
+from contracts import create_contract_store
 
 GWEI = 1000000000
 
