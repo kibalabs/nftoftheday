@@ -391,6 +391,7 @@ CREATE TABLE tbl_account_gms (
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     address TEXT NOT NULL,
+    delegate_address TEXT,
     date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     streak_length INTEGER NOT NULL,
     collection_count INTEGER NOT NULL,
@@ -409,6 +410,7 @@ CREATE TABLE tbl_account_collection_gms (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     registry_address TEXT NOT NULL,
     account_address TEXT NOT NULL,
+    account_delegate_address TEXT,
     date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     signature_message TEXT NOT NULL,
     signature TEXT NOT NULL

@@ -483,6 +483,7 @@ class AccountGm:
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
     address: str
+    delegateAddress: Optional[str]
     date: datetime.datetime
     streakLength: int
     collectionCount: int
@@ -497,6 +498,7 @@ class AccountCollectionGm:
     updatedDate: datetime.datetime
     registryAddress: str
     accountAddress: str
+    accountDelegateAddress: Optional[str]
     date: datetime.datetime
     signatureMessage: str
     signature: str
