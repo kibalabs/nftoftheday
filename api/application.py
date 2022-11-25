@@ -31,6 +31,7 @@ from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.collection_processor import CollectionProcessor
+from notd.delegation_manager import DelegationManager
 from notd.gallery_manager import GalleryManager
 from notd.gm_manager import GmManager
 from notd.listing_manager import ListingManager
@@ -101,7 +102,8 @@ badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueu
 notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager, collectionManager=collectionManager, badgeManager=badgeManager)
-gmManager = GmManager(retriever=retriever, saver=saver)
+delegationManager = DelegationManager(ethClient=ethClient)
+gmManager = GmManager(retriever=retriever, saver=saver, delegationManager=delegationManager)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=name, version=version, environment=environment))

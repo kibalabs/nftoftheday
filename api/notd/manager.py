@@ -1,11 +1,11 @@
 import datetime
 import json
 import random
+from collections import defaultdict
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
-from collections import defaultdict
 
 import sqlalchemy
 from core.exceptions import InternalServerErrorException
@@ -47,10 +47,10 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema import TokenTransfersTable
 from notd.store.schema import TokenOwnershipsView
-from notd.store.schema_conversions import token_transfer_from_row
+from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_multi_ownership_from_row
+from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
 from notd.twitter_manager import TwitterManager
 

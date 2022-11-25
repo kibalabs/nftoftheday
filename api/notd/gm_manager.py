@@ -10,6 +10,7 @@ from core.util import chain_util
 from core.util import date_util
 from pydantic import BaseModel
 
+from notd.delegation_manager import DelegationManager
 from notd.model import AccountGm
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
@@ -32,9 +33,10 @@ class GmNotification(BaseModel):
 
 class GmManager:
 
-    def __init__(self, retriever: Retriever, saver: Saver) -> None:
+    def __init__(self, retriever: Retriever, saver: Saver, delegationManager: DelegationManager) -> None:
         self.retriever = retriever
         self.saver = saver
+        self.delegationManager = delegationManager
         self.notifications: List[GmNotification] = []
 
     # TODO(krishan711): The structure of the response should be handled in api layer
@@ -53,7 +55,14 @@ class GmManager:
         self.notifications.append(GmNotification(address=None))
 
     async def create_gm(self, account: str, signatureMessage: str, signature: str) -> AccountGm:
+        delegations = await self.delegationManager.get_delegations(delegateAddress=account)
+        for delegation in delegations:
+            await self._create_gm(account=delegation.vaultAddress, delegateAddress=delegation.delegateAddress, signatureMessage=signatureMessage, signature=signature)
+        return await self._create_gm(account=account, delegateAddress=None, signatureMessage=signatureMessage, signature=signature)
+
+    async def _create_gm(self, account: str, delegateAddress: Optional[str], signatureMessage: str, signature: str) -> AccountGm:
         account = chain_util.normalize_address(value=account)
+        delegateAddress = chain_util.normalize_address(value=delegateAddress) if delegateAddress else None
         # TODO(krishan711): validate signature
         self.notifications.append(GmNotification(address=account))
         todayDate = date_util.start_of_day()
@@ -78,9 +87,9 @@ class GmManager:
         ownedCollectionsResult = await self.retriever.database.execute(query=ownedCollectionsQuery)
         ownedCollectionAddresses = {registryAddress for (registryAddress, ) in ownedCollectionsResult}
         async with self.saver.create_transaction() as connection:
-            accountGm = await self.saver.create_account_gm(address=account, date=todayDate, streakLength=streakLength, collectionCount=len(ownedCollectionAddresses), signatureMessage=signatureMessage, signature=signature, connection=connection)
+            accountGm = await self.saver.create_account_gm(address=account, delegateAddress=delegateAddress, date=todayDate, streakLength=streakLength, collectionCount=len(ownedCollectionAddresses), signatureMessage=signatureMessage, signature=signature, connection=connection)
             for registryAddress in ownedCollectionAddresses:
-                await self.saver.create_account_collection_gm(accountAddress=account, registryAddress=registryAddress, date=todayDate, signatureMessage=signatureMessage, signature=signature, connection=connection)
+                await self.saver.create_account_collection_gm(accountAddress=account, accountDelegateAddress=delegateAddress, registryAddress=registryAddress, date=todayDate, signatureMessage=signatureMessage, signature=signature, connection=connection)
         return accountGm
 
     async def list_gm_account_rows(self) -> List[GmAccountRow]:

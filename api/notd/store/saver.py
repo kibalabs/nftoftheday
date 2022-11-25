@@ -847,13 +847,14 @@ class Saver(CoreSaver):
         query = TwitterProfilesTable.update().where(TwitterProfilesTable.c.twitterProfileId == twitterProfileId).values(values).returning(TwitterProfilesTable.c.twitterProfileId)
         await self._execute(query=query, connection=connection)
 
-    async def create_account_gm(self, address: str, date: datetime.datetime, streakLength: int, collectionCount: int, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountGm:
+    async def create_account_gm(self, address: str, delegateAddress: Optional[str], date: datetime.datetime, streakLength: int, collectionCount: int, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountGm:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
             AccountGmsTable.c.createdDate.key: createdDate,
             AccountGmsTable.c.updatedDate.key: updatedDate,
             AccountGmsTable.c.address.key: address,
+            AccountGmsTable.c.delegateAddress.key: delegateAddress,
             AccountGmsTable.c.date.key: date,
             AccountGmsTable.c.streakLength.key: streakLength,
             AccountGmsTable.c.collectionCount.key: collectionCount,
@@ -868,6 +869,7 @@ class Saver(CoreSaver):
             createdDate=createdDate,
             updatedDate=updatedDate,
             address=address,
+            delegateAddress=delegateAddress,
             date=date,
             streakLength=streakLength,
             collectionCount=collectionCount,
@@ -875,7 +877,7 @@ class Saver(CoreSaver):
             signature=signature,
         )
 
-    async def create_account_collection_gm(self, registryAddress: str, accountAddress: str, date: datetime.datetime, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountCollectionGm:
+    async def create_account_collection_gm(self, registryAddress: str, accountAddress: str, accountDelegateAddress: Optional[str], date: datetime.datetime, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> AccountCollectionGm:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
@@ -883,6 +885,7 @@ class Saver(CoreSaver):
             AccountCollectionGmsTable.c.updatedDate.key: updatedDate,
             AccountCollectionGmsTable.c.registryAddress.key: registryAddress,
             AccountCollectionGmsTable.c.accountAddress.key: accountAddress,
+            AccountCollectionGmsTable.c.accountDelegateAddress.key: accountDelegateAddress,
             AccountCollectionGmsTable.c.date.key: date,
             AccountCollectionGmsTable.c.signatureMessage.key: signatureMessage,
             AccountCollectionGmsTable.c.signature.key: signature,
@@ -896,6 +899,7 @@ class Saver(CoreSaver):
             updatedDate=updatedDate,
             registryAddress=registryAddress,
             accountAddress=accountAddress,
+            accountDelegateAddress=accountDelegateAddress,
             date=date,
             signatureMessage=signatureMessage,
             signature=signature,
