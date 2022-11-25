@@ -53,7 +53,7 @@ class TokenListingProcessor:
                 }
                 if nextPageId:
                     queryData['next'] = nextPageId
-                response = await self.openseaRequester.get(url=f'https://api.opensea.io/v2/listings/collection/{collectionOpenseaSlug}/all', dataDict=queryData,timeout=30)
+                response = await self.openseaRequester.get(url=f'https://api.opensea.io/v2/listings/collection/{collectionOpenseaSlug}/all', dataDict=queryData, timeout=30)
                 responseJson = response.json()
                 for openseaListing in (responseJson.get('listings') or []):
                     startDate = _timestamp_to_datetime(timestamp=int(openseaListing['protocol_data']["parameters"]["startTime"]))
@@ -61,7 +61,7 @@ class TokenListingProcessor:
                     currentPrice = int(openseaListing["price"]['current']['value'])
                     offererAddress = openseaListing["protocol_data"]["parameters"]['offerer']
                     sourceId = openseaListing["order_hash"]
-                    tokenId =openseaListing["protocol_data"]["parameters"]['offer'][0]['identifierOrCriteria']
+                    tokenId = openseaListing["protocol_data"]["parameters"]['offer'][0]['identifierOrCriteria']
                     isValueNative = True
                     # NOTE(krishan711): should isValueNative and value be calculated using considerations?
                     listing = RetrievedTokenListing(
