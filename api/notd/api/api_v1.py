@@ -41,6 +41,8 @@ from notd.api.endpoints_v1 import UpdateCollectionTokensResponse
 from notd.api.endpoints_v1 import UpdateLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTokenAttributesForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTotalActivityForAllCollectionsDeferredResponse
+from notd.api.endpoints_v1 import CalculateCommonOwnersRequest
+from notd.api.endpoints_v1 import CalculateCommonOwnersResponse
 from notd.api.endpoints_v1 import datetime
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
@@ -227,6 +229,12 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def get_collection_daily_activities(registryAddress: str) -> GetCollectionDailyActivitiesResponse:
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
         return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
+
+    @router.post('/calculate-common-owners', response_model=CalculateCommonOwnersResponse)
+    async def calculate_common_owners(request: CalculateCommonOwnersRequest) -> CalculateCommonOwnersResponse:
+        date = request.date.replace(tzinfo=None) if request.date else None
+        ownerAddresses = await notdManager.calculate_common_owners(registryAddresses=request.registryAddresses, tokenIds=request.tokenIds, date=date)
+        return CalculateCommonOwnersResponse(ownerAddresses=ownerAddresses)
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:
