@@ -7,8 +7,6 @@ from core.http.basic_authentication import BasicAuthentication
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.requester import Requester
-from core.s3_manager import S3Manager
-from core.slack_client import SlackClient
 from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
@@ -66,7 +64,6 @@ async def main():
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    s3Manager = S3Manager(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret)
     dlWorkQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue-dl')
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
@@ -76,18 +73,18 @@ async def main():
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'], pabloClient=pabloClient)
-    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey, s3Manager=s3Manager, bucketName=os.environ['S3_BUCKET'])
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient)
+    collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey)
     tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
     collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     lockManager = LockManager(retriever=retriever, saver=saver)
-    tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManager=lockManager)
+    collectionManager = CollectionManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor)
+    tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManager=lockManager, collectionManger=collectionManager)
     tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
     collectionOverlapProcessor = CollectionOverlapProcessor(retriever=retriever)
     activityManager = ActivityManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionActivityProcessor=collectionActivityProcessor)
     attributeManager = AttributeManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenAttributeProcessor=tokenAttributeProcessor)
-    collectionManager = CollectionManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor)
     collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retriever, workQueue=workQueue, collectionOverlapProcessor=collectionOverlapProcessor)
     ownershipManager = OwnershipManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor, lockManager=lockManager, collectionManager=collectionManager)
     listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenListingProcessor=tokenListingProcessor)
@@ -103,7 +100,6 @@ async def main():
     workQueueProcessor = MessageQueueProcessor(queue=dlWorkQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
 
     await database.connect()
-    await s3Manager.connect()
     await dlWorkQueue.connect()
     await workQueue.connect()
     await tokenQueue.connect()
@@ -114,7 +110,6 @@ async def main():
                 break
     finally:
         await database.disconnect()
-        await s3Manager.disconnect()
         await dlWorkQueue.disconnect()
         await workQueue.disconnect()
         await tokenQueue.disconnect()

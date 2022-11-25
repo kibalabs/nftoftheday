@@ -140,9 +140,9 @@ class ListingManager:
     async def refresh_latest_listings_for_collection(self, address: str) -> None:
         currentDate = date_util.datetime_from_now()
         latestFullUpdate = await self.retriever.get_latest_update_by_key_name(key='update_latest_token_listings', name=address)
-        # if currentDate < date_util.datetime_from_datetime(dt=latestFullUpdate.date, hours=1):
-        #     logging.info('Skipping recently refresh collection listing')
-        #     return
+        if currentDate < date_util.datetime_from_datetime(dt=latestFullUpdate.date, hours=1):
+            logging.info('Skipping recently refresh collection listing')
+            return
         try:
             await self._update_full_latest_listings_for_collection(address=address)
         except LockTimeoutException as exception:
