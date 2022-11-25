@@ -62,7 +62,7 @@ class ListingManager:
         )
         tokenIdsQueryResult = await self.retriever.database.execute(query=tokenIdsQuery)
         tokenIds = [tokenId for (tokenId, ) in tokenIdsQueryResult]
-        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_tokens(registryAddress=address, tokenIds=tokenIds)
+        openseaListings = await self.tokenListingProcessor.get_opensea_listings_for_collection(registryAddress=address)
         logging.info(f'Retrieved {len(openseaListings)} openseaListings')
         looksrareListings = await self.tokenListingProcessor.get_looksrare_listings_for_collection(registryAddress=address)
         logging.info(f'Retrieved {len(looksrareListings)} looksrareListings')
@@ -140,9 +140,9 @@ class ListingManager:
     async def refresh_latest_listings_for_collection(self, address: str) -> None:
         currentDate = date_util.datetime_from_now()
         latestFullUpdate = await self.retriever.get_latest_update_by_key_name(key='update_latest_token_listings', name=address)
-        # if currentDate < date_util.datetime_from_datetime(dt=latestFullUpdate.date, hours=1):
-        #     logging.info('Skipping recently refresh collection listing')
-        #     return
+        if currentDate < date_util.datetime_from_datetime(dt=latestFullUpdate.date, hours=1):
+            logging.info('Skipping recently refresh collection listing')
+            return
         try:
             await self._update_full_latest_listings_for_collection(address=address)
         except LockTimeoutException as exception:
