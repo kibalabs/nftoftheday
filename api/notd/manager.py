@@ -310,7 +310,7 @@ class NotdManager:
             .where(TokenOwnershipsView.c.registryAddress == registryAddress)
             .where(TokenOwnershipsView.c.tokenId == tokenId)
             .where(TokenOwnershipsView.c.quantity > 0)
-            .order_by(TokenMultiOwnershipsTable.c.quantity.desc())
+            .order_by(TokenOwnershipsView.c.quantity.desc())
         )
         result = await self.retriever.database.execute(query=query)
         tokenOwnerships = [token_multi_ownership_from_row(row) for row in result.mappings()]
