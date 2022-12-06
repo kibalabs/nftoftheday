@@ -22,6 +22,7 @@ from core.util import chain_util
 from core.util import date_util
 
 from notd.activity_manager import ActivityManager
+from notd.delegation_manager import DelegationManager
 from notd.attribute_manager import AttributeManager
 from notd.badge_manager import BadgeManager
 from notd.block_manager import BlockManager
@@ -64,7 +65,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -76,6 +77,7 @@ class NotdManager:
         self.activityManager = activityManager
         self.blockManager = blockManager
         self.badgeManager = badgeManager
+        self.delegationManager = delegationManager
         self.twitterManager = twitterManager
         self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
