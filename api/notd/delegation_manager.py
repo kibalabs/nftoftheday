@@ -53,7 +53,7 @@ class DelegationManager:
     async def get_delegations(self, delegateAddress: str) -> List[Delegation]:
         response = await self.ethClient.call_contract_function(contract=self.depositCashContract, functionName='getDelegationsByDelegate', arguments={'delegate': delegateAddress})
         delegations = []
-        if len(response[0]) == 0:
+        if response[0] == ():
             return delegations
         for ((delegationTypeValue, vaultAddressRaw, delegateAddressRaw, contractAddressRaw, tokenIdRaw), ) in response:
             delegation = Delegation(
