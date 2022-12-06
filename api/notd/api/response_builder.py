@@ -141,7 +141,7 @@ class ResponseBuilder:
     async def collection_tokens_from_token_keys(self, tokenKeys: Sequence[Token]) -> List[ApiCollectionToken]:
         return await asyncio.gather(*[self.collection_token_from_token_key(tokenKey=tokenKey) for tokenKey in tokenKeys])
 
-    async def collection_tokens_from_account_token_keys(self, accountTokenKeys: Sequence[Token]) -> List[ApiAccountCollectionToken]:
+    async def collection_tokens_from_account_token_keys(self, accountTokenKeys: Sequence[AccountToken]) -> List[ApiAccountCollectionToken]:
         return await asyncio.gather(*[self.collection_token_from_account_token_key(accountTokenKey=accountTokenKey) for accountTokenKey in accountTokenKeys])
 
     async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> List[ApiCollectionToken]:
