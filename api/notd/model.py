@@ -164,7 +164,7 @@ class AccountToken:
     tokenId: str
     ownerAddress: str
 
-    
+
     def to_dict(self) -> JSON:
         return {
             'registryAddress': self.registryAddress,
