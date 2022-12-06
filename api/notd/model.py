@@ -173,11 +173,11 @@ class AccountToken:
         }
 
     @classmethod
-    def from_dict(cls, tokenDict: JSON) -> Token:
+    def from_dict(cls, accountTokenDict: JSON) -> AccountToken:
         return cls(
-            registryAddress=str(tokenDict['registryAddress']),  # type: ignore[index, call-overload]
-            tokenId=str(tokenDict['tokenId']),  # type: ignore[index, call-overload]
-            ownerAddress=str(tokenDict['ownerAddress']),  # type: ignore[index, call-overload]
+            registryAddress=str(accountTokenDict['registryAddress']),  # type: ignore[index, call-overload]
+            tokenId=str(accountTokenDict['tokenId']),  # type: ignore[index, call-overload]
+            ownerAddress=str(accountTokenDict['ownerAddress']),  # type: ignore[index, call-overload]
         )
 
 

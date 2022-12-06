@@ -106,10 +106,10 @@ class ResponseBuilder:
     async def collection_token_from_token_key(self, tokenKey: Token) -> ApiCollectionToken:
         return await self.collection_token_from_registry_address_token_id(registryAddress=tokenKey.registryAddress, tokenId=tokenKey.tokenId)
 
-    async def collection_token_from_account_token_key(self, tokenKey: AccountToken) -> ApiCollectionToken:
-        tokenMetadata = await self.collection_token_from_registry_address_token_id(registryAddress=tokenKey.registryAddress, tokenId=tokenKey.tokenId)
+    async def collection_token_from_account_token_key(self, accountTokenKey: AccountToken) -> ApiAccountCollectionToken:
+        tokenMetadata = await self.collection_token_from_registry_address_token_id(registryAddress=accountTokenKey.registryAddress, tokenId=accountTokenKey.tokenId)
         return ApiAccountCollectionToken(
-            ownerAddress=tokenKey.ownerAddress,
+            ownerAddress=accountTokenKey.ownerAddress,
             registryAddress=tokenMetadata.registryAddress,
             tokenId=tokenMetadata.tokenId,
             metadataUrl=tokenMetadata.metadataUrl,

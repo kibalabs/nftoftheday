@@ -221,7 +221,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         limit = limit if limit is not None else 100
         offset = offset if offset is not None else 0
         accountTokenKeys = await notdManager.list_account_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
-        return GetAllAccountTokensResponse(accountTokens=(await responseBuilder.collection_tokens_from_account_token_keys(tokenKeys=accountTokenKeys)))
+        return GetAllAccountTokensResponse(accountTokens=(await responseBuilder.collection_tokens_from_account_token_keys(accountTokenKeys=accountTokenKeys)))
 
     @router.post('/accounts/{accountAddress}/refresh-token-ownerships', response_model=RefreshAccountTokenOwnershipsResponse)
     async def refresh_owner_token_ownerships(accountAddress: str) -> RefreshAccountTokenOwnershipsResponse:
