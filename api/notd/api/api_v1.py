@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from notd.api.endpoints_v1 import CalculateCommonOwnersRequest
 from notd.api.endpoints_v1 import CalculateCommonOwnersResponse
 from notd.api.endpoints_v1 import GetAccountTokensResponse
+from notd.api.endpoints_v1 import GetAllAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentTransfersResponse
@@ -214,6 +215,13 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         offset = offset if offset is not None else 0
         tokenKeys = await notdManager.list_account_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
         return GetAccountTokensResponse(tokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokenKeys)))
+
+    @router.get('/accounts/{accountAddress}/all/tokens', response_model=GetAllAccountTokensResponse)
+    async def list_account_all_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> GetAllAccountTokensResponse:
+        limit = limit if limit is not None else 100
+        offset = offset if offset is not None else 0
+        accountTokenKeys = await notdManager.list_account_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
+        return GetAllAccountTokensResponse(accountTokens=(await responseBuilder.collection_tokens_from_account_token_keys(tokenKeys=accountTokenKeys)))
 
     @router.post('/accounts/{accountAddress}/refresh-token-ownerships', response_model=RefreshAccountTokenOwnershipsResponse)
     async def refresh_owner_token_ownerships(accountAddress: str) -> RefreshAccountTokenOwnershipsResponse:

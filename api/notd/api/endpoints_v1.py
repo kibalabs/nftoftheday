@@ -17,6 +17,7 @@ from notd.api.models_v1 import ApiCollectionOverlapOwner
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
@@ -199,6 +200,12 @@ class GetAccountTokensRequest(BaseModel):
 
 class GetAccountTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
+
+class GetAllAccountTokensRequest(BaseModel):
+    pass
+
+class GetAllAccountTokensResponse(BaseModel):
+    accountTokens: List[ApiAccountCollectionToken]
 
 class RefreshAccountTokenOwnershipsRequest(BaseModel):
     pass
