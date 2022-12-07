@@ -66,7 +66,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager,requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -79,6 +79,7 @@ class NotdManager:
         self.blockManager = blockManager
         self.badgeManager = badgeManager
         self.twitterManager = twitterManager
+        self.delegationManager = delegationManager
         self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
@@ -339,7 +340,7 @@ class NotdManager:
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
-    async def list_account_delegate_tokens(self, accountAddress: str, limit: int, offset: int) -> List[AccountToken]:
+    async def list_account_with_delegate_tokens(self, accountAddress: str, limit: int, offset: int) -> List[AccountToken]:
         delegations = await self.delegationManager.get_delegations(delegateAddress=accountAddress)
         tokenSingleOwnerships = await self.retriever.list_token_ownerships(
             fieldFilters=[
