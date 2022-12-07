@@ -22,7 +22,6 @@ from core.util import chain_util
 from core.util import date_util
 
 from notd.activity_manager import ActivityManager
-from notd.delegation_manager import DelegationManager
 from notd.attribute_manager import AttributeManager
 from notd.badge_manager import BadgeManager
 from notd.block_manager import BlockManager
