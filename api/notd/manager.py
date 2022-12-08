@@ -115,7 +115,7 @@ class NotdManager:
         return highestPricedTokenTransfers[0]
 
     async def retrieve_random_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
-        # NOT((krishan711):)  Because of delegation Optional[str] on  contractAddress and tokenIdthis is no longer actually random, it's just the latest (random is too slow)
+        # NOTE(krishan711): this is no longer actually random, it's just the latest (random is too slow)
         randomTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
