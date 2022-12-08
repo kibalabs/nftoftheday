@@ -340,7 +340,7 @@ class NotdManager:
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
 
-    async def list_account_with_delegate_tokens(self, accountAddress: str, limit: int, offset: int) -> List[AccountToken]:
+    async def list_account_tokens_with_delegate_tokens(self, accountAddress: str, limit: int, offset: int) -> List[AccountToken]:
         delegations = await self.delegationManager.get_delegations(delegateAddress=accountAddress)
         accountTokens = []
         for delegation in delegations:

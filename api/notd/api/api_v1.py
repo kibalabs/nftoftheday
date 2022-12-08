@@ -7,7 +7,7 @@ from fastapi import APIRouter
 from notd.api.endpoints_v1 import CalculateCommonOwnersRequest
 from notd.api.endpoints_v1 import CalculateCommonOwnersResponse
 from notd.api.endpoints_v1 import GetAccountTokensResponse
-from notd.api.endpoints_v1 import GetAccountWithDelegateTokensResponse
+from notd.api.endpoints_v1 import GetAccountTokensWithDelegateTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentTransfersResponse
@@ -216,12 +216,12 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokenKeys = await notdManager.list_account_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
         return GetAccountTokensResponse(tokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokenKeys)))
 
-    @router.get('/accounts/{accountAddress}/tokens/delegate', response_model=GetAccountWithDelegateTokensResponse)
-    async def list_account_with_delegate_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> GetAccountWithDelegateTokensResponse:
+    @router.get('/accounts/{accountAddress}/tokens/delegate', response_model=GetAccountTokensWithDelegateTokensResponse)
+    async def list_account_tokens_with_delegate_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> GetAccountTokensWithDelegateTokensResponse:
         limit = limit if limit is not None else 100
         offset = offset if offset is not None else 0
-        accountTokenKeys = await notdManager.list_account_with_delegate_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
-        return GetAccountWithDelegateTokensResponse(accountTokens=(await responseBuilder.collection_tokens_from_account_token_keys(accountTokenKeys=accountTokenKeys)))
+        accountTokenKeys = await notdManager.list_account_tokens_with_delegate_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
+        return GetAccountTokensWithDelegateTokensResponse(accountTokens=(await responseBuilder.collection_tokens_from_account_token_keys(accountTokenKeys=accountTokenKeys)))
 
     @router.post('/accounts/{accountAddress}/refresh-token-ownerships', response_model=RefreshAccountTokenOwnershipsResponse)
     async def refresh_owner_token_ownerships(accountAddress: str) -> RefreshAccountTokenOwnershipsResponse:

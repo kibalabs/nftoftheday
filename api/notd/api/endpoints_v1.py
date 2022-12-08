@@ -201,10 +201,10 @@ class GetAccountTokensRequest(BaseModel):
 class GetAccountTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
 
-class GetAccountWithDelegateTokensRequest(BaseModel):
+class GetAccountTokensWithDelegateTokensRequest(BaseModel):
     pass
 
-class GetAccountWithDelegateTokensResponse(BaseModel):
+class GetAccountTokensWithDelegateTokensResponse(BaseModel):
     accountTokens: List[ApiAccountCollectionToken]
 
 class RefreshAccountTokenOwnershipsRequest(BaseModel):
