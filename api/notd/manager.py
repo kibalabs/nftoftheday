@@ -115,7 +115,7 @@ class NotdManager:
         return highestPricedTokenTransfers[0]
 
     async def retrieve_random_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
-        # NOTE(krishan711): this is no longer actually random, it's just the latest (random is too slow)
+        # NOT((krishan711):)  Because of delegation Optional[str] on  contractAddress and tokenIdthis is no longer actually random, it's just the latest (random is too slow)
         randomTokenTransfers = await self.retriever.list_token_transfers(
             fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
             orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
@@ -350,7 +350,8 @@ class NotdManager:
             if delegation.delegationType == "CONTRACT":
                 accountTokens += [AccountToken(registryAddress=token.registryAddress, tokenId=token.tokenId, ownerAddress=delegation.vaultAddress) for token in tokens if delegation.contractAddress == token.registryAddress]
             if delegation.delegationType == "TOKEN":
-                accountTokens += [AccountToken(registryAddress=delegation.contractAddress, tokenId=delegation.tokenId, ownerAddress=delegation.vaultAddress)]
+                #NOTE(Femi-Ogunkola): registryAddress=delegation.contractAddress, tokenId=delegation.tokenId but typing error with Optional[str]
+                accountTokens += [AccountToken(registryAddress=token.registryAddress, tokenId=token.tokenId, ownerAddress=delegation.vaultAddress) for token in tokens if delegation.contractAddress == token.registryAddress and delegation.tokenId == token.tokenId]
 
         tokenSingleOwnerships = await self.retriever.list_token_ownerships(
             fieldFilters=[
