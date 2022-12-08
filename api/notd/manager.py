@@ -342,6 +342,16 @@ class NotdManager:
 
     async def list_account_with_delegate_tokens(self, accountAddress: str, limit: int, offset: int) -> List[AccountToken]:
         delegations = await self.delegationManager.get_delegations(delegateAddress=accountAddress)
+        accountTokens = []
+        for delegation in delegations:
+            tokens = await self.list_account_tokens(accountAddress=delegation.vaultAddress, limit=limit, offset=offset)
+            if delegation.delegationType == "ALL":
+                accountTokens += [AccountToken(registryAddress=token.registryAddress, tokenId=token.tokenId, ownerAddress=delegation.vaultAddress) for token in tokens]
+            if delegation.delegationType == "CONTRACT":
+                accountTokens += [AccountToken(registryAddress=token.registryAddress, tokenId=token.tokenId, ownerAddress=delegation.vaultAddress) for token in tokens if delegation.contractAddress == token.registryAddress]
+            if delegation.delegationType == "TOKEN":
+                accountTokens += [AccountToken(registryAddress=delegation.contractAddress, tokenId=delegation.tokenId, ownerAddress=delegation.vaultAddress)]
+
         tokenSingleOwnerships = await self.retriever.list_token_ownerships(
             fieldFilters=[
                 StringFieldFilter(fieldName=TokenOwnershipsTable.c.ownerAddress.key, eq=accountAddress),
@@ -357,11 +367,10 @@ class NotdManager:
             orders=[Order(fieldName=TokenMultiOwnershipsTable.c.latestTransferDate.key, direction=Direction.DESCENDING)],
             limit=limit+offset,
         )
-        tokenDelegates = [AccountToken(registryAddress=delegate.contractAddress, tokenId=delegate.tokenId, ownerAddress=delegate.delegateAddress) for delegate in delegations if delegate.tokenId is not None]
         tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId, ownership.ownerAddress, ownership.transferDate) for ownership in tokenSingleOwnerships]
         tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.ownerAddress, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[3], reverse=True)
-        accountTokens = tokenDelegates + [AccountToken(registryAddress=registryAddress, tokenId=tokenId, ownerAddress=ownerAddress) for (registryAddress, tokenId, ownerAddress, _) in sortedTokenOwnershipTuples]
+        accountTokens +=  [AccountToken(registryAddress=registryAddress, tokenId=tokenId, ownerAddress=ownerAddress) for (registryAddress, tokenId, ownerAddress, _) in sortedTokenOwnershipTuples]
         return accountTokens
 
     async def calculate_common_owners(self, registryAddresses: List[str], tokenIds: List[str], date: Optional[datetime.datetime] = None) -> List[str]:
