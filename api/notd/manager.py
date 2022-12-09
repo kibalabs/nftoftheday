@@ -362,9 +362,10 @@ class NotdManager:
         )
         result = await self.retriever.database.execute(query=query)
         tokenOwnerships = [token_multi_ownership_from_row(row) for row in result.mappings()]
-        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId, ownership.ownerAddress, ownership.transferDate) for ownership in tokenOwnerships]
+        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId, ownership.ownerAddress, ownership.latestTransferDate) for ownership in tokenOwnerships]
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[3], reverse=True)
         accountTokens += [AccountToken(registryAddress=registryAddress, tokenId=tokenId, ownerAddress=ownerAddress) for (registryAddress, tokenId, ownerAddress, _) in sortedTokenOwnershipTuples]
+        print(len(accountTokens))
         return accountTokens
 
     async def calculate_common_owners(self, registryAddresses: List[str], tokenIds: List[str], date: Optional[datetime.datetime] = None) -> List[str]:
