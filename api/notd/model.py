@@ -158,27 +158,12 @@ class Token:
             tokenId=str(tokenDict['tokenId']),  # type: ignore[index, call-overload]
         )
 
+
 @dataclasses.dataclass
 class AccountToken:
     registryAddress: str
     tokenId: str
     ownerAddress: str
-
-
-    def to_dict(self) -> JSON:
-        return {
-            'registryAddress': self.registryAddress,
-            'tokenId': self.tokenId,
-            'ownerAddress': self.ownerAddress,
-        }
-
-    @classmethod
-    def from_dict(cls, accountTokenDict: JSON) -> AccountToken:
-        return cls(
-            registryAddress=str(accountTokenDict['registryAddress']),  # type: ignore[index, call-overload]
-            tokenId=str(accountTokenDict['tokenId']),  # type: ignore[index, call-overload]
-            ownerAddress=str(accountTokenDict['ownerAddress']),  # type: ignore[index, call-overload]
-        )
 
 
 @dataclasses.dataclass

@@ -7,6 +7,7 @@ from typing import TypeVar
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
+from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -17,7 +18,6 @@ from notd.api.models_v1 import ApiCollectionOverlapOwner
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
@@ -201,10 +201,10 @@ class GetAccountTokensRequest(BaseModel):
 class GetAccountTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
 
-class GetAccountTokensWithDelegateTokensRequest(BaseModel):
+class ListAccountDelegatedTokensRequest(BaseModel):
     pass
 
-class GetAccountTokensWithDelegateTokensResponse(BaseModel):
+class ListAccountDelegatedTokensResponse(BaseModel):
     accountTokens: List[ApiAccountCollectionToken]
 
 class RefreshAccountTokenOwnershipsRequest(BaseModel):

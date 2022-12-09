@@ -6,6 +6,7 @@ from typing import Sequence
 from core.exceptions import NotFoundException
 
 from notd.api.models_v1 import ApiAccountCollectionGm
+from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -16,7 +17,6 @@ from notd.api.models_v1 import ApiCollectionOverlapOwner
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
