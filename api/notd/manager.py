@@ -27,8 +27,10 @@ from notd.badge_manager import BadgeManager
 from notd.block_manager import BlockManager
 from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
+from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
 from notd.messages import RefreshViewsMessageContent
+from notd.model import AccountToken
 from notd.model import BaseSponsoredToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
@@ -64,7 +66,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -77,6 +79,7 @@ class NotdManager:
         self.blockManager = blockManager
         self.badgeManager = badgeManager
         self.twitterManager = twitterManager
+        self.delegationManager = delegationManager
         self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
         with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
@@ -336,6 +339,34 @@ class NotdManager:
         tokenOwnershipTuples += [(ownership.registryAddress, ownership.tokenId, ownership.latestTransferDate) for ownership in tokenMultiOwnerships]
         sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[2], reverse=True)
         return [Token(registryAddress=registryAddress, tokenId=tokenId) for (registryAddress, tokenId, _) in sortedTokenOwnershipTuples]
+
+    async def list_account_delegated_tokens(self, accountAddress: str, limit: int, offset: int) -> List[AccountToken]:
+        delegations = await self.delegationManager.get_delegations(delegateAddress=accountAddress)
+        accountTokens = []
+        for delegation in delegations:
+            tokens = await self.list_account_tokens(accountAddress=delegation.vaultAddress, limit=limit, offset=offset)
+            if delegation.delegationType == "ALL":
+                accountTokens += [AccountToken(registryAddress=token.registryAddress, tokenId=token.tokenId, ownerAddress=delegation.vaultAddress) for token in tokens]
+            if delegation.delegationType == "CONTRACT":
+                accountTokens += [AccountToken(registryAddress=token.registryAddress, tokenId=token.tokenId, ownerAddress=delegation.vaultAddress) for token in tokens if delegation.contractAddress == token.registryAddress]
+            if delegation.delegationType == "TOKEN":
+                #NOTE(Femi-Ogunkola): registryAddress=delegation.contractAddress, tokenId=delegation.tokenId but typing error with Optional[str]
+                accountTokens += [AccountToken(registryAddress=token.registryAddress, tokenId=token.tokenId, ownerAddress=delegation.vaultAddress) for token in tokens if delegation.contractAddress == token.registryAddress and delegation.tokenId == token.tokenId]
+        query = (
+            TokenOwnershipsView.select()
+            .where(TokenOwnershipsView.c.ownerAddress == accountAddress)
+            .where(TokenOwnershipsView.c.quantity > 0)
+            .order_by(TokenOwnershipsView.c.latestTransferDate.desc())
+            .offset(offset=offset)
+            .limit(limit=limit+offset)
+        )
+        result = await self.retriever.database.execute(query=query)
+        tokenOwnerships = [token_multi_ownership_from_row(row) for row in result.mappings()]
+        tokenOwnershipTuples = [(ownership.registryAddress, ownership.tokenId, ownership.ownerAddress, ownership.latestTransferDate) for ownership in tokenOwnerships]
+        sortedTokenOwnershipTuples = sorted(tokenOwnershipTuples, key=lambda tuple: tuple[3], reverse=True)
+        accountTokens += [AccountToken(registryAddress=registryAddress, tokenId=tokenId, ownerAddress=ownerAddress) for (registryAddress, tokenId, ownerAddress, _) in sortedTokenOwnershipTuples]
+        print(len(accountTokens))
+        return accountTokens
 
     async def calculate_common_owners(self, registryAddresses: List[str], tokenIds: List[str], date: Optional[datetime.datetime] = None) -> List[str]:
         ownershipCountsMap: Dict[str, List[int]] = defaultdict(lambda: [0] * (len(registryAddresses)))

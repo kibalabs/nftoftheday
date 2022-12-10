@@ -160,6 +160,13 @@ class Token:
 
 
 @dataclasses.dataclass
+class AccountToken:
+    registryAddress: str
+    tokenId: str
+    ownerAddress: str
+
+
+@dataclasses.dataclass
 class BaseSponsoredToken:
     date: datetime.datetime
     token: Token

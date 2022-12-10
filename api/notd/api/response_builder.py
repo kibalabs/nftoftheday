@@ -6,6 +6,7 @@ from typing import Sequence
 from core.exceptions import NotFoundException
 
 from notd.api.models_v1 import ApiAccountCollectionGm
+from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -34,6 +35,7 @@ from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
+from notd.model import AccountToken
 from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
@@ -104,6 +106,21 @@ class ResponseBuilder:
     async def collection_token_from_token_key(self, tokenKey: Token) -> ApiCollectionToken:
         return await self.collection_token_from_registry_address_token_id(registryAddress=tokenKey.registryAddress, tokenId=tokenKey.tokenId)
 
+    async def collection_token_from_account_token_key(self, accountTokenKey: AccountToken) -> ApiAccountCollectionToken:
+        tokenMetadata = await self.collection_token_from_registry_address_token_id(registryAddress=accountTokenKey.registryAddress, tokenId=accountTokenKey.tokenId)
+        return ApiAccountCollectionToken(
+            ownerAddress=accountTokenKey.ownerAddress,
+            registryAddress=tokenMetadata.registryAddress,
+            tokenId=tokenMetadata.tokenId,
+            metadataUrl=tokenMetadata.metadataUrl,
+            name=tokenMetadata.name,
+            description=tokenMetadata.description,
+            imageUrl=tokenMetadata.imageUrl,
+            resizableImageUrl=tokenMetadata.resizableImageUrl,
+            frameImageUrl=tokenMetadata.frameImageUrl,
+            attributes=tokenMetadata.attributes,
+        )
+
     async def collection_token_from_model(self, tokenMetadata: RetrievedTokenMetadata) -> ApiCollectionToken:
         attributes = [{key: value for (key, value) in attribute.items() if key in VALID_ATTRIBUTE_FIELDS and value is None or type(value) in VALID_VALUE_TYPES} for attribute in tokenMetadata.attributes] if isinstance(tokenMetadata.attributes, list) else []  # type: ignore[union-attr]
         return ApiCollectionToken(
@@ -123,6 +140,9 @@ class ResponseBuilder:
 
     async def collection_tokens_from_token_keys(self, tokenKeys: Sequence[Token]) -> List[ApiCollectionToken]:
         return await asyncio.gather(*[self.collection_token_from_token_key(tokenKey=tokenKey) for tokenKey in tokenKeys])
+
+    async def collection_tokens_from_account_token_keys(self, accountTokenKeys: Sequence[AccountToken]) -> List[ApiAccountCollectionToken]:
+        return await asyncio.gather(*[self.collection_token_from_account_token_key(accountTokenKey=accountTokenKey) for accountTokenKey in accountTokenKeys])
 
     async def collection_token_from_registry_addresses_token_ids(self, tokens: Sequence[Token]) -> List[ApiCollectionToken]:
         tokenMetadatas: List[RetrievedTokenMetadata] = []

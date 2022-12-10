@@ -7,6 +7,7 @@ from typing import TypeVar
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
+from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -199,6 +200,12 @@ class GetAccountTokensRequest(BaseModel):
 
 class GetAccountTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
+
+class ListAccountDelegatedTokensRequest(BaseModel):
+    pass
+
+class ListAccountDelegatedTokensResponse(BaseModel):
+    accountTokens: List[ApiAccountCollectionToken]
 
 class RefreshAccountTokenOwnershipsRequest(BaseModel):
     pass

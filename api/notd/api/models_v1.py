@@ -36,6 +36,10 @@ class ApiCollectionToken(BaseModel):
     attributes: Optional[List[Dict[str, Union[str, int, float, None, bool]]]]
 
 
+class ApiAccountCollectionToken(ApiCollectionToken):
+    ownerAddress: str
+
+
 class ApiTokenTransfer(BaseModel):
     tokenTransferId: int
     transactionHash: str
