@@ -164,8 +164,8 @@ class Token:
     @classmethod
     def from_dict(cls, tokenDict: JSON) -> Token:
         return cls(
-            registryAddress=str(tokenDict['registryAddress']),  # type: ignore[index, call-overload]
-            tokenId=str(tokenDict['tokenId']),  # type: ignore[index, call-overload]
+            registryAddress=str(tokenDict['registryAddress']), # type: ignore[index, call-overload]
+            tokenId=str(tokenDict['tokenId']), # type: ignore[index, call-overload]
         )
 
 
@@ -184,13 +184,13 @@ class BaseSponsoredToken:
     def to_dict(self) -> JSON:
         return {
             'date': date_util.datetime_to_string(dt=self.date),
-            'token': self.token.to_dict(),  # type: ignore[dict-item]
+            'token': self.token.to_dict(), # type: ignore[dict-item]
         }
 
     @classmethod
     def from_dict(cls, sponsoredTokenDict: JSON) -> BaseSponsoredToken:
         return cls(
-            date=date_util.datetime_from_string(str(sponsoredTokenDict['date'])),  # type: ignore[index, call-overload]
+            date=date_util.datetime_from_string(str(sponsoredTokenDict['date'])), # type: ignore[index, call-overload]
             token=Token.from_dict(dict(sponsoredTokenDict['token']))  # type: ignore[index, call-overload, arg-type]
         )
 
@@ -422,8 +422,8 @@ class Signature:
     @classmethod
     def from_dict(cls, signatureDict: JSON) -> Signature:
         return cls(
-            message=str(signatureDict['message']),  # type: ignore[index, call-overload]
-            signature=str(signatureDict['signature']),  # type: ignore[index, call-overload]
+            message=str(signatureDict['message']), # type: ignore[index, call-overload]
+            signature=str(signatureDict['signature']), # type: ignore[index, call-overload]
         )
 
 
