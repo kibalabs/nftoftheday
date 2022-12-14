@@ -100,7 +100,7 @@ twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requ
 badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
 badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
 delegationManager = DelegationManager(ethClient=ethClient)
-notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, requester=requester, revueApiKey=revueApiKey)
+notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager, collectionManager=collectionManager, badgeManager=badgeManager)
 gmManager = GmManager(retriever=retriever, saver=saver, delegationManager=delegationManager)

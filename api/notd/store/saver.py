@@ -992,7 +992,7 @@ class Saver(CoreSaver):
         query = GalleryBadgeHoldersTable.delete().where(GalleryBadgeHoldersTable.c.galleryBadgeHolderId.in_(galleryBadgeHolderIds)).returning(GalleryBadgeHoldersTable.c.galleryBadgeHolderId)
         await self._execute(query=query, connection=connection)
 
-    async def create_gallery_badge_assignment(self, registryAddress: str, ownerAddress: str,  assignerAddress: str, badgeKey: str, achievedDate: datetime.datetime, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> GalleryBadgeAssignment:
+    async def create_gallery_badge_assignment(self, registryAddress: str, ownerAddress: str, assignerAddress: str, badgeKey: str, achievedDate: datetime.datetime, signatureMessage: str, signature: str, connection: Optional[DatabaseConnection] = None) -> GalleryBadgeAssignment:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {

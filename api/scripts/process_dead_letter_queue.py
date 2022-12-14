@@ -24,6 +24,7 @@ from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.collection_overlap_processor import CollectionOverlapProcessor
 from notd.collection_processor import CollectionProcessor
+from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager
@@ -93,7 +94,8 @@ async def main():
     twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
     badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
     badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
-    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager,  activityManager=activityManager,  attributeManager=attributeManager,  collectionManager=collectionManager,  ownershipManager=ownershipManager,  listingManager=listingManager,  twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, requester=requester, revueApiKey=revueApiKey)
+    delegationManager = DelegationManager(ethClient=ethClient)
+    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, requester=requester, revueApiKey=revueApiKey)
 
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = None #SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')

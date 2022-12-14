@@ -57,16 +57,16 @@ from notd.token_manager import TokenManager
 from notd.twitter_manager import TwitterManager
 
 _REGISTRY_BLACKLIST = set([
-    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47', # Curve SynthSwap
-    '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e', # zed.run
-    '0xC36442b4a4522E871399CD717aBDD847Ab11FE88', # uniswap-v3-positions
-    '0xb9ed94c6d594b2517c4296e24a8c517ff133fb6d', # hegic-eth-atm-calls-pool
+    '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47',  # Curve SynthSwap
+    '0xFf488FD296c38a24CCcC60B43DD7254810dAb64e',  # zed.run
+    '0xC36442b4a4522E871399CD717aBDD847Ab11FE88',  # uniswap-v3-positions
+    '0xb9ed94c6d594b2517c4296e24a8c517ff133fb6d',  # hegic-eth-atm-calls-pool
 ])
 
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager,  attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
