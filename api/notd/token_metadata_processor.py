@@ -117,7 +117,7 @@ class TokenMetadataProcessor():
 
     @staticmethod
     def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> Optional[str]:
-        return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://') if ipfsUrl else None
+        return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://').rstrip('/') if ipfsUrl else None
 
     def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Mapping[str, JSON1]) -> RetrievedTokenMetadata:
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
