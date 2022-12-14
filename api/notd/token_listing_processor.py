@@ -94,7 +94,7 @@ class TokenListingProcessor:
                 while True:
                     logging.stat('RETRIEVE_LISTINGS_OPENSEA', registryAddress, float(f'{index}.{pageCount}'))
                     queryData: Dict[str, JSON1] = {
-                        'token_ids': chunkedTokenIds, # type: ignore[dict-item]
+                        'token_ids': chunkedTokenIds,  # type: ignore[dict-item]
                         'asset_contract_address': registryAddress,
                     }
                     if nextPageId:

@@ -146,8 +146,8 @@ class TokenMetadataProcessor():
             animationUrl=self._clean_potential_ipfs_url(animationUrl),
             youtubeUrl=self._clean_potential_ipfs_url(youtubeUrl),
             frameImageUrl=self._clean_potential_ipfs_url(frameImageUrl),
-            backgroundColor=tokenMetadataDict.get('background_color'), # type: ignore[arg-type]
-            attributes=tokenMetadataDict.get('attributes', []), # type: ignore[arg-type]
+            backgroundColor=tokenMetadataDict.get('background_color'),  # type: ignore[arg-type]
+            attributes=tokenMetadataDict.get('attributes', []),  # type: ignore[arg-type]
         )
         return retrievedTokenMetadata
 
