@@ -1024,7 +1024,7 @@ class Saver(CoreSaver):
             signature=signature,
         )
 
-    async def create_token_staking(self, stakingAddress: str, ownerAddress: str, registryAddress: str, tokenId: str, stakingDate: datetime.datetime, connection: Optional[DatabaseConnection] = None):
+    async def create_token_staking(self, stakingAddress: str, ownerAddress: str, registryAddress: str, tokenId: str, stakingDate: datetime.datetime, connection: Optional[DatabaseConnection] = None) -> TokenStaking:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
@@ -1049,7 +1049,7 @@ class Saver(CoreSaver):
             tokenId=tokenId,
             stakingDate=stakingDate,
         )
-    
+
     async def delete_token_staking(self, tokenStakingId: int, connection: Optional[DatabaseConnection] = None) -> None:
         query = TokenStakingTable.delete().where(TokenStakingTable.c.tokenStakingId == tokenStakingId).returning(TokenStakingTable.c.tokenStakingId)
         await self._execute(query=query, connection=connection)
