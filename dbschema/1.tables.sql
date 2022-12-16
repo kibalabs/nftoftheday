@@ -483,7 +483,7 @@ CREATE INDEX tbl_gallery_badge_assignments_badge_key ON tbl_gallery_badge_assign
 CREATE INDEX tbl_gallery_badge_assignments_owner_address ON tbl_gallery_badge_assignments (owner_address);
 CREATE INDEX tbl_gallery_badge_assignments_achieved_date ON tbl_gallery_badge_assignments (achieved_date);
 
-CREATE TABLE tbl_token_stakings (
+CREATE TABLE tbl_token_staking (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -494,12 +494,12 @@ CREATE TABLE tbl_token_stakings (
     staking_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
-CREATE UNIQUE INDEX tbl_token_stakings_regsitry_address_staking_address_owner_address_token_id ON tbl_token_stakings (registry_address, staking_address, owner_address, token_id);
-CREATE INDEX tbl_token_stakings_created_date ON tbl_token_stakings (created_date);
-CREATE INDEX tbl_token_stakings_updated_date ON tbl_token_stakings (updated_date);
-CREATE INDEX tbl_token_stakings_registry_address_token_id ON tbl_token_stakings (registry_address, token_id);
-CREATE INDEX tbl_token_stakings_registry_address ON tbl_token_stakings (registry_address);
-CREATE INDEX tbl_token_stakings_staking_address ON tbl_token_stakings (staking_address);
-CREATE INDEX tbl_token_stakings_owner_address ON tbl_token_stakings (owner_address);
-CREATE INDEX tbl_token_stakings_staking_date ON tbl_token_stakings (staking_date);
-CREATE INDEX tbl_token_stakings_token_id ON tbl_token_stakings (token_id);
+CREATE UNIQUE INDEX tbl_token_staking_regsitry_address_staking_address_owner_address_token_id ON tbl_token_staking (registry_address, staking_address, owner_address, token_id);
+CREATE INDEX tbl_token_staking_created_date ON tbl_token_staking (created_date);
+CREATE INDEX tbl_token_staking_updated_date ON tbl_token_staking (updated_date);
+CREATE INDEX tbl_token_staking_registry_address_token_id ON tbl_token_staking (registry_address, token_id);
+CREATE INDEX tbl_token_staking_registry_address ON tbl_token_staking (registry_address);
+CREATE INDEX tbl_token_staking_staking_address ON tbl_token_staking (staking_address);
+CREATE INDEX tbl_token_staking_owner_address ON tbl_token_staking (owner_address);
+CREATE INDEX tbl_token_staking_staking_date ON tbl_token_staking (staking_date);
+CREATE INDEX tbl_token_staking_token_id ON tbl_token_staking (token_id);

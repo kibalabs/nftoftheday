@@ -30,6 +30,7 @@ from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenOwnership
+from notd.model import TokenStaking
 from notd.model import TokenTransfer
 from notd.model import TwitterCredential
 from notd.model import TwitterProfile
@@ -52,6 +53,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import TokenStakingTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
@@ -71,6 +73,7 @@ from notd.store.schema_conversions import lock_from_row
 from notd.store.schema_conversions import token_attribute_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
+from notd.store.schema_conversions import token_staking_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
@@ -565,3 +568,15 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         galleryAssignedBadgeHolders = [gallery_badge_assignment_from_row(row) for row in result.mappings()]
         return galleryAssignedBadgeHolders
+
+    async def list_token_staking(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenStaking]:
+        query = TokenStakingTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=TokenStakingTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=TokenStakingTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenStaking = [token_staking_from_row(row) for row in result.mappings()]
+        return tokenStaking

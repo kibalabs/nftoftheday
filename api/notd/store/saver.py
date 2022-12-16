@@ -32,6 +32,7 @@ from notd.model import Signature
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
+from notd.model import TokenStaking
 from notd.model import TwitterCredential
 from notd.model import TwitterProfile
 from notd.model import UserInteraction
@@ -53,6 +54,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import TokenStakingTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
@@ -1021,3 +1023,39 @@ class Saver(CoreSaver):
             signatureMessage=signatureMessage,
             signature=signature,
         )
+
+    async def create_token_staking(self, stakingAddress: str, ownerAddress: str, registryAddress: str, tokenId: str, stakingDate: datetime.datetime, connection: Optional[DatabaseConnection] = None):
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values: CreateRecordDict = {
+            TokenStakingTable.c.createdDate.key: createdDate,
+            TokenStakingTable.c.updatedDate.key: updatedDate,
+            TokenStakingTable.c.stakingAddress.key: stakingAddress,
+            TokenStakingTable.c.ownerAddress.key: ownerAddress,
+            TokenStakingTable.c.registryAddress.key: registryAddress,
+            TokenStakingTable.c.tokenId.key: tokenId,
+            TokenStakingTable.c.stakingDate.key: stakingDate,
+        }
+        query = TokenStakingTable.insert().values(values).returning(TokenStakingTable.c.tokenStakingId)
+        result = await self._execute(query=query, connection=connection)
+        tokenStakingId = int(result.scalar_one())
+        return TokenStaking(
+            tokenStakingId=tokenStakingId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            stakingAddress=stakingAddress,
+            ownerAddress=ownerAddress,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            stakingDate=stakingDate,
+        )
+    
+    async def delete_token_staking(self, tokenStakingId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenStakingTable.delete().where(TokenStakingTable.c.tokenStakingId == tokenStakingId).returning(TokenStakingTable.c.tokenStakingId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_list_token_staking(self, tokenStakingIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(tokenStakingIds) == 0:
+            return
+        query = TokenStakingTable.delete().where(TokenStakingTable.c.tokenStakingId.in_(tokenStakingIds)).returning(TokenStakingTable.c.tokenStakingId)
+        await self._execute(query=query, connection=connection)

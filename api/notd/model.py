@@ -608,3 +608,15 @@ class GalleryUserRow:
     galleryUser: GalleryUser
     chosenOwnedTokens: List[TokenMetadata]
     galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
+
+
+@dataclasses.dataclass
+class TokenStaking:
+    tokenStakingId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    stakingAddress: str
+    ownerAddress: str
+    registryAddress: str
+    tokenId: str
+    stakingDate: datetime.datetime
