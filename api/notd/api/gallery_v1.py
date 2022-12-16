@@ -63,6 +63,7 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         limit = request.limit if request.limit is not None else 20
         offset = request.offset if request.offset is not None else 0
         galleryTokens = await galleryManager.query_collection_tokens(registryAddress=registryAddress, ownerAddress=request.ownerAddress, minPrice=request.minPrice, maxPrice=request.maxPrice, isListed=request.isListed, tokenIdIn=request.tokenIdIn, attributeFilters=request.attributeFilters, limit=limit, offset=offset, order=request.order)
+        print(galleryTokens)
         return QueryCollectionTokensResponse(galleryTokens=(await responseBuilder.gallery_tokens_from_models(galleryTokens=galleryTokens)))
 
     @router.post('/collections/{registryAddress}/tokens/{tokenId}/submit-treasure-hunt')

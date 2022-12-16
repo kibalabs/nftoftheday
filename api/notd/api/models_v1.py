@@ -146,10 +146,19 @@ class ApiTokenListing(BaseModel):
     sourceId: str
 
 
+class ApiTokenStaking(BaseModel):
+    stakingAddress: str
+    ownerAddress: str
+    registryAddress: str
+    tokenId: str
+    stakingDate: datetime.datetime
+
+
 class ApiGalleryToken(BaseModel):
     collectionToken: ApiCollectionToken
     tokenCustomization: Optional[ApiTokenCustomization]
     tokenListing: Optional[ApiTokenListing]
+    tokenStaking: Optional[ApiTokenStaking]
     quantity: int
 
 

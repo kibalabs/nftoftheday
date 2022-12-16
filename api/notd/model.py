@@ -470,10 +470,23 @@ class TwitterProfile(RetrievedTwitterProfile):
 
 
 @dataclasses.dataclass
+class TokenStaking:
+    tokenStakingId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    stakingAddress: str
+    ownerAddress: str
+    registryAddress: str
+    tokenId: str
+    stakingDate: datetime.datetime
+
+
+@dataclasses.dataclass
 class GalleryToken:
     tokenMetadata: TokenMetadata
     tokenCustomization: Optional[TokenCustomization]
     tokenListing: Optional[TokenListing]
+    tokenStaking: Optional[TokenStaking]
     quantity: int
 
 
@@ -608,15 +621,3 @@ class GalleryUserRow:
     galleryUser: GalleryUser
     chosenOwnedTokens: List[TokenMetadata]
     galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
-
-
-@dataclasses.dataclass
-class TokenStaking:
-    tokenStakingId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
-    stakingAddress: str
-    ownerAddress: str
-    registryAddress: str
-    tokenId: str
-    stakingDate: datetime.datetime
