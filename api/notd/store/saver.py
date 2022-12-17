@@ -1054,7 +1054,7 @@ class Saver(CoreSaver):
         query = TokenStakingTable.delete().where(TokenStakingTable.c.tokenStakingId == tokenStakingId).returning(TokenStakingTable.c.tokenStakingId)
         await self._execute(query=query, connection=connection)
 
-    async def delete_list_token_staking(self, tokenStakingIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
+    async def delete_token_stakings(self, tokenStakingIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
         if len(tokenStakingIds) == 0:
             return
         query = TokenStakingTable.delete().where(TokenStakingTable.c.tokenStakingId.in_(tokenStakingIds)).returning(TokenStakingTable.c.tokenStakingId)

@@ -418,7 +418,7 @@ GalleryBadgeHoldersView = sqlalchemy.Table(
 )
 
 TokenStakingTable = sqlalchemy.Table(
-    'tbl_token_staking',
+    'tbl_token_stakings',
     metadata,
     sqlalchemy.Column(key='tokenStakingId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),

@@ -569,7 +569,7 @@ class Retriever(CoreRetriever):
         galleryAssignedBadgeHolders = [gallery_badge_assignment_from_row(row) for row in result.mappings()]
         return galleryAssignedBadgeHolders
 
-    async def list_token_staking(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenStaking]:
+    async def list_token_stakings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenStaking]:
         query = TokenStakingTable.select()
         if fieldFilters:
             query = self._apply_field_filters(query=query, table=TokenStakingTable, fieldFilters=fieldFilters)
