@@ -303,7 +303,7 @@ class TokenListingProcessor:
             'platform': 'RARIBLE',
             'itemId': f'ETHEREUM:{registryAddress}:{tokenId}',
             'status': 'ACTIVE',
-            'size': 150
+            'size': 1000
         }
         index = 0
         pageCount = 0
@@ -342,9 +342,9 @@ class TokenListingProcessor:
         return assetListings
 
     async def get_rarible_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(10 * len(tokenIds) / _LOOKSRARE_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(10 * len(tokenIds) / 100)):
             listings = []
-            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_LOOKSRARE_API_LISTING_CHUNK_SIZE):
+            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=150):
                 listings += await asyncio.gather(*[self._get_rarible_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
             listings = [listing for listing in listings if listing is not None]
             allListings = [item for sublist in listings for item in sublist]
@@ -352,7 +352,7 @@ class TokenListingProcessor:
 
     async def get_changed_rarible_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(60, int(secondsSinceStartDate / 100))):
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(120, int(secondsSinceStartDate / 100))):
             tokenIdsToReprocess = set()
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
