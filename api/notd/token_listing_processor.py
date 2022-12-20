@@ -344,7 +344,7 @@ class TokenListingProcessor:
     async def get_rarible_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
         async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(10 * len(tokenIds) / 100)):
             listings = []
-            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=150):
+            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=100):
                 listings += await asyncio.gather(*[self._get_rarible_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
             listings = [listing for listing in listings if listing is not None]
             allListings = [item for sublist in listings for item in sublist]
