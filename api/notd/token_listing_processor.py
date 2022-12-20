@@ -303,7 +303,7 @@ class TokenListingProcessor:
             'platform': 'RARIBLE',
             'itemId': f'ETHEREUM:{registryAddress}:{tokenId}',
             'status': 'ACTIVE',
-            'size': 1000
+            'size': 100
         }
         index = 0
         pageCount = 0
