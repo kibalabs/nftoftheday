@@ -353,7 +353,7 @@ class TokenListingProcessor:
 
     async def get_changed_rarible_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(120, int(secondsSinceStartDate / _RARIBLE_API_LISTING_CHUNK_SIZE))):
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(120, int(secondsSinceStartDate / 100))):
             tokenIdsToReprocess = set()
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
