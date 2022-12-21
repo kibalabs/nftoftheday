@@ -18,6 +18,7 @@ from notd.model import RetrievedTokenListing
 
 _OPENSEA_API_LISTING_CHUNK_SIZE = 30
 _LOOKSRARE_API_LISTING_CHUNK_SIZE = 30
+_RARIBLE_API_LISTING_CHUNK_SIZE = 100
 
 SECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 MILLISECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -342,9 +343,9 @@ class TokenListingProcessor:
         return assetListings
 
     async def get_rarible_listings_for_tokens(self, registryAddress: str, tokenIds: List[str]) -> List[RetrievedTokenListing]:
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(10 * len(tokenIds) / 100)):
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=int(10 * len(tokenIds) / _RARIBLE_API_LISTING_CHUNK_SIZE)):
             listings = []
-            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=100):
+            for chunkedTokenIds in list_util.generate_chunks(lst=tokenIds, chunkSize=_RARIBLE_API_LISTING_CHUNK_SIZE):
                 listings += await asyncio.gather(*[self._get_rarible_listings_for_token(registryAddress=registryAddress, tokenId=tokenId) for tokenId in chunkedTokenIds])
             listings = [listing for listing in listings if listing is not None]
             allListings = [item for sublist in listings for item in sublist]
@@ -352,7 +353,7 @@ class TokenListingProcessor:
 
     async def get_changed_rarible_token_listings_for_collection(self, address: str, startDate: datetime.datetime) -> List[str]:
         secondsSinceStartDate = (date_util.datetime_from_now() - startDate).seconds
-        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(120, int(secondsSinceStartDate / 100))):
+        async with self.lockManager.with_lock(name='rarible-requester', timeoutSeconds=10, expirySeconds=max(120, int(secondsSinceStartDate / _RARIBLE_API_LISTING_CHUNK_SIZE))):
             tokenIdsToReprocess = set()
             queryData: Dict[str, JSON1] = {
                 'collection': f"ETHEREUM:{address}",
