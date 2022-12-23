@@ -93,7 +93,7 @@ class RefreshListingsForAllCollections(MessageContent):
     _COMMAND = 'REFRESH_LISTINGS_FOR_ALL_COLLECTIONS'
 
 
-class RefreshListingsForCollection(MessageContent):
+class RefreshListingsForCollectionMessageContent(MessageContent):
     _COMMAND = 'REFRESH_LISTINGS_FOR_COLLECTION'
     address: str
 

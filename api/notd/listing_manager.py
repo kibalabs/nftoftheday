@@ -9,7 +9,7 @@ from core.util import date_util
 
 from notd.lock_manager import LockTimeoutException
 from notd.messages import RefreshListingsForAllCollections
-from notd.messages import RefreshListingsForCollection
+from notd.messages import RefreshListingsForCollectionMessageContent
 from notd.messages import UpdateListingsForAllCollections
 from notd.messages import UpdateListingsForCollection
 from notd.model import GALLERY_COLLECTIONS
@@ -48,10 +48,10 @@ class ListingManager:
     async def refresh_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
         for index, registryAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.refresh_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=int(30 * 5 * index))
+            await self.refresh_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=int(20 * 5 * index))
 
     async def refresh_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
-        await self.workQueue.send_message(message=RefreshListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
+        await self.workQueue.send_message(message=RefreshListingsForCollectionMessageContent(address=address).to_message(), delaySeconds=delaySeconds)
 
     async def _update_full_latest_listings_for_collection(self, address: str) -> None:
         tokenIdsQuery = (
