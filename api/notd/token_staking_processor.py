@@ -34,7 +34,7 @@ class TokenStakingProcessor:
             )
         unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
         unStakedTokens = list(unStakedTokensResult)
-        currentlyStakedTokens = defaultdict(Tuple)
+        currentlyStakedTokens = defaultdict(tuple)
         for tokenId, ownerAddress, blockDate in stakedTokens:
             currentlyStakedTokens[tokenId] = (ownerAddress, blockDate)
 
