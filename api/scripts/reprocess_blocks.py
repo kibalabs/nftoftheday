@@ -49,7 +49,7 @@ async def reprocess_blocks(startBlockNumber: int, endBlockNumber: int, batchSize
     ethClient = RestEthClient(url=f'https://mainnet.infura.io/v3/{os.environ["INFURA_PROJECT_ID"]}', requester=infuraRequester)
     blockProcessor = BlockProcessor(ethClient=ethClient)
     blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=None, blockProcessor=blockProcessor, tokenManager=None, collectionManager=None, ownershipManager=None)
-    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=None, blockManager=blockManager, tokenManager=None, activityManager=None, attributeManager=None, collectionManager=None, ownershipManager=None, listingManager=None, requester=requester, revueApiKey=None)
+    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=None, blockManager=blockManager, tokenManager=None, activityManager=None, attributeManager=None, collectionManager=None, ownershipManager=None, listingManager=None, twitterManager=None, collectionOverlapManager=None, badgeManager=None, delegationManager=None, requester=requester, revueApiKey=None)
 
     await database.connect()
     await slackClient.post(text=f'reprocess_blocks → 🚧 started: {startBlockNumber}-{endBlockNumber}')

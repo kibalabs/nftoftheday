@@ -57,6 +57,8 @@ GALLERY_COLLECTION_ADMINS = {
     ],
 }
 
+CREEPZ_STAKING_CONTRACT = '0xC3503192343EAE4B435E4A1211C5d28BF6f6a696'
+
 ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
 
 
@@ -470,15 +472,20 @@ class TwitterProfile(RetrievedTwitterProfile):
 
 
 @dataclasses.dataclass
-class TokenStaking:
-    tokenStakingId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
+class RetrievedTokenStaking:
     stakingAddress: str
     ownerAddress: str
     registryAddress: str
     tokenId: str
     stakingDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class TokenStaking(RetrievedTokenStaking):
+    tokenStakingId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
 
 
 @dataclasses.dataclass
