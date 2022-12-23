@@ -2,7 +2,6 @@ import datetime
 from typing import List
 from typing import Tuple
 from typing import Dict
-from collections import defaultdict
 import sqlalchemy
 
 from notd.model import RetrievedTokenStaking
@@ -35,7 +34,7 @@ class TokenStakingProcessor:
             )
         unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
         unStakedTokens = list(unStakedTokensResult)
-        currentlyStakedTokens: Dict[str, Tuple[str, datetime.datetime]] = {}
+        currentlyStakedTokens: Dict[str, Tuple[str, str, datetime.datetime]] = {}
         for tokenId, ownerAddress, transactionHash, blockDate in stakedTokens:
             currentlyStakedTokens[tokenId] = (ownerAddress, transactionHash, blockDate)
         for tokenId, ownerAddress, transactionHash, blockDate in unStakedTokens:
