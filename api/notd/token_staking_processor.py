@@ -35,11 +35,16 @@ class TokenStakingProcessor:
             )
         unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
         unStakedTokens = list(unStakedTokensResult)
-        currentlyStakedTokens: Dict[str, Tuple[str, datetime.datetime]] = {}
+        # currentlyStakedTokens: Dict[str, Tuple[str, datetime.datetime]] = {}
+        currentlyStakedTokens = defaultdict()
         for tokenId, ownerAddress, blockDate in stakedTokens:
+            if tokenId == '9135':
+                print('present')
             currentlyStakedTokens[tokenId] = (ownerAddress, blockDate)
 
         for tokenId, ownerAddress, blockDate in unStakedTokens:
+            if tokenId == '9135':
+                print('absent')
             if currentlyStakedTokens[tokenId][1] < blockDate:
                 del currentlyStakedTokens[tokenId]
 

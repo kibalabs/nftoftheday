@@ -13,6 +13,7 @@ from notd.messages import RefreshGalleryBadgeHoldersForAllCollectionsMessageCont
 from notd.messages import RefreshGalleryBadgeHoldersForCollectionMessageContent
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollection
+from notd.messages import RefreshStakingsForCollectionMessageContent
 from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
@@ -157,5 +158,9 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == RefreshGalleryBadgeHoldersForCollectionMessageContent.get_command():
             refreshGalleryBadgeHoldersForCollectionMessageContent = RefreshGalleryBadgeHoldersForCollectionMessageContent.parse_obj(message.content)  # pylint: disable=invalid-name
             await self.notdManager.refresh_gallery_badge_holders_for_collection(registryAddress=refreshGalleryBadgeHoldersForCollectionMessageContent.registryAddress)
+            return
+        if message.command == RefreshStakingsForCollectionMessageContent.get_command():
+            refreshStakingsForCollectionMessageContent = RefreshStakingsForCollectionMessageContent.parse_obj(message.content)  # pylint: disable=invalid-name
+            await self.notdManager.refresh_collection_stakings(registryAddress=refreshStakingsForCollectionMessageContent.address)
             return
         raise KibaException(message='Message was unhandled')

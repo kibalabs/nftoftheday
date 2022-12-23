@@ -14,6 +14,9 @@ from core.web3.eth_client import RestEthClient
 from pablo import PabloClient
 
 from notd.activity_manager import ActivityManager
+from notd.staking_manager import StakingManager
+from notd.token_staking_processor import TokenStakingProcessor
+
 from notd.attribute_manager import AttributeManager
 from notd.badge_manager import BadgeManager
 from notd.badge_processor import BadgeProcessor
@@ -94,8 +97,9 @@ async def main():
     badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
     badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
     delegationManager = DelegationManager(ethClient=ethClient)
-    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, requester=requester, revueApiKey=revueApiKey)
-
+    tokenStakingProcessor = TokenStakingProcessor(retriever=retriever)
+    stakingManager = StakingManager(retriever=retriever, saver=saver, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
+    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, stakingManager=stakingManager, requester=requester, revueApiKey=revueApiKey)
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)

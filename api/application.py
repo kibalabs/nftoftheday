@@ -23,6 +23,9 @@ from notd.api.gm_v1 import create_api as create_gm_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.attribute_manager import AttributeManager
 from notd.badge_manager import BadgeManager
+from notd.staking_manager import StakingManager
+from notd.token_staking_processor import TokenStakingProcessor
+
 from notd.badge_processor import BadgeProcessor
 from notd.block_manager import BlockManager
 from notd.block_processor import BlockProcessor
@@ -100,7 +103,9 @@ twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requ
 badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
 badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
 delegationManager = DelegationManager(ethClient=ethClient)
-notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, requester=requester, revueApiKey=revueApiKey)
+tokenStakingProcessor = TokenStakingProcessor(retriever=retriever)
+stakingManager = StakingManager(retriever=retriever, saver=saver, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
+notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, stakingManager=stakingManager, requester=requester, revueApiKey=revueApiKey)
 responseBuilder = ResponseBuilder(retriever=retriever)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager, collectionManager=collectionManager, badgeManager=badgeManager)
 gmManager = GmManager(retriever=retriever, saver=saver, delegationManager=delegationManager)

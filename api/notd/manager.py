@@ -29,6 +29,7 @@ from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
+from notd.staking_manager import StakingManager
 from notd.messages import RefreshViewsMessageContent
 from notd.model import AccountToken
 from notd.model import BaseSponsoredToken
@@ -38,6 +39,7 @@ from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenListing
+from notd.model import TokenStaking
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
@@ -66,7 +68,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, stakingManager: StakingManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -74,6 +76,7 @@ class NotdManager:
         self.collectionManager = collectionManager
         self.ownershipManager = ownershipManager
         self.listingManager = listingManager
+        self.stakingManager = stakingManager
         self.attributeManager = attributeManager
         self.activityManager = activityManager
         self.blockManager = blockManager
@@ -558,3 +561,9 @@ class NotdManager:
 
     async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
         await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()
+
+    async def refresh_collection_stakings_deferred(self, registryAddress: Optional[str] = '0xfE8C6d19365453D26af321D0e8c910428c23873F') -> None:
+        await self.stakingManager.refresh_collection_stakings_deferred(address=registryAddress)
+
+    async def refresh_collection_stakings(self, registryAddress: str) -> None:
+        await self.stakingManager.refresh_collection_stakings(address=registryAddress)
