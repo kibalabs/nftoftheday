@@ -1034,6 +1034,7 @@ class Saver(CoreSaver):
             TokenStakingsTable.c.registryAddress.key: retrievedTokenStaking.registryAddress,
             TokenStakingsTable.c.tokenId.key: retrievedTokenStaking.tokenId,
             TokenStakingsTable.c.stakingDate.key: retrievedTokenStaking.stakingDate,
+            TokenStakingsTable.c.transactionHash.key: retrievedTokenStaking.transactionHash,
         }
 
     async def create_token_staking(self, retrievedTokenStaking: RetrievedTokenStaking, connection: Optional[DatabaseConnection] = None) -> int:

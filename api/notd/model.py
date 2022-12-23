@@ -478,6 +478,7 @@ class RetrievedTokenStaking:
     registryAddress: str
     tokenId: str
     stakingDate: datetime.datetime
+    transactionHash: str
 
 
 @dataclasses.dataclass

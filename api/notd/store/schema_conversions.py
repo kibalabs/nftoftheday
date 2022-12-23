@@ -390,4 +390,5 @@ def token_staking_from_row(rowMapping: RowMapping) -> TokenStaking:
         registryAddress=rowMapping[TokenStakingsTable.c.registryAddress],
         tokenId=rowMapping[TokenStakingsTable.c.tokenId],
         stakingDate=rowMapping[TokenStakingsTable.c.stakingDate],
+        transactionHash=rowMapping[TokenStakingsTable.c.transactionHash],
     )

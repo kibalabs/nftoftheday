@@ -43,6 +43,9 @@ CREATE VIEW vw_token_ownerships AS
 ) UNION (
     SELECT id, created_date, updated_date, registry_address, token_id, owner_address, average_transfer_value, latest_transfer_date, latest_transfer_transaction_hash, quantity
     FROM tbl_token_multi_ownerships
+)UNION (
+    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, 0 AS average_transfer_value, staking_date AS latest_transfer_date, transaction_hash AS latest_transfer_transaction_hash, 1 AS quantity
+    FROM tbl_token_stakings
 );
 
 CREATE VIEW vw_ordered_token_listings AS

@@ -18,7 +18,7 @@ class TokenStakingProcessor:
 
     async def calculate_staked_creepz_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
         stakedQuery = (
-        sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, BlocksTable.c.blockDate)
+        sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
         .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
         .where(TokenTransfersTable.c.registryAddress == registryAddress)
         .where(TokenTransfersTable.c.toAddress == CREEPZ_STAKING_CONTRACT)
@@ -27,7 +27,7 @@ class TokenStakingProcessor:
         stakedTokensResult = await self.retriever.database.execute(query=stakedQuery)
         stakedTokens = list(stakedTokensResult)
         unStakedQuery = (
-            sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.toAddress, BlocksTable.c.blockDate)
+            sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.toAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(TokenTransfersTable.c.registryAddress == registryAddress)
             .where(TokenTransfersTable.c.fromAddress == CREEPZ_STAKING_CONTRACT)
@@ -37,12 +37,12 @@ class TokenStakingProcessor:
         unStakedTokens = list(unStakedTokensResult)
         # currentlyStakedTokens: Dict[str, Tuple[str, datetime.datetime]] = {}
         currentlyStakedTokens = defaultdict()
-        for tokenId, ownerAddress, blockDate in stakedTokens:
-            currentlyStakedTokens[tokenId] = (ownerAddress, blockDate)
-        for tokenId, ownerAddress, blockDate in unStakedTokens:
+        for tokenId, ownerAddress, transactionHash, blockDate in stakedTokens:
+            currentlyStakedTokens[tokenId] = (ownerAddress, transactionHash, blockDate)
+        for tokenId, ownerAddress, transactionHash, blockDate in unStakedTokens:
             if tokenId not in currentlyStakedTokens.keys():
                 continue
-            if currentlyStakedTokens[tokenId][1] < blockDate:
+            if currentlyStakedTokens[tokenId][2] < blockDate:
                 del currentlyStakedTokens[tokenId]
-        retrievedStakedTokens = [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=CREEPZ_STAKING_CONTRACT, ownerAddress=ownerAddress, stakingDate=stakingDate) for tokenId, (ownerAddress, stakingDate) in currentlyStakedTokens.items()]
+        retrievedStakedTokens = [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=CREEPZ_STAKING_CONTRACT, ownerAddress=ownerAddress, stakingDate=stakingDate, transactionHash=transactionHash) for tokenId, (ownerAddress, transactionHash, stakingDate) in currentlyStakedTokens.items()]
         return retrievedStakedTokens
