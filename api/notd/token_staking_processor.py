@@ -39,7 +39,6 @@ class TokenStakingProcessor:
         currentlyStakedTokens = defaultdict()
         for tokenId, ownerAddress, blockDate in stakedTokens:
             currentlyStakedTokens[tokenId] = (ownerAddress, blockDate)
-
         for tokenId, ownerAddress, blockDate in unStakedTokens:
             if tokenId not in currentlyStakedTokens.keys():
                 continue
