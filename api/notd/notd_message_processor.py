@@ -160,7 +160,7 @@ class NotdMessageProcessor(MessageProcessor):
             await self.notdManager.refresh_gallery_badge_holders_for_collection(registryAddress=refreshGalleryBadgeHoldersForCollectionMessageContent.registryAddress)
             return
         if message.command == RefreshStakingsForCollectionMessageContent.get_command():
-            refreshStakingsForCollectionMessageContent = RefreshStakingsForCollectionMessageContent.parse_obj(message.content)  # pylint: disable=invalid-name
+            refreshStakingsForCollectionMessageContent = RefreshStakingsForCollectionMessageContent.parse_obj(message.content)
             await self.notdManager.refresh_collection_stakings(registryAddress=refreshStakingsForCollectionMessageContent.address)
             return
         raise KibaException(message='Message was unhandled')

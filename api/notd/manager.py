@@ -39,7 +39,6 @@ from notd.model import CollectionStatistics
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenListing
-from notd.model import TokenStaking
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
@@ -562,7 +561,7 @@ class NotdManager:
     async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
         await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()
 
-    async def refresh_collection_stakings_deferred(self, registryAddress: Optional[str] = '0xfE8C6d19365453D26af321D0e8c910428c23873F') -> None:
+    async def refresh_collection_stakings_deferred(self, registryAddress: str) -> None:
         await self.stakingManager.refresh_collection_stakings_deferred(address=registryAddress)
 
     async def refresh_collection_stakings(self, registryAddress: str) -> None:
