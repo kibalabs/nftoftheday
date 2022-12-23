@@ -1,6 +1,7 @@
 import datetime
 from typing import List
 from typing import Tuple
+from typing import Dict
 from collections import defaultdict
 import sqlalchemy
 
@@ -34,7 +35,7 @@ class TokenStakingProcessor:
             )
         unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
         unStakedTokens = list(unStakedTokensResult)
-        currentlyStakedTokens = defaultdict(tuple)
+        currentlyStakedTokens: Dict[str, Tuple[str, datetime.datetime]] = {}
         for tokenId, ownerAddress, blockDate in stakedTokens:
             currentlyStakedTokens[tokenId] = (ownerAddress, blockDate)
 
