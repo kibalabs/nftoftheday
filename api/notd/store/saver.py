@@ -33,7 +33,6 @@ from notd.model import Signature
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
-from notd.model import TokenStaking
 from notd.model import TwitterCredential
 from notd.model import TwitterProfile
 from notd.model import UserInteraction

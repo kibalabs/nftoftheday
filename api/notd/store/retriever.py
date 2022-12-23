@@ -53,7 +53,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema import TokenStakingTable
+from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
@@ -570,11 +570,11 @@ class Retriever(CoreRetriever):
         return galleryAssignedBadgeHolders
 
     async def list_token_stakings(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[TokenStaking]:
-        query = TokenStakingTable.select()
+        query = TokenStakingsTable.select()
         if fieldFilters:
-            query = self._apply_field_filters(query=query, table=TokenStakingTable, fieldFilters=fieldFilters)
+            query = self._apply_field_filters(query=query, table=TokenStakingsTable, fieldFilters=fieldFilters)
         if orders:
-            query = self._apply_orders(query=query, table=TokenStakingTable, orders=orders)
+            query = self._apply_orders(query=query, table=TokenStakingsTable, orders=orders)
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)

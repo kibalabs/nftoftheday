@@ -43,7 +43,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
-from notd.store.schema import TokenStakingTable
+from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
@@ -382,12 +382,12 @@ def gallery_badge_assignment_from_row(rowMapping: RowMapping) -> GalleryBadgeAss
 
 def token_staking_from_row(rowMapping: RowMapping) -> TokenStaking:
     return TokenStaking(
-        tokenStakingId=rowMapping[TokenStakingTable.c.tokenStakingId],
-        createdDate=rowMapping[TokenStakingTable.c.createdDate],
-        updatedDate=rowMapping[TokenStakingTable.c.updatedDate],
-        stakingAddress=rowMapping[TokenStakingTable.c.stakingAddress],
-        ownerAddress=rowMapping[TokenStakingTable.c.ownerAddress],
-        registryAddress=rowMapping[TokenStakingTable.c.registryAddress],
-        tokenId=rowMapping[TokenStakingTable.c.tokenId],
-        stakingDate=rowMapping[TokenStakingTable.c.stakingDate],
+        tokenStakingId=rowMapping[TokenStakingsTable.c.tokenStakingId],
+        createdDate=rowMapping[TokenStakingsTable.c.createdDate],
+        updatedDate=rowMapping[TokenStakingsTable.c.updatedDate],
+        stakingAddress=rowMapping[TokenStakingsTable.c.stakingAddress],
+        ownerAddress=rowMapping[TokenStakingsTable.c.ownerAddress],
+        registryAddress=rowMapping[TokenStakingsTable.c.registryAddress],
+        tokenId=rowMapping[TokenStakingsTable.c.tokenId],
+        stakingDate=rowMapping[TokenStakingsTable.c.stakingDate],
     )

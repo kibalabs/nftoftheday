@@ -50,7 +50,7 @@ from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenOwnershipsView
-from notd.store.schema import TokenStakingTable
+from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TwitterProfilesTable
 from notd.store.schema import UserProfilesTable
 from notd.store.schema import UserRegistryFirstOwnershipsMaterializedView
@@ -153,14 +153,14 @@ class GalleryManager:
         await self.collectionManager.get_collection_by_address(address=registryAddress)
         usesListings = isListed or minPrice or maxPrice
         query = (
-            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, OrderedTokenListingsView, TokenStakingTable, sqlalchemy.func.sum(TokenOwnershipsView.c.quantity).label('quantity'))
+            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, OrderedTokenListingsView, TokenStakingsTable, sqlalchemy.func.sum(TokenOwnershipsView.c.quantity).label('quantity'))
                 .join(TokenOwnershipsView, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsView.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsView.c.tokenId))
                 .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                 .join(OrderedTokenListingsView, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == OrderedTokenListingsView.c.registryAddress, TokenMetadatasTable.c.tokenId == OrderedTokenListingsView.c.tokenId, OrderedTokenListingsView.c.tokenListingIndex == 1), isouter=True)
-                .join(TokenStakingTable, sqlalchemy.and_(OrderedTokenListingsView.c.registryAddress == TokenStakingTable.c.registryAddress, OrderedTokenListingsView.c.offererAddress == TokenStakingTable.c.ownerAddress), isouter=True)
+                .join(TokenStakingsTable, sqlalchemy.and_(OrderedTokenListingsView.c.registryAddress == TokenStakingsTable.c.registryAddress, OrderedTokenListingsView.c.offererAddress == TokenStakingsTable.c.ownerAddress), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .where(TokenOwnershipsView.c.quantity > 0)
-                .group_by(TokenMetadatasTable.c.tokenMetadataId, TokenCustomizationsTable.c.tokenCustomizationId, OrderedTokenListingsView.c, TokenStakingTable.c, TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
+                .group_by(TokenMetadatasTable.c.tokenMetadataId, TokenCustomizationsTable.c.tokenCustomizationId, OrderedTokenListingsView.c, TokenStakingsTable.c, TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
                 .limit(limit)
                 .offset(offset)
         )
@@ -204,7 +204,7 @@ class GalleryManager:
                 tokenMetadata=token_metadata_from_row(row),
                 tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
                 tokenListing=token_listing_from_row(row, OrderedTokenListingsView) if row[OrderedTokenListingsView.c.latestTokenListingId] else None,
-                tokenStaking=token_staking_from_row(row) if  row[TokenStakingTable.c.tokenStakingId] else None,
+                tokenStaking=token_staking_from_row(row) if  row[TokenStakingsTable.c.tokenStakingId] else None,
                 quantity=row['quantity'],
             ))
         return galleryTokens
