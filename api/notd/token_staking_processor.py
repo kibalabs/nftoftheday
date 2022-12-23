@@ -45,5 +45,4 @@ class TokenStakingProcessor:
             if currentlyStakedTokens[tokenId][1] < blockDate:
                 del currentlyStakedTokens[tokenId]
         retrievedStakedTokens = [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=CREEPZ_STAKING_CONTRACT, ownerAddress=ownerAddress, stakingDate=stakingDate) for tokenId, (ownerAddress, stakingDate) in currentlyStakedTokens.items()]
-        print(len(retrievedStakedTokens))
         return retrievedStakedTokens
