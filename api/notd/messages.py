@@ -98,6 +98,11 @@ class RefreshListingsForCollection(MessageContent):
     address: str
 
 
+class RefreshStakingsForCollectionMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_STAKINGS_FOR_COLLECTION'
+    address: str
+
+
 class RefreshCollectionOverlapMessageContent(MessageContent):
     _COMMAND = 'REFRESH_COLLECTION_OVERLAP'
     registryAddress: str

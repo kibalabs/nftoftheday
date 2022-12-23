@@ -15,7 +15,7 @@ class TokenStakingProcessor:
     def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def calculate_staked_creepz(self, registryAddress: str) -> List[RetrievedTokenStaking]:
+    async def calculate_staked_creepz_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
         stakedQuery = (
         sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.toAddress, BlocksTable.c.blockDate)
         .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
@@ -34,7 +34,7 @@ class TokenStakingProcessor:
             )
         unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
         unStakedTokens = list(unStakedTokensResult)
-        currentlyStakedTokens = defaultdict(Tuple[str, str, datetime.datetime])
+        currentlyStakedTokens = defaultdict(Tuple[str, datetime.datetime])
         for tokenId, ownerAddress, blockDate in stakedTokens:
             currentlyStakedTokens[tokenId] = (ownerAddress, blockDate)
 
