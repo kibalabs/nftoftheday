@@ -19,6 +19,7 @@ jobs:
           load: true
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
+          use: linux/amd64,linux/arm64
       - name: Build testable docker image
         uses: docker/build-push-action@v2
         with:
@@ -69,6 +70,7 @@ jobs:
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
           tags: ${{ env.DOCKER_IMAGE }}
+          use: linux/amd64,linux/arm64
       - name: Run lint
         run: |
           docker run --name lint $DOCKER_IMAGE lint --directory notd --output-file lint-results.json --output-format annotations

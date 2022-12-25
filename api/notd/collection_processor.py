@@ -1,5 +1,6 @@
 import asyncio
 import json
+from typing import Optional
 
 from core import logging
 from core.exceptions import BadRequestException
@@ -41,6 +42,10 @@ class CollectionProcessor:
             contractMetadataJson = json.load(contractJsonFile)
         self.contractAbi = contractMetadataJson['abi']
         self.contractUriFunctionAbi = [internalAbi for internalAbi in self.contractAbi if internalAbi['name'] == 'contractURI'][0]
+
+    @staticmethod
+    def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> Optional[str]:
+        return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://').rstrip('/') if ipfsUrl else None
 
     async def retrieve_collection(self, address: str) -> RetrievedCollection:  # pylint: disable=too-many-statements
         try:
@@ -155,14 +160,14 @@ class CollectionProcessor:
             name=name.replace('\u0000', '').encode('utf-8', 'namereplace').decode() if name else None,
             symbol=symbol.replace('\u0000', '').encode('utf-8', 'namereplace').decode() if symbol else None,
             description=description.replace('\u0000', '').encode('utf-8', 'namereplace').decode() if description else None,
-            imageUrl=imageUrl,
+            imageUrl=self._clean_potential_ipfs_url(imageUrl),
             twitterUsername=twitterUsername,
             instagramUsername=instagramUsername,
             wikiUrl=wikiUrl,
             openseaSlug=openseaSlug,
             url=url,
             discordUrl=discordUrl,
-            bannerImageUrl=bannerImageUrl,
+            bannerImageUrl=self._clean_potential_ipfs_url(bannerImageUrl),
             doesSupportErc721=doesSupportErc721,
             doesSupportErc1155=doesSupportErc1155,
         )

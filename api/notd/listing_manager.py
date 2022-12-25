@@ -37,7 +37,7 @@ class ListingManager:
     async def update_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
         for index, registryAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=int(60 * 0.2 * index))
+            await self.update_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=min(900, int(60 * 0.2 * index)))
 
     async def update_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
         await self.workQueue.send_message(message=UpdateListingsForCollection(address=address).to_message(), delaySeconds=delaySeconds)
@@ -48,7 +48,7 @@ class ListingManager:
     async def refresh_latest_listings_for_all_collections(self) -> None:
         # NOTE(krishan711): delay because of opensea limits, find a nicer way to do this
         for index, registryAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.refresh_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=int(20 * 5 * index))
+            await self.refresh_latest_listings_for_collection_deferred(address=registryAddress, delaySeconds=min(900, int(20 * 5 * index)))
 
     async def refresh_latest_listings_for_collection_deferred(self, address: str, delaySeconds: int = 0) -> None:
         await self.workQueue.send_message(message=RefreshListingsForCollectionMessageContent(address=address).to_message(), delaySeconds=delaySeconds)
