@@ -198,31 +198,31 @@ jobs:
               --env VERSION=${VERSION} \
               --env-file ~/.${NAME}.vars \
               ${DOCKER_IMAGE} './start-worker.sh'
-  run-worker-4:
-    needs: deploy-api
-    runs-on: ubuntu-latest
-    env:
-      NAME: nftoftheday-worker
-      VERSION: ${{ github.sha }}
-      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
-    steps:
-      - name: executing remote ssh commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.MDTPBOX_URL }}
-          username: ${{ secrets.MDTPBOX_USER }}
-          key: ${{ secrets.MDTPBOX_SSH_KEY }}
-          port: ${{ secrets.MDTPBOX_PORT }}
-          envs: DOCKER_IMAGE,NAME,VERSION
-          script_stop: true
-          script: |
-            docker pull ${DOCKER_IMAGE}
-            docker stop ${NAME} && docker rm ${NAME} || true
-            docker run \
-              --name ${NAME} \
-              --detach \
-              --restart on-failure \
-              --env NAME=${NAME} \
-              --env VERSION=${VERSION} \
-              --env-file ~/.${NAME}.vars \
-              ${DOCKER_IMAGE} './start-worker.sh'
+  # run-worker-4:
+  #   needs: deploy-api
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     NAME: nftoftheday-worker
+  #     VERSION: ${{ github.sha }}
+  #     DOCKER_IMAGE: ghcr.io/${{ github.repository }}-api:latest
+  #   steps:
+  #     - name: executing remote ssh commands
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.MDTPBOX_URL }}
+  #         username: ${{ secrets.MDTPBOX_USER }}
+  #         key: ${{ secrets.MDTPBOX_SSH_KEY }}
+  #         port: ${{ secrets.MDTPBOX_PORT }}
+  #         envs: DOCKER_IMAGE,NAME,VERSION
+  #         script_stop: true
+  #         script: |
+  #           docker pull ${DOCKER_IMAGE}
+  #           docker stop ${NAME} && docker rm ${NAME} || true
+  #           docker run \
+  #             --name ${NAME} \
+  #             --detach \
+  #             --restart on-failure \
+  #             --env NAME=${NAME} \
+  #             --env VERSION=${VERSION} \
+  #             --env-file ~/.${NAME}.vars \
+  #             ${DOCKER_IMAGE} './start-worker.sh'
