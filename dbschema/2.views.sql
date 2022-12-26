@@ -30,12 +30,12 @@ CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address_owner_address
 CREATE VIEW vw_token_ownerships AS
 (
     SELECT id, created_date, updated_date, registry_address, token_id, owner_address, transfer_value AS average_transfer_value, transfer_date AS latest_transfer_date, transfer_transaction_hash AS latest_transfer_transaction_hash, 1 AS quantity
-    FROM tbl_token_ownerships where owner_address != '0xC3503192343EAE4B435E4A1211C5d28BF6f6a696'
+    FROM tbl_token_ownerships
 ) UNION (
     SELECT id, created_date, updated_date, registry_address, token_id, owner_address, average_transfer_value, latest_transfer_date, latest_transfer_transaction_hash, quantity
     FROM tbl_token_multi_ownerships
 )UNION (
-    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, 0 AS average_transfer_value, staking_date AS latest_transfer_date, transaction_hash AS latest_transfer_transaction_hash, 1 AS quantity
+    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, 0 AS average_transfer_value, staked_date AS latest_transfer_date, transaction_hash AS latest_transfer_transaction_hash, 1 AS quantity
     FROM tbl_token_stakings
 );
 

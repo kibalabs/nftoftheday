@@ -25,8 +25,7 @@ class StakingManager:
         async with self.saver.create_transaction() as connection:
             currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
                 StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=address)
-            ],
-            )
+            ])
             currentTokenStakingIds = [tokenStaking.tokenStakingId for tokenStaking in currentTokenStakings]
             logging.info(f'Deleting {len(currentTokenStakingIds)} existing stakings')
             await self.saver.delete_token_stakings(tokenStakingIds=currentTokenStakingIds, connection=connection)

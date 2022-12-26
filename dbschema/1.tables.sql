@@ -491,7 +491,7 @@ CREATE TABLE tbl_token_stakings (
     owner_address TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
-    staking_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
+    staked_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
     transaction_hash TEXT NOT NULL,
 );
 
