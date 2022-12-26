@@ -287,7 +287,7 @@ class ResponseBuilder:
             ownerAddress=tokenStaking.ownerAddress,
             registryAddress=tokenStaking.registryAddress,
             tokenId=tokenStaking.tokenId,
-            stakingDate=tokenStaking.stakingDate,
+            stakedDate=tokenStaking.stakedDate,
         )
 
     async def token_listings_from_models(self, tokenListings: Sequence[TokenListing]) -> List[ApiTokenListing]:

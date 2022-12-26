@@ -1033,7 +1033,7 @@ class Saver(CoreSaver):
             TokenStakingsTable.c.ownerAddress.key: retrievedTokenStaking.ownerAddress,
             TokenStakingsTable.c.registryAddress.key: retrievedTokenStaking.registryAddress,
             TokenStakingsTable.c.tokenId.key: retrievedTokenStaking.tokenId,
-            TokenStakingsTable.c.stakingDate.key: retrievedTokenStaking.stakingDate,
+            TokenStakingsTable.c.stakedDate.key: retrievedTokenStaking.stakedDate,
             TokenStakingsTable.c.transactionHash.key: retrievedTokenStaking.transactionHash,
         }
 
