@@ -20,6 +20,7 @@ from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.model import CREEPZ_STAKING_CONTRACT
+from notd.model import COLLECTION_CREEPZ_ADDRESS
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 from notd.ownership_manager import OwnershipManager
@@ -82,9 +83,9 @@ class BlockManager:
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
-        stakingTransfers = {transfer for transfer in processedBlock.retrievedTokenTransfers if transfer.fromAddress == CREEPZ_STAKING_CONTRACT or transfer.toAddress == CREEPZ_STAKING_CONTRACT}
+        stakingTransfers = {transfer for transfer in processedBlock.retrievedTokenTransfers if CREEPZ_STAKING_CONTRACT in (transfer.fromAddress, transfer.toAddress)}
         if len(stakingTransfers) > 0:
-            await self.stakingManager.refresh_collection_stakings_deferred()
+            await self.stakingManager.refresh_collection_stakings_deferred(address=COLLECTION_CREEPZ_ADDRESS)
         if not shouldSkipUpdatingOwnerships:
             await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
