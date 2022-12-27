@@ -24,8 +24,8 @@ jobs:
         with:
           context: app
           push: true
-          # cache-from: type=gha,scope=app
-          # cache-to: type=gha,mode=max,scope=app
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,mode=max,scope=app
           tags: ${{ env.DOCKER_IMAGE }}
           platforms: linux/amd64,linux/arm64
   deploy-api:
@@ -48,8 +48,8 @@ jobs:
         with:
           context: api
           push: true
-          # cache-from: type=gha,scope=api
-          # cache-to: type=gha,mode=max,scope=api
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
           tags: ${{ env.DOCKER_IMAGE }}
           platforms: linux/amd64,linux/arm64
   run-app:
