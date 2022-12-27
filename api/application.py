@@ -23,9 +23,6 @@ from notd.api.gm_v1 import create_api as create_gm_v1_api
 from notd.api.response_builder import ResponseBuilder
 from notd.attribute_manager import AttributeManager
 from notd.badge_manager import BadgeManager
-from notd.staking_manager import StakingManager
-from notd.token_staking_processor import TokenStakingProcessor
-
 from notd.badge_processor import BadgeProcessor
 from notd.block_manager import BlockManager
 from notd.block_processor import BlockProcessor
@@ -41,6 +38,7 @@ from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager
 from notd.ownership_manager import OwnershipManager
+from notd.staking_manager import StakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_attributes_processor import TokenAttributeProcessor
@@ -48,6 +46,7 @@ from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
+from notd.token_staking_processor import TokenStakingProcessor
 from notd.twitter_manager import TwitterManager
 
 requestIdHolder = RequestIdHolder()

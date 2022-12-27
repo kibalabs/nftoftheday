@@ -26,8 +26,8 @@ from notd.model import RetrievedCollectionOverlap
 from notd.model import RetrievedGalleryBadgeHolder
 from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
-from notd.model import RetrievedTokenStaking
 from notd.model import RetrievedTokenMultiOwnership
+from notd.model import RetrievedTokenStaking
 from notd.model import RetrievedTokenTransfer
 from notd.model import Signature
 from notd.model import TokenCustomization

@@ -19,9 +19,11 @@ from notd.collection_manager import CollectionManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
+from notd.model import CREEPZ_STAKING_CONTRACT
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 from notd.ownership_manager import OwnershipManager
+from notd.staking_manager import StakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -31,13 +33,14 @@ from notd.token_manager import TokenManager
 
 class BlockManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, tokenManager: TokenManager) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, stakingManager: StakingManager, tokenManager: TokenManager) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
         self.blockProcessor = blockProcessor
         self.ownershipManager = ownershipManager
         self.collectionManager = collectionManager
+        self.stakingManager = stakingManager
         self.tokenManager = tokenManager
 
     async def receive_new_blocks_deferred(self) -> None:
@@ -79,6 +82,9 @@ class BlockManager:
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
+        stakingTransfers = {transfer for transfer in processedBlock.retrievedTokenTransfers if transfer.fromAddress == CREEPZ_STAKING_CONTRACT or transfer.toAddress == CREEPZ_STAKING_CONTRACT}
+        if len(stakingTransfers) > 0:
+            await self.stakingManager.refresh_collection_stakings_deferred()
         if not shouldSkipUpdatingOwnerships:
             await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:

@@ -1,3 +1,5 @@
+from typing import List
+
 from core import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
@@ -16,6 +18,10 @@ class StakingManager:
         self.saver = saver
         self.workQueue = workQueue
         self.tokenStakingProcessor = tokenStakingProcessor
+
+    async def refresh_stakings_for_collections_deferred(self, addresses: List[str]) -> None:
+        for index, address in enumerate(addresses):
+            await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=address).to_message(), delaySeconds=index*10)
 
     async def refresh_collection_stakings_deferred(self, address: str) -> None:
         await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=address).to_message())

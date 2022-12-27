@@ -73,10 +73,10 @@ from notd.store.schema_conversions import lock_from_row
 from notd.store.schema_conversions import token_attribute_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
-from notd.store.schema_conversions import token_staking_from_row
 from notd.store.schema_conversions import token_metadata_from_row
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_ownership_from_row
+from notd.store.schema_conversions import token_staking_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.store.schema_conversions import twitter_credential_from_row
 from notd.store.schema_conversions import twitter_profile_from_row

@@ -12,8 +12,8 @@ from notd.messages import RefreshCollectionOverlapMessageContent
 from notd.messages import RefreshGalleryBadgeHoldersForAllCollectionsMessageContent
 from notd.messages import RefreshGalleryBadgeHoldersForCollectionMessageContent
 from notd.messages import RefreshListingsForAllCollections
-from notd.messages import RefreshStakingsForCollectionMessageContent
 from notd.messages import RefreshListingsForCollectionMessageContent
+from notd.messages import RefreshStakingsForCollectionMessageContent
 from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent

@@ -29,7 +29,6 @@ from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
-from notd.staking_manager import StakingManager
 from notd.messages import RefreshViewsMessageContent
 from notd.model import AccountToken
 from notd.model import BaseSponsoredToken
@@ -44,6 +43,7 @@ from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
 from notd.ownership_manager import OwnershipManager
+from notd.staking_manager import StakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable

@@ -1,7 +1,8 @@
 import datetime
+from typing import Dict
 from typing import List
 from typing import Tuple
-from typing import Dict
+
 import sqlalchemy
 
 from notd.model import RetrievedTokenStaking
