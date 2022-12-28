@@ -57,7 +57,6 @@ GALLERY_COLLECTION_ADMINS = {
     ],
 }
 
-
 ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
 
 
