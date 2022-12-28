@@ -19,7 +19,6 @@ from notd.collection_manager import CollectionManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
-from notd.model import CREEPZ_STAKING_CONTRACT
 from notd.model import COLLECTION_CREEPZ_ADDRESS
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
@@ -30,6 +29,7 @@ from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_manager import TokenManager
+from notd.token_staking_processor import CREEPZ_STAKING_CONTRACT
 
 
 class BlockManager:
