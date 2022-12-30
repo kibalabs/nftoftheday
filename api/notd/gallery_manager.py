@@ -24,6 +24,7 @@ from notd.api.endpoints_v1 import InQueryParam
 from notd.badge_manager import BadgeManager
 from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
+from notd.model import STAKING_CONTRACTS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
@@ -160,7 +161,7 @@ class GalleryManager:
                 .join(TokenStakingsTable, sqlalchemy.and_(TokenOwnershipsView.c.registryAddress == TokenStakingsTable.c.registryAddress, TokenOwnershipsView.c.ownerAddress == TokenStakingsTable.c.ownerAddress, TokenOwnershipsView.c.tokenId == TokenStakingsTable.c.tokenId), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .where(TokenOwnershipsView.c.quantity > 0)
-                .where(TokenOwnershipsView.c.ownerAddress != '0xC3503192343EAE4B435E4A1211C5d28BF6f6a696')
+                .where(TokenOwnershipsView.c.ownerAddress.in_(STAKING_CONTRACTS))
                 .group_by(TokenMetadatasTable.c.tokenMetadataId, TokenCustomizationsTable.c.tokenCustomizationId, OrderedTokenListingsView.c, TokenStakingsTable.c, TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
                 .limit(limit)
                 .offset(offset)
@@ -316,7 +317,7 @@ class GalleryManager:
                 .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
-                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress != '0xC3503192343EAE4B435E4A1211C5d28BF6f6a696')
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(STAKING_CONTRACTS))
                 .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
