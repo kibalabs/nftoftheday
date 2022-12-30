@@ -1,4 +1,3 @@
-from typing import List
 from typing import Set
 from typing import Tuple
 
@@ -8,6 +7,7 @@ from core.store.retriever import StringFieldFilter
 
 from notd.messages import RefreshStakingsForCollectionMessageContent
 from notd.messages import UpdateTokenStakingMessageContent
+from notd.model import STAKING_CONTRACTS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenStakingsTable
@@ -49,8 +49,8 @@ class StakingManager:
                 logging.info(f'Saving stakings for registryAddress: {registryAddress}, tokenId: {tokenId}')
                 await self.saver.create_token_staking(retrievedTokenStaking=retrievedTokenStaking, connection=connection)
 
-    async def refresh_stakings_for_collections_deferred(self, addresses: List[str]) -> None:
-        for index, address in enumerate(addresses):
+    async def refresh_stakings_for_collections_deferred(self) -> None:
+        for index, address in enumerate(STAKING_CONTRACTS):
             await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=address).to_message(), delaySeconds=index*10)
 
     async def refresh_collection_stakings_deferred(self, address: str) -> None:

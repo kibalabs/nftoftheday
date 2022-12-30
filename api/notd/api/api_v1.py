@@ -117,6 +117,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.refresh_latest_listings_for_all_collections_deferred()
         return RefreshLatestListingsAllCollectionsDeferredResponse()
 
+    @router.post('/collections//refresh-stakings-deferred', response_model=RefreshStakingsDeferredResponse)
+    async def refresh_stakings_for_collections_deferred() -> RefreshStakingsDeferredResponse:
+        await notdManager.refresh_stakings_for_collections_deferred()
+        return RefreshStakingsDeferredResponse()
+
     @router.post('/collections/update-activity-deferred', response_model=UpdateActivityForAllCollectionsDeferredResponse)
     async def update_activity_for_all_collections_deferred() -> UpdateActivityForAllCollectionsDeferredResponse:
         await notdManager.update_activity_for_all_collections_deferred()
@@ -199,11 +204,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_recent_sales(registryAddress=registryAddress, limit=limit, offset=offset)
         return GetCollectionRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
-
-    @router.post('/collections/{registryAddress}/refresh-stakings-deferred', response_model=RefreshStakingsDeferredResponse)
-    async def refresh_collection_stakings_deferred(registryAddress: str) -> RefreshStakingsDeferredResponse:
-        await notdManager.refresh_collection_stakings_deferred(registryAddress=registryAddress)
-        return RefreshStakingsDeferredResponse()
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}', response_model=GetCollectionTokenResponse)
     async def get_token_metadata_by_registry_address_token_id(registryAddress: str, tokenId: str) -> GetCollectionTokenResponse:

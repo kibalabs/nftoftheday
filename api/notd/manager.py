@@ -561,8 +561,8 @@ class NotdManager:
     async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
         await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()
 
-    async def refresh_collection_stakings_deferred(self, registryAddress: str) -> None:
-        await self.stakingManager.refresh_collection_stakings_deferred(address=registryAddress)
+    async def refresh_stakings_for_collections_deferred(self) -> None:
+        await self.stakingManager.refresh_stakings_for_collections_deferred()
 
     async def refresh_collection_stakings(self, registryAddress: str) -> None:
         await self.stakingManager.refresh_collection_stakings(address=registryAddress)
