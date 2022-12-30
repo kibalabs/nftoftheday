@@ -117,7 +117,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.refresh_latest_listings_for_all_collections_deferred()
         return RefreshLatestListingsAllCollectionsDeferredResponse()
 
-    @router.post('/collections//refresh-stakings-deferred', response_model=RefreshStakingsDeferredResponse)
+    @router.post('/collections/refresh-stakings-deferred', response_model=RefreshStakingsDeferredResponse)
     async def refresh_stakings_for_collections_deferred() -> RefreshStakingsDeferredResponse:
         await notdManager.refresh_stakings_for_collections_deferred()
         return RefreshStakingsDeferredResponse()
