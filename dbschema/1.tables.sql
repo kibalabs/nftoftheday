@@ -491,8 +491,8 @@ CREATE TABLE tbl_token_stakings (
     owner_address TEXT NOT NULL,
     registry_address TEXT NOT NULL,
     token_id TEXT NOT NULL,
-    staked_date TIMESTAMP WITHOUT TIME ZONE NOT NULL
-    transaction_hash TEXT NOT NULL,
+    staked_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    transaction_hash TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX tbl_token_stakings_regsitry_address_staking_address_owner_address_token_id ON tbl_token_stakings (registry_address, staking_address, owner_address, token_id);
@@ -502,6 +502,6 @@ CREATE INDEX tbl_token_stakings_registry_address_token_id ON tbl_token_stakings 
 CREATE INDEX tbl_token_stakings_registry_address ON tbl_token_stakings (registry_address);
 CREATE INDEX tbl_token_stakings_staking_address ON tbl_token_stakings (staking_address);
 CREATE INDEX tbl_token_stakings_owner_address ON tbl_token_stakings (owner_address);
-CREATE INDEX tbl_token_stakings_staking_date ON tbl_token_stakings (staking_date);
+CREATE INDEX tbl_token_stakings_staked_date ON tbl_token_stakings (staked_date);
 CREATE INDEX tbl_token_stakings_token_id ON tbl_token_stakings (token_id);
 CREATE INDEX tbl_token_stakings_transaction_hash ON tbl_token_stakings (transaction_hash);

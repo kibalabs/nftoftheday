@@ -566,3 +566,9 @@ class NotdManager:
 
     async def refresh_collection_stakings(self, registryAddress: str) -> None:
         await self.stakingManager.refresh_collection_stakings(address=registryAddress)
+
+    async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
+        await self.stakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def update_token_staking_deferred(self, registryAddress: str, tokenId: str) -> None:
+        await self.stakingManager.update_token_staking_deferred(registryAddress=registryAddress, tokenId=tokenId)

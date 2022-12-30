@@ -27,6 +27,7 @@ from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
+from notd.messages import UpdateTokenStakingMessageContent
 from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 from notd.messages import UpdateTotalActivityForCollectionMessageContent
 
@@ -162,5 +163,9 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == RefreshStakingsForCollectionMessageContent.get_command():
             refreshStakingsForCollectionMessageContent = RefreshStakingsForCollectionMessageContent.parse_obj(message.content)
             await self.notdManager.refresh_collection_stakings(registryAddress=refreshStakingsForCollectionMessageContent.address)
+            return
+        if message.command == UpdateTokenStakingMessageContent.get_command():
+            updateTokenStakingMessageContent = UpdateTokenStakingMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_staking(registryAddress=updateTokenStakingMessageContent.registryAddress, tokenId=updateTokenStakingMessageContent.tokenId)
             return
         raise KibaException(message='Message was unhandled')

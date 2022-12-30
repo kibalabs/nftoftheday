@@ -1,13 +1,18 @@
 import datetime
 from typing import Dict
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 import sqlalchemy
+from core.store.retriever import Direction
+from core.store.retriever import Order
+from core.store.retriever import StringFieldFilter
 
 from notd.model import RetrievedTokenStaking
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
+from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TokenTransfersTable
 
 CREEPZ_STAKING_CONTRACT = '0xC3503192343EAE4B435E4A1211C5d28BF6f6a696'
@@ -17,7 +22,26 @@ class TokenStakingProcessor:
     def __init__(self, retriever: Retriever) -> None:
         self.retriever = retriever
 
-    async def calculate_staked_creepz_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
+    async def get_staked_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
+        latestTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[
+                StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=registryAddress),
+                StringFieldFilter(fieldName=TokenStakingsTable.c.tokenId.key, eq=tokenId)
+            ],
+        orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+        limit=1)
+        latestTokenTransfer = latestTokenTransfers[0]
+        if latestTokenTransfer.fromAddress == CREEPZ_STAKING_CONTRACT:
+            return None
+        return RetrievedTokenStaking(
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            stakingAddress=CREEPZ_STAKING_CONTRACT,
+            ownerAddress=latestTokenTransfer.toAddress,
+            stakedDate=latestTokenTransfer.blockDate,
+            transactionHash=latestTokenTransfer.transactionHash
+        )
+
+    async def get_all_staked_creepz_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
         stakedQuery = (
             sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
