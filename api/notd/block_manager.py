@@ -69,7 +69,7 @@ class BlockManager:
         logging.info(f'Scheduling messages for reprocessing {len(blockNumbers)} blocks')
         await self.process_blocks_deferred(blockNumbers=blockNumbers, shouldSkipProcessingTokens=True)
 
-    async def   process_blocks_deferred(self, blockNumbers: Sequence[int], shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
+    async def  process_blocks_deferred(self, blockNumbers: Sequence[int], shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
         messages = [ProcessBlockMessageContent(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens).to_message() for blockNumber in blockNumbers]
         await self.workQueue.send_messages(messages=messages, delaySeconds=delaySeconds)
 

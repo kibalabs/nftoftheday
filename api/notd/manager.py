@@ -528,8 +528,8 @@ class NotdManager:
     async def process_block_deferred(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
         await self.blockManager.process_block_deferred(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens, delaySeconds=delaySeconds)
 
-    async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, shouldSkipUpdatingOwnerships: Optional[bool] = None) -> None:
-        await self.blockManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens, shouldSkipUpdatingOwnerships=shouldSkipUpdatingOwnerships)
+    async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, shouldSkipUpdatingOwnerships: Optional[bool] = None, shouldSkipUpdatingStakings: Optional[bool] = None) -> None:
+        await self.blockManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens, shouldSkipUpdatingOwnerships=shouldSkipUpdatingOwnerships, shouldSkipUpdatingStakings=shouldSkipUpdatingStakings)
 
     async def update_all_twitter_users_deferred(self) -> None:
         await self.twitterManager.update_all_twitter_users_deferred()
