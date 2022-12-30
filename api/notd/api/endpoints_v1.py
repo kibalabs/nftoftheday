@@ -414,3 +414,9 @@ class CalculateCommonOwnersRequest(BaseModel):
 
 class CalculateCommonOwnersResponse(BaseModel):
     ownerAddresses: List[str]
+
+class RefreshStakingsDeferredResponse(BaseModel):
+    pass
+
+class RefreshStakingsDeferredRequest(BaseModel):
+    pass

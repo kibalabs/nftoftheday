@@ -25,6 +25,7 @@ from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
+from notd.api.endpoints_v1 import RefreshStakingsDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
 from notd.api.endpoints_v1 import RetrieveMostTradedRequest
@@ -198,6 +199,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         offset = offset if offset is not None else 0
         tokenTransfers = await notdManager.get_collection_recent_sales(registryAddress=registryAddress, limit=limit, offset=offset)
         return GetCollectionRecentSalesResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
+
+    @router.post('/collections/{registryAddress}/refresh-stakings-deferred', response_model=RefreshStakingsDeferredResponse)
+    async def refresh_collection_stakings_deferred(registryAddress: str) -> RefreshStakingsDeferredResponse:
+        await notdManager.refresh_collection_stakings_deferred(registryAddress=registryAddress)
+        return RefreshStakingsDeferredResponse()
 
     @router.get('/collections/{registryAddress}/tokens/{tokenId}', response_model=GetCollectionTokenResponse)
     async def get_token_metadata_by_registry_address_token_id(registryAddress: str, tokenId: str) -> GetCollectionTokenResponse:
