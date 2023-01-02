@@ -45,12 +45,12 @@ class TokenStakingProcessor:
 
     async def get_all_staked_creepz_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
         retrievedStakedTokens = []
-        for stakingAddresses in STAKING_CONTRACTS:
+        for stakingAddress in STAKING_CONTRACTS:
             stakedQuery = (
                 sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
                 .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
                 .where(TokenTransfersTable.c.registryAddress == registryAddress)
-                .where(TokenTransfersTable.c.toAddress == stakingAddresses)
+                .where(TokenTransfersTable.c.toAddress == stakingAddress)
                 .order_by(TokenTransfersTable.c.blockNumber.asc())
             )
             stakedTokensResult = await self.retriever.database.execute(query=stakedQuery)
@@ -59,7 +59,7 @@ class TokenStakingProcessor:
                 sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.toAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
                 .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
                 .where(TokenTransfersTable.c.registryAddress == registryAddress)
-                .where(TokenTransfersTable.c.fromAddress == stakingAddresses)
+                .where(TokenTransfersTable.c.fromAddress == stakingAddress)
                 .order_by(TokenTransfersTable.c.blockNumber.asc())
                 )
             unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
@@ -70,5 +70,5 @@ class TokenStakingProcessor:
             for tokenId, ownerAddress, transactionHash, blockDate in unStakedTokens:
                 if currentlyStakedTokens[tokenId][2] < blockDate:
                     del currentlyStakedTokens[tokenId]
-            retrievedStakedTokens += [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=stakingAddresses, ownerAddress=ownerAddress, stakedDate=stakedDate, transactionHash=transactionHash) for tokenId, (ownerAddress, transactionHash, stakedDate) in currentlyStakedTokens.items()]
+            retrievedStakedTokens += [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=stakingAddress, ownerAddress=ownerAddress, stakedDate=stakedDate, transactionHash=transactionHash) for tokenId, (ownerAddress, transactionHash, stakedDate) in currentlyStakedTokens.items()]
         return retrievedStakedTokens

@@ -7,7 +7,7 @@ from core.store.retriever import StringFieldFilter
 
 from notd.messages import RefreshStakingsForCollectionMessageContent
 from notd.messages import UpdateTokenStakingMessageContent
-from notd.model import STAKING_CONTRACTS
+from notd.model import COLLECTION_CREEPZ_ADDRESS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenStakingsTable
@@ -50,8 +50,7 @@ class StakingManager:
                 await self.saver.create_token_staking(retrievedTokenStaking=retrievedTokenStaking, connection=connection)
 
     async def refresh_stakings_for_collections_deferred(self) -> None:
-        for index, address in enumerate(STAKING_CONTRACTS):
-            await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=address).to_message(), delaySeconds=index*10)
+        await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=COLLECTION_CREEPZ_ADDRESS).to_message())
 
     async def refresh_collection_stakings_deferred(self, address: str) -> None:
         await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=address).to_message())
