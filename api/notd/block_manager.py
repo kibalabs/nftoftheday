@@ -33,14 +33,14 @@ from notd.token_manager import TokenManager
 
 class BlockManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, stakingManager: TokenStakingManager, tokenManager: TokenManager) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, tokenStakingManager: TokenStakingManager, tokenManager: TokenManager) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
         self.blockProcessor = blockProcessor
         self.ownershipManager = ownershipManager
         self.collectionManager = collectionManager
-        self.stakingManager = stakingManager
+        self.tokenStakingManager = tokenStakingManager
         self.tokenManager = tokenManager
 
     async def receive_new_blocks_deferred(self) -> None:
@@ -84,7 +84,7 @@ class BlockManager:
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
         stakingCollectionTokenIds = {(transfer.registryAddress, transfer.tokenId) for transfer in processedBlock.retrievedTokenTransfers if (transfer.fromAddress in STAKING_ADDRESSES) or (transfer.toAddress in STAKING_ADDRESSES)}
         if not shouldSkipUpdatingStakings:
-            await self.stakingManager.update_token_stakings_deferred(stakingCollectionTokenIds=stakingCollectionTokenIds)
+            await self.tokenStakingManager.update_token_stakings_deferred(stakingCollectionTokenIds=stakingCollectionTokenIds)
         if not shouldSkipUpdatingOwnerships:
             await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:

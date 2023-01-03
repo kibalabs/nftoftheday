@@ -151,7 +151,7 @@ class ApiTokenStaking(BaseModel):
     ownerAddress: str
     registryAddress: str
     tokenId: str
-    stakingDate: datetime.datetime
+    stakedDate: datetime.datetime
 
 
 class ApiGalleryToken(BaseModel):

@@ -30,7 +30,7 @@ from notd.lock_manager import LockManager
 from notd.manager import NotdManager
 from notd.notd_message_processor import NotdMessageProcessor
 from notd.ownership_manager import OwnershipManager
-from notd.token_staking_manager import StakingManager
+from notd.token_staking_manager import TokenStakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_attributes_processor import TokenAttributeProcessor
@@ -96,9 +96,9 @@ async def main():
     badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
     delegationManager = DelegationManager(ethClient=ethClient)
     tokenStakingProcessor = TokenStakingProcessor(retriever=retriever)
-    stakingManager = StakingManager(retriever=retriever, saver=saver, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
-    blockManager = BlockManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager, stakingManager=stakingManager)
-    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, stakingManager=stakingManager, requester=requester, revueApiKey=revueApiKey)
+    tokenStakingManager = TokenStakingManager(retriever=retriever, saver=saver, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
+    blockManager = BlockManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager, tokenStakingManager=tokenStakingManager)
+    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, requester=requester, revueApiKey=revueApiKey)
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
     workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
