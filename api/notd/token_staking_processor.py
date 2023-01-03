@@ -24,12 +24,14 @@ class TokenStakingProcessor:
 
     async def get_staked_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
         for stakingAddress in STAKING_CONTRACTS:
-            latestTokenTransfers = await self.retriever.list_token_transfers(fieldFilters=[
+            latestTokenTransfers = await self.retriever.list_token_transfers(
+                fieldFilters=[
                     StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=registryAddress),
-                    StringFieldFilter(fieldName=TokenStakingsTable.c.tokenId.key, eq=tokenId)
+                    StringFieldFilter(fieldName=TokenStakingsTable.c.tokenId.key, eq=tokenId),
                 ],
-            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
-            limit=1)
+                orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+                limit=1,
+            )
             latestTokenTransfer = latestTokenTransfers[0]
             if latestTokenTransfer.fromAddress == stakingAddress:
                 return None
