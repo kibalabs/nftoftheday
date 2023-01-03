@@ -30,7 +30,7 @@ from notd.lock_manager import LockManager
 from notd.manager import NotdManager
 from notd.notd_message_processor import NotdMessageProcessor
 from notd.ownership_manager import OwnershipManager
-from notd.staking_manager import StakingManager
+from notd.token_staking_manager import StakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_attributes_processor import TokenAttributeProcessor

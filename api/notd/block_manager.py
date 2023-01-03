@@ -19,11 +19,11 @@ from notd.collection_manager import CollectionManager
 from notd.messages import ProcessBlockMessageContent
 from notd.messages import ReceiveNewBlocksMessageContent
 from notd.messages import ReprocessBlocksMessageContent
-from notd.model import CREEPZ_STAKING_CONTRACT
+from notd.model import STAKING_ADDRESSES
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 from notd.ownership_manager import OwnershipManager
-from notd.staking_manager import StakingManager
+from notd.token_staking_manager import TokenStakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -33,7 +33,7 @@ from notd.token_manager import TokenManager
 
 class BlockManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, stakingManager: StakingManager, tokenManager: TokenManager) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, stakingManager: TokenStakingManager, tokenManager: TokenManager) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -82,7 +82,7 @@ class BlockManager:
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
         collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
-        stakingCollectionTokenIds = {(transfer.registryAddress, transfer.tokenId) for transfer in processedBlock.retrievedTokenTransfers if CREEPZ_STAKING_CONTRACT in (transfer.fromAddress, transfer.toAddress)}
+        stakingCollectionTokenIds = {(transfer.registryAddress, transfer.tokenId) for transfer in processedBlock.retrievedTokenTransfers if (transfer.fromAddress in STAKING_ADDRESSES) or (transfer.toAddress in STAKING_ADDRESSES)}
         if not shouldSkipUpdatingStakings:
             await self.stakingManager.update_token_stakings_deferred(stakingCollectionTokenIds=stakingCollectionTokenIds)
         if not shouldSkipUpdatingOwnerships:

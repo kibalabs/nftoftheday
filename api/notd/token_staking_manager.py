@@ -7,14 +7,14 @@ from core.store.retriever import StringFieldFilter
 
 from notd.messages import RefreshStakingsForCollectionMessageContent
 from notd.messages import UpdateTokenStakingMessageContent
-from notd.model import COLLECTION_CREEPZ_ADDRESS
+from notd.model import GALLERY_COLLECTIONS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenStakingsTable
 from notd.token_staking_processor import TokenStakingProcessor
 
 
-class StakingManager:
+class TokenStakingManager:
 
     def __init__(self, retriever: Retriever,saver: Saver, tokenQueue: SqsMessageQueue, workQueue: SqsMessageQueue, tokenStakingProcessor: TokenStakingProcessor) -> None:
         self.retriever = retriever
@@ -50,13 +50,14 @@ class StakingManager:
                 await self.saver.create_token_staking(retrievedTokenStaking=retrievedTokenStaking, connection=connection)
 
     async def refresh_stakings_for_collections_deferred(self) -> None:
-        await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=COLLECTION_CREEPZ_ADDRESS).to_message())
+        for index, stakingAddress in enumerate(GALLERY_COLLECTIONS):
+            await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=stakingAddress).to_message(), delaySeconds=index*20)
 
     async def refresh_collection_stakings_deferred(self, address: str) -> None:
         await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=address).to_message())
 
     async def refresh_collection_stakings(self, address: str) -> None:
-        retrievedTokenStakings = await self.tokenStakingProcessor.get_all_staked_creepz_tokens(registryAddress=address)
+        retrievedTokenStakings = await self.tokenStakingProcessor.get_all_staked_tokens(registryAddress=address)
         async with self.saver.create_transaction() as connection:
             currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
                 StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=address)

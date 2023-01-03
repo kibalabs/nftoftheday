@@ -11,7 +11,8 @@ from core.store.retriever import StringFieldFilter
 
 from notd.model import RetrievedTokenStaking
 from notd.store.retriever import Retriever
-from notd.model import STAKING_CONTRACTS
+from notd.model import STAKING_ADDRESSES
+from notd.model import COLLECTION_CREEPZ_ADDRESS
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TokenTransfersTable
@@ -23,7 +24,7 @@ class TokenStakingProcessor:
         self.retriever = retriever
 
     async def get_staked_token(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
-        for stakingAddress in STAKING_CONTRACTS:
+        for stakingAddress in STAKING_ADDRESSES:
             latestTokenTransfers = await self.retriever.list_token_transfers(
                 fieldFilters=[
                     StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=registryAddress),
@@ -45,9 +46,11 @@ class TokenStakingProcessor:
             )
         return retrievedTokenStaking
 
-    async def get_all_staked_creepz_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
-        retrievedStakedTokens = []
-        for stakingAddress in STAKING_CONTRACTS:
+    async def get_all_staked_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
+        retrievedStakedTokens: List[RetrievedTokenStaking] = []
+        if registryAddress != COLLECTION_CREEPZ_ADDRESS:
+            return retrievedStakedTokens
+        for stakingAddress in STAKING_ADDRESSES:
             stakedQuery = (
                 sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
                 .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)

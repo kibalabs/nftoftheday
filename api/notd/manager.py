@@ -43,7 +43,7 @@ from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
 from notd.ownership_manager import OwnershipManager
-from notd.staking_manager import StakingManager
+from notd.token_staking_manager import TokenStakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -67,7 +67,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, stakingManager: StakingManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, tokenStakingManager: TokenStakingManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -75,7 +75,7 @@ class NotdManager:
         self.collectionManager = collectionManager
         self.ownershipManager = ownershipManager
         self.listingManager = listingManager
-        self.stakingManager = stakingManager
+        self.tokenStakingManager = tokenStakingManager
         self.attributeManager = attributeManager
         self.activityManager = activityManager
         self.blockManager = blockManager
@@ -562,13 +562,13 @@ class NotdManager:
         await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()
 
     async def refresh_stakings_for_collections_deferred(self) -> None:
-        await self.stakingManager.refresh_stakings_for_collections_deferred()
+        await self.tokenStakingManager.refresh_stakings_for_collections_deferred()
 
     async def refresh_collection_stakings(self, registryAddress: str) -> None:
-        await self.stakingManager.refresh_collection_stakings(address=registryAddress)
+        await self.tokenStakingManager.refresh_collection_stakings(address=registryAddress)
 
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
-        await self.stakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+        await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token_staking_deferred(self, registryAddress: str, tokenId: str) -> None:
-        await self.stakingManager.update_token_staking_deferred(registryAddress=registryAddress, tokenId=tokenId)
+        await self.tokenStakingManager.update_token_staking_deferred(registryAddress=registryAddress, tokenId=tokenId)
