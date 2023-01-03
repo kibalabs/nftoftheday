@@ -11,18 +11,27 @@ CREATE INDEX mvw_user_registry_first_ownerships_registry_address ON mvw_user_reg
 
 CREATE MATERIALIZED VIEW mvw_user_registry_ordered_ownerships AS (
     (
-        SELECT tbl_token_metadatas.registry_address, tbl_token_metadatas.token_id, vw_token_ownerships.owner_address, vw_token_ownerships.quantity, row_number() OVER (
-            PARTITION BY vw_token_ownerships.registry_address, vw_token_ownerships.owner_address
-            ORDER BY vw_token_ownerships.latest_transfer_date ASC
+        SELECT tbl_token_metadatas.registry_address, tbl_token_metadatas.token_id, tbl_token_ownerships.owner_address, 1 AS quantity, row_number() OVER (
+            PARTITION BY tbl_token_ownerships.registry_address, tbl_token_ownerships.owner_address
+            ORDER BY tbl_token_ownerships.transfer_date ASC
         ) AS owner_token_index
         FROM tbl_token_metadatas
-        JOIN vw_token_ownerships ON vw_token_ownerships.token_id = tbl_token_metadatas.token_id
-            AND vw_token_ownerships.registry_address = tbl_token_metadatas.registry_address
-            AND vw_token_ownerships.quantity > 0
-        WHERE vw_token_ownerships.registry_address = ANY(array(select registry_address from tbl_gallery_customers))
+        JOIN tbl_token_ownerships ON tbl_token_ownerships.token_id = tbl_token_metadatas.token_id
+            AND tbl_token_ownerships.registry_address = tbl_token_metadatas.registry_address
+        WHERE tbl_token_ownerships.registry_address = ANY(array(select registry_address from tbl_gallery_customers))
+    ) UNION (
+        SELECT tbl_token_metadatas.registry_address, tbl_token_metadatas.token_id, tbl_token_multi_ownerships.owner_address, tbl_token_multi_ownerships.quantity, row_number() OVER (
+            PARTITION BY tbl_token_multi_ownerships.registry_address, tbl_token_multi_ownerships.owner_address
+            ORDER BY tbl_token_multi_ownerships.latest_transfer_date ASC
+        ) AS owner_token_index
+        FROM tbl_token_metadatas
+        JOIN tbl_token_multi_ownerships ON tbl_token_multi_ownerships.token_id = tbl_token_metadatas.token_id
+            AND tbl_token_multi_ownerships.registry_address = tbl_token_metadatas.registry_address
+            AND tbl_token_multi_ownerships.quantity > 0
+        WHERE tbl_token_multi_ownerships.registry_address = ANY(array(select registry_address from tbl_gallery_customers))
     )
 );
-CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address_token_id_owner_address ON mvw_user_registry_ordered_ownerships (registry_address, token_id, owner_address);
+CREATE UNiQUE INDEX mvw_user_registry_ordered_ownerships_registry_address_token_id_owner_address ON mvw_user_registry_ordered_ownerships (registry_address, token_id, owner_address);
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address ON mvw_user_registry_ordered_ownerships (registry_address);
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address_token_id ON mvw_user_registry_ordered_ownerships (registry_address, token_id);
 CREATE INDEX mvw_user_registry_ordered_ownerships_registry_address_owner_address ON mvw_user_registry_ordered_ownerships (registry_address, owner_address);
@@ -34,9 +43,6 @@ CREATE VIEW vw_token_ownerships AS
 ) UNION (
     SELECT id, created_date, updated_date, registry_address, token_id, owner_address, average_transfer_value, latest_transfer_date, latest_transfer_transaction_hash, quantity
     FROM tbl_token_multi_ownerships
-)UNION (
-    SELECT id, created_date, updated_date, registry_address, token_id, owner_address, 0 AS average_transfer_value, staked_date AS latest_transfer_date, transaction_hash AS latest_transfer_transaction_hash, 1 AS quantity
-    FROM tbl_token_stakings
 );
 
 CREATE VIEW vw_ordered_token_listings AS
