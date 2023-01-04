@@ -349,9 +349,8 @@ class GalleryManager:
         userCountsResult = await self.retriever.database.execute(query=userCountsQuery)
         totalCountRow = userCountsResult.first()
         chosenTokensQuery = (
-            sqlalchemy.select(TokenMetadatasTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenStakingsTable.c.ownerAddress)
+            sqlalchemy.select(TokenMetadatasTable, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
                 .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == TokenMetadatasTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.tokenId == TokenMetadatasTable.c.tokenId))
-                .join(TokenStakingsTable, sqlalchemy.and_(TokenStakingsTable.c.stakingAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenStakingsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenStakingsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(ownerAddresses))
         )
