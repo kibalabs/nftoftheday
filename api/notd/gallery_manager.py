@@ -161,7 +161,6 @@ class GalleryManager:
                 .join(TokenStakingsTable, sqlalchemy.and_(TokenOwnershipsView.c.registryAddress == TokenStakingsTable.c.registryAddress, TokenOwnershipsView.c.ownerAddress == TokenStakingsTable.c.stakingAddress, TokenOwnershipsView.c.tokenId == TokenStakingsTable.c.tokenId), isouter=True)
                 .where(TokenMetadatasTable.c.registryAddress == registryAddress)
                 .where(TokenOwnershipsView.c.quantity > 0)
-                .where(TokenOwnershipsView.c.ownerAddress.not_in(STAKING_ADDRESSES))
                 .group_by(TokenMetadatasTable.c.tokenMetadataId, TokenCustomizationsTable.c.tokenCustomizationId, OrderedTokenListingsView.c, TokenStakingsTable.c, TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
                 .limit(limit)
                 .offset(offset)
@@ -311,15 +310,14 @@ class GalleryManager:
         ownedCountColumn = sqlalchemy.func.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')
         uniqueOwnedCountColumn = sqlalchemy.func.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')
         usersQueryBase = (
-            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, TokenStakingsTable.c.ownerAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
                 .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
-                .join(TokenStakingsTable, sqlalchemy.and_(TokenStakingsTable.c.stakingAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenStakingsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenStakingsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
-                .where(TokenStakingsTable.c.ownerAddress.not_in(STAKING_ADDRESSES))
-                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenStakingsTable.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.not_in(STAKING_ADDRESSES))
+                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
         if not order or order == 'TOKENCOUNT_DESC':
@@ -343,7 +341,7 @@ class GalleryManager:
             raise BadRequestException('Unknown order')
         usersResult = await self.retriever.database.execute(query=usersQuery)
         userRows = list(usersResult.mappings())
-        ownerAddresses = {userRow[TokenStakingsTable.c.ownerAddress] or userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress] for userRow in userRows}
+        ownerAddresses = [userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress] for userRow in userRows]
         userCountsQuery = (
             sqlalchemy.select(sqlalchemy.func.count(sqlalchemy.func.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
@@ -355,7 +353,6 @@ class GalleryManager:
                 .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == TokenMetadatasTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.tokenId == TokenMetadatasTable.c.tokenId))
                 .join(TokenStakingsTable, sqlalchemy.and_(TokenStakingsTable.c.stakingAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenStakingsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenStakingsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
-                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex <= 5)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(ownerAddresses))
         )
         chosenTokensResult = await self.retriever.database.execute(query=chosenTokensQuery)
@@ -373,7 +370,7 @@ class GalleryManager:
             galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersView.c.ownerAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
         items = [GalleryUserRow(
             galleryUser=GalleryUser(
-                address=userRow[TokenStakingsTable.c.ownerAddress] or userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
+                address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
                 registryAddress=registryAddress,
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
@@ -381,7 +378,7 @@ class GalleryManager:
                 uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'],
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
-            chosenOwnedTokens=chosenTokens[userRow[TokenStakingsTable.c.ownerAddress]] or chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
+            chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=int(totalCountRow[0] if totalCountRow else 0))
