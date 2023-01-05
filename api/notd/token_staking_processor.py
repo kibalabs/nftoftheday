@@ -47,9 +47,9 @@ class TokenStakingProcessor:
                 return None
             latestTokenTransfers = await self.retriever.list_token_transfers(
                     fieldFilters=[
-                        StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=registryAddress),
-                        StringFieldFilter(fieldName=TokenStakingsTable.c.tokenId.key, eq=tokenId),
-                        StringFieldFilter(fieldName=TokenStakingsTable.c.toAddress.key, eq=stakingAddress),
+                        StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                        StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+                        StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=stakingAddress),
                     ],
                     orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
                     limit=1,
