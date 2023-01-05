@@ -21,6 +21,7 @@ from notd.store.schema import BlocksTable
 from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TokenTransfersTable
 
+
 class InvalidTokenStakingContract(BadRequestException):
     pass
 
