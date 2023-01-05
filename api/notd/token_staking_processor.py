@@ -38,10 +38,10 @@ class TokenStakingProcessor:
     async def get_updated_token_staking(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
         for stakingAddress in STAKING_ADDRESSES:
             try:
-                tokenOwnerResponse = (await self.ethClient.call_function(toAddress=stakingAddress, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingOwnerOfFunctionAbi, arguments={'tokenId': int(tokenId), 'contractAddress': registryAddress}))
+                tokenOwnerResponse = (await self.ethClient.call_function(toAddress=stakingAddress, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingOwnerOfFunctionAbi, arguments={'tokenId': int(tokenId), 'contractAddress': registryAddress}))[0]
             except BadRequestException:
                 raise InvalidTokenStakingContract()
-            ownerAddress = tokenOwnerResponse[0]
+            ownerAddress = tokenOwnerResponse
             if ownerAddress == BURN_ADDRESS:
                 return None
             latestTokenTransfers = await self.retriever.list_token_transfers(
