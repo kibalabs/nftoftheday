@@ -13,7 +13,6 @@ from notd.messages import RefreshGalleryBadgeHoldersForAllCollectionsMessageCont
 from notd.messages import RefreshGalleryBadgeHoldersForCollectionMessageContent
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollectionMessageContent
-from notd.messages import UpdateTokenStakingsForCollectionMessageContent
 from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
@@ -28,6 +27,7 @@ from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
 from notd.messages import UpdateTokenStakingMessageContent
+from notd.messages import UpdateTokenStakingsForCollectionMessageContent
 from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 from notd.messages import UpdateTotalActivityForCollectionMessageContent
 
