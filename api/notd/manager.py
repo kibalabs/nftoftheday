@@ -43,7 +43,6 @@ from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
 from notd.ownership_manager import OwnershipManager
-from notd.token_staking_manager import TokenStakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
@@ -55,6 +54,7 @@ from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
+from notd.token_staking_manager import TokenStakingManager
 from notd.twitter_manager import TwitterManager
 
 _REGISTRY_BLACKLIST = set([

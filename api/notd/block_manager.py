@@ -23,12 +23,12 @@ from notd.model import STAKING_ADDRESSES
 from notd.model import ProcessedBlock
 from notd.model import RetrievedTokenTransfer
 from notd.ownership_manager import OwnershipManager
-from notd.token_staking_manager import TokenStakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import TokenTransfersTable
 from notd.token_manager import TokenManager
+from notd.token_staking_manager import TokenStakingManager
 
 
 class BlockManager:

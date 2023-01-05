@@ -38,7 +38,6 @@ from notd.listing_manager import ListingManager
 from notd.lock_manager import LockManager
 from notd.manager import NotdManager
 from notd.ownership_manager import OwnershipManager
-from notd.token_staking_manager import TokenStakingManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.token_attributes_processor import TokenAttributeProcessor
@@ -46,6 +45,7 @@ from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
+from notd.token_staking_manager import TokenStakingManager
 from notd.token_staking_processor import TokenStakingProcessor
 from notd.twitter_manager import TwitterManager
 
