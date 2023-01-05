@@ -5,8 +5,8 @@ from core import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 
-from notd.messages import UpdateTokenStakingsForCollectionMessageContent
 from notd.messages import UpdateTokenStakingMessageContent
+from notd.messages import UpdateTokenStakingsForCollectionMessageContent
 from notd.model import GALLERY_COLLECTIONS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
