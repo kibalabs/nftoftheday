@@ -13,7 +13,7 @@ from notd.messages import RefreshGalleryBadgeHoldersForAllCollectionsMessageCont
 from notd.messages import RefreshGalleryBadgeHoldersForCollectionMessageContent
 from notd.messages import RefreshListingsForAllCollections
 from notd.messages import RefreshListingsForCollectionMessageContent
-from notd.messages import RefreshStakingsForCollectionMessageContent
+from notd.messages import UpdateTokenStakingsForCollectionMessageContent
 from notd.messages import RefreshViewsMessageContent
 from notd.messages import ReprocessBlocksMessageContent
 from notd.messages import UpdateActivityForAllCollectionsMessageContent
@@ -160,9 +160,9 @@ class NotdMessageProcessor(MessageProcessor):
             refreshGalleryBadgeHoldersForCollectionMessageContent = RefreshGalleryBadgeHoldersForCollectionMessageContent.parse_obj(message.content)  # pylint: disable=invalid-name
             await self.notdManager.refresh_gallery_badge_holders_for_collection(registryAddress=refreshGalleryBadgeHoldersForCollectionMessageContent.registryAddress)
             return
-        if message.command == RefreshStakingsForCollectionMessageContent.get_command():
-            refreshStakingsForCollectionMessageContent = RefreshStakingsForCollectionMessageContent.parse_obj(message.content)
-            await self.notdManager.refresh_collection_stakings(registryAddress=refreshStakingsForCollectionMessageContent.address)
+        if message.command == UpdateTokenStakingsForCollectionMessageContent.get_command():
+            updateTokenStakingsForCollectionMessageContent = UpdateTokenStakingsForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_stakings_for_collection(registryAddress=updateTokenStakingsForCollectionMessageContent.address)
             return
         if message.command == UpdateTokenStakingMessageContent.get_command():
             updateTokenStakingMessageContent = UpdateTokenStakingMessageContent.parse_obj(message.content)

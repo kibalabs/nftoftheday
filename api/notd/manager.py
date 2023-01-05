@@ -561,14 +561,14 @@ class NotdManager:
     async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
         await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()
 
-    async def refresh_stakings_for_collections_deferred(self) -> None:
-        await self.tokenStakingManager.refresh_stakings_for_collections_deferred()
+    async def update_token_stakings_for_all_collections_deferred(self) -> None:
+        await self.tokenStakingManager.update_token_stakings_for_all_collections_deferred()
 
-    async def refresh_collection_stakings(self, registryAddress: str) -> None:
-        await self.tokenStakingManager.refresh_collection_stakings(address=registryAddress)
-
-    async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
-        await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+    async def update_token_stakings_for_collection(self, registryAddress: str) -> None:
+        await self.tokenStakingManager.update_token_stakings_for_collection(address=registryAddress)
 
     async def update_token_staking_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking_deferred(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
+        await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)

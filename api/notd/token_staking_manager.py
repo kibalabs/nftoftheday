@@ -5,7 +5,7 @@ from core import logging
 from core.queues.sqs_message_queue import SqsMessageQueue
 from core.store.retriever import StringFieldFilter
 
-from notd.messages import RefreshStakingsForCollectionMessageContent
+from notd.messages import UpdateTokenStakingsForCollectionMessageContent
 from notd.messages import UpdateTokenStakingMessageContent
 from notd.model import GALLERY_COLLECTIONS
 from notd.store.retriever import Retriever
@@ -34,7 +34,7 @@ class TokenStakingManager:
         await self.tokenQueue.send_message(message=UpdateTokenStakingMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
-        retrievedTokenStaking = await self.tokenStakingProcessor.get_updated_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+        retrievedTokenStaking = await self.tokenStakingProcessor.retrieve_updated_token_staking(registryAddress=registryAddress, tokenId=tokenId)
         async with self.saver.create_transaction() as connection:
             currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
                 StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=registryAddress),
@@ -49,15 +49,15 @@ class TokenStakingManager:
                 logging.info(f'Saving stakings for registryAddress: {registryAddress}, tokenId: {tokenId}')
                 await self.saver.create_token_staking(retrievedTokenStaking=retrievedTokenStaking, connection=connection)
 
-    async def refresh_stakings_for_collections_deferred(self) -> None:
+    async def update_token_stakings_for_all_collections_deferred(self) -> None:
         for index, stakingAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=stakingAddress).to_message(), delaySeconds=index*20)
+            await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=stakingAddress).to_message(), delaySeconds=index*20)
 
-    async def refresh_collection_stakings_deferred(self, address: str) -> None:
-        await self.workQueue.send_message(message=RefreshStakingsForCollectionMessageContent(address=address).to_message())
+    async def update_token_stakings_for_collection_deferred(self, address: str) -> None:
+        await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=address).to_message())
 
-    async def refresh_collection_stakings(self, address: str) -> None:
-        retrievedTokenStakings = await self.tokenStakingProcessor.get_all_staked_tokens(registryAddress=address)
+    async def update_token_stakings_for_collection(self, address: str) -> None:
+        retrievedTokenStakings = await self.tokenStakingProcessor.retrieve_token_stakings(registryAddress=address)
         async with self.saver.create_transaction() as connection:
             currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
                 StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=address)

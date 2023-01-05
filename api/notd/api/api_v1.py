@@ -25,7 +25,7 @@ from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
-from notd.api.endpoints_v1 import RefreshStakingsDeferredResponse
+from notd.api.endpoints_v1 import UpdateStakingsForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
 from notd.api.endpoints_v1 import RetrieveMostTradedRequest
@@ -117,10 +117,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.refresh_latest_listings_for_all_collections_deferred()
         return RefreshLatestListingsAllCollectionsDeferredResponse()
 
-    @router.post('/collections/refresh-stakings-deferred', response_model=RefreshStakingsDeferredResponse)
-    async def refresh_stakings_for_collections_deferred() -> RefreshStakingsDeferredResponse:
-        await notdManager.refresh_stakings_for_collections_deferred()
-        return RefreshStakingsDeferredResponse()
+    @router.post('/collections/update-stakings-deferred', response_model=UpdateStakingsForAllCollectionsDeferredResponse)
+    async def update_token_stakings_for_all_collections_deferred() -> UpdateStakingsForAllCollectionsDeferredResponse:
+        await notdManager.update_token_stakings_for_all_collections_deferred()
+        return UpdateStakingsForAllCollectionsDeferredResponse()
 
     @router.post('/collections/update-activity-deferred', response_model=UpdateActivityForAllCollectionsDeferredResponse)
     async def update_activity_for_all_collections_deferred() -> UpdateActivityForAllCollectionsDeferredResponse:

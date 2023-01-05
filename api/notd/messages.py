@@ -98,8 +98,8 @@ class RefreshListingsForCollectionMessageContent(MessageContent):
     address: str
 
 
-class RefreshStakingsForCollectionMessageContent(MessageContent):
-    _COMMAND = 'REFRESH_STAKINGS_FOR_COLLECTION'
+class UpdateTokenStakingsForCollectionMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_STAKINGS_FOR_COLLECTION'
     address: str
 
 class UpdateTokenStakingMessageContent(MessageContent):

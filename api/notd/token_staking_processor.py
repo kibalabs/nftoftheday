@@ -35,7 +35,8 @@ class TokenStakingProcessor:
         self.creepzStakingContractAbi = contractJson['abi']
         self.creepzStakingOwnerOfFunctionAbi = [internalAbi for internalAbi in self.creepzStakingContractAbi if internalAbi.get('name') == 'ownerOf'][0]
 
-    async def get_updated_token_staking(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
+    # TODO(krishan711): this function is def wrong if there are multiple staking addresses
+    async def retrieve_updated_token_staking(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
         for stakingAddress in STAKING_ADDRESSES:
             try:
                 tokenOwnerResponse = (await self.ethClient.call_function(toAddress=stakingAddress, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingOwnerOfFunctionAbi, arguments={'tokenId': int(tokenId), 'contractAddress': registryAddress}))[0]
@@ -64,7 +65,8 @@ class TokenStakingProcessor:
                 )
         return retrievedTokenStaking
 
-    async def get_all_staked_tokens(self, registryAddress: str) -> List[RetrievedTokenStaking]:
+    # TODO(krishan711): this is wrong because it doesn't use the contract. it should refer to the function above
+    async def retrieve_token_stakings(self, registryAddress: str) -> List[RetrievedTokenStaking]:
         retrievedStakedTokens: List[RetrievedTokenStaking] = []
         if registryAddress != COLLECTION_CREEPZ_ADDRESS:
             return retrievedStakedTokens
@@ -84,7 +86,7 @@ class TokenStakingProcessor:
                 .where(TokenTransfersTable.c.registryAddress == registryAddress)
                 .where(TokenTransfersTable.c.fromAddress == stakingAddress)
                 .order_by(TokenTransfersTable.c.blockNumber.asc())
-                )
+            )
             unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
             unStakedTokens = list(unStakedTokensResult)
             currentlyStakedTokens: Dict[str, Tuple[str, str, datetime.datetime]] = {}
