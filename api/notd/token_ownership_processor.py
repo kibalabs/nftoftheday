@@ -24,7 +24,7 @@ class NoOwnershipException(KibaException):
 
 class TokenOwnershipProcessor:
 
-    def __init__(self,retriever: Retriever):
+    def __init__(self, retriever: Retriever):
         self.retriever = retriever
 
     async def calculate_token_single_ownership(self, registryAddress: str, tokenId: str, date: Optional[datetime.datetime] = None)-> RetrievedTokenOwnership:

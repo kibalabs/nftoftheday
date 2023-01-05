@@ -98,6 +98,16 @@ class RefreshListingsForCollectionMessageContent(MessageContent):
     address: str
 
 
+class UpdateTokenStakingsForCollectionMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_STAKINGS_FOR_COLLECTION'
+    address: str
+
+class UpdateTokenStakingMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_TOKEN_STAKING'
+    registryAddress: str
+    tokenId: str
+
+
 class RefreshCollectionOverlapMessageContent(MessageContent):
     _COMMAND = 'REFRESH_COLLECTION_OVERLAP'
     registryAddress: str

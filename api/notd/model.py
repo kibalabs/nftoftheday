@@ -31,6 +31,7 @@ OPENSEA_WYVERN_1_ADDRESS = '0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b'
 OPENSEA_WYVERN_2_ADDRESS = '0x7f268357A8c2552623316e2562D90e642bB538E5'
 LOOKSRARE_MARKETPLACE_ADDRESS = '0x59728544B08AB483533076417FbBB2fD0B17CE3a'
 
+CREEPZ_STAKING_ADDRESS = '0xC3503192343EAE4B435E4A1211C5d28BF6f6a696'
 
 MARKETPLACE_ADDRESSES = {
     OPENSEA_SEAPORT_ADDRESS,
@@ -56,6 +57,10 @@ GALLERY_COLLECTION_ADMINS = {
         '0xCE11D6fb4f1e006E5a348230449Dc387fde850CC',
     ],
 }
+
+STAKING_ADDRESSES = [
+    CREEPZ_STAKING_ADDRESS,
+]
 
 ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
 
@@ -470,10 +475,28 @@ class TwitterProfile(RetrievedTwitterProfile):
 
 
 @dataclasses.dataclass
+class RetrievedTokenStaking:
+    stakingAddress: str
+    ownerAddress: str
+    registryAddress: str
+    tokenId: str
+    stakedDate: datetime.datetime
+    transactionHash: str
+
+
+@dataclasses.dataclass
+class TokenStaking(RetrievedTokenStaking):
+    tokenStakingId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
 class GalleryToken:
     tokenMetadata: TokenMetadata
     tokenCustomization: Optional[TokenCustomization]
     tokenListing: Optional[TokenListing]
+    tokenStaking: Optional[TokenStaking]
     quantity: int
 
 
