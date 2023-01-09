@@ -18,7 +18,6 @@ from notd.model import STAKING_ADDRESSES
 from notd.model import RetrievedTokenStaking
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
-from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TokenTransfersTable
 
 
