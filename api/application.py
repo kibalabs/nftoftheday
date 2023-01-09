@@ -126,6 +126,7 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'https://mdtp-gallery.kibalabs.com',
     'https://gallery.spriteclubnft.com',
     'https://gallery.milliondollartokenpage.com',
+    'https://gallery.rudeboys.io',
 ], allow_origin_regex='https://.*\.tokenpage\.xyz')
 
 @app.on_event('startup')
