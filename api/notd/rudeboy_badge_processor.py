@@ -54,3 +54,44 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         result = await self.retriever.database.execute(query=query)
         oneOfOneBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="ONE_OF_ONE", achievedDate=row.achievedDate) for row in result.mappings()]
         return oneOfOneBadgeHolders
+
+    async def calculate_never_sold_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        soldTokenQuery = (
+                sqlalchemy.select(TokenTransfersTable.c.fromAddress)
+                .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
+                .group_by(TokenTransfersTable.c.fromAddress)
+            )
+        query = (
+                sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemy.func.min(BlocksTable.c.blockDate).label('achievedDate'))
+                .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
+                .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
+                .where(TokenTransfersTable.c.toAddress.not_in(soldTokenQuery))
+                .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.toAddress)
+            )
+        result = await self.retriever.database.execute(query=query)
+        neverSoldBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="NEVER_SOLD", achievedDate=row.achievedDate) for row in result.mappings()]
+        return neverSoldBadgeHolders
+
+    async def calculate_collector_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
+
+    async def calculate_holder_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
+
+    async def calculate_diamond_hands_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
+
+    async def calculate_holder_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
+
+    async def calculate_seeing_double_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
+
+    async def calculate_first_ten_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
+
+    async def calculate_member_of_month_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
+
+    async def calculate_special_edition_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
+        pass
