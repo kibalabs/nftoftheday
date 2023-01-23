@@ -26,7 +26,16 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
     async def calculate_all_gallery_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         minterBadgeHolders = await self.calculate_minter_badge_holders()
         oneOfOneBadgeHolders = await self.calculate_one_of_one_badge_holders()
-        allBadges = minterBadgeHolders + oneOfOneBadgeHolders
+        neverSoldBadgeHolders =  await self.calculate_never_sold_badge_holders()
+        collectorBadgeHolders =  await self.calculate_collector_badge_holders()
+        hodlerBadgeHolders =  await self.calculate_hodler_badge_holders()
+        diamondHandsBadgeHolders =  await self.calculate_diamond_hands_badge_holders()
+        enthusiastBadgeHolders =  await self.calculate_enthusiast_badge_holders()
+        seeingDoubleBadgeHolders =  await self.calculate_seeing_double_badge_holders()
+        firstTenBadgeHolders =  await self.calculate_first_ten_badge_holders()
+        memberOfMonthBadgeHolders =  await self.calculate_member_of_month_holders()
+        specialEditionBadgeHolders =  await self.calculate_special_edition_badge_holders()
+        allBadges = minterBadgeHolders + oneOfOneBadgeHolders + specialEditionBadgeHolders + neverSoldBadgeHolders + collectorBadgeHolders + hodlerBadgeHolders + diamondHandsBadgeHolders + enthusiastBadgeHolders + seeingDoubleBadgeHolders + firstTenBadgeHolders + memberOfMonthBadgeHolders
         return allBadges
 
     async def calculate_minter_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
@@ -76,57 +85,51 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         neverSoldBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="NEVER_SOLD", achievedDate=row.achievedDate) for row in result.mappings()]
         return neverSoldBadgeHolders
 
-    async def _get_holders_per_limits(self, lowerLimit: int, higherLimit: int) -> List[Tuple[str, str, datetime.datetime]]:
-        subQuery = (
-            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
-            .having(sqlalchemy.func.max(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex) >= lowerLimit)
-            .having(sqlalchemy.func.max(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex) <= higherLimit)
-            .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
-        )
+    async def _get_holders_per_limit(self, rewardTokenIndex: int) -> List[Tuple[str, str, datetime.datetime]]:
         query = (
             sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.latestTransferDate.label('achievedDate'))
             .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(subQuery))
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex == lowerLimit)
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
+            .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex == rewardTokenIndex)
         )
         result = await self.retriever.database.execute(query=query)
         holders = [(registryAddress, ownerAddress, achievedDate) for registryAddress, ownerAddress, achievedDate in result] #pylint: disable=unnecessary-comprehension
         return holders
 
     async def calculate_collector_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        holders = await self._get_holders_per_limits(lowerLimit=1, higherLimit=10)
+        holders = await self._get_holders_per_limit(rewardTokenIndex=1)
         collectorBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey="COLLECTOR", achievedDate=achievedDate) for (registryAddress, ownerAddress, achievedDate) in holders]
         return collectorBadgeHolders
 
     async def calculate_hodler_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        holders = await self._get_holders_per_limits(lowerLimit=11, higherLimit=20)
+        holders = await self._get_holders_per_limit(rewardTokenIndex=11)
         hodlerBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey="HODLER", achievedDate=achievedDate) for (registryAddress, ownerAddress, achievedDate) in holders]
         return hodlerBadgeHolders
 
     async def calculate_diamond_hands_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        holders = await self._get_holders_per_limits(lowerLimit=21, higherLimit=50)
+        holders = await self._get_holders_per_limit(rewardTokenIndex=21)
         diamondHandsBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey="DIAMOND_HANDS", achievedDate=achievedDate) for (registryAddress, ownerAddress, achievedDate) in holders]
         return diamondHandsBadgeHolders
 
     async def calculate_enthusiast_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         #NOTE(Femi-Ogunkola): Using a large value for higherLimit
-        holders = await self._get_holders_per_limits(lowerLimit=51, higherLimit=3000)
+        holders = await self._get_holders_per_limit(rewardTokenIndex=51)
         enthusiastBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey="ENTHUSIAST", achievedDate=achievedDate) for (registryAddress, ownerAddress, achievedDate) in holders]
         return enthusiastBadgeHolders
 
     async def calculate_seeing_double_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         query = (
-            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemy.func.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'), UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex)
+            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemy.func.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'))
             .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 2)
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         result = await self.retriever.database.execute(query=query)
-        collectorBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="SEEING_DOUBLE", achievedDate=row.achievedDate) for row in result.mappings()]
-        return collectorBadgeHolders
+        seeingDoubleBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="SEEING_DOUBLE", achievedDate=row.achievedDate) for row in result.mappings()]
+        return seeingDoubleBadgeHolders
 
     async def calculate_first_ten_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         firstTenBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
