@@ -114,7 +114,6 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return diamondHandsBadgeHolders
 
     async def calculate_enthusiast_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        #NOTE(Femi-Ogunkola): Using a large value for higherLimit
         holders = await self._get_holders_per_limit(rewardTokenIndex=51)
         enthusiastBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey="ENTHUSIAST", achievedDate=achievedDate) for (registryAddress, ownerAddress, achievedDate) in holders]
         return enthusiastBadgeHolders
