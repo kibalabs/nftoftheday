@@ -15,7 +15,7 @@ from notd.store.schema import TokenTransfersTable
 from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 
 RUDEBOYS_OWNER_ADDRESS = '0xAb3e5a900663ea8C573B8F893D540D331fbaB9F5'
-RUDEBOYS_SPECIAL_EDITION_TOKENS = []
+RUDEBOYS_SPECIAL_EDITION_TOKENS: List[int] = []
 
 class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
@@ -76,7 +76,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         neverSoldBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="NEVER_SOLD", achievedDate=row.achievedDate) for row in result.mappings()]
         return neverSoldBadgeHolders
 
-    async def _get_holders_per_limits(self, lowerLimit: int, higherLimit: int) -> List[Tuple[str, str, datetime.datetime]]: 
+    async def _get_holders_per_limits(self, lowerLimit: int, higherLimit: int) -> List[Tuple[str, str, datetime.datetime]]:
         subQuery = (
             sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
@@ -92,7 +92,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex == lowerLimit)
         )
         result = await self.retriever.database.execute(query=query)
-        holders = list(result)
+        holders = [(registryAddress, ownerAddress, achievedDate) for registryAddress, ownerAddress, achievedDate in result] #pylint: disable=unnecessary-comprehension
         return holders
 
     async def calculate_collector_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
@@ -106,17 +106,15 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return hodlerBadgeHolders
 
     async def calculate_diamond_hands_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        query = await self._get_holders_per_limits(lowerLimit=21, higherLimit=50)
-        result = await self.retriever.database.execute(query=query)
-        collectorBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="DIAMOND_HANDS", achievedDate=row.achievedDate) for row in result.mappings()]
-        return collectorBadgeHolders
+        holders = await self._get_holders_per_limits(lowerLimit=21, higherLimit=50)
+        diamondHandsBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey="DIAMOND_HANDS", achievedDate=achievedDate) for (registryAddress, ownerAddress, achievedDate) in holders]
+        return diamondHandsBadgeHolders
 
     async def calculate_enthusiast_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         #NOTE(Femi-Ogunkola): Using a large value for higherLimit
-        query = await self._get_holders_per_limits(lowerLimit=51, higherLimit=3000)
-        result = await self.retriever.database.execute(query=query)
-        collectorBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="ENTHUSIASTS", achievedDate=row.achievedDate) for row in result.mappings()]
-        return collectorBadgeHolders
+        holders = await self._get_holders_per_limits(lowerLimit=51, higherLimit=3000)
+        enthusiastBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey="ENTHUSIAST", achievedDate=achievedDate) for (registryAddress, ownerAddress, achievedDate) in holders]
+        return enthusiastBadgeHolders
 
     async def calculate_seeing_double_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         query = (
@@ -131,10 +129,13 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return collectorBadgeHolders
 
     async def calculate_first_ten_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        return
+        firstTenBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
+        return firstTenBadgeHolders
 
     async def calculate_member_of_month_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        return
+        memberOfMonthBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
+        return memberOfMonthBadgeHolders
 
     async def calculate_special_edition_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        return
+        specialEditionBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
+        return specialEditionBadgeHolders
