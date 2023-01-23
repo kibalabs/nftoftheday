@@ -35,7 +35,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         seeingDoubleBadgeHolders =  await self.calculate_seeing_double_badge_holders()
         firstTenBadgeHolders =  await self.calculate_first_ten_badge_holders()
         specialEditionBadgeHolders =  await self.calculate_special_edition_badge_holders()
-        allBadges = minterBadgeHolders + oneOfOneBadgeHolders + specialEditionBadgeHolders + neverSoldBadgeHolders + collectorBadgeHolders + hodlerBadgeHolders + diamondHandsBadgeHolders + enthusiastBadgeHolders + seeingDoubleBadgeHolders + firstTenBadgeHolders 
+        allBadges = minterBadgeHolders + oneOfOneBadgeHolders + specialEditionBadgeHolders + neverSoldBadgeHolders + collectorBadgeHolders + hodlerBadgeHolders + diamondHandsBadgeHolders + enthusiastBadgeHolders + seeingDoubleBadgeHolders + firstTenBadgeHolders
         return allBadges
 
     async def calculate_minter_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
@@ -92,7 +92,6 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex == rewardTokenIndex)
-            # .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.latestTransferDate.label('achievedDate'))
         )
         result = await self.retriever.database.execute(query=query)
         holders = [(registryAddress, ownerAddress, achievedDate) for registryAddress, ownerAddress, achievedDate in result] #pylint: disable=unnecessary-comprehension
