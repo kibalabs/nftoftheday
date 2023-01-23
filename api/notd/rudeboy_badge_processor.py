@@ -124,7 +124,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
             sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemy.func.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'))
             .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 2)
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity >= 2)
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         result = await self.retriever.database.execute(query=query)
@@ -133,6 +133,21 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
     async def calculate_first_ten_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         firstTenBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
+        subquery = (
+            sqlalchemy.select(TokenTransfersTable.c.tokenId)
+            .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
+            .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
+            .where(TokenTransfersTable.c.fromAddress == RUDEBOYS_OWNER_ADDRESS)
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.toAddress)
+            .order_by(BlocksTable.c.blockDate.asc())
+            .limit(10)
+        )
+        query = (
+            sqlalchemy.select(TokenMultiOwnershipsTable.c.registryAddress.label('registryAddress'), TokenMultiOwnershipsTable.c.ownerAddress ,TokenMultiOwnershipsTable.c.latest_transfer_date.label('achievedDate'))
+            .where(TokenMultiOwnershipsTable.c.tokenId.in_(subquery))
+        )
+        result = await self.retriever.database.execute(query=query)
+        firstTenBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="FIRST_TEN", achievedDate=row.achievedDate) for row in result.mappings()]
         return firstTenBadgeHolders
 
     async def calculate_member_of_month_holders(self) -> List[RetrievedGalleryBadgeHolder]:
@@ -141,4 +156,14 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
     async def calculate_special_edition_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         specialEditionBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
+        query = (
+            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemy.func.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'))
+            .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId.in_(RUDEBOYS_SPECIAL_EDITION_TOKENS))
+            .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
+            .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+        )
+        result = await self.retriever.database.execute(query=query)
+        specialEditionBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="SEEING_DOUBLE", achievedDate=row.achievedDate) for row in result.mappings()]
         return specialEditionBadgeHolders
