@@ -16,6 +16,7 @@ from notd.store.schema import UserRegistryOrderedOwnershipsMaterializedView
 
 RUDEBOYS_OWNER_ADDRESS = '0xAb3e5a900663ea8C573B8F893D540D331fbaB9F5'
 RUDEBOYS_SPECIAL_EDITION_TOKENS: List[int] = []
+RUDEBOYS_FIRST_TEN_MINTED_TOKENS: List[str] = []
 
 class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
@@ -33,9 +34,8 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         enthusiastBadgeHolders =  await self.calculate_enthusiast_badge_holders()
         seeingDoubleBadgeHolders =  await self.calculate_seeing_double_badge_holders()
         firstTenBadgeHolders =  await self.calculate_first_ten_badge_holders()
-        memberOfMonthBadgeHolders =  await self.calculate_member_of_month_holders()
         specialEditionBadgeHolders =  await self.calculate_special_edition_badge_holders()
-        allBadges = minterBadgeHolders + oneOfOneBadgeHolders + specialEditionBadgeHolders + neverSoldBadgeHolders + collectorBadgeHolders + hodlerBadgeHolders + diamondHandsBadgeHolders + enthusiastBadgeHolders + seeingDoubleBadgeHolders + firstTenBadgeHolders + memberOfMonthBadgeHolders
+        allBadges = minterBadgeHolders + oneOfOneBadgeHolders + specialEditionBadgeHolders + neverSoldBadgeHolders + collectorBadgeHolders + hodlerBadgeHolders + diamondHandsBadgeHolders + enthusiastBadgeHolders + seeingDoubleBadgeHolders + firstTenBadgeHolders 
         return allBadges
 
     async def calculate_minter_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
@@ -91,8 +91,8 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
             .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
-            .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex == rewardTokenIndex)
+            # .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.latestTransferDate.label('achievedDate'))
         )
         result = await self.retriever.database.execute(query=query)
         holders = [(registryAddress, ownerAddress, achievedDate) for registryAddress, ownerAddress, achievedDate in result] #pylint: disable=unnecessary-comprehension
@@ -133,26 +133,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
     async def calculate_first_ten_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         firstTenBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
-        subquery = (
-            sqlalchemy.select(TokenTransfersTable.c.tokenId)
-            .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
-            .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
-            .where(TokenTransfersTable.c.fromAddress == RUDEBOYS_OWNER_ADDRESS)
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.toAddress)
-            .order_by(BlocksTable.c.blockDate.asc())
-            .limit(10)
-        )
-        query = (
-            sqlalchemy.select(TokenMultiOwnershipsTable.c.registryAddress.label('registryAddress'), TokenMultiOwnershipsTable.c.ownerAddress ,TokenMultiOwnershipsTable.c.latest_transfer_date.label('achievedDate'))
-            .where(TokenMultiOwnershipsTable.c.tokenId.in_(subquery))
-        )
-        result = await self.retriever.database.execute(query=query)
-        firstTenBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="FIRST_TEN", achievedDate=row.achievedDate) for row in result.mappings()]
         return firstTenBadgeHolders
-
-    async def calculate_member_of_month_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        memberOfMonthBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
-        return memberOfMonthBadgeHolders
 
     async def calculate_special_edition_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         specialEditionBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
