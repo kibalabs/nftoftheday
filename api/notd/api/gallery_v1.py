@@ -17,7 +17,7 @@ from notd.api.endpoints_v1 import ListGalleryCollectionOverlapOwnersResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapsResponse
 from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapsResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapSummariesResponse
-from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapSummariesResponse
+# from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapSummariesResponse
 from notd.api.endpoints_v1 import ListGalleryUserBadgesResponse
 from notd.api.endpoints_v1 import ListCollectionsInSuperCollectionResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
@@ -137,9 +137,9 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         superCollectionOverlaps = await galleryManager.list_gallery_super_collection_overlaps(superCollectionName=superCollectionName, otherRegistryAddress=otherRegistryAddress)
         return ListGallerySuperCollectionOverlapsResponse(superCollectionOverlaps=(await responseBuilder.super_collection_overlaps_from_models(superCollectionOverlaps=superCollectionOverlaps)))
 
-    @router.get('/super-collections/{superCollectionName}/overlap-summaries')
-    async def list_gallery_super_collection_overlap_summaries(superCollectionName: str) -> ListGallerySuperCollectionOverlapSummariesResponse:
-        collectionOverlapSummaries = await galleryManager.list_gallery_super_collection_overlap_summaries(superCollectionName=superCollectionName)
-        return ListGallerySuperCollectionOverlapSummariesResponse(collectionOverlapSummaries=(await responseBuilder.collection_overlap_summaries_from_models(collectionOverlapSummaries=collectionOverlapSummaries)))
+    # @router.get('/super-collections/{superCollectionName}/overlap-summaries')
+    # async def list_gallery_super_collection_overlap_summaries(superCollectionName: str) -> ListGallerySuperCollectionOverlapSummariesResponse:
+    #     collectionOverlapSummaries = await galleryManager.list_gallery_super_collection_overlap_summaries(superCollectionName=superCollectionName)
+    #     return ListGallerySuperCollectionOverlapSummariesResponse(collectionOverlapSummaries=(await responseBuilder.collection_overlap_summaries_from_models(collectionOverlapSummaries=collectionOverlapSummaries)))
 
     return router

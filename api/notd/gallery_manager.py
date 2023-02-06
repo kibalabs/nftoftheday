@@ -499,19 +499,18 @@ class GalleryManager:
             collections = [await self.collectionManager.get_collection_by_address(address=address) for address in collectionAddresses]
         return collections
 
-    async def list_gallery_super_collection_overlaps(self, superCollectionName: str, otherRegistryAddress: str) -> List[CollectionOverlap]:
+    async def list_gallery_super_collection_overlaps(self, superCollectionName: str, otherRegistryAddress: str) -> List[SuperCollectionOverlap]:
+        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
         filters = [
-            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, containedIn=SUPER_COLLECTIONS.get(superCollectionName)),
+            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, containedIn=superCollectionAddresses),
             StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.otherRegistryAddress.key, eq=otherRegistryAddress)
         ]
         collectionOverlaps = await self.retriever.list_collection_overlaps(fieldFilters=filters, orders=[Order(fieldName=TokenCollectionOverlapsTable.c.otherRegistryTokenCount.key, direction=Direction.DESCENDING)])
-        superCollectionOverlapsTokenCountDict = defaultdict(lambda: defaultdict(int))
+        superCollectionOverlapsTokenCountDict: Dict[str, Dict[str,int]] = defaultdict(lambda: defaultdict(int))
         for collectionOverlap in collectionOverlaps:
-            if collectionOverlap.registryAddress in SUPER_COLLECTIONS.get(superCollectionName):
+            if superCollectionAddresses and collectionOverlap.registryAddress in superCollectionAddresses:
                 superCollectionOverlapsTokenCountDict[collectionOverlap.ownerAddress][collectionOverlap.registryAddress] = collectionOverlap.registryTokenCount
         overlaps = []
-        # with open("A.json", 'w') as f:
-        #     json.dump(superCollectionOverlapsTokenCountDict, f)
         for collectionOverlap in collectionOverlaps:
             overlaps += [
                 SuperCollectionOverlap(

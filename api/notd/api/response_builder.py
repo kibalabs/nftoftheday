@@ -442,14 +442,14 @@ class ResponseBuilder:
         return ApiSuperCollectionOverlap(
             ownerAddress=superCollectionOverlap.ownerAddress,
             otherRegistryAddress=superCollectionOverlap.otherRegistryAddress,
-            otherRegistryTokenCount=superCollectionOverlap.otherRegistryTokenCount, 
+            otherRegistryTokenCount=superCollectionOverlap.otherRegistryTokenCount,
             superCollectionTokenCount=superCollectionOverlap.superCollectionTokenCount,
         )
 
     async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> List[ApiCollectionOverlap]:
         return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])
 
-    async def super_collection_overlaps_from_models(self, superCollectionOverlaps: Sequence[CollectionOverlap]) -> List[ApiCollectionOverlap]:
+    async def super_collection_overlaps_from_models(self, superCollectionOverlaps: Sequence[SuperCollectionOverlap]) -> List[ApiSuperCollectionOverlap]:
         return await asyncio.gather(*[self.super_collection_overlap_from_model(superCollectionOverlap=superCollectionOverlap) for superCollectionOverlap in superCollectionOverlaps])
 
     async def collection_overlap_summary_from_model(self, collectionOverlapSummary: CollectionOverlapSummary) -> ApiCollectionOverlapSummary:
