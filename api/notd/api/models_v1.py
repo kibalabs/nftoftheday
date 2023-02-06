@@ -268,3 +268,10 @@ class ApiCollectionOverlapOwner(BaseModel):
     ownerAddress: str
     registryTokenCount: int
     otherRegistryTokenCount: int
+
+
+class ApiSuperCollectionOverlap(BaseModel):
+    ownerAddress: str
+    otherRegistryAddress: str
+    otherRegistryTokenCount: int
+    superCollectionTokenCount: Dict[str, int]

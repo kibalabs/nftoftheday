@@ -26,6 +26,7 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
+from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
@@ -56,6 +57,7 @@ from notd.model import LatestAccountGm
 from notd.model import ListResponse
 from notd.model import RetrievedTokenMetadata
 from notd.model import SponsoredToken
+from notd.model import SuperCollectionOverlap
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -436,8 +438,19 @@ class ResponseBuilder:
             otherRegistryTokenCount=collectionOverlap.otherRegistryTokenCount,
         )
 
+    async def super_collection_overlap_from_model(self, superCollectionOverlap: SuperCollectionOverlap) -> ApiSuperCollectionOverlap:
+        return ApiSuperCollectionOverlap(
+            ownerAddress=superCollectionOverlap.ownerAddress,
+            otherRegistryAddress=superCollectionOverlap.otherRegistryAddress,
+            otherRegistryTokenCount=superCollectionOverlap.otherRegistryTokenCount, 
+            superCollectionTokenCount=superCollectionOverlap.superCollectionTokenCount,
+        )
+
     async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> List[ApiCollectionOverlap]:
         return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])
+
+    async def super_collection_overlaps_from_models(self, superCollectionOverlaps: Sequence[CollectionOverlap]) -> List[ApiCollectionOverlap]:
+        return await asyncio.gather(*[self.super_collection_overlap_from_model(superCollectionOverlap=superCollectionOverlap) for superCollectionOverlap in superCollectionOverlaps])
 
     async def collection_overlap_summary_from_model(self, collectionOverlapSummary: CollectionOverlapSummary) -> ApiCollectionOverlapSummary:
         return ApiCollectionOverlapSummary(

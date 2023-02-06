@@ -5,6 +5,7 @@ import datetime
 from typing import TYPE_CHECKING
 from typing import Generic
 from typing import List
+from typing import Dict
 from typing import Optional
 from typing import TypeVar
 
@@ -41,10 +42,10 @@ MARKETPLACE_ADDRESSES = {
 }
 
 GALLERY_COLLECTIONS = {
-    COLLECTION_SPRITE_CLUB_ADDRESS,
-    COLLECTION_GOBLINTOWN_ADDRESS,
-    COLLECTION_MDTP_ADDRESS,
-    COLLECTION_RUDEBOYS_ADDRESS,
+    # COLLECTION_SPRITE_CLUB_ADDRESS,
+    # COLLECTION_GOBLINTOWN_ADDRESS,
+    # COLLECTION_MDTP_ADDRESS,
+    # COLLECTION_RUDEBOYS_ADDRESS,
     COLLECTION_CREEPZ_ADDRESS,
     COLLECTION_CREEPZ_SHAPESHIFTER_ADDRESS,
     COLLECTION_CREEPZ_MEGA_SHAPESHIFTER_ADDRESS,
@@ -61,6 +62,18 @@ GALLERY_COLLECTION_ADMINS = {
 STAKING_ADDRESSES = [
     CREEPZ_STAKING_ADDRESS,
 ]
+
+CREEPZ_SUPER_COLLECTION_ADDRESS = [
+    COLLECTION_CREEPZ_ADDRESS,
+    COLLECTION_CREEPZ_SHAPESHIFTER_ADDRESS,
+    COLLECTION_CREEPZ_MEGA_SHAPESHIFTER_ADDRESS,
+    COLLECTION_CREEPZ_ARMOURIES_ADDRESS,
+    COLLECTION_CREEPZ_VAULTS_ADDRESS,
+]
+
+SUPER_COLLECTIONS = {
+    'all-creepz': CREEPZ_SUPER_COLLECTION_ADDRESS
+}
 
 ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
 
@@ -574,6 +587,14 @@ class RetrievedCollectionOverlap:
     ownerAddress: str
     registryTokenCount: int
     otherRegistryTokenCount: int
+
+
+@dataclasses.dataclass
+class SuperCollectionOverlap:
+    ownerAddress: str
+    otherRegistryAddress: str
+    otherRegistryTokenCount: int
+    superCollectionTokenCount: Dict[str, int]
 
 
 @dataclasses.dataclass

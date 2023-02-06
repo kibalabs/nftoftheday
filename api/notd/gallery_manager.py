@@ -25,9 +25,12 @@ from notd.badge_manager import BadgeManager
 from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import STAKING_ADDRESSES
+from notd.model import SUPER_COLLECTIONS
 from notd.model import Airdrop
+from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
+from notd.model import SuperCollectionOverlap
 from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
 from notd.model import GalleryBadgeHolder
@@ -488,3 +491,34 @@ class GalleryManager:
 
     async def assign_badge(self, registryAddress: str, ownerAddress: str, badgeKey: str, assignerAddress: str, achievedDate: datetime.datetime, signature: str) -> None:
         await self.badgeManager.assign_badge(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey=badgeKey, assignerAddress=assignerAddress, achievedDate=achievedDate, signature=signature)
+
+    async def list_gallery_collections_in_super_collection(self, superCollectionName: str) -> List[Collection]:
+        collections = []
+        collectionAddresses = SUPER_COLLECTIONS.get(superCollectionName, [])
+        if len(collectionAddresses) > 0:
+            collections = [await self.collectionManager.get_collection_by_address(address=address) for address in collectionAddresses]
+        return collections
+
+    async def list_gallery_super_collection_overlaps(self, superCollectionName: str, otherRegistryAddress: str) -> List[CollectionOverlap]:
+        filters = [
+            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, containedIn=SUPER_COLLECTIONS.get(superCollectionName)),
+            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.otherRegistryAddress.key, eq=otherRegistryAddress)
+        ]
+        collectionOverlaps = await self.retriever.list_collection_overlaps(fieldFilters=filters, orders=[Order(fieldName=TokenCollectionOverlapsTable.c.otherRegistryTokenCount.key, direction=Direction.DESCENDING)])
+        superCollectionOverlapsTokenCountDict = defaultdict(lambda: defaultdict(int))
+        for collectionOverlap in collectionOverlaps:
+            if collectionOverlap.registryAddress in SUPER_COLLECTIONS.get(superCollectionName):
+                superCollectionOverlapsTokenCountDict[collectionOverlap.ownerAddress][collectionOverlap.registryAddress] = collectionOverlap.registryTokenCount
+        overlaps = []
+        # with open("A.json", 'w') as f:
+        #     json.dump(superCollectionOverlapsTokenCountDict, f)
+        for collectionOverlap in collectionOverlaps:
+            overlaps += [
+                SuperCollectionOverlap(
+                    ownerAddress=collectionOverlap.ownerAddress,
+                    otherRegistryAddress=otherRegistryAddress,
+                    otherRegistryTokenCount=collectionOverlap.otherRegistryTokenCount,
+                    superCollectionTokenCount=superCollectionOverlapsTokenCountDict[collectionOverlap.ownerAddress]
+                )
+            ]
+        return overlaps
