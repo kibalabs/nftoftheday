@@ -30,7 +30,6 @@ from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
-from notd.model import SuperCollectionOverlap
 from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
 from notd.model import GalleryBadgeHolder
@@ -40,6 +39,7 @@ from notd.model import GalleryUser
 from notd.model import GalleryUserRow
 from notd.model import ListResponse
 from notd.model import Signature
+from notd.model import SuperCollectionOverlap
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
