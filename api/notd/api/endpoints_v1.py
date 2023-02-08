@@ -438,4 +438,4 @@ class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
     pass
 
 class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
-    pass
+    collectionOverlapSummaries: List[ApiCollectionOverlapSummary]

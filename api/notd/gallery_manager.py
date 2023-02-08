@@ -521,3 +521,35 @@ class GalleryManager:
                 )
             ]
         return overlaps
+
+    async def list_gallery_super_collection_overlap_summaries(self, superCollectionName: str) -> List[CollectionOverlapSummary]:
+        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
+        if superCollectionAddresses and len(superCollectionAddresses) > 0:
+            query = (
+                sqlalchemy.select(
+                    TokenCollectionOverlapsTable.c.otherRegistryAddress,
+                    TokenCollectionsTable,
+                    sqlalchemy.func.count(TokenCollectionOverlapsTable.c.ownerAddress).label('ownerCount'),
+                    sqlalchemy.func.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),
+                    sqlalchemy.func.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),
+                )
+                .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+                .join(TokenCollectionsTable, TokenCollectionsTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+                .where(TokenCollectionOverlapsTable.c.registryAddress.in_(superCollectionAddresses))
+                .where(TokenCollectionOverlapsTable.c.otherRegistryAddress.not_in(superCollectionAddresses))
+                .order_by(CollectionTotalActivitiesTable.c.totalValue.desc())
+                .group_by(TokenCollectionOverlapsTable.c.otherRegistryAddress, TokenCollectionsTable.c, CollectionTotalActivitiesTable.c.totalValue)
+                .limit(100)
+            )
+            result = await self.retriever.database.execute(query=query)
+            return [
+                CollectionOverlapSummary(
+                    registryAddress=superCollectionName,
+                    otherCollection=collection_from_row(row),
+                    ownerCount=row['ownerCount'],
+                    registryTokenCount=row['registryTokenCount'],
+                    otherRegistryTokenCount=row['otherRegistryTokenCount'],
+                ) for row in result.mappings()
+            ]
+        else:
+            return []
