@@ -16,7 +16,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: app
-          load: true
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
           platforms: linux/amd64,linux/arm64
@@ -25,8 +24,6 @@ jobs:
         with:
           context: ./app/
           load: true
-          cache-from: type=gha,scope=app
-          cache-to: type=gha,mode=max,scope=app
           tags: ${{ env.DOCKER_IMAGE }}
           target: build
       - name: Run lint-check
