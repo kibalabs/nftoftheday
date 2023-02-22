@@ -54,6 +54,7 @@ from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
+from notd.token_staking_manager import TokenStakingManager
 from notd.twitter_manager import TwitterManager
 
 _REGISTRY_BLACKLIST = set([
@@ -66,7 +67,7 @@ _REGISTRY_BLACKLIST = set([
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, tokenStakingManager: TokenStakingManager, requester: Requester, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -74,6 +75,7 @@ class NotdManager:
         self.collectionManager = collectionManager
         self.ownershipManager = ownershipManager
         self.listingManager = listingManager
+        self.tokenStakingManager = tokenStakingManager
         self.attributeManager = attributeManager
         self.activityManager = activityManager
         self.blockManager = blockManager
@@ -526,8 +528,8 @@ class NotdManager:
     async def process_block_deferred(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, delaySeconds: int = 0) -> None:
         await self.blockManager.process_block_deferred(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens, delaySeconds=delaySeconds)
 
-    async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, shouldSkipUpdatingOwnerships: Optional[bool] = None) -> None:
-        await self.blockManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens, shouldSkipUpdatingOwnerships=shouldSkipUpdatingOwnerships)
+    async def process_block(self, blockNumber: int, shouldSkipProcessingTokens: Optional[bool] = None, shouldSkipUpdatingOwnerships: Optional[bool] = None, shouldSkipUpdatingStakings: Optional[bool] = None) -> None:
+        await self.blockManager.process_block(blockNumber=blockNumber, shouldSkipProcessingTokens=shouldSkipProcessingTokens, shouldSkipUpdatingOwnerships=shouldSkipUpdatingOwnerships, shouldSkipUpdatingStakings=shouldSkipUpdatingStakings)
 
     async def update_all_twitter_users_deferred(self) -> None:
         await self.twitterManager.update_all_twitter_users_deferred()
@@ -558,3 +560,15 @@ class NotdManager:
 
     async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
         await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()
+
+    async def update_token_stakings_for_all_collections_deferred(self) -> None:
+        await self.tokenStakingManager.update_token_stakings_for_all_collections_deferred()
+
+    async def update_token_stakings_for_collection(self, registryAddress: str) -> None:
+        await self.tokenStakingManager.update_token_stakings_for_collection(address=registryAddress)
+
+    async def update_token_staking_deferred(self, registryAddress: str, tokenId: str) -> None:
+        await self.tokenStakingManager.update_token_staking_deferred(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
+        await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)

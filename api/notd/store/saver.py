@@ -27,6 +27,7 @@ from notd.model import RetrievedGalleryBadgeHolder
 from notd.model import RetrievedTokenAttribute
 from notd.model import RetrievedTokenListing
 from notd.model import RetrievedTokenMultiOwnership
+from notd.model import RetrievedTokenStaking
 from notd.model import RetrievedTokenTransfer
 from notd.model import Signature
 from notd.model import TokenCustomization
@@ -53,6 +54,7 @@ from notd.store.schema import TokenCustomizationsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
+from notd.store.schema import TokenStakingsTable
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema import TwitterCredentialsTable
 from notd.store.schema import TwitterProfilesTable
@@ -1021,3 +1023,48 @@ class Saver(CoreSaver):
             signatureMessage=signatureMessage,
             signature=signature,
         )
+
+    @staticmethod
+    def _get_create_token_staking_values(retrievedTokenStaking: RetrievedTokenStaking , createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
+        return {
+            TokenStakingsTable.c.createdDate.key: createdDate,
+            TokenStakingsTable.c.updatedDate.key: updatedDate,
+            TokenStakingsTable.c.stakingAddress.key: retrievedTokenStaking.stakingAddress,
+            TokenStakingsTable.c.ownerAddress.key: retrievedTokenStaking.ownerAddress,
+            TokenStakingsTable.c.registryAddress.key: retrievedTokenStaking.registryAddress,
+            TokenStakingsTable.c.tokenId.key: retrievedTokenStaking.tokenId,
+            TokenStakingsTable.c.stakedDate.key: retrievedTokenStaking.stakedDate,
+            TokenStakingsTable.c.transactionHash.key: retrievedTokenStaking.transactionHash,
+        }
+
+    async def create_token_staking(self, retrievedTokenStaking: RetrievedTokenStaking, connection: Optional[DatabaseConnection] = None) -> int:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values = self._get_create_token_staking_values(retrievedTokenStaking=retrievedTokenStaking, createdDate=createdDate, updatedDate=updatedDate)
+        query = TokenStakingsTable.insert().values(values).returning(TokenStakingsTable.c.tokenStakingId)
+        result = await self._execute(query=query, connection=connection)
+        tokenStakingId = int(result.scalar_one())
+        return tokenStakingId
+
+    async def create_token_stakings(self, retrievedTokenStakings: Sequence[RetrievedTokenStaking], connection: Optional[DatabaseConnection] = None) -> List[int]:
+        if len(retrievedTokenStakings) == 0:
+            return []
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        tokenStakingIds = []
+        for chunk in list_util.generate_chunks(lst=retrievedTokenStakings, chunkSize=100):
+            values = [self._get_create_token_staking_values(retrievedTokenStaking=retrievedTokenStaking, createdDate=createdDate, updatedDate=updatedDate) for retrievedTokenStaking in chunk]
+            query = TokenStakingsTable.insert().values(values).returning(TokenStakingsTable.c.tokenStakingId)
+            rows = await self._execute(query=query, connection=connection)
+            tokenStakingIds += [row[0] for row in rows]
+        return tokenStakingIds
+
+    async def delete_token_staking(self, tokenStakingId: int, connection: Optional[DatabaseConnection] = None) -> None:
+        query = TokenStakingsTable.delete().where(TokenStakingsTable.c.tokenStakingId == tokenStakingId).returning(TokenStakingsTable.c.tokenStakingId)
+        await self._execute(query=query, connection=connection)
+
+    async def delete_token_stakings(self, tokenStakingIds: Sequence[int], connection: Optional[DatabaseConnection] = None) -> None:
+        if len(tokenStakingIds) == 0:
+            return
+        query = TokenStakingsTable.delete().where(TokenStakingsTable.c.tokenStakingId.in_(tokenStakingIds)).returning(TokenStakingsTable.c.tokenStakingId)
+        await self._execute(query=query, connection=connection)

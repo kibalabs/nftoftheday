@@ -29,6 +29,7 @@ from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
+from notd.api.models_v1 import ApiTokenStaking
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
@@ -59,6 +60,7 @@ from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenListing
 from notd.model import TokenMultiOwnership
+from notd.model import TokenStaking
 from notd.model import TokenTransfer
 from notd.model import TradedToken
 from notd.model import TwitterProfile
@@ -279,6 +281,15 @@ class ResponseBuilder:
             sourceId=tokenListing.sourceId,
         )
 
+    async def token_staking_from_model(self, tokenStaking: TokenStaking) -> ApiTokenStaking:
+        return ApiTokenStaking(
+            stakingAddress=tokenStaking.stakingAddress,
+            ownerAddress=tokenStaking.ownerAddress,
+            registryAddress=tokenStaking.registryAddress,
+            tokenId=tokenStaking.tokenId,
+            stakedDate=tokenStaking.stakedDate,
+        )
+
     async def token_listings_from_models(self, tokenListings: Sequence[TokenListing]) -> List[ApiTokenListing]:
         return await asyncio.gather(*[self.token_listing_from_model(tokenListing=tokenListing) for tokenListing in tokenListings])
 
@@ -287,6 +298,7 @@ class ResponseBuilder:
             collectionToken=(await self.collection_token_from_model(tokenMetadata=galleryToken.tokenMetadata)),
             tokenCustomization=(await self.token_customization_from_model(tokenCustomization=galleryToken.tokenCustomization) if galleryToken.tokenCustomization else None),
             tokenListing=(await self.token_listing_from_model(tokenListing=galleryToken.tokenListing) if galleryToken.tokenListing else None),
+            tokenStaking=(await self.token_staking_from_model(tokenStaking=galleryToken.tokenStaking) if galleryToken.tokenStaking else None),
             quantity=galleryToken.quantity
         )
 

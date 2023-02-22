@@ -88,7 +88,7 @@ class TokenListingProcessor:
 
     async def get_opensea_listings_for_tokens(self, registryAddress: str, tokenIds: Sequence[str]) -> List[RetrievedTokenListing]:
         listings = []
-        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=int(10 * len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
+        async with self.lockManager.with_lock(name='opensea-requester', timeoutSeconds=100, expirySeconds=int(30 * len(tokenIds) / _OPENSEA_API_LISTING_CHUNK_SIZE)):
             for index, chunkedTokenIds in enumerate(list_util.generate_chunks(lst=tokenIds, chunkSize=_OPENSEA_API_LISTING_CHUNK_SIZE)):
                 nextPageId: Optional[str] = None
                 pageCount = 0

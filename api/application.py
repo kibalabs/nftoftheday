@@ -45,6 +45,8 @@ from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
 from notd.token_metadata_processor import TokenMetadataProcessor
 from notd.token_ownership_processor import TokenOwnershipProcessor
+from notd.token_staking_manager import TokenStakingManager
+from notd.token_staking_processor import TokenStakingProcessor
 from notd.twitter_manager import TwitterManager
 
 requestIdHolder = RequestIdHolder()
@@ -95,15 +97,17 @@ ownershipManager = OwnershipManager(saver=saver, retriever=retriever, tokenQueue
 listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenListingProcessor=tokenListingProcessor)
 collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retriever, workQueue=workQueue, collectionOverlapProcessor=collectionOverlapProcessor)
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager, ownershipManager=ownershipManager)
-blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager)
 twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
 badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
 badgeManager = BadgeManager(retriever=retriever, saver=saver, workQueue=workQueue, badgeProcessor=badgeProcessor)
 delegationManager = DelegationManager(ethClient=ethClient)
-notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, requester=requester, revueApiKey=revueApiKey)
-responseBuilder = ResponseBuilder(retriever=retriever)
+tokenStakingProcessor = TokenStakingProcessor(ethClient=ethClient, retriever=retriever)
+tokenStakingManager = TokenStakingManager(retriever=retriever, saver=saver, tokenQueue=tokenQueue, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
+blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager, tokenStakingManager=tokenStakingManager)
+notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, requester=requester, revueApiKey=revueApiKey)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager, collectionManager=collectionManager, badgeManager=badgeManager)
 gmManager = GmManager(retriever=retriever, saver=saver, delegationManager=delegationManager)
+responseBuilder = ResponseBuilder(retriever=retriever)
 
 app = FastAPI()
 app.include_router(router=create_health_api(name=name, version=version, environment=environment))
@@ -122,6 +126,7 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'https://mdtp-gallery.kibalabs.com',
     'https://gallery.spriteclubnft.com',
     'https://gallery.milliondollartokenpage.com',
+    'https://gallery.rudeboys.io',
 ], allow_origin_regex='https://.*\.tokenpage\.xyz')
 
 @app.on_event('startup')

@@ -26,6 +26,8 @@ from notd.messages import UpdateListingsForCollection
 from notd.messages import UpdateTokenAttributesForAllCollectionsMessageContent
 from notd.messages import UpdateTokenMetadataMessageContent
 from notd.messages import UpdateTokenOwnershipMessageContent
+from notd.messages import UpdateTokenStakingMessageContent
+from notd.messages import UpdateTokenStakingsForCollectionMessageContent
 from notd.messages import UpdateTotalActivityForAllCollectionsMessageContent
 from notd.messages import UpdateTotalActivityForCollectionMessageContent
 
@@ -157,5 +159,13 @@ class NotdMessageProcessor(MessageProcessor):
         if message.command == RefreshGalleryBadgeHoldersForCollectionMessageContent.get_command():
             refreshGalleryBadgeHoldersForCollectionMessageContent = RefreshGalleryBadgeHoldersForCollectionMessageContent.parse_obj(message.content)  # pylint: disable=invalid-name
             await self.notdManager.refresh_gallery_badge_holders_for_collection(registryAddress=refreshGalleryBadgeHoldersForCollectionMessageContent.registryAddress)
+            return
+        if message.command == UpdateTokenStakingsForCollectionMessageContent.get_command():
+            updateTokenStakingsForCollectionMessageContent = UpdateTokenStakingsForCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_stakings_for_collection(registryAddress=updateTokenStakingsForCollectionMessageContent.address)
+            return
+        if message.command == UpdateTokenStakingMessageContent.get_command():
+            updateTokenStakingMessageContent = UpdateTokenStakingMessageContent.parse_obj(message.content)
+            await self.notdManager.update_token_staking(registryAddress=updateTokenStakingMessageContent.registryAddress, tokenId=updateTokenStakingMessageContent.tokenId)
             return
         raise KibaException(message='Message was unhandled')
