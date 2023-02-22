@@ -2,7 +2,8 @@ from typing import Set
 from typing import Tuple
 
 from core import logging
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import StringFieldFilter
 
 from notd.messages import UpdateTokenStakingMessageContent
@@ -16,7 +17,7 @@ from notd.token_staking_processor import TokenStakingProcessor
 
 class TokenStakingManager:
 
-    def __init__(self, retriever: Retriever,saver: Saver, tokenQueue: SqsMessageQueue, workQueue: SqsMessageQueue, tokenStakingProcessor: TokenStakingProcessor) -> None:
+    def __init__(self, retriever: Retriever,saver: Saver, tokenQueue: MessageQueue[Message], workQueue: MessageQueue[Message], tokenStakingProcessor: TokenStakingProcessor) -> None:
         self.retriever = retriever
         self.saver = saver
         self.workQueue = workQueue

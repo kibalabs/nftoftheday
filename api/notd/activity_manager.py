@@ -5,7 +5,8 @@ from typing import Tuple
 
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
@@ -26,7 +27,7 @@ from notd.store.schema import TokenTransfersTable
 
 class ActivityManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, collectionActivityProcessor: CollectionActivityProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], tokenQueue: MessageQueue[Message], collectionActivityProcessor: CollectionActivityProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue

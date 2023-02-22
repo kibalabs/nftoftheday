@@ -5,7 +5,7 @@ import sys
 import asyncclick as click
 from core import logging
 from core.aws_requester import AwsRequester
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.sqs import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
 from core.store.database import Database

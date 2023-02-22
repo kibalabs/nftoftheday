@@ -7,7 +7,8 @@ from typing import Tuple
 import sqlalchemy
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
@@ -31,7 +32,7 @@ _TOKEN_UPDATE_MIN_DAYS = 7
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager, ownershipManager: OwnershipManager):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: MessageQueue[Message], tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager, ownershipManager: OwnershipManager):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue

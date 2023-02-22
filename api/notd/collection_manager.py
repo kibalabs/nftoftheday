@@ -5,7 +5,8 @@ from typing import Sequence
 
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
@@ -25,7 +26,7 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class CollectionManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: MessageQueue[Message], collectionProcessor: CollectionProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue

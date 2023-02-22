@@ -10,7 +10,8 @@ from typing import Optional
 from core.exceptions import FoundRedirectException
 from core.exceptions import NotFoundException
 from core.http.basic_authentication import BasicAuthentication
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.requester import Requester
 from core.util import date_util
 from core.util import dict_util
@@ -26,7 +27,7 @@ from notd.store.saver import Saver
 
 class TwitterManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester, workQueue: SqsMessageQueue, twitterBearerToken: str):
+    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester, workQueue: MessageQueue[Message], twitterBearerToken: str):
         self.saver = saver
         self.retriever = retriever
         self.requester = requester

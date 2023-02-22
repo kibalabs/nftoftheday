@@ -8,7 +8,8 @@ from typing import Tuple
 import sqlalchemy
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
@@ -33,7 +34,7 @@ from notd.token_staking_manager import TokenStakingManager
 
 class BlockManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, tokenStakingManager: TokenStakingManager, tokenManager: TokenManager) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, tokenStakingManager: TokenStakingManager, tokenManager: TokenManager) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue

@@ -1,6 +1,7 @@
 import sqlalchemy
 from core import logging
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
@@ -16,7 +17,7 @@ from notd.token_attributes_processor import TokenAttributeProcessor
 
 class AttributeManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, tokenAttributeProcessor: TokenAttributeProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], tokenQueue: MessageQueue[Message], tokenAttributeProcessor: TokenAttributeProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue

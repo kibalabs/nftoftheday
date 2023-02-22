@@ -3,7 +3,8 @@ from typing import List
 
 from core import logging
 from core.queues.message_queue_processor import MessageNeedsReprocessingException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
@@ -25,7 +26,7 @@ from notd.token_listing_processor import TokenListingProcessor
 
 class ListingManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenListingProcessor: TokenListingProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], tokenListingProcessor: TokenListingProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
