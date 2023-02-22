@@ -1,5 +1,7 @@
 FROM python:3.10.9-slim
 
+RUN apt-get update && apt-get install --yes --no-install-recommends make
+
 WORKDIR /app
 
 # NOTE(krishan711): GCC (and others) needed to build some dependencies. Remove when everything has a wheel.
@@ -10,11 +12,10 @@ RUN apt-get update \
     && apt-get purge -y --auto-remove gcc libc-dev
 
 COPY requirements-dev.txt $WORKDIR
-RUN pip install -r requirements-dev.txt
 COPY requirements.txt $WORKDIR
-RUN pip install -r requirements.txt
+RUN make install
 
 COPY . $WORKDIR
 
 EXPOSE 5000
-CMD ["./start-api.sh"]
+CMD ["make", "start-prod"]

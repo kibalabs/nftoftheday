@@ -2,8 +2,8 @@ import datetime
 from typing import List
 
 from core import logging
-from core.queues.message_queue_processor import MessageNeedsReprocessingException
 from core.queues.message_queue import MessageQueue
+from core.queues.message_queue_processor import MessageNeedsReprocessingException
 from core.queues.model import Message
 from core.store.retriever import StringFieldFilter
 from core.util import date_util

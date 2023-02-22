@@ -2,19 +2,17 @@
 FROM node:18.2.0 as build
 
 WORKDIR /app
+COPY makefile $WORKDIR
 
 # Install requirements
-COPY package.json .
-COPY package-lock.json .
-RUN npm ci
+COPY package.json $WORKDIR
+COPY package-lock.json $WORKDIR
+RUN make install
 
 # Build app
-COPY . .
-RUN npm run build-ssr
+COPY . $WORKDIR
+RUN make build-ssr
 
-EXPOSE 3000
-CMD ["./dist/start.sh"]
-
-# # Stage 2: Serve with nginx
-# FROM ghcr.io/kibalabs/app-serve:latest
-# COPY --from=build /app/dist /usr/share/nginx/html
+# Stage 2: Serve with nginx
+FROM ghcr.io/kibalabs/app-serve:latest
+COPY --from=build /app/dist /usr/share/nginx/html

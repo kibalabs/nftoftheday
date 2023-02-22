@@ -1,6 +1,6 @@
+import datetime
 from typing import List
 from typing import Tuple
-import datetime
 
 import sqlalchemy
 
