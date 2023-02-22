@@ -62,7 +62,7 @@ async def reprocess_multi_transfers(startBlock: int, endBlock: int, batchSize: i
                 .filter(TokenTransfersTable.c.blockNumber >= start)
                 .filter(TokenTransfersTable.c.blockNumber < end)
                 .group_by(TokenTransfersTable.c.transactionHash)
-                .having(sqlalchemy.func.count(TokenTransfersTable.c.transactionHash) > 1)
+                .having(sqlalchemy.sql.functions.count(TokenTransfersTable.c.transactionHash) > 1)
                 .subquery()
             )
             query = (

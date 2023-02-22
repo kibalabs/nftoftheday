@@ -94,17 +94,17 @@ class GmManager:
 
     async def list_gm_account_rows(self) -> List[GmAccountRow]:
         latestRowQuery = (
-            sqlalchemy.select(AccountGmsTable.c.address, sqlalchemy.func.max(AccountGmsTable.c.date).label('date'))
+            sqlalchemy.select(AccountGmsTable.c.address, sqlalchemy.sql.functions.max(AccountGmsTable.c.date).label('date'))
             .where(AccountGmsTable.c.date >= date_util.start_of_day(dt=date_util.datetime_from_now(days=-7)))
             .group_by(AccountGmsTable.c.address)
         )
         weekCountQuery = (
-            sqlalchemy.select(AccountGmsTable.c.address, sqlalchemy.func.count(AccountGmsTable.c.accountGmId).label('weekCount'))
+            sqlalchemy.select(AccountGmsTable.c.address, sqlalchemy.sql.functions.count(AccountGmsTable.c.accountGmId).label('weekCount'))
             .where(AccountGmsTable.c.date > date_util.datetime_from_now(days=-7))
             .group_by(AccountGmsTable.c.address)
         ).subquery()
         monthCountQuery = (
-            sqlalchemy.select(AccountGmsTable.c.address, sqlalchemy.func.count(AccountGmsTable.c.accountGmId).label('monthCount'))
+            sqlalchemy.select(AccountGmsTable.c.address, sqlalchemy.sql.functions.count(AccountGmsTable.c.accountGmId).label('monthCount'))
             .where(AccountGmsTable.c.date > date_util.datetime_from_now(days=-30))
             .group_by(AccountGmsTable.c.address)
         ).subquery()
@@ -130,17 +130,17 @@ class GmManager:
 
     async def list_gm_collection_rows(self) -> List[GmCollectionRow]:
         todayCountQuery = (
-            sqlalchemy.select(AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('todayCount'))
+            sqlalchemy.select(AccountCollectionGmsTable.c.registryAddress, sqlalchemy.sql.functions.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('todayCount'))
             .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-1))
             .group_by(AccountCollectionGmsTable.c.registryAddress)
         ).subquery()
         weekCountQuery = (
-            sqlalchemy.select(AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('weekCount'))
+            sqlalchemy.select(AccountCollectionGmsTable.c.registryAddress, sqlalchemy.sql.functions.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('weekCount'))
             .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-7))
             .group_by(AccountCollectionGmsTable.c.registryAddress)
         ).subquery()
         monthCountQuery = (
-            sqlalchemy.select(AccountCollectionGmsTable.c.registryAddress, sqlalchemy.func.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('monthCount'))
+            sqlalchemy.select(AccountCollectionGmsTable.c.registryAddress, sqlalchemy.sql.functions.count(AccountCollectionGmsTable.c.accountCollectionGmId).label('monthCount'))
             .where(AccountCollectionGmsTable.c.date > date_util.datetime_from_now(days=-30))
             .group_by(AccountCollectionGmsTable.c.registryAddress)
         ).subquery()
@@ -150,7 +150,7 @@ class GmManager:
             .join(monthCountQuery, monthCountQuery.c.registryAddress == TokenCollectionsTable.c.address)
             .join(weekCountQuery, weekCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
             .join(todayCountQuery, todayCountQuery.c.registryAddress == TokenCollectionsTable.c.address, isouter=True)
-            .order_by(sqlalchemy.func.coalesce(todayCountQuery.c.todayCount, 0).desc(), sqlalchemy.func.coalesce(weekCountQuery.c.weekCount, 0).desc(), sqlalchemy.func.coalesce(monthCountQuery.c.monthCount, 0).desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
+            .order_by(sqlalchemy.sql.functions.coalesce(todayCountQuery.c.todayCount, 0).desc(), sqlalchemy.sql.functions.coalesce(weekCountQuery.c.weekCount, 0).desc(), sqlalchemy.sql.functions.coalesce(monthCountQuery.c.monthCount, 0).desc(), CollectionTotalActivitiesTable.c.totalValue.desc())
             .limit(500)
         )
         collectionRowsResult = await self.retriever.database.execute(query=collectionRowsQuery)

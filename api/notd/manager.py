@@ -129,7 +129,7 @@ class NotdManager:
 
     async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
-            sqlalchemy.select(sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId))
+            sqlalchemy.select(sqlalchemy.sql.functions.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
@@ -140,13 +140,13 @@ class NotdManager:
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TradedToken:
         query = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId))
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.sql.functions.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
             .where(TokenTransfersTable.c.registryAddress.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemy.func.count(TokenTransfersTable.c.tokenTransferId).desc())
+            .order_by(sqlalchemy.sql.functions.count(TokenTransfersTable.c.tokenTransferId).desc())
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
@@ -209,8 +209,8 @@ class NotdManager:
         holderCountQuery = (
             TokenOwnershipsTable.select()
             .with_only_columns(
-                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
-                sqlalchemy.func.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
+                sqlalchemy.sql.functions.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
+                sqlalchemy.sql.functions.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
             )
             .where(TokenOwnershipsTable.c.registryAddress == address)
         )
@@ -222,9 +222,9 @@ class NotdManager:
         allActivityQuery = (
             CollectionHourlyActivitiesTable.select()
             .with_only_columns(
-                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.saleCount),
-                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.transferCount),
-                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
+                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.saleCount),
+                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.transferCount),
+                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.totalValue),
             )
             .where(CollectionHourlyActivitiesTable.c.address == address)
         )
@@ -236,9 +236,9 @@ class NotdManager:
         dayActivityQuery = (
             CollectionHourlyActivitiesTable.select()
             .with_only_columns(
-                sqlalchemy.func.sum(CollectionHourlyActivitiesTable.c.totalValue),
-                sqlalchemy.func.min(CollectionHourlyActivitiesTable.c.minimumValue),
-                sqlalchemy.func.max(CollectionHourlyActivitiesTable.c.maximumValue),
+                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.totalValue),
+                sqlalchemy.sql.functions.min(CollectionHourlyActivitiesTable.c.minimumValue),
+                sqlalchemy.sql.functions.max(CollectionHourlyActivitiesTable.c.maximumValue),
             )
             .where(CollectionHourlyActivitiesTable.c.address == address)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)

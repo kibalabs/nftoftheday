@@ -11,6 +11,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get purge -y --auto-remove gcc libc-dev
 
+COPY makefile $WORKDIR
 COPY requirements-dev.txt $WORKDIR
 COPY requirements.txt $WORKDIR
 RUN make install
