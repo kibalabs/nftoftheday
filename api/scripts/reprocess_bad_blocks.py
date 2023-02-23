@@ -5,6 +5,7 @@ import sys
 
 import asyncclick as click
 import sqlalchemy
+from sqlalchemy.sql import functions as sqlalchemyfunc
 from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs import SqsMessageQueue
@@ -69,7 +70,7 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
             blocksWithUncles = set()
             logging.info(f'Found {len(blocksWithUncles)} blocks with uncles')
             blocksWithDuplicatesQuery = (
-                sqlalchemy.select(TokenTransfersTable.c.blockNumber, sqlalchemy.sql.functions.count(sqlalchemy.sql.functions.distinct(TokenTransfersTable.c.blockHash)))
+                sqlalchemy.select(TokenTransfersTable.c.blockNumber, sqlalchemyfunc.count(sqlalchemyfunc.distinct(TokenTransfersTable.c.blockHash)))
                 .where(TokenTransfersTable.c.blockNumber >= start)
                 .where(TokenTransfersTable.c.blockNumber < end)
                 .group_by(TokenTransfersTable.c.blockNumber)
@@ -89,7 +90,7 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
                 transactionReceipts = await asyncio.gather(*[blockProcessor.get_transaction_receipt(transactionHash=transactionHash) for transactionHash in chunk])
                 badBlockTransactionActualBlocks.update({transactionReceipt['blockNumber'] for transactionReceipt in transactionReceipts if transactionReceipt is not None})
             badBlockTransactionBlocksQuery = (
-                sqlalchemy.select(sqlalchemy.sql.functions.distinct(TokenTransfersTable.c.blockNumber))
+                sqlalchemy.select(sqlalchemyfunc.distinct(TokenTransfersTable.c.blockNumber))
                 .where(TokenTransfersTable.c.transactionHash.in_(badBlockTransactions))
             )
             results = await database.execute(query=badBlockTransactionBlocksQuery)
@@ -99,7 +100,7 @@ async def reprocess_bad_blocks(startBlockNumber: int, endBlockNumber: int, batch
             await notdManager.process_blocks_deferred(blockNumbers=allBadBlocks)
             insertQuery = BlocksTable.insert().from_select(
                 [BlocksTable.c.createdDate.key, BlocksTable.c.updatedDate.key, BlocksTable.c.blockNumber.key, BlocksTable.c.blockHash.key, BlocksTable.c.blockDate.key],
-                sqlalchemy.select(sqlalchemy.sql.functions.min(TokenTransfersTable.c.blockDate) + datetime.timedelta(minutes=15), sqlalchemy.sql.functions.min(TokenTransfersTable.c.blockDate) + datetime.timedelta(minutes=15), TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, sqlalchemy.sql.functions.min(TokenTransfersTable.c.blockDate))
+                sqlalchemy.select(sqlalchemyfunc.min(TokenTransfersTable.c.blockDate) + datetime.timedelta(minutes=15), sqlalchemyfunc.min(TokenTransfersTable.c.blockDate) + datetime.timedelta(minutes=15), TokenTransfersTable.c.blockNumber, TokenTransfersTable.c.blockHash, sqlalchemyfunc.min(TokenTransfersTable.c.blockDate))
                 .where(TokenTransfersTable.c.blockNumber.in_(set(blockNumbers) - allBadBlocks))
                 .where(TokenTransfersTable.c.blockNumber >= start)
                 .where(TokenTransfersTable.c.blockNumber < end)

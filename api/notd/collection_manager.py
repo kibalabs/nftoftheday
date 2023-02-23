@@ -36,7 +36,9 @@ class CollectionManager:
         address = chain_util.normalize_address(value=address)
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
 
-    async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = (0.1 * random.randint(1, 10))) -> Collection:
+    async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: Optional[float] = None) -> Collection:
+        if sleepSecondsBeforeProcess is None:
+            sleepSecondsBeforeProcess = 0.1 * random.randint(1, 10)
         address = chain_util.normalize_address(value=address)
         try:
             collection = await self.retriever.get_collection_by_address(address=address)

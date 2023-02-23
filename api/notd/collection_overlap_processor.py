@@ -1,6 +1,7 @@
 from typing import List
 
 import sqlalchemy
+from sqlalchemy.sql import functions as sqlalchemyfunc
 
 from notd.model import RetrievedCollectionOverlap
 from notd.store.retriever import Retriever
@@ -21,14 +22,14 @@ class CollectionOverlapProcessor():
         )
         # NOTE(krishan711): for some reason the view takes too long but querying the two tables separately fits in the time
         otherSingleRegistryCountQuery = (
-            sqlalchemy.select(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress, sqlalchemy.sql.functions.count(TokenOwnershipsTable.c.tokenId))
+            sqlalchemy.select(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress, sqlalchemyfunc.count(TokenOwnershipsTable.c.tokenId))
             .where(TokenOwnershipsTable.c.ownerAddress.in_(otherRegistrySubQuery))
             .group_by(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress)
         )
         otherSingleRegistryCountResult = await self.retriever.database.execute(query=otherSingleRegistryCountQuery)
         otherRegistryCounts = list(otherSingleRegistryCountResult)
         otherMultiRegistryCountQuery = (
-            sqlalchemy.select(TokenMultiOwnershipsTable.c.ownerAddress, TokenMultiOwnershipsTable.c.registryAddress, sqlalchemy.sql.functions.sum(TokenMultiOwnershipsTable.c.quantity))
+            sqlalchemy.select(TokenMultiOwnershipsTable.c.ownerAddress, TokenMultiOwnershipsTable.c.registryAddress, sqlalchemyfunc.sum(TokenMultiOwnershipsTable.c.quantity))
             .where(TokenMultiOwnershipsTable.c.ownerAddress.in_(otherRegistrySubQuery))
             .where(TokenMultiOwnershipsTable.c.quantity > 0)
             .group_by(TokenMultiOwnershipsTable.c.ownerAddress, TokenMultiOwnershipsTable.c.registryAddress)
@@ -36,7 +37,7 @@ class CollectionOverlapProcessor():
         otherMultiRegistryCountResult = await self.retriever.database.execute(query=otherMultiRegistryCountQuery)
         otherRegistryCounts += list(otherMultiRegistryCountResult)
         registryCountQuery = (
-            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemy.sql.functions.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity))
+            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )

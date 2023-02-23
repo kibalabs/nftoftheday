@@ -21,6 +21,7 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from sqlalchemy.sql import functions as sqlalchemyfunc
 
 from notd.activity_manager import ActivityManager
 from notd.attribute_manager import AttributeManager
@@ -129,7 +130,7 @@ class NotdManager:
 
     async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
         query = (
-            sqlalchemy.select(sqlalchemy.sql.functions.count(TokenTransfersTable.c.tokenTransferId))
+            sqlalchemy.select(sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
@@ -140,13 +141,13 @@ class NotdManager:
 
     async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TradedToken:
         query = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemy.sql.functions.count(TokenTransfersTable.c.tokenTransferId))
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId))
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate >= startDate)
             .where(BlocksTable.c.blockDate < endDate)
             .where(TokenTransfersTable.c.registryAddress.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemy.sql.functions.count(TokenTransfersTable.c.tokenTransferId).desc())
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId).desc())
             .limit(1)
         )
         result = await self.retriever.database.execute(query=query)
@@ -209,8 +210,8 @@ class NotdManager:
         holderCountQuery = (
             TokenOwnershipsTable.select()
             .with_only_columns(
-                sqlalchemy.sql.functions.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
-                sqlalchemy.sql.functions.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
+                sqlalchemyfunc.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
+                sqlalchemyfunc.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
             )
             .where(TokenOwnershipsTable.c.registryAddress == address)
         )
@@ -222,9 +223,9 @@ class NotdManager:
         allActivityQuery = (
             CollectionHourlyActivitiesTable.select()
             .with_only_columns(
-                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.saleCount),
-                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.transferCount),
-                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.totalValue),
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount),
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.transferCount),
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue),
             )
             .where(CollectionHourlyActivitiesTable.c.address == address)
         )
@@ -236,9 +237,9 @@ class NotdManager:
         dayActivityQuery = (
             CollectionHourlyActivitiesTable.select()
             .with_only_columns(
-                sqlalchemy.sql.functions.sum(CollectionHourlyActivitiesTable.c.totalValue),
-                sqlalchemy.sql.functions.min(CollectionHourlyActivitiesTable.c.minimumValue),
-                sqlalchemy.sql.functions.max(CollectionHourlyActivitiesTable.c.maximumValue),
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue),
+                sqlalchemyfunc.min(CollectionHourlyActivitiesTable.c.minimumValue),
+                sqlalchemyfunc.max(CollectionHourlyActivitiesTable.c.maximumValue),
             )
             .where(CollectionHourlyActivitiesTable.c.address == address)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)

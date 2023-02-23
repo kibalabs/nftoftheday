@@ -36,7 +36,7 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
         return ListGmCollectionRowsResponse(collectionRows=await responseBuilder.gm_collection_rows_from_models(gmCollectionRows=gmCollectionRows))
 
     @router.route('/generate-gms')
-    async def sse(rawRequest: Request) -> StreamingResponse:  # type: ignore[misc]  # pylint: disable=unused-argument
+    async def sse(rawRequest: Request) -> StreamingResponse:  # pylint: disable=unused-argument
         sseHeaders = {
             'Content-type': 'text/event-stream',
             'Cache-Control': 'no-cache',

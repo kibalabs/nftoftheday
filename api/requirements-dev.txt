@@ -1,2 +1,2 @@
-kiba-core[types]==0.5.1
+kiba-core[types]==0.5.2.dev1
 kiba-build==0.1.8

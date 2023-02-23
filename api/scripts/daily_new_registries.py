@@ -5,7 +5,7 @@ import sys
 import asyncclick as click
 from core import logging
 from core.store.database import Database
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql import functions as sqlalchemyfunc
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.store.schema import TokenTransfersTable
