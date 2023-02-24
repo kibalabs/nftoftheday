@@ -1,5 +1,5 @@
-from typing import List
 from typing import Any
+from typing import List
 
 import sqlalchemy
 from sqlalchemy import Select

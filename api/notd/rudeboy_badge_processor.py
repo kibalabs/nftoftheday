@@ -1,7 +1,7 @@
 import datetime
+from typing import Any
 from typing import List
 from typing import Tuple
-from typing import Any
 
 import sqlalchemy
 from sqlalchemy import Select

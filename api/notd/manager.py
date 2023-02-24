@@ -2,14 +2,13 @@ import datetime
 import json
 import random
 from collections import defaultdict
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Any
 
 import sqlalchemy
-from sqlalchemy import Select
 from core.exceptions import InternalServerErrorException
 from core.exceptions import NotFoundException
 from core.queues.message_queue import MessageQueue
@@ -23,6 +22,7 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from sqlalchemy import Select
 from sqlalchemy.sql import functions as sqlalchemyfunc
 
 from notd.activity_manager import ActivityManager

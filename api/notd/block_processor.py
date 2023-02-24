@@ -3,7 +3,6 @@ import datetime
 import json
 import typing
 from collections import defaultdict
-import typing
 from typing import Dict
 from typing import List
 from typing import Optional
