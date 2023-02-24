@@ -530,7 +530,7 @@ class GalleryManager:
                 sqlalchemy.select(
                     TokenCollectionOverlapsTable.c.otherRegistryAddress,
                     TokenCollectionsTable,
-                    sqlalchemyfunc.count(TokenCollectionOverlapsTable.c.ownerAddress).label('ownerCount'), # type: ignore[no-untyped-call, var-annotated]
+                    sqlalchemyfunc.count(TokenCollectionOverlapsTable.c.ownerAddress).label('ownerCount'), # type: ignore[no-untyped-call]
                     sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),  # type: ignore[no-untyped-call]
                     sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),  # type: ignore[no-untyped-call]
                 )
