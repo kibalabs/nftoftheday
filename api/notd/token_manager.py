@@ -7,7 +7,8 @@ from typing import Tuple
 import sqlalchemy
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
@@ -31,7 +32,7 @@ _TOKEN_UPDATE_MIN_DAYS = 7
 
 class TokenManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager, ownershipManager: OwnershipManager):
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: MessageQueue[Message], tokenMetadataProcessor: TokenMetadataProcessor, collectionManager: CollectionManager, ownershipManager: OwnershipManager):
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
@@ -69,7 +70,7 @@ class TokenManager:
                         .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(chunkedCollectionTokenIds))
                 )
                 recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
-                recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
+                recentlyUpdatedTokenIds = {(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas}
                 logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
                 collectionTokenIdsToProcess.update(set(chunkedCollectionTokenIds) - recentlyUpdatedTokenIds)
         messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIdsToProcess]
@@ -144,7 +145,7 @@ class TokenManager:
         tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
             StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
         ])
-        collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
+        collectionTokenIds = list({(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas})
         await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
         await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)

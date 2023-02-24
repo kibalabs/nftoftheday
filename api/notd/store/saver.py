@@ -75,7 +75,7 @@ UpdateRecordDict = Dict[_DMLColumnArgument, Any]  # type: ignore[misc]
 class Saver(CoreSaver):
 
     @staticmethod
-    def _get_create_token_transfer_values(retrievedTokenTransfer: RetrievedTokenTransfer) -> CreateRecordDict:
+    def _get_create_token_transfer_values(retrievedTokenTransfer: RetrievedTokenTransfer) -> CreateRecordDict:  # type: ignore[misc]
         return {
             TokenTransfersTable.c.transactionHash.key: retrievedTokenTransfer.transactionHash,
             TokenTransfersTable.c.registryAddress.key: retrievedTokenTransfer.registryAddress,
@@ -346,7 +346,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_token_multi_ownership(creationDate: datetime.datetime, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> CreateRecordDict:
+    def _get_create_token_multi_ownership(creationDate: datetime.datetime, retrievedTokenMultiOwnership: RetrievedTokenMultiOwnership) -> CreateRecordDict:  # type: ignore[misc]
         return {
             TokenMultiOwnershipsTable.c.createdDate.key: creationDate,
             TokenMultiOwnershipsTable.c.updatedDate.key: creationDate,
@@ -570,7 +570,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_token_attributes_values(retrievedTokenAttribute: RetrievedTokenAttribute, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
+    def _get_create_token_attributes_values(retrievedTokenAttribute: RetrievedTokenAttribute, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:  # type: ignore[misc]
         return {
             TokenAttributesTable.c.createdDate.key: createdDate,
             TokenAttributesTable.c.updatedDate.key: updatedDate,
@@ -613,7 +613,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_latest_token_listing_values(retrievedTokenListing: RetrievedTokenListing, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
+    def _get_create_latest_token_listing_values(retrievedTokenListing: RetrievedTokenListing, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:  # type: ignore[misc]
         return {
             LatestTokenListingsTable.c.createdDate.key: createdDate,
             LatestTokenListingsTable.c.updatedDate.key: updatedDate,
@@ -908,7 +908,7 @@ class Saver(CoreSaver):
         )
 
     @staticmethod
-    def _get_create_collection_overlaps_values(retrievedCollectionOverlap: RetrievedCollectionOverlap, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
+    def _get_create_collection_overlaps_values(retrievedCollectionOverlap: RetrievedCollectionOverlap, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:  # type: ignore[misc]
         return {
             TokenCollectionOverlapsTable.c.createdDate.key: createdDate,
             TokenCollectionOverlapsTable.c.updatedDate.key: updatedDate,
@@ -952,7 +952,7 @@ class Saver(CoreSaver):
         await self._execute(query=query, connection=connection)
 
     @staticmethod
-    def _get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder: RetrievedGalleryBadgeHolder, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
+    def _get_create_gallery_badge_holders_values(retrievedGalleryBadgeHolder: RetrievedGalleryBadgeHolder, createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:  # type: ignore[misc]
         return {
             GalleryBadgeHoldersTable.c.createdDate.key: createdDate,
             GalleryBadgeHoldersTable.c.updatedDate.key: updatedDate,
@@ -1025,7 +1025,7 @@ class Saver(CoreSaver):
         )
 
     @staticmethod
-    def _get_create_token_staking_values(retrievedTokenStaking: RetrievedTokenStaking , createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:
+    def _get_create_token_staking_values(retrievedTokenStaking: RetrievedTokenStaking , createdDate: datetime.datetime, updatedDate: datetime.datetime) -> CreateRecordDict:  # type: ignore[misc]
         return {
             TokenStakingsTable.c.createdDate.key: createdDate,
             TokenStakingsTable.c.updatedDate.key: updatedDate,

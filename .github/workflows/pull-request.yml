@@ -11,45 +11,43 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: Build docker image
         uses: docker/build-push-action@v2
         with:
           context: app
-          load: true
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
+          # platforms: linux/amd64,linux/arm64
       - name: Build testable docker image
         uses: docker/build-push-action@v2
         with:
-          context: app
+          context: ./app/
           load: true
-          cache-from: type=gha,scope=app
-          cache-to: type=gha,mode=max,scope=app
           tags: ${{ env.DOCKER_IMAGE }}
           target: build
-      - name: Run linting
+      - name: Run lint-check
         run: |
-          docker run --name lint $DOCKER_IMAGE npm run lint -- --output-file lint-results.json --output-file-format annotations
-          docker cp lint:/app/lint-results.json ./app/lint-results.json
-      - name: Upload linting results
+          docker run --name lint-check $DOCKER_IMAGE make lint-check-ci
+          docker cp lint-check:/app/lint-check-results.json ./lint-check-results.json
+      - name: Upload lint-check results
         uses: kibalabs/github-action-create-annotations@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          json-file-path: ./app/lint-results.json
-          check-name: lint-app
+          json-file-path: ./lint-check-results.json
+          check-name: app-lint-check
           fail-on-error: false
           path-prefix: ./app/
-      - name: Run typing
+      - name: Run type-check
         run: |
-          docker run --name typing $DOCKER_IMAGE npm run type-check -- --output-file typing-results.json --output-file-format annotations
-          docker cp typing:/app/typing-results.json ./app/typing-results.json
-      - name: Upload typing results
+          docker run --name type-check $DOCKER_IMAGE make type-check-ci
+          docker cp type-check:/app/type-check-results.json ./type-check-results.json
+      - name: Upload type-check results
         uses: kibalabs/github-action-create-annotations@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          json-file-path: ./app/typing-results.json
-          check-name: type-app
+          json-file-path: ./type-check-results.json
+          check-name: app-type-check
           fail-on-error: false
           path-prefix: ./app/
   build-api:
@@ -60,45 +58,53 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: Build docker image
         uses: docker/build-push-action@v2
         with:
           context: api
-          load: true
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
+          # platforms: linux/amd64,linux/arm64
+      - name: Build testable docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: api
+          load: true
           tags: ${{ env.DOCKER_IMAGE }}
-      - name: Run lint
+      - name: Run lint-check
         run: |
-          docker run --name lint $DOCKER_IMAGE lint --directory notd --output-file lint-results.json --output-format annotations
-          docker cp lint:/app/lint-results.json ./api/lint-results.json
-      - name: Upload lint results
+          docker run --name lint-check $DOCKER_IMAGE make lint-check-ci
+          docker cp lint-check:/app/lint-check-results.json ./lint-check-results.json
+      - name: Upload lint-check results
         uses: kibalabs/github-action-create-annotations@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          json-file-path: ./api/lint-results.json
-          check-name: lint-api
+          json-file-path: ./lint-check-results.json
+          check-name: api-lint-check
           fail-on-error: false
+          path-prefix: ./api/
       - name: Run type-check
         run: |
-          docker run --name type-check $DOCKER_IMAGE type-check --directory notd --output-file type-check-results.json --output-format annotations
-          docker cp type-check:/app/type-check-results.json ./api/type-check-results.json
+          docker run --name type-check $DOCKER_IMAGE make type-check-ci
+          docker cp type-check:/app/type-check-results.json ./type-check-results.json
       - name: Upload type-check results
         uses: kibalabs/github-action-create-annotations@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          json-file-path: ./api/type-check-results.json
-          check-name: type-check-api
+          json-file-path: ./type-check-results.json
+          check-name: api-type-check
           fail-on-error: false
+          path-prefix: ./api/
       - name: Run security-check
         run: |
-          docker run --name security-check $DOCKER_IMAGE security-check --directory notd --output-file security-check-results.json --output-format annotations
-          docker cp security-check:/app/security-check-results.json ./api/security-check-results.json
+          docker run --name security-check $DOCKER_IMAGE make security-check-ci
+          docker cp security-check:/app/security-check-results.json ./security-check-results.json
       - name: Upload security-check results
         uses: kibalabs/github-action-create-annotations@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          json-file-path: ./api/security-check-results.json
-          check-name: security-check-api
+          json-file-path: ./security-check-results.json
+          check-name: api-security-check
           fail-on-error: false
+          path-prefix: ./api/

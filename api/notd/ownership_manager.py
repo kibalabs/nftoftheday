@@ -6,7 +6,8 @@ from typing import Tuple
 
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
@@ -32,7 +33,7 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 
 class OwnershipManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionManager: CollectionManager, lockManager: LockManager, tokenOwnershipProcessor: TokenOwnershipProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: MessageQueue[Message], collectionManager: CollectionManager, lockManager: LockManager, tokenOwnershipProcessor: TokenOwnershipProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue

@@ -6,7 +6,7 @@ import asyncclick as click
 from core import logging
 from core.store.database import Database
 from core.util.chain_util import normalize_address
-from sqlalchemy.sql.expression import func as sqlalchemyfunc
+from sqlalchemy.sql import functions as sqlalchemyfunc
 from sqlalchemy.sql.expression import or_
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))

@@ -5,7 +5,8 @@ from typing import Sequence
 
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
@@ -25,7 +26,7 @@ _COLLECTION_UPDATE_MIN_DAYS = 30
 
 class CollectionManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: SqsMessageQueue, collectionProcessor: CollectionProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, tokenQueue: MessageQueue[Message], collectionProcessor: CollectionProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.tokenQueue = tokenQueue
@@ -35,7 +36,9 @@ class CollectionManager:
         address = chain_util.normalize_address(value=address)
         return await self._get_collection_by_address(address=address, shouldProcessIfNotFound=True)
 
-    async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: float = (0.1 * random.randint(1, 10))) -> Collection:
+    async def _get_collection_by_address(self, address: str, shouldProcessIfNotFound: bool = True, sleepSecondsBeforeProcess: Optional[float] = None) -> Collection:
+        if sleepSecondsBeforeProcess is None:
+            sleepSecondsBeforeProcess = 0.1 * random.randint(1, 10)
         address = chain_util.normalize_address(value=address)
         try:
             collection = await self.retriever.get_collection_by_address(address=address)
@@ -57,7 +60,7 @@ class CollectionManager:
                     DateFieldFilter(fieldName=TokenCollectionsTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
                 ],
             )
-            recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
+            recentlyUpdatedAddresses = {collection.address for collection in recentlyUpdatedCollections}
             logging.info(f'Skipping {len(recentlyUpdatedAddresses)} collections because they have been updated recently.')
             addresses = list(set(addresses) - recentlyUpdatedAddresses)
         messages = [UpdateCollectionMessageContent(address=address).to_message() for address in addresses]

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
-from typing import TYPE_CHECKING
 from typing import Generic
 from typing import List
 from typing import Optional
@@ -11,8 +10,8 @@ from typing import TypeVar
 from core.util import date_util
 from core.util.typing_util import JSON
 
-if not TYPE_CHECKING:
-    from pydantic import dataclasses
+# if not TYPE_CHECKING:
+#     from pydantic import dataclasses
 
 WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 

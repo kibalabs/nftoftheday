@@ -29,10 +29,8 @@ class LockManager:
 
     async def _acquire_lock_if_available(self, name: str, expirySeconds: int) -> Optional[Lock]:
         lock = None
-        try:
+        with contextlib.suppress(NotFoundException):
             lock = await self.retriever.get_lock_by_name(name=name)
-        except NotFoundException:
-            pass
         if lock and lock.expiryDate < date_util.datetime_from_now():
             await self.saver.delete_lock(lockId=lock.lockId)
             lock = None

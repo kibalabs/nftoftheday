@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import json
 import os
 import urllib.parse as urlparse
@@ -10,7 +11,8 @@ from typing import Optional
 from core.exceptions import FoundRedirectException
 from core.exceptions import NotFoundException
 from core.http.basic_authentication import BasicAuthentication
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.requester import Requester
 from core.util import date_util
 from core.util import dict_util
@@ -26,7 +28,7 @@ from notd.store.saver import Saver
 
 class TwitterManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester, workQueue: SqsMessageQueue, twitterBearerToken: str):
+    def __init__(self, saver: Saver, retriever: Retriever, requester: Requester, workQueue: MessageQueue[Message], twitterBearerToken: str):
         self.saver = saver
         self.retriever = retriever
         self.requester = requester
@@ -40,10 +42,8 @@ class TwitterManager:
 
     async def login(self, account: str, signature: Signature, initialUrl: str) -> None:
         userProfile = None
-        try:
+        with contextlib.suppress(NotFoundException):
             userProfile = await self.retriever.get_user_profile_by_address(address=account)
-        except NotFoundException:
-            pass
         if not userProfile:
             userProfile = await self.saver.create_user_profile(address=account, twitterId=None, discordId=None, signatureDict=signature.to_dict())
         state = {
@@ -94,10 +94,8 @@ class TwitterManager:
                 userProfile.twitterId = twitterId
                 await self.saver.update_user_profile(userProfileId=userProfileId, twitterId=twitterId, connection=connection)
                 twitterCredential = None
-                try:
+                with contextlib.suppress(NotFoundException):
                     twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=twitterId)
-                except NotFoundException:
-                    pass
                 if not twitterCredential:
                     await self.saver.create_twitter_credential(twitterId=twitterId, accessToken=accessToken, refreshToken=refreshToken, expiryDate=expiryDate)
                 else:
@@ -170,10 +168,8 @@ class TwitterManager:
         if date_util.datetime_from_now(seconds=-60) > twitterCredential.expiryDate:
             twitterCredential = await self.refresh_twitter_credentials(twitterId=twitterId)
         twitterProfile = None
-        try:
+        with contextlib.suppress(NotFoundException):
             twitterProfile = await self.retriever.get_twitter_profile_by_twitter_id(twitterId=twitterId)
-        except NotFoundException:
-            pass
         dataDict = {
             'ids': twitterId,
             'expansions': 'pinned_tweet_id',
