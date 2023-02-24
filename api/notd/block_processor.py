@@ -198,7 +198,7 @@ class BlockProcessor:
         registryAddress = chain_util.normalize_address(event['address'])
         if registryAddress == self.cryptoKittiesContract.address:
             # NOTE(krishan711): for CryptoKitties the tokenId isn't indexed in the Transfer event
-            decodedEventData = self.cryptoKittiesTransferEvent.processLog(event)
+            decodedEventData = self.cryptoKittiesTransferEvent.process_log(event)
             event['topics'] = [event['topics'][0], HexBytes(decodedEventData['args']['from']), HexBytes(decodedEventData['args']['to']), HexBytes(decodedEventData['args']['tokenId'])]
         if registryAddress == self.cryptoPunksContract.address:
             # NOTE(krishan711): for CryptoPunks there is a separate PunkBought (and PunkTransfer if its free) event with the punkId
