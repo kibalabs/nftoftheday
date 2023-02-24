@@ -3,9 +3,9 @@ from __future__ import annotations
 import dataclasses
 import datetime
 from typing import TYPE_CHECKING
-from typing import Dict
 from typing import Generic
 from typing import List
+from typing import Dict
 from typing import Optional
 from typing import TypeVar
 
