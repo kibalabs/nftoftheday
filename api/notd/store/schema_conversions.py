@@ -61,10 +61,10 @@ def token_transfer_from_row(rowMapping: RowMapping) -> TokenTransfer:
         toAddress=rowMapping[TokenTransfersTable.c.toAddress],
         operatorAddress=rowMapping[TokenTransfersTable.c.operatorAddress],
         contractAddress=rowMapping[TokenTransfersTable.c.contractAddress],
-        value=rowMapping[TokenTransfersTable.c.value],
-        amount=rowMapping[TokenTransfersTable.c.amount],
-        gasLimit=rowMapping[TokenTransfersTable.c.gasLimit],
-        gasPrice=rowMapping[TokenTransfersTable.c.gasPrice],
+        value=int(rowMapping[TokenTransfersTable.c.value]),
+        amount=int(rowMapping[TokenTransfersTable.c.amount]),
+        gasLimit=int(rowMapping[TokenTransfersTable.c.gasLimit]),
+        gasPrice=int(rowMapping[TokenTransfersTable.c.gasPrice]),
         blockNumber=rowMapping[TokenTransfersTable.c.blockNumber],
         tokenType=rowMapping[TokenTransfersTable.c.tokenType],
         isMultiAddress=rowMapping[TokenTransfersTable.c.isMultiAddress],
@@ -138,7 +138,7 @@ def token_ownership_from_row(rowMapping: RowMapping) -> TokenOwnership:
         registryAddress=rowMapping[TokenOwnershipsTable.c.registryAddress],
         tokenId=rowMapping[TokenOwnershipsTable.c.tokenId],
         ownerAddress=rowMapping[TokenOwnershipsTable.c.ownerAddress],
-        transferValue=rowMapping[TokenOwnershipsTable.c.transferValue],
+        transferValue=int(rowMapping[TokenOwnershipsTable.c.transferValue]),
         transferDate=rowMapping[TokenOwnershipsTable.c.transferDate],
         transferTransactionHash=rowMapping[TokenOwnershipsTable.c.transferTransactionHash],
     )
@@ -152,8 +152,8 @@ def token_multi_ownership_from_row(rowMapping: RowMapping) -> TokenMultiOwnershi
         registryAddress=rowMapping[TokenMultiOwnershipsTable.c.registryAddress.name],
         tokenId=rowMapping[TokenMultiOwnershipsTable.c.tokenId.name],
         ownerAddress=rowMapping[TokenMultiOwnershipsTable.c.ownerAddress.name],
-        quantity=rowMapping[TokenMultiOwnershipsTable.c.quantity.name],
-        averageTransferValue=rowMapping[TokenMultiOwnershipsTable.c.averageTransferValue.name],
+        quantity=int(rowMapping[TokenMultiOwnershipsTable.c.quantity.name]),
+        averageTransferValue=int(rowMapping[TokenMultiOwnershipsTable.c.averageTransferValue.name]),
         latestTransferDate=rowMapping[TokenMultiOwnershipsTable.c.latestTransferDate.name],
         latestTransferTransactionHash=rowMapping[TokenMultiOwnershipsTable.c.latestTransferTransactionHash.name],
     )
@@ -166,12 +166,12 @@ def collection_activity_from_row(rowMapping: RowMapping) -> CollectionHourlyActi
         updatedDate=rowMapping[CollectionHourlyActivitiesTable.c.updatedDate],
         address=rowMapping[CollectionHourlyActivitiesTable.c.address],
         date=rowMapping[CollectionHourlyActivitiesTable.c.date],
-        transferCount=rowMapping[CollectionHourlyActivitiesTable.c.transferCount],
-        saleCount=rowMapping[CollectionHourlyActivitiesTable.c.saleCount],
-        totalValue=rowMapping[CollectionHourlyActivitiesTable.c.totalValue],
-        minimumValue=rowMapping[CollectionHourlyActivitiesTable.c.minimumValue],
-        maximumValue=rowMapping[CollectionHourlyActivitiesTable.c.maximumValue],
-        averageValue=rowMapping[CollectionHourlyActivitiesTable.c.averageValue],
+        transferCount=int(rowMapping[CollectionHourlyActivitiesTable.c.transferCount]),
+        saleCount=int(rowMapping[CollectionHourlyActivitiesTable.c.saleCount]),
+        totalValue=int(rowMapping[CollectionHourlyActivitiesTable.c.totalValue]),
+        minimumValue=int(rowMapping[CollectionHourlyActivitiesTable.c.minimumValue]),
+        maximumValue=int(rowMapping[CollectionHourlyActivitiesTable.c.maximumValue]),
+        averageValue=int(rowMapping[CollectionHourlyActivitiesTable.c.averageValue]),
     )
 
 
@@ -181,12 +181,12 @@ def collection_total_activity_from_row(rowMapping: RowMapping) -> CollectionTota
         createdDate=rowMapping[CollectionTotalActivitiesTable.c.createdDate],
         updatedDate=rowMapping[CollectionTotalActivitiesTable.c.updatedDate],
         address=rowMapping[CollectionTotalActivitiesTable.c.address],
-        transferCount=rowMapping[CollectionTotalActivitiesTable.c.transferCount],
-        saleCount=rowMapping[CollectionTotalActivitiesTable.c.saleCount],
-        totalValue=rowMapping[CollectionTotalActivitiesTable.c.totalValue],
-        minimumValue=rowMapping[CollectionTotalActivitiesTable.c.minimumValue],
-        maximumValue=rowMapping[CollectionTotalActivitiesTable.c.maximumValue],
-        averageValue=rowMapping[CollectionTotalActivitiesTable.c.averageValue],
+        transferCount=int(rowMapping[CollectionTotalActivitiesTable.c.transferCount]),
+        saleCount=int(rowMapping[CollectionTotalActivitiesTable.c.saleCount]),
+        totalValue=int(rowMapping[CollectionTotalActivitiesTable.c.totalValue]),
+        minimumValue=int(rowMapping[CollectionTotalActivitiesTable.c.minimumValue]),
+        maximumValue=int(rowMapping[CollectionTotalActivitiesTable.c.maximumValue]),
+        averageValue=int(rowMapping[CollectionTotalActivitiesTable.c.averageValue]),
     )
 
 
@@ -226,7 +226,7 @@ def token_listing_from_row(rowMapping: RowMapping, table: Optional[Table] = None
         startDate=rowMapping[table.c.startDate],
         endDate=rowMapping[table.c.endDate],
         isValueNative=rowMapping[table.c.isValueNative],
-        value=rowMapping[table.c.value],
+        value=int(rowMapping[table.c.value]),
         source=rowMapping[table.c.source],
         sourceId=rowMapping[table.c.sourceId],
     )
@@ -347,8 +347,8 @@ def collection_overlap_from_row(rowMapping: RowMapping) -> CollectionOverlap:
         registryAddress=rowMapping[TokenCollectionOverlapsTable.c.registryAddress],
         otherRegistryAddress=rowMapping[TokenCollectionOverlapsTable.c.otherRegistryAddress],
         ownerAddress=rowMapping[TokenCollectionOverlapsTable.c.ownerAddress],
-        registryTokenCount=rowMapping[TokenCollectionOverlapsTable.c.registryTokenCount],
-        otherRegistryTokenCount=rowMapping[TokenCollectionOverlapsTable.c.otherRegistryTokenCount],
+        registryTokenCount=int(rowMapping[TokenCollectionOverlapsTable.c.registryTokenCount]),
+        otherRegistryTokenCount=int(rowMapping[TokenCollectionOverlapsTable.c.otherRegistryTokenCount]),
     )
 
 
