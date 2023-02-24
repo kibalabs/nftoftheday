@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import typing
 from typing import Set
@@ -5,7 +6,8 @@ from typing import Tuple
 
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import DateFieldFilter
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
@@ -26,7 +28,7 @@ from notd.store.schema import TokenTransfersTable
 
 class ActivityManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, tokenQueue: SqsMessageQueue, collectionActivityProcessor: CollectionActivityProcessor) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], tokenQueue: MessageQueue[Message], collectionActivityProcessor: CollectionActivityProcessor) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -116,10 +118,8 @@ class ActivityManager:
         retrievedCollectionTotalActivity = await self.collectionActivityProcessor.calculate_collection_total_activity(address=address)
         async with self.saver.create_transaction() as connection:
             collectionTotalActivity = None
-            try:
+            with contextlib.suppress(NotFoundException):
                 collectionTotalActivity = await self.retriever.get_collection_total_activity_by_address(address=address, connection=connection)
-            except NotFoundException:
-                pass
             if collectionTotalActivity:
                 await self.saver.update_collection_total_activity(connection=connection, collectionTotalActivityId=collectionTotalActivity.collectionTotalActivityId, address=address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)
             else:

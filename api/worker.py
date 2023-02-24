@@ -5,7 +5,7 @@ import time
 from core import logging
 from core.http.basic_authentication import BasicAuthentication
 from core.queues.message_queue_processor import MessageQueueProcessor
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.sqs import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
 from core.store.database import Database

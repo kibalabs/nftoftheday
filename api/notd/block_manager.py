@@ -8,7 +8,8 @@ from typing import Tuple
 import sqlalchemy
 from core import logging
 from core.exceptions import NotFoundException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import Direction
 from core.store.retriever import IntegerFieldFilter
 from core.store.retriever import Order
@@ -33,7 +34,7 @@ from notd.token_staking_manager import TokenStakingManager
 
 class BlockManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: SqsMessageQueue, blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, tokenStakingManager: TokenStakingManager, tokenManager: TokenManager) -> None:
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], blockProcessor: BlockProcessor, ownershipManager: OwnershipManager, collectionManager: CollectionManager, tokenStakingManager: TokenStakingManager, tokenManager: TokenManager) -> None:
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -80,7 +81,7 @@ class BlockManager:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
         logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
-        collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
+        collectionAddresses = list({registryAddress for registryAddress, _ in collectionTokenIds})
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
         stakingCollectionTokenIds = {(transfer.registryAddress, transfer.tokenId) for transfer in processedBlock.retrievedTokenTransfers if (transfer.fromAddress in STAKING_ADDRESSES) or (transfer.toAddress in STAKING_ADDRESSES)}
         if not shouldSkipUpdatingStakings:

@@ -3,7 +3,8 @@ import json
 import logging
 
 from core.exceptions import BadRequestException
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
@@ -24,7 +25,7 @@ from notd.store.schema import GalleryBadgeHoldersTable
 
 class BadgeManager:
 
-    def __init__(self, retriever: Retriever, saver: Saver, workQueue: SqsMessageQueue, badgeProcessor: BadgeProcessor) -> None:
+    def __init__(self, retriever: Retriever, saver: Saver, workQueue: MessageQueue[Message], badgeProcessor: BadgeProcessor) -> None:
         self.retriever = retriever
         self.saver = saver
         self.workQueue = workQueue
@@ -71,7 +72,7 @@ class BadgeManager:
         }
         signatureMessage = json.dumps({ 'command': command, 'message': message }, indent=2, ensure_ascii=False)
         messageHash = defunct_hash_message(text=signatureMessage)
-        signer = w3.eth.account.recoverHash(message_hash=messageHash, signature=signature)
+        signer = w3.eth.account._recover_hash(message_hash=messageHash, signature=signature)  # pylint: disable=protected-access
         if signer != assignerAddress:
             raise BadRequestException('Invalid signature')
         async with self.saver.create_transaction() as connection:

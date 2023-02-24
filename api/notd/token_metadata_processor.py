@@ -8,6 +8,7 @@ from typing import Optional
 
 from core import logging
 from core.exceptions import BadRequestException
+from core.exceptions import InternalServerErrorException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.requester import ResponseException
@@ -251,9 +252,9 @@ class TokenMetadataProcessor():
                 tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=10)
                 tokenMetadataDict = tokenMetadataResponse.json()
                 if tokenMetadataDict is None:
-                    raise Exception('Empty response')
+                    raise InternalServerErrorException('Empty response')
                 if isinstance(tokenMetadataDict, (bool, int, float)):
-                    raise Exception(f'Invalid response: {tokenMetadataDict}')
+                    raise InternalServerErrorException(f'Invalid response: {tokenMetadataDict}')
                 if isinstance(tokenMetadataDict, str):
                     tokenMetadataDict = json.loads(tokenMetadataDict)
             except ResponseException as exception:

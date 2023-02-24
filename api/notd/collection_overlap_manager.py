@@ -1,6 +1,7 @@
 import logging
 
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.message_queue import MessageQueue
+from core.queues.model import Message
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import list_util
@@ -16,7 +17,7 @@ from notd.store.schema import TokenCollectionOverlapsTable
 
 class CollectionOverlapManager:
 
-    def __init__(self, retriever: Retriever, saver: Saver, workQueue: SqsMessageQueue, collectionOverlapProcessor: CollectionOverlapProcessor) -> None:
+    def __init__(self, retriever: Retriever, saver: Saver, workQueue: MessageQueue[Message], collectionOverlapProcessor: CollectionOverlapProcessor) -> None:
         self.retriever = retriever
         self.saver = saver
         self.collectionOverlapProcessor = collectionOverlapProcessor

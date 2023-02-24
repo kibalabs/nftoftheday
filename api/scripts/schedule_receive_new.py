@@ -3,7 +3,7 @@ import sys
 
 import asyncclick as click
 from core import logging
-from core.queues.sqs_message_queue import SqsMessageQueue
+from core.queues.sqs import SqsMessageQueue
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.messages import ReceiveNewBlocksMessageContent
