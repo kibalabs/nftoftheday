@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
-from typing import TYPE_CHECKING
 from typing import Generic
 from typing import List
 from typing import Dict
