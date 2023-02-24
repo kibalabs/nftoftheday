@@ -60,7 +60,7 @@ class CollectionManager:
                     DateFieldFilter(fieldName=TokenCollectionsTable.c.updatedDate.key, gt=date_util.datetime_from_now(days=-_COLLECTION_UPDATE_MIN_DAYS))
                 ],
             )
-            recentlyUpdatedAddresses = set(collection.address for collection in recentlyUpdatedCollections)
+            recentlyUpdatedAddresses = {collection.address for collection in recentlyUpdatedCollections}
             logging.info(f'Skipping {len(recentlyUpdatedAddresses)} collections because they have been updated recently.')
             addresses = list(set(addresses) - recentlyUpdatedAddresses)
         messages = [UpdateCollectionMessageContent(address=address).to_message() for address in addresses]

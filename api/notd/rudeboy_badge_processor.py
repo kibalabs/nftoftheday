@@ -1,6 +1,7 @@
 import datetime
 from typing import List
 from typing import Tuple
+from typing import Any
 
 import sqlalchemy
 from sqlalchemy import Select
@@ -41,8 +42,8 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return allBadges
 
     async def calculate_minter_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        query: Select = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemyfunc.min(BlocksTable.c.blockDate).label('achievedDate'))
+        query: Select[Any] = (  # type: ignore[misc]
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemyfunc.min(BlocksTable.c.blockDate).label('achievedDate'))  # type: ignore[no-untyped-call]
             .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(TokenTransfersTable.c.fromAddress == RUDEBOYS_OWNER_ADDRESS)
@@ -53,14 +54,14 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return minterBadgeHolders
 
     async def calculate_one_of_one_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        oneOfOneQuery: Select = (
+        oneOfOneQuery: Select[Any] = (  # type: ignore[misc]
             sqlalchemy.select(TokenMultiOwnershipsTable.c.tokenId)
             .where(TokenMultiOwnershipsTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .group_by(TokenMultiOwnershipsTable.c.tokenId)
-            .having(sqlalchemyfunc.sum(TokenMultiOwnershipsTable.c.quantity) == 1)
+            .having(sqlalchemyfunc.sum(TokenMultiOwnershipsTable.c.quantity) == 1)  # type: ignore[no-untyped-call]
         )
-        query: Select = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemyfunc.min(BlocksTable.c.blockDate).label('achievedDate'))
+        query: Select[Any] = (  # type: ignore[misc]
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemyfunc.min(BlocksTable.c.blockDate).label('achievedDate'))  # type: ignore[no-untyped-call]
             .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
             .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(TokenTransfersTable.c.tokenId.in_(oneOfOneQuery))
@@ -71,13 +72,13 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return oneOfOneBadgeHolders
 
     async def calculate_never_sold_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        soldTokenQuery: Select = (
+        soldTokenQuery: Select[Any] = (  # type: ignore[misc]
                 sqlalchemy.select(TokenTransfersTable.c.fromAddress)
                 .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
                 .group_by(TokenTransfersTable.c.fromAddress)
             )
-        query: Select = (
-                sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemyfunc.min(BlocksTable.c.blockDate).label('achievedDate'))
+        query: Select[Any] = (  # type: ignore[misc]
+                sqlalchemy.select(TokenTransfersTable.c.registryAddress.label('registryAddress'), TokenTransfersTable.c.toAddress.label('ownerAddress'), sqlalchemyfunc.min(BlocksTable.c.blockDate).label('achievedDate'))  # type: ignore[no-untyped-call]
                 .join(BlocksTable, TokenTransfersTable.c.blockNumber == BlocksTable.c.blockNumber, isouter=True)
                 .where(TokenTransfersTable.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
                 .where(TokenTransfersTable.c.toAddress.not_in(soldTokenQuery))
@@ -88,7 +89,7 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return neverSoldBadgeHolders
 
     async def _get_holders_per_limit(self, rewardTokenIndex: int) -> List[Tuple[str, str, datetime.datetime]]:
-        query: Select = (
+        query: Select[Any] = (  # type: ignore[misc]
             sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.latestTransferDate.label('achievedDate'))
             .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
@@ -120,8 +121,8 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
         return enthusiastBadgeHolders
 
     async def calculate_seeing_double_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
-        query: Select = (
-            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemyfunc.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'))
+        query: Select[Any] = (  # type: ignore[misc]
+            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemyfunc.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'))  # type: ignore[no-untyped-call]
             .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity >= 2)
@@ -137,8 +138,8 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
 
     async def calculate_special_edition_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         specialEditionBadgeHolders: List[RetrievedGalleryBadgeHolder] = []
-        query: Select = (
-            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemyfunc.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'))
+        query: Select[Any] = (  # type: ignore[misc]
+            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemyfunc.min(TokenMultiOwnershipsTable.c.latestTransferDate).label('achievedDate'))  # type: ignore[no-untyped-call]
             .join(TokenMultiOwnershipsTable, sqlalchemy.and_(TokenMultiOwnershipsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, TokenMultiOwnershipsTable.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, TokenMultiOwnershipsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == COLLECTION_RUDEBOYS_ADDRESS)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId.in_(RUDEBOYS_SPECIAL_EDITION_TOKENS))

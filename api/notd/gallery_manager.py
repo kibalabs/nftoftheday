@@ -98,7 +98,7 @@ class GalleryManager:
 
     async def get_gallery_token(self, registryAddress: str, tokenId: str) -> GalleryToken:
         query = (
-            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, OrderedTokenListingsView, sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).label('quantity'))
+            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, OrderedTokenListingsView, sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).label('quantity'))  # type: ignore[no-untyped-call]
                 .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                 .join(TokenOwnershipsView, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsView.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsView.c.tokenId))
                 .join(OrderedTokenListingsView, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == OrderedTokenListingsView.c.registryAddress, TokenMetadatasTable.c.tokenId == OrderedTokenListingsView.c.tokenId, OrderedTokenListingsView.c.tokenListingIndex == 1), isouter=True)
@@ -155,7 +155,7 @@ class GalleryManager:
         await self.collectionManager.get_collection_by_address(address=registryAddress)
         usesListings = isListed or minPrice or maxPrice
         query = (
-            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, OrderedTokenListingsView, TokenStakingsTable, sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).label('quantity'))
+            sqlalchemy.select(TokenMetadatasTable, TokenCustomizationsTable, OrderedTokenListingsView, TokenStakingsTable, sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).label('quantity'))  # type: ignore[no-untyped-call]
                 .join(TokenOwnershipsView, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenOwnershipsView.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenOwnershipsView.c.tokenId))
                 .join(TokenCustomizationsTable, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == TokenCustomizationsTable.c.registryAddress, TokenMetadatasTable.c.tokenId == TokenCustomizationsTable.c.tokenId), isouter=True)
                 .join(OrderedTokenListingsView, sqlalchemy.and_(TokenMetadatasTable.c.registryAddress == OrderedTokenListingsView.c.registryAddress, TokenMetadatasTable.c.tokenId == OrderedTokenListingsView.c.tokenId, OrderedTokenListingsView.c.tokenListingIndex == 1), isouter=True)
@@ -172,9 +172,9 @@ class GalleryManager:
         elif order == "TOKENID_DESC":
             query = query.order_by(sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).desc())
         elif order == "QUANTITY_ASC":
-            query = query.order_by(sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).asc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+            query = query.order_by(sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).asc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())  # type: ignore[no-untyped-call]
         elif order == "QUANTITY_DESC":
-            query = query.order_by(sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).desc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
+            query = query.order_by(sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity).desc(), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())  # type: ignore[no-untyped-call]
         elif order == "PRICE_ASC":
             query = query.order_by(sqlalchemy.nulls_last(sqlalchemy.cast(OrderedTokenListingsView.c.value, sqlalchemy.NUMERIC).asc()), sqlalchemy.cast(TokenMetadatasTable.c.tokenId, sqlalchemy.Integer).asc())
         elif order == "PRICE_DESC":
@@ -268,8 +268,8 @@ class GalleryManager:
         return tokenCustomization
 
     async def get_gallery_user(self, registryAddress: str, userAddress: str) -> GalleryUser:
-        ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')
-        uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')
+        ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')  # type: ignore[no-untyped-call, var-annotated]
+        uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')  # type: ignore[no-untyped-call]
         userQuery = (
             sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
@@ -308,8 +308,8 @@ class GalleryManager:
         return galleryBadges
 
     async def query_collection_users(self, registryAddress: str, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
-        ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')
-        uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')
+        ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')  # type: ignore[no-untyped-call, var-annotated]
+        uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')  # type: ignore[no-untyped-call]
         usersQueryBase = (
             sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
@@ -330,9 +330,9 @@ class GalleryManager:
         elif order == 'UNIQUETOKENCOUNT_ASC':
             usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
         elif order == 'FOLLOWERCOUNT_DESC':
-            usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         elif order == 'FOLLOWERCOUNT_ASC':
-            usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
         elif order == 'JOINDATE_DESC':
             usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.asc(), ownedCountColumn.desc())
@@ -344,7 +344,7 @@ class GalleryManager:
         userRows = list(usersResult.mappings())
         ownerAddresses = [userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress] for userRow in userRows]
         userCountsQuery = (
-            sqlalchemy.select(sqlalchemyfunc.count(sqlalchemy.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))
+            sqlalchemy.select(sqlalchemyfunc.count(sqlalchemy.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))  # type: ignore[no-untyped-call]
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex <= 5)
         )
@@ -438,9 +438,9 @@ class GalleryManager:
                 TokenCollectionOverlapsTable.c.registryAddress,
                 TokenCollectionOverlapsTable.c.otherRegistryAddress,
                 TokenCollectionsTable,
-                sqlalchemyfunc.count(TokenCollectionOverlapsTable.c.ownerAddress).label('ownerCount'),
-                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),
-                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),
+                sqlalchemyfunc.count(TokenCollectionOverlapsTable.c.ownerAddress).label('ownerCount'),  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),  # type: ignore[no-untyped-call]
             )
             .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
             .join(TokenCollectionsTable, TokenCollectionsTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
@@ -467,8 +467,8 @@ class GalleryManager:
                 TokenCollectionOverlapsTable.c.otherRegistryAddress,
                 TokenCollectionOverlapsTable.c.ownerAddress,
                 TokenCollectionsTable,
-                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),
-                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),
+                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),  # type: ignore[no-untyped-call]
             )
             .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
             .join(TokenCollectionsTable, TokenCollectionsTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)

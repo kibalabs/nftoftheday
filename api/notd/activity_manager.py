@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import typing
 from typing import Set
@@ -117,10 +118,8 @@ class ActivityManager:
         retrievedCollectionTotalActivity = await self.collectionActivityProcessor.calculate_collection_total_activity(address=address)
         async with self.saver.create_transaction() as connection:
             collectionTotalActivity = None
-            try:
+            with contextlib.suppress(NotFoundException):
                 collectionTotalActivity = await self.retriever.get_collection_total_activity_by_address(address=address, connection=connection)
-            except NotFoundException:
-                pass
             if collectionTotalActivity:
                 await self.saver.update_collection_total_activity(connection=connection, collectionTotalActivityId=collectionTotalActivity.collectionTotalActivityId, address=address, transferCount=retrievedCollectionTotalActivity.transferCount, saleCount=retrievedCollectionTotalActivity.saleCount, totalValue=retrievedCollectionTotalActivity.totalValue, minimumValue=retrievedCollectionTotalActivity.minimumValue, maximumValue=retrievedCollectionTotalActivity.maximumValue, averageValue=retrievedCollectionTotalActivity.averageValue,)
             else:

@@ -81,7 +81,7 @@ class BlockManager:
         processedBlock = await self.blockProcessor.process_block(blockNumber=blockNumber)
         logging.info(f'Found {len(processedBlock.retrievedTokenTransfers)} token transfers in block #{blockNumber}')
         collectionTokenIds = await self._save_processed_block(processedBlock=processedBlock)
-        collectionAddresses = list(set(registryAddress for registryAddress, _ in collectionTokenIds))
+        collectionAddresses = list({registryAddress for registryAddress, _ in collectionTokenIds})
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
         stakingCollectionTokenIds = {(transfer.registryAddress, transfer.tokenId) for transfer in processedBlock.retrievedTokenTransfers if (transfer.fromAddress in STAKING_ADDRESSES) or (transfer.toAddress in STAKING_ADDRESSES)}
         if not shouldSkipUpdatingStakings:

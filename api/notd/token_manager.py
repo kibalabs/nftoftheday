@@ -70,7 +70,7 @@ class TokenManager:
                         .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(chunkedCollectionTokenIds))
                 )
                 recentlyUpdatedTokenMetadatas = await self.retriever.query_token_metadatas(query=query)
-                recentlyUpdatedTokenIds = set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas)
+                recentlyUpdatedTokenIds = {(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in recentlyUpdatedTokenMetadatas}
                 logging.info(f'Skipping {len(recentlyUpdatedTokenIds)} collectionTokenIds because they have been updated recently.')
                 collectionTokenIdsToProcess.update(set(chunkedCollectionTokenIds) - recentlyUpdatedTokenIds)
         messages = [UpdateTokenMetadataMessageContent(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce).to_message() for (registryAddress, tokenId) in collectionTokenIdsToProcess]
@@ -145,7 +145,7 @@ class TokenManager:
         tokenMetadatas = await self.retriever.list_token_metadatas(fieldFilters=[
             StringFieldFilter(fieldName=TokenMetadatasTable.c.registryAddress.key, eq=address),
         ])
-        collectionTokenIds = list(set((tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas))
+        collectionTokenIds = list({(tokenMetadata.registryAddress, tokenMetadata.tokenId) for tokenMetadata in tokenMetadatas})
         await self.collectionManager.update_collection_deferred(address=address, shouldForce=shouldForce)
         await self.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds, shouldForce=shouldForce)
         await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)

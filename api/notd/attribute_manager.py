@@ -38,7 +38,7 @@ class AttributeManager:
             .where(TokenMetadatasTable.c.updatedDate >= latestProcessedDate)
         )
         updatedTokenMetadatasQueryResult = await self.retriever.database.execute(query=updatedTokenMetadatasQuery)
-        updatedTokenMetadatas = set(list(updatedTokenMetadatasQueryResult))
+        updatedTokenMetadatas = set(updatedTokenMetadatasQueryResult)
         logging.info(f'Scheduling processing for {len(updatedTokenMetadatas)} changed tokens')
         messages = [UpdateCollectionTokenAttributesMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in updatedTokenMetadatas]
         await self.tokenQueue.send_messages(messages=messages)

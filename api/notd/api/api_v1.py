@@ -23,7 +23,9 @@ from notd.api.endpoints_v1 import ListCollectionTokensResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
-from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
+from notd.api.endpoints_v1 import (
+    RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse,
+)
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
@@ -45,7 +47,6 @@ from notd.api.endpoints_v1 import UpdateLatestListingsAllCollectionsDeferredResp
 from notd.api.endpoints_v1 import UpdateStakingsForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTokenAttributesForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import UpdateTotalActivityForAllCollectionsDeferredResponse
-from notd.api.endpoints_v1 import datetime
 from notd.api.response_builder import ResponseBuilder
 from notd.manager import NotdManager
 

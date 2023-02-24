@@ -90,8 +90,8 @@ class TokenStakingProcessor:
             unStakedTokens = list(unStakedTokensResult)
             currentlyStakedTokens: Dict[str, Tuple[str, str, datetime.datetime]] = {}
             for tokenId, ownerAddress, transactionHash, blockDate in stakedTokens:
-                currentlyStakedTokens[tokenId] = (ownerAddress,transactionHash, blockDate)
-            for tokenId, ownerAddress, transactionHash, blockDate in unStakedTokens:
+                currentlyStakedTokens[tokenId] = (ownerAddress, transactionHash, blockDate)
+            for tokenId, _, _, blockDate in unStakedTokens:
                 if currentlyStakedTokens[tokenId][2] < blockDate:
                     del currentlyStakedTokens[tokenId]
             retrievedStakedTokens += [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=stakingAddress, ownerAddress=ownerAddress, stakedDate=stakedDate, transactionHash=transactionHash) for tokenId, (ownerAddress, transactionHash, stakedDate) in currentlyStakedTokens.items()]
