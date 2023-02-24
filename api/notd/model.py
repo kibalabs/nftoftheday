@@ -71,7 +71,7 @@ CREEPZ_SUPER_COLLECTION_ADDRESS = [
 ]
 
 SUPER_COLLECTIONS = {
-    'all-creepz': CREEPZ_SUPER_COLLECTION_ADDRESS
+    'creepz': CREEPZ_SUPER_COLLECTION_ADDRESS
 }
 
 ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
