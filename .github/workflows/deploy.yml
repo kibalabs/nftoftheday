@@ -115,7 +115,7 @@ jobs:
               --env VIRTUAL_HOST=${url} \
               --env LETSENCRYPT_HOST=${url} \
               --env-file ~/.${NAME}.vars \
-              ${DOCKER_IMAGE} './start-api.sh'
+              ${DOCKER_IMAGE}
   run-worker:
     needs: deploy-api
     runs-on: ubuntu-latest
