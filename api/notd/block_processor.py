@@ -181,7 +181,16 @@ class BlockProcessor:
         tokenIds = dataParams[3: 3 + tokenCount]  # pylint: disable=unsubscriptable-object
         amounts = dataParams[3 + tokenCount + 1:]  # pylint: disable=unsubscriptable-object
         dataDict = {str(int(tokenIds[i])): int(amounts[i]) for i in range(len(tokenIds))}
-        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155batch') for (tokenId, amount) in dataDict.items()]
+        retrievedEvents = [RetrievedEvent(
+            transactionHash=transactionHash,
+            registryAddress=registryAddress,
+            fromAddress=fromAddress,
+            toAddress=toAddress,
+            operatorAddress=operatorAddress,
+            tokenId=str(tokenId),
+            amount=amount,
+            tokenType='erc1155batch',
+        ) for (tokenId, amount) in dataDict.items()]
         return retrievedEvents
 
     async def _process_erc721_single_event(self, event: LogReceipt) -> List[RetrievedEvent]:
