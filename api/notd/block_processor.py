@@ -229,7 +229,7 @@ class BlockProcessor:
                 RetrievedTokenTransfer(
                     transactionHash=retrievedEvent.transactionHash,
                     registryAddress=retrievedEvent.registryAddress,
-                    tokenId=retrievedEvent.tokenId,
+                    tokenId=str(retrievedEvent.tokenId),
                     fromAddress=retrievedEvent.fromAddress,
                     toAddress=retrievedEvent.toAddress,
                     operatorAddress=operatorAddress,
