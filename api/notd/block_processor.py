@@ -59,7 +59,7 @@ class BlockProcessor:
         self.ierc721Contract = self.w3.eth.contract(abi=contractJson['abi'])
         self.ierc721TransferEvent = self.ierc721Contract.events.Transfer()
         # TODO(krishan711): use the contract to get the signature hash instead of doing manually
-        # self.contractFilter = self.ierc721Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
+        # self.contractFilter = self.ierc721Contract.events.Transfer.create_filter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc721TransferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
         self.erc20TransferEventSignatureHash = Web3.keccak(text='Transfer(address,address,uint256)').hex()
 
@@ -68,7 +68,7 @@ class BlockProcessor:
         self.ierc1155Contract = self.w3.eth.contract(abi=contractJson['abi'])
         self.ierc1155TransferEvent = self.ierc1155Contract.events.TransferSingle()
         # TODO(krishan711): use the contract to get the signature hash instead of doing manually
-        # self.contractFilter = self.ierc1155Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
+        # self.contractFilter = self.ierc1155Contract.events.Transfer.create_filter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc1155TransferEventSignatureHash = Web3.keccak(text='TransferSingle(address,address,address,uint256,uint256)').hex()
 
         with open('./contracts/IERC1155.json') as contractJsonFile:
@@ -76,7 +76,7 @@ class BlockProcessor:
         self.ierc1155Contract = self.w3.eth.contract(abi=contractJson['abi'])
         self.ierc1155TransferEvent = self.ierc1155Contract.events.TransferBatch()
         # TODO(krishan711): use the contract to get the signature hash instead of doing manually
-        # self.contractFilter = self.ierc1155Contract.events.Transfer.createFilter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
+        # self.contractFilter = self.ierc1155Contract.events.Transfer.create_filter(fromBlock=6517190, toBlock=6517190, topics=[None, None, None, None])
         self.erc1155TransferBatchEventSignatureHash = Web3.keccak(text='TransferBatch(address,address,address,uint256[],uint256[])').hex()
 
     async def get_transaction_receipt(self, transactionHash: str) -> TxReceipt:
@@ -203,11 +203,11 @@ class BlockProcessor:
         if registryAddress == self.cryptoPunksContract.address:
             # NOTE(krishan711): for CryptoPunks there is a separate PunkBought (and PunkTransfer if its free) event with the punkId
             ethTransactionReceipt = await self.get_transaction_receipt(transactionHash=transactionHash)
-            decodedEventData = self.cryptoPunksBoughtEvent.processReceipt(ethTransactionReceipt)
+            decodedEventData = self.cryptoPunksBoughtEvent.process_receipt(ethTransactionReceipt)
             if len(decodedEventData) == 1:
                 event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['fromAddress']), HexBytes(decodedEventData[0]['args']['toAddress']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
             else:
-                decodedEventData = self.cryptoPunksTransferEvent.processReceipt(ethTransactionReceipt)
+                decodedEventData = self.cryptoPunksTransferEvent.process_receipt(ethTransactionReceipt)
                 if len(decodedEventData) == 1:
                     event['topics'] = [event['topics'][0], HexBytes(decodedEventData[0]['args']['from']), HexBytes(decodedEventData[0]['args']['to']), HexBytes(decodedEventData[0]['args']['punkIndex'])]
         if len(event['topics']) < 4:
