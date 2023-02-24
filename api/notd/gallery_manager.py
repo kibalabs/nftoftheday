@@ -552,5 +552,4 @@ class GalleryManager:
                     otherRegistryTokenCount=row['otherRegistryTokenCount'],
                 ) for row in result.mappings()
             ]
-        else:
-            return []
+        return []
