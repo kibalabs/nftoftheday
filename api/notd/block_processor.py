@@ -140,7 +140,16 @@ class BlockProcessor:
         fromAddress = chain_util.normalize_address(event['topics'][2].hex())
         toAddress = chain_util.normalize_address(event['topics'][3].hex())
         (tokenId, amount, ) = eth_abi.decode(["uint256", "uint256"], typing.cast(HexBytes, event['data']))
-        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155single')]
+        retrievedEvents = [RetrievedEvent(
+            transactionHash=transactionHash,
+            registryAddress=registryAddress,
+            fromAddress=fromAddress,
+            toAddress=toAddress,
+            operatorAddress=operatorAddress,
+            tokenId=str(tokenId),
+            amount=amount,
+            tokenType='erc1155single',
+        )]
         return retrievedEvents
 
     async def _merge_erc1155_retrieved_events(self, erc1155RetrievedEvents: List[RetrievedEvent]) -> List[RetrievedEvent]:
@@ -172,7 +181,16 @@ class BlockProcessor:
         tokenIds = dataParams[3: 3 + tokenCount]  # pylint: disable=unsubscriptable-object
         amounts = dataParams[3 + tokenCount + 1:]  # pylint: disable=unsubscriptable-object
         dataDict = {str(int(tokenIds[i])): int(amounts[i]) for i in range(len(tokenIds))}
-        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=operatorAddress, tokenId=tokenId, amount=amount, tokenType='erc1155batch') for (tokenId, amount) in dataDict.items()]
+        retrievedEvents = [RetrievedEvent(
+            transactionHash=transactionHash,
+            registryAddress=registryAddress,
+            fromAddress=fromAddress,
+            toAddress=toAddress,
+            operatorAddress=operatorAddress,
+            tokenId=str(tokenId),
+            amount=amount,
+            tokenType='erc1155batch',
+        ) for (tokenId, amount) in dataDict.items()]
         return retrievedEvents
 
     async def _process_erc721_single_event(self, event: LogReceipt) -> List[RetrievedEvent]:
@@ -198,7 +216,16 @@ class BlockProcessor:
         fromAddress = chain_util.normalize_address(event['topics'][1].hex())
         toAddress = chain_util.normalize_address(event['topics'][2].hex())
         tokenId = str(int.from_bytes(bytes(event['topics'][3]), 'big'))
-        retrievedEvents = [RetrievedEvent(transactionHash=transactionHash, registryAddress=registryAddress, fromAddress=fromAddress, toAddress=toAddress, operatorAddress=None, amount=1, tokenId=tokenId, tokenType='erc721')]
+        retrievedEvents = [RetrievedEvent(
+            transactionHash=transactionHash,
+            registryAddress=registryAddress,
+            fromAddress=fromAddress,
+            toAddress=toAddress,
+            operatorAddress=None,
+            amount=1,
+            tokenId=tokenId,
+            tokenType='erc721',
+        )]
         return retrievedEvents
 
     async def process_transaction(self, transaction: TxData, retrievedEvents: List[RetrievedEvent], transactionWethValues: List[Tuple[str, int]]) -> List[RetrievedTokenTransfer]:
