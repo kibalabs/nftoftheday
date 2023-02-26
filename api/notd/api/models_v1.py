@@ -118,7 +118,7 @@ class ApiCollectionAttribute(BaseModel):
     values: List[str]
 
 
-class ApiSuperCollectionAttribute(BaseModel):
+class ApiSuperCollectionEntry(BaseModel):
     collection: ApiCollection
     collectionAttributes: List[ApiCollectionAttribute]
 

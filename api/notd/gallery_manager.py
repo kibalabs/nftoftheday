@@ -28,11 +28,8 @@ from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import STAKING_ADDRESSES
 from notd.model import SUPER_COLLECTIONS
 from notd.model import Airdrop
-from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
-from notd.model import SuperCollectionAttribute
-from notd.model import SuperCollectionOverlap
 from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
 from notd.model import GalleryBadgeHolder
@@ -42,6 +39,8 @@ from notd.model import GalleryUser
 from notd.model import GalleryUserRow
 from notd.model import ListResponse
 from notd.model import Signature
+from notd.model import SuperCollectionEntry
+from notd.model import SuperCollectionOverlap
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
@@ -494,13 +493,6 @@ class GalleryManager:
     async def assign_badge(self, registryAddress: str, ownerAddress: str, badgeKey: str, assignerAddress: str, achievedDate: datetime.datetime, signature: str) -> None:
         await self.badgeManager.assign_badge(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey=badgeKey, assignerAddress=assignerAddress, achievedDate=achievedDate, signature=signature)
 
-    async def list_gallery_collections_in_super_collection(self, superCollectionName: str) -> List[Collection]:
-        collections = []
-        collectionAddresses = SUPER_COLLECTIONS.get(superCollectionName, [])
-        if len(collectionAddresses) > 0:
-            collections = [await self.collectionManager.get_collection_by_address(address=address) for address in collectionAddresses]
-        return collections
-
     async def list_gallery_super_collection_overlaps(self, superCollectionName: str, otherRegistryAddress: str) -> List[SuperCollectionOverlap]:
         superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
         filters = [
@@ -555,12 +547,12 @@ class GalleryManager:
             ]
         return []
 
-    async def get_super_collection_attributes(self, superCollectionName: str) -> List[SuperCollectionAttribute]:
+    async def list_entries_in_super_collection(self, superCollectionName: str) -> List[SuperCollectionEntry]:
         superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName, [])
         superCollectionAttributes = []
         for collectionAddress in superCollectionAddresses:
             superCollectionAttributes.append(
-                SuperCollectionAttribute(
+                SuperCollectionEntry(
                     collectionAddress=collectionAddress,
                     collectionAttributes=(await self.get_collection_attributes(registryAddress=collectionAddress))
                 )

@@ -11,7 +11,6 @@ from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
-from notd.api.models_v1 import ApiSuperCollectionAttribute
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionOverlap
@@ -28,6 +27,7 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
+from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
@@ -246,12 +246,6 @@ class GetCollectionAttributesRequest(BaseModel):
 class GetCollectionAttributesResponse(BaseModel):
     attributes: List[ApiCollectionAttribute]
 
-class GetSuperCollectionAttributesRequest(BaseModel):
-    pass
-
-class GetSuperCollectionAttributesResponse(BaseModel):
-    superCollectionAttributes: List[ApiSuperCollectionAttribute]
-
 class InQueryParam(BaseModel):
     fieldName: str
     values: List[str]
@@ -429,11 +423,11 @@ class UpdateStakingsForAllCollectionsDeferredRequest(BaseModel):
 class UpdateStakingsForAllCollectionsDeferredResponse(BaseModel):
     pass
 
-class ListCollectionsInSuperCollectionRequest(BaseModel):
+class ListEntriesInSuperCollectionRequest(BaseModel):
     pass
 
-class ListCollectionsInSuperCollectionResponse(BaseModel):
-    collections: List[ApiCollection]
+class ListEntriesInSuperCollectionResponse(BaseModel):
+    superCollectionEntries: List[ApiSuperCollectionEntry]
 
 class ListGallerySuperCollectionOverlapsRequest(BaseModel):
     pass

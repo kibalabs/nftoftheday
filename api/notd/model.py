@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+from typing import Dict
 from typing import Generic
 from typing import List
-from typing import Dict
 from typing import Optional
 from typing import TypeVar
 
@@ -403,7 +403,7 @@ class CollectionAttribute:
 
 
 @dataclasses.dataclass
-class SuperCollectionAttribute():
+class SuperCollectionEntry:
     collectionAddress: str
     collectionAttributes: List[CollectionAttribute]
 

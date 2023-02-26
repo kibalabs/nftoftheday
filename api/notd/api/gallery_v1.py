@@ -9,18 +9,17 @@ from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import FollowCollectionUserRequest
 from notd.api.endpoints_v1 import FollowCollectionUserResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
-from notd.api.endpoints_v1 import GetSuperCollectionAttributesResponse
 from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
 from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import GetGalleryUserOwnedCollectionsResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
+from notd.api.endpoints_v1 import ListEntriesInSuperCollectionResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapOwnersResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapsResponse
-from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapsResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapSummariesResponse
+from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapsResponse
 from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapSummariesResponse
 from notd.api.endpoints_v1 import ListGalleryUserBadgesResponse
-from notd.api.endpoints_v1 import ListCollectionsInSuperCollectionResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
 from notd.api.endpoints_v1 import QueryCollectionUsersRequest
@@ -128,10 +127,10 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         collectionOverlapOwners = await galleryManager.list_gallery_collection_overlap_owners(registryAddress=registryAddress)
         return ListGalleryCollectionOverlapOwnersResponse(collectionOverlapOwners=(await responseBuilder.collection_overlap_owners_from_models(collectionOverlapOwners=collectionOverlapOwners)))
 
-    @router.get('/super-collections/{superCollectionName}/collections')
-    async def list_gallery_collections_in_super_collection(superCollectionName: str) -> ListCollectionsInSuperCollectionResponse:
-        collections = await galleryManager.list_gallery_collections_in_super_collection(superCollectionName=superCollectionName)
-        return ListCollectionsInSuperCollectionResponse(collections=[await responseBuilder.collection_from_model(collection=collection) for collection in collections])
+    @router.get('/super-collections/{superCollectionName}/entries')
+    async def list_entries_in_super_collection(superCollectionName: str) -> ListEntriesInSuperCollectionResponse:
+        superCollectionEntries = await galleryManager.list_entries_in_super_collection(superCollectionName=superCollectionName)
+        return ListEntriesInSuperCollectionResponse(superCollectionEntries=(await responseBuilder.super_collection_entries_from_models(superCollectionEntries=superCollectionEntries)))
 
     @router.get('/super-collections/{superCollectionName}/overlaps')
     async def list_gallery_super_collection_overlaps(superCollectionName: str, otherRegistryAddress: str) -> ListGallerySuperCollectionOverlapsResponse:
@@ -142,10 +141,5 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def list_gallery_super_collection_overlap_summaries(superCollectionName: str) -> ListGallerySuperCollectionOverlapSummariesResponse:
         collectionOverlapSummaries = await galleryManager.list_gallery_super_collection_overlap_summaries(superCollectionName=superCollectionName)
         return ListGallerySuperCollectionOverlapSummariesResponse(collectionOverlapSummaries=(await responseBuilder.collection_overlap_summaries_from_models(collectionOverlapSummaries=collectionOverlapSummaries)))
-
-    @router.get('/super-collections/{superCollectionName}/attributes', response_model=GetSuperCollectionAttributesResponse)
-    async def get_super_collection_attributes(superCollectionName: str) -> GetSuperCollectionAttributesResponse:
-        superCollectionAttributes = await galleryManager.get_super_collection_attributes(superCollectionName=superCollectionName)
-        return GetSuperCollectionAttributesResponse(superCollectionAttributes=(await responseBuilder.super_collection_attributes_from_models(superCollectionAttributes=superCollectionAttributes)))
 
     return router
