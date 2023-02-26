@@ -11,6 +11,7 @@ from notd.api.models_v1 import ApiAccountCollectionToken
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
+from notd.api.models_v1 import ApiSuperCollectionAttribute
 from notd.api.models_v1 import ApiCollectionAttribute
 from notd.api.models_v1 import ApiCollectionDailyActivity
 from notd.api.models_v1 import ApiCollectionOverlap
@@ -244,6 +245,12 @@ class GetCollectionAttributesRequest(BaseModel):
 
 class GetCollectionAttributesResponse(BaseModel):
     attributes: List[ApiCollectionAttribute]
+
+class GetSuperCollectionAttributesRequest(BaseModel):
+    pass
+
+class GetSuperCollectionAttributesResponse(BaseModel):
+    superCollectionAttributes: List[ApiSuperCollectionAttribute]
 
 class InQueryParam(BaseModel):
     fieldName: str

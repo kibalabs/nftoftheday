@@ -31,6 +31,7 @@ from notd.model import Airdrop
 from notd.model import Collection
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
+from notd.model import SuperCollectionAttribute
 from notd.model import SuperCollectionOverlap
 from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
@@ -553,3 +554,15 @@ class GalleryManager:
                 ) for row in result.mappings()
             ]
         return []
+
+    async def get_super_collection_attributes(self, superCollectionName: str) -> List[SuperCollectionAttribute]:
+        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
+        superCollectionAttributes = []
+        for collectionAddress in superCollectionAddresses:
+            superCollectionAttributes.append(
+                SuperCollectionAttribute(
+                    collectionAddress=collectionAddress,
+                    collectionAttributes=(await self.get_collection_attributes(registryAddress=collectionAddress))
+                )
+            )
+        return superCollectionAttributes

@@ -9,6 +9,7 @@ from notd.api.endpoints_v1 import CreateCustomizationForCollectionTokenResponse
 from notd.api.endpoints_v1 import FollowCollectionUserRequest
 from notd.api.endpoints_v1 import FollowCollectionUserResponse
 from notd.api.endpoints_v1 import GetCollectionAttributesResponse
+from notd.api.endpoints_v1 import GetSuperCollectionAttributesResponse
 from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
 from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import GetGalleryUserOwnedCollectionsResponse
@@ -141,5 +142,10 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
     async def list_gallery_super_collection_overlap_summaries(superCollectionName: str) -> ListGallerySuperCollectionOverlapSummariesResponse:
         collectionOverlapSummaries = await galleryManager.list_gallery_super_collection_overlap_summaries(superCollectionName=superCollectionName)
         return ListGallerySuperCollectionOverlapSummariesResponse(collectionOverlapSummaries=(await responseBuilder.collection_overlap_summaries_from_models(collectionOverlapSummaries=collectionOverlapSummaries)))
+
+    @router.get('/super-collections/{superCollectionName}/attributes', response_model=GetSuperCollectionAttributesResponse)
+    async def get_super_collection_attributes(superCollectionName: str) -> GetSuperCollectionAttributesResponse:
+        superCollectionAttributes = await galleryManager.get_super_collection_attributes(superCollectionName=superCollectionName)
+        return GetSuperCollectionAttributesResponse(superCollectionAttributes=(await responseBuilder.super_collection_attributes_from_models(superCollectionAttributes=superCollectionAttributes)))
 
     return router

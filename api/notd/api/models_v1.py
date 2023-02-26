@@ -118,6 +118,11 @@ class ApiCollectionAttribute(BaseModel):
     values: List[str]
 
 
+class ApiSuperCollectionAttribute(BaseModel):
+    collection: ApiCollection
+    collectionAttributes: List[ApiCollectionAttribute]
+
+
 class ApiTokenCustomization(BaseModel):
     tokenCustomizationId: int
     createdDate: datetime.datetime

@@ -403,6 +403,12 @@ class CollectionAttribute:
 
 
 @dataclasses.dataclass
+class SuperCollectionAttribute():
+    collectionAddress: str
+    collectionAttributes: List[CollectionAttribute]
+
+
+@dataclasses.dataclass
 class TokenCustomization:
     tokenCustomizationId: int
     createdDate: datetime.datetime

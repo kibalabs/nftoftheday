@@ -27,6 +27,7 @@ from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiSuperCollectionOverlap
+from notd.api.models_v1 import ApiSuperCollectionAttribute
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
@@ -58,6 +59,7 @@ from notd.model import ListResponse
 from notd.model import RetrievedTokenMetadata
 from notd.model import SponsoredToken
 from notd.model import SuperCollectionOverlap
+from notd.model import SuperCollectionAttribute
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -248,6 +250,12 @@ class ResponseBuilder:
             name=attribute.name,
             values=attribute.values
         ) for attribute in collectionAttributes]
+
+    async def super_collection_attributes_from_models(self, superCollectionAttributes: Sequence[SuperCollectionAttribute]) -> List[ApiSuperCollectionAttribute]:
+        return [ApiSuperCollectionAttribute(
+            collection=await self.collection_from_address(address=attribute.collectionAddress),
+            collectionAttributes=await self.collection_attributes_from_models(collectionAttributes=attribute.collectionAttributes)
+        ) for attribute in superCollectionAttributes]
 
     async def get_token_customization_for_collection_token(self, registryAddress: str, tokenId: str) -> ApiTokenCustomization:
         tokenCustomization = await self.retriever.get_token_customization_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
