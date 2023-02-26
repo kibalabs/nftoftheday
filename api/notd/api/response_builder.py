@@ -253,8 +253,8 @@ class ResponseBuilder:
 
     async def super_collection_attributes_from_models(self, superCollectionAttributes: Sequence[SuperCollectionAttribute]) -> List[ApiSuperCollectionAttribute]:
         return [ApiSuperCollectionAttribute(
-            collection=await self.collection_from_address(address=attribute.collectionAddress),
-            collectionAttributes=await self.collection_attributes_from_models(collectionAttributes=attribute.collectionAttributes)
+            collection=(await self.collection_from_address(address=attribute.collectionAddress)),
+            collectionAttributes=(await self.collection_attributes_from_models(collectionAttributes=attribute.collectionAttributes))
         ) for attribute in superCollectionAttributes]
 
     async def get_token_customization_for_collection_token(self, registryAddress: str, tokenId: str) -> ApiTokenCustomization:
