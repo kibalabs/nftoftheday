@@ -556,7 +556,7 @@ class GalleryManager:
         return []
 
     async def get_super_collection_attributes(self, superCollectionName: str) -> List[SuperCollectionAttribute]:
-        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
+        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName, [])
         superCollectionAttributes = []
         for collectionAddress in superCollectionAddresses:
             superCollectionAttributes.append(
