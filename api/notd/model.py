@@ -595,14 +595,6 @@ class RetrievedCollectionOverlap:
 
 
 @dataclasses.dataclass
-class SuperCollectionOverlap:
-    ownerAddress: str
-    otherRegistryAddress: str
-    otherRegistryTokenCount: int
-    superCollectionTokenCount: Dict[str, int]
-
-
-@dataclasses.dataclass
 class CollectionOverlap(RetrievedCollectionOverlap):
     collectionOverlapId: int
     createdDate: datetime.datetime
@@ -616,6 +608,14 @@ class CollectionOverlapSummary:
     ownerCount: int
     registryTokenCount: int
     otherRegistryTokenCount: int
+
+
+@dataclasses.dataclass
+class SuperCollectionOverlap:
+    ownerAddress: str
+    otherRegistryAddress: str
+    otherRegistryTokenCount: int
+    registryTokenCountMap: Dict[str, int]
 
 
 @dataclasses.dataclass

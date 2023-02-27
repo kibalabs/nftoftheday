@@ -279,4 +279,4 @@ class ApiSuperCollectionOverlap(BaseModel):
     ownerAddress: str
     otherRegistryAddress: str
     otherRegistryTokenCount: int
-    superCollectionTokenCount: Dict[str, int]
+    registryTokenCountMap: Dict[str, int]

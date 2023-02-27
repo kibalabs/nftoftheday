@@ -451,7 +451,7 @@ class ResponseBuilder:
             ownerAddress=superCollectionOverlap.ownerAddress,
             otherRegistryAddress=superCollectionOverlap.otherRegistryAddress,
             otherRegistryTokenCount=superCollectionOverlap.otherRegistryTokenCount,
-            superCollectionTokenCount=superCollectionOverlap.superCollectionTokenCount,
+            registryTokenCountMap=superCollectionOverlap.registryTokenCountMap,
         )
 
     async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> List[ApiCollectionOverlap]:
