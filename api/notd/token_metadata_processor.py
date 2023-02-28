@@ -123,7 +123,7 @@ class TokenMetadataProcessor():
         return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://').rstrip('/') if ipfsUrl else None
 
     @staticmethod
-    def _clean_attribute(attribute: Dict[str, JSON1]) -> Dict[str, JSON1]: #type: ignore[arg-type]
+    def _clean_attribute(attribute: Dict[str, JSON1]) -> Dict[str, JSON1]:
         for key, value in attribute.items():
             if isinstance(value, float) and math.isnan(value):
                 attribute[key] = 'NaN'
