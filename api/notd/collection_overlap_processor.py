@@ -1,14 +1,11 @@
 from typing import Any
 from typing import List
-from typing import Tuple
 
 import sqlalchemy
+from core.util import chain_util
+from core.util import list_util
 from sqlalchemy import Select
 from sqlalchemy.sql import functions as sqlalchemyfunc
-
-
-from core.util import list_util
-from core.util import chain_util
 
 from notd.model import RetrievedCollectionOverlap
 from notd.store.retriever import Retriever
@@ -31,7 +28,7 @@ class CollectionOverlapProcessor():
         otherRegistryAddresses = [registryAddress for registryAddress, in (ownerRegistryResult) if registryAddress != chain_util.BURN_ADDRESS]
         chunks = list_util.generate_chunks(lst=otherRegistryAddresses, chunkSize=5)
         # NOTE(krishan711): for some reason the view takes too long but querying the two tables separately fits in the time
-        otherRegistryCounts = [] # type: ignore[misc]
+        otherRegistryCounts = []
         for chunk in chunks:
             otherSingleRegistryCountQuery = (
                 sqlalchemy.select(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress, sqlalchemyfunc.count(TokenOwnershipsTable.c.tokenId))  # type: ignore[no-untyped-call]

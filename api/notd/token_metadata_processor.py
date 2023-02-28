@@ -123,7 +123,7 @@ class TokenMetadataProcessor():
         return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://').rstrip('/') if ipfsUrl else None
 
     @staticmethod
-    def _clean_attribute(attribute: Dict[str, JSON1]) -> Dict[str, JSON1]:
+    def _clean_attribute(attribute: Dict[str, JSON1]) -> Dict[str, JSON1]: #type: ignore[arg-type]
         for key, value in attribute.items():
             if isinstance(value, float) and math.isnan(value):
                 attribute[key] = 'NaN'
@@ -145,7 +145,7 @@ class TokenMetadataProcessor():
         animationUrl: Optional[str] = tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation')  # type: ignore[assignment]
         youtubeUrl: Optional[str] = tokenMetadataDict.get('youtube_url')  # type: ignore[assignment]
         frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
-        attributes: JSON = [self._clean_attribute(attribute) for attribute in tokenMetadataDict.get('attributes') or []]
+        attributes: JSON = [self._clean_attribute(attribute) for attribute in tokenMetadataDict.get('attributes') or []] # type: ignore[union-attr, arg-type, misc]
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
@@ -158,7 +158,7 @@ class TokenMetadataProcessor():
             youtubeUrl=self._clean_potential_ipfs_url(youtubeUrl),
             frameImageUrl=self._clean_potential_ipfs_url(frameImageUrl),
             backgroundColor=tokenMetadataDict.get('background_color'),  # type: ignore[arg-type]
-            attributes=attributes,  # type: ignore[arg-type]
+            attributes=attributes,
         )
         return retrievedTokenMetadata
 
