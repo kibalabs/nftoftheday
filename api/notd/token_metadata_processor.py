@@ -145,7 +145,9 @@ class TokenMetadataProcessor():
         animationUrl: Optional[str] = tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation')  # type: ignore[assignment]
         youtubeUrl: Optional[str] = tokenMetadataDict.get('youtube_url')  # type: ignore[assignment]
         frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
-        attributes: JSON = [self._clean_attribute(attribute) for attribute in tokenMetadataDict.get('attributes') or []] # type: ignore[union-attr, arg-type, misc]
+        attributes: JSON = tokenMetadataDict.get('attributes') or []
+        if isinstance(attributes, list):
+            attributes: JSON = [self._clean_attribute(attribute) for attribute in attributes] # type: ignore[union-attr, arg-type, misc]
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
