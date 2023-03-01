@@ -11,9 +11,6 @@ from typing import TypeVar
 from core.util import date_util
 from core.util.typing_util import JSON
 
-# if not TYPE_CHECKING:
-#     from pydantic import dataclasses
-
 WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
 COLLECTION_SPRITE_CLUB_ADDRESS = '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3'
