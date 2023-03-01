@@ -25,7 +25,7 @@ class CollectionOverlapProcessor():
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
         )
         ownerRegistryResult = await self.retriever.database.execute(query=ownerRegistryQuery)
-        otherRegistryOwnerAddresses = [registryAddress for registryAddress, in (ownerRegistryResult) if registryAddress != chain_util.BURN_ADDRESS]
+        otherRegistryOwnerAddresses = [ownerAddress for ownerAddress, in (ownerRegistryResult) if ownerAddress != chain_util.BURN_ADDRESS]
         chunks = list_util.generate_chunks(lst=otherRegistryOwnerAddresses, chunkSize=5)
         # NOTE(krishan711): for some reason the view takes too long but querying the two tables separately fits in the time
         otherRegistryCounts = []
