@@ -1,8 +1,10 @@
 import base64
 import json
+import math
 import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
+from typing import Dict
 from typing import Mapping
 from typing import Optional
 
@@ -120,6 +122,13 @@ class TokenMetadataProcessor():
     def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> Optional[str]:
         return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://').rstrip('/') if ipfsUrl else None
 
+    @staticmethod
+    def _clean_attribute(attribute: Dict[str, JSON1]) -> Dict[str, JSON1]:
+        for key, value in attribute.items():
+            if isinstance(value, float) and math.isnan(value):
+                attribute[key] = 'NaN'
+        return attribute
+
     def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Mapping[str, JSON1]) -> RetrievedTokenMetadata:
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description: Optional[str] = tokenMetadataDict.get('description')  # type: ignore[assignment]
@@ -136,6 +145,9 @@ class TokenMetadataProcessor():
         animationUrl: Optional[str] = tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation')  # type: ignore[assignment]
         youtubeUrl: Optional[str] = tokenMetadataDict.get('youtube_url')  # type: ignore[assignment]
         frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
+        attributes: JSON = tokenMetadataDict.get('attributes') or []  # type: ignore[assignment]
+        if isinstance(attributes, list):
+            attributes = [self._clean_attribute(attribute) for attribute in attributes]  # type: ignore[misc, arg-type]
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
@@ -148,7 +160,7 @@ class TokenMetadataProcessor():
             youtubeUrl=self._clean_potential_ipfs_url(youtubeUrl),
             frameImageUrl=self._clean_potential_ipfs_url(frameImageUrl),
             backgroundColor=tokenMetadataDict.get('background_color'),  # type: ignore[arg-type]
-            attributes=tokenMetadataDict.get('attributes', []),  # type: ignore[arg-type]
+            attributes=attributes,
         )
         return retrievedTokenMetadata
 

@@ -27,6 +27,8 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
+from notd.api.models_v1 import ApiSuperCollectionEntry
+from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
@@ -420,3 +422,21 @@ class UpdateStakingsForAllCollectionsDeferredRequest(BaseModel):
 
 class UpdateStakingsForAllCollectionsDeferredResponse(BaseModel):
     pass
+
+class ListEntriesInSuperCollectionRequest(BaseModel):
+    pass
+
+class ListEntriesInSuperCollectionResponse(BaseModel):
+    superCollectionEntries: List[ApiSuperCollectionEntry]
+
+class ListGallerySuperCollectionOverlapsRequest(BaseModel):
+    pass
+
+class ListGallerySuperCollectionOverlapsResponse(BaseModel):
+    superCollectionOverlaps: List[ApiSuperCollectionOverlap]
+
+class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
+    pass
+
+class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
+    collectionOverlapSummaries: List[ApiCollectionOverlapSummary]

@@ -13,9 +13,12 @@ from notd.api.endpoints_v1 import GetGalleryCollectionUserResponse
 from notd.api.endpoints_v1 import GetGalleryTokenResponse
 from notd.api.endpoints_v1 import GetGalleryUserOwnedCollectionsResponse
 from notd.api.endpoints_v1 import ListCollectionTokenAirdropsResponse
+from notd.api.endpoints_v1 import ListEntriesInSuperCollectionResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapOwnersResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapsResponse
 from notd.api.endpoints_v1 import ListGalleryCollectionOverlapSummariesResponse
+from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapsResponse
+from notd.api.endpoints_v1 import ListGallerySuperCollectionOverlapSummariesResponse
 from notd.api.endpoints_v1 import ListGalleryUserBadgesResponse
 from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
@@ -109,19 +112,34 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         ownedCollections = await galleryManager.get_gallery_user_owned_collections(registryAddress=registryAddress, userAddress=userAddress)
         return GetGalleryUserOwnedCollectionsResponse(ownedCollections=(await responseBuilder.gallery_owned_collections_from_models(ownedCollections=ownedCollections)))
 
-    @router.get('/collections/{registryAddress}/overlaps')
-    async def list_gallery_collection_overlaps(registryAddress: str, otherRegistryAddress: Optional[str]) -> ListGalleryCollectionOverlapsResponse:
-        collectionOverlaps = await galleryManager.list_gallery_collection_overlaps(registryAddress=registryAddress, otherRegistryAddress=otherRegistryAddress)
-        return ListGalleryCollectionOverlapsResponse(collectionOverlaps=(await responseBuilder.collection_overlaps_from_models(collectionOverlaps=collectionOverlaps)))
-
     @router.get('/collections/{registryAddress}/overlap-summaries')
     async def list_gallery_collection_overlap_summaries(registryAddress: str) -> ListGalleryCollectionOverlapSummariesResponse:
         collectionOverlapSummaries = await galleryManager.list_gallery_collection_overlap_summaries(registryAddress=registryAddress)
         return ListGalleryCollectionOverlapSummariesResponse(collectionOverlapSummaries=(await responseBuilder.collection_overlap_summaries_from_models(collectionOverlapSummaries=collectionOverlapSummaries)))
 
+    @router.get('/collections/{registryAddress}/overlaps')
+    async def list_gallery_collection_overlaps(registryAddress: str, otherRegistryAddress: Optional[str]) -> ListGalleryCollectionOverlapsResponse:
+        collectionOverlaps = await galleryManager.list_gallery_collection_overlaps(registryAddress=registryAddress, otherRegistryAddress=otherRegistryAddress)
+        return ListGalleryCollectionOverlapsResponse(collectionOverlaps=(await responseBuilder.collection_overlaps_from_models(collectionOverlaps=collectionOverlaps)))
+
     @router.get('/collections/{registryAddress}/overlap-owners')
     async def list_gallery_collection_overlap_owners(registryAddress: str) -> ListGalleryCollectionOverlapOwnersResponse:
         collectionOverlapOwners = await galleryManager.list_gallery_collection_overlap_owners(registryAddress=registryAddress)
         return ListGalleryCollectionOverlapOwnersResponse(collectionOverlapOwners=(await responseBuilder.collection_overlap_owners_from_models(collectionOverlapOwners=collectionOverlapOwners)))
+
+    @router.get('/super-collections/{superCollectionName}/entries')
+    async def list_entries_in_super_collection(superCollectionName: str) -> ListEntriesInSuperCollectionResponse:
+        superCollectionEntries = await galleryManager.list_entries_in_super_collection(superCollectionName=superCollectionName)
+        return ListEntriesInSuperCollectionResponse(superCollectionEntries=(await responseBuilder.super_collection_entries_from_models(superCollectionEntries=superCollectionEntries)))
+
+    @router.get('/super-collections/{superCollectionName}/overlap-summaries')
+    async def list_gallery_super_collection_overlap_summaries(superCollectionName: str) -> ListGallerySuperCollectionOverlapSummariesResponse:
+        collectionOverlapSummaries = await galleryManager.list_gallery_super_collection_overlap_summaries(superCollectionName=superCollectionName)
+        return ListGallerySuperCollectionOverlapSummariesResponse(collectionOverlapSummaries=(await responseBuilder.collection_overlap_summaries_from_models(collectionOverlapSummaries=collectionOverlapSummaries)))
+
+    @router.get('/super-collections/{superCollectionName}/overlaps')
+    async def list_gallery_super_collection_overlaps(superCollectionName: str, otherRegistryAddress: str) -> ListGallerySuperCollectionOverlapsResponse:
+        superCollectionOverlaps = await galleryManager.list_gallery_super_collection_overlaps(superCollectionName=superCollectionName, otherRegistryAddress=otherRegistryAddress)
+        return ListGallerySuperCollectionOverlapsResponse(superCollectionOverlaps=(await responseBuilder.super_collection_overlaps_from_models(superCollectionOverlaps=superCollectionOverlaps)))
 
     return router

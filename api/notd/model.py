@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Optional
@@ -9,9 +10,6 @@ from typing import TypeVar
 
 from core.util import date_util
 from core.util.typing_util import JSON
-
-# if not TYPE_CHECKING:
-#     from pydantic import dataclasses
 
 WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
@@ -60,6 +58,16 @@ GALLERY_COLLECTION_ADMINS = {
 STAKING_ADDRESSES = [
     CREEPZ_STAKING_ADDRESS,
 ]
+
+SUPER_COLLECTIONS = {
+    'creepz': [
+        COLLECTION_CREEPZ_ADDRESS,
+        COLLECTION_CREEPZ_SHAPESHIFTER_ADDRESS,
+        COLLECTION_CREEPZ_MEGA_SHAPESHIFTER_ADDRESS,
+        COLLECTION_CREEPZ_ARMOURIES_ADDRESS,
+        COLLECTION_CREEPZ_VAULTS_ADDRESS,
+    ],
+}
 
 ListResponseItemType = TypeVar("ListResponseItemType") # pylint: disable=invalid-name
 
@@ -390,6 +398,12 @@ class CollectionAttribute:
 
 
 @dataclasses.dataclass
+class SuperCollectionEntry:
+    collectionAddress: str
+    collectionAttributes: List[CollectionAttribute]
+
+
+@dataclasses.dataclass
 class TokenCustomization:
     tokenCustomizationId: int
     createdDate: datetime.datetime
@@ -589,6 +603,14 @@ class CollectionOverlapSummary:
     ownerCount: int
     registryTokenCount: int
     otherRegistryTokenCount: int
+
+
+@dataclasses.dataclass
+class SuperCollectionOverlap:
+    ownerAddress: str
+    otherRegistryAddress: str
+    otherRegistryTokenCount: int
+    registryTokenCountMap: Dict[str, int]
 
 
 @dataclasses.dataclass

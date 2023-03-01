@@ -26,6 +26,8 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiSponsoredToken
+from notd.api.models_v1 import ApiSuperCollectionEntry
+from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
@@ -56,6 +58,8 @@ from notd.model import LatestAccountGm
 from notd.model import ListResponse
 from notd.model import RetrievedTokenMetadata
 from notd.model import SponsoredToken
+from notd.model import SuperCollectionEntry
+from notd.model import SuperCollectionOverlap
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -247,6 +251,12 @@ class ResponseBuilder:
             values=attribute.values
         ) for attribute in collectionAttributes]
 
+    async def super_collection_entries_from_models(self, superCollectionEntries: Sequence[SuperCollectionEntry]) -> List[ApiSuperCollectionEntry]:
+        return [ApiSuperCollectionEntry(
+            collection=(await self.collection_from_address(address=attribute.collectionAddress)),
+            collectionAttributes=(await self.collection_attributes_from_models(collectionAttributes=attribute.collectionAttributes))
+        ) for attribute in superCollectionEntries]
+
     async def get_token_customization_for_collection_token(self, registryAddress: str, tokenId: str) -> ApiTokenCustomization:
         tokenCustomization = await self.retriever.get_token_customization_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         return await self.token_customization_from_model(tokenCustomization=tokenCustomization)
@@ -436,8 +446,19 @@ class ResponseBuilder:
             otherRegistryTokenCount=collectionOverlap.otherRegistryTokenCount,
         )
 
+    async def super_collection_overlap_from_model(self, superCollectionOverlap: SuperCollectionOverlap) -> ApiSuperCollectionOverlap:
+        return ApiSuperCollectionOverlap(
+            ownerAddress=superCollectionOverlap.ownerAddress,
+            otherRegistryAddress=superCollectionOverlap.otherRegistryAddress,
+            otherRegistryTokenCount=superCollectionOverlap.otherRegistryTokenCount,
+            registryTokenCountMap=superCollectionOverlap.registryTokenCountMap,
+        )
+
     async def collection_overlaps_from_models(self, collectionOverlaps: Sequence[CollectionOverlap]) -> List[ApiCollectionOverlap]:
         return await asyncio.gather(*[self.collection_overlap_from_model(collectionOverlap=collectionOverlap) for collectionOverlap in collectionOverlaps])
+
+    async def super_collection_overlaps_from_models(self, superCollectionOverlaps: Sequence[SuperCollectionOverlap]) -> List[ApiSuperCollectionOverlap]:
+        return await asyncio.gather(*[self.super_collection_overlap_from_model(superCollectionOverlap=superCollectionOverlap) for superCollectionOverlap in superCollectionOverlaps])
 
     async def collection_overlap_summary_from_model(self, collectionOverlapSummary: CollectionOverlapSummary) -> ApiCollectionOverlapSummary:
         return ApiCollectionOverlapSummary(

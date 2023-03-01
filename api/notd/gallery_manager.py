@@ -26,6 +26,7 @@ from notd.badge_manager import BadgeManager
 from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import STAKING_ADDRESSES
+from notd.model import SUPER_COLLECTIONS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
@@ -38,6 +39,8 @@ from notd.model import GalleryUser
 from notd.model import GalleryUserRow
 from notd.model import ListResponse
 from notd.model import Signature
+from notd.model import SuperCollectionEntry
+from notd.model import SuperCollectionOverlap
 from notd.model import Token
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
@@ -489,3 +492,69 @@ class GalleryManager:
 
     async def assign_badge(self, registryAddress: str, ownerAddress: str, badgeKey: str, assignerAddress: str, achievedDate: datetime.datetime, signature: str) -> None:
         await self.badgeManager.assign_badge(registryAddress=registryAddress, ownerAddress=ownerAddress, badgeKey=badgeKey, assignerAddress=assignerAddress, achievedDate=achievedDate, signature=signature)
+
+    async def list_gallery_super_collection_overlaps(self, superCollectionName: str, otherRegistryAddress: str) -> List[SuperCollectionOverlap]:
+        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
+        filters = [
+            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.registryAddress.key, containedIn=superCollectionAddresses),
+            StringFieldFilter(fieldName=TokenCollectionOverlapsTable.c.otherRegistryAddress.key, eq=otherRegistryAddress)
+        ]
+        collectionOverlaps = await self.retriever.list_collection_overlaps(fieldFilters=filters, orders=[Order(fieldName=TokenCollectionOverlapsTable.c.otherRegistryTokenCount.key, direction=Direction.DESCENDING)])
+        superCollectionOverlapsTokenCountDict: Dict[str, Dict[str,int]] = defaultdict(lambda: defaultdict(int))
+        for collectionOverlap in collectionOverlaps:
+            if superCollectionAddresses and collectionOverlap.registryAddress in superCollectionAddresses:
+                superCollectionOverlapsTokenCountDict[collectionOverlap.ownerAddress][collectionOverlap.registryAddress] = collectionOverlap.registryTokenCount
+        overlaps = []
+        for collectionOverlap in collectionOverlaps:
+            overlaps += [
+                SuperCollectionOverlap(
+                    ownerAddress=collectionOverlap.ownerAddress,
+                    otherRegistryAddress=otherRegistryAddress,
+                    otherRegistryTokenCount=collectionOverlap.otherRegistryTokenCount,
+                    registryTokenCountMap=superCollectionOverlapsTokenCountDict[collectionOverlap.ownerAddress]
+                )
+            ]
+        return overlaps
+
+    async def list_gallery_super_collection_overlap_summaries(self, superCollectionName: str) -> List[CollectionOverlapSummary]:
+        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
+        if not superCollectionAddresses or len(superCollectionAddresses) == 0:
+            return []
+        query = (
+            sqlalchemy.select(
+                TokenCollectionOverlapsTable.c.otherRegistryAddress,
+                TokenCollectionsTable,
+                sqlalchemyfunc.count(TokenCollectionOverlapsTable.c.ownerAddress).label('ownerCount'), # type: ignore[no-untyped-call]
+                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.registryTokenCount).label('registryTokenCount'),  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.sum(TokenCollectionOverlapsTable.c.otherRegistryTokenCount).label('otherRegistryTokenCount'),  # type: ignore[no-untyped-call]
+            )
+            .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+            .join(TokenCollectionsTable, TokenCollectionsTable.c.address == TokenCollectionOverlapsTable.c.otherRegistryAddress)
+            .where(TokenCollectionOverlapsTable.c.registryAddress.in_(superCollectionAddresses))
+            .where(TokenCollectionOverlapsTable.c.otherRegistryAddress.not_in(superCollectionAddresses))
+            .order_by(CollectionTotalActivitiesTable.c.totalValue.desc())
+            .group_by(TokenCollectionOverlapsTable.c.otherRegistryAddress, TokenCollectionsTable.c, CollectionTotalActivitiesTable.c.totalValue)
+            .limit(100)
+        )
+        result = await self.retriever.database.execute(query=query)
+        return [
+            CollectionOverlapSummary(
+                registryAddress=superCollectionName,
+                otherCollection=collection_from_row(row),
+                ownerCount=row['ownerCount'],
+                registryTokenCount=row['registryTokenCount'],
+                otherRegistryTokenCount=row['otherRegistryTokenCount'],
+            ) for row in result.mappings()
+        ]
+
+    async def list_entries_in_super_collection(self, superCollectionName: str) -> List[SuperCollectionEntry]:
+        superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName, [])
+        superCollectionAttributes = []
+        for collectionAddress in superCollectionAddresses:
+            superCollectionAttributes.append(
+                SuperCollectionEntry(
+                    collectionAddress=collectionAddress,
+                    collectionAttributes=(await self.get_collection_attributes(registryAddress=collectionAddress))
+                )
+            )
+        return superCollectionAttributes

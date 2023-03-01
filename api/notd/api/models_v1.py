@@ -118,6 +118,11 @@ class ApiCollectionAttribute(BaseModel):
     values: List[str]
 
 
+class ApiSuperCollectionEntry(BaseModel):
+    collection: ApiCollection
+    collectionAttributes: List[ApiCollectionAttribute]
+
+
 class ApiTokenCustomization(BaseModel):
     tokenCustomizationId: int
     createdDate: datetime.datetime
@@ -268,3 +273,10 @@ class ApiCollectionOverlapOwner(BaseModel):
     ownerAddress: str
     registryTokenCount: int
     otherRegistryTokenCount: int
+
+
+class ApiSuperCollectionOverlap(BaseModel):
+    ownerAddress: str
+    otherRegistryAddress: str
+    otherRegistryTokenCount: int
+    registryTokenCountMap: Dict[str, int]
