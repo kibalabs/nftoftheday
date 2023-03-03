@@ -3,10 +3,11 @@ import React from 'react';
 import { dateToString, isToday, shortFormatEther } from '@kibalabs/core';
 import { useInitialization, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Head, KibaIcon, LoadingSpinner, Media, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { useWeb3Account } from '@kibalabs/web3-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
-import { useAccount } from '../../AccountContext';
+import { ITokenPageData } from './getTokenPageData';
 import { Collection, CollectionToken, TokenAttribute, TokenTransfer } from '../../client/resources';
 import { Account } from '../../components/Account';
 import { CollectionView } from '../../components/CollectionView';
@@ -14,14 +15,13 @@ import { MetricView } from '../../components/MetricView';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 import { usePageData } from '../../PageDataContext';
-import { ITokenPageData } from './getTokenPageData';
 
 const RECENT_SALES_PAGE_SIZE = 10;
 
 export const TokenPage = (): React.ReactElement => {
   const { data } = usePageData<ITokenPageData>();
   const { notdClient } = useGlobals();
-  const account = useAccount();
+  const account = useWeb3Account();
   const registryAddress = useStringRouteParam('registryAddress');
   const tokenId = useStringRouteParam('tokenId');
   const navigator = useNavigator();

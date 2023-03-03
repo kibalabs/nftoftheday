@@ -5,9 +5,9 @@ import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-r
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
+import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
 
-import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
@@ -32,19 +32,13 @@ const requester = new Requester(undefined, undefined, false);
 const notdClient = new NotdClient(requester, typeof window !== 'undefined' ? window.KRT_API_URL : undefined);
 const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
+const theme = buildNotdTheme();
 
 export const globals = {
   requester,
   notdClient,
   localStorageClient,
 };
-
-const theme = buildNotdTheme();
-
-export interface IAppProps extends IHeadRootProviderProps {
-  staticPath?: string;
-  pageData?: unknown | undefined | null;
-}
 
 export const routes: IRoute<IGlobals>[] = [
   { path: '/', page: HomePage },
@@ -53,17 +47,26 @@ export const routes: IRoute<IGlobals>[] = [
   { path: '/accounts/:accountAddress', page: UserPage },
 ];
 
+interface IAppProps extends IHeadRootProviderProps {
+  staticPath?: string;
+  pageData?: unknown | undefined | null;
+}
+
 export const App = (props: IAppProps): React.ReactElement => {
   useInitialization((): void => {
     tracker.initialize();
     tracker.trackApplicationOpen();
   });
 
+  const onWeb3AccountError = (error: Error): void => {
+    console.error(error);
+  };
+
   return (
     <KibaApp theme={theme} isFullPageApp={true} setHead={props.setHead}>
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={globals}>
-          <AccountControlProvider>
+          <Web3AccountControlProvider localStorageClient={localStorageClient} onError={onWeb3AccountError}>
             <BackgroundView linearGradient='#200122,#000000'>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
                 <NavBar />
@@ -77,7 +80,7 @@ export const App = (props: IAppProps): React.ReactElement => {
                 </Stack.Item>
               </Stack>
             </BackgroundView>
-          </AccountControlProvider>
+          </Web3AccountControlProvider>
           <ToastContainer />
         </GlobalsProvider>
       </PageDataProvider>

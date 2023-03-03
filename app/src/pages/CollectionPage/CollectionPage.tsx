@@ -3,20 +3,20 @@ import React from 'react';
 import { dateToRelativeShortString, dateToString, etherToNumber, shortFormatEther } from '@kibalabs/core';
 import { useFavicon, useInitialization, useIntegerUrlQueryState, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ContainingView, Direction, Head, Image, KibaIcon, LayerContainer, Link, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
+import { useOnLinkWeb3AccountsClicked, useWeb3Account } from '@kibalabs/web3-react';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 import { TwitterTimelineEmbed } from 'react-twitter-embed';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from 'styled-components';
 
-import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
+import { ICollectionPageData } from './getCollectionPageData';
 import { Collection, CollectionActivity, CollectionStatistics, CollectionToken, TokenTransfer } from '../../client/resources';
 import { MetricView } from '../../components/MetricView';
 import { TokenCard } from '../../components/TokenCard';
 import { TruncateText } from '../../components/TruncateText';
 import { useGlobals } from '../../globalsContext';
 import { usePageData } from '../../PageDataContext';
-import { ICollectionPageData } from './getCollectionPageData';
 
 interface ChartData {
   date: string;
@@ -45,8 +45,8 @@ export const CollectionPage = (): React.ReactElement => {
   const [holdings, setHoldings] = React.useState<CollectionToken[] | undefined | null>(undefined);
   const address = useStringRouteParam('address');
   const navigator = useNavigator();
-  const account = useAccount();
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
+  const account = useWeb3Account();
+  const onLinkAccountsClicked = useOnLinkWeb3AccountsClicked();
   const bannerImageUrl = collection?.bannerImageUrl || '/assets/black_banner.png';
   const imageUrl = collection?.imageUrl || '/assets/icon.png';
   useFavicon(imageUrl);
@@ -234,38 +234,6 @@ export const CollectionPage = (): React.ReactElement => {
                 <Stack.Item gutterAfter={PaddingSize.Default}>
                   <Text variant='header1' alignment={TextAlignment.Center}>{collection.name}</Text>
                 </Stack.Item>
-                <Stack.Item alignment={Alignment.Center} gutterAfter={PaddingSize.Default}>
-                  {account?.address && !isRefreshClicked && (
-                    <Button variant='tertiary' text= {'Refresh Metadata'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
-                  )}
-                </Stack.Item>
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
-                  {collection.discordUrl && (
-                    <Stack.Item baseSize='10em'>
-                      <Button variant='tertiary' text= {'Discord'} iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
-                    </Stack.Item>
-                  )}
-                  {collection.instagramUsername && (
-                    <Stack.Item baseSize='10em'>
-                      <Button variant='tertiary' text={'Instagram'} target={`https://instagram.com/${collection.instagramUsername}`} iconLeft={<KibaIcon iconId='feather-instagram' />} />
-                    </Stack.Item>
-                  )}
-                  {collection.twitterUsername && (
-                    <Stack.Item baseSize='10em'>
-                      <Button variant='tertiary' text={'Twitter'} target={`https://twitter.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
-                    </Stack.Item>
-                  )}
-                  {collection.openseaSlug && (
-                    <Stack.Item baseSize='10em'>
-                      <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
-                    </Stack.Item>
-                  )}
-                  {collection.url && (
-                    <Stack.Item baseSize='10em'>
-                      <Button variant='tertiary' text={'Website'} target={collection.url} iconLeft={<KibaIcon iconId='ion-globe' />} />
-                    </Stack.Item>
-                  )}
-                </Stack>
                 {collection.description && (
                   <TruncateText
                     markdownText={collection.description}
@@ -273,6 +241,36 @@ export const CollectionPage = (): React.ReactElement => {
                     maximumCharacters={300}
                   />
                 )}
+                <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} isFullWidth={true} shouldWrapItems={true}>
+                  {collection.discordUrl && (
+                    <Stack.Item baseSize='5em'>
+                      <Button variant='tertiary' text= {'Discord'} iconLeft={<KibaIcon iconId='ion-logo-discord' />} target={collection.discordUrl} />
+                    </Stack.Item>
+                  )}
+                  {collection.instagramUsername && (
+                    <Stack.Item baseSize='5em'>
+                      <Button variant='tertiary' text={'Instagram'} target={`https://instagram.com/${collection.instagramUsername}`} iconLeft={<KibaIcon iconId='feather-instagram' />} />
+                    </Stack.Item>
+                  )}
+                  {collection.twitterUsername && (
+                    <Stack.Item baseSize='5em'>
+                      <Button variant='tertiary' text={'Twitter'} target={`https://twitter.com/${collection.twitterUsername}`} iconLeft={<KibaIcon iconId='feather-twitter' />} />
+                    </Stack.Item>
+                  )}
+                  {collection.openseaSlug && (
+                    <Stack.Item baseSize='5em'>
+                      <Button variant='tertiary' text={'Opensea'} target={`https://opensea.io/collection/${collection.openseaSlug}`} iconLeft={<KibaIcon iconId='ion-cart' />} />
+                    </Stack.Item>
+                  )}
+                  {collection.url && (
+                    <Stack.Item baseSize='5em'>
+                      <Button variant='tertiary' text={'Website'} target={collection.url} iconLeft={<KibaIcon iconId='ion-globe' />} />
+                    </Stack.Item>
+                  )}
+                  {account?.address && !isRefreshClicked && (
+                    <Button variant='tertiary' text= {'Refresh'} iconLeft={<KibaIcon iconId='ion-refresh-circle-outline' />} onClicked={onRefreshMetadataClicked} />
+                  )}
+                </Stack>
                 {collectionStatistics === undefined ? (
                   <LoadingSpinner />
                 ) : collectionStatistics === null ? (

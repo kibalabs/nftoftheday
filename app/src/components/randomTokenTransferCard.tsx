@@ -2,8 +2,8 @@ import React from 'react';
 
 import { dateToString, shortFormatEther } from '@kibalabs/core';
 
-import { TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
+import { TokenTransfer } from '../client/resources';
 
 export type RandomTokenTransferCardProps = {
   tokenTransfer: TokenTransfer;
