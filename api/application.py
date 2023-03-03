@@ -121,6 +121,7 @@ app.add_middleware(DatabaseConnectionMiddleware, database=database)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], allow_headers=['*'], expose_headers=['*'], allow_origins=[
     'http://localhost:3000',
     'https://tokenhunt.io',
+    'https://db65-152-37-100-200.eu.ngrok.io',
     'https://nft.tokenhunt.io',
     'https://pfpkit.xyz',
     'https://mdtp-gallery.kibalabs.com',

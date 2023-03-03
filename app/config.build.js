@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Tag, MetaTag } from '@kibalabs/build/scripts/plugins/injectSeoPlugin.js';
+const { Tag, MetaTag } = require('@kibalabs/build/scripts/plugins/injectSeoPlugin.js');
 
 const title = 'Token Hunt';
 const description = 'Your daily dose of the best NFTs';
@@ -18,7 +18,7 @@ const seoTags = [
   new Tag('link', {rel: 'icon', type: 'image/png', href: '/assets/icon.png'}),
 ];
 
-export default (config) => {
+module.exports = (config) => {
   config.seoTags = seoTags;
   config.title = title;
   config.pages = [{

@@ -32,6 +32,7 @@ const requester = new Requester(undefined, undefined, false);
 const notdClient = new NotdClient(requester, typeof window !== 'undefined' ? window.KRT_API_URL : undefined);
 const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
 const tracker = new EveryviewTracker('017285d5fef9449783000125f2d5d330');
+const theme = buildNotdTheme();
 
 export const globals = {
   requester,
@@ -39,19 +40,17 @@ export const globals = {
   localStorageClient,
 };
 
-const theme = buildNotdTheme();
-
-export interface IAppProps extends IHeadRootProviderProps {
-  staticPath?: string;
-  pageData?: unknown | undefined | null;
-}
-
 export const routes: IRoute<IGlobals>[] = [
   { path: '/', page: HomePage },
   { path: '/collections/:address', page: CollectionPage, getPageData: getCollectionPageData },
   { path: '/collections/:registryAddress/tokens/:tokenId', page: TokenPage, getPageData: getTokenPageData },
   { path: '/accounts/:accountAddress', page: UserPage },
 ];
+
+interface IAppProps extends IHeadRootProviderProps {
+  staticPath?: string;
+  pageData?: unknown | undefined | null;
+}
 
 export const App = (props: IAppProps): React.ReactElement => {
   useInitialization((): void => {
