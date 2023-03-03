@@ -24,8 +24,8 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenMetadatasTable
 from notd.token_metadata_processor import TokenDoesNotExistException
-from notd.token_metadata_processor import TokenHasNoMetadataException
 from notd.token_metadata_processor import TokenMetadataProcessor
+from notd.token_metadata_processor import TokenMetadataUnprocessableException
 
 _TOKEN_UPDATE_MIN_DAYS = 7
 
@@ -107,9 +107,12 @@ class TokenManager:
         collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
         try:
             retrievedTokenMetadata = await self.tokenMetadataProcessor.retrieve_token_metadata(registryAddress=registryAddress, tokenId=tokenId, collection=collection)
-        except (TokenDoesNotExistException, TokenHasNoMetadataException) as exception:
+        except TokenMetadataUnprocessableException as exception:
             logging.info(f'Failed to retrieve metadata for token: {registryAddress}/{tokenId}: {exception}')
             retrievedTokenMetadata = None
+        except TokenDoesNotExistException as exception:
+            logging.info(f'Failed to retrieve metadata for token: {registryAddress}/{tokenId}: {exception}')
+            return
         async with self.saver.create_transaction() as connection:
             try:
                 tokenMetadata = await self.retriever.get_token_metadata_by_registry_address_token_id(connection=connection, registryAddress=registryAddress, tokenId=tokenId)
