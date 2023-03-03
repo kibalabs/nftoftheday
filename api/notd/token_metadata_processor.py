@@ -5,6 +5,7 @@ import typing
 import urllib.parse
 from json.decoder import JSONDecodeError
 from typing import Dict
+from typing import List
 from typing import Mapping
 from typing import Optional
 
@@ -41,7 +42,7 @@ class TokenDoesNotExistException(NotFoundException):
     pass
 
 
-class TokenHasNoMetadataException(NotFoundException):
+class TokenMetadataUnprocessableException(NotFoundException):
     pass
 
 
@@ -129,6 +130,17 @@ class TokenMetadataProcessor():
                 attribute[key] = 'NaN'
         return attribute
 
+    def _clean_attributes(self, attributes: List[Dict[str, JSON1]]) -> List[Dict[str, JSON1]]:
+        cleanedAttributes: List[Dict[str, JSON1]] = []
+        for attribute in attributes:
+            if not attribute:
+                continue
+            if isinstance(attribute, list):  # type: ignore[unreachable]
+                cleanedAttributes += self._clean_attributes(attribute)  # type: ignore[unreachable]
+            else:
+                cleanedAttributes.append(self._clean_attribute(attribute))
+        return cleanedAttributes
+
     def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Mapping[str, JSON1]) -> RetrievedTokenMetadata:
         name = tokenMetadataDict.get('name') or tokenMetadataDict.get('title') or f'#{tokenId}'
         description: Optional[str] = tokenMetadataDict.get('description')  # type: ignore[assignment]
@@ -147,7 +159,7 @@ class TokenMetadataProcessor():
         frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
         attributes: JSON = tokenMetadataDict.get('attributes') or []  # type: ignore[assignment]
         if isinstance(attributes, list):
-            attributes = [self._clean_attribute(attribute) for attribute in attributes]  # type: ignore[misc, arg-type]
+            attributes = self._clean_attributes(attributes)  # type: ignore[assignment, arg-type]
         retrievedTokenMetadata = RetrievedTokenMetadata(
             registryAddress=registryAddress,
             tokenId=tokenId,
@@ -186,25 +198,25 @@ class TokenMetadataProcessor():
             )
         if registryAddress == '0xd65c5D035A35F41f31570887E3ddF8c3289EB920':
             # TODO(krishan711): Implement special case for ETHTerrestrials
-            raise TokenDoesNotExistException()
+            raise TokenMetadataUnprocessableException()
         if registryAddress == '0xAA6612F03443517ceD2Bdcf27958c22353ceeAb9':
             # TODO(krishan711): Implement special case for Bamboozlers
-            raise TokenDoesNotExistException()
+            raise TokenMetadataUnprocessableException()
         if registryAddress == '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85':
             # TODO(krishan711): Implement special case for ENS
-            raise TokenDoesNotExistException()
+            raise TokenMetadataUnprocessableException()
         if registryAddress == '0x06012c8cf97BEaD5deAe237070F9587f8E7A266d':
             # TODO(krishan711): Implement special case for cryptokitties
-            raise TokenDoesNotExistException()
+            raise TokenMetadataUnprocessableException()
         if registryAddress in ('0x57E9a39aE8eC404C08f88740A9e6E306f50c937f', '0xFFF7F797213d7aE5f654f2bC91c071745843b5B9'):
             # TODO(krishan711): Implement special case for polkacity and Elephants for Africa (their contract seems broken)
-            raise TokenDoesNotExistException()
+            raise TokenMetadataUnprocessableException()
         if registryAddress in ('0x772Da237fc93ded712E5823b497Db5991CC6951e', '0xE072AA2B0d39587A08813391e84495971A098084'):
             # TODO(krishan711): Implement special case for Everdragons, DISTXR (their contract is unverified)
-            raise TokenDoesNotExistException()
+            raise TokenMetadataUnprocessableException()
         if registryAddress == '0xdF5d68D54433661b1e5e90a547237fFB0AdF6EC2':
             # TODO(krishan711): Implement special case for Arcona Digital Land (it's a really old contract)
-            raise TokenDoesNotExistException()
+            raise TokenMetadataUnprocessableException()
         if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
             logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
             raise TokenDoesNotExistException()
@@ -223,17 +235,17 @@ class TokenMetadataProcessor():
         if badRequestException is not None:
             if badRequestException.message:
                 if 'URI query for nonexistent token' in badRequestException.message:
-                    raise TokenDoesNotExistException()
+                    raise TokenDoesNotExistException(message='URI query for nonexistent token')
                 if 'execution reverted' in badRequestException.message:
-                    raise TokenDoesNotExistException()
+                    raise TokenMetadataUnprocessableException(message='execution reverted')
                 if 'out of gas' in badRequestException.message:
-                    raise TokenDoesNotExistException()
+                    raise TokenMetadataUnprocessableException(message='out of gas')
                 if 'stack limit reached' in badRequestException.message:
-                    raise TokenDoesNotExistException()
+                    raise TokenMetadataUnprocessableException(message='stack limit reached')
                 if 'Maybe the method does not exist on this contract' in badRequestException.message:
-                    raise TokenDoesNotExistException()
+                    raise TokenMetadataUnprocessableException(message='Maybe the method does not exist on this contract')
                 if 'value could not be decoded as valid UTF8' in badRequestException.message:
-                    raise TokenDoesNotExistException()
+                    raise TokenMetadataUnprocessableException(message='value could not be decoded as valid UTF8')
             raise badRequestException
         tokenMetadataUri: Optional[str] = None
         if tokenMetadataUriResponse:
@@ -245,7 +257,7 @@ class TokenMetadataProcessor():
         if tokenMetadataUri and len(tokenMetadataUri.strip()) == 0:
             tokenMetadataUri = None
         if not tokenMetadataUri:
-            raise TokenHasNoMetadataException()
+            raise TokenMetadataUnprocessableException()
         for ipfsProviderPrefix in IPFS_PROVIDER_PREFIXES:
             if tokenMetadataUri.startswith(ipfsProviderPrefix):
                 tokenMetadataUri = tokenMetadataUri.replace(ipfsProviderPrefix, 'ipfs://')
