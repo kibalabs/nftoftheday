@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { TradedToken } from '../client/resources';
 import { NftCard } from './nftCard';
+import { TradedToken } from '../client/resources';
 
 export type MostTradedTokenTransferCardProps = {
   tradedToken: TradedToken;

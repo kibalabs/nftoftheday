@@ -3,8 +3,8 @@ import React from 'react';
 import { dateToRelativeString, shortFormatEther } from '@kibalabs/core';
 import { Alignment, Box, Direction, IconButton, KibaIcon, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { TokenTransfer } from '../client/resources';
 import { Account } from './Account';
+import { TokenTransfer } from '../client/resources';
 
 export interface ITokenSaleRowProps {
   tokenTransfer: TokenTransfer;

@@ -5,9 +5,9 @@ import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-r
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
+import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
 
-import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
@@ -59,11 +59,15 @@ export const App = (props: IAppProps): React.ReactElement => {
     tracker.trackApplicationOpen();
   });
 
+  const onWeb3AccountError = (error: Error): void => {
+    console.error(error);
+  };
+
   return (
     <KibaApp theme={theme} isFullPageApp={true} setHead={props.setHead}>
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={globals}>
-          <AccountControlProvider>
+          <Web3AccountControlProvider localStorageClient={localStorageClient} onError={onWeb3AccountError}>
             <BackgroundView linearGradient='#200122,#000000'>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
                 <NavBar />
@@ -77,7 +81,7 @@ export const App = (props: IAppProps): React.ReactElement => {
                 </Stack.Item>
               </Stack>
             </BackgroundView>
-          </AccountControlProvider>
+          </Web3AccountControlProvider>
           <ToastContainer />
         </GlobalsProvider>
       </PageDataProvider>

@@ -1,13 +1,13 @@
 import React from 'react';
 
 import { Alignment, Box, Button, Direction, Image, LinkBase, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
+import { useOnLinkWeb3AccountsClicked, useWeb3Account } from '@kibalabs/web3-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from './Account';
 
 export const NavBar = (): React.ReactElement => {
-  const account = useAccount();
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
+  const account = useWeb3Account();
+  const onLinkAccountsClicked = useOnLinkWeb3AccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();

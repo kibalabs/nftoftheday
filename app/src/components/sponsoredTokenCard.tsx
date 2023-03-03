@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Collection, CollectionToken, TokenTransfer } from '../client/resources';
 import { NftCard } from './nftCard';
+import { Collection, CollectionToken, TokenTransfer } from '../client/resources';
 
 export type SponsoredTokenCardProps = {
   token: CollectionToken;

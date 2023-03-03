@@ -3,8 +3,8 @@ import React from 'react';
 import { truncateEnd } from '@kibalabs/core';
 import { Alignment, Box, Button, Direction, Image, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { Collection, CollectionToken } from '../client/resources';
 import { CollectionView } from './CollectionView';
+import { Collection, CollectionToken } from '../client/resources';
 
 export interface NftCardProps {
   token: CollectionToken;
