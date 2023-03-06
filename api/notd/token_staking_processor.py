@@ -14,6 +14,7 @@ from core.util.chain_util import BURN_ADDRESS
 from core.web3.eth_client import EthClientInterface
 
 from notd.model import COLLECTION_CREEPZ_ADDRESS
+from notd.model import SUPER_COLLECTIONS
 from notd.model import STAKING_ADDRESSES
 from notd.model import RetrievedTokenStaking
 from notd.store.retriever import Retriever
@@ -67,7 +68,7 @@ class TokenStakingProcessor:
     # TODO(krishan711): this is wrong because it doesn't use the contract. it should refer to the function above
     async def retrieve_token_stakings(self, registryAddress: str) -> List[RetrievedTokenStaking]:
         retrievedStakedTokens: List[RetrievedTokenStaking] = []
-        if registryAddress != COLLECTION_CREEPZ_ADDRESS:
+        if registryAddress not in SUPER_COLLECTIONS.get('creepz'):
             return retrievedStakedTokens
         for stakingAddress in STAKING_ADDRESSES:
             stakedQuery = (
@@ -92,7 +93,10 @@ class TokenStakingProcessor:
             for tokenId, ownerAddress, transactionHash, blockDate in stakedTokens:
                 currentlyStakedTokens[tokenId] = (ownerAddress, transactionHash, blockDate)
             for tokenId, _, _, blockDate in unStakedTokens:
-                if currentlyStakedTokens[tokenId][2] < blockDate:
-                    del currentlyStakedTokens[tokenId]
+                try:
+                    if currentlyStakedTokens[tokenId][2] < blockDate:
+                        del currentlyStakedTokens[tokenId]
+                except:
+                    pass
             retrievedStakedTokens += [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=stakingAddress, ownerAddress=ownerAddress, stakedDate=stakedDate, transactionHash=transactionHash) for tokenId, (ownerAddress, transactionHash, stakedDate) in currentlyStakedTokens.items()]
         return retrievedStakedTokens
