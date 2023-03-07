@@ -63,7 +63,6 @@ class TokenStakingProcessor:
                 )
         return retrievedTokenStaking
 
-    # TODO(krishan711): this is wrong because it doesn't use the contract. it should refer to the function above
     async def retrieve_collection_token_staking_ids(self, registryAddress: str) -> Set[Tuple[str, str]]:
         for stakingAddress in STAKING_ADDRESSES:
             stakedQuery = (
