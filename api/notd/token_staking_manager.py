@@ -35,7 +35,7 @@ class TokenStakingManager:
         await self.tokenQueue.send_message(message=UpdateTokenStakingMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message())
 
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
-        retrievedTokenStaking = await self.tokenStakingProcessor.retrieve_updated_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+        retrievedTokenStaking = await self.tokenStakingProcessor.retrieve_token_staking(registryAddress=registryAddress, tokenId=tokenId)
         async with self.saver.create_transaction() as connection:
             currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
                 StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=registryAddress),

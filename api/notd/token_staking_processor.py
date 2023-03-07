@@ -33,7 +33,7 @@ class TokenStakingProcessor:
         self.creepzStakingContractAbi = contractJson['abi']
         self.creepzStakingOwnerOfFunctionAbi = [internalAbi for internalAbi in self.creepzStakingContractAbi if internalAbi.get('name') == 'ownerOf'][0]
 
-    async def retrieve_updated_token_staking(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
+    async def retrieve_token_staking(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
         tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         if tokenOwnership.ownerAddress == CREEPZ_STAKING_ADDRESS:
             stakingAddress = CREEPZ_STAKING_ADDRESS
@@ -51,13 +51,13 @@ class TokenStakingProcessor:
             )
         latestTokenTransfer = latestTokenTransfers[0]
         retrievedTokenStaking = RetrievedTokenStaking(
-                registryAddress=registryAddress,
-                tokenId=tokenId,
-                stakingAddress=stakingAddress,
-                ownerAddress=ownerAddress,
-                stakedDate=latestTokenTransfer.blockDate,
-                transactionHash=latestTokenTransfer.transactionHash
-            )
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            stakingAddress=stakingAddress,
+            ownerAddress=ownerAddress,
+            stakedDate=latestTokenTransfer.blockDate,
+            transactionHash=latestTokenTransfer.transactionHash
+        )
         return retrievedTokenStaking
 
     async def retrieve_collection_token_staking_ids(self, registryAddress: str) -> Set[Tuple[str, str]]:
