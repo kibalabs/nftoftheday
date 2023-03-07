@@ -66,12 +66,9 @@ class TokenStakingProcessor:
 
     # TODO(krishan711): this is wrong because it doesn't use the contract. it should refer to the function above
     async def retrieve_token_stakings(self, registryAddress: str) -> List[RetrievedTokenStaking]:
-        retrievedStakedTokens: List[RetrievedTokenStaking] = []
-        if registryAddress != COLLECTION_CREEPZ_ADDRESS:
-            return retrievedStakedTokens
         for stakingAddress in STAKING_ADDRESSES:
             stakedQuery = (
-                sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
+                sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
                 .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
                 .where(TokenTransfersTable.c.registryAddress == registryAddress)
                 .where(TokenTransfersTable.c.toAddress == stakingAddress)
@@ -80,7 +77,7 @@ class TokenStakingProcessor:
             stakedTokensResult = await self.retriever.database.execute(query=stakedQuery)
             stakedTokens = list(stakedTokensResult)
             unStakedQuery = (
-                sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.toAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
+                sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, TokenTransfersTable.c.toAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
                 .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
                 .where(TokenTransfersTable.c.registryAddress == registryAddress)
                 .where(TokenTransfersTable.c.fromAddress == stakingAddress)
@@ -88,11 +85,27 @@ class TokenStakingProcessor:
             )
             unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
             unStakedTokens = list(unStakedTokensResult)
-            currentlyStakedTokens: Dict[str, Tuple[str, str, datetime.datetime]] = {}
-            for tokenId, ownerAddress, transactionHash, blockDate in stakedTokens:
-                currentlyStakedTokens[tokenId] = (ownerAddress, transactionHash, blockDate)
-            for tokenId, _, _, blockDate in unStakedTokens:
-                if currentlyStakedTokens[tokenId][2] < blockDate:
-                    del currentlyStakedTokens[tokenId]
-            retrievedStakedTokens += [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=stakingAddress, ownerAddress=ownerAddress, stakedDate=stakedDate, transactionHash=transactionHash) for tokenId, (ownerAddress, transactionHash, stakedDate) in currentlyStakedTokens.items()]
-        return retrievedStakedTokens
+            currentlyStakedTokens: Dict[Tuple[str, str], Tuple[str, datetime.datetime]] = {}
+            for registryAddress, tokenId, ownerAddress, transactionHash, blockDate in stakedTokens:
+                currentlyStakedTokens[(registryAddress, tokenId)] = (transactionHash, blockDate)
+            for registryAddress, tokenId, _, _, blockDate in unStakedTokens:
+                if currentlyStakedTokens[(registryAddress, tokenId)][1] < blockDate:
+                    del currentlyStakedTokens[(registryAddress, tokenId)]
+            retrievedTokenStakings: List[RetrievedTokenStaking] = []
+            for (registryAddress, tokenId), (transactionHash, blockDate) in currentlyStakedTokens.items():
+                try:
+                    tokenOwnerResponse = (await self.ethClient.call_function(toAddress=stakingAddress, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingOwnerOfFunctionAbi, arguments={'tokenId': int(tokenId), 'contractAddress': registryAddress}))[0]
+                except BadRequestException:
+                    raise InvalidTokenStakingContract()
+                ownerAddress = tokenOwnerResponse
+                if ownerAddress == BURN_ADDRESS:
+                    continue
+                retrievedTokenStakings += [RetrievedTokenStaking(
+                        registryAddress=registryAddress,
+                        tokenId=tokenId,
+                        stakingAddress=stakingAddress,
+                        ownerAddress=ownerAddress,
+                        stakedDate=blockDate,
+                        transactionHash=transactionHash
+                    )]
+        return retrievedTokenStakings
