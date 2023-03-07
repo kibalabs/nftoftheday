@@ -14,6 +14,7 @@ from core.util.chain_util import BURN_ADDRESS
 from core.web3.eth_client import EthClientInterface
 
 from notd.model import STAKING_ADDRESSES
+from notd.model import CREEPZ_STAKING_ADDRESS
 from notd.model import RetrievedTokenStaking
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
@@ -33,34 +34,31 @@ class TokenStakingProcessor:
         self.creepzStakingContractAbi = contractJson['abi']
         self.creepzStakingOwnerOfFunctionAbi = [internalAbi for internalAbi in self.creepzStakingContractAbi if internalAbi.get('name') == 'ownerOf'][0]
 
-    # TODO(krishan711): this function is def wrong if there are multiple staking addresses
     async def retrieve_updated_token_staking(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
-        for stakingAddress in STAKING_ADDRESSES:
-            try:
-                tokenOwnerResponse = (await self.ethClient.call_function(toAddress=stakingAddress, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingOwnerOfFunctionAbi, arguments={'tokenId': int(tokenId), 'contractAddress': registryAddress}))[0]
-            except BadRequestException:
-                raise InvalidTokenStakingContract()
-            ownerAddress = tokenOwnerResponse
-            if ownerAddress == BURN_ADDRESS:
-                return None
-            latestTokenTransfers = await self.retriever.list_token_transfers(
-                    fieldFilters=[
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
-                        StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=stakingAddress),
-                    ],
-                    orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
-                    limit=1,
-                )
-            latestTokenTransfer = latestTokenTransfers[0]
-            retrievedTokenStaking = RetrievedTokenStaking(
-                    registryAddress=registryAddress,
-                    tokenId=tokenId,
-                    stakingAddress=stakingAddress,
-                    ownerAddress=ownerAddress,
-                    stakedDate=latestTokenTransfer.blockDate,
-                    transactionHash=latestTokenTransfer.transactionHash
-                )
+        tokenOwnership = await self.retriever.get_token_ownership_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+        if tokenOwnership.ownerAddress == CREEPZ_STAKING_ADDRESS:
+            stakingAddress = CREEPZ_STAKING_ADDRESS
+            ownerAddress = (await self.ethClient.call_function(toAddress=CREEPZ_STAKING_ADDRESS, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingOwnerOfFunctionAbi, arguments={'tokenId': int(tokenId), 'contractAddress': registryAddress}))[0]
+        else:
+            return None
+        latestTokenTransfers = await self.retriever.list_token_transfers(
+                fieldFilters=[
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=tokenId),
+                    StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=stakingAddress),
+                ],
+                orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+                limit=1,
+            )
+        latestTokenTransfer = latestTokenTransfers[0]
+        retrievedTokenStaking = RetrievedTokenStaking(
+                registryAddress=registryAddress,
+                tokenId=tokenId,
+                stakingAddress=stakingAddress,
+                ownerAddress=ownerAddress,
+                stakedDate=latestTokenTransfer.blockDate,
+                transactionHash=latestTokenTransfer.transactionHash
+            )
         return retrievedTokenStaking
 
     async def retrieve_collection_token_staking_ids(self, registryAddress: str) -> Set[Tuple[str, str]]:
