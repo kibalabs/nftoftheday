@@ -58,13 +58,5 @@ class TokenStakingManager:
         await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=address).to_message())
 
     async def update_token_stakings_for_collection(self, address: str) -> None:
-        retrievedTokenStakings = await self.tokenStakingProcessor.retrieve_token_stakings(registryAddress=address)
-        async with self.saver.create_transaction() as connection:
-            currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
-                StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=address)
-            ])
-            currentTokenStakingIds = [tokenStaking.tokenStakingId for tokenStaking in currentTokenStakings]
-            logging.info(f'Deleting {len(currentTokenStakingIds)} existing stakings')
-            await self.saver.delete_token_stakings(tokenStakingIds=currentTokenStakingIds, connection=connection)
-            logging.info(f'Saving {len(retrievedTokenStakings)} stakings')
-            await self.saver.create_token_stakings(retrievedTokenStakings=retrievedTokenStakings, connection=connection)
+        stakingCollectionTokenIds = await self.tokenStakingProcessor.retrieve_collection_token_staking_ids(registryAddress=address)
+        await self.update_token_stakings_deferred(stakingCollectionTokenIds=stakingCollectionTokenIds)
