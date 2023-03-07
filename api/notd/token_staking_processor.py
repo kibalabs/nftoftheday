@@ -10,7 +10,6 @@ from core.exceptions import BadRequestException
 from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
-from core.util.chain_util import BURN_ADDRESS
 from core.web3.eth_client import EthClientInterface
 
 from notd.model import STAKING_ADDRESSES
