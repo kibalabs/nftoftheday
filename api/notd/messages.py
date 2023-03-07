@@ -98,9 +98,9 @@ class RefreshListingsForCollectionMessageContent(MessageContent):
     address: str
 
 
-class UpdateTokenStakingsForCollectionMessageContent(MessageContent):
-    _COMMAND = 'UPDATE_TOKEN_STAKINGS_FOR_COLLECTION'
-    address: str
+class RefreshTokenStakingsForStakingAddressMessageContent(MessageContent):
+    _COMMAND = 'REFRESH_TOKEN_STAKINGS_FOR_STAKING_ADDRESS'
+    stakingAddress: str
 
 class UpdateTokenStakingMessageContent(MessageContent):
     _COMMAND = 'UPDATE_TOKEN_STAKING'

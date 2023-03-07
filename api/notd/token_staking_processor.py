@@ -1,11 +1,7 @@
-import datetime
 import json
-from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Tuple
 
-import sqlalchemy
 from core.exceptions import BadRequestException
 from core.store.retriever import Direction
 from core.store.retriever import Order
@@ -13,7 +9,10 @@ from core.store.retriever import StringFieldFilter
 from core.util.chain_util import BURN_ADDRESS
 from core.web3.eth_client import EthClientInterface
 
-from notd.model import SUPER_COLLECTIONS
+from notd.model import COLLECTION_CREEPZ_ADDRESS
+from notd.model import COLLECTION_CREEPZ_ARMOURIES_ADDRESS
+from notd.model import COLLECTION_CREEPZ_MEGA_SHAPESHIFTER_ADDRESS
+from notd.model import CREEPZ_STAKING_ADDRESS
 from notd.model import STAKING_ADDRESSES
 from notd.model import RetrievedTokenStaking
 from notd.store.retriever import Retriever
@@ -33,6 +32,7 @@ class TokenStakingProcessor:
             contractJson = json.load(contractJsonFile)
         self.creepzStakingContractAbi = contractJson['abi']
         self.creepzStakingOwnerOfFunctionAbi = [internalAbi for internalAbi in self.creepzStakingContractAbi if internalAbi.get('name') == 'ownerOf'][0]
+        self.creepzStakingGetStakerTokenFunctionAbi = [internalAbi for internalAbi in self.creepzStakingContractAbi if internalAbi.get('name') == 'getStakerTokens'][0]
 
     # TODO(krishan711): this function is def wrong if there are multiple staking addresses
     async def retrieve_updated_token_staking(self, registryAddress: str, tokenId: str) -> Optional[RetrievedTokenStaking]:
@@ -64,35 +64,32 @@ class TokenStakingProcessor:
                 )
         return retrievedTokenStaking
 
-    # TODO(krishan711): this is wrong because it doesn't use the contract. it should refer to the function above
-    async def retrieve_token_stakings(self, registryAddress: str) -> List[RetrievedTokenStaking]:
-        retrievedStakedTokens: List[RetrievedTokenStaking] = []
-        if registryAddress not in SUPER_COLLECTIONS.get('creepz') :
-            return retrievedStakedTokens
-        for stakingAddress in STAKING_ADDRESSES:
-            stakedQuery = (
-                sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.fromAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
-                .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-                .where(TokenTransfersTable.c.registryAddress == registryAddress)
-                .where(TokenTransfersTable.c.toAddress == stakingAddress)
-                .order_by(TokenTransfersTable.c.blockNumber.asc())
-            )
-            stakedTokensResult = await self.retriever.database.execute(query=stakedQuery)
-            stakedTokens = list(stakedTokensResult)
-            unStakedQuery = (
-                sqlalchemy.select(TokenTransfersTable.c.tokenId, TokenTransfersTable.c.toAddress, TokenTransfersTable.c.transactionHash, BlocksTable.c.blockDate)
-                .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-                .where(TokenTransfersTable.c.registryAddress == registryAddress)
-                .where(TokenTransfersTable.c.fromAddress == stakingAddress)
-                .order_by(TokenTransfersTable.c.blockNumber.asc())
-            )
-            unStakedTokensResult = await self.retriever.database.execute(query=unStakedQuery)
-            unStakedTokens = list(unStakedTokensResult)
-            currentlyStakedTokens: Dict[str, Tuple[str, str, datetime.datetime]] = {}
-            for tokenId, ownerAddress, transactionHash, blockDate in stakedTokens:
-                currentlyStakedTokens[tokenId] = (ownerAddress, transactionHash, blockDate)
-            for tokenId, _, _, blockDate in unStakedTokens:
-                if currentlyStakedTokens[tokenId][2] < blockDate:
-                    del currentlyStakedTokens[tokenId]
-            retrievedStakedTokens += [RetrievedTokenStaking(registryAddress=registryAddress, tokenId=tokenId, stakingAddress=stakingAddress, ownerAddress=ownerAddress, stakedDate=stakedDate, transactionHash=transactionHash) for tokenId, (ownerAddress, transactionHash, stakedDate) in currentlyStakedTokens.items()]
-        return retrievedStakedTokens
+    async def retrieve_owner_token_stakings(self, ownerAddress: str, stakingAddress: str) -> List[RetrievedTokenStaking]:
+        retrievedTokenStakings: List[RetrievedTokenStaking] = []
+        if stakingAddress == CREEPZ_STAKING_ADDRESS:
+            stakedTokensResponse = (await self.ethClient.call_function(toAddress=stakingAddress, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingGetStakerTokenFunctionAbi, arguments={'staker': ownerAddress}))
+            stakedCreepzToken = [(COLLECTION_CREEPZ_ADDRESS, tokenId) for tokenId in stakedTokensResponse[0]]
+            stakedArmouriesToken = [(COLLECTION_CREEPZ_ARMOURIES_ADDRESS, tokenId) for tokenId in stakedTokensResponse[1]]
+            stakedBlackBoxToken = [(COLLECTION_CREEPZ_MEGA_SHAPESHIFTER_ADDRESS, tokenId) for tokenId in stakedTokensResponse[2]]
+            stakedTokens = stakedCreepzToken + stakedArmouriesToken + stakedBlackBoxToken
+            for registryAddress, tokenId in stakedTokens:
+                latestTokenTransfers = await self.retriever.list_token_transfers(
+                    fieldFilters=[
+                        StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
+                        StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=str(tokenId)),
+                        StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=stakingAddress),
+                    ],
+                    orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+                    limit=1,
+                )
+                if len(latestTokenTransfers) > 0:
+                    latestTokenTransfer = latestTokenTransfers[0]
+                    retrievedTokenStakings += [RetrievedTokenStaking(
+                            registryAddress=registryAddress,
+                            tokenId=str(tokenId),
+                            stakingAddress=stakingAddress,
+                            ownerAddress=ownerAddress,
+                            stakedDate=latestTokenTransfer.blockDate,
+                            transactionHash=latestTokenTransfer.transactionHash
+                        )]
+        return retrievedTokenStakings

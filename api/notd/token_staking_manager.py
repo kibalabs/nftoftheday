@@ -1,17 +1,19 @@
 from typing import Set
 from typing import Tuple
 
+import sqlalchemy
 from core import logging
 from core.queues.message_queue import MessageQueue
 from core.queues.model import Message
 from core.store.retriever import StringFieldFilter
 
+from notd.messages import RefreshTokenStakingsForStakingAddressMessageContent
 from notd.messages import UpdateTokenStakingMessageContent
-from notd.messages import UpdateTokenStakingsForCollectionMessageContent
-from notd.model import GALLERY_COLLECTIONS
+from notd.model import STAKING_ADDRESSES
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import TokenStakingsTable
+from notd.store.schema import TokenTransfersTable
 from notd.token_staking_processor import TokenStakingProcessor
 
 
@@ -50,21 +52,30 @@ class TokenStakingManager:
                 logging.info(f'Saving stakings for registryAddress: {registryAddress}, tokenId: {tokenId}')
                 await self.saver.create_token_staking(retrievedTokenStaking=retrievedTokenStaking, connection=connection)
 
-    async def update_token_stakings_for_all_collections_deferred(self) -> None:
-        for index, stakingAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=stakingAddress).to_message(), delaySeconds=index*20)
+    async def refresh_token_stakings_for_all_staking_addresses_deferred(self) -> None:
+        for index, stakingAddress in enumerate(STAKING_ADDRESSES):
+            await self.workQueue.send_message(message=RefreshTokenStakingsForStakingAddressMessageContent(stakingAddress=stakingAddress).to_message(), delaySeconds=index*20)
 
-    async def update_token_stakings_for_collection_deferred(self, address: str) -> None:
-        await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=address).to_message())
+    async def refresh_token_stakings_for_staking_address_deferred(self, stakingAddress: str) -> None:
+        await self.workQueue.send_message(message=RefreshTokenStakingsForStakingAddressMessageContent(stakingAddress=stakingAddress).to_message())
 
-    async def update_token_stakings_for_collection(self, address: str) -> None:
-        retrievedTokenStakings = await self.tokenStakingProcessor.retrieve_token_stakings(registryAddress=address)
+    async def refresh_token_stakings_for_staking_address(self, stakingAddress: str) -> None:
+        ownerQuery = (
+        sqlalchemy.select(TokenTransfersTable.c.fromAddress.distinct())
+        .where((TokenTransfersTable.c.toAddress == stakingAddress))
+        )
+        stakerAddressesResult = await self.retriever.database.execute(query=ownerQuery)
+        stakerAddresses = [stakerAddress for stakerAddress, in list(stakerAddressesResult)]
         async with self.saver.create_transaction() as connection:
-            currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
-                StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=address)
-            ])
-            currentTokenStakingIds = [tokenStaking.tokenStakingId for tokenStaking in currentTokenStakings]
-            logging.info(f'Deleting {len(currentTokenStakingIds)} existing stakings')
-            await self.saver.delete_token_stakings(tokenStakingIds=currentTokenStakingIds, connection=connection)
-            logging.info(f'Saving {len(retrievedTokenStakings)} stakings')
-            await self.saver.create_token_stakings(retrievedTokenStakings=retrievedTokenStakings, connection=connection)
+            for stakerAddress in stakerAddresses:
+                retrievedTokenStakings = await self.tokenStakingProcessor.retrieve_owner_token_stakings(ownerAddress=stakerAddress, stakingAddress=stakingAddress)
+                query = (
+                    sqlalchemy.select(TokenStakingsTable.c.tokenStakingId)
+                    .where((TokenStakingsTable.c.ownerAddress == stakerAddress))
+                )
+                result = await self.retriever.database.execute(query=query, connection=connection)
+                tokenStakingIdsToDelete = [tokenStakingId for tokenStakingId, in result]
+                logging.info(f'Deleting {len(tokenStakingIdsToDelete)} tokenStaking.')
+                await self.saver.delete_token_stakings(tokenStakingIds=tokenStakingIdsToDelete, connection=connection)
+                logging.info(f'Saving {len(retrievedTokenStakings)} tokenStaking.')
+                await self.saver.create_token_stakings(retrievedTokenStakings=retrievedTokenStakings, connection=connection)

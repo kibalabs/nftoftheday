@@ -564,11 +564,11 @@ class NotdManager:
     async def refresh_gallery_badge_holders_for_all_collections(self) -> None:
         await self.badgeManager.refresh_gallery_badge_holders_for_all_collections()
 
-    async def update_token_stakings_for_all_collections_deferred(self) -> None:
-        await self.tokenStakingManager.update_token_stakings_for_all_collections_deferred()
+    async def refresh_token_stakings_for_all_staking_addresses_deferred(self) -> None:
+        await self.tokenStakingManager.refresh_token_stakings_for_all_staking_addresses_deferred()
 
-    async def update_token_stakings_for_collection(self, registryAddress: str) -> None:
-        await self.tokenStakingManager.update_token_stakings_for_collection(address=registryAddress)
+    async def refresh_token_stakings_for_staking_address(self, stakingAddress: str) -> None:
+        await self.tokenStakingManager.refresh_token_stakings_for_staking_address(stakingAddress=stakingAddress)
 
     async def update_token_staking_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking_deferred(registryAddress=registryAddress, tokenId=tokenId)
