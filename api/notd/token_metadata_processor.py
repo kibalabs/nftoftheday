@@ -123,6 +123,19 @@ class TokenMetadataProcessor():
     def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> Optional[str]:
         return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://').rstrip('/') if ipfsUrl else None
 
+    def _clean_potential_url(self, url: JSON1) -> Optional[str]:
+        if not isinstance(url, str):
+            if isinstance(url, list) and len(url) > 0:
+                url = url[0]  # type: ignore[assignment]
+            elif isinstance(url, dict):
+                imageDict = url
+                url = imageDict.get('src')
+                if not url:
+                    logging.error(f'Failed to extract url from dict: {imageDict}')
+            else:
+                url = str(url)
+        return self._clean_potential_ipfs_url(ipfsUrl=url)  # type: ignore[arg-type]
+
     @staticmethod
     def _clean_attribute(attribute: Dict[str, JSON1]) -> Dict[str, JSON1]:
         for key, value in attribute.items():
@@ -137,8 +150,10 @@ class TokenMetadataProcessor():
                 continue
             if isinstance(attribute, list):  # type: ignore[unreachable]
                 cleanedAttributes += self._clean_attributes(attribute)  # type: ignore[unreachable]
-            else:
+            elif isinstance(attribute, dict):
                 cleanedAttributes.append(self._clean_attribute(attribute))
+            else:
+                logging.info(f'Unknown attribute instance type: {attribute}')  # type: ignore[unreachable]
         return cleanedAttributes
 
     def _get_token_metadata_from_data(self, registryAddress: str, tokenId: str, metadataUrl: str, tokenMetadataDict: Mapping[str, JSON1]) -> RetrievedTokenMetadata:
@@ -147,13 +162,6 @@ class TokenMetadataProcessor():
         if isinstance(description, list) and len(description) > 0:  # type: ignore[unreachable]
             description = description[0]  # type: ignore[unreachable]
         imageUrl: Optional[str] = tokenMetadataDict.get('image') or tokenMetadataDict.get('image_url') or tokenMetadataDict.get('imageUrl') or tokenMetadataDict.get('image_data')  # type: ignore[assignment]
-        if isinstance(imageUrl, list) and len(imageUrl) > 0:  # type: ignore[unreachable]
-            imageUrl = imageUrl[0]  # type: ignore[unreachable]
-        elif isinstance(imageUrl, dict):
-            imageDict = imageUrl  # type: ignore[unreachable]
-            imageUrl = imageDict.get('src')
-            if not imageUrl:
-                logging.error(f'Failed to extract imageUrl from {imageDict}')
         animationUrl: Optional[str] = tokenMetadataDict.get('animation_url') or tokenMetadataDict.get('animation')  # type: ignore[assignment]
         youtubeUrl: Optional[str] = tokenMetadataDict.get('youtube_url')  # type: ignore[assignment]
         frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
@@ -166,11 +174,11 @@ class TokenMetadataProcessor():
             metadataUrl=metadataUrl,
             name=str(name).replace('\u0000', '').encode('utf-8', 'namereplace').decode(),
             description=str(description).replace('\u0000', '').encode('utf-8', 'namereplace').decode() if description else None,
-            imageUrl=self._clean_potential_ipfs_url(imageUrl),
+            imageUrl=self._clean_potential_url(url=imageUrl),
             resizableImageUrl=None,
-            animationUrl=self._clean_potential_ipfs_url(animationUrl),
-            youtubeUrl=self._clean_potential_ipfs_url(youtubeUrl),
-            frameImageUrl=self._clean_potential_ipfs_url(frameImageUrl),
+            animationUrl=self._clean_potential_url(url=animationUrl),
+            youtubeUrl=self._clean_potential_url(url=youtubeUrl),
+            frameImageUrl=self._clean_potential_url(url=frameImageUrl),
             backgroundColor=tokenMetadataDict.get('background_color'),  # type: ignore[arg-type]
             attributes=attributes,
         )
