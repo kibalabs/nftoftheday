@@ -40,14 +40,14 @@ class TokenStakingManager:
             currentTokenStakings = await self.retriever.list_token_stakings(fieldFilters=[
                 StringFieldFilter(fieldName=TokenStakingsTable.c.registryAddress.key, eq=registryAddress),
                 StringFieldFilter(fieldName=TokenStakingsTable.c.tokenId.key, eq=tokenId)],
-                limit=1
+                limit=1,
             )
             if len(currentTokenStakings) > 0:
                 currentTokenStakingId = currentTokenStakings[0].tokenStakingId
-                logging.info(f'Deleting existing stakings for registryAddress: {registryAddress}, tokenId: {tokenId}')
+                logging.info(f'Deleting existing staking for registryAddress: {registryAddress}, tokenId: {tokenId}')
                 await self.saver.delete_token_staking(tokenStakingId=currentTokenStakingId, connection=connection)
             if retrievedTokenStaking:
-                logging.info(f'Saving stakings for registryAddress: {registryAddress}, tokenId: {tokenId}')
+                logging.info(f'Saving staking for registryAddress: {registryAddress}, tokenId: {tokenId}')
                 await self.saver.create_token_staking(retrievedTokenStaking=retrievedTokenStaking, connection=connection)
 
     async def update_token_stakings_for_all_collections_deferred(self) -> None:

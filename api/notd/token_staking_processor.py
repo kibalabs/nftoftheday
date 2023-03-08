@@ -1,8 +1,8 @@
 import datetime
 import json
 from typing import Dict
-from typing import Set
 from typing import Optional
+from typing import Set
 from typing import Tuple
 
 import sqlalchemy
@@ -12,8 +12,8 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.web3.eth_client import EthClientInterface
 
-from notd.model import STAKING_ADDRESSES
 from notd.model import CREEPZ_STAKING_ADDRESS
+from notd.model import STAKING_ADDRESSES
 from notd.model import RetrievedTokenStaking
 from notd.store.retriever import Retriever
 from notd.store.schema import BlocksTable
@@ -61,6 +61,7 @@ class TokenStakingProcessor:
         return retrievedTokenStaking
 
     async def retrieve_collection_token_staking_ids(self, registryAddress: str) -> Set[Tuple[str, str]]:
+        stakedCollectionTokenIds: Set[Tuple[str, str]] = set()
         for stakingAddress in STAKING_ADDRESSES:
             stakedQuery = (
                 sqlalchemy.select(TokenTransfersTable.c.tokenId, BlocksTable.c.blockDate)
@@ -86,5 +87,5 @@ class TokenStakingProcessor:
             for tokenId, blockDate in unStakedTokens:
                 if currentlyStakedTokens[tokenId] < blockDate:
                     del currentlyStakedTokens[tokenId]
-            stakingCollectionTokenIds = {(registryAddress, tokenId) for tokenId in currentlyStakedTokens.keys()}
-        return stakingCollectionTokenIds
+            stakedCollectionTokenIds.update({(registryAddress, tokenId) for tokenId in currentlyStakedTokens.keys()})
+        return stakedCollectionTokenIds
