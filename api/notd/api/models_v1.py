@@ -197,13 +197,13 @@ class ApiGalleryUser(BaseModel):
     registryAddress: str
     userProfile: Optional[ApiUserProfile]
     twitterProfile: Optional[ApiTwitterProfile]
-    ownedTokenCount: int
-    uniqueOwnedTokenCount: int
     joinDate: Optional[datetime.datetime]
 
 
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
+    ownedTokenCount: int
+    uniqueOwnedTokenCount: int
     chosenOwnedTokens: List[ApiCollectionToken]
     galleryUserBadges: List[ApiGalleryUserBadge]
 

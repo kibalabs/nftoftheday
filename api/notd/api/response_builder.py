@@ -341,8 +341,6 @@ class ResponseBuilder:
             registryAddress=galleryUser.registryAddress,
             userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)) if galleryUser.userProfile else None,
             twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)) if galleryUser.twitterProfile else None,
-            ownedTokenCount=galleryUser.ownedTokenCount,
-            uniqueOwnedTokenCount=galleryUser.uniqueOwnedTokenCount,
             joinDate=galleryUser.joinDate,
         )
 
@@ -363,6 +361,8 @@ class ResponseBuilder:
     async def gallery_user_row_from_model(self, galleryUserRow: GalleryUserRow) -> ApiGalleryUserRow:
         return ApiGalleryUserRow(
             galleryUser=(await self.gallery_user_from_model(galleryUserRow.galleryUser)),
+            ownedTokenCount=galleryUserRow.ownedTokenCount,
+            uniqueOwnedTokenCount=galleryUserRow.uniqueOwnedTokenCount,
             chosenOwnedTokens=(await self.collection_tokens_from_models(tokenMetadatas=galleryUserRow.chosenOwnedTokens)),
             galleryUserBadges=(await self.gallery_user_badges_from_models(galleryBadgeHolders=galleryUserRow.galleryBadgeHolders) if galleryUserRow.galleryBadgeHolders else [])
         )

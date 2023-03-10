@@ -378,10 +378,11 @@ class GalleryManager:
                 registryAddress=registryAddress,
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
-                ownedTokenCount=userRow['ownedTokenCount'],
-                uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'],
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
+            #NOTE(Femi-Ogunkola): For super collections these should be registry owned token count
+            ownedTokenCount=userRow['ownedTokenCount'],
+            uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'],
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
         ) for userRow in userRows]
