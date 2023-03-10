@@ -559,38 +559,39 @@ class GalleryManager:
             )
         return superCollectionAttributes
 
-    async def query_super_collection_users(self, registryAddress: str, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
+    async def query_super_collection_users(self, superCollectionAddresses: str, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
         superCollectionAddresses = SUPER_COLLECTIONS.get('creepz')
         ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')  # type: ignore[no-untyped-call, var-annotated]
         uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')  # type: ignore[no-untyped-call]
+        joinDate = sqlalchemyfunc.min(UserRegistryFirstOwnershipsMaterializedView.c.joinDate).label('joinDate')  # type: ignore[no-untyped-call]
         usersQueryBase = (
-            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
                 .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
-                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.not_in(STAKING_ADDRESSES))
+                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
-        print(usersQueryBase)
         usersQuery = usersQueryBase.limit(limit).offset(offset)
         if not order or order == 'TOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by(ownedCountColumn.desc())
         elif order == 'TOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by(ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
+            usersQuery = usersQuery.order_by(ownedCountColumn.asc(), joinDate.desc())
         elif order == 'UNIQUETOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.desc())
         elif order == 'UNIQUETOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
+            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.asc(), joinDate.desc())
         elif order == 'FOLLOWERCOUNT_DESC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         elif order == 'FOLLOWERCOUNT_ASC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
         elif order == 'JOINDATE_DESC':
-            usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.asc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(joinDate.asc(), ownedCountColumn.desc())
         elif order == 'JOINDATE_ASC':
-            usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(joinDate.desc(), ownedCountColumn.desc())
         else:
             raise BadRequestException('Unknown order')
         usersResult = await self.retriever.database.execute(query=usersQuery)
@@ -625,12 +626,12 @@ class GalleryManager:
         items = [GalleryUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
-                registryAddress=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress],
+                registryAddress='creepz',
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
                 ownedTokenCount=userRow['ownedTokenCount'],
                 uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'],
-                joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
+                joinDate=userRow['joinDate'],
             ),
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
