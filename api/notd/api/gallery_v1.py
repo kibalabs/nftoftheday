@@ -142,12 +142,4 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         superCollectionOverlaps = await galleryManager.list_gallery_super_collection_overlaps(superCollectionName=superCollectionName, otherRegistryAddress=otherRegistryAddress)
         return ListGallerySuperCollectionOverlapsResponse(superCollectionOverlaps=(await responseBuilder.super_collection_overlaps_from_models(superCollectionOverlaps=superCollectionOverlaps)))
 
-    # TODO(krishan711): make this a GET request once we understand complex query params
-    @router.post('/super-collections/{superCollectionName}/users/query')
-    async def query_super_collection_users(superCollectionName: str, request: QueryCollectionUsersRequest) -> QueryCollectionUsersResponse:
-        limit = request.limit if request.limit is not None else 20
-        offset = request.offset if request.offset is not None else 0
-        galleryUserRowListResponse = await galleryManager.query_super_collection_users(superCollectionName=superCollectionName, order=request.order, limit=limit, offset=offset)
-        return QueryCollectionUsersResponse(galleryUserRowListResponse=(await responseBuilder.gallery_user_row_list_response_from_model(galleryUserRowListResponse=galleryUserRowListResponse)))
-
     return router
