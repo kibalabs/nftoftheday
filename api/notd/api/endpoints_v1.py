@@ -23,6 +23,7 @@ from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserBadge
 from notd.api.models_v1 import ApiGalleryUserRow
+from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
@@ -331,6 +332,14 @@ class QueryCollectionUsersRequest(BaseModel):
 
 class QueryCollectionUsersResponse(BaseModel):
     galleryUserRowListResponse: ApiListResponse[ApiGalleryUserRow]
+
+class QuerySuperCollectionUsersRequest(BaseModel):
+    order: Optional[str]
+    limit: Optional[int]
+    offset: Optional[int]
+
+class QuerySuperCollectionUsersResponse(BaseModel):
+    galleryUserRowListResponse: ApiListResponse[ApiGallerySuperCollectionUserRow]
 
 class UpdateAllTwitterUsersDeferredRequest(BaseModel):
     pass

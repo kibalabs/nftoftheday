@@ -22,6 +22,7 @@ from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserBadge
 from notd.api.models_v1 import ApiGalleryUserRow
+from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
@@ -52,6 +53,7 @@ from notd.model import GalleryOwnedCollection
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
+from notd.model import GallerySuperCollectionUserRow
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
 from notd.model import LatestAccountGm
@@ -374,6 +376,25 @@ class ResponseBuilder:
         return ApiListResponse(
             items=(await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRowListResponse.items])),
             totalCount=galleryUserRowListResponse.totalCount,
+        )
+
+    async def gallery_super_collection_user_row_from_model(self, gallerySuperCollectionUserRow: GallerySuperCollectionUserRow) -> ApiGallerySuperCollectionUserRow:
+        if gallerySuperCollectionUserRow.galleryBadgeHolders:
+            galleryUserBadges={address: (await self.gallery_user_badges_from_models(galleryBadgeHolders=galleryBadgeHolders)) for address, galleryBadgeHolders in gallerySuperCollectionUserRow.galleryBadgeHolders.items()}
+        else:
+            galleryUserBadges = {}
+        return ApiGallerySuperCollectionUserRow(
+            galleryUser=(await self.gallery_user_from_model(gallerySuperCollectionUserRow.galleryUser)),
+            ownedTokenCount=gallerySuperCollectionUserRow.ownedTokenCount,
+            uniqueOwnedTokenCount=gallerySuperCollectionUserRow.uniqueOwnedTokenCount,
+            chosenOwnedTokens={address: (await self.collection_tokens_from_models(tokenMetadatas=chosenOwnedTokens)) for address, chosenOwnedTokens in  gallerySuperCollectionUserRow.chosenOwnedTokens.items()},
+            galleryUserBadges=galleryUserBadges
+        )
+
+    async def gallery_super_collection_user_row_list_response_from_model(self, gallerySuperCollectionUserRowListResponse: ListResponse[GallerySuperCollectionUserRow]) -> ApiListResponse[ApiGallerySuperCollectionUserRow]:
+        return ApiListResponse(
+            items=(await asyncio.gather(*[self.gallery_super_collection_user_row_from_model(gallerySuperCollectionUserRow=gallerySuperCollectionUserRow) for gallerySuperCollectionUserRow in gallerySuperCollectionUserRowListResponse.items])),
+            totalCount=gallerySuperCollectionUserRowListResponse.totalCount,
         )
 
     async def gallery_owned_collection_from_model(self, ownedCollection: GalleryOwnedCollection) -> ApiGalleryOwnedCollection:

@@ -24,6 +24,8 @@ from notd.api.endpoints_v1 import QueryCollectionTokensRequest
 from notd.api.endpoints_v1 import QueryCollectionTokensResponse
 from notd.api.endpoints_v1 import QueryCollectionUsersRequest
 from notd.api.endpoints_v1 import QueryCollectionUsersResponse
+from notd.api.endpoints_v1 import QuerySuperCollectionUsersRequest
+from notd.api.endpoints_v1 import QuerySuperCollectionUsersResponse
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenRequest
 from notd.api.endpoints_v1 import SubmitTreasureHuntForCollectionTokenResponse
 from notd.api.endpoints_v1 import TwitterLoginCallbackResponse
@@ -142,11 +144,11 @@ def create_api(galleryManager: GalleryManager, responseBuilder: ResponseBuilder)
         superCollectionOverlaps = await galleryManager.list_gallery_super_collection_overlaps(superCollectionName=superCollectionName, otherRegistryAddress=otherRegistryAddress)
         return ListGallerySuperCollectionOverlapsResponse(superCollectionOverlaps=(await responseBuilder.super_collection_overlaps_from_models(superCollectionOverlaps=superCollectionOverlaps)))
 
-    @router.post('/collections/{registryAddress}/users/query')
-    async def query_super_collection_users(registryAddress: str, request: QueryCollectionUsersRequest) -> QueryCollectionUsersResponse:
+    @router.post('/super-collections/{superCollectionName}/users/query')
+    async def query_super_collection_users(superCollectionName: str, request: QuerySuperCollectionUsersRequest) -> QuerySuperCollectionUsersResponse:
         limit = request.limit if request.limit is not None else 20
         offset = request.offset if request.offset is not None else 0
-        galleryUserRowListResponse = await galleryManager.query_collection_users(registryAddress=registryAddress, order=request.order, limit=limit, offset=offset)
-        return QueryCollectionUsersResponse(galleryUserRowListResponse=(await responseBuilder.gallery_user_row_list_response_from_model(galleryUserRowListResponse=galleryUserRowListResponse)))
+        gallerySuperCollectionUserRowListResponse = await galleryManager.query_super_collection_users(superCollectionName=superCollectionName, order=request.order, limit=limit, offset=offset)
+        return QuerySuperCollectionUsersResponse(galleryUserRowListResponse=(await responseBuilder.gallery_super_collection_user_row_list_response_from_model(gallerySuperCollectionUserRowListResponse=gallerySuperCollectionUserRowListResponse)))
 
     return router

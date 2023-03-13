@@ -519,6 +519,7 @@ class GalleryUser:
     registryAddress: str
     userProfile: Optional[UserProfile]
     twitterProfile: Optional[TwitterProfile]
+    tokenStaking: Optional[TokenStaking]
     joinDate: Optional[datetime.datetime]
 
 
@@ -652,3 +653,11 @@ class GalleryUserRow:
     uniqueOwnedTokenCount: int
     chosenOwnedTokens: List[TokenMetadata]
     galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
+
+@dataclasses.dataclass
+class GallerySuperCollectionUserRow:
+    galleryUser: GalleryUser
+    ownedTokenCount: int
+    uniqueOwnedTokenCount: int
+    chosenOwnedTokens: Dict[str, List[TokenMetadata]]
+    galleryBadgeHolders: Optional[Dict[str, List[GalleryBadgeHolder]]]
