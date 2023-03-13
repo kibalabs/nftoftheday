@@ -24,10 +24,8 @@ class TokenStakingManager:
         self.tokenQueue = tokenQueue
         self.tokenStakingProcessor = tokenStakingProcessor
 
-    async def update_token_stakings_deferred(self, stakingCollectionTokenIds: Set[Tuple[str, str]]) -> None:
-        if len(stakingCollectionTokenIds) == 0:
-            return
-        uniqueCollectionTokenIds = set(stakingCollectionTokenIds)
+    async def update_token_stakings_deferred(self, collectionTokenIds: Set[Tuple[str, str]]) -> None:
+        uniqueCollectionTokenIds = set(collectionTokenIds)
         messages = [UpdateTokenStakingMessageContent(registryAddress=registryAddress, tokenId=tokenId).to_message() for (registryAddress, tokenId) in uniqueCollectionTokenIds]
         await self.tokenQueue.send_messages(messages=messages)
 
@@ -51,12 +49,12 @@ class TokenStakingManager:
                 await self.saver.create_token_staking(retrievedTokenStaking=retrievedTokenStaking, connection=connection)
 
     async def update_token_stakings_for_all_collections_deferred(self) -> None:
-        for index, stakingAddress in enumerate(GALLERY_COLLECTIONS):
-            await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=stakingAddress).to_message(), delaySeconds=index*20)
+        for index, registryAddress in enumerate(GALLERY_COLLECTIONS):
+            await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=registryAddress).to_message(), delaySeconds=index*20)
 
     async def update_token_stakings_for_collection_deferred(self, address: str) -> None:
         await self.workQueue.send_message(message=UpdateTokenStakingsForCollectionMessageContent(address=address).to_message())
 
     async def update_token_stakings_for_collection(self, address: str) -> None:
-        stakingCollectionTokenIds = await self.tokenStakingProcessor.retrieve_collection_token_staking_ids(registryAddress=address)
-        await self.update_token_stakings_deferred(stakingCollectionTokenIds=stakingCollectionTokenIds)
+        collectionTokenIds = await self.tokenStakingProcessor.retrieve_collection_token_staking_ids(registryAddress=address)
+        await self.update_token_stakings_deferred(collectionTokenIds=collectionTokenIds)
