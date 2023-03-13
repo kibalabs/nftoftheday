@@ -519,7 +519,6 @@ class GalleryUser:
     registryAddress: str
     userProfile: Optional[UserProfile]
     twitterProfile: Optional[TwitterProfile]
-    tokenStaking: Optional[TokenStaking]
     joinDate: Optional[datetime.datetime]
 
 

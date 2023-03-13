@@ -377,7 +377,6 @@ class GalleryManager:
                 registryAddress=registryAddress,
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
-                tokenStaking=None,
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
             ownedTokenCount=userRow['ownedTokenCount'],
@@ -392,17 +391,15 @@ class GalleryManager:
         ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')  # type: ignore[no-untyped-call, var-annotated]
         uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')  # type: ignore[no-untyped-call]
         usersQueryBase = (
-            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate, TokenStakingsTable)
+            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
                 .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
-                .join(TokenStakingsTable, sqlalchemy.and_(TokenStakingsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId, TokenStakingsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.not_in(STAKING_ADDRESSES))
-                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, TokenStakingsTable.c.tokenStakingId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
-        print(usersQueryBase)
         usersQuery = usersQueryBase.limit(limit).offset(offset)
         if not order or order == 'TOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by(ownedCountColumn.desc())
@@ -458,7 +455,6 @@ class GalleryManager:
                 registryAddress=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress],
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
-                tokenStaking=token_staking_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
             ownedTokenCount=userRow['ownedTokenCount'],
