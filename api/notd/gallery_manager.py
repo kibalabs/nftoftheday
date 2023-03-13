@@ -318,7 +318,6 @@ class GalleryManager:
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
                 .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
-                .join(TokenStakingsTable, sqlalchemy.and_(TokenStakingsTable.c.tokenId == UserRegistryOrderedOwnershipsMaterializedView.c.tokenId, TokenStakingsTable.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.not_in(STAKING_ADDRESSES))
