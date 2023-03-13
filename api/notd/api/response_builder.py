@@ -18,11 +18,11 @@ from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
+from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserBadge
 from notd.api.models_v1 import ApiGalleryUserRow
-from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
@@ -50,10 +50,10 @@ from notd.model import CollectionOverlapSummary
 from notd.model import CollectionStatistics
 from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
+from notd.model import GallerySuperCollectionUserRow
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
-from notd.model import GallerySuperCollectionUserRow
 from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
 from notd.model import LatestAccountGm

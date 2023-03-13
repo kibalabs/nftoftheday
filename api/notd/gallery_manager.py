@@ -34,10 +34,10 @@ from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
 from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
+from notd.model import GallerySuperCollectionUserRow
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
-from notd.model import GallerySuperCollectionUserRow
 from notd.model import ListResponse
 from notd.model import Signature
 from notd.model import SuperCollectionEntry
@@ -386,8 +386,11 @@ class GalleryManager:
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=int(totalCountRow[0] if totalCountRow else 0))
 
-    async def query_super_collection_users(self, superCollectionName: str, order: Optional[str], limit: int, offset: int) -> ListResponse[GalleryUserRow]:
+    async def query_super_collection_users(self, superCollectionName: str, order: Optional[str], limit: int, offset: int) -> ListResponse[GallerySuperCollectionUserRow]:
         superCollectionAddresses = SUPER_COLLECTIONS.get(superCollectionName)
+        if not superCollectionAddresses or len(superCollectionAddresses) == 0:
+            emptyGallerySuperCollectionUserRow: List[GallerySuperCollectionUserRow] = []
+            return ListResponse(items=emptyGallerySuperCollectionUserRow, totalCount=0)
         ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')  # type: ignore[no-untyped-call, var-annotated]
         uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')  # type: ignore[no-untyped-call]
         usersQueryBase = (
@@ -446,9 +449,9 @@ class GalleryManager:
                 .where(GalleryBadgeHoldersView.c.ownerAddress.in_(ownerAddresses))
         )
         galleryBadgeHoldersResult = await self.retriever.database.execute(query=galleryBadgeHoldersQuery)
-        galleryBadgeHolders: Dict[str, Dict[str, List[GalleryBadgeHolder]]] = defaultdict(list)
+        galleryBadgeHolders: Dict[str, Dict[str, List[GalleryBadgeHolder]]] = defaultdict(lambda: defaultdict(list))
         for galleryBadgeHolderRow in galleryBadgeHoldersResult.mappings():
-            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersView.c.ownerAddress]][GalleryBadgeHoldersView.c.registryAddress].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
+            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersView.c.ownerAddress]][galleryBadgeHolderRow[GalleryBadgeHoldersView.c.registryAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
         items = [GallerySuperCollectionUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
