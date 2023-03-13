@@ -85,7 +85,7 @@ class BlockManager:
         logging.info(f'Found {len(collectionTokenIds)} changed tokens and {len(collectionAddresses)} changed collections in block #{blockNumber}')
         stakingCollectionTokenIds = {(transfer.registryAddress, transfer.tokenId) for transfer in processedBlock.retrievedTokenTransfers if (transfer.fromAddress in STAKING_ADDRESSES) or (transfer.toAddress in STAKING_ADDRESSES)}
         if not shouldSkipUpdatingStakings:
-            await self.tokenStakingManager.update_token_stakings_deferred(stakingCollectionTokenIds=stakingCollectionTokenIds)
+            await self.tokenStakingManager.update_token_stakings_deferred(collectionTokenIds=stakingCollectionTokenIds)
         if not shouldSkipUpdatingOwnerships:
             await self.ownershipManager.update_token_ownerships_deferred(collectionTokenIds=collectionTokenIds)
         if not shouldSkipProcessingTokens:
