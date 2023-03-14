@@ -11,6 +11,7 @@ from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.web3.eth_client import EthClientInterface
+from core.util.chain_util import normalize_address
 
 from notd.model import CREEPZ_STAKING_ADDRESS
 from notd.model import STAKING_ADDRESSES
@@ -40,6 +41,7 @@ class TokenStakingProcessor:
             ownerAddress = (await self.ethClient.call_function(toAddress=CREEPZ_STAKING_ADDRESS, contractAbi=self.creepzStakingContractAbi, functionAbi=self.creepzStakingOwnerOfFunctionAbi, arguments={'tokenId': int(tokenId), 'contractAddress': registryAddress}))[0]
         else:
             return None
+        ownerAddress = normalize_address(ownerAddress)
         latestTokenTransfers = await self.retriever.list_token_transfers(
                 fieldFilters=[
                     StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=registryAddress),
