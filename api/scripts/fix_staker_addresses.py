@@ -1,6 +1,7 @@
 import os
 import sys
 import asyncio
+import tqdm
 
 import logging
 from core.store.database import Database
@@ -19,7 +20,7 @@ async def fix_staker_address():
     await database.connect()
     async with saver.create_transaction() as connection:
         tokenStakings = await retriever.list_token_stakings()
-        for tokenStaking in tokenStakings:
+        for tokenStaking in tqdm.tqdm(tokenStakings):
             values = {
                 TokenStakingsTable.c.ownerAddress.key: normalize_address(tokenStaking.ownerAddress),
             }
