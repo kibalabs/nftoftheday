@@ -653,6 +653,7 @@ class GalleryUserRow:
     chosenOwnedTokens: List[TokenMetadata]
     galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
 
+
 @dataclasses.dataclass
 class GallerySuperCollectionUserRow:
     galleryUser: GalleryUser

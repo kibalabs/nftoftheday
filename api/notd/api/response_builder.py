@@ -391,7 +391,7 @@ class ResponseBuilder:
             galleryUserBadges=galleryUserBadges
         )
 
-    async def gallery_super_collection_user_row_list_response_from_model(self, gallerySuperCollectionUserRowListResponse: ListResponse[GallerySuperCollectionUserRow]) -> ApiListResponse[ApiGallerySuperCollectionUserRow]:
+    async def gallery_super_collection_user_row_list_response_from_model(self, gallerySuperCollectionUserRowListResponse: ListResponse[GallerySuperCollectionUserRow]) -> ApiListResponse[ApiGallerySuperCollectionUserRow]:  # pylint: disable=invalid-name
         return ApiListResponse(
             items=(await asyncio.gather(*[self.gallery_super_collection_user_row_from_model(gallerySuperCollectionUserRow=gallerySuperCollectionUserRow) for gallerySuperCollectionUserRow in gallerySuperCollectionUserRowListResponse.items])),
             totalCount=gallerySuperCollectionUserRowListResponse.totalCount,
