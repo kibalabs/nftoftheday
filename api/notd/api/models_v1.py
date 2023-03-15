@@ -197,15 +197,23 @@ class ApiGalleryUser(BaseModel):
     registryAddress: str
     userProfile: Optional[ApiUserProfile]
     twitterProfile: Optional[ApiTwitterProfile]
-    ownedTokenCount: int
-    uniqueOwnedTokenCount: int
     joinDate: Optional[datetime.datetime]
 
 
 class ApiGalleryUserRow(BaseModel):
     galleryUser: ApiGalleryUser
+    ownedTokenCount: int
+    uniqueOwnedTokenCount: int
     chosenOwnedTokens: List[ApiCollectionToken]
     galleryUserBadges: List[ApiGalleryUserBadge]
+
+
+class ApiGallerySuperCollectionUserRow(BaseModel):
+    galleryUser: ApiGalleryUser
+    ownedTokenCount: int
+    uniqueOwnedTokenCount: int
+    chosenOwnedTokens: Dict[str, List[ApiCollectionToken]]
+    galleryUserBadges: Dict[str, List[ApiGalleryUserBadge]]
 
 
 class ApiGalleryOwnedCollection(BaseModel):

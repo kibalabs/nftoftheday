@@ -18,6 +18,7 @@ from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
 from notd.api.models_v1 import ApiGalleryOwnedCollection
+from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
 from notd.api.models_v1 import ApiGalleryUserBadge
@@ -49,6 +50,7 @@ from notd.model import CollectionOverlapSummary
 from notd.model import CollectionStatistics
 from notd.model import GalleryBadgeHolder
 from notd.model import GalleryOwnedCollection
+from notd.model import GallerySuperCollectionUserRow
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
@@ -341,8 +343,6 @@ class ResponseBuilder:
             registryAddress=galleryUser.registryAddress,
             userProfile=(await self.user_profile_from_model(userProfile=galleryUser.userProfile)) if galleryUser.userProfile else None,
             twitterProfile=(await self.twitter_profile_from_model(twitterProfile=galleryUser.twitterProfile)) if galleryUser.twitterProfile else None,
-            ownedTokenCount=galleryUser.ownedTokenCount,
-            uniqueOwnedTokenCount=galleryUser.uniqueOwnedTokenCount,
             joinDate=galleryUser.joinDate,
         )
 
@@ -363,6 +363,8 @@ class ResponseBuilder:
     async def gallery_user_row_from_model(self, galleryUserRow: GalleryUserRow) -> ApiGalleryUserRow:
         return ApiGalleryUserRow(
             galleryUser=(await self.gallery_user_from_model(galleryUserRow.galleryUser)),
+            ownedTokenCount=galleryUserRow.ownedTokenCount,
+            uniqueOwnedTokenCount=galleryUserRow.uniqueOwnedTokenCount,
             chosenOwnedTokens=(await self.collection_tokens_from_models(tokenMetadatas=galleryUserRow.chosenOwnedTokens)),
             galleryUserBadges=(await self.gallery_user_badges_from_models(galleryBadgeHolders=galleryUserRow.galleryBadgeHolders) if galleryUserRow.galleryBadgeHolders else [])
         )
@@ -374,6 +376,25 @@ class ResponseBuilder:
         return ApiListResponse(
             items=(await asyncio.gather(*[self.gallery_user_row_from_model(galleryUserRow=galleryUserRow) for galleryUserRow in galleryUserRowListResponse.items])),
             totalCount=galleryUserRowListResponse.totalCount,
+        )
+
+    async def gallery_super_collection_user_row_from_model(self, gallerySuperCollectionUserRow: GallerySuperCollectionUserRow) -> ApiGallerySuperCollectionUserRow:
+        if gallerySuperCollectionUserRow.galleryBadgeHolders:
+            galleryUserBadges={address: (await self.gallery_user_badges_from_models(galleryBadgeHolders=galleryBadgeHolders)) for address, galleryBadgeHolders in gallerySuperCollectionUserRow.galleryBadgeHolders.items()}
+        else:
+            galleryUserBadges = {}
+        return ApiGallerySuperCollectionUserRow(
+            galleryUser=(await self.gallery_user_from_model(gallerySuperCollectionUserRow.galleryUser)),
+            ownedTokenCount=gallerySuperCollectionUserRow.ownedTokenCount,
+            uniqueOwnedTokenCount=gallerySuperCollectionUserRow.uniqueOwnedTokenCount,
+            chosenOwnedTokens={address: (await self.collection_tokens_from_models(tokenMetadatas=chosenOwnedTokens)) for address, chosenOwnedTokens in  gallerySuperCollectionUserRow.chosenOwnedTokens.items()},
+            galleryUserBadges=galleryUserBadges
+        )
+
+    async def gallery_super_collection_user_row_list_response_from_model(self, gallerySuperCollectionUserRowListResponse: ListResponse[GallerySuperCollectionUserRow]) -> ApiListResponse[ApiGallerySuperCollectionUserRow]:  # pylint: disable=invalid-name
+        return ApiListResponse(
+            items=(await asyncio.gather(*[self.gallery_super_collection_user_row_from_model(gallerySuperCollectionUserRow=gallerySuperCollectionUserRow) for gallerySuperCollectionUserRow in gallerySuperCollectionUserRowListResponse.items])),
+            totalCount=gallerySuperCollectionUserRowListResponse.totalCount,
         )
 
     async def gallery_owned_collection_from_model(self, ownedCollection: GalleryOwnedCollection) -> ApiGalleryOwnedCollection:
