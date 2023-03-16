@@ -27,6 +27,7 @@ from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import STAKING_ADDRESSES
 from notd.model import SUPER_COLLECTIONS
+from notd.model import COLLECTION_CREEPZ_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
@@ -404,22 +405,29 @@ class GalleryManager:
                 .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
-        if not order or order == 'TOKENCOUNT_DESC':
-            usersQuery = usersQuery.order_by(ownedCountColumn.desc())
-        elif order == 'TOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by(ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
-        elif order == 'UNIQUETOKENCOUNT_DESC':
-            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.desc())
-        elif order == 'UNIQUETOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
-        elif order == 'FOLLOWERCOUNT_DESC':
+        if not order:
+            address = superCollectionAddresses[0]
+            orderFilter = 'TOKENCOUNT_DESC'
+        else:
+            addressSpecificOrder = order.split('_', 1)
+            address = addressSpecificOrder[0]
+            orderFilter = addressSpecificOrder[1] 
+        if orderFilter == 'TOKENCOUNT_DESC':
+            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.desc())
+        elif orderFilter == 'TOKENCOUNT_ASC':
+            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
+        elif orderFilter == 'UNIQUETOKENCOUNT_DESC':
+            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), uniqueOwnedCountColumn.desc())
+        elif orderFilter == 'UNIQUETOKENCOUNT_ASC':
+            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), uniqueOwnedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
+        elif orderFilter == 'FOLLOWERCOUNT_DESC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
-        elif order == 'FOLLOWERCOUNT_ASC':
+        elif orderFilter == 'FOLLOWERCOUNT_ASC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
-        elif order == 'JOINDATE_DESC':
+        elif orderFilter == 'JOINDATE_DESC':
             usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.asc(), ownedCountColumn.desc())
-        elif order == 'JOINDATE_ASC':
+        elif orderFilter == 'JOINDATE_ASC':
             usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc(), ownedCountColumn.desc())
         else:
             raise BadRequestException('Unknown order')
