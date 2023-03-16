@@ -425,7 +425,12 @@ class GalleryManager:
             raise BadRequestException('Unknown order')
         usersResult = await self.retriever.database.execute(query=usersQuery)
         userRows = list(usersResult.mappings())
-        ownerAddresses = [userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress] for userRow in userRows]
+        registryOwnedTokenCount: Dict[str, Dict[str, int]] =  defaultdict(lambda: defaultdict(int))
+        registryUniqueOwnedTokenCount: Dict[str, Dict[str, int]] =  defaultdict(lambda: defaultdict(int))
+        for userRow in userRows:
+            registryOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]][userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress]] = userRow['ownedTokenCount']
+            registryUniqueOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]][userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress]]= userRow['uniqueOwnedTokenCount']
+        ownerAddresses = {userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress] for userRow in userRows}
         userCountsQuery = (
             sqlalchemy.select(sqlalchemyfunc.count(sqlalchemy.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))  # type: ignore[no-untyped-call]
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
@@ -449,9 +454,9 @@ class GalleryManager:
                 .where(GalleryBadgeHoldersView.c.ownerAddress.in_(ownerAddresses))
         )
         galleryBadgeHoldersResult = await self.retriever.database.execute(query=galleryBadgeHoldersQuery)
-        galleryBadgeHolders: Dict[str, Dict[str, List[GalleryBadgeHolder]]] = defaultdict(lambda: defaultdict(list))
+        galleryBadgeHolders: Dict[str, List[GalleryBadgeHolder]] = defaultdict(list)
         for galleryBadgeHolderRow in galleryBadgeHoldersResult.mappings():
-            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersView.c.ownerAddress]][galleryBadgeHolderRow[GalleryBadgeHoldersView.c.registryAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
+            galleryBadgeHolders[galleryBadgeHolderRow[GalleryBadgeHoldersView.c.ownerAddress]].append(gallery_badge_holder_from_row(galleryBadgeHolderRow))
         items = [GallerySuperCollectionUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
@@ -460,8 +465,8 @@ class GalleryManager:
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
-            ownedTokenCount=userRow['ownedTokenCount'],
-            uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'],
+            ownedTokenCount=registryOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
+            uniqueOwnedTokenCount=registryUniqueOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
         ) for userRow in userRows]

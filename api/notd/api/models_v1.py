@@ -210,10 +210,10 @@ class ApiGalleryUserRow(BaseModel):
 
 class ApiGallerySuperCollectionUserRow(BaseModel):
     galleryUser: ApiGalleryUser
-    ownedTokenCount: int
-    uniqueOwnedTokenCount: int
+    ownedTokenCount: Dict[str, int]
+    uniqueOwnedTokenCount: Dict[str, int]
     chosenOwnedTokens: Dict[str, List[ApiCollectionToken]]
-    galleryUserBadges: Dict[str, List[ApiGalleryUserBadge]]
+    galleryUserBadges: List[ApiGalleryUserBadge]
 
 
 class ApiGalleryOwnedCollection(BaseModel):

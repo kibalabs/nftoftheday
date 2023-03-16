@@ -657,7 +657,7 @@ class GalleryUserRow:
 @dataclasses.dataclass
 class GallerySuperCollectionUserRow:
     galleryUser: GalleryUser
-    ownedTokenCount: int
-    uniqueOwnedTokenCount: int
+    ownedTokenCount: Dict[str, int]
+    uniqueOwnedTokenCount: Dict[str, int]
     chosenOwnedTokens: Dict[str, List[TokenMetadata]]
-    galleryBadgeHolders: Optional[Dict[str, List[GalleryBadgeHolder]]]
+    galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
