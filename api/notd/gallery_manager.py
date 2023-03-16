@@ -27,7 +27,6 @@ from notd.collection_manager import CollectionManager
 from notd.model import COLLECTION_SPRITE_CLUB_ADDRESS
 from notd.model import STAKING_ADDRESSES
 from notd.model import SUPER_COLLECTIONS
-from notd.model import COLLECTION_CREEPZ_ADDRESS
 from notd.model import Airdrop
 from notd.model import CollectionAttribute
 from notd.model import CollectionOverlap
@@ -411,7 +410,7 @@ class GalleryManager:
         else:
             addressSpecificOrder = order.split('_', 1)
             address = addressSpecificOrder[0]
-            specificOrder = addressSpecificOrder[1] 
+            specificOrder = addressSpecificOrder[1]
         if specificOrder == 'TOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.desc())
         elif specificOrder == 'TOKENCOUNT_ASC':
