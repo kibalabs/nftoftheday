@@ -664,6 +664,6 @@ class GallerySuperCollectionUserRow:
 
 
 @dataclasses.dataclass
-class DailyMintedTokenCount(BaseModel):
+class MintedTokenCount():
     date: datetime.date
     mintedTokenCount: int

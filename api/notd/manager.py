@@ -39,7 +39,7 @@ from notd.model import BaseSponsoredToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
-from notd.model import DailyMintedTokenCount
+from notd.model import MintedTokenCount
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenListing
@@ -577,5 +577,15 @@ class NotdManager:
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def minted_token_count(self, currentDate: datetime.date, duration: str) -> List[DailyMintedTokenCount]:
-        return []
+    async def minted_token_count(self, currentDate: datetime.date, duration: str) -> List[MintedTokenCount]:
+        mintedTokenCount: List[MintedTokenCount] = [
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-7)), mintedTokenCount=20),
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-6)), mintedTokenCount=120),
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-5)), mintedTokenCount=220),
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-4)), mintedTokenCount=230),
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-3)), mintedTokenCount=20),
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-2)), mintedTokenCount=420),
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-1)), mintedTokenCount=120),
+            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now()), mintedTokenCount=200),
+            ]
+        return mintedTokenCount

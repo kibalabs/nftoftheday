@@ -5,7 +5,7 @@ from typing import List
 from core.util import date_util
 from fastapi import APIRouter
 
-from notd.api.models_v1 import ApiDailyMintedTokenCount
+from notd.api.models_v1 import ApiMintedTokenCount
 
 from notd.api.endpoints_v1 import CalculateCommonOwnersRequest
 from notd.api.endpoints_v1 import CalculateCommonOwnersResponse
@@ -258,18 +258,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def minted_token_count(request: MintedTokenCountRequest) -> MintedTokenCountResponse:
         currentDate = request.currentDate.replace(tzinfo=None) if request.currentDate else date_util.start_of_day()
         duration = request.duration
-        mintedTokenCount = await notdManager.minted_token_count(currentDate=currentDate, duration=duration)
-        mintedTokenCount: List[ApiDailyMintedTokenCount] = [
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-7)), mintedTokenCount=20),
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-6)), mintedTokenCount=120),
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-5)), mintedTokenCount=220),
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-4)), mintedTokenCount=230),
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-3)), mintedTokenCount=20),
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-2)), mintedTokenCount=420),
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-1)), mintedTokenCount=120),
-            ApiDailyMintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now()), mintedTokenCount=200),
-            ]
-        return MintedTokenCountResponse(mintedTokenCount=mintedTokenCount)
+        mintedTokenCounts = await notdManager.minted_token_count(currentDate=currentDate, duration=duration)
+        return MintedTokenCountResponse(mintedTokenCounts=(await responseBuilder.minted_token_count_from_models(mintedTokenCounts=mintedTokenCounts)))
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:
