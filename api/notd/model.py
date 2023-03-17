@@ -661,3 +661,9 @@ class GallerySuperCollectionUserRow:
     uniqueOwnedTokenCount: int
     chosenOwnedTokens: Dict[str, List[TokenMetadata]]
     galleryBadgeHolders: Optional[Dict[str, List[GalleryBadgeHolder]]]
+
+
+@dataclasses.dataclass
+class DailyMintedTokenCount(BaseModel):
+    date: datetime.date
+    mintedTokenCount: int

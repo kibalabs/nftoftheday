@@ -39,6 +39,7 @@ from notd.model import BaseSponsoredToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
+from notd.model import DailyMintedTokenCount
 from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenListing
@@ -575,3 +576,6 @@ class NotdManager:
 
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def minted_token_count(self, currentDate: datetime.date, duration: str) -> List[DailyMintedTokenCount]:
+        return []

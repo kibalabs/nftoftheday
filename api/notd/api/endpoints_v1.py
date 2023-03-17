@@ -18,6 +18,7 @@ from notd.api.models_v1 import ApiCollectionOverlapOwner
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
+from notd.api.models_v1 import ApiDailyMintedTokenCount
 from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGalleryToken
@@ -449,3 +450,10 @@ class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
 
 class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
+
+class MintedTokenCountRequest(BaseModel):
+    currentDate: datetime.datetime
+    duration: str
+
+class MintedTokenCountResponse(BaseModel):
+    mintedTokenCount: List[ApiDailyMintedTokenCount]
