@@ -10,8 +10,8 @@ from core.exceptions import BadRequestException
 from core.store.retriever import Direction
 from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
-from core.web3.eth_client import EthClientInterface
 from core.util.chain_util import normalize_address
+from core.web3.eth_client import EthClientInterface
 
 from notd.model import CREEPZ_STAKING_ADDRESS
 from notd.model import STAKING_ADDRESSES
