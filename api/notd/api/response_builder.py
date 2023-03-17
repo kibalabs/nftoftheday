@@ -513,5 +513,5 @@ class ResponseBuilder:
             mintedTokenCount=mintedTokenCount.mintedTokenCount
         )
 
-    async def minted_token_count_from_models(self, mintedTokenCounts: Sequence[MintedTokenCount]) -> List[ApiMintedTokenCount]:
+    async def minted_token_counts_from_models(self, mintedTokenCounts: Sequence[MintedTokenCount]) -> List[ApiMintedTokenCount]:
         return await asyncio.gather(*[self.minted_token_count_from_model(mintedTokenCount=mintedTokenCount) for mintedTokenCount in mintedTokenCounts])

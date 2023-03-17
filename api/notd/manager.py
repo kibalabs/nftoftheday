@@ -588,4 +588,20 @@ class NotdManager:
             MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-1)), mintedTokenCount=120),
             MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now()), mintedTokenCount=200),
             ]
+        print(currentDate)
+        print(date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=currentDate), days=-1))
+        print(duration)
+        transferDate = sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label("date")
+        query = (
+            sqlalchemy.select(
+                transferDate, 
+                sqlalchemyfunc.count(TokenTransfersTable.c.tokenId.distinct()).label("mintedTokenCount"))
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(BlocksTable.c.blockDate < currentDate)
+            .where(BlocksTable.c.blockDate >= date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=currentDate), days=-1))
+            .where(TokenTransfersTable.c.fromAddress == chain_util.BURN_ADDRESS)
+            .group_by(transferDate)
+        )
+        result = await self.retriever.database.execute(query=query)
+        print(list(result.mappings())) 
         return mintedTokenCount

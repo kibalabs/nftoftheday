@@ -253,7 +253,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
 
     @router.post('/minted-token-count', response_model=MintedTokenCountResponse)
     async def minted_token_count(request: MintedTokenCountRequest) -> MintedTokenCountResponse:
-        currentDate = request.currentDate.replace(tzinfo=None) if request.currentDate else date_util.start_of_day()
+        currentDate = date_util.start_of_day(dt=request.currentDate.replace(tzinfo=None)) if request.currentDate else date_util.start_of_day()
         duration = request.duration
         mintedTokenCounts = await notdManager.minted_token_count(currentDate=currentDate, duration=duration)
         return MintedTokenCountResponse(mintedTokenCounts=(await responseBuilder.minted_token_counts_from_models(mintedTokenCounts=mintedTokenCounts)))
