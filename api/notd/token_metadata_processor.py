@@ -123,7 +123,9 @@ class TokenMetadataProcessor():
     def _clean_potential_ipfs_url(ipfsUrl: Optional[str]) -> Optional[str]:
         return ipfsUrl.replace('ipfs://ipfs/', 'ipfs://').rstrip('/') if ipfsUrl else None
 
-    def _clean_potential_url(self, url: JSON1) -> Optional[str]:
+    def _clean_potential_url(self, url: Optional[JSON1]) -> Optional[str]:
+        if not url:
+            return None
         if not isinstance(url, str):
             if isinstance(url, list) and len(url) > 0:
                 url = url[0]  # type: ignore[assignment]
