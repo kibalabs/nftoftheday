@@ -577,7 +577,7 @@ class NotdManager:
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def minted_token_count(self, currentDate: datetime.date, duration: str) -> List[MintedTokenCount]:
+    async def minted_token_count(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
         mintedTokenCount: List[MintedTokenCount] = [
             MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-7)), mintedTokenCount=20),
             MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-6)), mintedTokenCount=120),
@@ -594,8 +594,8 @@ class NotdManager:
         transferDate = sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label("date")
         query = (
             sqlalchemy.select(
-                transferDate, 
-                sqlalchemyfunc.count(TokenTransfersTable.c.tokenId.distinct()).label("mintedTokenCount"))
+                transferDate,
+                sqlalchemyfunc.count(TokenTransfersTable.c.tokenId.distinct()).label("mintedTokenCount"))  # type: ignore[no-untyped-call]
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate < currentDate)
             .where(BlocksTable.c.blockDate >= date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=currentDate), days=-1))
@@ -603,5 +603,5 @@ class NotdManager:
             .group_by(transferDate)
         )
         result = await self.retriever.database.execute(query=query)
-        print(list(result.mappings())) 
+        print(list(result.mappings()))
         return mintedTokenCount
