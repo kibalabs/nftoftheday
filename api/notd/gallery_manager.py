@@ -382,7 +382,7 @@ class GalleryManager:
             ownedTokenCount=userRow['ownedTokenCount'],
             uniqueOwnedTokenCount=userRow['uniqueOwnedTokenCount'],
             chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
-            galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
+            galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress], []),
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=int(totalCountRow[0] if totalCountRow else 0))
 
@@ -393,15 +393,32 @@ class GalleryManager:
             return ListResponse(items=emptyGallerySuperCollectionUserRow, totalCount=0)
         ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')  # type: ignore[no-untyped-call, var-annotated]
         uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')  # type: ignore[no-untyped-call]
+        countQuery = (
+            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.not_in(STAKING_ADDRESSES))
+                .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
+        )
+        countResult = await self.retriever.database.execute(query=countQuery)
+        countRows = list(countResult.mappings())
+        registryOwnedTokenCount: Dict[str, Dict[str, int]] =  defaultdict(lambda: defaultdict(int))
+        registryUniqueOwnedTokenCount: Dict[str, Dict[str, int]] =  defaultdict(lambda: defaultdict(int))
+        for userRow in countRows:
+            registryOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]][userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress]] = userRow['ownedTokenCount']
+            registryUniqueOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]][userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress]]= userRow['uniqueOwnedTokenCount']
+        ownedCountColumn = sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity).label('ownedTokenCount')  # type: ignore[no-untyped-call]
+        uniqueOwnedCountColumn = sqlalchemyfunc.count(UserRegistryOrderedOwnershipsMaterializedView.c.tokenId).label('uniqueOwnedTokenCount')  # type: ignore[no-untyped-call]
+        minimumJoinDate = sqlalchemyfunc.min(UserRegistryFirstOwnershipsMaterializedView.c.joinDate).label('minimumJoinDate')  # type: ignore[no-untyped-call, var-annotated]
         usersQueryBase = (
-            sqlalchemy.select(ownedCountColumn, uniqueOwnedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+            sqlalchemy.select(ownedCountColumn, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserProfilesTable, TwitterProfilesTable, minimumJoinDate)
                 .join(UserProfilesTable, UserProfilesTable.c.address == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, isouter=True)
                 .join(TwitterProfilesTable, TwitterProfilesTable.c.twitterId == UserProfilesTable.c.twitterId, isouter=True)
                 .join(UserRegistryFirstOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryFirstOwnershipsMaterializedView.c.ownerAddress == UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryFirstOwnershipsMaterializedView.c.registryAddress == UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress), isouter=True)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.not_in(STAKING_ADDRESSES))
-                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryFirstOwnershipsMaterializedView.c.joinDate)
+                .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
         if not order:
@@ -414,29 +431,24 @@ class GalleryManager:
         if specificOrder == 'TOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.desc())
         elif specificOrder == 'TOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
+            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.asc(), minimumJoinDate.desc())
         elif specificOrder == 'UNIQUETOKENCOUNT_DESC':
             usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), uniqueOwnedCountColumn.desc())
         elif specificOrder == 'UNIQUETOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), uniqueOwnedCountColumn.asc(), UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc())
+            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), uniqueOwnedCountColumn.asc(), minimumJoinDate.desc())
         elif specificOrder == 'FOLLOWERCOUNT_DESC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         elif specificOrder == 'FOLLOWERCOUNT_ASC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
         elif specificOrder == 'JOINDATE_DESC':
-            usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.asc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(minimumJoinDate.asc(), ownedCountColumn.desc())
         elif specificOrder == 'JOINDATE_ASC':
-            usersQuery = usersQuery.order_by(UserRegistryFirstOwnershipsMaterializedView.c.joinDate.desc(), ownedCountColumn.desc())
+            usersQuery = usersQuery.order_by(minimumJoinDate.desc(), ownedCountColumn.desc())
         else:
             raise BadRequestException('Unknown order')
         usersResult = await self.retriever.database.execute(query=usersQuery)
         userRows = list(usersResult.mappings())
-        registryOwnedTokenCount: Dict[str, Dict[str, int]] =  defaultdict(lambda: defaultdict(int))
-        registryUniqueOwnedTokenCount: Dict[str, Dict[str, int]] =  defaultdict(lambda: defaultdict(int))
-        for userRow in userRows:
-            registryOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]][userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress]] = userRow['ownedTokenCount']
-            registryUniqueOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]][userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress]]= userRow['uniqueOwnedTokenCount']
         ownerAddresses = {userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress] for userRow in userRows}
         userCountsQuery = (
             sqlalchemy.select(sqlalchemyfunc.count(sqlalchemy.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))  # type: ignore[no-untyped-call]
@@ -467,15 +479,15 @@ class GalleryManager:
         items = [GallerySuperCollectionUserRow(
             galleryUser=GalleryUser(
                 address=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress],
-                registryAddress=userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress],
+                registryAddress=superCollectionName,#userRow[UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress],
                 userProfile=user_profile_from_row(userRow) if userRow and userRow[UserProfilesTable.c.userProfileId] else None,
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
-                joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
+                joinDate=userRow['minimumJoinDate'],
             ),
             ownedTokenCountMap=registryOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             uniqueOwnedTokenCountMap=registryUniqueOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             chosenOwnedTokensMap=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
-            galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
+            galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress], []),
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=int(totalCountRow[0] if totalCountRow else 0))
 
