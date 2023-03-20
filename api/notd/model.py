@@ -651,13 +651,13 @@ class GalleryUserRow:
     ownedTokenCount: int
     uniqueOwnedTokenCount: int
     chosenOwnedTokens: List[TokenMetadata]
-    galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
+    galleryBadgeHolders: List[GalleryBadgeHolder]
 
 
 @dataclasses.dataclass
 class GallerySuperCollectionUserRow:
     galleryUser: GalleryUser
-    ownedTokenCount: Dict[str, int]
-    uniqueOwnedTokenCount: Dict[str, int]
-    chosenOwnedTokens: Dict[str, List[TokenMetadata]]
-    galleryBadgeHolders: Optional[List[GalleryBadgeHolder]]
+    ownedTokenCountMap: Dict[str, int]
+    uniqueOwnedTokenCountMap: Dict[str, int]
+    chosenOwnedTokensMap: Dict[str, List[TokenMetadata]]
+    galleryBadgeHolders: List[GalleryBadgeHolder]

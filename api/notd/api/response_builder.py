@@ -381,9 +381,9 @@ class ResponseBuilder:
     async def gallery_super_collection_user_row_from_model(self, gallerySuperCollectionUserRow: GallerySuperCollectionUserRow) -> ApiGallerySuperCollectionUserRow:
         return ApiGallerySuperCollectionUserRow(
             galleryUser=(await self.gallery_user_from_model(gallerySuperCollectionUserRow.galleryUser)),
-            ownedTokenCount=dict(gallerySuperCollectionUserRow.ownedTokenCount.items()),
-            uniqueOwnedTokenCount=dict(gallerySuperCollectionUserRow.uniqueOwnedTokenCount.items()),
-            chosenOwnedTokens={address: (await self.collection_tokens_from_models(tokenMetadatas=chosenOwnedTokens)) for address, chosenOwnedTokens in  gallerySuperCollectionUserRow.chosenOwnedTokens.items()},
+            ownedTokenCountMap=dict(gallerySuperCollectionUserRow.ownedTokenCountMap.items()),
+            uniqueOwnedTokenCountMap=dict(gallerySuperCollectionUserRow.uniqueOwnedTokenCountMap.items()),
+            chosenOwnedTokensMap={address: (await self.collection_tokens_from_models(tokenMetadatas=chosenOwnedTokens)) for address, chosenOwnedTokens in  gallerySuperCollectionUserRow.chosenOwnedTokensMap.items()},
             galleryUserBadges=(await self.gallery_user_badges_from_models(galleryBadgeHolders=gallerySuperCollectionUserRow.galleryBadgeHolders) if gallerySuperCollectionUserRow.galleryBadgeHolders else [])
         )
 

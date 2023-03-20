@@ -472,9 +472,9 @@ class GalleryManager:
                 twitterProfile=twitter_profile_from_row(userRow) if userRow and userRow[TwitterProfilesTable.c.twitterProfileId] else None,
                 joinDate=userRow[UserRegistryFirstOwnershipsMaterializedView.c.joinDate],
             ),
-            ownedTokenCount=registryOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
-            uniqueOwnedTokenCount=registryUniqueOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
-            chosenOwnedTokens=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
+            ownedTokenCountMap=registryOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
+            uniqueOwnedTokenCountMap=registryUniqueOwnedTokenCount[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
+            chosenOwnedTokensMap=chosenTokens[userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]],
             galleryBadgeHolders=galleryBadgeHolders.get(userRow[UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress]),
         ) for userRow in userRows]
         return ListResponse(items=items, totalCount=int(totalCountRow[0] if totalCountRow else 0))
