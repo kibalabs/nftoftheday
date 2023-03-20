@@ -451,9 +451,9 @@ class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
 class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
 
-class MintedTokenCountRequest(BaseModel):
+class MintedTokenCountsRequest(BaseModel):
     currentDate: datetime.datetime
     duration: str
 
-class MintedTokenCountResponse(BaseModel):
+class MintedTokenCountsResponse(BaseModel):
     mintedTokenCounts: List[ApiMintedTokenCount]

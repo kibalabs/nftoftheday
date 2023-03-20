@@ -577,31 +577,18 @@ class NotdManager:
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def minted_token_count(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
-        mintedTokenCount: List[MintedTokenCount] = [
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-7)), mintedTokenCount=20),
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-6)), mintedTokenCount=120),
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-5)), mintedTokenCount=220),
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-4)), mintedTokenCount=230),
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-3)), mintedTokenCount=20),
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-2)), mintedTokenCount=420),
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now(days=-1)), mintedTokenCount=120),
-            MintedTokenCount(date=date_util.start_of_day(dt=date_util.datetime_from_now()), mintedTokenCount=200),
-            ]
-        print(currentDate)
-        print(date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=currentDate), days=-1))
-        print(duration)
+    async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
         transferDate = sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label("date")
         query = (
             sqlalchemy.select(
                 transferDate,
-                sqlalchemyfunc.count(TokenTransfersTable.c.tokenId.distinct()).label("mintedTokenCount"))  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId).label("mintedTokenCount"))  # type: ignore[no-untyped-call]
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
             .where(BlocksTable.c.blockDate < currentDate)
             .where(BlocksTable.c.blockDate >= date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=currentDate), days=-1))
             .where(TokenTransfersTable.c.fromAddress == chain_util.BURN_ADDRESS)
-            .group_by(transferDate)
+            .group_by(TokenTransfersTable.c.blockNumber, transferDate)
         )
         result = await self.retriever.database.execute(query=query)
-        print(list(result.mappings()))
-        return mintedTokenCount
+        mintedTokenCounts = [MintedTokenCount(date=date, mintedTokenCount=mintedTokenCount) for  date, mintedTokenCount in (list(result))]
+        return mintedTokenCounts
