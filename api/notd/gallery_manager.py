@@ -423,29 +423,22 @@ class GalleryManager:
                 .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
-        if not order:
-            address = superCollectionAddresses[0]
-            specificOrder = 'TOKENCOUNT_DESC'
-        else:
-            addressSpecificOrder = order.split('_', 1)
-            address = addressSpecificOrder[0]
-            specificOrder = addressSpecificOrder[1]
-        if specificOrder == 'TOKENCOUNT_DESC':
-            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.desc())
-        elif specificOrder == 'TOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), ownedCountColumn.asc(), minimumJoinDate.desc())
-        elif specificOrder == 'UNIQUETOKENCOUNT_DESC':
-            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), uniqueOwnedCountColumn.desc())
-        elif specificOrder == 'UNIQUETOKENCOUNT_ASC':
-            usersQuery = usersQuery.order_by((UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == address).desc(), uniqueOwnedCountColumn.asc(), minimumJoinDate.desc())
-        elif specificOrder == 'FOLLOWERCOUNT_DESC':
+        if not order or order == 'TOKENCOUNT_DESC':
+            usersQuery = usersQuery.order_by(ownedCountColumn.desc())
+        elif order == 'TOKENCOUNT_ASC':
+            usersQuery = usersQuery.order_by(ownedCountColumn.asc(), minimumJoinDate.desc())
+        elif order == 'UNIQUETOKENCOUNT_DESC':
+            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.desc())
+        elif order == 'UNIQUETOKENCOUNT_ASC':
+            usersQuery = usersQuery.order_by(uniqueOwnedCountColumn.asc(), minimumJoinDate.desc())
+        elif order == 'FOLLOWERCOUNT_DESC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).desc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
-        elif specificOrder == 'FOLLOWERCOUNT_ASC':
+        elif order == 'FOLLOWERCOUNT_ASC':
             usersQuery = usersQuery.order_by(sqlalchemyfunc.coalesce(TwitterProfilesTable.c.followerCount, 0).asc(), ownedCountColumn.desc())  # type: ignore[no-untyped-call]
         # NOTE(krishan711): joindate ordering is inverse because its displayed as time ago so oldest is highest
-        elif specificOrder == 'JOINDATE_DESC':
+        elif order == 'JOINDATE_DESC':
             usersQuery = usersQuery.order_by(minimumJoinDate.asc(), ownedCountColumn.desc())
-        elif specificOrder == 'JOINDATE_ASC':
+        elif order == 'JOINDATE_ASC':
             usersQuery = usersQuery.order_by(minimumJoinDate.desc(), ownedCountColumn.desc())
         else:
             raise BadRequestException('Unknown order')
