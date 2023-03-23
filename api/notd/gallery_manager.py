@@ -348,7 +348,6 @@ class GalleryManager:
         userCountsQuery = (
             sqlalchemy.select(sqlalchemyfunc.count(sqlalchemy.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))  # type: ignore[no-untyped-call]
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex <= 5)
         )
         userCountsResult = await self.retriever.database.execute(query=userCountsQuery)
         totalCountRow = userCountsResult.first()
@@ -357,6 +356,8 @@ class GalleryManager:
                 .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == TokenMetadatasTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.tokenId == TokenMetadatasTable.c.tokenId))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(ownerAddresses))
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex <= 5)
+                .order_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex.asc())
         )
         chosenTokensResult = await self.retriever.database.execute(query=chosenTokensQuery)
         chosenTokens: Dict[str, List[TokenMetadata]] = defaultdict(list)
@@ -418,6 +419,7 @@ class GalleryManager:
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.quantity > 0)
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.not_in(STAKING_ADDRESSES))
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress != chain_util.BURN_ADDRESS)
                 .group_by(UserProfilesTable.c.userProfileId, TwitterProfilesTable.c.twitterProfileId, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         usersQuery = usersQueryBase.limit(limit).offset(offset)
@@ -453,7 +455,6 @@ class GalleryManager:
         userCountsQuery = (
             sqlalchemy.select(sqlalchemyfunc.count(sqlalchemy.distinct(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)))  # type: ignore[no-untyped-call]
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
-            .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex <= 5)
         )
         userCountsResult = await self.retriever.database.execute(query=userCountsQuery)
         totalCountRow = userCountsResult.first()
@@ -462,6 +463,8 @@ class GalleryManager:
                 .join(UserRegistryOrderedOwnershipsMaterializedView, sqlalchemy.and_(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == TokenMetadatasTable.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.tokenId == TokenMetadatasTable.c.tokenId))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress.in_(superCollectionAddresses))
                 .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress.in_(ownerAddresses))
+                .where(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex <= 5)
+                .order_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerTokenIndex.asc())
         )
         chosenTokensResult = await self.retriever.database.execute(query=chosenTokensQuery)
         chosenTokens: Dict[str, Dict[str, List[TokenMetadata]]] = defaultdict(lambda: defaultdict(list))
