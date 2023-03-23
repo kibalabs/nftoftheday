@@ -289,17 +289,13 @@ class BlockProcessor:
             retrievedTokenTransfer.isSwap = isSwap
         # Calculate transaction value for either weth or eth
         transactionValue = int(transaction['value'])
-        print(transaction['hash'].hex(), 'transactionWethValues', transactionWethValues)
         if transactionValue == 0 and len(transactionWethValues) > 0:
             for address, wethValue in transactionWethValues:
                 if address in nonInterstitialToAddresses:
                     transactionValue += wethValue
-        print(transaction['hash'].hex(), 'transactionValue', transactionValue)
-        print(transaction['hash'].hex(), 'isMultiAddress', isMultiAddress)
         # Only calculate value for remaining
         if transactionValue > 0 and not isMultiAddress:
             valuedTransfers = [retrievedTokenTransfer for retrievedTokenTransfer in retrievedTokenTransfers if not retrievedTokenTransfer.isInterstitial and not retrievedTokenTransfer.isSwap and (contractAddress in MARKETPLACE_ADDRESSES or not retrievedTokenTransfer.isOutbound)]
-            print('valuedTransfers', valuedTransfers)
             for retrievedTokenTransfer in valuedTransfers:
                 retrievedTokenTransfer.value = int(transactionValue / len(valuedTransfers))
         return retrievedTokenTransfers
