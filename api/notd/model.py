@@ -667,18 +667,13 @@ class GalleryUserRow:
 @dataclasses.dataclass
 class GallerySuperCollectionUserRow:
     galleryUser: GalleryUser
-    ownedTokenCount: int
-    uniqueOwnedTokenCount: int
-    chosenOwnedTokens: Dict[str, List[TokenMetadata]]
-    galleryBadgeHolders: Optional[Dict[str, List[GalleryBadgeHolder]]]
+    ownedTokenCountMap: Dict[str, int]
+    uniqueOwnedTokenCountMap: Dict[str, int]
+    chosenOwnedTokensMap: Dict[str, List[TokenMetadata]]
+    galleryBadgeHolders: List[GalleryBadgeHolder]
 
 
 @dataclasses.dataclass
 class MintedTokenCount():
     date: datetime.date
     mintedTokenCount: int
-    ownedTokenCountMap: Dict[str, int]
-    uniqueOwnedTokenCountMap: Dict[str, int]
-    chosenOwnedTokensMap: Dict[str, List[TokenMetadata]]
-    galleryBadgeHolders: List[GalleryBadgeHolder]
-
