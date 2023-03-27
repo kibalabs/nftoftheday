@@ -578,17 +578,4 @@ class NotdManager:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
     async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
-        transferDate = sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label("date")
-        query = (
-            sqlalchemy.select(
-                transferDate,
-                sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId).label("mintedTokenCount"))  # type: ignore[no-untyped-call]
-            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .where(BlocksTable.c.blockDate < currentDate)
-            .where(BlocksTable.c.blockDate >= date_util.datetime_from_datetime(dt=date_util.start_of_day(dt=currentDate), days=-1))
-            .where(TokenTransfersTable.c.fromAddress == chain_util.BURN_ADDRESS)
-            .group_by(TokenTransfersTable.c.blockNumber, transferDate)
-        )
-        result = await self.retriever.database.execute(query=query)
-        mintedTokenCounts = [MintedTokenCount(date=date, mintedTokenCount=mintedTokenCount) for  date, mintedTokenCount in (list(result))]
-        return mintedTokenCounts
+        pass

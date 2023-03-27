@@ -402,7 +402,7 @@ class Saver(CoreSaver):
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds)).returning(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId)
         await self._execute(query=query, connection=connection)
 
-    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
+    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, mintCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
@@ -411,6 +411,7 @@ class Saver(CoreSaver):
             CollectionHourlyActivitiesTable.c.address.key: address,
             CollectionHourlyActivitiesTable.c.date.key: date,
             CollectionHourlyActivitiesTable.c.transferCount.key: transferCount,
+            CollectionHourlyActivitiesTable.c.mintCount.key: mintCount,
             CollectionHourlyActivitiesTable.c.saleCount.key: saleCount,
             CollectionHourlyActivitiesTable.c.totalValue.key: totalValue,
             CollectionHourlyActivitiesTable.c.minimumValue.key: minimumValue,
@@ -427,6 +428,7 @@ class Saver(CoreSaver):
             address=address,
             date=date,
             transferCount=transferCount,
+            mintCount=mintCount,
             saleCount=saleCount,
             totalValue=totalValue,
             minimumValue=minimumValue,
@@ -434,7 +436,7 @@ class Saver(CoreSaver):
             averageValue=averageValue,
         )
 
-    async def update_collection_hourly_activity(self, collectionActivityId: int, address: Optional[str], date: Optional[datetime.datetime], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_hourly_activity(self, collectionActivityId: int, address: Optional[str], date: Optional[datetime.datetime], transferCount: Optional[int] = None, mintCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
         if address is not None:
             values[CollectionHourlyActivitiesTable.c.address.key] = address
@@ -442,6 +444,8 @@ class Saver(CoreSaver):
             values[CollectionHourlyActivitiesTable.c.date.key] = date
         if transferCount is not None:
             values[CollectionHourlyActivitiesTable.c.transferCount.key] = transferCount
+        if mintCount is not None:
+            values[CollectionHourlyActivitiesTable.c.mintCount.key] = mintCount
         if saleCount is not None:
             values[CollectionHourlyActivitiesTable.c.saleCount.key] = saleCount
         if totalValue is not None:
@@ -457,7 +461,7 @@ class Saver(CoreSaver):
         query = CollectionHourlyActivitiesTable.update().where(CollectionHourlyActivitiesTable.c.collectionActivityId == collectionActivityId).values(values).returning(CollectionHourlyActivitiesTable.c.collectionActivityId)
         await self._execute(query=query, connection=connection)
 
-    async def create_collection_total_activity(self, address: str, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
+    async def create_collection_total_activity(self, address: str, transferCount: int, saleCount: int, totalValue: int, mintCount: int, minimumValue: int, maximumValue: int, averageValue: int, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
@@ -465,6 +469,7 @@ class Saver(CoreSaver):
             CollectionTotalActivitiesTable.c.updatedDate.key: updatedDate,
             CollectionTotalActivitiesTable.c.address.key: address,
             CollectionTotalActivitiesTable.c.transferCount.key: transferCount,
+            CollectionTotalActivitiesTable.c.mintCount.key: mintCount,
             CollectionTotalActivitiesTable.c.saleCount.key: saleCount,
             CollectionTotalActivitiesTable.c.totalValue.key: totalValue,
             CollectionTotalActivitiesTable.c.minimumValue.key: minimumValue,
@@ -480,6 +485,7 @@ class Saver(CoreSaver):
             updatedDate=updatedDate,
             address=address,
             transferCount=transferCount,
+            mintCount=mintCount,
             saleCount=saleCount,
             totalValue=totalValue,
             minimumValue=minimumValue,
@@ -487,12 +493,14 @@ class Saver(CoreSaver):
             averageValue=averageValue,
         )
 
-    async def update_collection_total_activity(self, collectionTotalActivityId: int, address: Optional[str], transferCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_collection_total_activity(self, collectionTotalActivityId: int, address: Optional[str], transferCount: Optional[int] = None, mintCount: Optional[int] = None, saleCount: Optional[int] = None, totalValue: Optional[int] = None, minimumValue: Optional[int] = None, maximumValue: Optional[int] = None, averageValue: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
         if address is not None:
             values[CollectionTotalActivitiesTable.c.address.key] = address
         if transferCount is not None:
             values[CollectionTotalActivitiesTable.c.transferCount.key] = transferCount
+        if mintCount is not None:
+            values[CollectionTotalActivitiesTable.c.mintCount.key] = mintCount
         if saleCount is not None:
             values[CollectionTotalActivitiesTable.c.saleCount.key] = saleCount
         if totalValue is not None:
