@@ -9,6 +9,7 @@ from typing import Optional
 from typing import Sequence
 
 import sqlalchemy
+from core.exceptions import BadRequestException
 from core.exceptions import InternalServerErrorException
 from core.exceptions import NotFoundException
 from core.queues.message_queue import MessageQueue
@@ -578,4 +579,28 @@ class NotdManager:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
     async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
-        pass
+        if duration == "7_DAYS":
+            date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
+            endDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
+        elif duration == '30_DAYS':
+            date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
+            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-30)
+        elif duration == '24_HOURS':
+            date = CollectionHourlyActivitiesTable.c.date.label('date')
+            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
+        elif duration == '12_HOURS':
+            date = CollectionHourlyActivitiesTable.c.date.label('date')
+            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
+        else:
+            raise BadRequestException('Unknown duration')
+        mintedTokenCount = sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.mintCount).label('mintedTokenCount') # type: ignore[no-untyped-call, var-annotated]
+        query = (
+            sqlalchemy.select(date, mintedTokenCount)
+            .where(CollectionHourlyActivitiesTable.c.date >= endDate)
+            .where(CollectionHourlyActivitiesTable.c.date < currentDate)
+            .group_by(date)
+            .order_by(date.desc())
+        )
+        result = await self.retriever.database.execute(query=query)
+        mintedTokenCounts = [MintedTokenCount(date=day['date'], mintedTokenCount=day['mintedTokenCount']) for day in result.mappings()]
+        return mintedTokenCounts
