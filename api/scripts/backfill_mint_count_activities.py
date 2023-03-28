@@ -40,7 +40,7 @@ async def backfill_collection_activities():
     await tokenQueue.connect()
     query = (
         sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, CollectionHourlyActivitiesTable.c.date)
-        .where(CollectionHourlyActivitiesTable.c.mintCount == 0)
+        .where(CollectionHourlyActivitiesTable.c.mintCount.is_(None))
     )
     result = await database.execute(query=query)
     registryDatePairs = list(result)
