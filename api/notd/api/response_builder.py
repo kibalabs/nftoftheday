@@ -35,6 +35,7 @@ from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenStaking
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
+from notd.api.models_v1 import ApiTrendingCollection
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
 from notd.model import AccountCollectionGm
@@ -69,6 +70,7 @@ from notd.model import TokenMultiOwnership
 from notd.model import TokenStaking
 from notd.model import TokenTransfer
 from notd.model import TradedToken
+from notd.model import TrendingCollection
 from notd.model import TwitterProfile
 from notd.model import UserProfile
 from notd.store.retriever import Retriever
@@ -500,3 +502,15 @@ class ResponseBuilder:
 
     async def collection_overlap_owners_from_models(self, collectionOverlapOwners: Sequence[CollectionOverlapOwner]) -> List[ApiCollectionOverlapOwner]:
         return await asyncio.gather(*[self.collection_overlap_owner_from_model(collectionOverlapOwner=collectionOverlapOwner) for collectionOverlapOwner in collectionOverlapOwners])
+
+    async def trending_collection_from_model(self, trendingCollection: TrendingCollection) -> ApiTrendingCollection:
+        return ApiTrendingCollection(
+            registryAddress=await self.collection_from_address(address=trendingCollection.registryAddress),
+            totalSaleCount=trendingCollection.totalSaleCount,
+            totalVolume=trendingCollection.totalVolume,
+            previousSaleCount=trendingCollection.previousSaleCount,
+            previousTotalVolume=trendingCollection.previousTotalVolume,
+        )
+
+    async def trending_collections_from_models(self, trendingCollections: Sequence[TrendingCollection]) -> List[ApiTrendingCollection]:
+        return await asyncio.gather(*[self.trending_collection_from_model(trendingCollection=trendingCollection) for trendingCollection in trendingCollections])

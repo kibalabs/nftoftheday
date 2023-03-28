@@ -288,3 +288,11 @@ class ApiSuperCollectionOverlap(BaseModel):
     otherRegistryAddress: str
     otherRegistryTokenCount: int
     registryTokenCountMap: Dict[str, int]
+
+
+class ApiTrendingCollection(BaseModel):
+    registryAddress: ApiCollection
+    previousSaleCount: str
+    previousTotalVolume: str
+    totalVolume: str
+    totalSaleCount: str

@@ -34,6 +34,8 @@ from notd.api.endpoints_v1 import RetrieveRandomTransferResponse
 from notd.api.endpoints_v1 import RetrieveSponsoredTokenResponse
 from notd.api.endpoints_v1 import RetrieveTransactionCountRequest
 from notd.api.endpoints_v1 import RetrieveTransactionCountResponse
+from notd.api.endpoints_v1 import RetrieveTrendingCollectionRequest
+from notd.api.endpoints_v1 import RetrieveTrendingCollectionResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
@@ -248,6 +250,12 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         date = request.date.replace(tzinfo=None) if request.date else None
         ownerAddresses = await notdManager.calculate_common_owners(registryAddresses=request.registryAddresses, tokenIds=request.tokenIds, date=date)
         return CalculateCommonOwnersResponse(ownerAddresses=ownerAddresses)
+
+    @router.post('/collections/retrieve-trending', response_model=RetrieveTrendingCollectionResponse)
+    async def retrieve_trending_collections(request: RetrieveTrendingCollectionRequest) -> RetrieveTrendingCollectionResponse:
+        currentDate = request.currentDate.replace(tzinfo=None) if request.currentDate else date_util.start_of_day()
+        trendingCollections = await notdManager.retrieve_trending_collections(currentDate=currentDate, duration=request.duration, order=request.order)
+        return RetrieveTrendingCollectionResponse(trendingCollections=(await responseBuilder.trending_collections_from_models(trendingCollections=trendingCollections)))
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:

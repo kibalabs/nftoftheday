@@ -669,3 +669,12 @@ class GallerySuperCollectionUserRow:
     uniqueOwnedTokenCountMap: Dict[str, int]
     chosenOwnedTokensMap: Dict[str, List[TokenMetadata]]
     galleryBadgeHolders: List[GalleryBadgeHolder]
+
+
+@dataclasses.dataclass
+class TrendingCollection:
+    registryAddress: str
+    previousSaleCount: str
+    previousTotalVolume: str
+    totalVolume: str
+    totalSaleCount: str

@@ -9,6 +9,7 @@ from typing import Optional
 from typing import Sequence
 
 import sqlalchemy
+from core.exceptions import BadRequestException
 from core.exceptions import InternalServerErrorException
 from core.exceptions import NotFoundException
 from core.queues.message_queue import MessageQueue
@@ -46,6 +47,7 @@ from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TradedToken
+from notd.model import TrendingCollection
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -575,3 +577,56 @@ class NotdManager:
 
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def retrieve_trending_collections(self, currentDate: datetime.datetime, duration: Optional[str] = None, order: Optional[str] = None) -> List[TrendingCollection]:
+        if not duration or  duration == "7_DAYS":
+            endDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
+            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, days=-7)
+        elif duration == '30_DAYS':
+            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-30)
+            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, days=-30)
+        elif duration == '24_HOURS':
+            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
+            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, hours=-24)
+        elif duration == '12_HOURS':
+            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
+            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, hours=-12)
+        else:
+            raise BadRequestException('Unknown duration')
+        query = (
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount')) # type: ignore[no-untyped-call, var-annotated]
+            .where(CollectionHourlyActivitiesTable.c.date >= endDate)
+            .where(CollectionHourlyActivitiesTable.c.date < currentDate)
+            .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
+            .group_by(CollectionHourlyActivitiesTable.c.address)
+        )
+        if not order or order == "TOTAL_VALUE":
+            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call, var-annotated]
+        elif order == "TOTAL_SALES":
+            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).desc()) # type: ignore[no-untyped-call, var-annotated]
+        query = query.limit(9)
+        result = await self.retriever.database.execute(query=query)
+        trendingCollectionRows = list(result.mappings())
+        currentTrendingCollections = {trendingCollectionRow['address']: (trendingCollectionRow['totalSalesCount'], trendingCollectionRow['totalTransferCount']) for trendingCollectionRow in trendingCollectionRows}
+        addresses = list(currentTrendingCollections.keys())
+        previousPeriodQuery = (
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount')) # type: ignore[no-untyped-call, var-annotated]
+            .where(CollectionHourlyActivitiesTable.c.date >= previousPeriodEndDate)
+            .where(CollectionHourlyActivitiesTable.c.date < endDate)
+            .where(CollectionHourlyActivitiesTable.c.address.in_(addresses))
+            .group_by(CollectionHourlyActivitiesTable.c.address)
+        )
+        previousPeriodResult = await self.retriever.database.execute(query=previousPeriodQuery)
+        previousPeriod = list(previousPeriodResult.mappings())
+        previousPeriodValues = {previousPeriodRow['address']: (previousPeriodRow['totalSalesCount'], previousPeriodRow['totalTransferCount']) for previousPeriodRow in previousPeriod}
+        #NOTE(Femi-Ogunkola): Find better way to previous value
+        trendingCollections = [
+            TrendingCollection(
+                registryAddress=address,
+                totalSaleCount=totalSaleCount,
+                totalVolume=totalVolume,
+                previousSaleCount=str(previousPeriodValues.get(address, [0, 0])[0]),
+                previousTotalVolume=str(previousPeriodValues.get(address, [0, 0])[1]),
+            ) for address, (totalSaleCount, totalVolume) in currentTrendingCollections.items()
+            ]
+        return trendingCollections
