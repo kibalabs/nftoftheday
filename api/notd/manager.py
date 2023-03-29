@@ -601,9 +601,9 @@ class NotdManager:
             .group_by(CollectionHourlyActivitiesTable.c.address)
         )
         if not order or order == "TOTAL_VALUE":
-            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call, var-annotated]
+            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
         elif order == "TOTAL_SALES":
-            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).desc()) # type: ignore[no-untyped-call, var-annotated]
+            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).desc()) # type: ignore[no-untyped-call]
         query = query.limit(9)
         result = await self.retriever.database.execute(query=query)
         trendingCollectionRows = list(result.mappings())
