@@ -619,7 +619,7 @@ class NotdManager:
         previousPeriodResult = await self.retriever.database.execute(query=previousPeriodQuery)
         previousPeriod = list(previousPeriodResult.mappings())
         previousPeriodValues = {previousPeriodRow['address']: (previousPeriodRow['totalSalesCount'], previousPeriodRow['totalTransferCount']) for previousPeriodRow in previousPeriod}
-        #NOTE(Femi-Ogunkola): Find better way to previous value
+        #NOTE(Femi-Ogunkola): Find better way to calculate previousSaleCount and previousTotalCount
         trendingCollections = [
             TrendingCollection(
                 registryAddress=address,
