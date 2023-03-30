@@ -581,26 +581,37 @@ class NotdManager:
     async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
         if duration == "7_DAYS":
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
-            endDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-6)
+            validDateValue = [date for date in date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True)]
         elif duration == '30_DAYS':
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
-            endDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
+            validDateValue = [date for date in date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True)]
         elif duration == '24_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
-            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
+            dateIntervals = [dateInterval for dateInterval in date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate)]
+            validDateValue = [date for date,_ in dateIntervals]
         elif duration == '12_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
-            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
+            dateIntervals = [dateInterval for dateInterval in date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate)]
+            validDateValue = [date for date,_ in dateIntervals]
         else:
             raise BadRequestException('Unknown duration')
-        mintedTokenCount = sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.mintCount).label('mintedTokenCount') # type: ignore[no-untyped-call, var-annotated]
         query = (
-            sqlalchemy.select(date, mintedTokenCount)
-            .where(CollectionHourlyActivitiesTable.c.date >= endDate)
-            .where(CollectionHourlyActivitiesTable.c.date < currentDate)
+            sqlalchemy.select(date, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.mintCount).label('count'))
+            .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
+            .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .group_by(date)
             .order_by(date.desc())
         )
         result = await self.retriever.database.execute(query=query)
-        mintedTokenCounts = [MintedTokenCount(date=day['date'], mintedTokenCount=day['mintedTokenCount']) for day in result.mappings()]
+        dateCountDict = {dateCount['date']: dateCount['count'] for dateCount in result.mappings()}
+        mintedTokenCounts: List[MintedTokenCount] = []
+        for date in validDateValue:
+            if date in dateCountDict.keys():
+                mintedTokenCounts += [MintedTokenCount(date=date, count=dateCountDict[date])]
+            else:
+                mintedTokenCounts += [MintedTokenCount(date=date, count=0)]
         return mintedTokenCounts
