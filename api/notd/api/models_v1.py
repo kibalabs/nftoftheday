@@ -291,4 +291,4 @@ class ApiSuperCollectionOverlap(BaseModel):
 
 class ApiMintedTokenCount(BaseModel):
     date: datetime.date
-    mintedTokenCount: int
+    mintedTokenCount: Optional[int]
