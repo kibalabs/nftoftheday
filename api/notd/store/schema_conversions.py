@@ -167,7 +167,7 @@ def collection_activity_from_row(rowMapping: RowMapping) -> CollectionHourlyActi
         address=rowMapping[CollectionHourlyActivitiesTable.c.address],
         date=rowMapping[CollectionHourlyActivitiesTable.c.date],
         transferCount=int(rowMapping[CollectionHourlyActivitiesTable.c.transferCount]),
-        mintCount=rowMapping[CollectionHourlyActivitiesTable.c.mintCount],
+        mintCount=int(rowMapping[CollectionHourlyActivitiesTable.c.mintCount]),
         saleCount=int(rowMapping[CollectionHourlyActivitiesTable.c.saleCount]),
         totalValue=int(rowMapping[CollectionHourlyActivitiesTable.c.totalValue]),
         minimumValue=int(rowMapping[CollectionHourlyActivitiesTable.c.minimumValue]),
