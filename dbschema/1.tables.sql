@@ -178,7 +178,7 @@ CREATE TABLE tbl_collection_hourly_activities (
     address TEXT NOT NULL,
     date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     transfer_count NUMERIC(256, 0) NOT NULL,
-    mint_count NUMERIC(256, 0),
+    mint_count NUMERIC(256, 0) NOT NULL,
     sale_count NUMERIC(256, 0) NOT NULL,
     total_value NUMERIC(256, 0) NOT NULL,
     minimum_value NUMERIC(256, 0) NOT NULL,
