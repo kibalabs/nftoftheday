@@ -506,7 +506,7 @@ class ResponseBuilder:
     async def minted_token_count_from_model(self, mintedTokenCount: MintedTokenCount) -> ApiMintedTokenCount:
         return ApiMintedTokenCount(
             date=mintedTokenCount.date,
-            mintedTokenCount=mintedTokenCount.mintedTokenCount
+            mintedTokenCount=mintedTokenCount.mintedTokenCount or 0
         )
 
     async def minted_token_counts_from_models(self, mintedTokenCounts: Sequence[MintedTokenCount]) -> List[ApiMintedTokenCount]:

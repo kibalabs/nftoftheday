@@ -279,7 +279,7 @@ class RetrievedCollectionHourlyActivity:
     date: datetime.datetime
     transferCount: int
     saleCount: int
-    mintCount: int
+    mintCount: Optional[int]
     totalValue: int
     minimumValue: int
     maximumValue: int
@@ -320,7 +320,7 @@ class CollectionDailyActivity:
 class RetrievedCollectionTotalActivity:
     address: str
     transferCount: int
-    mintCount: int
+    mintCount: Optional[int]
     saleCount: int
     totalValue: int
     minimumValue: int

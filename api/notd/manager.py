@@ -584,7 +584,7 @@ class NotdManager:
             endDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
         elif duration == '30_DAYS':
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
-            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-30)
+            endDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
         elif duration == '24_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
