@@ -63,7 +63,7 @@ class CollectionActivityProcessor:
             totalValue += collectionHourlyActivity.totalValue
             saleCount += collectionHourlyActivity.saleCount
             transferCount += collectionHourlyActivity.transferCount
-            mintCount += collectionHourlyActivity.mintCount
+            mintCount += collectionHourlyActivity.mintCount or 0
             maximumValue = max(maximumValue, collectionHourlyActivity.maximumValue)
             minimumValue = min(minimumValue, collectionHourlyActivity.minimumValue) if minimumValue > 0 else collectionHourlyActivity.minimumValue
         averageValue = int(totalValue / saleCount) if saleCount > 0 else 0
