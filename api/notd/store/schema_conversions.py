@@ -183,7 +183,7 @@ def collection_total_activity_from_row(rowMapping: RowMapping) -> CollectionTota
         updatedDate=rowMapping[CollectionTotalActivitiesTable.c.updatedDate],
         address=rowMapping[CollectionTotalActivitiesTable.c.address],
         transferCount=int(rowMapping[CollectionTotalActivitiesTable.c.transferCount]),
-        mintCount=rowMapping[CollectionTotalActivitiesTable.c.mintCount],
+        mintCount=int(rowMapping[CollectionTotalActivitiesTable.c.mintCount]),
         saleCount=int(rowMapping[CollectionTotalActivitiesTable.c.saleCount]),
         totalValue=int(rowMapping[CollectionTotalActivitiesTable.c.totalValue]),
         minimumValue=int(rowMapping[CollectionTotalActivitiesTable.c.minimumValue]),
