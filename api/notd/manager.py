@@ -579,28 +579,29 @@ class NotdManager:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
     async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
+        currentDate = date_util.start_of_day(dt=currentDate)
         if duration == "7_DAYS":
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-6)
-            validDateValue = [date for date in date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True)]
+            validDateValue = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '30_DAYS':
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
-            validDateValue = [date for date in date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True)]
+            validDateValue = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '24_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
-            dateIntervals = [dateInterval for dateInterval in date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate)]
+            dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
             validDateValue = [date for date,_ in dateIntervals]
         elif duration == '12_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
-            dateIntervals = [dateInterval for dateInterval in date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate)]
+            dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
             validDateValue = [date for date,_ in dateIntervals]
         else:
             raise BadRequestException('Unknown duration')
         query = (
-            sqlalchemy.select(date, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.mintCount).label('count'))
+            sqlalchemy.select(date, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.mintCount).label('count')) # type: ignore[no-untyped-call, var-annotated]
             .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .group_by(date)
