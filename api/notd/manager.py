@@ -612,13 +612,7 @@ class NotdManager:
         for validDate in validDates:
             validDatetime = datetime.datetime.combine(validDate, datetime.datetime.min.time()) if isinstance(validDate, datetime.date) else validDate
             if validDate in dateCountDict.keys():
-<<<<<<< HEAD
                 mintedTokenCounts += [MintedTokenCount(date=validDatetime, count=dateCountDict[validDate])]
-=======
-                #NOTE(Femi-Ogunkola): Remove if statement once backfilling is complete
-                count = dateCountDict[validDate] if dateCountDict[validDate] else 0
-                mintedTokenCounts += [MintedTokenCount(date=validDatetime, count=count)]
->>>>>>> main
             else:
                 mintedTokenCounts += [MintedTokenCount(date=validDatetime, count=0)]
         return mintedTokenCounts
