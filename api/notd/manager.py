@@ -580,24 +580,25 @@ class NotdManager:
 
     async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
         currentDate = date_util.start_of_day(dt=currentDate)
+        validDateValue: List[datetime.date] = []
         if duration == "7_DAYS":
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-6)
-            validDateValue: List[datetime.date] = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
+            validDateValue = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '30_DAYS':
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
-            validDateValue: List[datetime.date] = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
+            validDateValue = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '24_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
             dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
-            validDateValue: List[datetime.date] = [date for date,_ in dateIntervals]
+            validDateValue = [date for date,_ in dateIntervals]
         elif duration == '12_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
             dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
-            validDateValue: List[datetime.date] = [date for date,_ in dateIntervals]
+            validDateValue = [date for date,_ in dateIntervals]
         else:
             raise BadRequestException('Unknown duration')
         query = (
@@ -610,9 +611,9 @@ class NotdManager:
         result = await self.retriever.database.execute(query=query)
         dateCountDict = {dateCount['date']: dateCount['count'] for dateCount in result.mappings()}
         mintedTokenCounts: List[MintedTokenCount] = []
-        for date in validDateValue:
+        for date in validDateValue: # type: ignore[assignment]
             if date in dateCountDict.keys():
-                mintedTokenCounts += [MintedTokenCount(date=date, count=dateCountDict[date])]
+                mintedTokenCounts += [MintedTokenCount(date=date, count=dateCountDict[date])] # type: ignore[arg-type]
             else:
-                mintedTokenCounts += [MintedTokenCount(date=date, count=0)]
+                mintedTokenCounts += [MintedTokenCount(date=date, count=0)] # type: ignore[arg-type]
         return mintedTokenCounts
