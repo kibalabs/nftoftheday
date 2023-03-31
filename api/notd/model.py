@@ -7,7 +7,6 @@ from typing import Generic
 from typing import List
 from typing import Optional
 from typing import TypeVar
-from typing import Union
 
 from core.util import date_util
 from core.util.typing_util import JSON
@@ -676,5 +675,5 @@ class GallerySuperCollectionUserRow:
 
 @dataclasses.dataclass
 class MintedTokenCount:
-    date: Union[datetime.datetime, datetime.date]
+    date: datetime.datetime
     count: int
