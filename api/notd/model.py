@@ -681,6 +681,8 @@ class TrendingCollection:
     totalVolume: str
     totalSaleCount: str
 
+
+@dataclasses.dataclass
 class MintedTokenCount:
     date: datetime.datetime
     count: int
