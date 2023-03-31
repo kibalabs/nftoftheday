@@ -579,10 +579,9 @@ class NotdManager:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
     async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
-        currentDate = date_util.start_of_day(dt=currentDate)
         if duration == "7_DAYS":
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
-            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-6)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
             validDates = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '30_DAYS':
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')

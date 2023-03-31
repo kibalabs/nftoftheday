@@ -94,7 +94,6 @@ class ActivityManager:
                 if retrievedCollectionActivity.transferCount == 0:
                     logging.info(f'Not creating activity with transferCount==0')
                 else:
-                    print("here")
                     await self.saver.create_collection_hourly_activity(connection=connection, address=retrievedCollectionActivity.address, date=retrievedCollectionActivity.date, transferCount=retrievedCollectionActivity.transferCount, mintCount=retrievedCollectionActivity.mintCount, saleCount=retrievedCollectionActivity.saleCount, totalValue=retrievedCollectionActivity.totalValue, minimumValue=retrievedCollectionActivity.minimumValue, maximumValue=retrievedCollectionActivity.maximumValue, averageValue=retrievedCollectionActivity.averageValue,)
 
     async def update_total_activity_for_all_collections_deferred(self) -> None:
