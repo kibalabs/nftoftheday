@@ -30,14 +30,14 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
     async def calculate_all_gallery_badge_holders(self) -> List[RetrievedGalleryBadgeHolder]:
         minterBadgeHolders = await self.calculate_minter_badge_holders()
         oneOfOneBadgeHolders = await self.calculate_one_of_one_badge_holders()
-        neverSoldBadgeHolders =  await self.calculate_never_sold_badge_holders()
-        collectorBadgeHolders =  await self.calculate_collector_badge_holders()
-        hodlerBadgeHolders =  await self.calculate_hodler_badge_holders()
-        diamondHandsBadgeHolders =  await self.calculate_diamond_hands_badge_holders()
-        enthusiastBadgeHolders =  await self.calculate_enthusiast_badge_holders()
-        seeingDoubleBadgeHolders =  await self.calculate_seeing_double_badge_holders()
-        firstTenBadgeHolders =  await self.calculate_first_ten_badge_holders()
-        specialEditionBadgeHolders =  await self.calculate_special_edition_badge_holders()
+        neverSoldBadgeHolders = await self.calculate_never_sold_badge_holders()
+        collectorBadgeHolders = await self.calculate_collector_badge_holders()
+        hodlerBadgeHolders = await self.calculate_hodler_badge_holders()
+        diamondHandsBadgeHolders = await self.calculate_diamond_hands_badge_holders()
+        enthusiastBadgeHolders = await self.calculate_enthusiast_badge_holders()
+        seeingDoubleBadgeHolders = await self.calculate_seeing_double_badge_holders()
+        firstTenBadgeHolders = await self.calculate_first_ten_badge_holders()
+        specialEditionBadgeHolders = await self.calculate_special_edition_badge_holders()
         allBadges = minterBadgeHolders + oneOfOneBadgeHolders + specialEditionBadgeHolders + neverSoldBadgeHolders + collectorBadgeHolders + hodlerBadgeHolders + diamondHandsBadgeHolders + enthusiastBadgeHolders + seeingDoubleBadgeHolders + firstTenBadgeHolders
         return allBadges
 
@@ -147,5 +147,5 @@ class RudeboysBadgeProcessor(CollectionBadgeProcessor):
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress, UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
         result = await self.retriever.database.execute(query=query)
-        specialEditionBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="SEEING_DOUBLE", achievedDate=row.achievedDate) for row in result.mappings()]
+        specialEditionBadgeHolders = [RetrievedGalleryBadgeHolder(registryAddress=row.registryAddress, ownerAddress=row.ownerAddress, badgeKey="SPECIAL_EDITION", achievedDate=row.achievedDate) for row in result.mappings()]
         return specialEditionBadgeHolders

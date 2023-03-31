@@ -210,7 +210,7 @@ class GalleryManager:
                 tokenMetadata=token_metadata_from_row(row),
                 tokenCustomization=token_customization_from_row(row) if row[TokenCustomizationsTable.c.tokenCustomizationId] else None,
                 tokenListing=token_listing_from_row(row, OrderedTokenListingsView) if row[OrderedTokenListingsView.c.latestTokenListingId] else None,
-                tokenStaking=token_staking_from_row(row) if  row[TokenStakingsTable.c.tokenStakingId] else None,
+                tokenStaking=token_staking_from_row(row) if row[TokenStakingsTable.c.tokenStakingId] else None,
                 quantity=row['quantity'],
             ))
         return galleryTokens
