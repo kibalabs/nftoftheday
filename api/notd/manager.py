@@ -583,21 +583,21 @@ class NotdManager:
         if duration == "7_DAYS":
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-6)
-            validDateValue = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
+            validDateValue: List[datetime.date] = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '30_DAYS':
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
-            validDateValue = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
+            validDateValue: List[datetime.date] = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '24_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
             dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
-            validDateValue = [date for date,_ in dateIntervals]
+            validDateValue: List[datetime.date] = [date for date,_ in dateIntervals]
         elif duration == '12_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
             dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
-            validDateValue = [date for date,_ in dateIntervals]
+            validDateValue: List[datetime.date] = [date for date,_ in dateIntervals]
         else:
             raise BadRequestException('Unknown duration')
         query = (
