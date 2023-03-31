@@ -178,6 +178,7 @@ CREATE TABLE tbl_collection_hourly_activities (
     address TEXT NOT NULL,
     date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     transfer_count NUMERIC(256, 0) NOT NULL,
+    mint_count NUMERIC(256, 0),
     sale_count NUMERIC(256, 0) NOT NULL,
     total_value NUMERIC(256, 0) NOT NULL,
     minimum_value NUMERIC(256, 0) NOT NULL,
@@ -191,6 +192,7 @@ CREATE INDEX tbl_collection_hourly_activities_address ON tbl_collection_hourly_a
 CREATE INDEX tbl_collection_hourly_activities_date ON tbl_collection_hourly_activities (date);
 CREATE INDEX tbl_collection_hourly_activities_transfer_count ON tbl_collection_hourly_activities (transfer_count);
 CREATE INDEX tbl_collection_hourly_activities_sale_count ON tbl_collection_hourly_activities (sale_count);
+CREATE INDEX tbl_collection_hourly_activities_mint_count ON tbl_collection_hourly_activities (mint_count);
 CREATE INDEX tbl_collection_hourly_activities_total_value ON tbl_collection_hourly_activities (total_value);
 CREATE INDEX tbl_collection_hourly_activities_minimum_value ON tbl_collection_hourly_activities (minimum_value);
 CREATE INDEX tbl_collection_hourly_activities_maximum_value ON tbl_collection_hourly_activities (maximum_value);
@@ -370,6 +372,7 @@ CREATE TABLE tbl_collection_total_activities (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     address TEXT NOT NULL,
     transfer_count NUMERIC(256, 0) NOT NULL,
+    mint_count NUMERIC(256, 0),
     sale_count NUMERIC(256, 0) NOT NULL,
     total_value NUMERIC(256, 0) NOT NULL,
     minimum_value NUMERIC(256, 0) NOT NULL,
@@ -380,6 +383,7 @@ CREATE UNIQUE INDEX tbl_collection_total_activities_address on tbl_collection_to
 CREATE INDEX tbl_collection_total_activities_created_date ON tbl_collection_total_activities (created_date);
 CREATE INDEX tbl_collection_total_activities_updated_date ON tbl_collection_total_activities (updated_date);
 CREATE INDEX tbl_collection_total_activities_transfer_count ON tbl_collection_total_activities (transfer_count);
+CREATE INDEX tbl_collection_total_activities_mint_count ON tbl_collection_total_activities (mint_count);
 CREATE INDEX tbl_collection_total_activities_sale_count ON tbl_collection_total_activities (sale_count);
 CREATE INDEX tbl_collection_total_activities_total_value ON tbl_collection_total_activities (total_value);
 CREATE INDEX tbl_collection_total_activities_minimum_value ON tbl_collection_total_activities (minimum_value);

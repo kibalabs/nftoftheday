@@ -288,3 +288,7 @@ class ApiSuperCollectionOverlap(BaseModel):
     otherRegistryAddress: str
     otherRegistryTokenCount: int
     registryTokenCountMap: Dict[str, int]
+
+class ApiMintedTokenCount(BaseModel):
+    date: datetime.datetime
+    count: str

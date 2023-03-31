@@ -20,6 +20,8 @@ from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
+from notd.api.endpoints_v1 import MintedTokenCountsRequest
+from notd.api.endpoints_v1 import MintedTokenCountsResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
@@ -248,6 +250,13 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         date = request.date.replace(tzinfo=None) if request.date else None
         ownerAddresses = await notdManager.calculate_common_owners(registryAddresses=request.registryAddresses, tokenIds=request.tokenIds, date=date)
         return CalculateCommonOwnersResponse(ownerAddresses=ownerAddresses)
+
+    @router.post('/retrieve-minted-token-counts', response_model=MintedTokenCountsResponse)
+    async def retrieve_minted_token_counts(request: MintedTokenCountsRequest) -> MintedTokenCountsResponse:
+        currentDate = date_util.start_of_day(dt=request.currentDate.replace(tzinfo=None)) if request.currentDate else date_util.start_of_day()
+        duration = request.duration
+        mintedTokenCounts = await notdManager.retrieve_minted_token_counts(currentDate=currentDate, duration=duration)
+        return MintedTokenCountsResponse(mintedTokenCounts=(await responseBuilder.minted_token_counts_from_models(mintedTokenCounts=mintedTokenCounts)))
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:
