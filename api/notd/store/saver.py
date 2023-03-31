@@ -402,7 +402,7 @@ class Saver(CoreSaver):
         query = TokenMultiOwnershipsTable.delete().where(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId.in_(tokenMultiOwnershipIds)).returning(TokenMultiOwnershipsTable.c.tokenMultiOwnershipId)
         await self._execute(query=query, connection=connection)
 
-    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, mintCount: Optional[int], connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
+    async def create_collection_hourly_activity(self, address: str, date: datetime.datetime, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, mintCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionHourlyActivity:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
@@ -461,7 +461,7 @@ class Saver(CoreSaver):
         query = CollectionHourlyActivitiesTable.update().where(CollectionHourlyActivitiesTable.c.collectionActivityId == collectionActivityId).values(values).returning(CollectionHourlyActivitiesTable.c.collectionActivityId)
         await self._execute(query=query, connection=connection)
 
-    async def create_collection_total_activity(self, address: str, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, mintCount: Optional[int], connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
+    async def create_collection_total_activity(self, address: str, transferCount: int, saleCount: int, totalValue: int, minimumValue: int, maximumValue: int, averageValue: int, mintCount: int, connection: Optional[DatabaseConnection] = None) -> CollectionTotalActivity:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
