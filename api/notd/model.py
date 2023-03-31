@@ -675,6 +675,6 @@ class GallerySuperCollectionUserRow:
 
 
 @dataclasses.dataclass
-class MintedTokenCount():
-    date: Union[datetime.date, datetime.datetime]
+class MintedTokenCount:
+    date: Union[datetime.datetime, datetime.date]
     count: int

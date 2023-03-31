@@ -290,5 +290,5 @@ class ApiSuperCollectionOverlap(BaseModel):
     registryTokenCountMap: Dict[str, int]
 
 class ApiMintedTokenCount(BaseModel):
-    date: Union[datetime.date, datetime.datetime]
-    count: int
+    date: Union[datetime.datetime, datetime.date]
+    count: str

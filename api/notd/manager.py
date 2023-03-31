@@ -592,12 +592,12 @@ class NotdManager:
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
             dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
-            validDates = [date for date,_ in dateIntervals]
+            validDates = [time for time, _ in dateIntervals]
         elif duration == '12_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
             dateIntervals = list(date_util.generate_hourly_intervals(startDate=startDate, endDate=currentDate))
-            validDates = [date for date,_ in dateIntervals]
+            validDates = [time for time, _ in dateIntervals]
         else:
             raise BadRequestException('Unknown duration')
         query = (
@@ -612,7 +612,7 @@ class NotdManager:
         mintedTokenCounts: List[MintedTokenCount] = []
         for validDate in validDates:
             if validDate in dateCountDict.keys():
-                mintedTokenCounts += [MintedTokenCount(date=validDate, count=dateCountDict[validDate])] 
+                mintedTokenCounts += [MintedTokenCount(date=validDate, count=dateCountDict[validDate])]
             else:
-                mintedTokenCounts += [MintedTokenCount(date=validDate, count=0)] 
+                mintedTokenCounts += [MintedTokenCount(date=validDate, count=0)]
         return mintedTokenCounts
