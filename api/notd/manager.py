@@ -611,7 +611,7 @@ class NotdManager:
         dateCountDict = {dateCount['date']: dateCount['count'] for dateCount in result.mappings()}
         mintedTokenCounts: List[MintedTokenCount] = []
         for validDate in validDates:
-            if validDate in list(dateCountDict.keys()):
+            if validDate in dateCountDict.keys():
                 mintedTokenCounts += [MintedTokenCount(date=validDate, count=dateCountDict[validDate])] 
             else:
                 mintedTokenCounts += [MintedTokenCount(date=validDate, count=0)] 
