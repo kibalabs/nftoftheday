@@ -580,23 +580,23 @@ class NotdManager:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
     async def retrieve_trending_collections(self, currentDate: datetime.datetime, duration: Optional[str] = None, order: Optional[str] = None) -> List[TrendingCollection]:
-        if not duration or  duration == "7_DAYS":
-            endDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
-            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, days=-7)
+        if duration == "7_DAYS":
+            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
+            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, days=-7)
         elif duration == '30_DAYS':
-            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-30)
-            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, days=-30)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
+            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, days=-30)
         elif duration == '24_HOURS':
-            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
-            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, hours=-24)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
+            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, hours=-24)
         elif duration == '12_HOURS':
-            endDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
-            previousPeriodEndDate = date_util.datetime_from_datetime(dt=endDate, hours=-12)
+            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
+            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, hours=-12)
         else:
             raise BadRequestException('Unknown duration')
         query = (
             sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount')) # type: ignore[no-untyped-call, var-annotated]
-            .where(CollectionHourlyActivitiesTable.c.date >= endDate)
+            .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .where(CollectionHourlyActivitiesTable.c.date < currentDate)
             .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(CollectionHourlyActivitiesTable.c.address)
@@ -612,8 +612,8 @@ class NotdManager:
         addresses = list(currentTrendingCollections.keys())
         previousPeriodQuery = (
             sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount')) # type: ignore[no-untyped-call, var-annotated]
-            .where(CollectionHourlyActivitiesTable.c.date >= previousPeriodEndDate)
-            .where(CollectionHourlyActivitiesTable.c.date < endDate)
+            .where(CollectionHourlyActivitiesTable.c.date >= previousPeriodStartDate)
+            .where(CollectionHourlyActivitiesTable.c.date < startDate)
             .where(CollectionHourlyActivitiesTable.c.address.in_(addresses))
             .group_by(CollectionHourlyActivitiesTable.c.address)
         )
@@ -626,8 +626,8 @@ class NotdManager:
                 registryAddress=address,
                 totalSaleCount=totalSaleCount,
                 totalVolume=totalVolume,
-                previousSaleCount=str(previousPeriodValues.get(address, [0, 0])[0]),
-                previousTotalVolume=str(previousPeriodValues.get(address, [0, 0])[1]),
+                previousSaleCount=previousPeriodValues.get(address)[0] if previousPeriodValues.get(address, None) else 0,
+                previousTotalVolume=previousPeriodValues.get(address)[1] if previousPeriodValues.get(address, None) else 0,
             ) for address, (totalSaleCount, totalVolume) in currentTrendingCollections.items()
             ]
         return trendingCollections

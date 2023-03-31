@@ -508,10 +508,10 @@ class ResponseBuilder:
     async def trending_collection_from_model(self, trendingCollection: TrendingCollection) -> ApiTrendingCollection:
         return ApiTrendingCollection(
             registryAddress=await self.collection_from_address(address=trendingCollection.registryAddress),
-            totalSaleCount=trendingCollection.totalSaleCount,
-            totalVolume=trendingCollection.totalVolume,
-            previousSaleCount=trendingCollection.previousSaleCount,
-            previousTotalVolume=trendingCollection.previousTotalVolume,
+            totalSaleCount=str(trendingCollection.totalSaleCount),
+            totalVolume=str(trendingCollection.totalVolume),
+            previousSaleCount=str(trendingCollection.previousSaleCount),
+            previousTotalVolume=str(trendingCollection.previousTotalVolume),
         )
 
     async def trending_collections_from_models(self, trendingCollections: Sequence[TrendingCollection]) -> List[ApiTrendingCollection]:

@@ -676,10 +676,10 @@ class GallerySuperCollectionUserRow:
 @dataclasses.dataclass
 class TrendingCollection:
     registryAddress: str
-    previousSaleCount: str
-    previousTotalVolume: str
-    totalVolume: str
-    totalSaleCount: str
+    previousSaleCount: int
+    previousTotalVolume: int
+    totalVolume: int
+    totalSaleCount: int
 
 
 @dataclasses.dataclass
