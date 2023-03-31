@@ -296,3 +296,8 @@ class ApiTrendingCollection(BaseModel):
     previousTotalVolume: str
     totalVolume: str
     totalSaleCount: str
+
+
+class ApiMintedTokenCount(BaseModel):
+    date: datetime.datetime
+    count: str

@@ -34,6 +34,7 @@ class CollectionActivityProcessor:
         averageValue = 0
         minimumValue = 0
         maximumValue = 0
+        mintCount = 0
         for tokenTransfer in tokenTransfers:
             if tokenTransfer.value > 0:
                 saleCount += tokenTransfer.amount
@@ -41,8 +42,9 @@ class CollectionActivityProcessor:
                 minimumValue = min(minimumValue, tokenTransfer.value) if minimumValue > 0 else tokenTransfer.value
                 maximumValue = max(maximumValue, tokenTransfer.value)
             transferCount += tokenTransfer.amount
+            mintCount += tokenTransfer.amount if tokenTransfer.fromAddress == chain_util.BURN_ADDRESS else 0
         averageValue = int(totalValue / saleCount) if saleCount > 0 else 0
-        return RetrievedCollectionHourlyActivity(address=address, date=startDate, transferCount=transferCount, saleCount=saleCount, totalValue=totalValue, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
+        return RetrievedCollectionHourlyActivity(address=address, date=startDate, transferCount=transferCount, saleCount=saleCount, mintCount=mintCount, totalValue=totalValue, minimumValue=minimumValue, maximumValue=maximumValue, averageValue=averageValue)
 
     async def calculate_collection_total_activity(self, address: str) -> RetrievedCollectionTotalActivity:
         address = chain_util.normalize_address(address)
@@ -56,11 +58,13 @@ class CollectionActivityProcessor:
         totalValue = 0
         minimumValue = 0
         maximumValue = 0
+        mintCount = 0
         for collectionHourlyActivity in collectionHourlyActivities:
             totalValue += collectionHourlyActivity.totalValue
             saleCount += collectionHourlyActivity.saleCount
             transferCount += collectionHourlyActivity.transferCount
+            mintCount += collectionHourlyActivity.mintCount or 0
             maximumValue = max(maximumValue, collectionHourlyActivity.maximumValue)
             minimumValue = min(minimumValue, collectionHourlyActivity.minimumValue) if minimumValue > 0 else collectionHourlyActivity.minimumValue
         averageValue = int(totalValue / saleCount) if saleCount > 0 else 0
-        return RetrievedCollectionTotalActivity(address=address, totalValue=totalValue, saleCount=saleCount, transferCount=transferCount, maximumValue=maximumValue, minimumValue=minimumValue, averageValue=averageValue)
+        return RetrievedCollectionTotalActivity(address=address, totalValue=totalValue, saleCount=saleCount, transferCount=transferCount, mintCount=mintCount, maximumValue=maximumValue, minimumValue=minimumValue, averageValue=averageValue)

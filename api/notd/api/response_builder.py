@@ -26,6 +26,7 @@ from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
+from notd.api.models_v1 import ApiMintedTokenCount
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
@@ -59,6 +60,7 @@ from notd.model import GmAccountRow
 from notd.model import GmCollectionRow
 from notd.model import LatestAccountGm
 from notd.model import ListResponse
+from notd.model import MintedTokenCount
 from notd.model import RetrievedTokenMetadata
 from notd.model import SponsoredToken
 from notd.model import SuperCollectionEntry
@@ -514,3 +516,12 @@ class ResponseBuilder:
 
     async def trending_collections_from_models(self, trendingCollections: Sequence[TrendingCollection]) -> List[ApiTrendingCollection]:
         return await asyncio.gather(*[self.trending_collection_from_model(trendingCollection=trendingCollection) for trendingCollection in trendingCollections])
+
+    async def minted_token_count_from_model(self, mintedTokenCount: MintedTokenCount) -> ApiMintedTokenCount:
+        return ApiMintedTokenCount(
+            date=mintedTokenCount.date,
+            count=str(mintedTokenCount.count)
+        )
+
+    async def minted_token_counts_from_models(self, mintedTokenCounts: Sequence[MintedTokenCount]) -> List[ApiMintedTokenCount]:
+        return await asyncio.gather(*[self.minted_token_count_from_model(mintedTokenCount=mintedTokenCount) for mintedTokenCount in mintedTokenCounts])

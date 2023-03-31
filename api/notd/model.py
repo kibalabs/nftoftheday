@@ -279,6 +279,7 @@ class RetrievedCollectionHourlyActivity:
     date: datetime.datetime
     transferCount: int
     saleCount: int
+    mintCount: Optional[int]
     totalValue: int
     minimumValue: int
     maximumValue: int
@@ -319,6 +320,7 @@ class CollectionDailyActivity:
 class RetrievedCollectionTotalActivity:
     address: str
     transferCount: int
+    mintCount: Optional[int]
     saleCount: int
     totalValue: int
     minimumValue: int
@@ -678,3 +680,7 @@ class TrendingCollection:
     previousTotalVolume: str
     totalVolume: str
     totalSaleCount: str
+
+class MintedTokenCount:
+    date: datetime.datetime
+    count: int

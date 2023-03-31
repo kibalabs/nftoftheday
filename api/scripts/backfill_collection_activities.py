@@ -59,7 +59,7 @@ async def backfill_collection_activities(startBlock: int, endBlock: int, batchSi
                 ],
             )
             processedPairs = {(collectionHourlyActivity.address, collectionHourlyActivity.date) for collectionHourlyActivity in collectionHourlyActivities}
-            registryDatePairs = {(tokenTransfer.registryAddress, date_util.date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers if (tokenTransfer.registryAddress, date_hour_from_datetime(tokenTransfer.blockDate)) not in processedPairs}
+            registryDatePairs = {(tokenTransfer.registryAddress, date_util.date_hour_from_datetime(tokenTransfer.blockDate)) for tokenTransfer in tokenTransfers if (tokenTransfer.registryAddress, date_util.date_hour_from_datetime(tokenTransfer.blockDate)) not in processedPairs}
             print(f'Processing {len(registryDatePairs)} pairs from {len(tokenTransfers)} transfers')
             # messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
             # await tokenQueue.send_messages(messages=messages)

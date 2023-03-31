@@ -27,6 +27,7 @@ from notd.api.models_v1 import ApiGalleryUserRow
 from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
+from notd.api.models_v1 import ApiMintedTokenCount
 from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
@@ -458,3 +459,10 @@ class RetrieveTrendingCollectionRequest(BaseModel):
 
 class RetrieveTrendingCollectionResponse(BaseModel):
     trendingCollections: List[ApiTrendingCollection]
+
+class MintedTokenCountsRequest(BaseModel):
+    currentDate: datetime.datetime
+    duration: str
+
+class MintedTokenCountsResponse(BaseModel):
+    mintedTokenCounts: List[ApiMintedTokenCount]
