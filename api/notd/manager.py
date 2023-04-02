@@ -626,8 +626,8 @@ class NotdManager:
                 registryAddress=address,
                 totalSaleCount=totalSaleCount,
                 totalVolume=totalVolume,
-                previousSaleCount=previousPeriodValues.get[address][0] if previousPeriodValues.get(address) else 0,
-                previousTotalVolume=previousPeriodValues.get[address][1] if previousPeriodValues.get(address) else 0,
+                previousSaleCount=previousPeriodValues[address][0] if previousPeriodValues.get(address) else 0,
+                previousTotalVolume=previousPeriodValues[address][1] if previousPeriodValues.get(address) else 0,
             ) for address, (totalSaleCount, totalVolume) in currentTrendingCollections.items()
         ]
         return trendingCollections
