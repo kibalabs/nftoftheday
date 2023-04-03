@@ -372,11 +372,7 @@ CREATE TABLE tbl_collection_total_activities (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     address TEXT NOT NULL,
     transfer_count NUMERIC(256, 0) NOT NULL,
-<<<<<<< HEAD
     mint_count NUMERIC(256, 0) NOT NULL,
-=======
-    mint_count NUMERIC(256, 0),
->>>>>>> main
     sale_count NUMERIC(256, 0) NOT NULL,
     total_value NUMERIC(256, 0) NOT NULL,
     minimum_value NUMERIC(256, 0) NOT NULL,
