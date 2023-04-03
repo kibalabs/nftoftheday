@@ -57,51 +57,6 @@ export class TokenTransfer {
   };
 }
 
-export class TradedToken {
-  readonly token: CollectionToken;
-  readonly collection: Collection;
-  readonly latestTransfer: TokenTransfer;
-  readonly transferCount: BigNumber;
-
-  public constructor(token: CollectionToken, collection: Collection, latestTransfer: TokenTransfer, transferCount: BigNumber) {
-    this.token = token;
-    this.collection = collection;
-    this.latestTransfer = latestTransfer;
-    this.transferCount = transferCount;
-  }
-
-  public static fromObject = (obj: Record<string, unknown>): TradedToken => {
-    return new TradedToken(
-      CollectionToken.fromObject(obj.token as Record<string, unknown>),
-      Collection.fromObject(obj.collection as Record<string, unknown>),
-      TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>),
-      BigNumber.from(String(obj.transferCount)),
-    );
-  };
-}
-
-export class SponsoredToken {
-  readonly token: CollectionToken;
-  readonly collection: Collection;
-  readonly date: Date;
-  readonly latestTransfer: TokenTransfer | null;
-
-  public constructor(token: CollectionToken, collection: Collection, date: Date, latestTransfer: TokenTransfer | null) {
-    this.token = token;
-    this.collection = collection;
-    this.date = date;
-    this.latestTransfer = latestTransfer;
-  }
-
-  public static fromObject = (obj: Record<string, unknown>): SponsoredToken => {
-    return new SponsoredToken(
-      CollectionToken.fromObject(obj.token as Record<string, unknown>),
-      Collection.fromObject(obj.collection as Record<string, unknown>),
-      dateFromString(obj.date as string),
-      obj.latestTransfer ? TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>) : null,
-    );
-  };
-}
 
 export class TokenAttribute {
   readonly traitType: string;

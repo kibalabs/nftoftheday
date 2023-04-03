@@ -165,12 +165,6 @@ class TokenTransfer(RetrievedTokenTransfer):
 
 
 @dataclasses.dataclass
-class TradedToken:
-    latestTransfer: TokenTransfer
-    transferCount: int
-
-
-@dataclasses.dataclass
 class Token:
     registryAddress: str
     tokenId: str
@@ -194,30 +188,6 @@ class AccountToken:
     registryAddress: str
     tokenId: str
     ownerAddress: str
-
-
-@dataclasses.dataclass
-class BaseSponsoredToken:
-    date: datetime.datetime
-    token: Token
-
-    def to_dict(self) -> JSON:
-        return {
-            'date': date_util.datetime_to_string(dt=self.date),
-            'token': self.token.to_dict(),  # type: ignore[dict-item]
-        }
-
-    @classmethod
-    def from_dict(cls, sponsoredTokenDict: JSON) -> BaseSponsoredToken:
-        return cls(
-            date=date_util.datetime_from_string(str(sponsoredTokenDict['date'])),  # type: ignore[index, call-overload]
-            token=Token.from_dict(dict(sponsoredTokenDict['token']))  # type: ignore[index, call-overload, arg-type]
-        )
-
-
-@dataclasses.dataclass
-class SponsoredToken(BaseSponsoredToken):
-    latestTransfer: Optional[TokenTransfer]
 
 
 @dataclasses.dataclass

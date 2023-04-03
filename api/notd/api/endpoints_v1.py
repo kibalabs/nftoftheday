@@ -28,50 +28,13 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiMintedTokenCount
-from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
-from notd.api.models_v1 import ApiTradedToken
 
-
-class RetrieveHighestPriceTransferRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveHighestPriceTransferResponse(BaseModel):
-    transfer: ApiTokenTransfer
-
-class  RetrieveRandomTransferRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveRandomTransferResponse(BaseModel):
-    transfer: ApiTokenTransfer
-
-class  RetrieveTransactionCountRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveTransactionCountResponse(BaseModel):
-    count: int
-
-class  RetrieveMostTradedRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveMostTradedResponse(BaseModel):
-    tradedToken: ApiTradedToken
-
-class  RetrieveSponsoredTokenRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveSponsoredTokenResponse(BaseModel):
-    sponsoredToken: ApiSponsoredToken
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass

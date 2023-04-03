@@ -191,7 +191,7 @@ export const TokenPage = (): React.ReactElement => {
             {collectionToken.attributes.length === 0 ? (
               <Text>Token has no traits</Text>
             ) : (
-              <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true} padding={PaddingSize.Wide}>
+              <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true} shouldWrapItems={true}>
                 {collectionToken?.attributes.map((tokenAttribute: TokenAttribute, index: number) : React.ReactElement => (
                   <MetricView key={index} name={tokenAttribute.traitType} value={tokenAttribute.value} />
                 ))}

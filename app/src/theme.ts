@@ -86,6 +86,23 @@ export const buildNotdTheme = (): ITheme => {
         'word-break': 'break-word',
       },
     },
+    prettyTexts: {
+      header2: {
+        normal: {
+          default: {
+            text: {
+              'font-size': '3em',
+            },
+          },
+          strong: {
+            text:{
+              'color': '$colors.brandPrimaryLight50',
+              'font-weight': 'bold',
+            }
+          }
+        }
+      }
+    },
     boxes: {
       phBanner: {
         padding: `${defaultTheme.dimensions.paddingWide} ${defaultTheme.dimensions.paddingWide}`,
@@ -93,9 +110,12 @@ export const buildNotdTheme = (): ITheme => {
       },
       card: {
         padding: '0',
-        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'background-color': 'rgba(255, 255, 255, 0.45)',
         'border-width': '0',
         margin: '0',
+      },
+      tooltip: {
+        'background-color': '$colors.background',
       },
       cardLabelBox: {
         'border-radius': '0.5em 0 0.2em 0',

@@ -117,15 +117,15 @@ class BlockProcessor:
         return transactionHashWethValuesMap
 
     async def process_block(self, blockNumber: int) -> ProcessedBlock:
-        # NOTE(krishan711): some blocks are too large to be retrieved from the AWS hosted node e.g. #14222802
-        # for these, we can use infura specifically but if this problem gets too big find a better solution
         blockData = await self.ethClient.get_block(blockNumber=blockNumber, shouldHydrateTransactions=True)
-        transactionHashEventMap = await self._get_retrieved_events(blockNumber=blockNumber)
-        transactionHashWethValuesMap = await self._get_transaction_weth_values(blockNumber=blockNumber)
         retrievedTokenTransfers: List[RetrievedTokenTransfer] = []
+        transactionHashEventMap = await self._get_retrieved_events(blockNumber=blockNumber)
         for transaction in blockData['transactions']:
             transactionData = typing.cast(TxData, transaction)
-            retrievedTokenTransfers += await self.process_transaction(transaction=transactionData, retrievedEvents=transactionHashEventMap[transactionData['hash'].hex()], transactionWethValues=transactionHashWethValuesMap[transactionData['hash'].hex()])
+            retrievedEvents = transactionHashEventMap[transactionData['hash'].hex()]
+            if len(retrievedEvents) > 0:
+                transactionHashWethValuesMap = await self._get_transaction_weth_values(blockNumber=blockNumber)
+                retrievedTokenTransfers += await self.process_transaction(transaction=transactionData, retrievedEvents=retrievedEvents, transactionWethValues=transactionHashWethValuesMap[transactionData['hash'].hex()])
         blockHash = blockData['hash'].hex()
         blockDate = datetime.datetime.utcfromtimestamp(blockData['timestamp'])
         return ProcessedBlock(blockNumber=blockNumber, blockHash=blockHash, blockDate=blockDate, retrievedTokenTransfers=retrievedTokenTransfers)

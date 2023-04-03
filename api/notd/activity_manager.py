@@ -3,6 +3,7 @@ import datetime
 import typing
 from typing import Set
 from typing import Tuple
+from typing import Optional
 
 from core import logging
 from core.exceptions import NotFoundException
@@ -99,7 +100,7 @@ class ActivityManager:
     async def update_total_activity_for_all_collections_deferred(self) -> None:
         await self.workQueue.send_message(message=UpdateTotalActivityForAllCollectionsMessageContent().to_message())
 
-    async def update_total_activity_for_all_collections(self) -> None:
+    async def update_total_activity_for_all_collections(self, shouldDeferWork: Optional[bool] = True) -> None:
         processStartDate = date_util.datetime_from_now()
         latestUpdate = await self.retriever.get_latest_update_by_key_name(key='total_collection_activities')
         query = (
@@ -109,8 +110,12 @@ class ActivityManager:
         )
         result = await self.retriever.database.execute(query=query)
         changedAddresses = {row[0] for row in result}
-        messages = [UpdateTotalActivityForCollectionMessageContent(address=address).to_message() for address in changedAddresses]
-        await self.tokenQueue.send_messages(messages=messages)
+        if shouldDeferWork:
+            messages = [UpdateTotalActivityForCollectionMessageContent(address=address).to_message() for address in changedAddresses]
+            await self.tokenQueue.send_messages(messages=messages)
+        else:
+            for address in changedAddresses:
+                await self.update_total_activity_for_collection(address=address)
         await self.saver.update_latest_update(latestUpdateId=latestUpdate.latestUpdateId, date=processStartDate)
 
     async def update_total_activity_for_collection(self, address: str) -> None:

@@ -27,7 +27,6 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiMintedTokenCount
-from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
@@ -35,7 +34,6 @@ from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenStaking
 from notd.api.models_v1 import ApiTokenTransfer
-from notd.api.models_v1 import ApiTradedToken
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
 from notd.model import AccountCollectionGm
@@ -61,7 +59,6 @@ from notd.model import LatestAccountGm
 from notd.model import ListResponse
 from notd.model import MintedTokenCount
 from notd.model import RetrievedTokenMetadata
-from notd.model import SponsoredToken
 from notd.model import SuperCollectionEntry
 from notd.model import SuperCollectionOverlap
 from notd.model import Token
@@ -70,7 +67,6 @@ from notd.model import TokenListing
 from notd.model import TokenMultiOwnership
 from notd.model import TokenStaking
 from notd.model import TokenTransfer
-from notd.model import TradedToken
 from notd.model import TwitterProfile
 from notd.model import UserProfile
 from notd.store.retriever import Retriever
@@ -211,22 +207,6 @@ class ResponseBuilder:
             lowestSaleLast24Hours=str(collectionStatistics.lowestSaleLast24Hours),
             highestSaleLast24Hours=str(collectionStatistics.highestSaleLast24Hours),
             tradeVolume24Hours=str(collectionStatistics.tradeVolume24Hours),
-        )
-
-    async def traded_token_from_model(self, tradedToken: TradedToken) -> ApiTradedToken:
-        return ApiTradedToken(
-            token=await self.collection_token_from_registry_address_token_id(registryAddress=tradedToken.latestTransfer.registryAddress, tokenId=tradedToken.latestTransfer.tokenId),
-            collection=await self.collection_from_address(address=tradedToken.latestTransfer.registryAddress),
-            latestTransfer=await self.token_transfer_from_model(tokenTransfer=tradedToken.latestTransfer),
-            transferCount=str(tradedToken.transferCount),
-        )
-
-    async def sponsored_token_from_model(self, sponsoredToken: SponsoredToken) -> ApiSponsoredToken:
-        return ApiSponsoredToken(
-            token=await self.collection_token_from_token_key(tokenKey=sponsoredToken.token),
-            collection=await self.collection_from_address(address=sponsoredToken.token.registryAddress),
-            latestTransfer=await self.token_transfer_from_model(tokenTransfer=sponsoredToken.latestTransfer) if sponsoredToken.latestTransfer else None,
-            date=sponsoredToken.date,
         )
 
     async def collection_activities_from_models(self, collectionActivities: Sequence[CollectionDailyActivity]) -> List[ApiCollectionDailyActivity]:

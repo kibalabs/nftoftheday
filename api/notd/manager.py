@@ -36,18 +36,15 @@ from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
 from notd.messages import RefreshViewsMessageContent
 from notd.model import AccountToken
-from notd.model import BaseSponsoredToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import MintedTokenCount
-from notd.model import SponsoredToken
 from notd.model import Token
 from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
-from notd.model import TradedToken
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -90,93 +87,7 @@ class NotdManager:
         self.delegationManager = delegationManager
         self.collectionOverlapManager = collectionOverlapManager
         self.requester = requester
-        with open("notd/sponsored_tokens.json", "r") as sponsoredTokensFile:
-            sponsoredTokensDicts = json.loads(sponsoredTokensFile.read())
         self.revueApiKey = revueApiKey
-        self.sponsoredTokens = [BaseSponsoredToken.from_dict(sponsoredTokenDict) for sponsoredTokenDict in sponsoredTokensDicts]
-
-    async def get_sponsored_token(self) -> SponsoredToken:
-        baseSponsoredToken = self.sponsoredTokens[0]
-        currentDate = date_util.datetime_from_now()
-        allPastTokens = [sponsoredToken for sponsoredToken in self.sponsoredTokens if sponsoredToken.date < currentDate]
-        if allPastTokens:
-            baseSponsoredToken = max(allPastTokens, key=lambda sponsoredToken: sponsoredToken.date)
-        latestTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, eq=baseSponsoredToken.token.registryAddress),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.tokenId.key, eq=baseSponsoredToken.token.tokenId),
-            ],
-            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
-            limit=1
-        )
-        return SponsoredToken(date=baseSponsoredToken.date, token=baseSponsoredToken.token, latestTransfer=latestTransfers[0] if len(latestTransfers) > 0 else None)
-
-    async def retrieve_highest_priced_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
-        highestPricedTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[
-                DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate),
-                StringFieldFilter(fieldName=TokenTransfersTable.c.registryAddress.key, notContainedIn=list(_REGISTRY_BLACKLIST)),
-            ],
-            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
-            limit=1
-        )
-        return highestPricedTokenTransfers[0]
-
-    async def retrieve_random_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TokenTransfer:
-        # NOTE(krishan711): this is no longer actually random, it's just the latest (random is too slow)
-        randomTokenTransfers = await self.retriever.list_token_transfers(
-            fieldFilters=[DateFieldFilter(fieldName=BlocksTable.c.blockDate.key, gte=startDate, lt=endDate)],
-            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
-            offset=random.randint(1000, 10000),
-            limit=1,
-        )
-        return randomTokenTransfers[0]
-
-    async def get_transfer_count(self, startDate: datetime.datetime, endDate: datetime.datetime) ->int:
-        query = (
-            sqlalchemy.select(sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId))  # type: ignore[no-untyped-call]
-            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .where(BlocksTable.c.blockDate >= startDate)
-            .where(BlocksTable.c.blockDate < endDate)
-        )
-        result = await self.retriever.database.execute(query=query)
-        row = result.first()
-        return int(row[0]) if row else 0
-
-    async def retrieve_most_traded_token_transfer(self, startDate: datetime.datetime, endDate: datetime.datetime) -> TradedToken:
-        query = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId))  # type: ignore[no-untyped-call]
-            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .where(BlocksTable.c.blockDate >= startDate)
-            .where(BlocksTable.c.blockDate < endDate)
-            .where(TokenTransfersTable.c.registryAddress.not_in(list(_REGISTRY_BLACKLIST)))
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenTransferId).desc())  # type: ignore[no-untyped-call]
-            .limit(1)
-        )
-        result = await self.retriever.database.execute(query=query)
-        row = result.first()
-        if not row:
-            raise NotFoundException()
-        (registryAddress, tokenId, transferCount) = row
-        query = (
-            sqlalchemy.select(TokenTransfersTable, BlocksTable)
-            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .where(BlocksTable.c.blockDate >= startDate)
-            .where(BlocksTable.c.blockDate < endDate)
-            .where(TokenTransfersTable.c.registryAddress == registryAddress)
-            .where(TokenTransfersTable.c.tokenId == tokenId)
-            .order_by(TokenTransfersTable.c.value.desc())
-            .limit(1)
-        )
-        result = await self.retriever.database.execute(query=query)
-        latestTransferRow = result.mappings().first()
-        if not latestTransferRow:
-            raise NotFoundException()
-        return TradedToken(
-            latestTransfer=token_transfer_from_row(latestTransferRow),
-            transferCount=int(transferCount),
-        )
 
     async def get_collection_recent_sales(self, registryAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
         registryAddress = chain_util.normalize_address(value=registryAddress)
@@ -449,8 +360,8 @@ class NotdManager:
     async def update_total_activity_for_all_collections_deferred(self) -> None:
         await self.activityManager.update_total_activity_for_all_collections_deferred()
 
-    async def update_total_activity_for_all_collections(self) -> None:
-        await self.activityManager.update_total_activity_for_all_collections()
+    async def update_total_activity_for_all_collections(self, shouldDeferWork: Optional[bool] = True) -> None:
+        await self.activityManager.update_total_activity_for_all_collections(shouldDeferWork=shouldDeferWork)
 
     async def update_token_attributes_for_all_collections_deferred(self) -> None:
         await self.attributeManager.update_token_attributes_for_all_collections_deferred()

@@ -63,20 +63,6 @@ class ApiTokenTransfer(BaseModel):
     token: ApiCollectionToken
 
 
-class ApiTradedToken(BaseModel):
-    token: ApiCollectionToken
-    collection: ApiCollection
-    latestTransfer: ApiTokenTransfer
-    transferCount: str
-
-
-class ApiSponsoredToken(BaseModel):
-    token: ApiCollectionToken
-    collection: ApiCollection
-    date: datetime.datetime
-    latestTransfer: Optional[ApiTokenTransfer]
-
-
 class ApiTokenOwnership(BaseModel):
     registryAddress: str
     tokenId: str

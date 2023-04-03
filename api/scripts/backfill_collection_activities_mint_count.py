@@ -25,20 +25,26 @@ from notd.collection_activity_processor import CollectionActivityProcessor
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import CollectionHourlyActivitiesTable, BlocksTable, TokenTransfersTable
+from notd.messages import UpdateActivityForCollectionMessageContent
 
 @click.command()
 @click.option('-s', '--start-block-number', 'startBlock', required=True, type=int)
 @click.option('-e', '--end-block-number', 'endBlock', required=True, type=int)
 @click.option('-b', '--batch-size', 'batchSize', required=False, type=int, default=500)
 async def backfill_collection_activities_mint_count(startBlock: int, endBlock: int, batchSize: int):
+    accessKeyId = os.environ['AWS_KEY']
+    accessKeySecret = os.environ['AWS_SECRET']
+
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
     collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
-    activityManager = ActivityManager(saver=saver, retriever=retriever, workQueue=None, tokenQueue=None, collectionActivityProcessor=collectionActivityProcessor)
+    tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
+    activityManager = ActivityManager(saver=saver, retriever=retriever, workQueue=None, tokenQueue=tokenQueue, collectionActivityProcessor=collectionActivityProcessor)
 
     await database.connect()
+    await tokenQueue.connect()
 
     currentBlockNumber = startBlock
     while currentBlockNumber < endBlock:
@@ -62,7 +68,6 @@ async def backfill_collection_activities_mint_count(startBlock: int, endBlock: i
                 fieldFilters=[
                     DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, gte=minDate),
                     DateFieldFilter(CollectionHourlyActivitiesTable.c.date.key, lte=maxDate),
-                    IntegerFieldFilter(CollectionHourlyActivitiesTable.c.mintCount.key, isNotNull=True),
                 ],
             )
             processedRegistryDatePairs = {(collectionHourlyActivity.address, collectionHourlyActivity.date) for collectionHourlyActivity in collectionHourlyActivities}
@@ -70,11 +75,12 @@ async def backfill_collection_activities_mint_count(startBlock: int, endBlock: i
             print(f'Processing {len(registryDatePairsToProcess)} registryDatePairs')
             # messages = [UpdateActivityForCollectionMessageContent(address=address, startDate=startDate).to_message() for (address, startDate) in registryDatePairs]
             # await tokenQueue.send_messages(messages=messages)
-            for pairChunk in list_util.generate_chunks(lst=list(registryDatePairsToProcess), chunkSize=20):
+            for pairChunk in list_util.generate_chunks(lst=list(registryDatePairsToProcess), chunkSize=50):
                 await asyncio.gather(*[activityManager.update_activity_for_collection(address=registryAddress, startDate=startDate) for registryAddress, startDate in pairChunk])
         currentBlockNumber = endBlockNumber
 
     await database.disconnect()
+    await tokenQueue.disconnect()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

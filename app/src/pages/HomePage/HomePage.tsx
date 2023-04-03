@@ -1,186 +1,66 @@
 import React from 'react';
 
-import { dateToString, isToday, isYesterday, numberWithCommas } from '@kibalabs/core';
-import { useDateUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Button, ContainingView, Direction, EqualGrid, Head, IconButton, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
-
-import { SponsoredToken, TokenTransfer, TradedToken } from '../../client/resources';
-import { EmailSubsriptionPopup } from '../../components/emailSubcriptionPopup';
-import { HighestPricedTokenTransferCard } from '../../components/highestPricedTokenTransferCard';
-import { MostTradedTokenTransferCard } from '../../components/mostTradedTokenTransferCard';
-import { RandomTokenTransferCard } from '../../components/randomTokenTransferCard';
-import { SponsoredTokenCard } from '../../components/sponsoredTokenCard';
+import { Alignment, BackgroundView, Box, PrettyText, Text, ContainingView, Direction, Head, Stack, PaddingSize, Image, Spacing, ResponsiveTextAlignmentView, TextAlignment, } from '@kibalabs/ui-react';
 import { useGlobals } from '../../globalsContext';
+import styled, { keyframes as styledKeyframes} from 'styled-components';
 
-const defaultDate = new Date();
-defaultDate.setHours(0, 0, 0, 0);
-
-const getDateString = (startDate: Date): string => {
-  if (startDate !== null) {
-    if (isToday(startDate)) {
-      return 'Today';
-    }
-    if (isYesterday(startDate)) {
-      return 'Yesterday';
-    }
-    return dateToString(startDate, 'dd MMMM yyyy');
+const HeroTextAnimation = styledKeyframes`
+  to {
+    background-position: 200% 0;
   }
-  return '';
-};
+`;
+
+const HeroText = styled.span`
+  background: linear-gradient(to right, #a34b4b, #ffffff, #a34b4b);//, #ffffff);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation-name: ${HeroTextAnimation};
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+`;
 
 export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
-  const [isEmailPopupShowing, setIsEmailPopopShowing] = React.useState(false);
-  const [highestPricedTokenTransfer, setHighestPricedTokenTransfer] = React.useState<TokenTransfer| null>(null);
-  const [mostTradedToken, setMostTradedToken] = React.useState<TradedToken | null>(null);
-  const [randomTokenTransfer, setRandomTokenTransfer] = React.useState<TokenTransfer | null>(null);
-  const [sponsoredToken, setSponsoredToken] = React.useState<SponsoredToken | null>(null);
-  const [transferCount, setTransferCount] = React.useState<number | null>(null);
-  const [startDate_, setStartDate] = useDateUrlQueryState('date', undefined, 'yyyy-MM-dd', defaultDate);
-  const startDate = startDate_ as Date;
-
-  const getTitleDateString = (): string => {
-    if (startDate !== null) {
-      if (isToday(startDate)) {
-        return '';
-      }
-      return `| ${dateToString(startDate, 'dd MMMM yyyy')}`;
-    }
-    return '';
-  };
-
-  React.useEffect((): void => {
-    notdClient.retrieveHighestPriceTransfer(startDate).then((transfer: TokenTransfer): void => {
-      setHighestPricedTokenTransfer(transfer);
-    }).catch((error: unknown): void => {
-      console.error(error);
-    });
-
-    notdClient.retrieveMostTradedToken(startDate).then((tradedToken: TradedToken): void => {
-      setMostTradedToken(tradedToken);
-    }).catch((error: unknown): void => {
-      console.error(error);
-    });
-
-    notdClient.retrieveRandomTokenTransfer(startDate).then((transfer: TokenTransfer): void => {
-      setRandomTokenTransfer(transfer);
-    }).catch((error: unknown): void => {
-      console.error(error);
-    });
-
-    notdClient.retrieveSponsoredTokenTransfer(startDate).then((token: SponsoredToken): void => {
-      setSponsoredToken(token);
-    }).catch((error: unknown): void => {
-      console.error(error);
-    });
-
-    notdClient.retrieveTransferCount(startDate).then((count: number): void => {
-      setTransferCount(count);
-    }).catch((error: unknown): void => {
-      console.error(error);
-    });
-  }, [startDate, notdClient]);
-
-  const onBackClicked = (): void => {
-    const newDate = new Date(startDate);
-    newDate.setDate(newDate.getDate() - 1);
-    newDate.setHours(0, 0, 0, 0);
-    setStartDate(newDate);
-    setRandomTokenTransfer(null);
-    setHighestPricedTokenTransfer(null);
-    setMostTradedToken(null);
-    setSponsoredToken(null);
-    setTransferCount(null);
-  };
-
-  const onForwardClicked = (): void => {
-    const newDate = new Date(startDate);
-    newDate.setDate(newDate.getDate() + 1);
-    newDate.setHours(0, 0, 0, 0);
-    setStartDate(newDate);
-    setRandomTokenTransfer(null);
-    setHighestPricedTokenTransfer(null);
-    setMostTradedToken(null);
-    setSponsoredToken(null);
-    setTransferCount(null);
-  };
-
-  const onEmailClicked = (): void => {
-    setIsEmailPopopShowing(true);
-  };
 
   return (
     <React.Fragment>
       <Head headId='home'>
-        <title>{`Token Hunt ${getTitleDateString()}`}</title>
+        <title>Token Hunt</title>
       </Head>
       <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
-        <Spacing variant={PaddingSize.Wide2} />
-        <Text variant='header1'>NFT of the day</Text>
-        <Spacing variant={PaddingSize.Default} />
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-          <IconButton icon={<KibaIcon iconId='ion-chevron-back' />} onClicked={onBackClicked} isEnabled={startDate > new Date(2019, 10, 1) } />
-          <Text variant='header3'>{getDateString(startDate)}</Text>
-          <IconButton icon={<KibaIcon iconId='ion-chevron-forward' />} onClicked={onForwardClicked} isEnabled={startDate < defaultDate} />
-        </Stack>
-        <Spacing variant={PaddingSize.Wide2} />
-        {!transferCount ? (
-          <Text variant='header3'>Loading transfers...</Text>
-        ) : (
-          <Text variant='header3'>{`${numberWithCommas(transferCount)} transfers`}</Text>
-        )}
-        <Spacing variant={PaddingSize.Default} />
-        <Stack.Item growthFactor={1} shrinkFactor={1}>
-          <Spacing variant={PaddingSize.Wide2} />
-        </Stack.Item>
+        <BackgroundView layers={[{imageUrl: 'https://arweave.net/cuGWQb6lme5sVhumf1yrt2GnTuxILG_f-9IhbDyLIEY'}, {color: 'rgba(0, 0, 0, 0.9)'}]}>
+          <Box>
+            <ContainingView>
+              <Stack directionResponsive={{base: Direction.Vertical, medium: Direction.Horizontal}} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingVertical={PaddingSize.Wide2} paddingHorizontal={PaddingSize.Wide2}>
+                <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+                  <ResponsiveTextAlignmentView alignmentResponsive={{base: TextAlignment.Center, medium: TextAlignment.Left}}>
+                    <Stack direction={Direction.Vertical} shouldAddGutters={true}>
+                      <PrettyText variant='header2-large'>Your explorer for <HeroText>all NFTs and Collections</HeroText> on Ethereum Mainnet 🎭</PrettyText>
+                    </Stack>
+                  </ResponsiveTextAlignmentView>
+                </Stack.Item>
+                <Spacing variant={PaddingSize.Wide} />
+                <Box widthResponsive={{base: '100%', medium: '40%'}} height='400px' maxHeight='calc(max(400px, 0.5vh))' maxWidth='calc(max(400px, 0.5vh))'>
+                  <Stack direction={Direction.Vertical} shouldAddGutters={true}>
+                    <Image source='https://arweave.net/cuGWQb6lme5sVhumf1yrt2GnTuxILG_f-9IhbDyLIEY' alternativeText='Title NFT' isFullHeight={true} isFullWidth={true} fitType='cover' />
+                    <Text variant='note'>XYZ 123</Text>
+                  </Stack>
+                </Box>
+              </Stack>
+            </ContainingView>
+          </Box>
+        </BackgroundView>
         <ContainingView>
-          <EqualGrid isFullHeight={false} childSizeResponsive={{ base: 12, small: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true}>
-            <React.Fragment>
-              {randomTokenTransfer ? (
-                <RandomTokenTransferCard tokenTransfer={randomTokenTransfer} />
-              ) : (
-                <LoadingSpinner />
-              )}
-              {highestPricedTokenTransfer ? (
-                <HighestPricedTokenTransferCard tokenTransfer={highestPricedTokenTransfer} />
-              ) : (
-                <LoadingSpinner />
-              )}
-              {mostTradedToken ? (
-                <MostTradedTokenTransferCard tradedToken={mostTradedToken} />
-              ) : (
-                <LoadingSpinner />
-              )}
-              {sponsoredToken ? (
-                <SponsoredTokenCard token={sponsoredToken.token} collection={sponsoredToken.collection} latestTransfer={sponsoredToken.latestTransfer} />
-              ) : (
-                <LoadingSpinner />
-              )}
-            </React.Fragment>
-          </EqualGrid>
+          <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2}>
+            <Spacing variant={PaddingSize.Wide2} />
+            <Text variant='header2'>Trending Collections</Text>
+            <Spacing variant={PaddingSize.Wide2} />
+          </Stack>
         </ContainingView>
-        <Stack.Item growthFactor={1} shrinkFactor={1}>
-          <Spacing variant={PaddingSize.Wide2} />
-        </Stack.Item>
-        <Text>Get your daily dose on:</Text>
-        <Spacing variant={PaddingSize.Narrow} />
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-          <Stack.Item growthFactor={1} shrinkFactor={1}>
-            <Button variant='tertiary' text={'Twitter'} target={'https://twitter.com/tokenhunt'} iconLeft={<KibaIcon iconId='feather-twitter' />} />
-          </Stack.Item>
-          <Stack.Item growthFactor={1} shrinkFactor={1}>
-            <Button variant='tertiary' text={'Instagram'} target={'https://instagram.com/tokenhunt'} iconLeft={<KibaIcon iconId='feather-instagram' />} />
-          </Stack.Item>
-          <Stack.Item growthFactor={1} shrinkFactor={1}>
-            <Button variant='tertiary' text={'Email'} onClicked={onEmailClicked} iconLeft={<KibaIcon iconId='feather-mail' />} />
-          </Stack.Item>
-        </Stack>
-        <Spacing />
+        <Stack.Item growthFactor={1} shrinkFactor={1} />
       </Stack>
-      <EmailSubsriptionPopup
-        isOpen={isEmailPopupShowing}
-        onCloseClicked={() => setIsEmailPopopShowing(false)}
-      />
     </React.Fragment>
   );
 };
