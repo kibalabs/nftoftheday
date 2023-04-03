@@ -36,6 +36,7 @@ from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTradedToken
+from notd.api.models_v1 import ApiTrendingCollection
 
 
 class RetrieveHighestPriceTransferRequest(BaseModel):
@@ -450,6 +451,14 @@ class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
 
 class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
+
+class RetrieveTrendingCollectionRequest(BaseModel):
+    currentDate: datetime.datetime
+    duration: Optional[str]
+    order: Optional[str]
+
+class RetrieveTrendingCollectionResponse(BaseModel):
+    trendingCollections: List[ApiTrendingCollection]
 
 class MintedTokenCountsRequest(BaseModel):
     currentDate: datetime.datetime
