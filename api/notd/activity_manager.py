@@ -1,9 +1,9 @@
 import contextlib
 import datetime
 import typing
+from typing import Optional
 from typing import Set
 from typing import Tuple
-from typing import Optional
 
 from core import logging
 from core.exceptions import NotFoundException

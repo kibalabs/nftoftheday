@@ -110,22 +110,12 @@ export const buildNotdTheme = (): ITheme => {
       },
       card: {
         padding: '0',
-        'background-color': 'rgba(255, 255, 255, 0.45)',
+        'background-color': 'rgba(0, 0, 0, 0.45)',
         'border-width': '0',
         margin: '0',
       },
       tooltip: {
         'background-color': '$colors.background',
-      },
-      cardLabelBox: {
-        'border-radius': '0.5em 0 0.2em 0',
-        padding: '0.5em 1em',
-      },
-      cardLabelBoxSponsored: {
-        'background-color': 'rgba(238, 213, 102, 0.25)',
-      },
-      cardLabelBoxRandom: {
-        'background-color': 'rgba(46, 180, 255, 0.25)',
       },
       unrounded: {
         'border-radius': '0',
@@ -136,23 +126,23 @@ export const buildNotdTheme = (): ITheme => {
         'border-width': '5px',
       },
       divider: {
-        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'background-color': 'rgba(0, 0, 0, 0.5)',
       },
       metricCard: {
         padding: '0',
-        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'background-color': 'rgba(0, 0, 0, 0.5)',
         'border-width': '0',
         margin: '0',
       },
       tokenCard: {
         padding: '0px',
-        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'background-color': 'rgba(0, 0, 0, 0.5)',
         'border-width': '0',
         'border-radius': '10px',
       },
       tokenSaleRow: {
         padding: '0',
-        'background-color': 'rgba(255, 255, 255, 0.15)',
+        'background-color': 'rgba(0, 0, 0, 0.5)',
         'border-width': '0',
         margin: '0',
         'border-radius': '0',
@@ -164,6 +154,11 @@ export const buildNotdTheme = (): ITheme => {
           'border-radius': '0',
         },
       },
+      rounded: {
+        background: {
+          'border-radius': defaultTheme.dimensions.borderRadius,
+        },
+      },
     },
     iconButtons: {
       default: {
@@ -171,6 +166,33 @@ export const buildNotdTheme = (): ITheme => {
           default: {
             background: {
               'background-color': 'rgba(255, 255, 255, 0)',
+            },
+          },
+        },
+      },
+    },
+    linkBases: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'background-color': 'rgba(0, 0, 0, 0.15)',
+            }
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.15)',
+            }
+          }
+        }
+      }
+    },
+    listItems: {
+      default:{
+        normal: {
+          default: {
+            background: {
+              'background-color': 'rgba(0, 0, 0, 0.95)',
             },
           },
         },
@@ -308,6 +330,15 @@ export const buildNotdTheme = (): ITheme => {
       },
     },
     inputWrappers: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'background-color': 'rgba(0, 0, 0, 0.25)',
+            },
+          },
+        },
+      },
       dialogInput: {
         normal: {
           default: {

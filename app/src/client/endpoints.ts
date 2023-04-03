@@ -78,7 +78,6 @@ export class GetTokenRecentSalesRequest extends RequestData {
   readonly limit?: number;
   readonly offset?: number;
 
-
   constructor(limit?: number, offset?: number) {
     super();
     this.limit = limit;
@@ -293,6 +292,43 @@ export class GetCollectionActivitiesResponse extends ResponseData {
   public static fromObject = (obj: Record<string, unknown>): GetCollectionActivitiesResponse => {
     return new GetCollectionActivitiesResponse(
       (obj.collectionActivities as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionActivity.fromObject(innerObj)),
+    );
+  };
+}
+
+
+export class ListTrendingCollectionsRequest extends RequestData {
+  readonly duration?: string;
+  readonly limit?: number;
+  readonly order?: string;
+
+  constructor(duration?: string, limit?: number, order?: string) {
+    super();
+    this.duration = duration;
+    this.limit = limit;
+    this.order = order;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      duration: this.duration,
+      limit: this.limit,
+      order: this.order,
+    };
+  };
+}
+
+export class ListTrendingCollectionsResponse extends ResponseData {
+  readonly trendingCollections: Resources.TrendingCollection[];
+
+  public constructor(trendingCollections: Resources.TrendingCollection[]) {
+    super();
+    this.trendingCollections = trendingCollections;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListTrendingCollectionsResponse => {
+    return new ListTrendingCollectionsResponse(
+      (obj.trendingCollections as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TrendingCollection.fromObject(innerObj)),
     );
   };
 }

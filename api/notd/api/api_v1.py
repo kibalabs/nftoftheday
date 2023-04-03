@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from core.util import date_util
@@ -26,6 +27,8 @@ from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
+from notd.api.endpoints_v1 import ListTrendingCollectionsRequest
+from notd.api.endpoints_v1 import ListTrendingCollectionsResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
@@ -100,6 +103,12 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.refresh_gallery_badge_holders_for_all_collections_deferred()
         return RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse()
 
+    @router.get('/collections/trending', response_model=ListTrendingCollectionsResponse)
+    async def list_trending_collections(currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None, limit: Optional[str] = None, order: Optional[str] = None) -> ListTrendingCollectionsResponse:
+        currentDate = currentDate.replace(tzinfo=None) if currentDate else None
+        trendingCollections = await notdManager.list_trending_collections(currentDate=currentDate, duration=duration, limit=limit, order=order)
+        return ListTrendingCollectionsResponse(trendingCollections=(await responseBuilder.trending_collections_from_models(trendingCollections=trendingCollections)))
+
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
     async def get_collection_by_address(registryAddress: str) -> GetCollectionResponse:
         collection = await notdManager.get_collection_by_address(address=registryAddress)
@@ -173,6 +182,16 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.update_token_deferred(registryAddress=registryAddress, tokenId=tokenId)
         return UpdateCollectionTokenResponse()
 
+    @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
+    async def get_collection_statistics(registryAddress: str) -> GetCollectionStatisticsResponse:
+        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
+        return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
+
+    @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionDailyActivitiesResponse)
+    async def get_collection_daily_activities(registryAddress: str) -> GetCollectionDailyActivitiesResponse:
+        collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
+        return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
+
     @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)
     async def list_account_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> GetAccountTokensResponse:
         limit = limit if limit is not None else 100
@@ -191,16 +210,6 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_owner_token_ownerships(accountAddress: str) -> RefreshAccountTokenOwnershipsResponse:
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
-
-    @router.get('/collections/{registryAddress}/statistics', response_model=GetCollectionStatisticsResponse)
-    async def get_collection_statistics(registryAddress: str) -> GetCollectionStatisticsResponse:
-        collectionStatistics = await notdManager.get_collection_statistics(address=registryAddress)
-        return GetCollectionStatisticsResponse(collectionStatistics=(await responseBuilder.get_collection_statistics(collectionStatistics=collectionStatistics)))
-
-    @router.get('/collections/{registryAddress}/daily-activities', response_model=GetCollectionDailyActivitiesResponse)
-    async def get_collection_daily_activities(registryAddress: str) -> GetCollectionDailyActivitiesResponse:
-        collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
-        return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
 
     @router.post('/calculate-common-owners', response_model=CalculateCommonOwnersResponse)
     async def calculate_common_owners(request: CalculateCommonOwnersRequest) -> CalculateCommonOwnersResponse:

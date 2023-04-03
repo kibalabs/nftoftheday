@@ -644,6 +644,15 @@ class GallerySuperCollectionUserRow:
 
 
 @dataclasses.dataclass
+class TrendingCollection:
+    registryAddress: str
+    previousSaleCount: int
+    previousTotalVolume: int
+    totalVolume: int
+    totalSaleCount: int
+
+
+@dataclasses.dataclass
 class MintedTokenCount:
     date: datetime.datetime
     count: int

@@ -34,6 +34,7 @@ from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
+from notd.api.models_v1 import ApiTrendingCollection
 
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
@@ -413,6 +414,14 @@ class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
 
 class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
+
+class ListTrendingCollectionsRequest(BaseModel):
+    currentDate: Optional[datetime.datetime]
+    duration: Optional[str]
+    order: Optional[str]
+
+class ListTrendingCollectionsResponse(BaseModel):
+    trendingCollections: List[ApiTrendingCollection]
 
 class MintedTokenCountsRequest(BaseModel):
     currentDate: datetime.datetime

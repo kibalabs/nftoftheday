@@ -206,3 +206,29 @@ export class CollectionActivity {
     );
   };
 }
+
+export class TrendingCollection {
+  readonly collection: Collection;
+  readonly previousSaleCount: BigNumber;
+  readonly previousTotalVolume: BigNumber;
+  readonly totalVolume: BigNumber;
+  readonly totalSaleCount: BigNumber;
+
+  public constructor(collection: Collection, previousSaleCount: BigNumber, previousTotalVolume: BigNumber, totalVolume: BigNumber, totalSaleCount: BigNumber) {
+    this.collection = collection;
+    this.previousSaleCount = previousSaleCount;
+    this.previousTotalVolume = previousTotalVolume;
+    this.totalVolume = totalVolume;
+    this.totalSaleCount = totalSaleCount;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): TrendingCollection => {
+    return new TrendingCollection(
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      BigNumber.from(String(obj.previousSaleCount)),
+      BigNumber.from(String(obj.previousTotalVolume)),
+      BigNumber.from(String(obj.totalVolume)),
+      BigNumber.from(String(obj.totalSaleCount)),
+    );
+  };
+}

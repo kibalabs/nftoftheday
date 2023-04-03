@@ -115,4 +115,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionActivitiesResponse);
     return response.collectionActivities;
   };
+
+  public listTrendingCollections = async (duration?: string, limit?: number, order?: string): Promise<Resources.TrendingCollection[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/trending`;
+    const request = new Endpoints.ListTrendingCollectionsRequest(duration, limit, order);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListTrendingCollectionsResponse);
+    return response.trendingCollections;
+  };
 }
