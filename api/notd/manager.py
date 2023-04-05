@@ -700,14 +700,14 @@ class NotdManager:
         query = (
             sqlalchemy.select(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
             .where(TokenMetadatasTable.c.registryAddress == heroAddresses[0])
-            .offset(random.randint(0, 5))
+            .offset(random.randint(1, 15))
             .limit(1)
         )
         for heroAddress in heroAddresses[1:]:
             randomTokenQuery = (
                 sqlalchemy.select(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
                 .where(TokenMetadatasTable.c.registryAddress == heroAddress)
-                .offset(random.randint(0, 5))
+                .offset(random.randint(1, 15))
                 .limit(1)
             )
             query = randomTokenQuery.union(query) # type: ignore[assignment]
