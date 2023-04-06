@@ -466,3 +466,10 @@ class MintedTokenCountsRequest(BaseModel):
 
 class MintedTokenCountsResponse(BaseModel):
     mintedTokenCounts: List[ApiMintedTokenCount]
+
+class RetrieveHeroTokensRequest(BaseModel):
+    currentDate: datetime.datetime
+    limit: int
+
+class RetrieveHeroTokensResponse(BaseModel):
+    heroTokens: List[ApiCollectionToken]

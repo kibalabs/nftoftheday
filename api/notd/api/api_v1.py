@@ -27,6 +27,8 @@ from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
+from notd.api.endpoints_v1 import RetrieveHeroTokensRequest
+from notd.api.endpoints_v1 import RetrieveHeroTokensResponse
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferRequest
 from notd.api.endpoints_v1 import RetrieveHighestPriceTransferResponse
 from notd.api.endpoints_v1 import RetrieveMostTradedRequest
@@ -265,6 +267,13 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         duration = request.duration
         mintedTokenCounts = await notdManager.retrieve_minted_token_counts(currentDate=currentDate, duration=duration)
         return MintedTokenCountsResponse(mintedTokenCounts=(await responseBuilder.minted_token_counts_from_models(mintedTokenCounts=mintedTokenCounts)))
+
+    @router.post('/retrieve-hero-tokens', response_model=RetrieveHeroTokensResponse)
+    async def retrieve_hero_tokens(request: RetrieveHeroTokensRequest) -> RetrieveHeroTokensResponse:
+        currentDate = date_util.start_of_day(dt=request.currentDate.replace(tzinfo=None)) if request.currentDate else date_util.datetime_from_now()
+        limit = request.limit if request.limit else 10
+        tokenHeroes = await notdManager.retrieve_hero_tokens(currentDate=currentDate, limit=limit)
+        return RetrieveHeroTokensResponse(heroTokens=(await responseBuilder.collection_token_from_registry_addresses_token_ids(tokens=tokenHeroes)))
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:

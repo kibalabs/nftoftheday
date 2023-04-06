@@ -54,6 +54,7 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
+from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
 from notd.store.schema import TokenOwnershipsView
@@ -670,3 +671,47 @@ class NotdManager:
             else:
                 mintedTokenCounts += [MintedTokenCount(date=validDatetime, count=0)]
         return mintedTokenCounts
+
+    async def retrieve_hero_tokens(self, currentDate: datetime.datetime, limit: int) -> List[Token]:
+        heroAddresses = []
+        halfLimit = limit//2
+        currentDate = date_util.start_of_day(dt=currentDate)
+        highestValueAddressesQuery = (
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address)
+            .where(CollectionHourlyActivitiesTable.c.date >= date_util.datetime_from_datetime(dt=currentDate, days=-7))
+            .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
+            .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
+            .group_by(CollectionHourlyActivitiesTable.c.address)
+            .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
+            .limit(halfLimit)
+        )
+        highestValueAddressesResult = await self.retriever.database.execute(query=highestValueAddressesQuery)
+        heroAddresses += [row['address'] for row in list(highestValueAddressesResult.mappings())]
+        newlyMintedAddressSubQuery = (
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address.distinct())
+            .where(CollectionHourlyActivitiesTable.c.date >= date_util.datetime_from_datetime(dt=currentDate, days=-7))
+            .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
+            .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
+            .where(CollectionHourlyActivitiesTable.c.mintCount > 0)
+            .limit(halfLimit)
+        )
+        newlyMintedAddressResult = await self.retriever.database.execute(query=newlyMintedAddressSubQuery)
+        heroAddresses += [row['address'] for row in list(newlyMintedAddressResult.mappings())]
+        query = (
+            sqlalchemy.select(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
+            .where(TokenMetadatasTable.c.registryAddress == heroAddresses[0])
+            .offset(random.randint(1, 15))
+            .limit(1)
+        )
+        for heroAddress in heroAddresses[1:]:
+            randomTokenQuery = (
+                sqlalchemy.select(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
+                .where(TokenMetadatasTable.c.registryAddress == heroAddress)
+                .offset(random.randint(1, 15))
+                .limit(1)
+            )
+            query = randomTokenQuery.union(query) # type: ignore[assignment]
+        result = await self.retriever.database.execute(query=query)
+        heroTokenRows = list(result.mappings())
+        heroTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in heroTokenRows]
+        return heroTokens
