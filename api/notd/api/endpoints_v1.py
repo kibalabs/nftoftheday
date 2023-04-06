@@ -18,7 +18,6 @@ from notd.api.models_v1 import ApiCollectionOverlapOwner
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
@@ -28,6 +27,7 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiMintedTokenCount
+from notd.api.models_v1 import ApiOwnedCollection
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
@@ -289,7 +289,7 @@ class GetGalleryUserOwnedCollectionsRequest(BaseModel):
     pass
 
 class GetGalleryUserOwnedCollectionsResponse(BaseModel):
-    ownedCollections: List[ApiGalleryOwnedCollection]
+    ownedCollections: List[ApiOwnedCollection]
 
 ApiListResponseItemType = TypeVar("ApiListResponseItemType")  # pylint: disable=invalid-name
 
@@ -439,3 +439,15 @@ class RetrieveHeroTokensRequest(BaseModel):
 
 class RetrieveHeroTokensResponse(BaseModel):
     tokens: List[ApiCollectionToken]
+
+class ListUserOwnedCollectionsRequest(BaseModel):
+    pass
+
+class ListUserOwnedCollectionsResponse(BaseModel):
+    ownedCollections: List[ApiOwnedCollection]
+
+class ListUserRecentTransfersRequest(BaseModel):
+    pass
+
+class ListUserRecentTransfersResponse(BaseModel):
+    tokenTransfers: List[ApiTokenTransfer]

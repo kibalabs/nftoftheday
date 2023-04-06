@@ -353,7 +353,7 @@ export const CollectionPage = (): React.ReactElement => {
                             <YAxis yAxisId={0} type='number' domain={['dataMin', 'auto']} orientation='right' />
                             <YAxis yAxisId={1} />
                             <Tooltip content={renderCustomToolTip} />
-                            <Bar isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.backgroundLight50} fillOpacity={0.5} yAxisId={1} />
+                            <Bar isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.brandPrimary} fillOpacity={1} yAxisId={1} />
                             <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text} strokeWidth={2} fillOpacity={0} yAxisId={0} />
                           </ComposedChart>
                         </RechartsContainer>

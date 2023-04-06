@@ -121,8 +121,8 @@ export const buildNotdTheme = (): ITheme => {
         'border-radius': '0',
       },
       avatar: {
-        'border-color': '$colors.brandSecondary',
-        'background-color': '$colors.brandSecondary',
+        'border-color': '$colors.background',
+        'background-color': '$colors.background',
         'border-width': '5px',
       },
       divider: {
@@ -142,10 +142,10 @@ export const buildNotdTheme = (): ITheme => {
       },
       tokenSaleRow: {
         padding: '0',
-        'background-color': 'rgba(0, 0, 0, 0.5)',
+        'background-color': '$colors.backgroundLight10',
         'border-width': '0',
         margin: '0',
-        'border-radius': '0',
+        // 'border-radius': '0',
       },
     },
     images: {
@@ -356,6 +356,36 @@ export const buildNotdTheme = (): ITheme => {
             background: {
               'border-width': '0',
               padding: '0',
+            },
+          },
+        },
+      },
+    },
+    collapsibleBoxes: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'border-color': '$colors.backgroundLight10',
+              'border-width': '1px',
+            },
+            headerBackground: {
+              'background-color': '$colors.backgroundLight10',
+            },
+          },
+        },
+      },
+    },
+    titledCollapsibleBoxes: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'border-color': '$colors.backgroundLight10',
+              'border-width': '1px',
+            },
+            headerBackground: {
+              'background-color': '$colors.backgroundLight10',
             },
           },
         },

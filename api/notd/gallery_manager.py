@@ -33,12 +33,12 @@ from notd.model import CollectionOverlap
 from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
 from notd.model import GalleryBadgeHolder
-from notd.model import GalleryOwnedCollection
 from notd.model import GallerySuperCollectionUserRow
 from notd.model import GalleryToken
 from notd.model import GalleryUser
 from notd.model import GalleryUserRow
 from notd.model import ListResponse
+from notd.model import OwnedCollection
 from notd.model import Signature
 from notd.model import SuperCollectionEntry
 from notd.model import SuperCollectionOverlap
@@ -497,7 +497,7 @@ class GalleryManager:
             raise BadRequestException('NO_TWITTER_ID')
         await self.twitterManager.follow_user_from_user(userTwitterId=accountProfile.twitterId, targetTwitterId=userProfile.twitterId)
 
-    async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> List[GalleryOwnedCollection]:
+    async def get_gallery_user_owned_collections(self, registryAddress: str, userAddress: str) -> List[OwnedCollection]:
         collectionsQuery = (
             sqlalchemy.select(TokenOwnershipsView)
                 .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsView.c.registryAddress)
@@ -521,7 +521,7 @@ class GalleryManager:
             for token in tokens:
                 collectionTokenMap[token.registryAddress].append(token)
         return [
-            GalleryOwnedCollection(
+            OwnedCollection(
                 collection=collectionMap[registryAddress],
                 tokenMetadatas=collectionTokenMap[registryAddress],
             ) for registryAddress in registryAddresses

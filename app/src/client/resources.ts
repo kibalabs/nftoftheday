@@ -1,40 +1,29 @@
-import { dateFromString } from '@kibalabs/core';
+import { dateFromString, ResponseData } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
-export class TokenTransfer {
-  readonly tokenTransferId: number;
-  readonly transactionHash: string;
-  readonly registryAddress: string;
-  readonly fromAddress: string;
-  readonly toAddress: string;
-  readonly tokenId: string;
-  readonly value: BigNumber;
-  readonly gasLimit: number;
-  readonly gasPrice: number;
-  readonly gasUsed: number;
-  readonly blockNumber: number;
-  readonly blockHash: string;
-  readonly blockDate: Date;
-  readonly token: CollectionToken;
-  readonly collection: Collection;
+export class TokenTransfer extends ResponseData {
+  public constructor(
+    readonly tokenTransferId: number,
+    readonly transactionHash: string,
+    readonly registryAddress: string,
+    readonly fromAddress: string,
+    readonly toAddress: string,
+    readonly tokenId: string,
+    readonly value: BigNumber,
+    readonly gasLimit: number,
+    readonly gasPrice: number,
+    readonly gasUsed: number,
+    readonly blockNumber: number,
+    readonly blockHash: string,
+    readonly blockDate: Date,
+    readonly token: CollectionToken,
+    readonly isMultiAddress: boolean,
+    readonly isInterstitial: boolean,
+    readonly isSwap: boolean,
+    readonly isBatch: boolean,
+    readonly isOutbound: boolean,
 
-  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: BigNumber, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date, token: CollectionToken, collection: Collection) {
-    this.tokenTransferId = tokenTransferId;
-    this.transactionHash = transactionHash;
-    this.registryAddress = registryAddress;
-    this.fromAddress = fromAddress;
-    this.toAddress = toAddress;
-    this.tokenId = tokenId;
-    this.value = value;
-    this.gasLimit = gasLimit;
-    this.gasPrice = gasPrice;
-    this.gasUsed = gasUsed;
-    this.blockNumber = blockNumber;
-    this.blockHash = blockHash;
-    this.blockDate = blockDate;
-    this.token = token;
-    this.collection = collection;
-  }
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
     return new TokenTransfer(
@@ -52,7 +41,11 @@ export class TokenTransfer {
       String(obj.blockHash),
       dateFromString(obj.blockDate as string),
       CollectionToken.fromObject(obj.token as Record<string, unknown>),
-      Collection.fromObject(obj.collection as Record<string, unknown>),
+      Boolean(obj.isMultiAddress),
+      Boolean(obj.isInterstitial),
+      Boolean(obj.isSwap),
+      Boolean(obj.isBatch),
+      Boolean(obj.isOutbound),
     );
   };
 }
@@ -103,14 +96,16 @@ export class CollectionToken {
   readonly registryAddress: string;
   readonly tokenId: string;
   readonly name: string;
+  readonly resizableImageUrl: string | null;
   readonly imageUrl: string | null;
   readonly description: string | null;
   readonly attributes: TokenAttribute[];
 
-  public constructor(registryAddress: string, tokenId: string, name: string, imageUrl: string | null, description: string | null, attributes: TokenAttribute[]) {
+  public constructor(registryAddress: string, tokenId: string, name: string, resizableImageUrl: string | null, imageUrl: string | null, description: string | null, attributes: TokenAttribute[]) {
     this.registryAddress = registryAddress;
     this.tokenId = tokenId;
     this.name = name;
+    this.resizableImageUrl = resizableImageUrl;
     this.imageUrl = imageUrl;
     this.description = description;
     this.attributes = attributes;
@@ -121,6 +116,7 @@ export class CollectionToken {
       String(obj.registryAddress),
       String(obj.tokenId),
       String(obj.name),
+      obj.resizableImageUrl ? String(obj.resizableImageUrl) : null,
       obj.imageUrl ? String(obj.imageUrl) : null,
       obj.description ? String(obj.description) : null,
       (obj.attributes as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenAttribute.fromObject(innerObj)),
@@ -274,6 +270,21 @@ export class MintedTokenCount {
       dateFromString(obj.date as string),
       BigNumber.from(String(obj.mintedTokenCount)),
       BigNumber.from(String(obj.newRegistryCount)),
+    );
+  };
+}
+
+
+export class OwnedCollection extends ResponseData {
+  public constructor(
+    readonly collection: Collection,
+    readonly tokens: CollectionToken[],
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): OwnedCollection => {
+    return new OwnedCollection(
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(innerObj)),
     );
   };
 }

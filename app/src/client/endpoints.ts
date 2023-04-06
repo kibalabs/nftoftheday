@@ -417,3 +417,54 @@ export class RetrieveHeroTokensResponse extends ResponseData {
     );
   };
 }
+
+export class ListUserOwnedCollectionsRequest extends RequestData {
+}
+
+export class ListUserOwnedCollectionsResponse extends ResponseData {
+  readonly ownedCollections: Resources.OwnedCollection[];
+
+  public constructor(ownedCollections: Resources.OwnedCollection[]) {
+    super();
+    this.ownedCollections = ownedCollections;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListUserOwnedCollectionsResponse => {
+    return new ListUserOwnedCollectionsResponse(
+      (obj.ownedCollections as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.OwnedCollection.fromObject(innerObj)),
+    );
+  };
+}
+
+export class ListUserRecentTransfersRequest extends RequestData {
+  readonly limit?: number;
+  readonly offset?: number;
+
+  constructor(limit?: number, offset?: number) {
+    super();
+    this.limit = limit;
+    this.offset = offset;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      limit: this.limit,
+      offset: this.offset,
+    };
+  };
+}
+
+export class ListUserRecentTransfersResponse extends ResponseData {
+  readonly tokenTransfers: Resources.TokenTransfer[];
+
+  public constructor(tokenTransfers: Resources.TokenTransfer[]) {
+    super();
+    this.tokenTransfers = tokenTransfers;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListUserRecentTransfersResponse => {
+    return new ListUserRecentTransfersResponse(
+      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+    );
+  };
+}

@@ -148,4 +148,20 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveHeroTokensResponse);
     return response.tokens;
   };
+
+  public listUserOwnedCollections = async (userAddress: string): Promise<Resources.OwnedCollection[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${userAddress}/owned-collections`;
+    const request = new Endpoints.ListUserOwnedCollectionsRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListUserOwnedCollectionsResponse);
+    return response.ownedCollections;
+  };
+
+  public listUserRecentTransfers = async (address: string, limit?: number, offset?: number): Promise<Resources.TokenTransfer[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${address}/recent-transfers`;
+    const request = new Endpoints.ListUserRecentTransfersRequest(limit, offset);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListUserRecentTransfersResponse);
+    return response.tokenTransfers;
+  };
 }
