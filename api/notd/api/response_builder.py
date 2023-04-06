@@ -27,6 +27,7 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiMintedTokenCount
+from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
@@ -39,6 +40,7 @@ from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
+from notd.model import TokenTransferValue
 from notd.model import AccountToken
 from notd.model import Airdrop
 from notd.model import Collection
@@ -187,6 +189,17 @@ class ResponseBuilder:
 
     async def token_transfers_from_models(self, tokenTransfers: Sequence[TokenTransfer]) -> List[ApiTokenTransfer]:
         return await asyncio.gather(*[self.token_transfer_from_model(tokenTransfer=tokenTransfer) for tokenTransfer in tokenTransfers])
+
+    async def token_transfer_value_from_model(self, tokenTransferValue: TokenTransferValue) -> ApiTokenTransferValue:
+        return ApiTokenTransferValue(
+            registryAddress=tokenTransferValue.registryAddress,
+            tokenId=tokenTransferValue.tokenId,
+            value=str(tokenTransferValue.value),
+            blockDate=tokenTransferValue.blockDate,
+        )
+
+    async def token_transfer_values_from_models(self, tokenTransferValues: Sequence[TokenTransferValue]) -> List[ApiTokenTransferValue]:
+        return await asyncio.gather(*[self.token_transfer_value_from_model(tokenTransferValue=tokenTransferValue) for tokenTransferValue in tokenTransferValues])
 
     async def token_ownership_from_model(self, tokenMultiOwnership: TokenMultiOwnership) -> ApiTokenOwnership:
         return ApiTokenOwnership(
@@ -500,7 +513,8 @@ class ResponseBuilder:
     async def minted_token_count_from_model(self, mintedTokenCount: MintedTokenCount) -> ApiMintedTokenCount:
         return ApiMintedTokenCount(
             date=mintedTokenCount.date,
-            count=str(mintedTokenCount.count)
+            mintedTokenCount=str(mintedTokenCount.mintedTokenCount),
+            newRegistryCount=str(mintedTokenCount.newRegistryCount),
         )
 
     async def minted_token_counts_from_models(self, mintedTokenCounts: Sequence[MintedTokenCount]) -> List[ApiMintedTokenCount]:

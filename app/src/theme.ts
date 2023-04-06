@@ -12,8 +12,8 @@ export const buildNotdTheme = (): ITheme => {
       },
     },
     colors: {
-      brandPrimary: '#6F0000',
-      brandSecondary: '#200122',
+      brandPrimary: '#00A3FF',
+      brandSecondary: '#7500E5',
       background: '#000000',
       text: '#ffffff',
       placeholderText: 'rgba(255, 255, 255, 0.5)',
@@ -344,6 +344,18 @@ export const buildNotdTheme = (): ITheme => {
           default: {
             background: {
               'background-color': 'rgba(255, 255, 255, 0.25)',
+            },
+          },
+        },
+      },
+    },
+    selectableViews: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'border-width': '0',
+              'padding': '0',
             },
           },
         },

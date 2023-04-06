@@ -58,6 +58,30 @@ export class TokenTransfer {
 }
 
 
+export class TokenTransferValue {
+  readonly registryAddress: string;
+  readonly tokenId: string;
+  readonly value: BigNumber;
+  readonly blockDate: Date;
+
+  public constructor(registryAddress: string, tokenId: string, value: BigNumber, blockDate: Date, ) {
+    this.registryAddress = registryAddress;
+    this.tokenId = tokenId;
+    this.value = value;
+    this.blockDate = blockDate;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): TokenTransferValue => {
+    return new TokenTransferValue(
+      String(obj.registryAddress),
+      String(obj.tokenId),
+      BigNumber.from(String(obj.value)),
+      dateFromString(obj.blockDate as string),
+    );
+  };
+}
+
+
 export class TokenAttribute {
   readonly traitType: string;
   readonly value: string;
@@ -229,6 +253,27 @@ export class TrendingCollection {
       BigNumber.from(String(obj.previousTotalVolume)),
       BigNumber.from(String(obj.totalVolume)),
       BigNumber.from(String(obj.totalSaleCount)),
+    );
+  };
+}
+
+
+export class MintedTokenCount {
+  readonly date: Date;
+  readonly mintedTokenCount: BigNumber;
+  readonly newRegistryCount: BigNumber;
+
+  public constructor(date: Date, mintedTokenCount: BigNumber, newRegistryCount: BigNumber) {
+    this.date = date;
+    this.mintedTokenCount = mintedTokenCount;
+    this.newRegistryCount = newRegistryCount;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): MintedTokenCount => {
+    return new MintedTokenCount(
+      dateFromString(obj.date as string),
+      BigNumber.from(String(obj.mintedTokenCount)),
+      BigNumber.from(String(obj.newRegistryCount)),
     );
   };
 }

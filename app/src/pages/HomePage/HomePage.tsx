@@ -1,58 +1,204 @@
 import React from 'react';
 
-import { Alignment, BackgroundView, Box, PrettyText, Text, ContainingView, Direction, Head, Stack, PaddingSize, Image, Spacing, ResponsiveTextAlignmentView, TextAlignment, LoadingSpinner, EqualGrid, OptionSelect, IOption, } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, PrettyText, Text, ContainingView, Direction, Head, Stack, PaddingSize, Image, Spacing, ResponsiveTextAlignmentView, TextAlignment, LoadingSpinner, EqualGrid, OptionSelect, IOption, useColors, SelectableView, MarkdownText, Button, } from '@kibalabs/ui-react';
 import { useGlobals } from '../../globalsContext';
 import styled, { keyframes as styledKeyframes} from 'styled-components';
-import { TrendingCollection } from '../../client/resources';
-import { longFormatEther, shortFormatEther } from '@kibalabs/core';
+import { MintedTokenCount, TokenTransfer, TokenTransferValue, TrendingCollection } from '../../client/resources';
+import { addDays, dateToString, etherToNumber, longFormatEther, shortFormatEther } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
+import { Area, AreaChart, Bar, ComposedChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis, ResponsiveContainer, Scatter } from 'recharts';
+
+interface MintedTokenChartData {
+  date: number;
+  mintedTokenCount: number;
+  newRegistryCount: number;
+}
+
+const renderMintedTokenChartToolTip = (dataItem: any): React.ReactElement | null => {
+  if (!dataItem.payload || dataItem.payload.length === 0) {
+    return null;
+  }
+  const tooltipData = dataItem.payload[0].payload;
+  return (
+    <Box variant='card-tooltip'>
+      <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide1}>
+        <Text>{`Date: ${dateToString(new Date(tooltipData.date), 'HH:mm dd/MM/yyyy')}`}</Text>
+        <Text>{`New Collections: ${tooltipData.newRegistryCount}`}</Text>
+      </Stack>
+    </Box>
+  );
+};
+
+interface TrendingCollectionTokenTransferValuesChartData {
+  date: number;
+  value: number;
+}
+
+const renderTrendingCollectionTokenTransferValuesTooltip = (dataItem: any): React.ReactElement | null => {
+  if (!dataItem.payload || dataItem.payload.length === 0) {
+    return null;
+  }
+  const tooltipData = dataItem.payload[0].payload;
+  return (
+    <Box variant='card-tooltip'>
+      <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide1}>
+        <Text>{`Date: ${dateToString(new Date(tooltipData.date), 'HH:mm dd/MM/yyyy')}`}</Text>
+        <Text>{`Value: Ξ${tooltipData.value}`}</Text>
+      </Stack>
+    </Box>
+  );
+};
 
 const TRENDING_COLLECTIONS_DURATION_OPTIONS: IOption[] = [
+  {itemKey: '12_HOURS', text: '12 Hours'},
+  {itemKey: '24_HOURS', text: '24 Hours'},
   {itemKey: '7_DAYS', text: '7 Days'},
   {itemKey: '30_DAYS', text: '30 Days'},
-  {itemKey: '24_HOURS', text: '24 Hours'},
+];
+
+const MINTED_TOKEN_COUNTS_DURATION_OPTIONS: IOption[] = [
   {itemKey: '12_HOURS', text: '12 Hours'},
+  {itemKey: '24_HOURS', text: '24 Hours'},
+  {itemKey: '7_DAYS', text: '7 Days'},
+  {itemKey: '30_DAYS', text: '30 Days'},
+  {itemKey: '90_DAYS', text: '90 Days'},
+  {itemKey: '180_DAYS', text: '180 Days'},
 ];
 
 const HeroTextAnimation = styledKeyframes`
   to {
-    background-position: 200% 0;
+    background-position: -200% 0;
   }
 `;
 
 const HeroText = styled.span`
-  background: linear-gradient(to right, #a34b4b, #ffffff, #a34b4b);//, #ffffff);
+  background: linear-gradient(to right, #00A3FF 0%, #00A3FF 90%, #c2e9ff 95%, #00A3FF 100%);
+  background-position: 0% 0;
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation-name: ${HeroTextAnimation};
-  animation-duration: 5s;
+  animation-duration: 4s;
   animation-iteration-count: infinite;
+  animation-timing-function: linear;
+
 `;
 
 export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
-  const [trendingCollectionsDuration, setTrendingCollectionsDuration] = React.useState<string>('24_HOURS');
+  const colors = useColors();
+  const [trendingCollectionsDuration, setTrendingCollectionsDuration] = React.useState<string>(TRENDING_COLLECTIONS_DURATION_OPTIONS[0].itemKey);
   const [trendingCollections, setTrendingCollections] = React.useState<TrendingCollection[] | undefined | null>(undefined);
+  const [selectedTrendingCollectionAddress, setSelectedTrendingCollectionAddress] = React.useState<string | undefined | null>(undefined);
+  const [trendingCollectionTokenTransferValues, setTrendingCollectionTokenTransferValues] = React.useState<TokenTransferValue[] | undefined | null>(undefined);
+  const [mintedTokenCountsDuration, setMintedTokenCountsDuration] = React.useState<string>(MINTED_TOKEN_COUNTS_DURATION_OPTIONS[0].itemKey);
+  const [mintedTokenCounts, setMintedTokenCounts] = React.useState<MintedTokenCount[] | undefined | null>(undefined);
 
   const updateTrendingCollections = React.useCallback((): void => {
     setTrendingCollections(undefined);
-    notdClient.listTrendingCollections(trendingCollectionsDuration, 9).then((retrievedTrendingCollections: TrendingCollection[]): void => {
+    setSelectedTrendingCollectionAddress(undefined);
+    notdClient.retrieveTrendingCollections(trendingCollectionsDuration, 9).then((retrievedTrendingCollections: TrendingCollection[]): void => {
       setTrendingCollections(retrievedTrendingCollections);
+      setSelectedTrendingCollectionAddress(setSelectedTrendingCollectionAddress.length > 0 ? retrievedTrendingCollections[0].collection.address : null);
     }).catch((error: unknown): void => {
       console.error(error);
       setTrendingCollections(null);
-    })
+      setSelectedTrendingCollectionAddress(null);
+    });
   }, [notdClient, trendingCollectionsDuration]);
 
   React.useEffect((): void => {
     updateTrendingCollections();
   }, [updateTrendingCollections]);
 
+  const updateTrendingCollectionGraphData = React.useCallback((): void => {
+    if (!selectedTrendingCollectionAddress) {
+      setTrendingCollectionTokenTransferValues(null);
+      return;
+    }
+    setTrendingCollectionTokenTransferValues(undefined);
+    const maxDate = new Date();
+    let minDate: Date | undefined = addDays(maxDate, -1);;
+    if (trendingCollectionsDuration === '12_HOURS') {
+      minDate = addDays(maxDate, -0.5);
+    } else if (trendingCollectionsDuration === '24_HOURS') {
+      minDate = addDays(maxDate, -1);
+    } else if (trendingCollectionsDuration === '7_DAYS') {
+      minDate = addDays(maxDate, -7);
+    } else if (trendingCollectionsDuration === '30_DAYS') {
+      minDate = addDays(maxDate, -30);
+    } else if (trendingCollectionsDuration === '90_DAYS') {
+      minDate = addDays(maxDate, -90);
+    } else if (trendingCollectionsDuration === '180_DAYS') {
+      minDate = addDays(maxDate, -180);
+    }
+    notdClient.listCollectionTransferValues(selectedTrendingCollectionAddress, minDate, maxDate, BigNumber.from(1)).then((retrievedTokenTransferValues: TokenTransferValue[]): void => {
+      setTrendingCollectionTokenTransferValues(retrievedTokenTransferValues.sort((tokenTransferValue1: TokenTransferValue, tokenTransferValue2: TokenTransferValue): number => {
+        return tokenTransferValue1.blockDate.getTime() - tokenTransferValue2.blockDate.getTime();
+      }));
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setTrendingCollectionTokenTransferValues(null);
+    });
+  }, [notdClient, selectedTrendingCollectionAddress, trendingCollectionsDuration]);
+
+  React.useEffect((): void => {
+    updateTrendingCollectionGraphData();
+  }, [updateTrendingCollectionGraphData]);
+
   const onTrendingCollectionsDurationClicked = (newTrendingCollectionsDuration: string): void => {
     setTrendingCollectionsDuration(newTrendingCollectionsDuration);
   }
+
+  const updateMintedTokenCounts = React.useCallback((): void => {
+    setMintedTokenCounts(undefined);
+    notdClient.retrieveMintedTokenCounts(mintedTokenCountsDuration).then((retrievedMintedTokenCounts: MintedTokenCount[]): void => {
+      setMintedTokenCounts(retrievedMintedTokenCounts);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setMintedTokenCounts(null);
+    })
+  }, [notdClient, mintedTokenCountsDuration]);
+
+  React.useEffect((): void => {
+    updateMintedTokenCounts();
+  }, [updateMintedTokenCounts]);
+
+  const onMintedTokenCountsDurationClicked = (newMintedTokenCountsDuration: string): void => {
+    setMintedTokenCountsDuration(newMintedTokenCountsDuration);
+  }
+
+  const mintedTokenCountsChartData = React.useMemo((): MintedTokenChartData[] | undefined | null => {
+    if (mintedTokenCounts === undefined) {
+      return undefined;
+    }
+    if (mintedTokenCounts === null) {
+      return null;
+    }
+    return mintedTokenCounts.map((mintedToken: MintedTokenCount): MintedTokenChartData => ({
+      date: mintedToken.date.getTime(),
+      mintedTokenCount: mintedToken.mintedTokenCount.toNumber(),
+      newRegistryCount: mintedToken.newRegistryCount.toNumber(),
+    }));
+  }, [mintedTokenCounts]);
+
+  const onTrendingCollectionClicked = (trendingCollection: TrendingCollection): void => {
+    setSelectedTrendingCollectionAddress(trendingCollection.collection.address);
+  }
+
+  const trendingCollectionTokenTransferValuesChartData = React.useMemo((): TrendingCollectionTokenTransferValuesChartData[] | undefined | null => {
+    if (trendingCollectionTokenTransferValues === undefined) {
+      return undefined;
+    }
+    if (trendingCollectionTokenTransferValues === null) {
+      return null;
+    }
+    return trendingCollectionTokenTransferValues.map((tokenTransferValue: TokenTransferValue): TrendingCollectionTokenTransferValuesChartData => ({
+      date: tokenTransferValue.blockDate.getTime(),
+      value: tokenTransferValue.value.div(1000000000000000).toNumber() / 1000,
+    }));
+  }, [trendingCollectionTokenTransferValues]);
 
   return (
     <React.Fragment>
@@ -85,7 +231,7 @@ export const HomePage = (): React.ReactElement => {
           </Box>
         </BackgroundView>
         <ContainingView>
-          <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2} isScrollableVertically={false}>
+          <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide2}>
             <Spacing variant={PaddingSize.Wide3} />
             <Stack directionResponsive={{base: Direction.Vertical, small: Direction.Horizontal}} isFullWidth={true}>
               <Stack direction={Direction.Vertical}>
@@ -107,10 +253,10 @@ export const HomePage = (): React.ReactElement => {
             ) : (
               <EqualGrid childSizeResponsive={{base: 12, medium: 6, large: 4}} shouldAddGutters={true} childAlignment={Alignment.Start}>
                 {trendingCollections.map((trendingCollection: TrendingCollection, index: number): React.ReactElement => (
-                  <Box key={index} variant='card' shouldClipContent={true}>
+                  <SelectableView key={index} variant='card' isSelected={trendingCollection.collection.address === selectedTrendingCollectionAddress} onClicked={(): void => onTrendingCollectionClicked(trendingCollection)} shouldHideDefaultSelectedIndicator={true} isFullWidth={true} isFullHeight={true}>
                     <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullHeight={true} isFullWidth={true} padding={PaddingSize.Wide} contentAlignment={Alignment.Start} childAlignment={Alignment.Center}>
                       <Text variant='note'>{`#${index + 1}`}</Text>
-                      <Image variant='rounded' source={trendingCollection.collection.imageUrl || ''} alternativeText={trendingCollection.collection.name || ''} maxHeight='3em' maxWidth='3em' fitType='cover' />
+                      <Image variant='rounded' source={trendingCollection.collection.imageUrl || ''} alternativeText={''} maxHeight='3em' maxWidth='3em' fitType='cover' />
                       <Stack.Item growthFactor={1} shrinkFactor={1}>
                         <Stack direction={Direction.Vertical} shouldAddGutters={false} contentAlignment={Alignment.Start}>
                           <Text isSingleLine={true}>{`${trendingCollection.collection.name}`}</Text>
@@ -129,13 +275,83 @@ export const HomePage = (): React.ReactElement => {
                         </Stack>
                       </Stack.Item>
                     </Stack>
-                  </Box>
+                  </SelectableView>
                 ))}
               </EqualGrid>
+            )}
+            {trendingCollectionTokenTransferValuesChartData && (
+              <ResponsiveContainer width="100%" height={400}>
+                <ComposedChart data={trendingCollectionTokenTransferValuesChartData}>
+                  <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
+                  <XAxis
+                    dataKey='date'
+                    tickFormatter={(value: number): string => {
+                      return dateToString(new Date(value), 'dd.MM.yy');
+                    }}
+                    type='number'
+                    domain={['min', (new Date()).getTime()]}
+                    style={{ fontSize: '0.8em' }}
+                  />
+                  <YAxis yAxisId={0} />
+                  <Tooltip content={renderTrendingCollectionTokenTransferValuesTooltip} />
+                  <Scatter isAnimationActive={false} type='monotone' dataKey='value' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.brandPrimary} fillOpacity={1} yAxisId={0} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
+            <Spacing variant={PaddingSize.Wide3} />
+            <Stack directionResponsive={{base: Direction.Vertical, small: Direction.Horizontal}} isFullWidth={true}>
+              <Stack direction={Direction.Vertical}>
+                <Text variant='header2'>New Collections Trend</Text>
+                <Text>Here's how many new collections are being created on mainnet.</Text>
+              </Stack>
+              <Stack.Item growthFactor={1} shrinkFactor={1}>
+                <Spacing />
+              </Stack.Item>
+              <Box isFullWidth={false}>
+                <OptionSelect options={MINTED_TOKEN_COUNTS_DURATION_OPTIONS} selectedItemKey={mintedTokenCountsDuration} onItemClicked={onMintedTokenCountsDurationClicked} />
+              </Box>
+            </Stack>
+            <Spacing variant={PaddingSize.Default} />
+            {mintedTokenCountsChartData === undefined ? (
+              <LoadingSpinner />
+            ) : mintedTokenCountsChartData === null ? (
+              <Text variant='note-error'>Failed to retrieve mintedTokenCounts</Text>
+            ) : (
+              <Box height='350px'>
+                <RechartsContainer width='100%' height='100%'>
+                  <ComposedChart data={mintedTokenCountsChartData}>
+                    <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
+                    <XAxis
+                      dataKey='date'
+                      tickFormatter={(value: number): string => {
+                        return dateToString(new Date(value), 'dd.MM.yy');
+                      }}
+                      type='number'
+                      domain={['auto', (new Date()).getTime()]}
+                      style={{ fontSize: '0.8em' }}
+                    />
+                    <YAxis yAxisId={0} />
+                    <Tooltip content={renderMintedTokenChartToolTip} />
+                    <Bar isAnimationActive={false} type='monotone' dataKey='newRegistryCount' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.brandPrimary} fillOpacity={1} yAxisId={0} />
+                  </ComposedChart>
+                </RechartsContainer>
+              </Box>
             )}
             <Spacing variant={PaddingSize.Wide3} />
           </Stack>
         </ContainingView>
+        <Stack childAlignment={Alignment.Center} isFullWidth={true}>
+          <Box maxWidth='650px'>
+            <Stack direction={Direction.Vertical} shouldAddGutters={true} isFullWidth={true} childAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide}>
+              <Spacing variant={PaddingSize.Wide3} />
+              <PrettyText variant='header2' alignment={TextAlignment.Center}><HeroText>Super-charge your apps</HeroText> with rich data 🚀</PrettyText>
+              <MarkdownText textVariant='default' textAlignment={TextAlignment.Center} source={`We've got a database brimming with insights about NFTs, Collections and Accounts. It's aching to be harnessed into custom APIs to power your apps.\n\nWe already use it to super-charge our own apps as well as some of the coolest web3 experiences such as [the Rude Boy's Gallery](https://gallery.rudeboys.io) and the suite of [SwapShop tools by seedphrase](https://swapshop.pro).\n\nGo on! Let's get your app filled with the rich data it deserves.`} />
+              <Spacing variant={PaddingSize.Wide} />
+              <Button variant='large-primary' target='#' text='Start using our API' />
+              <Spacing variant={PaddingSize.Wide3} />
+            </Stack>
+          </Box>
+        </Stack>
         <Stack.Item growthFactor={1} shrinkFactor={1} />
       </Stack>
     </React.Fragment>

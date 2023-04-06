@@ -67,7 +67,7 @@ export const App = (props: IAppProps): React.ReactElement => {
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={globals}>
           <Web3AccountControlProvider localStorageClient={localStorageClient} onError={onWeb3AccountError}>
-            <BackgroundView linearGradient='#200122,#000000'>
+            <BackgroundView linearGradient='#000000,#000000'>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
                 <NavBar />
                 <Stack.Item growthFactor={1} shrinkFactor={1}>

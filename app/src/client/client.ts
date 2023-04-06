@@ -2,6 +2,7 @@ import { Requester, RestMethod, ServiceClient } from '@kibalabs/core';
 
 import * as Endpoints from './endpoints';
 import * as Resources from './resources';
+import { BigNumber } from 'ethers';
 
 export class NotdClient extends ServiceClient {
   public constructor(requester: Requester, baseUrl?: string) {
@@ -38,6 +39,14 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.GetCollectionRecentSalesRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionRecentSalesResponse);
     return response.tokenTransfers;
+  };
+
+  public listCollectionTransferValues = async (address: string, minDate?: Date, maxDate?: Date, minValue?: BigNumber): Promise<Resources.TokenTransferValue[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${address}/token-transfer-values`;
+    const request = new Endpoints.ListCollectionTransferValuesRequest(minDate, maxDate, minValue);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTransferValuesResponse);
+    return response.tokenTransferValues;
   };
 
   public getCollectionHoldings = async (address: string, ownerAddress: string): Promise<Resources.CollectionToken[]> => {
@@ -116,11 +125,19 @@ export class NotdClient extends ServiceClient {
     return response.collectionActivities;
   };
 
-  public listTrendingCollections = async (duration?: string, limit?: number, order?: string): Promise<Resources.TrendingCollection[]> => {
+  public retrieveTrendingCollections = async (duration?: string, limit?: number, order?: string): Promise<Resources.TrendingCollection[]> => {
     const method = RestMethod.GET;
     const path = `v1/collections/trending`;
-    const request = new Endpoints.ListTrendingCollectionsRequest(duration, limit, order);
-    const response = await this.makeRequest(method, path, request, Endpoints.ListTrendingCollectionsResponse);
+    const request = new Endpoints.RetrieveTrendingCollectionsRequest(duration, limit, order);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveTrendingCollectionsResponse);
     return response.trendingCollections;
+  };
+
+  public retrieveMintedTokenCounts = async (duration?: string): Promise<Resources.MintedTokenCount[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/minted-token-counts`;
+    const request = new Endpoints.RetrieveMintedTokenCountsRequest(duration);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMintedTokenCountsResponse);
+    return response.mintedTokenCounts;
   };
 }

@@ -164,6 +164,14 @@ class TokenTransfer(RetrievedTokenTransfer):
     updatedDate: datetime.datetime
 
 
+@dataclasses.dataclass(unsafe_hash=True)
+class TokenTransferValue:
+    blockDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    value: int
+
+
 @dataclasses.dataclass
 class Token:
     registryAddress: str
@@ -655,4 +663,5 @@ class TrendingCollection:
 @dataclasses.dataclass
 class MintedTokenCount:
     date: datetime.datetime
-    count: int
+    mintedTokenCount: int
+    newRegistryCount: int

@@ -63,6 +63,13 @@ class ApiTokenTransfer(BaseModel):
     token: ApiCollectionToken
 
 
+class ApiTokenTransferValue(BaseModel):
+    registryAddress: str
+    tokenId: str
+    value: str
+    blockDate: datetime.datetime
+
+
 class ApiTokenOwnership(BaseModel):
     registryAddress: str
     tokenId: str
@@ -286,4 +293,5 @@ class ApiTrendingCollection(BaseModel):
 
 class ApiMintedTokenCount(BaseModel):
     date: datetime.datetime
-    count: str
+    mintedTokenCount: str
+    newRegistryCount: str

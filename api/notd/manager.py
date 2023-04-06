@@ -41,6 +41,7 @@ from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import MintedTokenCount
 from notd.model import Token
+from notd.model import TokenTransferValue
 from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
@@ -118,6 +119,47 @@ class NotdManager:
         result = await self.retriever.database.execute(query=tokenTransfersQuery)
         tokenTransfers = [token_transfer_from_row(row) for row in result.mappings()]
         return tokenTransfers
+
+    async def get_collection_transfers(self, registryAddress: str, minDate: Optional[datetime.datetime] = None, maxDate: Optional[datetime.datetime] = None, minValue: Optional[int] = None) -> List[TokenTransfer]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
+        tokenTransfersQuery = (
+            sqlalchemy.select(TokenTransfersTable, BlocksTable)
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(TokenTransfersTable.c.registryAddress == registryAddress)
+            .order_by(TokenTransfersTable.c.blockNumber.desc())
+        )
+        if minDate:
+            tokenTransfersQuery = tokenTransfersQuery.where(BlocksTable.c.blockDate >= minDate)
+        if maxDate:
+            tokenTransfersQuery = tokenTransfersQuery.where(BlocksTable.c.blockDate < maxDate)
+        if minValue:
+            tokenTransfersQuery = tokenTransfersQuery.where(TokenTransfersTable.c.value > 0)
+        result = await self.retriever.database.execute(query=tokenTransfersQuery)
+        tokenTransfers = [token_transfer_from_row(row) for row in result.mappings()]
+        return tokenTransfers
+
+    async def get_collection_token_transfer_values(self, registryAddress: str, minDate: Optional[datetime.datetime] = None, maxDate: Optional[datetime.datetime] = None, minValue: Optional[int] = None) -> List[TokenTransferValue]:
+        registryAddress = chain_util.normalize_address(value=registryAddress)
+        tokenTransfersQuery = (
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId, TokenTransfersTable.c.value, BlocksTable.c.blockDate)
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(TokenTransfersTable.c.registryAddress == registryAddress)
+            .order_by(TokenTransfersTable.c.blockNumber.desc())
+        )
+        if minDate:
+            tokenTransfersQuery = tokenTransfersQuery.where(BlocksTable.c.blockDate >= minDate)
+        if maxDate:
+            tokenTransfersQuery = tokenTransfersQuery.where(BlocksTable.c.blockDate < maxDate)
+        if minValue:
+            tokenTransfersQuery = tokenTransfersQuery.where(TokenTransfersTable.c.value > 0)
+        result = await self.retriever.database.execute(query=tokenTransfersQuery)
+        tokenTransferValues = [TokenTransferValue(
+            registryAddress=rowMapping[TokenTransfersTable.c.registryAddress],
+            tokenId=rowMapping[TokenTransfersTable.c.tokenId],
+            value=int(rowMapping[TokenTransfersTable.c.value]),
+            blockDate=rowMapping[BlocksTable.c.blockDate],
+        ) for rowMapping in result.mappings()]
+        return tokenTransferValues
 
     async def get_collection_statistics(self, address: str) -> CollectionStatistics:
         address = chain_util.normalize_address(value=address)
@@ -490,21 +532,21 @@ class NotdManager:
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def list_trending_collections(self, currentDate: Optional[datetime.datetime], duration: Optional[str] = None, limit: Optional[str] = None, order: Optional[str] = None) -> List[TrendingCollection]:
-        currentDate = currentDate or date_util.start_of_day()
+    async def retrieve_trending_collections(self, currentDate: Optional[datetime.datetime], duration: Optional[str] = None, limit: Optional[str] = None, order: Optional[str] = None) -> List[TrendingCollection]:
+        currentDate = currentDate or date_util.datetime_from_now()
         limit = limit or 9
-        if duration == "7_DAYS":
+        if duration == '12_HOURS' or duration is None:
+            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
+            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, hours=-12)
+        elif duration == '24_HOURS':
+            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
+            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, hours=-24)
+        elif duration == "7_DAYS":
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
             previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, days=-7)
         elif duration == '30_DAYS':
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
             previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, days=-30)
-        elif duration == '24_HOURS' or duration is None:
-            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-24)
-            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, hours=-24)
-        elif duration == '12_HOURS':
-            startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
-            previousPeriodStartDate = date_util.datetime_from_datetime(dt=startDate, hours=-12)
         else:
             raise BadRequestException('Unknown duration')
         query = (
@@ -545,14 +587,23 @@ class NotdManager:
         ]
         return trendingCollections
 
-    async def retrieve_minted_token_counts(self, currentDate: datetime.datetime, duration: str) -> List[MintedTokenCount]:
-        if duration == "7_DAYS":
+    async def retrieve_minted_token_counts(self, currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None) -> List[MintedTokenCount]:
+        currentDate = date_util.start_of_day(dt=(currentDate or date_util.datetime_from_now()))
+        if duration is None or duration == "7_DAYS":
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-7)
             validDates = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '30_DAYS':
             date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, days=-30)
+            validDates = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
+        elif duration == '90_DAYS':
+            date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
+            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-90)
+            validDates = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
+        elif duration == '180_DAYS':
+            date = sqlalchemy.cast(CollectionHourlyActivitiesTable.c.date, sqlalchemy.DATE).label('date')
+            startDate = date_util.datetime_from_datetime(dt=currentDate, days=-180)
             validDates = list(date_util.generate_dates_in_range(startDate=startDate, endDate=currentDate, days=1, shouldIncludeEndDate=True))
         elif duration == '24_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
@@ -567,19 +618,19 @@ class NotdManager:
         else:
             raise BadRequestException('Unknown duration')
         query = (
-            sqlalchemy.select(date, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.mintCount).label('count')) # type: ignore[no-untyped-call, var-annotated]
+            sqlalchemy.select(date, sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('mintedTokenCount'), sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('newRegistryCount')) # type: ignore[no-untyped-call, var-annotated]
             .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .group_by(date)
             .order_by(date.desc())
         )
         result = await self.retriever.database.execute(query=query)
-        dateCountDict = {dateCount['date']: dateCount['count'] for dateCount in result.mappings()}
+        dateCountDict = {dateCount['date']: (dateCount['mintedTokenCount'], dateCount['newRegistryCount']) for dateCount in result.mappings()}
         mintedTokenCounts: List[MintedTokenCount] = []
         for validDate in validDates:
-            validDatetime = datetime.datetime.combine(validDate, datetime.datetime.min.time()) if isinstance(validDate, datetime.date) else validDate
+            validDatetime = datetime.datetime.combine(validDate, datetime.datetime.min.time()) if not isinstance(validDate, datetime.datetime) else validDate
             if validDate in dateCountDict.keys():
-                mintedTokenCounts += [MintedTokenCount(date=validDatetime, count=dateCountDict[validDate])]
+                mintedTokenCounts += [MintedTokenCount(date=validDatetime, mintedTokenCount=dateCountDict[validDate][0], newRegistryCount=dateCountDict[validDate][1])]
             else:
-                mintedTokenCounts += [MintedTokenCount(date=validDatetime, count=0)]
+                mintedTokenCounts += [MintedTokenCount(date=validDatetime, mintedTokenCount=0, newRegistryCount=0)]
         return mintedTokenCounts

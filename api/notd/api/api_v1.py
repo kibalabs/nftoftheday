@@ -10,6 +10,7 @@ from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentTransfersResponse
+from notd.api.endpoints_v1 import GetCollectionTransferValuesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import GetCollectionTokenOwnershipsResponse
@@ -20,15 +21,14 @@ from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
-from notd.api.endpoints_v1 import MintedTokenCountsRequest
-from notd.api.endpoints_v1 import MintedTokenCountsResponse
+from notd.api.endpoints_v1 import RetrieveMintedTokenCountsRequest
+from notd.api.endpoints_v1 import RetrieveMintedTokenCountsResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
-from notd.api.endpoints_v1 import ListTrendingCollectionsRequest
-from notd.api.endpoints_v1 import ListTrendingCollectionsResponse
+from notd.api.endpoints_v1 import RetrieveTrendingCollectionsResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
@@ -103,11 +103,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         await notdManager.refresh_gallery_badge_holders_for_all_collections_deferred()
         return RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse()
 
-    @router.get('/collections/trending', response_model=ListTrendingCollectionsResponse)
-    async def list_trending_collections(currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None, limit: Optional[str] = None, order: Optional[str] = None) -> ListTrendingCollectionsResponse:
+    @router.get('/collections/trending', response_model=RetrieveTrendingCollectionsResponse)
+    async def retrieve_trending_collections(currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None, limit: Optional[str] = None, order: Optional[str] = None) -> RetrieveTrendingCollectionsResponse:
         currentDate = currentDate.replace(tzinfo=None) if currentDate else None
-        trendingCollections = await notdManager.list_trending_collections(currentDate=currentDate, duration=duration, limit=limit, order=order)
-        return ListTrendingCollectionsResponse(trendingCollections=(await responseBuilder.trending_collections_from_models(trendingCollections=trendingCollections)))
+        trendingCollections = await notdManager.retrieve_trending_collections(currentDate=currentDate, duration=duration, limit=limit, order=order)
+        return RetrieveTrendingCollectionsResponse(trendingCollections=(await responseBuilder.trending_collections_from_models(trendingCollections=trendingCollections)))
 
     @router.get('/collections/{registryAddress}', response_model=GetCollectionResponse)
     async def get_collection_by_address(registryAddress: str) -> GetCollectionResponse:
@@ -165,6 +165,13 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokenTransfers = await notdManager.get_collection_recent_transfers(registryAddress=registryAddress, userAddress=userAddress, limit=limit, offset=offset)
         return GetCollectionRecentTransfersResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
+    @router.get('/collections/{registryAddress}/token-transfer-values', response_model=GetCollectionTransferValuesResponse)
+    async def get_collection_token_transfer_values(registryAddress: str, minDate: Optional[datetime.datetime] = None, maxDate: Optional[datetime.datetime] = None, minValue: Optional[int] = None) -> GetCollectionTransferValuesResponse:
+        minDate = minDate.replace(tzinfo=None) if minDate else None
+        maxDate = maxDate.replace(tzinfo=None) if maxDate else None
+        tokenTransferValues = await notdManager.get_collection_token_transfer_values(registryAddress=registryAddress, minDate=minDate, maxDate=maxDate, minValue=minValue)
+        return GetCollectionTransferValuesResponse(tokenTransferValues=(await responseBuilder.token_transfer_values_from_models(tokenTransferValues=tokenTransferValues)))
+
     @router.get('/collections/{registryAddress}/recent-sales', response_model=GetCollectionRecentSalesResponse)
     async def get_collection_recent_sales(registryAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> GetCollectionRecentSalesResponse:
         limit = limit if limit is not None else 50
@@ -217,12 +224,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         ownerAddresses = await notdManager.calculate_common_owners(registryAddresses=request.registryAddresses, tokenIds=request.tokenIds, date=date)
         return CalculateCommonOwnersResponse(ownerAddresses=ownerAddresses)
 
-    @router.post('/retrieve-minted-token-counts', response_model=MintedTokenCountsResponse)
-    async def retrieve_minted_token_counts(request: MintedTokenCountsRequest) -> MintedTokenCountsResponse:
-        currentDate = date_util.start_of_day(dt=request.currentDate.replace(tzinfo=None)) if request.currentDate else date_util.start_of_day()
-        duration = request.duration
+    @router.get('/minted-token-counts', response_model=RetrieveMintedTokenCountsResponse)
+    async def retrieve_minted_token_counts(currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None) -> RetrieveMintedTokenCountsResponse:
+        currentDate = currentDate.replace(tzinfo=None) if currentDate else None
         mintedTokenCounts = await notdManager.retrieve_minted_token_counts(currentDate=currentDate, duration=duration)
-        return MintedTokenCountsResponse(mintedTokenCounts=(await responseBuilder.minted_token_counts_from_models(mintedTokenCounts=mintedTokenCounts)))
+        return RetrieveMintedTokenCountsResponse(mintedTokenCounts=(await responseBuilder.minted_token_counts_from_models(mintedTokenCounts=mintedTokenCounts)))
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:

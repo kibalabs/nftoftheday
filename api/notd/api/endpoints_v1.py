@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
 from notd.api.models_v1 import ApiAccountCollectionToken
+from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -132,6 +133,12 @@ class GetCollectionRecentTransfersRequest(BaseModel):
 
 class GetCollectionRecentTransfersResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
+
+class GetCollectionTransferValuesRequest(BaseModel):
+    pass
+
+class GetCollectionTransferValuesResponse(BaseModel):
+    tokenTransferValues: List[ApiTokenTransferValue]
 
 class GetCollectionTokenRequest(BaseModel):
     pass
@@ -415,17 +422,14 @@ class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
 class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
 
-class ListTrendingCollectionsRequest(BaseModel):
-    currentDate: Optional[datetime.datetime]
-    duration: Optional[str]
-    order: Optional[str]
+class RetrieveTrendingCollectionsRequest(BaseModel):
+    pass
 
-class ListTrendingCollectionsResponse(BaseModel):
+class RetrieveTrendingCollectionsResponse(BaseModel):
     trendingCollections: List[ApiTrendingCollection]
 
-class MintedTokenCountsRequest(BaseModel):
-    currentDate: datetime.datetime
-    duration: str
+class RetrieveMintedTokenCountsRequest(BaseModel):
+    pass
 
-class MintedTokenCountsResponse(BaseModel):
+class RetrieveMintedTokenCountsResponse(BaseModel):
     mintedTokenCounts: List[ApiMintedTokenCount]
