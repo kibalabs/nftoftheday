@@ -8,7 +8,6 @@ from typing import List
 from typing import Optional
 from typing import TypeVar
 
-from core.util import date_util
 from core.util.typing_util import JSON
 
 WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -164,10 +163,12 @@ class TokenTransfer(RetrievedTokenTransfer):
     updatedDate: datetime.datetime
 
 
-@dataclasses.dataclass
-class TradedToken:
-    latestTransfer: TokenTransfer
-    transferCount: int
+@dataclasses.dataclass(unsafe_hash=True)
+class TokenTransferValue:
+    blockDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    value: int
 
 
 @dataclasses.dataclass
@@ -194,30 +195,6 @@ class AccountToken:
     registryAddress: str
     tokenId: str
     ownerAddress: str
-
-
-@dataclasses.dataclass
-class BaseSponsoredToken:
-    date: datetime.datetime
-    token: Token
-
-    def to_dict(self) -> JSON:
-        return {
-            'date': date_util.datetime_to_string(dt=self.date),
-            'token': self.token.to_dict(),  # type: ignore[dict-item]
-        }
-
-    @classmethod
-    def from_dict(cls, sponsoredTokenDict: JSON) -> BaseSponsoredToken:
-        return cls(
-            date=date_util.datetime_from_string(str(sponsoredTokenDict['date'])),  # type: ignore[index, call-overload]
-            token=Token.from_dict(dict(sponsoredTokenDict['token']))  # type: ignore[index, call-overload, arg-type]
-        )
-
-
-@dataclasses.dataclass
-class SponsoredToken(BaseSponsoredToken):
-    latestTransfer: Optional[TokenTransfer]
 
 
 @dataclasses.dataclass
@@ -685,4 +662,5 @@ class TrendingCollection:
 @dataclasses.dataclass
 class MintedTokenCount:
     date: datetime.datetime
-    count: int
+    mintedTokenCount: int
+    newRegistryCount: int

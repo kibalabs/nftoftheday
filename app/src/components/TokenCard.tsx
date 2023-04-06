@@ -30,8 +30,8 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
     <LinkBase onClicked={onClicked} target={props.target}>
       <Box variant='tokenCard' shouldClipContent={true}>
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
-          <Box height='11rem' width='11rem'>
-            <Media source={ imageUrl || defaultImage} alternativeText='image' fitType='contain' />
+          <Box variant='unrounded' height='11rem' width='11rem' shouldClipContent={true}>
+            <Media source={ imageUrl || defaultImage} alternativeText='image' fitType='cover' />
           </Box>
           <Box>
             <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide}>

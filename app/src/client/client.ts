@@ -1,4 +1,5 @@
 import { Requester, RestMethod, ServiceClient } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 import * as Endpoints from './endpoints';
 import * as Resources from './resources';
@@ -7,46 +8,6 @@ export class NotdClient extends ServiceClient {
   public constructor(requester: Requester, baseUrl?: string) {
     super(requester, baseUrl || 'https://api.tokenhunt.io');
   }
-
-  public retrieveHighestPriceTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
-    const method = RestMethod.POST;
-    const path = 'v1/retrieve-highest-price-transfer';
-    const request = new Endpoints.RetrieveHighestPriceTransferRequest(startDate, endDate);
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveHighestPriceTransferResponse);
-    return response.transfer;
-  };
-
-  public retrieveMostTradedToken = async (startDate?: Date, endDate?: Date): Promise<Resources.TradedToken> => {
-    const method = RestMethod.POST;
-    const path = 'v1/retrieve-most-traded-token';
-    const request = new Endpoints.RetrieveMostTradedTokenRequest(startDate, endDate);
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMostTradedTokenResponse);
-    return response.tradedToken;
-  };
-
-  public retrieveRandomTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.TokenTransfer> => {
-    const method = RestMethod.POST;
-    const path = 'v1/retrieve-random-token-transfer';
-    const request = new Endpoints.RetrieveRandomTokenTransferRequest(startDate, endDate);
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveRandomTokenTransferResponse);
-    return response.transfer;
-  };
-
-  public retrieveSponsoredTokenTransfer = async (startDate?: Date, endDate?: Date): Promise<Resources.SponsoredToken> => {
-    const method = RestMethod.POST;
-    const path = 'v1/retrieve-sponsored-token';
-    const request = new Endpoints.RetrieveSponsoredTokenRequest(startDate, endDate);
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveSponsoredTokenResponse);
-    return response.sponsoredToken;
-  };
-
-  public retrieveTransferCount = async (startDate?: Date, endDate?: Date): Promise<number> => {
-    const method = RestMethod.POST;
-    const path = 'v1/retrieve-transfer-count';
-    const request = new Endpoints.RetrieveTransferCountRequest(startDate, endDate);
-    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveTransferCountResponse);
-    return response.count;
-  };
 
   public listCollectionTokens = async (registryAddress: string): Promise<Resources.CollectionToken[]> => {
     const method = RestMethod.GET;
@@ -78,6 +39,14 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.GetCollectionRecentSalesRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionRecentSalesResponse);
     return response.tokenTransfers;
+  };
+
+  public listCollectionTransferValues = async (address: string, minDate?: Date, maxDate?: Date, minValue?: BigNumber): Promise<Resources.TokenTransferValue[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${address}/token-transfer-values`;
+    const request = new Endpoints.ListCollectionTransferValuesRequest(minDate, maxDate, minValue);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTransferValuesResponse);
+    return response.tokenTransferValues;
   };
 
   public getCollectionHoldings = async (address: string, ownerAddress: string): Promise<Resources.CollectionToken[]> => {
@@ -154,5 +123,29 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.GetCollectionActivitiesRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionActivitiesResponse);
     return response.collectionActivities;
+  };
+
+  public retrieveTrendingCollections = async (duration?: string, limit?: number, order?: string): Promise<Resources.TrendingCollection[]> => {
+    const method = RestMethod.GET;
+    const path = 'v1/collections/trending';
+    const request = new Endpoints.RetrieveTrendingCollectionsRequest(duration, limit, order);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveTrendingCollectionsResponse);
+    return response.trendingCollections;
+  };
+
+  public retrieveMintedTokenCounts = async (duration?: string): Promise<Resources.MintedTokenCount[]> => {
+    const method = RestMethod.GET;
+    const path = 'v1/minted-token-counts';
+    const request = new Endpoints.RetrieveMintedTokenCountsRequest(duration);
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMintedTokenCountsResponse);
+    return response.mintedTokenCounts;
+  };
+
+  public retrieveHeroTokens = async (): Promise<Resources.CollectionToken[]> => {
+    const method = RestMethod.GET;
+    const path = 'v1/hero-tokens';
+    const request = new Endpoints.RetrieveHeroTokensRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveHeroTokensResponse);
+    return response.tokens;
   };
 }

@@ -63,18 +63,11 @@ class ApiTokenTransfer(BaseModel):
     token: ApiCollectionToken
 
 
-class ApiTradedToken(BaseModel):
-    token: ApiCollectionToken
-    collection: ApiCollection
-    latestTransfer: ApiTokenTransfer
-    transferCount: str
-
-
-class ApiSponsoredToken(BaseModel):
-    token: ApiCollectionToken
-    collection: ApiCollection
-    date: datetime.datetime
-    latestTransfer: Optional[ApiTokenTransfer]
+class ApiTokenTransferValue(BaseModel):
+    registryAddress: str
+    tokenId: str
+    value: str
+    blockDate: datetime.datetime
 
 
 class ApiTokenOwnership(BaseModel):
@@ -291,7 +284,7 @@ class ApiSuperCollectionOverlap(BaseModel):
 
 
 class ApiTrendingCollection(BaseModel):
-    registryAddress: ApiCollection
+    collection: ApiCollection
     previousSaleCount: str
     previousTotalVolume: str
     totalVolume: str
@@ -300,4 +293,5 @@ class ApiTrendingCollection(BaseModel):
 
 class ApiMintedTokenCount(BaseModel):
     date: datetime.datetime
-    count: str
+    mintedTokenCount: str
+    newRegistryCount: str

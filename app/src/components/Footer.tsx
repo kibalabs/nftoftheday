@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Alignment, Box, Direction, Image, LinkBase, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Direction, Image, LinkBase, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
 
 export const Footer = (): React.ReactElement => {
   return (
@@ -8,9 +8,7 @@ export const Footer = (): React.ReactElement => {
       <LinkBase target='https://www.tokenpage.xyz?ref=tokenhunt'>
         <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} padding={PaddingSize.Default}>
           <Text>Made by</Text>
-          <Box shouldClipContent={true} width='1.5rem' height='1.5rem'>
-            <Image source='/assets/tokenpage.png' alternativeText='TokenPage Logo' fitType='contain' />
-          </Box>
+          <Image variant='rounded' source='/assets/tokenpage.png' alternativeText='TokenPage Logo' width='1.2rem' height='1.2rem' fitType='contain' />
           <Text>Token Page</Text>
         </Stack>
       </LinkBase>

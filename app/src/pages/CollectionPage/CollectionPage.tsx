@@ -7,7 +7,7 @@ import { useOnLinkWeb3AccountsClicked, useWeb3Account } from '@kibalabs/web3-rea
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 import { TwitterTimelineEmbed } from 'react-twitter-embed';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, Bar, CartesianGrid, ComposedChart, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from 'styled-components';
 
 import { ICollectionPageData } from './getCollectionPageData';
@@ -191,7 +191,7 @@ export const CollectionPage = (): React.ReactElement => {
     }
     const tooltipData = dataItem.payload[0].payload;
     return (
-      <Box variant='card'>
+      <Box variant='card-tooltip'>
         <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Wide1}>
           <Text>{`Date: ${tooltipData.date}`}</Text>
           <Text>{`Sale count: ${tooltipData.saleCount}`}</Text>
@@ -347,15 +347,15 @@ export const CollectionPage = (): React.ReactElement => {
                     <Stack.Item gutterAfter={PaddingSize.Narrow}>
                       <Box height='350px'>
                         <RechartsContainer width='100%' height='100%'>
-                          <AreaChart data={chartData}>
+                          <ComposedChart data={chartData}>
                             <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
                             <XAxis dataKey='date' />
-                            <YAxis yAxisId={0} />
-                            <YAxis yAxisId={1}type='number' domain={['dataMin', 'auto']} orientation='right' />
+                            <YAxis yAxisId={0} type='number' domain={['dataMin', 'auto']} orientation='right' />
+                            <YAxis yAxisId={1} />
                             <Tooltip content={renderCustomToolTip} />
-                            <Area isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={2} fill={colors.brandPrimary} fillOpacity={0.15} yAxisId={1} />
+                            <Bar isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.backgroundLight50} fillOpacity={0.5} yAxisId={1} />
                             <Area isAnimationActive={false} type='monotone' dataKey='averageValue' stroke={colors.text} strokeWidth={2} fillOpacity={0} yAxisId={0} />
-                          </AreaChart>
+                          </ComposedChart>
                         </RechartsContainer>
                       </Box>
                     </Stack.Item>

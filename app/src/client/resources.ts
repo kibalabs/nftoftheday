@@ -57,51 +57,30 @@ export class TokenTransfer {
   };
 }
 
-export class TradedToken {
-  readonly token: CollectionToken;
-  readonly collection: Collection;
-  readonly latestTransfer: TokenTransfer;
-  readonly transferCount: BigNumber;
 
-  public constructor(token: CollectionToken, collection: Collection, latestTransfer: TokenTransfer, transferCount: BigNumber) {
-    this.token = token;
-    this.collection = collection;
-    this.latestTransfer = latestTransfer;
-    this.transferCount = transferCount;
+export class TokenTransferValue {
+  readonly registryAddress: string;
+  readonly tokenId: string;
+  readonly value: BigNumber;
+  readonly blockDate: Date;
+
+  public constructor(registryAddress: string, tokenId: string, value: BigNumber, blockDate: Date) {
+    this.registryAddress = registryAddress;
+    this.tokenId = tokenId;
+    this.value = value;
+    this.blockDate = blockDate;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): TradedToken => {
-    return new TradedToken(
-      CollectionToken.fromObject(obj.token as Record<string, unknown>),
-      Collection.fromObject(obj.collection as Record<string, unknown>),
-      TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>),
-      BigNumber.from(String(obj.transferCount)),
+  public static fromObject = (obj: Record<string, unknown>): TokenTransferValue => {
+    return new TokenTransferValue(
+      String(obj.registryAddress),
+      String(obj.tokenId),
+      BigNumber.from(String(obj.value)),
+      dateFromString(obj.blockDate as string),
     );
   };
 }
 
-export class SponsoredToken {
-  readonly token: CollectionToken;
-  readonly collection: Collection;
-  readonly date: Date;
-  readonly latestTransfer: TokenTransfer | null;
-
-  public constructor(token: CollectionToken, collection: Collection, date: Date, latestTransfer: TokenTransfer | null) {
-    this.token = token;
-    this.collection = collection;
-    this.date = date;
-    this.latestTransfer = latestTransfer;
-  }
-
-  public static fromObject = (obj: Record<string, unknown>): SponsoredToken => {
-    return new SponsoredToken(
-      CollectionToken.fromObject(obj.token as Record<string, unknown>),
-      Collection.fromObject(obj.collection as Record<string, unknown>),
-      dateFromString(obj.date as string),
-      obj.latestTransfer ? TokenTransfer.fromObject(obj.latestTransfer as Record<string, unknown>) : null,
-    );
-  };
-}
 
 export class TokenAttribute {
   readonly traitType: string;
@@ -248,6 +227,53 @@ export class CollectionActivity {
       BigNumber.from(String(obj.minimumValue)),
       BigNumber.from(String(obj.maximumValue)),
       BigNumber.from(String(obj.averageValue)),
+    );
+  };
+}
+
+export class TrendingCollection {
+  readonly collection: Collection;
+  readonly previousSaleCount: BigNumber;
+  readonly previousTotalVolume: BigNumber;
+  readonly totalVolume: BigNumber;
+  readonly totalSaleCount: BigNumber;
+
+  public constructor(collection: Collection, previousSaleCount: BigNumber, previousTotalVolume: BigNumber, totalVolume: BigNumber, totalSaleCount: BigNumber) {
+    this.collection = collection;
+    this.previousSaleCount = previousSaleCount;
+    this.previousTotalVolume = previousTotalVolume;
+    this.totalVolume = totalVolume;
+    this.totalSaleCount = totalSaleCount;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): TrendingCollection => {
+    return new TrendingCollection(
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      BigNumber.from(String(obj.previousSaleCount)),
+      BigNumber.from(String(obj.previousTotalVolume)),
+      BigNumber.from(String(obj.totalVolume)),
+      BigNumber.from(String(obj.totalSaleCount)),
+    );
+  };
+}
+
+
+export class MintedTokenCount {
+  readonly date: Date;
+  readonly mintedTokenCount: BigNumber;
+  readonly newRegistryCount: BigNumber;
+
+  public constructor(date: Date, mintedTokenCount: BigNumber, newRegistryCount: BigNumber) {
+    this.date = date;
+    this.mintedTokenCount = mintedTokenCount;
+    this.newRegistryCount = newRegistryCount;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): MintedTokenCount => {
+    return new MintedTokenCount(
+      dateFromString(obj.date as string),
+      BigNumber.from(String(obj.mintedTokenCount)),
+      BigNumber.from(String(obj.newRegistryCount)),
     );
   };
 }

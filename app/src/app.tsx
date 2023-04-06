@@ -3,7 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, Stack } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
 import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
@@ -67,14 +67,17 @@ export const App = (props: IAppProps): React.ReactElement => {
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={globals}>
           <Web3AccountControlProvider localStorageClient={localStorageClient} onError={onWeb3AccountError}>
-            <BackgroundView linearGradient='#200122,#000000'>
+            <BackgroundView linearGradient='#000000,#000000'>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
                 <NavBar />
                 <Stack.Item growthFactor={1} shrinkFactor={1}>
                   <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} isScrollableVertically={true}>
-                    <Box>
-                      <Router staticPath={props.staticPath} routes={routes} />
-                    </Box>
+                    <Stack.Item growthFactor={1} shrinkFactor={1}>
+                      <Box>
+                        <Router staticPath={props.staticPath} routes={routes} />
+                      </Box>
+                    </Stack.Item>
+                    <Spacing variant={PaddingSize.Wide} />
                     <Footer />
                   </Stack>
                 </Stack.Item>

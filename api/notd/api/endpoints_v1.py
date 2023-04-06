@@ -28,51 +28,15 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiMintedTokenCount
-from notd.api.models_v1 import ApiSponsoredToken
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
-from notd.api.models_v1 import ApiTradedToken
+from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiTrendingCollection
 
-
-class RetrieveHighestPriceTransferRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveHighestPriceTransferResponse(BaseModel):
-    transfer: ApiTokenTransfer
-
-class  RetrieveRandomTransferRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveRandomTransferResponse(BaseModel):
-    transfer: ApiTokenTransfer
-
-class  RetrieveTransactionCountRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveTransactionCountResponse(BaseModel):
-    count: int
-
-class  RetrieveMostTradedRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveMostTradedResponse(BaseModel):
-    tradedToken: ApiTradedToken
-
-class  RetrieveSponsoredTokenRequest(BaseModel):
-    startDate: Optional[datetime.datetime]
-    endDate: Optional[datetime.datetime]
-
-class RetrieveSponsoredTokenResponse(BaseModel):
-    sponsoredToken: ApiSponsoredToken
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
     pass
@@ -169,6 +133,12 @@ class GetCollectionRecentTransfersRequest(BaseModel):
 
 class GetCollectionRecentTransfersResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
+
+class GetCollectionTransferValuesRequest(BaseModel):
+    pass
+
+class GetCollectionTransferValuesResponse(BaseModel):
+    tokenTransferValues: List[ApiTokenTransferValue]
 
 class GetCollectionTokenRequest(BaseModel):
     pass
@@ -452,24 +422,20 @@ class ListGallerySuperCollectionOverlapSummariesRequest(BaseModel):
 class ListGallerySuperCollectionOverlapSummariesResponse(BaseModel):
     collectionOverlapSummaries: List[ApiCollectionOverlapSummary]
 
-class RetrieveTrendingCollectionRequest(BaseModel):
-    currentDate: datetime.datetime
-    duration: Optional[str]
-    order: Optional[str]
+class RetrieveTrendingCollectionsRequest(BaseModel):
+    pass
 
-class RetrieveTrendingCollectionResponse(BaseModel):
+class RetrieveTrendingCollectionsResponse(BaseModel):
     trendingCollections: List[ApiTrendingCollection]
 
-class MintedTokenCountsRequest(BaseModel):
-    currentDate: datetime.datetime
-    duration: str
+class RetrieveMintedTokenCountsRequest(BaseModel):
+    pass
 
-class MintedTokenCountsResponse(BaseModel):
+class RetrieveMintedTokenCountsResponse(BaseModel):
     mintedTokenCounts: List[ApiMintedTokenCount]
 
 class RetrieveHeroTokensRequest(BaseModel):
-    currentDate: datetime.datetime
-    limit: int
+    pass
 
 class RetrieveHeroTokensResponse(BaseModel):
-    heroTokens: List[ApiCollectionToken]
+    tokens: List[ApiCollectionToken]
