@@ -23,6 +23,7 @@ from core.store.retriever import Order
 from core.store.retriever import StringFieldFilter
 from core.util import chain_util
 from core.util import date_util
+from core.util import list_util
 from sqlalchemy import Select
 from sqlalchemy.sql import functions as sqlalchemyfunc
 
@@ -40,6 +41,7 @@ from notd.model import Collection
 from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import MintedTokenCount
+from notd.model import OwnedCollection
 from notd.model import Token
 from notd.model import TokenListing
 from notd.model import TokenMetadata
@@ -52,6 +54,8 @@ from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import BlocksTable
 from notd.store.schema import CollectionHourlyActivitiesTable
+from notd.store.schema import CollectionTotalActivitiesTable
+from notd.store.schema import TokenCollectionsTable
 from notd.store.schema import TokenMetadatasTable
 from notd.store.schema import TokenMultiOwnershipsTable
 from notd.store.schema import TokenOwnershipsTable
@@ -507,6 +511,49 @@ class NotdManager:
         result = await self.retriever.database.execute(query=query)
         tokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in result.mappings()]
         return tokens
+
+    async def list_user_owned_collections(self, userAddress: str) -> List[OwnedCollection]:
+        collectionsQuery = (
+            sqlalchemy.select(TokenOwnershipsView)
+                .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsView.c.registryAddress)
+                .where(TokenOwnershipsView.c.ownerAddress == userAddress)
+                .where(TokenOwnershipsView.c.quantity > 0)
+                .order_by(CollectionTotalActivitiesTable.c.totalValue.desc(), TokenOwnershipsView.c.latestTransferDate.asc())
+        )
+        collectionsResult = await self.retriever.database.execute(query=collectionsQuery)
+        collectionTokenIds = [(row[TokenOwnershipsView.c.registryAddress], row[TokenOwnershipsView.c.tokenId]) for row in collectionsResult.mappings()]
+        registryAddresses = list(dict.fromkeys([collectionTokenId[0] for collectionTokenId in collectionTokenIds]))
+        collections = await self.retriever.list_collections(fieldFilters=[StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=registryAddresses)])
+        collectionMap = {collection.address: collection for collection in collections}
+        collectionTokenMap: Dict[str, List[TokenMetadata]] = defaultdict(list)
+        for chunkedCollectionTokenIds in list_util.generate_chunks(lst=list(collectionTokenIds), chunkSize=1000):
+            tokensQuery = (
+                TokenMetadatasTable.select()
+                    .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(chunkedCollectionTokenIds))
+            )
+            tokens = await self.retriever.query_token_metadatas(query=tokensQuery)
+            for token in tokens:
+                collectionTokenMap[token.registryAddress].append(token)
+        return [
+            OwnedCollection(
+                collection=collectionMap[registryAddress],
+                tokenMetadatas=collectionTokenMap[registryAddress],
+            ) for registryAddress in registryAddresses
+        ]
+
+    async def list_user_recent_transfers(self, userAddress: str, limit: int, offset: int) -> List[TokenTransfer]:
+        userAddress = chain_util.normalize_address(value=userAddress)
+        tokenTransfersQuery = (
+            sqlalchemy.select(TokenTransfersTable, BlocksTable)
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .order_by(TokenTransfersTable.c.blockNumber.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.retriever.database.execute(query=tokenTransfersQuery)
+        tokenTransfers = [token_transfer_from_row(row) for row in result.mappings()]
+        return tokenTransfers
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

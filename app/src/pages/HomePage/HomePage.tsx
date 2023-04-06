@@ -10,8 +10,8 @@ import styled, { keyframes as styledKeyframes } from 'styled-components';
 import { Collection, CollectionToken, MintedTokenCount, TokenTransferValue, TrendingCollection } from '../../client/resources';
 import { useGlobals } from '../../globalsContext';
 
-const DEFAULT_TOKEN = new CollectionToken('0xED5AF388653567Af2F388E6224dC7C4b3241C544', '8982', 'Azuki #8982', 'ipfs://QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/8982.png', '', []);
-const DEFAULT_TOKEN_2 = new CollectionToken('0x8e720F90014fA4De02627f4A4e217B7e3942d5e8', '6052', 'MDTP #6052', 'ipfs://QmWYrCr8tALEabbcpTa6HCKUewmmCDbR8oPgMHhnC6jdrs', '', []);
+const DEFAULT_TOKEN = new CollectionToken('0xED5AF388653567Af2F388E6224dC7C4b3241C544', '8982', 'Azuki #8982', null, 'ipfs://QmYDvPAXtiJg7s8JdRBSLWdgSphQdac8j1YuQNNxcGE1hg/8982.png', '', []);
+const DEFAULT_TOKEN_2 = new CollectionToken('0x8e720F90014fA4De02627f4A4e217B7e3942d5e8', '6052', 'MDTP #6052', null, 'ipfs://QmWYrCr8tALEabbcpTa6HCKUewmmCDbR8oPgMHhnC6jdrs', '', []);
 
 interface MintedTokenChartData {
   date: number;
@@ -236,7 +236,7 @@ export const HomePage = (): React.ReactElement => {
         setCurrentToken(heroTokens[0]);
       } else {
         let nextToken = heroTokens[(heroTokenIndex + 1) % heroTokens.length];
-        while (nextToken.imageUrl == null) {
+        while (!nextToken.imageUrl) {
           heroTokenIndex += 1;
           nextToken = heroTokens[(heroTokenIndex + 1) % heroTokens.length];
         }
@@ -251,7 +251,7 @@ export const HomePage = (): React.ReactElement => {
         <title>Token Hunt</title>
       </Head>
       <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start}>
-        <BackgroundView layers={[{ imageUrl: (currentToken.imageUrl as string).replace('ipfs://', 'https://ipfs.io/ipfs/') }, { color: 'rgba(0, 0, 0, 0.85)' }]}>
+        <BackgroundView layers={[{ imageUrl: currentToken.imageUrl?.replace('ipfs://', 'https://ipfs.io/ipfs/') || '' }, { color: 'rgba(0, 0, 0, 0.85)' }]}>
           <Box>
             <ContainingView>
               <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} paddingVertical={PaddingSize.Wide2} paddingHorizontal={PaddingSize.Wide2}>
@@ -259,10 +259,9 @@ export const HomePage = (): React.ReactElement => {
                   <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
                     <Stack direction={Direction.Vertical} shouldAddGutters={true}>
                       <PrettyText variant='header2-large'>
-Your explorer for
+                        {' Your explorer for '}
                         <HeroText>all NFTs and Collections</HeroText>
-                        {' '}
-on Ethereum Mainnet 🎭
+                        {' on Ethereum Mainnet 🎭'}
                       </PrettyText>
                     </Stack>
                   </ResponsiveTextAlignmentView>
@@ -335,29 +334,33 @@ on Ethereum Mainnet 🎭
                 ))}
               </EqualGrid>
             )}
-            {selectedTrendingCollection && trendingCollectionTokenTransferValuesChartData && (
+            {selectedTrendingCollection && (
               <React.Fragment>
                 <Text variant='header3'>{`${selectedTrendingCollection.name} activity`}</Text>
                 <Spacing />
                 <Link text={'See all collection data'} target={`/collections/${selectedTrendingCollection.address}`} />
                 <Spacing variant={PaddingSize.Wide} />
-                <ResponsiveContainer width='100%' height={400}>
-                  <ComposedChart data={trendingCollectionTokenTransferValuesChartData}>
-                    <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
-                    <XAxis
-                      dataKey='date'
-                      tickFormatter={(value: number): string => {
-                        return dateToString(new Date(value), 'dd.MM.yy');
-                      }}
-                      type='number'
-                      domain={['min', (new Date()).getTime()]}
-                      style={{ fontSize: '0.8em' }}
-                    />
-                    <YAxis yAxisId={0} />
-                    <Tooltip content={renderTrendingCollectionTokenTransferValuesTooltip} />
-                    <Scatter isAnimationActive={false} type='monotone' dataKey='value' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.brandPrimary} fillOpacity={1} yAxisId={0} />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                {trendingCollectionTokenTransferValuesChartData === undefined ? (
+                  <LoadingSpinner />
+                ) : trendingCollectionTokenTransferValuesChartData && (
+                  <ResponsiveContainer width='100%' height={400}>
+                    <ComposedChart data={trendingCollectionTokenTransferValuesChartData}>
+                      <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
+                      <XAxis
+                        dataKey='date'
+                        tickFormatter={(value: number): string => {
+                          return dateToString(new Date(value), 'dd.MM.yy');
+                        }}
+                        type='number'
+                        domain={['min', (new Date()).getTime()]}
+                        style={{ fontSize: '0.8em' }}
+                      />
+                      <YAxis yAxisId={0} />
+                      <Tooltip content={renderTrendingCollectionTokenTransferValuesTooltip} />
+                      <Scatter isAnimationActive={false} type='monotone' dataKey='value' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.brandPrimary} fillOpacity={0.6} yAxisId={0} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                )}
               </React.Fragment>
             )}
             <Spacing variant={PaddingSize.Wide3} />
@@ -408,8 +411,7 @@ on Ethereum Mainnet 🎭
               <Spacing variant={PaddingSize.Wide3} />
               <PrettyText variant='header2' alignment={TextAlignment.Center}>
                 <HeroText>Super-charge your apps</HeroText>
-                {' '}
-with rich data 🚀
+                {' with rich data 🚀'}
               </PrettyText>
               <MarkdownText textVariant='default' textAlignment={TextAlignment.Center} source={'We\'ve got a database brimming with insights about NFTs, Collections and Accounts. It\'s aching to be harnessed into custom APIs to power your apps.\n\nWe already use it to super-charge our own apps as well as some of the coolest web3 experiences such as [the Rude Boy\'s Gallery](https://gallery.rudeboys.io) and the suite of [SwapShop tools by seedphrase](https://swapshop.pro).\n\nGo on! Let\'s get your app filled with the rich data it deserves.'} />
               <Spacing variant={PaddingSize.Wide} />

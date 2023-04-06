@@ -181,7 +181,7 @@ class TokenMetadataProcessor():
             animationUrl=self._clean_potential_url(url=animationUrl),
             youtubeUrl=self._clean_potential_url(url=youtubeUrl),
             frameImageUrl=self._clean_potential_url(url=frameImageUrl),
-            backgroundColor=tokenMetadataDict.get('background_color'),  # type: ignore[arg-type]
+            backgroundColor=str(tokenMetadataDict['background_color']) if tokenMetadataDict.get('background_color') else None,
             attributes=attributes,
         )
         return retrievedTokenMetadata

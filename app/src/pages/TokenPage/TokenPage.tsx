@@ -134,7 +134,7 @@ export const TokenPage = (): React.ReactElement => {
       <Head>
         <title>{`${collection && collectionToken ? `${collection.name} ${collectionToken.name}` : 'Token'} | Token Hunt`}</title>
       </Head>
-      <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+      <Stack direction={Direction.Vertical} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide}>
         {collectionToken === undefined ? (
           <LoadingSpinner />
         ) : collectionToken === null ? (
@@ -206,10 +206,7 @@ export const TokenPage = (): React.ReactElement => {
                 <Text variant='error'>Token Sale failed to load</Text>
               ) : tokenRecentTransfers && tokenRecentTransfers.length !== 0 ? (
                 tokenRecentTransfers.map((tokenTransfer: TokenTransfer, index: number) : React.ReactElement => (
-                  <TokenSaleRow
-                    tokenTransfer={tokenTransfer}
-                    key={index}
-                  />
+                  <TokenSaleRow key={index} tokenTransfer={tokenTransfer} />
                 ))
               ) : (
                 <Text>No recent sales</Text>

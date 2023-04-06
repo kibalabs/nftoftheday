@@ -20,6 +20,8 @@ from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
+from notd.api.endpoints_v1 import ListUserOwnedCollectionsResponse
+from notd.api.endpoints_v1 import ListUserRecentTransfersResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
@@ -216,6 +218,18 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def refresh_owner_token_ownerships(accountAddress: str) -> RefreshAccountTokenOwnershipsResponse:
         await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
         return RefreshAccountTokenOwnershipsResponse()
+
+    @router.get('/accounts/{userAddress}/owned-collections')
+    async def list_user_owned_collections(userAddress: str) -> ListUserOwnedCollectionsResponse:
+        ownedCollections = await notdManager.list_user_owned_collections(userAddress=userAddress)
+        return ListUserOwnedCollectionsResponse(ownedCollections=(await responseBuilder.owned_collections_from_models(ownedCollections=ownedCollections)))
+
+    @router.get('/accounts/{userAddress}/recent-transfers', response_model=ListUserRecentTransfersResponse)
+    async def list_user_recent_transfers(userAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> ListUserRecentTransfersResponse:
+        limit = limit if limit is not None else 50
+        offset = offset if offset is not None else 0
+        tokenTransfers = await notdManager.list_user_recent_transfers(userAddress=userAddress, limit=limit, offset=offset)
+        return ListUserRecentTransfersResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
     @router.post('/calculate-common-owners', response_model=CalculateCommonOwnersResponse)
     async def calculate_common_owners(request: CalculateCommonOwnersRequest) -> CalculateCommonOwnersResponse:

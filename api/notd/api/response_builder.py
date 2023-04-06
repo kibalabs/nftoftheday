@@ -17,7 +17,6 @@ from notd.api.models_v1 import ApiCollectionOverlapOwner
 from notd.api.models_v1 import ApiCollectionOverlapSummary
 from notd.api.models_v1 import ApiCollectionStatistics
 from notd.api.models_v1 import ApiCollectionToken
-from notd.api.models_v1 import ApiGalleryOwnedCollection
 from notd.api.models_v1 import ApiGallerySuperCollectionUserRow
 from notd.api.models_v1 import ApiGalleryToken
 from notd.api.models_v1 import ApiGalleryUser
@@ -27,6 +26,7 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiMintedTokenCount
+from notd.api.models_v1 import ApiOwnedCollection
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
@@ -50,7 +50,6 @@ from notd.model import CollectionOverlapOwner
 from notd.model import CollectionOverlapSummary
 from notd.model import CollectionStatistics
 from notd.model import GalleryBadgeHolder
-from notd.model import GalleryOwnedCollection
 from notd.model import GallerySuperCollectionUserRow
 from notd.model import GalleryToken
 from notd.model import GalleryUser
@@ -60,6 +59,7 @@ from notd.model import GmCollectionRow
 from notd.model import LatestAccountGm
 from notd.model import ListResponse
 from notd.model import MintedTokenCount
+from notd.model import OwnedCollection
 from notd.model import RetrievedTokenMetadata
 from notd.model import SuperCollectionEntry
 from notd.model import SuperCollectionOverlap
@@ -390,14 +390,14 @@ class ResponseBuilder:
             totalCount=gallerySuperCollectionUserRowListResponse.totalCount,
         )
 
-    async def gallery_owned_collection_from_model(self, ownedCollection: GalleryOwnedCollection) -> ApiGalleryOwnedCollection:
-        return ApiGalleryOwnedCollection(
+    async def owned_collection_from_model(self, ownedCollection: OwnedCollection) -> ApiOwnedCollection:
+        return ApiOwnedCollection(
             collection=(await self.collection_from_model(collection=ownedCollection.collection)) if ownedCollection.collection else None,
             tokens=(await self.collection_tokens_from_models(tokenMetadatas=ownedCollection.tokenMetadatas)) if ownedCollection.tokenMetadatas else None,
         )
 
-    async def gallery_owned_collections_from_models(self, ownedCollections: Sequence[GalleryOwnedCollection]) -> List[ApiGalleryOwnedCollection]:
-        return await asyncio.gather(*[self.gallery_owned_collection_from_model(ownedCollection=ownedCollection) for ownedCollection in ownedCollections])
+    async def owned_collections_from_models(self, ownedCollections: Sequence[OwnedCollection]) -> List[ApiOwnedCollection]:
+        return await asyncio.gather(*[self.owned_collection_from_model(ownedCollection=ownedCollection) for ownedCollection in ownedCollections])
 
     async def gm_account_row_from_model(self, gmAccountRow: GmAccountRow) -> ApiGmAccountRow:
         return ApiGmAccountRow(

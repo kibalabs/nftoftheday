@@ -209,7 +209,7 @@ class ApiGallerySuperCollectionUserRow(BaseModel):
     galleryUserBadges: List[ApiGalleryUserBadge]
 
 
-class ApiGalleryOwnedCollection(BaseModel):
+class ApiOwnedCollection(BaseModel):
     collection: ApiCollection
     tokens: List[ApiCollectionToken]
 

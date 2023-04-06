@@ -510,7 +510,7 @@ class GalleryUser:
 
 
 @dataclasses.dataclass
-class GalleryOwnedCollection:
+class OwnedCollection:
     collection: Collection
     tokenMetadatas: List[TokenMetadata]
 
