@@ -7,7 +7,7 @@ import { useOnLinkWeb3AccountsClicked, useWeb3Account } from '@kibalabs/web3-rea
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 import { TwitterTimelineEmbed } from 'react-twitter-embed';
-import { Area, AreaChart, Bar, ComposedChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, Bar, CartesianGrid, ComposedChart, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import styled from 'styled-components';
 
 import { ICollectionPageData } from './getCollectionPageData';
@@ -350,7 +350,7 @@ export const CollectionPage = (): React.ReactElement => {
                           <ComposedChart data={chartData}>
                             <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
                             <XAxis dataKey='date' />
-                            <YAxis yAxisId={0} type='number' domain={['dataMin', 'auto']} orientation='right'/>
+                            <YAxis yAxisId={0} type='number' domain={['dataMin', 'auto']} orientation='right' />
                             <YAxis yAxisId={1} />
                             <Tooltip content={renderCustomToolTip} />
                             <Bar isAnimationActive={false} type='monotone' dataKey='saleCount' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.backgroundLight50} fillOpacity={0.5} yAxisId={1} />

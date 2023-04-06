@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
 from notd.api.models_v1 import ApiAccountCollectionToken
-from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiAccountGm
 from notd.api.models_v1 import ApiAirdrop
 from notd.api.models_v1 import ApiCollection
@@ -35,6 +34,7 @@ from notd.api.models_v1 import ApiTokenCustomization
 from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
+from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiTrendingCollection
 
 

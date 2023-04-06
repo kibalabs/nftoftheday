@@ -1,7 +1,7 @@
-import { RequestData, ResponseData, dateToString } from '@kibalabs/core';
+import { dateToString, RequestData, ResponseData } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 import * as Resources from './resources';
-import { BigNumber } from 'ethers';
 
 export class ListCollectionTokensRequest extends RequestData {
 }
@@ -178,7 +178,6 @@ export class ListCollectionTransferValuesRequest extends RequestData {
       minValue: this.minValue ? this.minValue.toString() : undefined,
     };
   };
-
 }
 
 export class ListCollectionTransferValuesResponse extends ResponseData {

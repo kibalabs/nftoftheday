@@ -1,8 +1,8 @@
 import { Requester, RestMethod, ServiceClient } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 import * as Endpoints from './endpoints';
 import * as Resources from './resources';
-import { BigNumber } from 'ethers';
 
 export class NotdClient extends ServiceClient {
   public constructor(requester: Requester, baseUrl?: string) {
@@ -127,7 +127,7 @@ export class NotdClient extends ServiceClient {
 
   public retrieveTrendingCollections = async (duration?: string, limit?: number, order?: string): Promise<Resources.TrendingCollection[]> => {
     const method = RestMethod.GET;
-    const path = `v1/collections/trending`;
+    const path = 'v1/collections/trending';
     const request = new Endpoints.RetrieveTrendingCollectionsRequest(duration, limit, order);
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveTrendingCollectionsResponse);
     return response.trendingCollections;
@@ -135,7 +135,7 @@ export class NotdClient extends ServiceClient {
 
   public retrieveMintedTokenCounts = async (duration?: string): Promise<Resources.MintedTokenCount[]> => {
     const method = RestMethod.GET;
-    const path = `v1/minted-token-counts`;
+    const path = 'v1/minted-token-counts';
     const request = new Endpoints.RetrieveMintedTokenCountsRequest(duration);
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMintedTokenCountsResponse);
     return response.mintedTokenCounts;
@@ -143,7 +143,7 @@ export class NotdClient extends ServiceClient {
 
   public retrieveHeroTokens = async (): Promise<Resources.CollectionToken[]> => {
     const method = RestMethod.GET;
-    const path = `v1/hero-tokens`;
+    const path = 'v1/hero-tokens';
     const request = new Endpoints.RetrieveHeroTokensRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveHeroTokensResponse);
     return response.tokens;

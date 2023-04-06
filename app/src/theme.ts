@@ -95,13 +95,13 @@ export const buildNotdTheme = (): ITheme => {
             },
           },
           strong: {
-            text:{
-              'color': '$colors.brandPrimaryLight50',
+            text: {
+              color: '$colors.brandPrimaryLight50',
               'font-weight': 'bold',
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     },
     boxes: {
       phBanner: {
@@ -177,18 +177,18 @@ export const buildNotdTheme = (): ITheme => {
           default: {
             background: {
               'background-color': 'rgba(0, 0, 0, 0.15)',
-            }
+            },
           },
           hover: {
             background: {
               'background-color': 'rgba(255, 255, 255, 0.15)',
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     },
     listItems: {
-      default:{
+      default: {
         normal: {
           default: {
             background: {
@@ -355,7 +355,7 @@ export const buildNotdTheme = (): ITheme => {
           default: {
             background: {
               'border-width': '0',
-              'padding': '0',
+              padding: '0',
             },
           },
         },

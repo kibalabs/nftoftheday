@@ -64,7 +64,7 @@ export class TokenTransferValue {
   readonly value: BigNumber;
   readonly blockDate: Date;
 
-  public constructor(registryAddress: string, tokenId: string, value: BigNumber, blockDate: Date, ) {
+  public constructor(registryAddress: string, tokenId: string, value: BigNumber, blockDate: Date) {
     this.registryAddress = registryAddress;
     this.tokenId = tokenId;
     this.value = value;

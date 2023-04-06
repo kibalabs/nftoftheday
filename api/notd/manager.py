@@ -1,5 +1,4 @@
 import datetime
-import json
 import random
 from collections import defaultdict
 from typing import Any
@@ -41,11 +40,11 @@ from notd.model import CollectionDailyActivity
 from notd.model import CollectionStatistics
 from notd.model import MintedTokenCount
 from notd.model import Token
-from notd.model import TokenTransferValue
 from notd.model import TokenListing
 from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
+from notd.model import TokenTransferValue
 from notd.model import TrendingCollection
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
@@ -462,55 +461,50 @@ class NotdManager:
                 mintedTokenCounts += [MintedTokenCount(date=validDatetime, mintedTokenCount=0, newRegistryCount=0)]
         return mintedTokenCounts
 
-    async def retrieve_hero_tokens(self, currentDate: Optional[datetime.datetime] = None, limit: Optional[int] = None) -> List[TokenMetadata]:
-        import time
-        s = time.time()
+    async def retrieve_hero_tokens(self, currentDate: Optional[datetime.datetime] = None, limit: Optional[int] = None) -> List[Token]:
         currentDate = currentDate.replace(tzinfo=None) if currentDate else None
-        limit = limit if limit else 6
         currentDate = date_util.start_of_day(dt=currentDate)
+        limit = limit if limit else 10
         highestValueAddressesQuery = (
-            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address.distinct())
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address)
             .where(CollectionHourlyActivitiesTable.c.date >= date_util.datetime_from_datetime(dt=currentDate, days=-1))
             .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
             .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
+            .group_by(CollectionHourlyActivitiesTable.c.address)
             .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
             .limit(limit / 2)
         )
         highestValueAddressesResult = await self.retriever.database.execute(query=highestValueAddressesQuery)
-        print('1', time.time() - s)
-        s = time.time()
         heroAddresses = [row['address'] for row in list(highestValueAddressesResult.mappings())]
         newlyMintedAddressSubQuery = (
-            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address.distinct())
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address)
             .where(CollectionHourlyActivitiesTable.c.date >= date_util.datetime_from_datetime(dt=currentDate, days=-1))
             .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
             .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
             .where(CollectionHourlyActivitiesTable.c.mintCount > 0)
-            .order_by(sqlalchemyfunc.random())
+            .group_by(CollectionHourlyActivitiesTable.c.address)
+            .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
             .limit(limit / 2)
         )
         newlyMintedAddressResult = await self.retriever.database.execute(query=newlyMintedAddressSubQuery)
-        print('2', time.time() - s)
-        s = time.time()
         heroAddresses += [row['address'] for row in list(newlyMintedAddressResult.mappings())]
         query = (
-            sqlalchemy.select(TokenMetadatasTable)
+            sqlalchemy.select(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
             .where(TokenMetadatasTable.c.registryAddress == heroAddresses[0])
             .offset(random.randint(1, 15))
             .limit(1)
         )
         for heroAddress in heroAddresses[1:]:
             randomTokenQuery = (
-                sqlalchemy.select(TokenMetadatasTable)
+                sqlalchemy.select(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId)
                 .where(TokenMetadatasTable.c.registryAddress == heroAddress)
                 .offset(random.randint(1, 15))
                 .limit(1)
             )
             query = randomTokenQuery.union(query) # type: ignore[assignment]
-        tokenMetadatas = await self.retriever.query_token_metadatas(query=query)
-        print('3', time.time() - s)
-        s = time.time()
-        return tokenMetadatas
+        result = await self.retriever.database.execute(query=query)
+        tokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in result.mappings()]
+        return tokens
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

@@ -1,7 +1,6 @@
 import datetime
 from typing import Optional
 
-from core.util import date_util
 from fastapi import APIRouter
 
 from notd.api.endpoints_v1 import CalculateCommonOwnersRequest
@@ -10,26 +9,25 @@ from notd.api.endpoints_v1 import GetAccountTokensResponse
 from notd.api.endpoints_v1 import GetCollectionDailyActivitiesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionRecentTransfersResponse
-from notd.api.endpoints_v1 import GetCollectionTransferValuesResponse
 from notd.api.endpoints_v1 import GetCollectionResponse
 from notd.api.endpoints_v1 import GetCollectionStatisticsResponse
 from notd.api.endpoints_v1 import GetCollectionTokenOwnershipsResponse
 from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
+from notd.api.endpoints_v1 import GetCollectionTransferValuesResponse
 from notd.api.endpoints_v1 import GetTokenRecentTransfersResponse
 from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
-from notd.api.endpoints_v1 import RetrieveMintedTokenCountsResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
 from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
-from notd.api.endpoints_v1 import RetrieveTrendingCollectionsResponse
-from notd.api.endpoints_v1 import RetrieveHeroTokensRequest
 from notd.api.endpoints_v1 import RetrieveHeroTokensResponse
+from notd.api.endpoints_v1 import RetrieveMintedTokenCountsResponse
+from notd.api.endpoints_v1 import RetrieveTrendingCollectionsResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
@@ -235,7 +233,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
     async def retrieve_hero_tokens(currentDate: Optional[datetime.datetime] = None, limit: Optional[int] = None) -> RetrieveHeroTokensResponse:
         currentDate = currentDate.replace(tzinfo=None) if currentDate else None
         tokens = await notdManager.retrieve_hero_tokens(currentDate=currentDate, limit=limit)
-        return RetrieveHeroTokensResponse(tokens=(await responseBuilder.collection_token_from_model(tokens=tokens)))
+        return RetrieveHeroTokensResponse(tokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokens)))
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:

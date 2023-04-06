@@ -27,7 +27,6 @@ from notd.api.models_v1 import ApiGmAccountRow
 from notd.api.models_v1 import ApiGmCollectionRow
 from notd.api.models_v1 import ApiLatestAccountGm
 from notd.api.models_v1 import ApiMintedTokenCount
-from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiSuperCollectionEntry
 from notd.api.models_v1 import ApiSuperCollectionOverlap
 from notd.api.models_v1 import ApiTokenCustomization
@@ -35,12 +34,12 @@ from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenStaking
 from notd.api.models_v1 import ApiTokenTransfer
+from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiTrendingCollection
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
-from notd.model import TokenTransferValue
 from notd.model import AccountToken
 from notd.model import Airdrop
 from notd.model import Collection
@@ -70,6 +69,7 @@ from notd.model import TokenListing
 from notd.model import TokenMultiOwnership
 from notd.model import TokenStaking
 from notd.model import TokenTransfer
+from notd.model import TokenTransferValue
 from notd.model import TrendingCollection
 from notd.model import TwitterProfile
 from notd.model import UserProfile

@@ -8,7 +8,6 @@ from typing import List
 from typing import Optional
 from typing import TypeVar
 
-from core.util import date_util
 from core.util.typing_util import JSON
 
 WRAPPED_ETHER_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
