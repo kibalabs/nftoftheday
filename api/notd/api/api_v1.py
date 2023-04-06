@@ -103,7 +103,7 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         return RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse()
 
     @router.get('/collections/trending', response_model=RetrieveTrendingCollectionsResponse)
-    async def retrieve_trending_collections(currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None, limit: Optional[str] = None, order: Optional[str] = None) -> RetrieveTrendingCollectionsResponse:
+    async def retrieve_trending_collections(currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None, limit: Optional[int] = None, order: Optional[str] = None) -> RetrieveTrendingCollectionsResponse:
         currentDate = currentDate.replace(tzinfo=None) if currentDate else None
         trendingCollections = await notdManager.retrieve_trending_collections(currentDate=currentDate, duration=duration, limit=limit, order=order)
         return RetrieveTrendingCollectionsResponse(trendingCollections=(await responseBuilder.trending_collections_from_models(trendingCollections=trendingCollections)))

@@ -6,6 +6,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Union
 
 import sqlalchemy
 from core.exceptions import BadRequestException
@@ -357,7 +358,7 @@ class NotdManager:
     async def subscribe_email(self, email: str) -> None:
         await self.requester.post_json(url='https://www.getrevue.co/api/v2/subscribers', dataDict={'email': email.lower(), 'double_opt_in': False}, headers={'Authorization': f'Token {self.revueApiKey}'})
 
-    async def retrieve_trending_collections(self, currentDate: Optional[datetime.datetime], duration: Optional[str] = None, limit: Optional[str] = None, order: Optional[str] = None) -> List[TrendingCollection]:
+    async def retrieve_trending_collections(self, currentDate: Optional[datetime.datetime], duration: Optional[str] = None, limit: Optional[int] = None, order: Optional[str] = None) -> List[TrendingCollection]:
         currentDate = currentDate or date_util.datetime_from_now()
         limit = limit or 9
         if duration == '12_HOURS' or duration is None:
@@ -415,6 +416,7 @@ class NotdManager:
     async def retrieve_minted_token_counts(self, currentDate: Optional[datetime.datetime] = None, duration: Optional[str] = None) -> List[MintedTokenCount]:
         currentDate = currentDate or date_util.datetime_from_now()
         currentDate = date_util.date_hour_from_datetime(dt=currentDate)
+        validDates: List[Union[datetime.datetime, datetime.date]]
         if duration == '12_HOURS':
             date = CollectionHourlyActivitiesTable.c.date.label('date')
             startDate = date_util.datetime_from_datetime(dt=currentDate, hours=-12)
@@ -444,7 +446,7 @@ class NotdManager:
         else:
             raise BadRequestException('Unknown duration')
         query = (
-            sqlalchemy.select(date, sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('mintedTokenCount'), sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('newRegistryCount')) # type: ignore[no-untyped-call, var-annotated]
+            sqlalchemy.select(date, sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('mintedTokenCount'), sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('newRegistryCount')) # type: ignore[no-untyped-call]
             .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .group_by(date)
@@ -472,7 +474,7 @@ class NotdManager:
             .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(CollectionHourlyActivitiesTable.c.address)
             .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
-            .limit(limit / 2)
+            .limit(int(limit / 2))
         )
         highestValueAddressesResult = await self.retriever.database.execute(query=highestValueAddressesQuery)
         heroAddresses = [row['address'] for row in list(highestValueAddressesResult.mappings())]
@@ -484,7 +486,7 @@ class NotdManager:
             .where(CollectionHourlyActivitiesTable.c.mintCount > 0)
             .group_by(CollectionHourlyActivitiesTable.c.address)
             .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
-            .limit(limit / 2)
+            .limit(int(limit / 2))
         )
         newlyMintedAddressResult = await self.retriever.database.execute(query=newlyMintedAddressSubQuery)
         heroAddresses += [row['address'] for row in list(newlyMintedAddressResult.mappings())]
