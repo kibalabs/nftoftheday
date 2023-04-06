@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { Alignment, BackgroundView, Box, PrettyText, Text, ContainingView, Direction, Head, Stack, PaddingSize, Image, Spacing, ResponsiveTextAlignmentView, TextAlignment, LoadingSpinner, EqualGrid, OptionSelect, IOption, useColors, SelectableView, MarkdownText, Button, } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Box, PrettyText, Text, ContainingView, Direction, Head, Stack, PaddingSize, Image, Spacing, ResponsiveTextAlignmentView, TextAlignment, LoadingSpinner, EqualGrid, OptionSelect, IOption, useColors, SelectableView, MarkdownText, Button, Link, } from '@kibalabs/ui-react';
 import { useGlobals } from '../../globalsContext';
 import styled, { keyframes as styledKeyframes} from 'styled-components';
-import { MintedTokenCount, TokenTransfer, TokenTransferValue, TrendingCollection } from '../../client/resources';
+import { Collection, CollectionToken, MintedTokenCount, TokenTransfer, TokenTransferValue, TrendingCollection } from '../../client/resources';
 import { addDays, dateToString, etherToNumber, longFormatEther, shortFormatEther } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 import { Area, AreaChart, Bar, ComposedChart, CartesianGrid, ResponsiveContainer as RechartsContainer, Tooltip, XAxis, YAxis, ResponsiveContainer, Scatter } from 'recharts';
@@ -88,23 +88,38 @@ const HeroText = styled.span`
 export const HomePage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const colors = useColors();
+  const [heroTokens, setHeroTokens] = React.useState<CollectionToken[] | undefined | null>(undefined);
   const [trendingCollectionsDuration, setTrendingCollectionsDuration] = React.useState<string>(TRENDING_COLLECTIONS_DURATION_OPTIONS[0].itemKey);
   const [trendingCollections, setTrendingCollections] = React.useState<TrendingCollection[] | undefined | null>(undefined);
-  const [selectedTrendingCollectionAddress, setSelectedTrendingCollectionAddress] = React.useState<string | undefined | null>(undefined);
+  const [selectedTrendingCollection, setSelectedTrendingCollection] = React.useState<Collection | undefined | null>(undefined);
   const [trendingCollectionTokenTransferValues, setTrendingCollectionTokenTransferValues] = React.useState<TokenTransferValue[] | undefined | null>(undefined);
   const [mintedTokenCountsDuration, setMintedTokenCountsDuration] = React.useState<string>(MINTED_TOKEN_COUNTS_DURATION_OPTIONS[0].itemKey);
   const [mintedTokenCounts, setMintedTokenCounts] = React.useState<MintedTokenCount[] | undefined | null>(undefined);
 
+  const updateHeroTokens = React.useCallback((): void => {
+    setHeroTokens(undefined);
+    notdClient.retrieveHeroTokens().then((retrievedHeroTokens: CollectionToken[]): void => {
+      setHeroTokens(retrievedHeroTokens);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setHeroTokens(null);
+    });
+  }, [notdClient]);
+
+  React.useEffect((): void => {
+    updateHeroTokens();
+  }, [updateHeroTokens]);
+
   const updateTrendingCollections = React.useCallback((): void => {
     setTrendingCollections(undefined);
-    setSelectedTrendingCollectionAddress(undefined);
+    setSelectedTrendingCollection(undefined);
     notdClient.retrieveTrendingCollections(trendingCollectionsDuration, 9).then((retrievedTrendingCollections: TrendingCollection[]): void => {
       setTrendingCollections(retrievedTrendingCollections);
-      setSelectedTrendingCollectionAddress(setSelectedTrendingCollectionAddress.length > 0 ? retrievedTrendingCollections[0].collection.address : null);
+      setSelectedTrendingCollection(retrievedTrendingCollections.length > 0 ? retrievedTrendingCollections[0].collection : null);
     }).catch((error: unknown): void => {
       console.error(error);
       setTrendingCollections(null);
-      setSelectedTrendingCollectionAddress(null);
+      setSelectedTrendingCollection(null);
     });
   }, [notdClient, trendingCollectionsDuration]);
 
@@ -113,7 +128,7 @@ export const HomePage = (): React.ReactElement => {
   }, [updateTrendingCollections]);
 
   const updateTrendingCollectionGraphData = React.useCallback((): void => {
-    if (!selectedTrendingCollectionAddress) {
+    if (!selectedTrendingCollection) {
       setTrendingCollectionTokenTransferValues(null);
       return;
     }
@@ -133,7 +148,7 @@ export const HomePage = (): React.ReactElement => {
     } else if (trendingCollectionsDuration === '180_DAYS') {
       minDate = addDays(maxDate, -180);
     }
-    notdClient.listCollectionTransferValues(selectedTrendingCollectionAddress, minDate, maxDate, BigNumber.from(1)).then((retrievedTokenTransferValues: TokenTransferValue[]): void => {
+    notdClient.listCollectionTransferValues(selectedTrendingCollection.address, minDate, maxDate, BigNumber.from(1)).then((retrievedTokenTransferValues: TokenTransferValue[]): void => {
       setTrendingCollectionTokenTransferValues(retrievedTokenTransferValues.sort((tokenTransferValue1: TokenTransferValue, tokenTransferValue2: TokenTransferValue): number => {
         return tokenTransferValue1.blockDate.getTime() - tokenTransferValue2.blockDate.getTime();
       }));
@@ -141,7 +156,7 @@ export const HomePage = (): React.ReactElement => {
       console.error(error);
       setTrendingCollectionTokenTransferValues(null);
     });
-  }, [notdClient, selectedTrendingCollectionAddress, trendingCollectionsDuration]);
+  }, [notdClient, selectedTrendingCollection, trendingCollectionsDuration]);
 
   React.useEffect((): void => {
     updateTrendingCollectionGraphData();
@@ -184,7 +199,7 @@ export const HomePage = (): React.ReactElement => {
   }, [mintedTokenCounts]);
 
   const onTrendingCollectionClicked = (trendingCollection: TrendingCollection): void => {
-    setSelectedTrendingCollectionAddress(trendingCollection.collection.address);
+    setSelectedTrendingCollection(trendingCollection.collection);
   }
 
   const trendingCollectionTokenTransferValuesChartData = React.useMemo((): TrendingCollectionTokenTransferValuesChartData[] | undefined | null => {
@@ -199,6 +214,8 @@ export const HomePage = (): React.ReactElement => {
       value: tokenTransferValue.value.div(1000000000000000).toNumber() / 1000,
     }));
   }, [trendingCollectionTokenTransferValues]);
+
+  console.log('heroTokens', heroTokens);
 
   return (
     <React.Fragment>
@@ -253,7 +270,7 @@ export const HomePage = (): React.ReactElement => {
             ) : (
               <EqualGrid childSizeResponsive={{base: 12, medium: 6, large: 4}} shouldAddGutters={true} childAlignment={Alignment.Start}>
                 {trendingCollections.map((trendingCollection: TrendingCollection, index: number): React.ReactElement => (
-                  <SelectableView key={index} variant='card' isSelected={trendingCollection.collection.address === selectedTrendingCollectionAddress} onClicked={(): void => onTrendingCollectionClicked(trendingCollection)} shouldHideDefaultSelectedIndicator={true} isFullWidth={true} isFullHeight={true}>
+                  <SelectableView key={index} variant='card' isSelected={trendingCollection.collection.address === selectedTrendingCollection?.address} onClicked={(): void => onTrendingCollectionClicked(trendingCollection)} shouldHideDefaultSelectedIndicator={true} isFullWidth={true} isFullHeight={true}>
                     <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullHeight={true} isFullWidth={true} padding={PaddingSize.Wide} contentAlignment={Alignment.Start} childAlignment={Alignment.Center}>
                       <Text variant='note'>{`#${index + 1}`}</Text>
                       <Image variant='rounded' source={trendingCollection.collection.imageUrl || ''} alternativeText={''} maxHeight='3em' maxWidth='3em' fitType='cover' />
@@ -279,24 +296,30 @@ export const HomePage = (): React.ReactElement => {
                 ))}
               </EqualGrid>
             )}
-            {trendingCollectionTokenTransferValuesChartData && (
-              <ResponsiveContainer width="100%" height={400}>
-                <ComposedChart data={trendingCollectionTokenTransferValuesChartData}>
-                  <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
-                  <XAxis
-                    dataKey='date'
-                    tickFormatter={(value: number): string => {
-                      return dateToString(new Date(value), 'dd.MM.yy');
-                    }}
-                    type='number'
-                    domain={['min', (new Date()).getTime()]}
-                    style={{ fontSize: '0.8em' }}
-                  />
-                  <YAxis yAxisId={0} />
-                  <Tooltip content={renderTrendingCollectionTokenTransferValuesTooltip} />
-                  <Scatter isAnimationActive={false} type='monotone' dataKey='value' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.brandPrimary} fillOpacity={1} yAxisId={0} />
-                </ComposedChart>
-              </ResponsiveContainer>
+            {selectedTrendingCollection && trendingCollectionTokenTransferValuesChartData && (
+              <React.Fragment>
+                <Text variant='header3'>{`${selectedTrendingCollection.name} activity`}</Text>
+                <Spacing />
+                <Link text={`See all collection data`} target={`/collections/${selectedTrendingCollection.address}`} />
+                <Spacing variant={PaddingSize.Wide} />
+                <ResponsiveContainer width="100%" height={400}>
+                  <ComposedChart data={trendingCollectionTokenTransferValuesChartData}>
+                    <CartesianGrid stroke={colors.brandPrimaryClear90} strokeDasharray='3 3' />
+                    <XAxis
+                      dataKey='date'
+                      tickFormatter={(value: number): string => {
+                        return dateToString(new Date(value), 'dd.MM.yy');
+                      }}
+                      type='number'
+                      domain={['min', (new Date()).getTime()]}
+                      style={{ fontSize: '0.8em' }}
+                    />
+                    <YAxis yAxisId={0} />
+                    <Tooltip content={renderTrendingCollectionTokenTransferValuesTooltip} />
+                    <Scatter isAnimationActive={false} type='monotone' dataKey='value' stroke={colors.brandPrimary} strokeWidth={0} fill={colors.brandPrimary} fillOpacity={1} yAxisId={0} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </React.Fragment>
             )}
             <Spacing variant={PaddingSize.Wide3} />
             <Stack directionResponsive={{base: Direction.Vertical, small: Direction.Horizontal}} isFullWidth={true}>
@@ -327,7 +350,7 @@ export const HomePage = (): React.ReactElement => {
                         return dateToString(new Date(value), 'dd.MM.yy');
                       }}
                       type='number'
-                      domain={['auto', (new Date()).getTime()]}
+                      domain={['min', (new Date()).getTime()]}
                       style={{ fontSize: '0.8em' }}
                     />
                     <YAxis yAxisId={0} />

@@ -433,3 +433,9 @@ class RetrieveMintedTokenCountsRequest(BaseModel):
 
 class RetrieveMintedTokenCountsResponse(BaseModel):
     mintedTokenCounts: List[ApiMintedTokenCount]
+
+class RetrieveHeroTokensRequest(BaseModel):
+    pass
+
+class RetrieveHeroTokensResponse(BaseModel):
+    tokens: List[ApiCollectionToken]

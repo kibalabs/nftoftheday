@@ -400,3 +400,21 @@ export class RetrieveMintedTokenCountsResponse extends ResponseData {
     );
   };
 }
+
+export class RetrieveHeroTokensRequest extends RequestData {
+}
+
+export class RetrieveHeroTokensResponse extends ResponseData {
+  readonly tokens: Resources.CollectionToken[];
+
+  public constructor(tokens: Resources.CollectionToken[]) {
+    super();
+    this.tokens = tokens;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveHeroTokensResponse => {
+    return new RetrieveHeroTokensResponse(
+      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionToken.fromObject(innerObj)),
+    );
+  };
+}

@@ -140,4 +140,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.RetrieveMintedTokenCountsResponse);
     return response.mintedTokenCounts;
   };
+
+  public retrieveHeroTokens = async (): Promise<Resources.CollectionToken[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/hero-tokens`;
+    const request = new Endpoints.RetrieveHeroTokensRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveHeroTokensResponse);
+    return response.tokens;
+  };
 }

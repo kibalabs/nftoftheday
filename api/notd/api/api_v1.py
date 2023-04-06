@@ -21,7 +21,6 @@ from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
-from notd.api.endpoints_v1 import RetrieveMintedTokenCountsRequest
 from notd.api.endpoints_v1 import RetrieveMintedTokenCountsResponse
 from notd.api.endpoints_v1 import ReceiveNewBlocksDeferredResponse
 from notd.api.endpoints_v1 import RefreshAccountTokenOwnershipsResponse
@@ -29,6 +28,8 @@ from notd.api.endpoints_v1 import RefreshCollectionOverlapsDeferredResponse
 from notd.api.endpoints_v1 import RefreshGalleryBadgeHoldersForAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RefreshLatestListingsAllCollectionsDeferredResponse
 from notd.api.endpoints_v1 import RetrieveTrendingCollectionsResponse
+from notd.api.endpoints_v1 import RetrieveHeroTokensRequest
+from notd.api.endpoints_v1 import RetrieveHeroTokensResponse
 from notd.api.endpoints_v1 import SubscribeRequest
 from notd.api.endpoints_v1 import SubscribeResponse
 from notd.api.endpoints_v1 import UpdateActivityForAllCollectionsDeferredResponse
@@ -229,6 +230,12 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         currentDate = currentDate.replace(tzinfo=None) if currentDate else None
         mintedTokenCounts = await notdManager.retrieve_minted_token_counts(currentDate=currentDate, duration=duration)
         return RetrieveMintedTokenCountsResponse(mintedTokenCounts=(await responseBuilder.minted_token_counts_from_models(mintedTokenCounts=mintedTokenCounts)))
+
+    @router.get('/hero-tokens', response_model=RetrieveHeroTokensResponse)
+    async def retrieve_hero_tokens(currentDate: Optional[datetime.datetime] = None, limit: Optional[int] = None) -> RetrieveHeroTokensResponse:
+        currentDate = currentDate.replace(tzinfo=None) if currentDate else None
+        tokens = await notdManager.retrieve_hero_tokens(currentDate=currentDate, limit=limit)
+        return RetrieveHeroTokensResponse(tokens=(await responseBuilder.collection_token_from_model(tokens=tokens)))
 
     @router.post('/subscribe', response_model=SubscribeResponse)
     async def subscribe_email(request: SubscribeRequest) -> SubscribeResponse:
