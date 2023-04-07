@@ -48,6 +48,7 @@ from notd.model import TokenMetadata
 from notd.model import TokenMultiOwnership
 from notd.model import TokenTransfer
 from notd.model import TokenTransferValue
+from notd.model import TradingHistory
 from notd.model import TrendingCollection
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
@@ -554,6 +555,33 @@ class NotdManager:
         result = await self.retriever.database.execute(query=tokenTransfersQuery)
         tokenTransfers = [token_transfer_from_row(row) for row in result.mappings()]
         return tokenTransfers
+
+    async def list_user_trading_history(self, userAddress: str, offset: int) -> List[TradingHistory]:
+        currentDate = date_util.datetime_from_now()
+        userAddress = chain_util.normalize_address(value=userAddress)
+        tokenTransfersQuery = (
+            sqlalchemy.select(sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label('date'), TokenTransfersTable,)
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .where(BlocksTable.c.blockDate <= currentDate)
+            .where(BlocksTable.c.blockDate >= date_util.datetime_from_datetime(dt=currentDate, weeks=-52))
+            .group_by(sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label('date'), TokenTransfersTable.c)
+            .order_by(sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label('date').desc())
+            .offset(offset)
+        )
+        result = await self.retriever.database.execute(query=tokenTransfersQuery)
+        transferRow = (list(result.mappings()))
+        dateActivitiesDict: Dict[datetime.date, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+        for row in transferRow:
+            dateActivitiesDict[row['date']]['buyCount'] += 1 if (row['toAddress'] == userAddress and row['value'] > 0) else 0
+            dateActivitiesDict[row['date']]['sellCount'] += 1 if (row['fromAddress'] == userAddress and row['value'] > 0) else 0
+            dateActivitiesDict[row['date']]['mintCount'] += 1 if row['fromAddress'] == chain_util.BURN_ADDRESS else 0
+        tradingHistories = [
+            TradingHistory(
+                date=date,
+                counts=counts
+            ) for date, counts in dateActivitiesDict.items()]
+        return tradingHistories
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

@@ -35,6 +35,7 @@ from notd.api.models_v1 import ApiTokenListing
 from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTokenTransferValue
+from notd.api.models_v1 import ApiTradingHistory
 from notd.api.models_v1 import ApiTrendingCollection
 
 
@@ -451,3 +452,9 @@ class ListUserRecentTransfersRequest(BaseModel):
 
 class ListUserRecentTransfersResponse(BaseModel):
     tokenTransfers: List[ApiTokenTransfer]
+
+class ListUserTradingHistoryRequest(BaseModel):
+    pass
+
+class ListUserTradingHistoryResponse(BaseModel):
+    tradingHistories: List[ApiTradingHistory]
