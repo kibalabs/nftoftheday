@@ -232,10 +232,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         tokenTransfers = await notdManager.list_user_recent_transfers(userAddress=userAddress, limit=limit, offset=offset)
         return ListUserRecentTransfersResponse(tokenTransfers=(await responseBuilder.token_transfers_from_models(tokenTransfers=tokenTransfers)))
 
-    @router.get('/accounts/{userAddress}/trading-history', response_model=ListUserTradingHistoryResponse)
-    async def list_user_trading_history(userAddress: str, offset: Optional[int] = None) -> ListUserTradingHistoryResponse:
+    @router.get('/accounts/{userAddress}/trading-histories', response_model=ListUserTradingHistoryResponse)
+    async def list_user_trading_histories(userAddress: str, offset: Optional[int] = None) -> ListUserTradingHistoryResponse:
         offset = offset if offset is not None else 0
-        tradingHistories = await notdManager.list_user_trading_history(userAddress=userAddress, offset=offset)
+        tradingHistories = await notdManager.list_user_trading_histories(userAddress=userAddress, offset=offset)
         return ListUserTradingHistoryResponse(tradingHistories=(await responseBuilder.trading_histories_from_models(tradingHistories=tradingHistories)))
 
     @router.post('/calculate-common-owners', response_model=CalculateCommonOwnersResponse)

@@ -299,4 +299,6 @@ class ApiMintedTokenCount(BaseModel):
 
 class ApiTradingHistory(BaseModel):
     date: datetime.date
-    counts: Dict[str, int]
+    buyCount: int
+    sellCount: int
+    mintCount: int

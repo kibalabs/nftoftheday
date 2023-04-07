@@ -669,4 +669,6 @@ class MintedTokenCount:
 @dataclasses.dataclass
 class TradingHistory:
     date: datetime.date
-    counts: Dict[str, int]
+    buyCount: int
+    sellCount: int
+    mintCount: int
