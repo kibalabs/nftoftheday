@@ -20,6 +20,7 @@ from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
+from notd.api.endpoints_v1 import ListUserBlueChipCollectionResponse
 from notd.api.endpoints_v1 import ListUserOwnedCollectionsResponse
 from notd.api.endpoints_v1 import ListUserRecentTransfersResponse
 from notd.api.endpoints_v1 import ListUserTradingHistoryResponse
@@ -237,6 +238,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         offset = offset if offset is not None else 0
         tradingHistories = await notdManager.list_user_trading_histories(userAddress=userAddress, offset=offset)
         return ListUserTradingHistoryResponse(tradingHistories=(await responseBuilder.trading_histories_from_models(tradingHistories=tradingHistories)))
+
+    @router.get('/accounts/{userAddress}/blue-chip-collection', response_model=ListUserBlueChipCollectionResponse)
+    async def list_user_blue_chip_collection(userAddress: str) -> ListUserBlueChipCollectionResponse:
+        addresses = await notdManager.list_user_blue_chip_collection(userAddress=userAddress)
+        return ListUserBlueChipCollectionResponse(collections=(await responseBuilder.collections_from_addresses(addresses=addresses)))
 
     @router.post('/calculate-common-owners', response_model=CalculateCommonOwnersResponse)
     async def calculate_common_owners(request: CalculateCommonOwnersRequest) -> CalculateCommonOwnersResponse:

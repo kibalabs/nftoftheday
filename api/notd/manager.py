@@ -36,6 +36,7 @@ from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
 from notd.messages import RefreshViewsMessageContent
+from notd.model import BLUE_CHIP_COLLECTIONS
 from notd.model import AccountToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
@@ -586,6 +587,16 @@ class NotdManager:
                 mintCount=dateMintCountDict[date],
             ) for date, buyCount in dateBuyCountDict.items()]
         return tradingHistories
+
+    async def list_user_blue_chip_collection(self, userAddress: str) -> List[str]:
+        query = (
+            sqlalchemy.select(TokenOwnershipsView.c.registryAddress)
+            .where(TokenOwnershipsView.c.registryAddress.in_(BLUE_CHIP_COLLECTIONS))
+            .where(TokenOwnershipsView.c.ownerAddress == userAddress)
+        )
+        result = await self.retriever.database.execute(query=query)
+        collections = [row['registryAddress'] for row in list(result.mappings())]
+        return collections
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
