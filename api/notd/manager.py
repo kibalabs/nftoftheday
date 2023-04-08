@@ -595,8 +595,8 @@ class NotdManager:
             .where(TokenOwnershipsView.c.ownerAddress == userAddress)
         )
         result = await self.retriever.database.execute(query=query)
-        collections = [row['registryAddress'] for row in list(result.mappings())]
-        return collections
+        registryAddresses = [row['registryAddress'] for row in list(result.mappings())]
+        return registryAddresses
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

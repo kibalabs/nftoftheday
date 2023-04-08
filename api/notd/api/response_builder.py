@@ -111,9 +111,6 @@ class ResponseBuilder:
             doesSupportErc1155=collection.doesSupportErc1155,
         )
 
-    async def collections_from_models(self, collections: Sequence[Collection]) -> List[Collection]:
-        return await asyncio.gather(*[self.collection_from_model(collection=collection) for collection in collections])
-
     async def collections_from_addresses(self, addresses: Sequence[str]) -> List[Collection]:
         return await asyncio.gather(*[self.collection_from_address(address=address) for address in addresses])
 
