@@ -51,6 +51,7 @@ from notd.model import TokenTransfer
 from notd.model import TokenTransferValue
 from notd.model import TradingHistory
 from notd.model import TrendingCollection
+from notd.model import UserTradingOverview
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -597,6 +598,41 @@ class NotdManager:
         result = await self.retriever.database.execute(query=query)
         registryAddresses = [row['registryAddress'] for row in list(result.mappings())]
         return registryAddresses
+
+    async def get_user_trading_overview(self, userAddress: str) -> UserTradingOverview:
+        #NOTE(Femi-Ogunkola): Please confirm if using one query is the better option
+        mostTradedQuery = (
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc())
+            .limit(1)
+        )
+        mostTradedResult = await self.retriever.database.execute(query=mostTradedQuery)
+        mostTradedTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostTradedResult.mappings()]
+        mostTradedToken = mostTradedTokens[0]
+        mostSoldQuery = (
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc())
+            .limit(1)
+        )
+        mostSoldResult = await self.retriever.database.execute(query=mostSoldQuery)
+        mostSoldTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostSoldResult.mappings()]
+        mostSoldToken = mostSoldTokens[0]
+        mostBoughtQuery = (
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc())
+            .limit(1)
+        )
+        mostBoughtResult = await self.retriever.database.execute(query=mostBoughtQuery)
+        mostBoughtTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostBoughtResult.mappings()]
+        mostBoughtToken = mostBoughtTokens[0]
+        userTradingOverview = UserTradingOverview(mostTradedToken=mostTradedToken, mostSoldToken=mostSoldToken, mostBoughtToken=mostBoughtToken)
+        return userTradingOverview
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

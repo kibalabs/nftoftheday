@@ -302,3 +302,9 @@ class ApiTradingHistory(BaseModel):
     buyCount: int
     sellCount: int
     mintCount: int
+
+
+class ApiUserTradingOverview(BaseModel):
+    mostTradedToken: ApiCollectionToken
+    mostSoldToken: ApiCollectionToken
+    mostBoughtToken: ApiCollectionToken

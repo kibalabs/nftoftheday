@@ -680,3 +680,10 @@ class TradingHistory:
     buyCount: int
     sellCount: int
     mintCount: int
+
+
+@dataclasses.dataclass
+class UserTradingOverview:
+    mostTradedToken: Token
+    mostSoldToken: Token
+    mostBoughtToken: Token

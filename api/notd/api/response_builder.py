@@ -39,6 +39,7 @@ from notd.api.models_v1 import ApiTradingHistory
 from notd.api.models_v1 import ApiTrendingCollection
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
+from notd.api.models_v1 import ApiUserTradingOverview
 from notd.model import AccountCollectionGm
 from notd.model import AccountGm
 from notd.model import AccountToken
@@ -75,6 +76,7 @@ from notd.model import TradingHistory
 from notd.model import TrendingCollection
 from notd.model import TwitterProfile
 from notd.model import UserProfile
+from notd.model import UserTradingOverview
 from notd.store.retriever import Retriever
 from notd.token_metadata_processor import TokenMetadataProcessor
 
@@ -535,3 +537,10 @@ class ResponseBuilder:
 
     async def trading_histories_from_models(self, tradingHistories: Sequence[TradingHistory]) -> List[ApiTradingHistory]:
         return await asyncio.gather(*[self.trading_history_from_model(tradingHistory=tradingHistory) for tradingHistory in tradingHistories])
+
+    async def user_trading_overview_from_model(self, userTradingOverview: UserTradingOverview) -> ApiUserTradingOverview:
+        return ApiUserTradingOverview(
+            mostTradedToken=(await self.collection_token_from_token_key(tokenKey=userTradingOverview.mostTradedToken)),
+            mostSoldToken=(await self.collection_token_from_token_key(userTradingOverview.mostSoldToken)),
+            mostBoughtToken=(await self.collection_token_from_token_key(userTradingOverview.mostBoughtToken)),
+        )
