@@ -164,4 +164,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.ListUserRecentTransfersResponse);
     return response.tokenTransfers;
   };
+
+  public listUserTradingHistories = async (address: string, offset?: number): Promise<Resources.TradingHistory[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${address}/trading-histories`;
+    const request = new Endpoints.ListUserTradingHistoriesRequest(offset);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListUserTradingHistoriesResponse);
+    return response.tradingHistories;
+  };
 }
