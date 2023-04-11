@@ -456,23 +456,23 @@ export class ListUserRecentTransfersRequest extends RequestData {
 
 export class ListUserRecentTransfersResponse extends ResponseData {
   readonly tokenTransfers: Resources.TokenTransfer[];
-  
+
   public constructor(tokenTransfers: Resources.TokenTransfer[]) {
     super();
     this.tokenTransfers = tokenTransfers;
   }
-  
+
   public static fromObject = (obj: Record<string, unknown>): ListUserRecentTransfersResponse => {
     return new ListUserRecentTransfersResponse(
       (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
-      );
-    };
-  }
+    );
+  };
+}
 
 export class ListUserTradingHistoriesRequest extends RequestData {
   readonly offset?: number;
 
-  constructor( offset?: number) {
+  constructor(offset?: number) {
     super();
     this.offset = offset;
   }
