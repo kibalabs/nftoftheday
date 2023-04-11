@@ -240,8 +240,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         return ListUserTradingHistoryResponse(tradingHistories=(await responseBuilder.trading_histories_from_models(tradingHistories=tradingHistories)))
 
     @router.get('/accounts/{userAddress}/tokens/blue-chip-collections', response_model=ListUserBlueChipCollectionsTokensResponse)
-    async def list_user_blue_chip_collections(userAddress: str) -> ListUserBlueChipCollectionsTokensResponse:
-        tokenKeys = await notdManager.list_user_blue_chip_collections(userAddress=userAddress)
+    async def list_user_blue_chip_collection_tokens(userAddress: str) -> ListUserBlueChipCollectionsTokensResponse:
+        tokenKeys = await notdManager.list_user_blue_chip_collection_tokens(userAddress=userAddress)
         return ListUserBlueChipCollectionsTokensResponse(collectionTokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokenKeys)))
 
     @router.post('/calculate-common-owners', response_model=CalculateCommonOwnersResponse)

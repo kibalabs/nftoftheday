@@ -588,7 +588,7 @@ class NotdManager:
             ) for date, buyCount in dateBuyCountDict.items()]
         return tradingHistories
 
-    async def list_user_blue_chip_collections(self, userAddress: str) -> List[Token]:
+    async def list_user_blue_chip_collection_tokens(self, userAddress: str) -> List[Token]:
         query = (
             sqlalchemy.select(TokenOwnershipsView.c.registryAddress, TokenOwnershipsView.c.tokenId)
             .where(TokenOwnershipsView.c.registryAddress.in_(BLUE_CHIP_COLLECTIONS))

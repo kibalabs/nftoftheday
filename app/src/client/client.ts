@@ -172,4 +172,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.ListUserTradingHistoriesResponse);
     return response.tradingHistories;
   };
+
+  public listUserBlueChipCollectionToken = async (address: string): Promise<Resources.CollectionToken[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${address}/tokens/blue-chip-collections`;
+    const request = new Endpoints.ListUserBlueChipCollectionsTokenRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListUserBlueChipCollectionTokensResponse);
+    return response.tokens;
+  };
 }
