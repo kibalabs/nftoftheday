@@ -588,15 +588,15 @@ class NotdManager:
             ) for date, buyCount in dateBuyCountDict.items()]
         return tradingHistories
 
-    async def list_user_blue_chip_collection(self, userAddress: str) -> List[str]:
+    async def list_user_blue_chip_collections(self, userAddress: str) -> List[Token]:
         query = (
-            sqlalchemy.select(TokenOwnershipsView.c.registryAddress)
+            sqlalchemy.select(TokenOwnershipsView.c.registryAddress, TokenOwnershipsView.c.tokenId)
             .where(TokenOwnershipsView.c.registryAddress.in_(BLUE_CHIP_COLLECTIONS))
             .where(TokenOwnershipsView.c.ownerAddress == userAddress)
         )
         result = await self.retriever.database.execute(query=query)
-        registryAddresses = [row['registryAddress'] for row in list(result.mappings())]
-        return registryAddresses
+        tokenKeys = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in list(result.mappings())]
+        return tokenKeys
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

@@ -459,8 +459,8 @@ class ListUserTradingHistoryRequest(BaseModel):
 class ListUserTradingHistoryResponse(BaseModel):
     tradingHistories: List[ApiTradingHistory]
 
-class ListUserBlueChipCollectionRequest(BaseModel):
+class ListUserBlueChipCollectionsTokensRequest(BaseModel):
     pass
 
-class ListUserBlueChipCollectionResponse(BaseModel):
-    collections: List[ApiCollection]
+class ListUserBlueChipCollectionsTokensResponse(BaseModel):
+    collectionTokens: List[ApiCollectionToken]
