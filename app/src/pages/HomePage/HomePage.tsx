@@ -274,7 +274,7 @@ export const HomePage = (): React.ReactElement => {
                       </Stack.Item>
                       <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.End}>
                         <Text variant='note'>{currentToken.name}</Text>
-                        <KibaIcon variant='small' iconId='ion-open' />
+                        <KibaIcon variant='small' iconId='ion-open-outline' />
                       </Stack>
                       <Spacing variant={PaddingSize.Narrow} />
                     </Stack>
