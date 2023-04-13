@@ -316,7 +316,7 @@ export const HomePage = (): React.ReactElement => {
                         <Stack direction={Direction.Vertical} shouldAddGutters={false} contentAlignment={Alignment.Start}>
                           <Text isSingleLine={true}>{`${trendingCollection.collection.name}`}</Text>
                           <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                            <Text>{`${shortFormatEther(trendingCollection.totalVolume)}`}</Text>
+                            <Text>{`${shortFormatEther(BigInt(trendingCollection.totalVolume.toString()))}`}</Text>
                             {trendingCollection.previousTotalVolume.eq(BigNumber.from(0)) ? (
                               <Text variant='success'>{'✨ NEW'}</Text>
                             ) : (trendingCollection.totalVolume.gt(trendingCollection.previousTotalVolume)) ? (

@@ -289,7 +289,7 @@ export class TradingHistory {
 
   public static fromObject = (obj: Record<string, unknown>): TradingHistory => {
     return new TradingHistory(
-      dateFromString(obj.date as string),
+      dateFromString(obj.date as string, 'yyyy-MM-dd'),
       BigNumber.from(String(obj.buyCount)),
       BigNumber.from(String(obj.sellCount)),
       BigNumber.from(String(obj.mintCount)),

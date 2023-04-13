@@ -179,7 +179,7 @@ export const CollectionPage = (): React.ReactElement => {
     }
     return collectionActivities.map((collectionActivity: CollectionActivity): ChartData => ({
       date: dateToString(collectionActivity.date, 'dd/MM/yy'),
-      averageValue: etherToNumber(collectionActivity.averageValue),
+      averageValue: etherToNumber(BigInt(collectionActivity.averageValue.toString())),
       saleCount: collectionActivity.saleCount.toNumber(),
     }));
   }, [collectionActivities]);
@@ -280,15 +280,15 @@ export const CollectionPage = (): React.ReactElement => {
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
                       <MetricView name={'Items'} value={`${collectionStatistics.itemCount}`} />
                       <MetricView name={'Owners'} value={`${collectionStatistics.holderCount}`} />
-                      <MetricView name={'Total Volume'} value={shortFormatEther(collectionStatistics.totalTradeVolume)} />
+                      <MetricView name={'Total Volume'} value={shortFormatEther(BigInt(collectionStatistics.totalTradeVolume.toString()))} />
                     </Stack>
                     <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
                       <Box variant='divider' isFullHeight={true} width='1px' />
                     </ResponsiveHidingView>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                      <MetricView name={'24h Low Sale'} value={shortFormatEther(collectionStatistics.lowestSaleLast24Hours)} />
-                      <MetricView name={'24h High Sale'} value={shortFormatEther(collectionStatistics.highestSaleLast24Hours)} />
-                      <MetricView name={'24h Volume'} value={shortFormatEther(collectionStatistics.tradeVolume24Hours)} />
+                      <MetricView name={'24h Low Sale'} value={shortFormatEther(BigInt(collectionStatistics.lowestSaleLast24Hours.toString()))} />
+                      <MetricView name={'24h High Sale'} value={shortFormatEther(BigInt(collectionStatistics.highestSaleLast24Hours.toString()))} />
+                      <MetricView name={'24h Volume'} value={shortFormatEther(BigInt(collectionStatistics.tradeVolume24Hours.toString()))} />
                     </Stack>
                   </Stack>
                 )}
@@ -328,7 +328,7 @@ export const CollectionPage = (): React.ReactElement => {
                     <TokenCard
                       key={index}
                       collectionToken={recentSale.token}
-                      subtitle={`${dateToRelativeShortString(recentSale.blockDate)} • ${shortFormatEther(recentSale.value)}`}
+                      subtitle={`${dateToRelativeShortString(recentSale.blockDate)} • ${shortFormatEther(BigInt(recentSale.value.toString()))}`}
                       target={`/collections/${recentSale.registryAddress}/tokens/${recentSale.tokenId}`}
                     />
                   )) : (

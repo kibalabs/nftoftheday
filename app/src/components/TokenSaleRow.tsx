@@ -36,7 +36,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
               <Spacing variant={PaddingSize.Wide} />
             </Stack.Item>
             <Stack.Item baseSize='5rem' alignment={Alignment.Center}>
-              <Text alignment={TextAlignment.Center}>{`${shortFormatEther(props.tokenTransfer.value)}`}</Text>
+              <Text alignment={TextAlignment.Center}>{`${shortFormatEther(BigInt(props.tokenTransfer.value.toString()))}`}</Text>
             </Stack.Item>
             <Stack.Item baseSize='7rem' alignment={Alignment.Center}>
               <Text alignment={TextAlignment.Center}>{dateToRelativeString(props.tokenTransfer.blockDate)}</Text>
@@ -66,7 +66,7 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
             </Stack>
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Narrow}>
               <Stack.Item alignment={Alignment.Center}>
-                <Text alignment={TextAlignment.Right}>{`${shortFormatEther(props.tokenTransfer.value)}`}</Text>
+                <Text alignment={TextAlignment.Right}>{`${shortFormatEther(BigInt(props.tokenTransfer.value.toString()))}`}</Text>
               </Stack.Item>
               <Spacing variant={PaddingSize.Wide2} direction={Direction.Horizontal} />
               <Stack.Item alignment={Alignment.Center}>

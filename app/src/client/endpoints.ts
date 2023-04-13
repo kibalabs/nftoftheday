@@ -492,9 +492,9 @@ export class ListUserTradingHistoriesResponse extends ResponseData {
     this.tradingHistories = tradingHistories;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): ListUserRecentTransfersResponse => {
-    return new ListUserRecentTransfersResponse(
-      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+  public static fromObject = (obj: Record<string, unknown>): ListUserTradingHistoriesResponse => {
+    return new ListUserTradingHistoriesResponse(
+      (obj.tradingHistories as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TradingHistory.fromObject(innerObj)),
     );
   };
 }
