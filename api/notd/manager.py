@@ -579,7 +579,7 @@ class NotdManager:
             dateBuyCountDict[row['date']] += 1 if (row['toAddress'] == userAddress and row['value'] > 0) else 0
             dateSellCountDict[row['date']] += 1 if (row['fromAddress'] == userAddress and row['value'] > 0) else 0
             dateMintCountDict[row['date']] += 1 if row['fromAddress'] == chain_util.BURN_ADDRESS else 0
-            dateTransferCountDict[row['date']] += 1 if userAddress in ((row['fromAddress'], row['toAddress']) and row['value']==0) else 0
+            dateTransferCountDict[row['date']] += 1 if userAddress in ((row['fromAddress'], row['toAddress']) and row['value'] == 0) else 0
         tradingHistories = [
             TradingHistory(
                 date=date,
