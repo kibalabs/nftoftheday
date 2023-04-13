@@ -274,6 +274,29 @@ export class MintedTokenCount {
   };
 }
 
+export class TradingHistory {
+  readonly date: Date;
+  readonly buyCount: BigNumber;
+  readonly sellCount: BigNumber;
+  readonly mintCount: BigNumber;
+
+  public constructor(date: Date, buyCount: BigNumber, sellCount: BigNumber, mintCount: BigNumber) {
+    this.date = date;
+    this.buyCount = buyCount;
+    this.sellCount = sellCount;
+    this.mintCount = mintCount;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): TradingHistory => {
+    return new TradingHistory(
+      dateFromString(obj.date as string, 'yyyy-MM-dd'),
+      BigNumber.from(String(obj.buyCount)),
+      BigNumber.from(String(obj.sellCount)),
+      BigNumber.from(String(obj.mintCount)),
+    );
+  };
+}
+
 
 export class OwnedCollection extends ResponseData {
   public constructor(

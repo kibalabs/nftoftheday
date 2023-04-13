@@ -468,3 +468,33 @@ export class ListUserRecentTransfersResponse extends ResponseData {
     );
   };
 }
+
+export class ListUserTradingHistoriesRequest extends RequestData {
+  readonly offset?: number;
+
+  constructor(offset?: number) {
+    super();
+    this.offset = offset;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      offset: this.offset,
+    };
+  };
+}
+
+export class ListUserTradingHistoriesResponse extends ResponseData {
+  readonly tradingHistories: Resources.TradingHistory[];
+
+  public constructor(tradingHistories: Resources.TradingHistory[]) {
+    super();
+    this.tradingHistories = tradingHistories;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListUserTradingHistoriesResponse => {
+    return new ListUserTradingHistoriesResponse(
+      (obj.tradingHistories as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TradingHistory.fromObject(innerObj)),
+    );
+  };
+}

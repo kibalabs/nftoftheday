@@ -664,3 +664,11 @@ class MintedTokenCount:
     date: datetime.datetime
     mintedTokenCount: int
     newRegistryCount: int
+
+
+@dataclasses.dataclass
+class TradingHistory:
+    date: datetime.date
+    buyCount: int
+    sellCount: int
+    mintCount: int

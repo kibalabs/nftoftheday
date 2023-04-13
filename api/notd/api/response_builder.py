@@ -35,6 +35,7 @@ from notd.api.models_v1 import ApiTokenOwnership
 from notd.api.models_v1 import ApiTokenStaking
 from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTokenTransferValue
+from notd.api.models_v1 import ApiTradingHistory
 from notd.api.models_v1 import ApiTrendingCollection
 from notd.api.models_v1 import ApiTwitterProfile
 from notd.api.models_v1 import ApiUserProfile
@@ -70,6 +71,7 @@ from notd.model import TokenMultiOwnership
 from notd.model import TokenStaking
 from notd.model import TokenTransfer
 from notd.model import TokenTransferValue
+from notd.model import TradingHistory
 from notd.model import TrendingCollection
 from notd.model import TwitterProfile
 from notd.model import UserProfile
@@ -519,3 +521,14 @@ class ResponseBuilder:
 
     async def minted_token_counts_from_models(self, mintedTokenCounts: Sequence[MintedTokenCount]) -> List[ApiMintedTokenCount]:
         return await asyncio.gather(*[self.minted_token_count_from_model(mintedTokenCount=mintedTokenCount) for mintedTokenCount in mintedTokenCounts])
+
+    async def trading_history_from_model(self, tradingHistory: TradingHistory) -> ApiTradingHistory:
+        return ApiTradingHistory(
+            date=tradingHistory.date,
+            buyCount=tradingHistory.buyCount,
+            sellCount=tradingHistory.sellCount,
+            mintCount=tradingHistory.mintCount,
+        )
+
+    async def trading_histories_from_models(self, tradingHistories: Sequence[TradingHistory]) -> List[ApiTradingHistory]:
+        return await asyncio.gather(*[self.trading_history_from_model(tradingHistory=tradingHistory) for tradingHistory in tradingHistories])

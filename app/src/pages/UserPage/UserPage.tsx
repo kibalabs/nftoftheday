@@ -1,24 +1,66 @@
 import React from 'react';
 
+import { addDays, dateToString, startOfDay } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, ContainingView, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, StatefulCollapsibleBox, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, ContainingView, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, StatefulCollapsibleBox, TabBar, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
+import ActivityCalendar, { BlockElement, Activity as CalendarActivity, Level as CalendarActivityLevel } from 'react-activity-calendar';
+import { Tooltip as ReactTooltip } from 'react-tooltip';
 
-import { CollectionToken, OwnedCollection, TokenTransfer } from '../../client/resources';
+import { CollectionToken, OwnedCollection, TokenTransfer, TradingHistory } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
 import { TokenCard } from '../../components/TokenCard';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
-// const TAB_KEY_OVERVIEW = 'TAB_KEY_OVERVIEW';
+const TAB_KEY_OVERVIEW = 'TAB_KEY_OVERVIEW';
 const TAB_KEY_OWNED = 'TAB_KEY_OWNED';
 const TAB_KEY_TRANSACTIONS = 'TAB_KEY_TRANSACTIONS';
 
 export const UserPage = (): React.ReactElement => {
+  const colors = useColors();
   const { notdClient } = useGlobals();
   const accountAddress = useStringRouteParam('accountAddress');
   const [ownedCollections, setOwnedCollections] = React.useState<OwnedCollection[] | null | undefined>(undefined);
-  const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_OWNED);
+  const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_OVERVIEW);
+  const [tradingCalendarActivity, setTradingCalendarActivity] = React.useState<CalendarActivity[] | undefined | null>(undefined);
   const [recentTransfers, setRecentTransfers] = React.useState<TokenTransfer[] | null | undefined>(undefined);
+
+  const updateTradingCalendarActivity = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setTradingCalendarActivity(undefined);
+    }
+    if (!accountAddress) {
+      setTradingCalendarActivity(undefined);
+      return;
+    }
+    notdClient.listUserTradingHistories(accountAddress).then((tradingHistories: TradingHistory[]): void => {
+      const allValues: Record<string, TradingHistory> = tradingHistories.reduce((accumulator: Record<string, TradingHistory>, current: TradingHistory): Record<string, TradingHistory> => {
+        accumulator[dateToString(current.date, 'yyyy-MM-dd')] = current;
+        return accumulator;
+      }, {});
+      let currentDay = addDays(startOfDay(new Date()), -365);
+      const newTradingCalendarActivities: CalendarActivity[] = [];
+      while (currentDay < new Date()) {
+        const currentDayString = dateToString(currentDay, 'yyyy-MM-dd');
+        const currentDayHistory = allValues[currentDayString];
+        const value = currentDayHistory ? (currentDayHistory.buyCount.add(currentDayHistory.mintCount).add(currentDayHistory.sellCount).toNumber()) : 0;
+        newTradingCalendarActivities.push({
+          date: currentDayString,
+          count: value,
+          level: Math.max(0, Math.min(value, 4)) as CalendarActivityLevel,
+        });
+        currentDay = addDays(currentDay, 1);
+      }
+      setTradingCalendarActivity(newTradingCalendarActivities);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setTradingCalendarActivity(null);
+    });
+  }, [notdClient, accountAddress]);
+
+  React.useEffect((): void => {
+    updateTradingCalendarActivity();
+  }, [updateTradingCalendarActivity]);
 
   const updateOwnedCollections = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
@@ -82,14 +124,14 @@ export const UserPage = (): React.ReactElement => {
           </Stack>
           <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
             <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-              {/* <TabBar.Item variant='lined' tabKey={TAB_KEY_OVERVIEW} text='Overview' /> */}
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_OVERVIEW} text='Overview' />
               <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
               <TabBar.Item variant='lined' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
             </TabBar>
           </ResponsiveHidingView>
           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
             <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-              {/* <TabBar.Item variant='lined' tabKey={TAB_KEY_OVERVIEW} text='Overview' /> */}
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_OVERVIEW} text='Overview' />
               <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
               <TabBar.Item variant='lined' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
             </TabBar>
@@ -148,15 +190,40 @@ export const UserPage = (): React.ReactElement => {
                   </React.Fragment>
                 )}
               </Stack>
-            ) : /* selectedTabKey === TAB_KEY_OVERVIEW */ (
+            ) : selectedTabKey === TAB_KEY_OVERVIEW ? (
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
-                <Text>Overview</Text>
+                { tradingCalendarActivity === undefined ? (
+                  <LoadingSpinner />
+                ) : tradingCalendarActivity === null ? (
+                  <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
+                ) : tradingCalendarActivity.length === 0 ? (
+                  <Text alignment={TextAlignment.Center}>No activity</Text>
+                ) : (
+                  <ActivityCalendar
+                    data={tradingCalendarActivity}
+                    weekStart={1}
+                    hideColorLegend={true}
+                    hideTotalCount={true}
+                    theme={{
+                      light: [colors.brandPrimaryClear95, colors.brandPrimaryClear75, colors.brandPrimaryClear50, colors.brandPrimaryClear25, colors.brandPrimary],
+                      dark: [colors.brandPrimaryClear95, colors.brandPrimaryClear75, colors.brandPrimaryClear50, colors.brandPrimaryClear25, colors.brandPrimary],
+                    }}
+                    renderBlock={(block :BlockElement, activity: CalendarActivity) => React.cloneElement(block, {
+                      'data-tooltip-id': 'react-tooltip',
+                      'data-tooltip-html': `${activity.count} activities on ${activity.date}`,
+                    })
+                    }
+                  />
+                )}
                 <Stack.Item growthFactor={1} shrinkFactor={1} />
               </Stack>
+            ) : (
+              null
             )}
           </Stack.Item>
         </Stack>
       </ContainingView>
+      <ReactTooltip id='react-tooltip' />
     </React.Fragment>
   );
 };

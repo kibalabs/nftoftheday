@@ -295,3 +295,10 @@ class ApiMintedTokenCount(BaseModel):
     date: datetime.datetime
     mintedTokenCount: str
     newRegistryCount: str
+
+
+class ApiTradingHistory(BaseModel):
+    date: datetime.date
+    buyCount: int
+    sellCount: int
+    mintCount: int
