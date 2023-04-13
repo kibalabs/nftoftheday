@@ -677,6 +677,7 @@ class MintedTokenCount:
 @dataclasses.dataclass
 class TradingHistory:
     date: datetime.date
+    transferCount: int
     buyCount: int
     sellCount: int
     mintCount: int
