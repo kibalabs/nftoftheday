@@ -525,6 +525,7 @@ class ResponseBuilder:
     async def trading_history_from_model(self, tradingHistory: TradingHistory) -> ApiTradingHistory:
         return ApiTradingHistory(
             date=tradingHistory.date,
+            transferCount=tradingHistory.transferCount,
             buyCount=tradingHistory.buyCount,
             sellCount=tradingHistory.sellCount,
             mintCount=tradingHistory.mintCount,
