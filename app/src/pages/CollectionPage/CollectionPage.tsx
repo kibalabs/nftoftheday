@@ -180,7 +180,7 @@ export const CollectionPage = (): React.ReactElement => {
     return collectionActivities.map((collectionActivity: CollectionActivity): ChartData => ({
       date: dateToString(collectionActivity.date, 'dd/MM/yy'),
       averageValue: etherToNumber(BigInt(collectionActivity.averageValue.toString())),
-      saleCount: collectionActivity.saleCount.toNumber(),
+      saleCount: Number(collectionActivity.saleCount),
     }));
   }, [collectionActivities]);
 

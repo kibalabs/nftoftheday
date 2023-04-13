@@ -3,7 +3,6 @@ import React from 'react';
 import { addDays, dateToString, shortFormatEther } from '@kibalabs/core';
 import { useInterval } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, Image, IOption, KibaIcon, Link, LinkBase, LoadingSpinner, MarkdownText, OptionSelect, PaddingSize, PrettyText, ResponsiveTextAlignmentView, SelectableView, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
-import { BigNumber } from 'ethers';
 import { Bar, CartesianGrid, ComposedChart, ResponsiveContainer as RechartsContainer, ResponsiveContainer, Scatter, Tooltip, XAxis, YAxis } from 'recharts';
 import styled, { keyframes as styledKeyframes } from 'styled-components';
 
@@ -156,7 +155,7 @@ export const HomePage = (): React.ReactElement => {
     } else if (trendingCollectionsDuration === '180_DAYS') {
       minDate = addDays(maxDate, -180);
     }
-    notdClient.listCollectionTransferValues(selectedTrendingCollection.address, minDate, maxDate, BigNumber.from(1)).then((retrievedTokenTransferValues: TokenTransferValue[]): void => {
+    notdClient.listCollectionTransferValues(selectedTrendingCollection.address, minDate, maxDate, BigInt(1)).then((retrievedTokenTransferValues: TokenTransferValue[]): void => {
       setTrendingCollectionTokenTransferValues(retrievedTokenTransferValues.sort((tokenTransferValue1: TokenTransferValue, tokenTransferValue2: TokenTransferValue): number => {
         return tokenTransferValue1.blockDate.getTime() - tokenTransferValue2.blockDate.getTime();
       }));
@@ -201,8 +200,8 @@ export const HomePage = (): React.ReactElement => {
     }
     return mintedTokenCounts.map((mintedToken: MintedTokenCount): MintedTokenChartData => ({
       date: mintedToken.date.getTime(),
-      mintedTokenCount: mintedToken.mintedTokenCount.toNumber(),
-      newRegistryCount: mintedToken.newRegistryCount.toNumber(),
+      mintedTokenCount: Number(mintedToken.mintedTokenCount),
+      newRegistryCount: Number(mintedToken.newRegistryCount),
     }));
   }, [mintedTokenCounts]);
 
@@ -219,7 +218,7 @@ export const HomePage = (): React.ReactElement => {
     }
     return trendingCollectionTokenTransferValues.map((tokenTransferValue: TokenTransferValue): TrendingCollectionTokenTransferValuesChartData => ({
       date: tokenTransferValue.blockDate.getTime(),
-      value: tokenTransferValue.value.div(1000000000000000).toNumber() / 1000,
+      value: Number(tokenTransferValue.value / 1000000000000000n) / 1000,
     }));
   }, [trendingCollectionTokenTransferValues]);
 
@@ -317,12 +316,12 @@ export const HomePage = (): React.ReactElement => {
                           <Text isSingleLine={true}>{`${trendingCollection.collection.name}`}</Text>
                           <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
                             <Text>{`${shortFormatEther(BigInt(trendingCollection.totalVolume.toString()))}`}</Text>
-                            {trendingCollection.previousTotalVolume.eq(BigNumber.from(0)) ? (
+                            {trendingCollection.previousTotalVolume === BigInt(0) ? (
                               <Text variant='success'>{'✨ NEW'}</Text>
-                            ) : (trendingCollection.totalVolume.gt(trendingCollection.previousTotalVolume)) ? (
-                              <Text variant='success'>{`▴ ${(trendingCollection.totalVolume.sub(trendingCollection.previousTotalVolume)).mul(100).div(trendingCollection.previousTotalVolume.add(1))}%`}</Text>
-                            ) : (trendingCollection.totalVolume.lt(trendingCollection.previousTotalVolume)) ? (
-                              <Text variant='error'>{`▾ ${(trendingCollection.previousTotalVolume.sub(trendingCollection.totalVolume)).mul(100).div(trendingCollection.previousTotalVolume.add(1))}%`}</Text>
+                            ) : (trendingCollection.totalVolume > trendingCollection.previousTotalVolume) ? (
+                              <Text variant='success'>{`▴ ${((trendingCollection.totalVolume - trendingCollection.previousTotalVolume) * 100n) / (trendingCollection.previousTotalVolume + 1n)}%`}</Text>
+                            ) : (trendingCollection.totalVolume < trendingCollection.previousTotalVolume) ? (
+                              <Text variant='error'>{`▾ ${((trendingCollection.previousTotalVolume - trendingCollection.totalVolume) * 100n) / (trendingCollection.previousTotalVolume + 1n)}%`}</Text>
                             ) : (
                               <Text>{''}</Text>
                             )}

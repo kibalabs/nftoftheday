@@ -1,5 +1,4 @@
 import { dateFromString, ResponseData } from '@kibalabs/core';
-import { BigNumber } from 'ethers';
 
 export class TokenTransfer extends ResponseData {
   public constructor(
@@ -9,7 +8,7 @@ export class TokenTransfer extends ResponseData {
     readonly fromAddress: string,
     readonly toAddress: string,
     readonly tokenId: string,
-    readonly value: BigNumber,
+    readonly value: bigint,
     readonly gasLimit: number,
     readonly gasPrice: number,
     readonly gasUsed: number,
@@ -33,7 +32,7 @@ export class TokenTransfer extends ResponseData {
       String(obj.fromAddress),
       String(obj.toAddress),
       String(obj.tokenId),
-      BigNumber.from(String(obj.value)),
+      BigInt(String(obj.value)),
       Number(obj.gasLimit),
       Number(obj.gasPrice),
       Number(obj.gasUsed),
@@ -54,10 +53,10 @@ export class TokenTransfer extends ResponseData {
 export class TokenTransferValue {
   readonly registryAddress: string;
   readonly tokenId: string;
-  readonly value: BigNumber;
+  readonly value: bigint;
   readonly blockDate: Date;
 
-  public constructor(registryAddress: string, tokenId: string, value: BigNumber, blockDate: Date) {
+  public constructor(registryAddress: string, tokenId: string, value: bigint, blockDate: Date) {
     this.registryAddress = registryAddress;
     this.tokenId = tokenId;
     this.value = value;
@@ -68,7 +67,7 @@ export class TokenTransferValue {
     return new TokenTransferValue(
       String(obj.registryAddress),
       String(obj.tokenId),
-      BigNumber.from(String(obj.value)),
+      BigInt(String(obj.value)),
       dateFromString(obj.blockDate as string),
     );
   };
@@ -169,12 +168,12 @@ export class Collection {
 export class CollectionStatistics {
   readonly itemCount: number;
   readonly holderCount: number;
-  readonly totalTradeVolume: BigNumber;
-  readonly lowestSaleLast24Hours: BigNumber;
-  readonly highestSaleLast24Hours: BigNumber;
-  readonly tradeVolume24Hours: BigNumber;
+  readonly totalTradeVolume: bigint;
+  readonly lowestSaleLast24Hours: bigint;
+  readonly highestSaleLast24Hours: bigint;
+  readonly tradeVolume24Hours: bigint;
 
-  public constructor(itemCount: number, holderCount: number, totalTradeVolume: BigNumber, lowestSaleLast24Hours: BigNumber, highestSaleLast24Hours: BigNumber, tradeVolume24Hours: BigNumber) {
+  public constructor(itemCount: number, holderCount: number, totalTradeVolume: bigint, lowestSaleLast24Hours: bigint, highestSaleLast24Hours: bigint, tradeVolume24Hours: bigint) {
     this.itemCount = itemCount;
     this.holderCount = holderCount;
     this.totalTradeVolume = totalTradeVolume;
@@ -187,24 +186,24 @@ export class CollectionStatistics {
     return new CollectionStatistics(
       Number(obj.itemCount),
       Number(obj.holderCount),
-      BigNumber.from(String(obj.totalTradeVolume)),
-      BigNumber.from(String(obj.lowestSaleLast24Hours)),
-      BigNumber.from(String(obj.highestSaleLast24Hours)),
-      BigNumber.from(String(obj.tradeVolume24Hours)),
+      BigInt(String(obj.totalTradeVolume)),
+      BigInt(String(obj.lowestSaleLast24Hours)),
+      BigInt(String(obj.highestSaleLast24Hours)),
+      BigInt(String(obj.tradeVolume24Hours)),
     );
   };
 }
 
 export class CollectionActivity {
   readonly date: Date;
-  readonly transferCount: BigNumber;
-  readonly saleCount: BigNumber;
-  readonly totalValue: BigNumber;
-  readonly minimumValue: BigNumber;
-  readonly maximumValue: BigNumber;
-  readonly averageValue: BigNumber;
+  readonly transferCount: bigint;
+  readonly saleCount: bigint;
+  readonly totalValue: bigint;
+  readonly minimumValue: bigint;
+  readonly maximumValue: bigint;
+  readonly averageValue: bigint;
 
-  public constructor(date: Date, transferCount: BigNumber, saleCount: BigNumber, totalValue: BigNumber, minimumValue: BigNumber, maximumValue: BigNumber, averageValue: BigNumber) {
+  public constructor(date: Date, transferCount: bigint, saleCount: bigint, totalValue: bigint, minimumValue: bigint, maximumValue: bigint, averageValue: bigint) {
     this.date = date;
     this.transferCount = transferCount;
     this.saleCount = saleCount;
@@ -217,24 +216,24 @@ export class CollectionActivity {
   public static fromObject = (obj: Record<string, unknown>): CollectionActivity => {
     return new CollectionActivity(
       dateFromString(obj.date as string),
-      BigNumber.from(String(obj.transferCount)),
-      BigNumber.from(String(obj.saleCount)),
-      BigNumber.from(String(obj.totalValue)),
-      BigNumber.from(String(obj.minimumValue)),
-      BigNumber.from(String(obj.maximumValue)),
-      BigNumber.from(String(obj.averageValue)),
+      BigInt(String(obj.transferCount)),
+      BigInt(String(obj.saleCount)),
+      BigInt(String(obj.totalValue)),
+      BigInt(String(obj.minimumValue)),
+      BigInt(String(obj.maximumValue)),
+      BigInt(String(obj.averageValue)),
     );
   };
 }
 
 export class TrendingCollection {
   readonly collection: Collection;
-  readonly previousSaleCount: BigNumber;
-  readonly previousTotalVolume: BigNumber;
-  readonly totalVolume: BigNumber;
-  readonly totalSaleCount: BigNumber;
+  readonly previousSaleCount: bigint;
+  readonly previousTotalVolume: bigint;
+  readonly totalVolume: bigint;
+  readonly totalSaleCount: bigint;
 
-  public constructor(collection: Collection, previousSaleCount: BigNumber, previousTotalVolume: BigNumber, totalVolume: BigNumber, totalSaleCount: BigNumber) {
+  public constructor(collection: Collection, previousSaleCount: bigint, previousTotalVolume: bigint, totalVolume: bigint, totalSaleCount: bigint) {
     this.collection = collection;
     this.previousSaleCount = previousSaleCount;
     this.previousTotalVolume = previousTotalVolume;
@@ -245,10 +244,10 @@ export class TrendingCollection {
   public static fromObject = (obj: Record<string, unknown>): TrendingCollection => {
     return new TrendingCollection(
       Collection.fromObject(obj.collection as Record<string, unknown>),
-      BigNumber.from(String(obj.previousSaleCount)),
-      BigNumber.from(String(obj.previousTotalVolume)),
-      BigNumber.from(String(obj.totalVolume)),
-      BigNumber.from(String(obj.totalSaleCount)),
+      BigInt(String(obj.previousSaleCount)),
+      BigInt(String(obj.previousTotalVolume)),
+      BigInt(String(obj.totalVolume)),
+      BigInt(String(obj.totalSaleCount)),
     );
   };
 }
@@ -256,10 +255,10 @@ export class TrendingCollection {
 
 export class MintedTokenCount {
   readonly date: Date;
-  readonly mintedTokenCount: BigNumber;
-  readonly newRegistryCount: BigNumber;
+  readonly mintedTokenCount: bigint;
+  readonly newRegistryCount: bigint;
 
-  public constructor(date: Date, mintedTokenCount: BigNumber, newRegistryCount: BigNumber) {
+  public constructor(date: Date, mintedTokenCount: bigint, newRegistryCount: bigint) {
     this.date = date;
     this.mintedTokenCount = mintedTokenCount;
     this.newRegistryCount = newRegistryCount;
@@ -268,19 +267,19 @@ export class MintedTokenCount {
   public static fromObject = (obj: Record<string, unknown>): MintedTokenCount => {
     return new MintedTokenCount(
       dateFromString(obj.date as string),
-      BigNumber.from(String(obj.mintedTokenCount)),
-      BigNumber.from(String(obj.newRegistryCount)),
+      BigInt(String(obj.mintedTokenCount)),
+      BigInt(String(obj.newRegistryCount)),
     );
   };
 }
 
 export class TradingHistory {
   readonly date: Date;
-  readonly buyCount: BigNumber;
-  readonly sellCount: BigNumber;
-  readonly mintCount: BigNumber;
+  readonly buyCount: bigint;
+  readonly sellCount: bigint;
+  readonly mintCount: bigint;
 
-  public constructor(date: Date, buyCount: BigNumber, sellCount: BigNumber, mintCount: BigNumber) {
+  public constructor(date: Date, buyCount: bigint, sellCount: bigint, mintCount: bigint) {
     this.date = date;
     this.buyCount = buyCount;
     this.sellCount = sellCount;
@@ -290,9 +289,9 @@ export class TradingHistory {
   public static fromObject = (obj: Record<string, unknown>): TradingHistory => {
     return new TradingHistory(
       dateFromString(obj.date as string, 'yyyy-MM-dd'),
-      BigNumber.from(String(obj.buyCount)),
-      BigNumber.from(String(obj.sellCount)),
-      BigNumber.from(String(obj.mintCount)),
+      BigInt(String(obj.buyCount)),
+      BigInt(String(obj.sellCount)),
+      BigInt(String(obj.mintCount)),
     );
   };
 }

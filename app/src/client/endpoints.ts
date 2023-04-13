@@ -1,5 +1,4 @@
 import { dateToString, RequestData, ResponseData } from '@kibalabs/core';
-import { BigNumber } from 'ethers';
 
 import * as Resources from './resources';
 
@@ -162,9 +161,9 @@ export class GetCollectionRecentSalesResponse extends ResponseData {
 export class ListCollectionTransferValuesRequest extends RequestData {
   readonly minDate?: Date;
   readonly maxDate?: Date;
-  readonly minValue?: BigNumber;
+  readonly minValue?: bigint;
 
-  constructor(minDate?: Date, maxDate?: Date, minValue?: BigNumber) {
+  constructor(minDate?: Date, maxDate?: Date, minValue?: bigint) {
     super();
     this.minDate = minDate;
     this.maxDate = maxDate;
