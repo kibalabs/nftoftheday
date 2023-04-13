@@ -270,7 +270,7 @@ export const HomePage = (): React.ReactElement => {
                   <LinkBase target={`/collections/${currentToken.registryAddress}/tokens/${currentToken.tokenId}`} isFullHeight={true} isFullWidth={true}>
                     <Stack direction={Direction.Vertical} shouldAddGutters={true} isFullHeight={true} isFullWidth={true}>
                       <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                        <Image variant='rounded' source={currentToken.imageUrl as string || ''} alternativeText='Title NFT' isFullWidth={true} fitType='cover' />
+                        <Image variant='rounded' source={(currentToken.imageUrl || '') as string} alternativeText='Title NFT' isFullWidth={true} fitType='cover' />
                       </Stack.Item>
                       <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.End}>
                         <Text variant='note'>{currentToken.name}</Text>
