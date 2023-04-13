@@ -574,14 +574,17 @@ class NotdManager:
         dateBuyCountDict: Dict[datetime.date, int] = defaultdict(int)
         dateSellCountDict: Dict[datetime.date, int] = defaultdict(int)
         dateMintCountDict: Dict[datetime.date, int] = defaultdict(int)
+        dateTransferCountDict: Dict[datetime.date, int] = defaultdict(int)
         for row in transferRow:
             dateBuyCountDict[row['date']] += 1 if (row['toAddress'] == userAddress and row['value'] > 0) else 0
             dateSellCountDict[row['date']] += 1 if (row['fromAddress'] == userAddress and row['value'] > 0) else 0
             dateMintCountDict[row['date']] += 1 if row['fromAddress'] == chain_util.BURN_ADDRESS else 0
+            dateTransferCountDict[row['date']] += 1 if (row['fromAddress'] == userAddress or row['toAddress'] == userAddress) else 0
         tradingHistories = [
             TradingHistory(
                 date=date,
                 buyCount=buyCount,
+                transferCount=dateTransferCountDict[date],
                 sellCount=dateSellCountDict[date],
                 mintCount=dateMintCountDict[date],
             ) for date, buyCount in dateBuyCountDict.items()]
