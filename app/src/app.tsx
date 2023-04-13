@@ -5,6 +5,7 @@ import { IRoute, MockStorage, Router, useInitialization } from '@kibalabs/core-r
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Box, Direction, IHeadRootProviderProps, KibaApp, PaddingSize, Spacing, Stack } from '@kibalabs/ui-react';
 import 'react-toastify/dist/ReactToastify.css';
+import 'react-tooltip/dist/react-tooltip.css';
 import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
 

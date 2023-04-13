@@ -1,5 +1,4 @@
 import { dateToString, RequestData, ResponseData } from '@kibalabs/core';
-import { BigNumber } from 'ethers';
 
 import * as Resources from './resources';
 
@@ -162,9 +161,9 @@ export class GetCollectionRecentSalesResponse extends ResponseData {
 export class ListCollectionTransferValuesRequest extends RequestData {
   readonly minDate?: Date;
   readonly maxDate?: Date;
-  readonly minValue?: BigNumber;
+  readonly minValue?: bigint;
 
-  constructor(minDate?: Date, maxDate?: Date, minValue?: BigNumber) {
+  constructor(minDate?: Date, maxDate?: Date, minValue?: bigint) {
     super();
     this.minDate = minDate;
     this.maxDate = maxDate;
@@ -492,9 +491,9 @@ export class ListUserTradingHistoriesResponse extends ResponseData {
     this.tradingHistories = tradingHistories;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): ListUserRecentTransfersResponse => {
-    return new ListUserRecentTransfersResponse(
-      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+  public static fromObject = (obj: Record<string, unknown>): ListUserTradingHistoriesResponse => {
+    return new ListUserTradingHistoriesResponse(
+      (obj.tradingHistories as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TradingHistory.fromObject(innerObj)),
     );
   };
 }

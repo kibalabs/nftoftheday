@@ -171,7 +171,7 @@ export const TokenPage = (): React.ReactElement => {
                           <Text>Owned By</Text>
                           <Account accountId={tokenRecentTransfers[0].toAddress} target={`/accounts/${tokenRecentTransfers[0].toAddress}`} />
                         </Stack>
-                        <Text>{`Last Bought for ${shortFormatEther(tokenRecentTransfers[0].value)} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
+                        <Text>{`Last Bought for ${shortFormatEther(BigInt(tokenRecentTransfers[0].value.toString()))} on ${getTokenDateString(tokenRecentTransfers[0].blockDate)}`}</Text>
                       </Stack>
                     )}
                     <Spacing variant={PaddingSize.Wide} />

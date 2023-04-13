@@ -1,5 +1,4 @@
 import { Requester, RestMethod, ServiceClient } from '@kibalabs/core';
-import { BigNumber } from 'ethers';
 
 import * as Endpoints from './endpoints';
 import * as Resources from './resources';
@@ -41,7 +40,7 @@ export class NotdClient extends ServiceClient {
     return response.tokenTransfers;
   };
 
-  public listCollectionTransferValues = async (address: string, minDate?: Date, maxDate?: Date, minValue?: BigNumber): Promise<Resources.TokenTransferValue[]> => {
+  public listCollectionTransferValues = async (address: string, minDate?: Date, maxDate?: Date, minValue?: bigint): Promise<Resources.TokenTransferValue[]> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${address}/token-transfer-values`;
     const request = new Endpoints.ListCollectionTransferValuesRequest(minDate, maxDate, minValue);
