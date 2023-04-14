@@ -498,20 +498,20 @@ export class ListUserTradingHistoriesResponse extends ResponseData {
   };
 }
 
-export class ListUserBlueChipCollectionsTokenRequest extends RequestData {
+export class ListUserBlueChipOwnedCollectionsRequest extends RequestData {
 }
 
-export class ListUserBlueChipCollectionTokensResponse extends ResponseData {
-  readonly tokens: Resources.CollectionToken[];
+export class ListUserBlueChipOwnedCollectionsResponse extends ResponseData {
+  readonly ownedCollections: Resources.OwnedCollection[];
 
-  public constructor(tokens: Resources.CollectionToken[]) {
+  public constructor(ownedCollections: Resources.OwnedCollection[]) {
     super();
-    this.tokens = tokens;
+    this.ownedCollections = ownedCollections;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): ListUserBlueChipCollectionTokensResponse => {
-    return new ListUserBlueChipCollectionTokensResponse(
-      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionToken.fromObject(innerObj)),
+  public static fromObject = (obj: Record<string, unknown>): ListUserBlueChipOwnedCollectionsResponse => {
+    return new ListUserBlueChipOwnedCollectionsResponse(
+      (obj.ownedCollections as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.OwnedCollection.fromObject(innerObj)),
     );
   };
 }

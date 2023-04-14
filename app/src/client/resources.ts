@@ -297,7 +297,6 @@ export class TradingHistory {
 }
 
 
-
 export class OwnedCollection extends ResponseData {
   public constructor(
     readonly collection: Collection,
