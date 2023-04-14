@@ -2,7 +2,7 @@ import React from 'react';
 
 import { addDays, dateToString, startOfDay } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, ContainingView, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, StatefulCollapsibleBox, TabBar, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
+import { Alignment, Box, ContainingView, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, StatefulCollapsibleBox, TabBar, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import ActivityCalendar, { BlockElement, Activity as CalendarActivity, Level as CalendarActivityLevel } from 'react-activity-calendar';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 
@@ -20,6 +20,7 @@ export const UserPage = (): React.ReactElement => {
   const colors = useColors();
   const { notdClient } = useGlobals();
   const accountAddress = useStringRouteParam('accountAddress');
+  const [blueChipOwnedCollections, setBlueChipOwnedCollections] = React.useState<OwnedCollection[] | null | undefined>(undefined);
   const [ownedCollections, setOwnedCollections] = React.useState<OwnedCollection[] | null | undefined>(undefined);
   const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_OVERVIEW);
   const [tradingCalendarActivity, setTradingCalendarActivity] = React.useState<CalendarActivity[] | undefined | null>(undefined);
@@ -61,6 +62,26 @@ export const UserPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateTradingCalendarActivity();
   }, [updateTradingCalendarActivity]);
+
+  const updateOwnedBlueChipTokens = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setBlueChipOwnedCollections(undefined);
+    }
+    if (!accountAddress) {
+      setBlueChipOwnedCollections(undefined);
+      return;
+    }
+    notdClient.listUserBlueChipOwnedCollections(accountAddress).then((retrievedOwnedCollections: OwnedCollection[]): void => {
+      setBlueChipOwnedCollections(retrievedOwnedCollections);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setBlueChipOwnedCollections(null);
+    });
+  }, [notdClient, accountAddress]);
+
+  React.useEffect((): void => {
+    updateOwnedBlueChipTokens();
+  }, [updateOwnedBlueChipTokens]);
 
   const updateOwnedCollections = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
@@ -192,6 +213,9 @@ export const UserPage = (): React.ReactElement => {
               </Stack>
             ) : selectedTabKey === TAB_KEY_OVERVIEW ? (
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
+                <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                  <Text variant='header3'>Activity Map</Text>
+                </Stack.Item>
                 { tradingCalendarActivity === undefined ? (
                   <LoadingSpinner />
                 ) : tradingCalendarActivity === null ? (
@@ -214,6 +238,40 @@ export const UserPage = (): React.ReactElement => {
                     })
                     }
                   />
+                )}
+                <Spacing variant={PaddingSize.Wide} />
+                <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                  <Text variant='header3'>Blue Chip Holdings</Text>
+                </Stack.Item>
+                { blueChipOwnedCollections === undefined ? (
+                  <LoadingSpinner />
+                ) : blueChipOwnedCollections === null ? (
+                  <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
+                ) : blueChipOwnedCollections.length === 0 ? (
+                  <Text alignment={TextAlignment.Center}>No activity</Text>
+                ) : (
+                  <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 4, large: 3 }} shouldAddGutters={true}>
+                    {blueChipOwnedCollections.map((ownedCollection: OwnedCollection): React.ReactElement => (
+                      <Box key={ownedCollection.collection.address} variant='card' isFullHeight={true} isFullWidth={true}>
+                        <Stack direction={Direction.Vertical} shouldAddGutters={true}>
+                          <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                            <Image height='3em' width='3em' source={ownedCollection.collection.imageUrl || '/favicon.png'} alternativeText='' />
+                            <Stack.Item growthFactor={1} shrinkFactor={1}>
+                              <Stack direction={Direction.Vertical} shouldAddGutters={false} contentAlignment={Alignment.Start} childAlignment={Alignment.Start}>
+                                <Text variant='bold'>{ownedCollection.collection.name}</Text>
+                                <Text>{`x${ownedCollection.tokens.length}`}</Text>
+                              </Stack>
+                            </Stack.Item>
+                          </Stack>
+                          <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Start} isFullWidth={true}>
+                            {ownedCollection.tokens.slice(0, 10).map((token: CollectionToken): React.ReactElement => (
+                              <Image key={token.tokenId} source={token.imageUrl || '/favicon.png'} width='1em' height='1em' alternativeText='' />
+                            ))}
+                          </Stack>
+                        </Stack>
+                      </Box>
+                    ))}
+                  </EqualGrid>
                 )}
                 <Stack.Item growthFactor={1} shrinkFactor={1} />
               </Stack>

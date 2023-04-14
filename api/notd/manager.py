@@ -36,6 +36,7 @@ from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
 from notd.messages import RefreshViewsMessageContent
+from notd.model import BLUE_CHIP_COLLECTIONS
 from notd.model import AccountToken
 from notd.model import Collection
 from notd.model import CollectionDailyActivity
@@ -589,6 +590,36 @@ class NotdManager:
                 mintCount=dateMintCountDict[date],
             ) for date, buyCount in dateBuyCountDict.items()]
         return tradingHistories
+
+    async def list_user_blue_chip_owned_collections(self, userAddress: str) -> List[OwnedCollection]:
+        collectionsQuery = (
+            sqlalchemy.select(TokenOwnershipsView)
+                .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsView.c.registryAddress)
+                .where(TokenOwnershipsView.c.ownerAddress == userAddress)
+                .where(TokenOwnershipsView.c.quantity > 0)
+                .where(TokenOwnershipsView.c.registryAddress.in_(BLUE_CHIP_COLLECTIONS))
+                .order_by(CollectionTotalActivitiesTable.c.totalValue.desc(), TokenOwnershipsView.c.latestTransferDate.asc())
+        )
+        collectionsResult = await self.retriever.database.execute(query=collectionsQuery)
+        collectionTokenIds = [(row[TokenOwnershipsView.c.registryAddress], row[TokenOwnershipsView.c.tokenId]) for row in collectionsResult.mappings()]
+        registryAddresses = list(dict.fromkeys([collectionTokenId[0] for collectionTokenId in collectionTokenIds]))
+        collections = await self.retriever.list_collections(fieldFilters=[StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=registryAddresses)])
+        collectionMap = {collection.address: collection for collection in collections}
+        collectionTokenMap: Dict[str, List[TokenMetadata]] = defaultdict(list)
+        for chunkedCollectionTokenIds in list_util.generate_chunks(lst=list(collectionTokenIds), chunkSize=1000):
+            tokensQuery = (
+                TokenMetadatasTable.select()
+                    .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(chunkedCollectionTokenIds))
+            )
+            tokens = await self.retriever.query_token_metadatas(query=tokensQuery)
+            for token in tokens:
+                collectionTokenMap[token.registryAddress].append(token)
+        return [
+            OwnedCollection(
+                collection=collectionMap[registryAddress],
+                tokenMetadatas=collectionTokenMap[registryAddress],
+            ) for registryAddress in registryAddresses
+        ]
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

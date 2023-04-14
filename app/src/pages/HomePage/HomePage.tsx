@@ -414,7 +414,7 @@ export const HomePage = (): React.ReactElement => {
               </PrettyText>
               <MarkdownText textVariant='default' textAlignment={TextAlignment.Center} source={'We\'ve got a database brimming with insights about NFTs, Collections and Accounts. It\'s aching to be harnessed into custom APIs to power your apps.\n\nWe already use it to super-charge our own apps as well as some of the coolest web3 experiences such as [the Rude Boy\'s Gallery](https://gallery.rudeboys.io) and the suite of [SwapShop tools by seedphrase](https://swapshop.pro).\n\nGo on! Let\'s get your app filled with the rich data it deserves.'} />
               <Spacing variant={PaddingSize.Wide} />
-              <Button variant='large-primary' target='#' text='Start using our API' />
+              <Button variant='large-primary' target='mailto:krishan@tokenpage.xyz?cc=arthur@tokenpage.xyz&subject=I%20want%20to%20build%20with%20TokenHunt%20APIs&body=What%20are%20you%20looking%20to%20build%3F' text='Start using our API' />
               <Spacing variant={PaddingSize.Wide3} />
             </Stack>
           </Box>
