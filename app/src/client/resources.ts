@@ -275,12 +275,14 @@ export class MintedTokenCount {
 
 export class TradingHistory {
   readonly date: Date;
+  readonly transferCount: bigint;
   readonly buyCount: bigint;
   readonly sellCount: bigint;
   readonly mintCount: bigint;
 
-  public constructor(date: Date, buyCount: bigint, sellCount: bigint, mintCount: bigint) {
+  public constructor(date: Date, transferCount: bigint, buyCount: bigint, sellCount: bigint, mintCount: bigint) {
     this.date = date;
+    this.transferCount = transferCount;
     this.buyCount = buyCount;
     this.sellCount = sellCount;
     this.mintCount = mintCount;
@@ -289,6 +291,7 @@ export class TradingHistory {
   public static fromObject = (obj: Record<string, unknown>): TradingHistory => {
     return new TradingHistory(
       dateFromString(obj.date as string, 'yyyy-MM-dd'),
+      BigInt(String(obj.transferCount)),
       BigInt(String(obj.buyCount)),
       BigInt(String(obj.sellCount)),
       BigInt(String(obj.mintCount)),
@@ -296,7 +299,10 @@ export class TradingHistory {
   };
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7bfe3cd1742d66b93889b7027720ffdbf5680cd7
 export class OwnedCollection extends ResponseData {
   public constructor(
     readonly collection: Collection,

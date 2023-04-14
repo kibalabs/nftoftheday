@@ -44,7 +44,7 @@ export const UserPage = (): React.ReactElement => {
       while (currentDay < new Date()) {
         const currentDayString = dateToString(currentDay, 'yyyy-MM-dd');
         const currentDayHistory = allValues[currentDayString];
-        const value = currentDayHistory ? Number(currentDayHistory.buyCount + currentDayHistory.mintCount + currentDayHistory.sellCount) : 0;
+        const value = currentDayHistory ? Number(currentDayHistory.buyCount + currentDayHistory.mintCount + currentDayHistory.sellCount + currentDayHistory.transferCount) : 0;
         newTradingCalendarActivities.push({
           date: currentDayString,
           count: value,

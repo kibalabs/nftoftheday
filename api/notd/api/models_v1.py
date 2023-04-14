@@ -299,6 +299,7 @@ class ApiMintedTokenCount(BaseModel):
 
 class ApiTradingHistory(BaseModel):
     date: datetime.date
+    transferCount: int
     buyCount: int
     sellCount: int
     mintCount: int
