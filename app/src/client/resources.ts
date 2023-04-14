@@ -299,10 +299,7 @@ export class TradingHistory {
   };
 }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 7bfe3cd1742d66b93889b7027720ffdbf5680cd7
 export class OwnedCollection extends ResponseData {
   public constructor(
     readonly collection: Collection,
