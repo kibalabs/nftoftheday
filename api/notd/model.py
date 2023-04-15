@@ -714,5 +714,6 @@ class TradingHistory:
 @dataclasses.dataclass
 class UserTradingOverview:
     mostTradedToken: Token
-    mostSoldToken: Token
-    mostBoughtToken: Token
+    highestSoldToken: Token
+    highestBoughtToken: Token
+    mostRecentlyMintedToken: Token
