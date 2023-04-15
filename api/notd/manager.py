@@ -636,9 +636,9 @@ class NotdManager:
         mostTradedToken = mostTradedTokens[0]
         highestSoldQuery = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .where(TokenTransfersTable.c.fromAddress == userAddress)
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc())
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.value).desc())
             .limit(1)
         )
         highestSoldResult = await self.retriever.database.execute(query=highestSoldQuery)
@@ -646,9 +646,9 @@ class NotdManager:
         highestSoldToken = highestSoldTokens[0]
         highestBoughtQuery = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .where(TokenTransfersTable.c.toAddress == userAddress)
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc())
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.value).desc())
             .limit(1)
         )
         highestBoughtResult = await self.retriever.database.execute(query=highestBoughtQuery)
@@ -656,9 +656,11 @@ class NotdManager:
         highestBoughtToken = highestBoughtTokens[0]
         mostRecentlyMintedQuery = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
+            .where(TokenTransfersTable.c.toAddress == chain_util.BURN_ADDRESS)
+            .where(TokenTransfersTable.c.fromAddress == userAddress)
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc())
+            .order_by(sqlalchemyfunc.count(BlocksTable.c.blockDate).desc())
             .limit(1)
         )
         mostRecentlyMintedResult = await self.retriever.database.execute(query=mostRecentlyMintedQuery)

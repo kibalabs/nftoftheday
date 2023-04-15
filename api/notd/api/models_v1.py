@@ -307,5 +307,6 @@ class ApiTradingHistory(BaseModel):
 
 class ApiUserTradingOverview(BaseModel):
     mostTradedToken: ApiCollectionToken
-    mostSoldToken: ApiCollectionToken
-    mostBoughtToken: ApiCollectionToken
+    highestSoldToken: ApiCollectionToken
+    highestBoughtToken: ApiCollectionToken
+    mostRecentlyMintedToken: ApiCollectionToken
