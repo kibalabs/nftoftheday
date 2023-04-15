@@ -176,7 +176,7 @@ export const buildNotdTheme = (): ITheme => {
         normal: {
           default: {
             background: {
-              'background-color': 'rgba(0, 0, 0, 0.15)',
+              'background-color': 'rgba(0, 0, 0, 0)',
             },
           },
           hover: {

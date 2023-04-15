@@ -1,5 +1,4 @@
 import { Requester, RestMethod, ServiceClient } from '@kibalabs/core';
-import { BigNumber } from 'ethers';
 
 import * as Endpoints from './endpoints';
 import * as Resources from './resources';
@@ -41,7 +40,7 @@ export class NotdClient extends ServiceClient {
     return response.tokenTransfers;
   };
 
-  public listCollectionTransferValues = async (address: string, minDate?: Date, maxDate?: Date, minValue?: BigNumber): Promise<Resources.TokenTransferValue[]> => {
+  public listCollectionTransferValues = async (address: string, minDate?: Date, maxDate?: Date, minValue?: bigint): Promise<Resources.TokenTransferValue[]> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${address}/token-transfer-values`;
     const request = new Endpoints.ListCollectionTransferValuesRequest(minDate, maxDate, minValue);
@@ -163,5 +162,21 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.ListUserRecentTransfersRequest(limit, offset);
     const response = await this.makeRequest(method, path, request, Endpoints.ListUserRecentTransfersResponse);
     return response.tokenTransfers;
+  };
+
+  public listUserTradingHistories = async (address: string, offset?: number): Promise<Resources.TradingHistory[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${address}/trading-histories`;
+    const request = new Endpoints.ListUserTradingHistoriesRequest(offset);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListUserTradingHistoriesResponse);
+    return response.tradingHistories;
+  };
+
+  public listUserBlueChipOwnedCollections = async (address: string): Promise<Resources.OwnedCollection[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${address}/blue-chip-owned-collections`;
+    const request = new Endpoints.ListUserBlueChipOwnedCollectionsRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListUserBlueChipOwnedCollectionsResponse);
+    return response.ownedCollections;
   };
 }

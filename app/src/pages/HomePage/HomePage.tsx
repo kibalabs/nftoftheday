@@ -3,7 +3,6 @@ import React from 'react';
 import { addDays, dateToString, shortFormatEther } from '@kibalabs/core';
 import { useInterval } from '@kibalabs/core-react';
 import { Alignment, BackgroundView, Box, Button, ContainingView, Direction, EqualGrid, Head, Image, IOption, KibaIcon, Link, LinkBase, LoadingSpinner, MarkdownText, OptionSelect, PaddingSize, PrettyText, ResponsiveTextAlignmentView, SelectableView, Spacing, Stack, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
-import { BigNumber } from 'ethers';
 import { Bar, CartesianGrid, ComposedChart, ResponsiveContainer as RechartsContainer, ResponsiveContainer, Scatter, Tooltip, XAxis, YAxis } from 'recharts';
 import styled, { keyframes as styledKeyframes } from 'styled-components';
 
@@ -156,7 +155,7 @@ export const HomePage = (): React.ReactElement => {
     } else if (trendingCollectionsDuration === '180_DAYS') {
       minDate = addDays(maxDate, -180);
     }
-    notdClient.listCollectionTransferValues(selectedTrendingCollection.address, minDate, maxDate, BigNumber.from(1)).then((retrievedTokenTransferValues: TokenTransferValue[]): void => {
+    notdClient.listCollectionTransferValues(selectedTrendingCollection.address, minDate, maxDate, BigInt(1)).then((retrievedTokenTransferValues: TokenTransferValue[]): void => {
       setTrendingCollectionTokenTransferValues(retrievedTokenTransferValues.sort((tokenTransferValue1: TokenTransferValue, tokenTransferValue2: TokenTransferValue): number => {
         return tokenTransferValue1.blockDate.getTime() - tokenTransferValue2.blockDate.getTime();
       }));
@@ -201,8 +200,8 @@ export const HomePage = (): React.ReactElement => {
     }
     return mintedTokenCounts.map((mintedToken: MintedTokenCount): MintedTokenChartData => ({
       date: mintedToken.date.getTime(),
-      mintedTokenCount: mintedToken.mintedTokenCount.toNumber(),
-      newRegistryCount: mintedToken.newRegistryCount.toNumber(),
+      mintedTokenCount: Number(mintedToken.mintedTokenCount),
+      newRegistryCount: Number(mintedToken.newRegistryCount),
     }));
   }, [mintedTokenCounts]);
 
@@ -219,7 +218,7 @@ export const HomePage = (): React.ReactElement => {
     }
     return trendingCollectionTokenTransferValues.map((tokenTransferValue: TokenTransferValue): TrendingCollectionTokenTransferValuesChartData => ({
       date: tokenTransferValue.blockDate.getTime(),
-      value: tokenTransferValue.value.div(1000000000000000).toNumber() / 1000,
+      value: Number(tokenTransferValue.value / 1000000000000000n) / 1000,
     }));
   }, [trendingCollectionTokenTransferValues]);
 
@@ -236,7 +235,7 @@ export const HomePage = (): React.ReactElement => {
         setCurrentToken(heroTokens[0]);
       } else {
         let nextToken = heroTokens[(heroTokenIndex + 1) % heroTokens.length];
-        while (!nextToken.imageUrl) {
+        while (!nextToken.imageUrl || nextToken.imageUrl.length === 0) {
           heroTokenIndex += 1;
           nextToken = heroTokens[(heroTokenIndex + 1) % heroTokens.length];
         }
@@ -271,11 +270,11 @@ export const HomePage = (): React.ReactElement => {
                   <LinkBase target={`/collections/${currentToken.registryAddress}/tokens/${currentToken.tokenId}`} isFullHeight={true} isFullWidth={true}>
                     <Stack direction={Direction.Vertical} shouldAddGutters={true} isFullHeight={true} isFullWidth={true}>
                       <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                        <Image variant='rounded' source={currentToken.imageUrl as string} alternativeText='Title NFT' isFullWidth={true} fitType='cover' />
+                        <Image variant='rounded' source={(currentToken.imageUrl || '') as string} alternativeText='Title NFT' isFullWidth={true} fitType='cover' />
                       </Stack.Item>
                       <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.End}>
                         <Text variant='note'>{currentToken.name}</Text>
-                        <KibaIcon variant='small' iconId='ion-open' />
+                        <KibaIcon variant='small' iconId='ion-open-outline' />
                       </Stack>
                       <Spacing variant={PaddingSize.Narrow} />
                     </Stack>
@@ -316,13 +315,13 @@ export const HomePage = (): React.ReactElement => {
                         <Stack direction={Direction.Vertical} shouldAddGutters={false} contentAlignment={Alignment.Start}>
                           <Text isSingleLine={true}>{`${trendingCollection.collection.name}`}</Text>
                           <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                            <Text>{`${shortFormatEther(trendingCollection.totalVolume)}`}</Text>
-                            {trendingCollection.previousTotalVolume.eq(BigNumber.from(0)) ? (
+                            <Text>{`${shortFormatEther(BigInt(trendingCollection.totalVolume.toString()))}`}</Text>
+                            {trendingCollection.previousTotalVolume === BigInt(0) ? (
                               <Text variant='success'>{'✨ NEW'}</Text>
-                            ) : (trendingCollection.totalVolume.gt(trendingCollection.previousTotalVolume)) ? (
-                              <Text variant='success'>{`▴ ${(trendingCollection.totalVolume.sub(trendingCollection.previousTotalVolume)).mul(100).div(trendingCollection.previousTotalVolume.add(1))}%`}</Text>
-                            ) : (trendingCollection.totalVolume.lt(trendingCollection.previousTotalVolume)) ? (
-                              <Text variant='error'>{`▾ ${(trendingCollection.previousTotalVolume.sub(trendingCollection.totalVolume)).mul(100).div(trendingCollection.previousTotalVolume.add(1))}%`}</Text>
+                            ) : (trendingCollection.totalVolume > trendingCollection.previousTotalVolume) ? (
+                              <Text variant='success'>{`▴ ${((trendingCollection.totalVolume - trendingCollection.previousTotalVolume) * 100n) / (trendingCollection.previousTotalVolume + 1n)}%`}</Text>
+                            ) : (trendingCollection.totalVolume < trendingCollection.previousTotalVolume) ? (
+                              <Text variant='error'>{`▾ ${((trendingCollection.previousTotalVolume - trendingCollection.totalVolume) * 100n) / (trendingCollection.previousTotalVolume + 1n)}%`}</Text>
                             ) : (
                               <Text>{''}</Text>
                             )}
@@ -415,7 +414,7 @@ export const HomePage = (): React.ReactElement => {
               </PrettyText>
               <MarkdownText textVariant='default' textAlignment={TextAlignment.Center} source={'We\'ve got a database brimming with insights about NFTs, Collections and Accounts. It\'s aching to be harnessed into custom APIs to power your apps.\n\nWe already use it to super-charge our own apps as well as some of the coolest web3 experiences such as [the Rude Boy\'s Gallery](https://gallery.rudeboys.io) and the suite of [SwapShop tools by seedphrase](https://swapshop.pro).\n\nGo on! Let\'s get your app filled with the rich data it deserves.'} />
               <Spacing variant={PaddingSize.Wide} />
-              <Button variant='large-primary' target='#' text='Start using our API' />
+              <Button variant='large-primary' target='mailto:krishan@tokenpage.xyz?cc=arthur@tokenpage.xyz&subject=I%20want%20to%20build%20with%20TokenHunt%20APIs&body=What%20are%20you%20looking%20to%20build%3F' text='Start using our API' />
               <Spacing variant={PaddingSize.Wide3} />
             </Stack>
           </Box>

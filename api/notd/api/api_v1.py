@@ -21,7 +21,7 @@ from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
 from notd.api.endpoints_v1 import ListCollectionTokensResponse
-from notd.api.endpoints_v1 import ListUserBlueChipCollectionResponse
+from notd.api.endpoints_v1 import ListUserBlueChipOwnedCollectionsResponse
 from notd.api.endpoints_v1 import ListUserOwnedCollectionsResponse
 from notd.api.endpoints_v1 import ListUserRecentTransfersResponse
 from notd.api.endpoints_v1 import ListUserTradingHistoryResponse
@@ -245,10 +245,10 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         userTradingOverview = await notdManager.get_user_trading_overview(userAddress=userAddress)
         return GetUserTradingOverviewResponse(userTradingOverview=(await responseBuilder.user_trading_overview_from_model(userTradingOverview=userTradingOverview)))
 
-    @router.get('/accounts/{userAddress}/blue-chip-collection', response_model=ListUserBlueChipCollectionResponse)
-    async def list_user_blue_chip_collection(userAddress: str) -> ListUserBlueChipCollectionResponse:
-        addresses = await notdManager.list_user_blue_chip_collection(userAddress=userAddress)
-        return ListUserBlueChipCollectionResponse(collections=(await responseBuilder.collections_from_addresses(addresses=addresses)))
+    @router.get('/accounts/{userAddress}/blue-chip-owned-collections', response_model=ListUserBlueChipOwnedCollectionsResponse)
+    async def list_user_blue_chip_owned_collections(userAddress: str) -> ListUserBlueChipOwnedCollectionsResponse:
+        ownedCollections = await notdManager.list_user_blue_chip_owned_collections(userAddress=userAddress)
+        return ListUserBlueChipOwnedCollectionsResponse(ownedCollections=(await responseBuilder.owned_collections_from_models(ownedCollections=ownedCollections)))
 
     @router.post('/calculate-common-owners', response_model=CalculateCommonOwnersResponse)
     async def calculate_common_owners(request: CalculateCommonOwnersRequest) -> CalculateCommonOwnersResponse:

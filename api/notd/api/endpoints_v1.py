@@ -460,11 +460,11 @@ class ListUserTradingHistoryRequest(BaseModel):
 class ListUserTradingHistoryResponse(BaseModel):
     tradingHistories: List[ApiTradingHistory]
 
-class ListUserBlueChipCollectionRequest(BaseModel):
+class ListUserBlueChipOwnedCollectionsRequest(BaseModel):
     pass
 
-class ListUserBlueChipCollectionResponse(BaseModel):
-    collections: List[ApiCollection]
+class ListUserBlueChipOwnedCollectionsResponse(BaseModel):
+    ownedCollections: List[ApiOwnedCollection]
 
 class GetUserTradingOverviewRequest(BaseModel):
     pass

@@ -576,28 +576,51 @@ class NotdManager:
         dateBuyCountDict: Dict[datetime.date, int] = defaultdict(int)
         dateSellCountDict: Dict[datetime.date, int] = defaultdict(int)
         dateMintCountDict: Dict[datetime.date, int] = defaultdict(int)
+        dateTransferCountDict: Dict[datetime.date, int] = defaultdict(int)
         for row in transferRow:
             dateBuyCountDict[row['date']] += 1 if (row['toAddress'] == userAddress and row['value'] > 0) else 0
             dateSellCountDict[row['date']] += 1 if (row['fromAddress'] == userAddress and row['value'] > 0) else 0
             dateMintCountDict[row['date']] += 1 if row['fromAddress'] == chain_util.BURN_ADDRESS else 0
+            dateTransferCountDict[row['date']] += 1 if (userAddress in (row['fromAddress'], row['toAddress']) and row['value'] == 0) else 0
         tradingHistories = [
             TradingHistory(
                 date=date,
                 buyCount=buyCount,
+                transferCount=dateTransferCountDict[date],
                 sellCount=dateSellCountDict[date],
                 mintCount=dateMintCountDict[date],
             ) for date, buyCount in dateBuyCountDict.items()]
         return tradingHistories
 
-    async def list_user_blue_chip_collection(self, userAddress: str) -> List[str]:
-        query = (
-            sqlalchemy.select(TokenOwnershipsView.c.registryAddress)
-            .where(TokenOwnershipsView.c.registryAddress.in_(BLUE_CHIP_COLLECTIONS))
-            .where(TokenOwnershipsView.c.ownerAddress == userAddress)
+    async def list_user_blue_chip_owned_collections(self, userAddress: str) -> List[OwnedCollection]:
+        collectionsQuery = (
+            sqlalchemy.select(TokenOwnershipsView)
+                .join(CollectionTotalActivitiesTable, CollectionTotalActivitiesTable.c.address == TokenOwnershipsView.c.registryAddress)
+                .where(TokenOwnershipsView.c.ownerAddress == userAddress)
+                .where(TokenOwnershipsView.c.quantity > 0)
+                .where(TokenOwnershipsView.c.registryAddress.in_(BLUE_CHIP_COLLECTIONS))
+                .order_by(CollectionTotalActivitiesTable.c.totalValue.desc(), TokenOwnershipsView.c.latestTransferDate.asc())
         )
-        result = await self.retriever.database.execute(query=query)
-        registryAddresses = [row['registryAddress'] for row in list(result.mappings())]
-        return registryAddresses
+        collectionsResult = await self.retriever.database.execute(query=collectionsQuery)
+        collectionTokenIds = [(row[TokenOwnershipsView.c.registryAddress], row[TokenOwnershipsView.c.tokenId]) for row in collectionsResult.mappings()]
+        registryAddresses = list(dict.fromkeys([collectionTokenId[0] for collectionTokenId in collectionTokenIds]))
+        collections = await self.retriever.list_collections(fieldFilters=[StringFieldFilter(fieldName=TokenCollectionsTable.c.address.key, containedIn=registryAddresses)])
+        collectionMap = {collection.address: collection for collection in collections}
+        collectionTokenMap: Dict[str, List[TokenMetadata]] = defaultdict(list)
+        for chunkedCollectionTokenIds in list_util.generate_chunks(lst=list(collectionTokenIds), chunkSize=1000):
+            tokensQuery = (
+                TokenMetadatasTable.select()
+                    .where(sqlalchemy.tuple_(TokenMetadatasTable.c.registryAddress, TokenMetadatasTable.c.tokenId).in_(chunkedCollectionTokenIds))
+            )
+            tokens = await self.retriever.query_token_metadatas(query=tokensQuery)
+            for token in tokens:
+                collectionTokenMap[token.registryAddress].append(token)
+        return [
+            OwnedCollection(
+                collection=collectionMap[registryAddress],
+                tokenMetadatas=collectionTokenMap[registryAddress],
+            ) for registryAddress in registryAddresses
+        ]
 
     async def get_user_trading_overview(self, userAddress: str) -> UserTradingOverview:
         #NOTE(Femi-Ogunkola): Please confirm if using one query is the better option
