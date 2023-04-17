@@ -299,6 +299,29 @@ export class TradingHistory {
   };
 }
 
+export class TradingOverview {
+  readonly mostTradedToken: CollectionToken;
+  readonly highestSoldToken: CollectionToken;
+  readonly highestBoughtToken: CollectionToken;
+  readonly mostRecentlyMintedToken: CollectionToken;
+
+  public constructor(mostTradedToken: CollectionToken, highestSoldToken: CollectionToken, highestBoughtToken: CollectionToken, mostRecentlyMintedToken: CollectionToken) {
+    this.mostTradedToken = mostTradedToken;
+    this.highestSoldToken = highestSoldToken;
+    this.highestBoughtToken = highestBoughtToken;
+    this.mostRecentlyMintedToken = mostRecentlyMintedToken;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): TradingOverview => {
+    return new TradingOverview(
+      CollectionToken.fromObject(obj.mostTradedToken as Record<string, unknown>),
+      CollectionToken.fromObject(obj.highestSoldToken as Record<string, unknown>),
+      CollectionToken.fromObject(obj.highestBoughtToken as Record<string, unknown>),
+      CollectionToken.fromObject(obj.mostRecentlyMintedToken as Record<string, unknown>),
+    );
+  };
+}
+
 
 export class OwnedCollection extends ResponseData {
   public constructor(
