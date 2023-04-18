@@ -306,7 +306,7 @@ export const UserPage = (): React.ReactElement => {
                   <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
                       {tradingOverview.mostTradedToken === null ? (
-                        <LoadingSpinner />
+                        <Text alignment={TextAlignment.Center}>No most traded token</Text>
                       ) : (
                         <TokenCard
                           key={`${tradingOverview.mostTradedToken.registryAddress}-${tradingOverview.mostTradedToken.tokenId}`}
@@ -317,8 +317,8 @@ export const UserPage = (): React.ReactElement => {
                       )
                       }
                       {tradingOverview.mostRecentlyMintedToken === null ? (
-                        <LoadingSpinner />
-                      ) : (
+                        <Text alignment={TextAlignment.Center}>No recently minted token</Text>
+                        ) : (
                         <TokenCard
                           key={`${tradingOverview.mostRecentlyMintedToken.registryAddress}-${tradingOverview.mostRecentlyMintedToken.tokenId}`}
                           collectionToken={tradingOverview.mostRecentlyMintedToken}
@@ -331,8 +331,8 @@ export const UserPage = (): React.ReactElement => {
                         <Box variant='divider' isFullHeight={true} width='5px' />
                       </ResponsiveHidingView>
                       {tradingOverview.highestBoughtToken === null ? (
-                        <LoadingSpinner />
-                      ) : (
+                        <Text alignment={TextAlignment.Center}>No highest bought token</Text>
+                        ) : (
                         <TokenCard
                           subtitle='Highest Bought Token'
                           key={`${tradingOverview.highestBoughtToken.registryAddress}-${tradingOverview.highestBoughtToken.tokenId}`}
@@ -342,8 +342,8 @@ export const UserPage = (): React.ReactElement => {
                       )
                       }
                       {tradingOverview.highestSoldToken === null ? (
-                        <LoadingSpinner />
-                      ) : (
+                        <Text alignment={TextAlignment.Center}>No highest sold token</Text>
+                        ) : (
                         <TokenCard
                           subtitle='Highest Sold Token'
                           key={`${tradingOverview.highestSoldToken.registryAddress}-${tradingOverview.highestSoldToken.tokenId}`}
