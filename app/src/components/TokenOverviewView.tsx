@@ -22,9 +22,9 @@ export const TokenOverviewView = (props: TokenOverviewViewProps): React.ReactEle
 
   return (
     <Box variant='tokenOverviewViewCard' height='8rem' width='20rem' shouldClipContent={true}>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Default}>
-        <Text variant='bold' alignment={TextAlignment.Center} lineLimit={2}>{props.title}</Text>
-        <Stack direction={Direction.Horizontal} padding={PaddingSize.Default}>
+      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Default}>
+        <Text variant='h5' alignment={TextAlignment.Left} lineLimit={2}>{props.title}</Text>
+        <Stack direction={Direction.Horizontal} paddingVertical={PaddingSize.Default}>
           <Box variant='rounded' height='2rem' width='2rem' shouldClipContent={true}>
           <Media source={imageUrl || defaultImage} alternativeText='image' fitType='cover' />
           </Box>

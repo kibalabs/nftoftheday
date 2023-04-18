@@ -304,10 +304,9 @@ export const UserPage = (): React.ReactElement => {
                 ) : tradingOverview === null ? (
                   <Text variant='error'>Trading overview failed to load</Text>
                 ) : (
-                  <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Default}>
                       {tradingOverview.mostTradedToken === null ? (
-                        <Text alignment={TextAlignment.Center}>No most traded token</Text>
+                        <Text alignment={TextAlignment.Left}>No most traded token</Text>
                       ) : (
                         <TokenOverviewView
                           title={"Most Traded Token"}
@@ -316,7 +315,7 @@ export const UserPage = (): React.ReactElement => {
                       )
                       }
                       {tradingOverview.mostRecentlyMintedToken === null ? (
-                        <Text alignment={TextAlignment.Center}>No recently minted token</Text>
+                        <Text alignment={TextAlignment.Left}>No recently minted token</Text>
                       ) : (
                         <TokenOverviewView
                           title={"Most Recently Minted Token"}
@@ -328,7 +327,7 @@ export const UserPage = (): React.ReactElement => {
                         <Box variant='divider' isFullHeight={true} width='5px' />
                       </ResponsiveHidingView>
                       {tradingOverview.highestBoughtToken === null ? (
-                        <Text alignment={TextAlignment.Center}>No highest bought token</Text>
+                        <Text alignment={TextAlignment.Left}>No highest bought token</Text>
                       ) : (
                         <TokenOverviewView
                           title={"Highest Bought Token"}
@@ -337,7 +336,7 @@ export const UserPage = (): React.ReactElement => {
                       )
                       }
                       {tradingOverview.highestSoldToken === null ? (
-                        <Text alignment={TextAlignment.Center}>No highest sold token</Text>
+                        <Text alignment={TextAlignment.Left}>No highest sold token</Text>
                       ) : (
                         <TokenOverviewView
                           title={"Highest Sold Token"}
@@ -346,7 +345,6 @@ export const UserPage = (): React.ReactElement => {
                       )
                       }
                     </Stack>
-                  </Stack>
                 )}
                 <Stack.Item growthFactor={1} shrinkFactor={1} />
               </Stack>
