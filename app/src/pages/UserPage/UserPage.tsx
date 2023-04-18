@@ -318,7 +318,7 @@ export const UserPage = (): React.ReactElement => {
                       }
                       {tradingOverview.mostRecentlyMintedToken === null ? (
                         <Text alignment={TextAlignment.Center}>No recently minted token</Text>
-                        ) : (
+                      ) : (
                         <TokenCard
                           key={`${tradingOverview.mostRecentlyMintedToken.registryAddress}-${tradingOverview.mostRecentlyMintedToken.tokenId}`}
                           collectionToken={tradingOverview.mostRecentlyMintedToken}
@@ -332,7 +332,7 @@ export const UserPage = (): React.ReactElement => {
                       </ResponsiveHidingView>
                       {tradingOverview.highestBoughtToken === null ? (
                         <Text alignment={TextAlignment.Center}>No highest bought token</Text>
-                        ) : (
+                      ) : (
                         <TokenCard
                           subtitle='Highest Bought Token'
                           key={`${tradingOverview.highestBoughtToken.registryAddress}-${tradingOverview.highestBoughtToken.tokenId}`}
@@ -343,7 +343,7 @@ export const UserPage = (): React.ReactElement => {
                       }
                       {tradingOverview.highestSoldToken === null ? (
                         <Text alignment={TextAlignment.Center}>No highest sold token</Text>
-                        ) : (
+                      ) : (
                         <TokenCard
                           subtitle='Highest Sold Token'
                           key={`${tradingOverview.highestSoldToken.registryAddress}-${tradingOverview.highestSoldToken.tokenId}`}
