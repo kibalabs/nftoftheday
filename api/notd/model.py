@@ -713,7 +713,7 @@ class TradingHistory:
 
 @dataclasses.dataclass
 class UserTradingOverview:
-    mostTradedToken: Token
-    highestSoldToken: Token
-    highestBoughtToken: Token
-    mostRecentlyMintedToken: Token
+    mostTradedToken: Optional[Token]
+    highestSoldToken: Optional[Token]
+    highestBoughtToken: Optional[Token]
+    mostRecentlyMintedToken: Optional[Token]

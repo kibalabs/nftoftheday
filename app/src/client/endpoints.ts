@@ -520,16 +520,16 @@ export class RetrieveUserTradingOverviewRequest extends RequestData {
 }
 
 export class RetrieveUserTradingOverviewResponse extends ResponseData {
-  readonly tradingOverview: Resources.TradingOverview[];
+  readonly tradingOverview: Resources.TradingOverview;
 
-  public constructor(tradingOverview: Resources.TradingOverview[]) {
+  public constructor(tradingOverview: Resources.TradingOverview) {
     super();
     this.tradingOverview = tradingOverview;
   }
 
   public static fromObject = (obj: Record<string, unknown>): RetrieveUserTradingOverviewResponse => {
     return new RetrieveUserTradingOverviewResponse(
-      (obj.tradingOverview as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TradingOverview.fromObject(innerObj)),
+      Resources.TradingOverview.fromObject(obj.userTradingOverview as Record<string, unknown>),
     );
   };
 }

@@ -633,7 +633,7 @@ class NotdManager:
         )
         mostTradedResult = await self.retriever.database.execute(query=mostTradedQuery)
         mostTradedTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostTradedResult.mappings()]
-        mostTradedToken = mostTradedTokens[0]
+        mostTradedToken = mostTradedTokens[0] if len(mostTradedTokens) > 0 else None
         highestSoldQuery = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
             .where(TokenTransfersTable.c.fromAddress == userAddress)
@@ -643,7 +643,7 @@ class NotdManager:
         )
         highestSoldResult = await self.retriever.database.execute(query=highestSoldQuery)
         highestSoldTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in highestSoldResult.mappings()]
-        highestSoldToken = highestSoldTokens[0]
+        highestSoldToken = highestSoldTokens[0] if len(highestSoldTokens) > 0 else None
         highestBoughtQuery = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
             .where(TokenTransfersTable.c.toAddress == userAddress)
@@ -653,7 +653,7 @@ class NotdManager:
         )
         highestBoughtResult = await self.retriever.database.execute(query=highestBoughtQuery)
         highestBoughtTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in highestBoughtResult.mappings()]
-        highestBoughtToken = highestBoughtTokens[0]
+        highestBoughtToken = highestBoughtTokens[0] if len(highestBoughtTokens) > 0 else None
         mostRecentlyMintedQuery = (
             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
             .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
@@ -665,7 +665,7 @@ class NotdManager:
         )
         mostRecentlyMintedResult = await self.retriever.database.execute(query=mostRecentlyMintedQuery)
         mostRecentlyMintedTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostRecentlyMintedResult.mappings()]
-        mostRecentlyMintedToken = mostRecentlyMintedTokens[0]
+        mostRecentlyMintedToken = mostRecentlyMintedTokens[0] if len(mostRecentlyMintedTokens) > 0 else None
         userTradingOverview = UserTradingOverview(mostTradedToken=mostTradedToken, highestSoldToken=highestSoldToken, highestBoughtToken=highestBoughtToken, mostRecentlyMintedToken=mostRecentlyMintedToken)
         return userTradingOverview
 

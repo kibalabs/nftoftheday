@@ -541,8 +541,8 @@ class ResponseBuilder:
 
     async def user_trading_overview_from_model(self, userTradingOverview: UserTradingOverview) -> ApiUserTradingOverview:
         return ApiUserTradingOverview(
-            mostTradedToken=(await self.collection_token_from_token_key(tokenKey=userTradingOverview.mostTradedToken)),
-            highestSoldToken=(await self.collection_token_from_token_key(userTradingOverview.highestSoldToken)),
-            highestBoughtToken=(await self.collection_token_from_token_key(userTradingOverview.highestBoughtToken)),
-            mostRecentlyMintedToken=(await self.collection_token_from_token_key(userTradingOverview.mostRecentlyMintedToken)),
+            mostTradedToken=(await self.collection_token_from_token_key(tokenKey=userTradingOverview.mostTradedToken)) if userTradingOverview.mostTradedToken else None,
+            highestSoldToken=(await self.collection_token_from_token_key(userTradingOverview.highestSoldToken)) if userTradingOverview.highestSoldToken else None,
+            highestBoughtToken=(await self.collection_token_from_token_key(userTradingOverview.highestBoughtToken)) if userTradingOverview.highestBoughtToken else None,
+            mostRecentlyMintedToken=(await self.collection_token_from_token_key(userTradingOverview.mostRecentlyMintedToken)) if userTradingOverview.mostRecentlyMintedToken else None,
         )

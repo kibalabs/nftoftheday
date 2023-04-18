@@ -300,12 +300,12 @@ export class TradingHistory {
 }
 
 export class TradingOverview {
-  readonly mostTradedToken: CollectionToken;
-  readonly highestSoldToken: CollectionToken;
-  readonly highestBoughtToken: CollectionToken;
-  readonly mostRecentlyMintedToken: CollectionToken;
+  readonly mostTradedToken: CollectionToken | null;
+  readonly highestSoldToken: CollectionToken | null;
+  readonly highestBoughtToken: CollectionToken | null;
+  readonly mostRecentlyMintedToken: CollectionToken | null;
 
-  public constructor(mostTradedToken: CollectionToken, highestSoldToken: CollectionToken, highestBoughtToken: CollectionToken, mostRecentlyMintedToken: CollectionToken) {
+  public constructor(mostTradedToken: CollectionToken | null, highestSoldToken: CollectionToken | null, highestBoughtToken: CollectionToken | null, mostRecentlyMintedToken: CollectionToken | null) {
     this.mostTradedToken = mostTradedToken;
     this.highestSoldToken = highestSoldToken;
     this.highestBoughtToken = highestBoughtToken;
@@ -314,10 +314,10 @@ export class TradingOverview {
 
   public static fromObject = (obj: Record<string, unknown>): TradingOverview => {
     return new TradingOverview(
-      CollectionToken.fromObject(obj.mostTradedToken as Record<string, unknown>),
-      CollectionToken.fromObject(obj.highestSoldToken as Record<string, unknown>),
-      CollectionToken.fromObject(obj.highestBoughtToken as Record<string, unknown>),
-      CollectionToken.fromObject(obj.mostRecentlyMintedToken as Record<string, unknown>),
+      obj.mostTradedToken ? CollectionToken.fromObject(obj.mostTradedToken as Record<string, unknown>) : null,
+      obj.highestSoldToken ? CollectionToken.fromObject(obj.highestSoldToken as Record<string, unknown>) : null,
+      obj.highestBoughtToken ? CollectionToken.fromObject(obj.highestBoughtToken as Record<string, unknown>) : null,
+      obj.mostRecentlyMintedToken ? CollectionToken.fromObject(obj.mostRecentlyMintedToken as Record<string, unknown>) : null,
     );
   };
 }
