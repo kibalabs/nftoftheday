@@ -10,6 +10,7 @@ import { CollectionToken, OwnedCollection, TokenTransfer, TradingHistory, Tradin
 import { AccountView } from '../../components/AccountView';
 import { TokenCard } from '../../components/TokenCard';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
+import { TokenOverviewView } from '../../components/TokenOverviewView';
 import { useGlobals } from '../../globalsContext';
 
 const TAB_KEY_OVERVIEW = 'TAB_KEY_OVERVIEW';
@@ -308,11 +309,17 @@ export const UserPage = (): React.ReactElement => {
                       {tradingOverview.mostTradedToken === null ? (
                         <Text alignment={TextAlignment.Center}>No most traded token</Text>
                       ) : (
-                        <TokenCard
-                          key={`${tradingOverview.mostTradedToken.registryAddress}-${tradingOverview.mostTradedToken.tokenId}`}
-                          collectionToken={tradingOverview.mostTradedToken}
-                          target={`/collections/${tradingOverview.mostTradedToken.registryAddress}/tokens/${tradingOverview.mostTradedToken.tokenId}`}
-                          subtitle='Most Traded Token'
+                        // <TokenCard
+                        //   key={`${tradingOverview.mostTradedToken.registryAddress}-${tradingOverview.mostTradedToken.tokenId}`}
+                        //   collectionToken={tradingOverview.mostTradedToken}
+                        //   target={`/collections/${tradingOverview.mostTradedToken.registryAddress}/tokens/${tradingOverview.mostTradedToken.tokenId}`}
+                        //   subtitle='Most Traded Token'
+                        // />
+                        <TokenOverviewView 
+                          title={"Most Traded Token"}
+                          value={500000000}
+                          imageUrl={tradingOverview.mostTradedToken.imageUrl}
+                          name={tradingOverview.mostTradedToken.name}
                         />
                       )
                       }
