@@ -309,28 +309,18 @@ export const UserPage = (): React.ReactElement => {
                       {tradingOverview.mostTradedToken === null ? (
                         <Text alignment={TextAlignment.Center}>No most traded token</Text>
                       ) : (
-                        // <TokenCard
-                        //   key={`${tradingOverview.mostTradedToken.registryAddress}-${tradingOverview.mostTradedToken.tokenId}`}
-                        //   collectionToken={tradingOverview.mostTradedToken}
-                        //   target={`/collections/${tradingOverview.mostTradedToken.registryAddress}/tokens/${tradingOverview.mostTradedToken.tokenId}`}
-                        //   subtitle='Most Traded Token'
-                        // />
-                        <TokenOverviewView 
+                        <TokenOverviewView
                           title={"Most Traded Token"}
-                          value={500000000}
-                          imageUrl={tradingOverview.mostTradedToken.imageUrl}
-                          name={tradingOverview.mostTradedToken.name}
+                          collectionToken={tradingOverview.mostTradedToken}
                         />
                       )
                       }
                       {tradingOverview.mostRecentlyMintedToken === null ? (
                         <Text alignment={TextAlignment.Center}>No recently minted token</Text>
                       ) : (
-                        <TokenCard
-                          key={`${tradingOverview.mostRecentlyMintedToken.registryAddress}-${tradingOverview.mostRecentlyMintedToken.tokenId}`}
+                        <TokenOverviewView
+                          title={"Most Recently Minted Token"}
                           collectionToken={tradingOverview.mostRecentlyMintedToken}
-                          target={`/collections/${tradingOverview.mostRecentlyMintedToken.registryAddress}/tokens/${tradingOverview.mostRecentlyMintedToken.tokenId}`}
-                          subtitle='Most Recently Minted Token'
                         />
                       )
                       }
@@ -340,22 +330,18 @@ export const UserPage = (): React.ReactElement => {
                       {tradingOverview.highestBoughtToken === null ? (
                         <Text alignment={TextAlignment.Center}>No highest bought token</Text>
                       ) : (
-                        <TokenCard
-                          subtitle='Highest Bought Token'
-                          key={`${tradingOverview.highestBoughtToken.registryAddress}-${tradingOverview.highestBoughtToken.tokenId}`}
+                        <TokenOverviewView
+                          title={"Highest Bought Token"}
                           collectionToken={tradingOverview.highestBoughtToken}
-                          target={`/collections/${tradingOverview.highestBoughtToken.registryAddress}/tokens/${tradingOverview.highestBoughtToken.tokenId}`}
                         />
                       )
                       }
                       {tradingOverview.highestSoldToken === null ? (
                         <Text alignment={TextAlignment.Center}>No highest sold token</Text>
                       ) : (
-                        <TokenCard
-                          subtitle='Highest Sold Token'
-                          key={`${tradingOverview.highestSoldToken.registryAddress}-${tradingOverview.highestSoldToken.tokenId}`}
+                        <TokenOverviewView
+                          title={"Highest Sold Token"}
                           collectionToken={tradingOverview.highestSoldToken}
-                          target={`/collections/${tradingOverview.highestSoldToken.registryAddress}/tokens/${tradingOverview.highestSoldToken.tokenId}`}
                         />
                       )
                       }
