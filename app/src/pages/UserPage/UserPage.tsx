@@ -272,7 +272,7 @@ export const UserPage = (): React.ReactElement => {
                 ) : blueChipOwnedCollections.length === 0 ? (
                   <Text alignment={TextAlignment.Center}>No activity</Text>
                 ) : (
-                  <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 4, large: 3 }} shouldAddGutters={true}>
+                  <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 4, large: 3 }} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                     {blueChipOwnedCollections.map((ownedCollection: OwnedCollection): React.ReactElement => (
                       <Box key={ownedCollection.collection.address} variant='card' isFullHeight={true} isFullWidth={true}>
                         <Stack direction={Direction.Vertical} shouldAddGutters={true}>
@@ -295,7 +295,7 @@ export const UserPage = (): React.ReactElement => {
                     ))}
                   </EqualGrid>
                 )}
-                <Stack.Item growthFactor={1} shrinkFactor={1} />
+                <Spacing variant={PaddingSize.Wide} />
                 <Stack.Item gutterAfter={PaddingSize.Narrow}>
                   <Text variant='header3'>Trading Overview</Text>
                 </Stack.Item>
@@ -304,51 +304,36 @@ export const UserPage = (): React.ReactElement => {
                 ) : tradingOverview === null ? (
                   <Text variant='error'>Trading overview failed to load</Text>
                 ) : (
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Default}>
-                    {tradingOverview.mostTradedToken === null ? (
-                      <Text alignment={TextAlignment.Left}>No most traded token</Text>
-                    ) : (
+                  <EqualGrid childSizeResponsive={{ base: 12, small: 6, large: 3 }} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                    {tradingOverview.mostTradedToken != null && (
                       <TokenOverviewView
-                        title={'Most Traded Token'}
+                        title={'Most Traded'}
                         collectionToken={tradingOverview.mostTradedToken}
                       />
-                    )
-                    }
-                    {tradingOverview.mostRecentlyMintedTokenTransfer === null ? (
-                      <Text alignment={TextAlignment.Left}>No recently minted token</Text>
-                    ) : (
+                    )}
+                    {tradingOverview.mostRecentlyMintedTokenTransfer != null && (
                       <TokenOverviewView
-                        title={'Most Recently Minted Token'}
+                        title={'Latest Minted'}
                         collectionToken={tradingOverview.mostRecentlyMintedTokenTransfer.token}
                         value={tradingOverview.mostRecentlyMintedTokenTransfer.value}
                       />
-                    )
-                    }
-                    <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                      <Box variant='divider' isFullHeight={true} width='5px' />
-                    </ResponsiveHidingView>
-                    {tradingOverview.highestBoughtTokenTransfer === null ? (
-                      <Text alignment={TextAlignment.Left}>No highest bought token</Text>
-                    ) : (
+                    )}
+                    {tradingOverview.highestBoughtTokenTransfer != null && (
                       <TokenOverviewView
-                        title={'Highest Bought Token'}
+                        title={'Highest Buy'}
                         collectionToken={tradingOverview.highestBoughtTokenTransfer.token}
                         value={tradingOverview.highestBoughtTokenTransfer.value}
 
                       />
-                    )
-                    }
-                    {tradingOverview.highestSoldTokenTransfer === null ? (
-                      <Text alignment={TextAlignment.Left}>No highest sold token</Text>
-                    ) : (
+                    )}
+                    {tradingOverview.highestSoldTokenTransfer != null && (
                       <TokenOverviewView
-                        title={'Highest Sold Token'}
+                        title={'Highest Sell'}
                         collectionToken={tradingOverview.highestSoldTokenTransfer.token}
                         value={tradingOverview.highestSoldTokenTransfer.value}
                       />
-                    )
-                    }
-                  </Stack>
+                    )}
+                  </EqualGrid>
                 )}
                 <Stack.Item growthFactor={1} shrinkFactor={1} />
               </Stack>
