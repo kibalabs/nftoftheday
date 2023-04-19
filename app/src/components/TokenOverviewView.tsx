@@ -1,21 +1,21 @@
 import React from 'react';
 
-import { Alignment, Box, Direction, PaddingSize, Media, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import { shortFormatEther } from '@kibalabs/core';
+import { Alignment, Box, Direction, Media, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+
 import { CollectionToken } from '../client/resources';
 
 
 export interface TokenOverviewViewProps {
   title: string;
   collectionToken: CollectionToken;
-  value?: BigInt
+  value?: bigint
 }
 
 const defaultImage = '/assets/icon.png';
 
 
 export const TokenOverviewView = (props: TokenOverviewViewProps): React.ReactElement => {
-
   let imageUrl = props.collectionToken.imageUrl || defaultImage;
   if (imageUrl?.startsWith('ipfs://')) {
     imageUrl = imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/');
@@ -33,8 +33,8 @@ export const TokenOverviewView = (props: TokenOverviewViewProps): React.ReactEle
             <Text variant='small' alignment={TextAlignment.Left} lineLimit={2} shouldBreakAnywhere={true}>{props.collectionToken.name}</Text>
             <Spacing variant={PaddingSize.Default} />
             { props.value && (
-                <Text variant='small' lineLimit={2} alignment={TextAlignment.Left}>{`${shortFormatEther(BigInt(props.value.toString()))}`}</Text>
-              )}
+              <Text variant='small' lineLimit={2} alignment={TextAlignment.Left}>{`${shortFormatEther(BigInt(props.value.toString()))}`}</Text>
+            )}
           </Stack>
         </Stack>
       </Stack>

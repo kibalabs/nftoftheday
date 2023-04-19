@@ -9,8 +9,8 @@ import { Tooltip as ReactTooltip } from 'react-tooltip';
 import { CollectionToken, OwnedCollection, TokenTransfer, TradingHistory, TradingOverview } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
 import { TokenCard } from '../../components/TokenCard';
-import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { TokenOverviewView } from '../../components/TokenOverviewView';
+import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
 const TAB_KEY_OVERVIEW = 'TAB_KEY_OVERVIEW';
@@ -304,51 +304,51 @@ export const UserPage = (): React.ReactElement => {
                 ) : tradingOverview === null ? (
                   <Text variant='error'>Trading overview failed to load</Text>
                 ) : (
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Default}>
-                      {tradingOverview.mostTradedToken === null ? (
-                        <Text alignment={TextAlignment.Left}>No most traded token</Text>
-                      ) : (
-                        <TokenOverviewView
-                          title={"Most Traded Token"}
-                          collectionToken={tradingOverview.mostTradedToken}
-                        />
-                      )
-                      }
-                      {tradingOverview.mostRecentlyMintedTokenTransfer === null ? (
-                        <Text alignment={TextAlignment.Left}>No recently minted token</Text>
-                      ) : (
-                        <TokenOverviewView
-                          title={"Most Recently Minted Token"}
-                          collectionToken={tradingOverview.mostRecentlyMintedTokenTransfer.token}
-                          value={tradingOverview.mostRecentlyMintedTokenTransfer.value}
-                        />
-                      )
-                      }
-                      <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                        <Box variant='divider' isFullHeight={true} width='5px' />
-                      </ResponsiveHidingView>
-                      {tradingOverview.highestBoughtTokenTransfer === null ? (
-                        <Text alignment={TextAlignment.Left}>No highest bought token</Text>
-                      ) : (
-                        <TokenOverviewView
-                          title={"Highest Bought Token"}
-                          collectionToken={tradingOverview.highestBoughtTokenTransfer.token}
-                          value={tradingOverview.highestBoughtTokenTransfer.value}
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} defaultGutter={PaddingSize.Default}>
+                    {tradingOverview.mostTradedToken === null ? (
+                      <Text alignment={TextAlignment.Left}>No most traded token</Text>
+                    ) : (
+                      <TokenOverviewView
+                        title={'Most Traded Token'}
+                        collectionToken={tradingOverview.mostTradedToken}
+                      />
+                    )
+                    }
+                    {tradingOverview.mostRecentlyMintedTokenTransfer === null ? (
+                      <Text alignment={TextAlignment.Left}>No recently minted token</Text>
+                    ) : (
+                      <TokenOverviewView
+                        title={'Most Recently Minted Token'}
+                        collectionToken={tradingOverview.mostRecentlyMintedTokenTransfer.token}
+                        value={tradingOverview.mostRecentlyMintedTokenTransfer.value}
+                      />
+                    )
+                    }
+                    <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                      <Box variant='divider' isFullHeight={true} width='5px' />
+                    </ResponsiveHidingView>
+                    {tradingOverview.highestBoughtTokenTransfer === null ? (
+                      <Text alignment={TextAlignment.Left}>No highest bought token</Text>
+                    ) : (
+                      <TokenOverviewView
+                        title={'Highest Bought Token'}
+                        collectionToken={tradingOverview.highestBoughtTokenTransfer.token}
+                        value={tradingOverview.highestBoughtTokenTransfer.value}
 
-                        />
-                      )
-                      }
-                      {tradingOverview.highestSoldTokenTransfer === null ? (
-                        <Text alignment={TextAlignment.Left}>No highest sold token</Text>
-                      ) : (
-                        <TokenOverviewView
-                          title={"Highest Sold Token"}
-                          collectionToken={tradingOverview.highestSoldTokenTransfer.token}
-                          value={tradingOverview.highestSoldTokenTransfer.value}
-                        />
-                      )
-                      }
-                    </Stack>
+                      />
+                    )
+                    }
+                    {tradingOverview.highestSoldTokenTransfer === null ? (
+                      <Text alignment={TextAlignment.Left}>No highest sold token</Text>
+                    ) : (
+                      <TokenOverviewView
+                        title={'Highest Sold Token'}
+                        collectionToken={tradingOverview.highestSoldTokenTransfer.token}
+                        value={tradingOverview.highestSoldTokenTransfer.value}
+                      />
+                    )
+                    }
+                  </Stack>
                 )}
                 <Stack.Item growthFactor={1} shrinkFactor={1} />
               </Stack>
