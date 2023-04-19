@@ -242,8 +242,8 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
 
     @router.get('/accounts/{userAddress}/trading-overview', response_model=GetUserTradingOverviewResponse)
     async def get_user_trading_overview(userAddress: str) -> GetUserTradingOverviewResponse:
-        userTradingOverview = await notdManager.get_user_trading_overview(userAddress=userAddress)
-        return GetUserTradingOverviewResponse(userTradingOverview=(await responseBuilder.user_trading_overview_from_model(userTradingOverview=userTradingOverview)))
+        tradingOverview = await notdManager.get_user_trading_overview(userAddress=userAddress)
+        return GetUserTradingOverviewResponse(tradingOverview=(await responseBuilder.trading_overview_from_model(tradingOverview=tradingOverview)))
 
     @router.get('/accounts/{userAddress}/blue-chip-owned-collections', response_model=ListUserBlueChipOwnedCollectionsResponse)
     async def list_user_blue_chip_owned_collections(userAddress: str) -> ListUserBlueChipOwnedCollectionsResponse:

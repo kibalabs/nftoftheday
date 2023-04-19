@@ -307,6 +307,6 @@ class ApiTradingHistory(BaseModel):
 
 class ApiUserTradingOverview(BaseModel):
     mostTradedToken: Optional[ApiCollectionToken]
-    highestSoldToken: Optional[ApiCollectionToken]
-    highestBoughtToken: Optional[ApiCollectionToken]
-    mostRecentlyMintedToken: Optional[ApiCollectionToken]
+    highestSoldTokenTransfer: Optional[ApiTokenTransfer]
+    highestBoughtTokenTransfer: Optional[ApiTokenTransfer]
+    mostRecentlyMintedTokenTransfer: Optional[ApiTokenTransfer]

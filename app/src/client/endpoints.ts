@@ -529,7 +529,7 @@ export class RetrieveUserTradingOverviewResponse extends ResponseData {
 
   public static fromObject = (obj: Record<string, unknown>): RetrieveUserTradingOverviewResponse => {
     return new RetrieveUserTradingOverviewResponse(
-      Resources.TradingOverview.fromObject(obj.userTradingOverview as Record<string, unknown>),
+      Resources.TradingOverview.fromObject(obj.tradingOverview as Record<string, unknown>),
     );
   };
 }

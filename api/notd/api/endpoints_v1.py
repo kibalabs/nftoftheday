@@ -470,4 +470,4 @@ class GetUserTradingOverviewRequest(BaseModel):
     pass
 
 class GetUserTradingOverviewResponse(BaseModel):
-    userTradingOverview: ApiUserTradingOverview
+    tradingOverview: ApiUserTradingOverview

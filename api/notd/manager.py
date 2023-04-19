@@ -634,39 +634,32 @@ class NotdManager:
         mostTradedResult = await self.retriever.database.execute(query=mostTradedQuery)
         mostTradedTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostTradedResult.mappings()]
         mostTradedToken = mostTradedTokens[0] if len(mostTradedTokens) > 0 else None
-        highestSoldQuery = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .where(TokenTransfersTable.c.fromAddress == userAddress)
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.value).desc()) # type: ignore[no-untyped-call]
-            .limit(1)
+        highestSoldTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=userAddress)
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+            limit=1
         )
-        highestSoldResult = await self.retriever.database.execute(query=highestSoldQuery)
-        highestSoldTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in highestSoldResult.mappings()]
-        highestSoldToken = highestSoldTokens[0] if len(highestSoldTokens) > 0 else None
-        highestBoughtQuery = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .where(TokenTransfersTable.c.toAddress == userAddress)
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.value).desc()) # type: ignore[no-untyped-call]
-            .limit(1)
+        highestSoldTokenTransfer = highestSoldTokenTransfers[0] if len(highestSoldTokenTransfers) else None
+        highestBoughtTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=userAddress)
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+            limit=1
         )
-        highestBoughtResult = await self.retriever.database.execute(query=highestBoughtQuery)
-        highestBoughtTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in highestBoughtResult.mappings()]
-        highestBoughtToken = highestBoughtTokens[0] if len(highestBoughtTokens) > 0 else None
-        mostRecentlyMintedQuery = (
-            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .join(BlocksTable, BlocksTable.c.blockNumber == TokenTransfersTable.c.blockNumber)
-            .where(TokenTransfersTable.c.toAddress == chain_util.BURN_ADDRESS)
-            .where(TokenTransfersTable.c.fromAddress == userAddress)
-            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(BlocksTable.c.blockDate).desc()) # type: ignore[no-untyped-call]
-            .limit(1)
+        highestBoughtTokenTransfer = highestBoughtTokenTransfers[0] if len(highestBoughtTokenTransfers) else None
+        mostRecentlyMintedTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=userAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=chain_util.BURN_ADDRESS),
+            ],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            limit=1
         )
-        mostRecentlyMintedResult = await self.retriever.database.execute(query=mostRecentlyMintedQuery)
-        mostRecentlyMintedTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostRecentlyMintedResult.mappings()]
-        mostRecentlyMintedToken = mostRecentlyMintedTokens[0] if len(mostRecentlyMintedTokens) > 0 else None
-        userTradingOverview = UserTradingOverview(mostTradedToken=mostTradedToken, highestSoldToken=highestSoldToken, highestBoughtToken=highestBoughtToken, mostRecentlyMintedToken=mostRecentlyMintedToken)
+        mostRecentlyMintedTokenTransfer = mostRecentlyMintedTokenTransfers[0] if len(mostRecentlyMintedTokenTransfers) else None
+        userTradingOverview = UserTradingOverview(mostTradedToken=mostTradedToken, highestSoldTokenTransfer=highestSoldTokenTransfer, highestBoughtTokenTransfer=highestBoughtTokenTransfer, mostRecentlyMintedTokenTransfer=mostRecentlyMintedTokenTransfer)
         return userTradingOverview
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:

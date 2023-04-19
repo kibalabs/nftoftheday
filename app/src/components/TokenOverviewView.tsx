@@ -1,13 +1,14 @@
 import React from 'react';
 
 import { Alignment, Box, Direction, PaddingSize, Media, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
-import { longFormatEther } from '@kibalabs/core';
+import { shortFormatEther } from '@kibalabs/core';
 import { CollectionToken } from '../client/resources';
 
 
 export interface TokenOverviewViewProps {
   title: string;
   collectionToken: CollectionToken;
+  value?: BigInt
 }
 
 const defaultImage = '/assets/icon.png';
@@ -21,15 +22,19 @@ export const TokenOverviewView = (props: TokenOverviewViewProps): React.ReactEle
   }
 
   return (
-    <Box variant='tokenOverviewViewCard' height='8rem' width='20rem' shouldClipContent={true}>
+    <Box variant='tokenOverviewViewCard' height='5rem' width='15rem' shouldClipContent={false}>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} padding={PaddingSize.Default}>
         <Text variant='h5' alignment={TextAlignment.Left} lineLimit={2}>{props.title}</Text>
         <Stack direction={Direction.Horizontal} paddingVertical={PaddingSize.Default}>
           <Box variant='rounded' height='2rem' width='2rem' shouldClipContent={true}>
-          <Media source={imageUrl || defaultImage} alternativeText='image' fitType='cover' />
+            <Media source={imageUrl || defaultImage} alternativeText='image' fitType='cover' />
           </Box>
-          <Stack childAlignment={Alignment.Center} contentAlignment={Alignment.Center} paddingLeft={PaddingSize.Default}>
-            <Text variant='small' alignment={TextAlignment.Center} lineLimit={2} shouldBreakAnywhere={true}>{props.collectionToken.name}</Text>
+          <Stack contentAlignment={Alignment.Center} paddingLeft={PaddingSize.Default}>
+            <Text variant='small' alignment={TextAlignment.Left} lineLimit={2} shouldBreakAnywhere={true}>{props.collectionToken.name}</Text>
+            <Spacing variant={PaddingSize.Default} />
+            { props.value && (
+                <Text variant='small' lineLimit={2} alignment={TextAlignment.Left}>{`${shortFormatEther(BigInt(props.value.toString()))}`}</Text>
+              )}
           </Stack>
         </Stack>
       </Stack>

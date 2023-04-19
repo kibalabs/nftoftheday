@@ -301,23 +301,23 @@ export class TradingHistory {
 
 export class TradingOverview {
   readonly mostTradedToken: CollectionToken | null;
-  readonly highestSoldToken: CollectionToken | null;
-  readonly highestBoughtToken: CollectionToken | null;
-  readonly mostRecentlyMintedToken: CollectionToken | null;
+  readonly highestSoldTokenTransfer: TokenTransfer | null;
+  readonly highestBoughtTokenTransfer: TokenTransfer | null;
+  readonly mostRecentlyMintedTokenTransfer: TokenTransfer | null;
 
-  public constructor(mostTradedToken: CollectionToken | null, highestSoldToken: CollectionToken | null, highestBoughtToken: CollectionToken | null, mostRecentlyMintedToken: CollectionToken | null) {
+  public constructor(mostTradedToken: CollectionToken | null, highestSoldTokenTransfer: TokenTransfer | null, highestBoughtTokenTransfer: TokenTransfer | null, mostRecentlyMintedTokenTransfer: TokenTransfer | null) {
     this.mostTradedToken = mostTradedToken;
-    this.highestSoldToken = highestSoldToken;
-    this.highestBoughtToken = highestBoughtToken;
-    this.mostRecentlyMintedToken = mostRecentlyMintedToken;
+    this.highestSoldTokenTransfer = highestSoldTokenTransfer;
+    this.highestBoughtTokenTransfer = highestBoughtTokenTransfer;
+    this.mostRecentlyMintedTokenTransfer = mostRecentlyMintedTokenTransfer;
   }
 
   public static fromObject = (obj: Record<string, unknown>): TradingOverview => {
     return new TradingOverview(
       obj.mostTradedToken ? CollectionToken.fromObject(obj.mostTradedToken as Record<string, unknown>) : null,
-      obj.highestSoldToken ? CollectionToken.fromObject(obj.highestSoldToken as Record<string, unknown>) : null,
-      obj.highestBoughtToken ? CollectionToken.fromObject(obj.highestBoughtToken as Record<string, unknown>) : null,
-      obj.mostRecentlyMintedToken ? CollectionToken.fromObject(obj.mostRecentlyMintedToken as Record<string, unknown>) : null,
+      obj.highestSoldTokenTransfer ? TokenTransfer.fromObject(obj.highestSoldTokenTransfer as Record<string, unknown>) : null,
+      obj.highestBoughtTokenTransfer ? TokenTransfer.fromObject(obj.highestBoughtTokenTransfer as Record<string, unknown>) : null,
+      obj.mostRecentlyMintedTokenTransfer ? TokenTransfer.fromObject(obj.mostRecentlyMintedTokenTransfer as Record<string, unknown>) : null,
     );
   };
 }

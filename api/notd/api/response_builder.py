@@ -539,10 +539,10 @@ class ResponseBuilder:
     async def trading_histories_from_models(self, tradingHistories: Sequence[TradingHistory]) -> List[ApiTradingHistory]:
         return await asyncio.gather(*[self.trading_history_from_model(tradingHistory=tradingHistory) for tradingHistory in tradingHistories])
 
-    async def user_trading_overview_from_model(self, userTradingOverview: UserTradingOverview) -> ApiUserTradingOverview:
+    async def trading_overview_from_model(self, tradingOverview: UserTradingOverview) -> ApiUserTradingOverview:
         return ApiUserTradingOverview(
-            mostTradedToken=(await self.collection_token_from_token_key(tokenKey=userTradingOverview.mostTradedToken)) if userTradingOverview.mostTradedToken else None,
-            highestSoldToken=(await self.collection_token_from_token_key(userTradingOverview.highestSoldToken)) if userTradingOverview.highestSoldToken else None,
-            highestBoughtToken=(await self.collection_token_from_token_key(userTradingOverview.highestBoughtToken)) if userTradingOverview.highestBoughtToken else None,
-            mostRecentlyMintedToken=(await self.collection_token_from_token_key(userTradingOverview.mostRecentlyMintedToken)) if userTradingOverview.mostRecentlyMintedToken else None,
+            mostTradedToken=(await self.collection_token_from_token_key(tokenKey=tradingOverview.mostTradedToken)) if tradingOverview.mostTradedToken else None,
+            highestSoldTokenTransfer=(await self.token_transfer_from_model(tradingOverview.highestSoldTokenTransfer)) if tradingOverview.highestSoldTokenTransfer else None,
+            highestBoughtTokenTransfer=(await self.token_transfer_from_model(tradingOverview.highestBoughtTokenTransfer)) if tradingOverview.highestBoughtTokenTransfer else None,
+            mostRecentlyMintedTokenTransfer=(await self.token_transfer_from_model(tradingOverview.mostRecentlyMintedTokenTransfer)) if tradingOverview.mostRecentlyMintedTokenTransfer else None,
         )

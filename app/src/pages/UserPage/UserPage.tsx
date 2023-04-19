@@ -314,33 +314,37 @@ export const UserPage = (): React.ReactElement => {
                         />
                       )
                       }
-                      {tradingOverview.mostRecentlyMintedToken === null ? (
+                      {tradingOverview.mostRecentlyMintedTokenTransfer === null ? (
                         <Text alignment={TextAlignment.Left}>No recently minted token</Text>
                       ) : (
                         <TokenOverviewView
                           title={"Most Recently Minted Token"}
-                          collectionToken={tradingOverview.mostRecentlyMintedToken}
+                          collectionToken={tradingOverview.mostRecentlyMintedTokenTransfer.token}
+                          value={tradingOverview.mostRecentlyMintedTokenTransfer.value}
                         />
                       )
                       }
                       <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
                         <Box variant='divider' isFullHeight={true} width='5px' />
                       </ResponsiveHidingView>
-                      {tradingOverview.highestBoughtToken === null ? (
+                      {tradingOverview.highestBoughtTokenTransfer === null ? (
                         <Text alignment={TextAlignment.Left}>No highest bought token</Text>
                       ) : (
                         <TokenOverviewView
                           title={"Highest Bought Token"}
-                          collectionToken={tradingOverview.highestBoughtToken}
+                          collectionToken={tradingOverview.highestBoughtTokenTransfer.token}
+                          value={tradingOverview.highestBoughtTokenTransfer.value}
+
                         />
                       )
                       }
-                      {tradingOverview.highestSoldToken === null ? (
+                      {tradingOverview.highestSoldTokenTransfer === null ? (
                         <Text alignment={TextAlignment.Left}>No highest sold token</Text>
                       ) : (
                         <TokenOverviewView
                           title={"Highest Sold Token"}
-                          collectionToken={tradingOverview.highestSoldToken}
+                          collectionToken={tradingOverview.highestSoldTokenTransfer.token}
+                          value={tradingOverview.highestSoldTokenTransfer.value}
                         />
                       )
                       }
