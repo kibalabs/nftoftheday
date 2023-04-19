@@ -37,6 +37,7 @@ from notd.api.models_v1 import ApiTokenTransfer
 from notd.api.models_v1 import ApiTokenTransferValue
 from notd.api.models_v1 import ApiTradingHistory
 from notd.api.models_v1 import ApiTrendingCollection
+from notd.api.models_v1 import ApiUserTradingOverview
 
 
 class ReceiveNewBlocksDeferredRequest(BaseModel):
@@ -464,3 +465,9 @@ class ListUserBlueChipOwnedCollectionsRequest(BaseModel):
 
 class ListUserBlueChipOwnedCollectionsResponse(BaseModel):
     ownedCollections: List[ApiOwnedCollection]
+
+class GetUserTradingOverviewRequest(BaseModel):
+    pass
+
+class GetUserTradingOverviewResponse(BaseModel):
+    tradingOverview: ApiUserTradingOverview

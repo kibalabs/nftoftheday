@@ -6,9 +6,10 @@ import { Alignment, Box, ContainingView, Direction, EqualGrid, Head, IconButton,
 import ActivityCalendar, { BlockElement, Activity as CalendarActivity, Level as CalendarActivityLevel } from 'react-activity-calendar';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 
-import { CollectionToken, OwnedCollection, TokenTransfer, TradingHistory } from '../../client/resources';
+import { CollectionToken, OwnedCollection, TokenTransfer, TradingHistory, TradingOverview } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
 import { TokenCard } from '../../components/TokenCard';
+import { TokenOverviewView } from '../../components/TokenOverviewView';
 import { TokenSaleRow } from '../../components/TokenSaleRow';
 import { useGlobals } from '../../globalsContext';
 
@@ -21,6 +22,7 @@ export const UserPage = (): React.ReactElement => {
   const { notdClient } = useGlobals();
   const accountAddress = useStringRouteParam('accountAddress');
   const [blueChipOwnedCollections, setBlueChipOwnedCollections] = React.useState<OwnedCollection[] | null | undefined>(undefined);
+  const [tradingOverview, setTradingOverview] = React.useState<TradingOverview | null | undefined>(undefined);
   const [ownedCollections, setOwnedCollections] = React.useState<OwnedCollection[] | null | undefined>(undefined);
   const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_OVERVIEW);
   const [tradingCalendarActivity, setTradingCalendarActivity] = React.useState<CalendarActivity[] | undefined | null>(undefined);
@@ -103,6 +105,26 @@ export const UserPage = (): React.ReactElement => {
     updateOwnedCollections();
   }, [updateOwnedCollections]);
 
+  const updateTradingOverview = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setTradingOverview(undefined);
+    }
+    if (!accountAddress) {
+      setTradingOverview(undefined);
+      return;
+    }
+    notdClient.retrieveUserTradingOverview(accountAddress).then((retrievedTradingOverview: TradingOverview): void => {
+      setTradingOverview(retrievedTradingOverview);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setTradingOverview(null);
+    });
+  }, [notdClient, accountAddress]);
+
+  React.useEffect((): void => {
+    updateTradingOverview();
+  }, [updateTradingOverview]);
+
   const updateTransfers = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
       setRecentTransfers(undefined);
@@ -160,7 +182,7 @@ export const UserPage = (): React.ReactElement => {
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             {selectedTabKey === TAB_KEY_OWNED ? (
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
-                { ownedCollections === undefined ? (
+                {ownedCollections === undefined ? (
                   <LoadingSpinner />
                 ) : ownedCollections === null ? (
                   <Text variant='error' alignment={TextAlignment.Center}>Failed to load other projects</Text>
@@ -197,7 +219,7 @@ export const UserPage = (): React.ReactElement => {
               </Stack>
             ) : selectedTabKey === TAB_KEY_TRANSACTIONS ? (
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
-                { recentTransfers === undefined ? (
+                {recentTransfers === undefined ? (
                   <LoadingSpinner />
                 ) : recentTransfers === null ? (
                   <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
@@ -216,7 +238,7 @@ export const UserPage = (): React.ReactElement => {
                 <Stack.Item gutterAfter={PaddingSize.Narrow}>
                   <Text variant='header3'>Activity Map</Text>
                 </Stack.Item>
-                { tradingCalendarActivity === undefined ? (
+                {tradingCalendarActivity === undefined ? (
                   <LoadingSpinner />
                 ) : tradingCalendarActivity === null ? (
                   <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
@@ -232,7 +254,7 @@ export const UserPage = (): React.ReactElement => {
                       light: [colors.brandPrimaryClear95, colors.brandPrimaryClear75, colors.brandPrimaryClear50, colors.brandPrimaryClear25, colors.brandPrimary],
                       dark: [colors.brandPrimaryClear95, colors.brandPrimaryClear75, colors.brandPrimaryClear50, colors.brandPrimaryClear25, colors.brandPrimary],
                     }}
-                    renderBlock={(block :BlockElement, activity: CalendarActivity) => React.cloneElement(block, {
+                    renderBlock={(block: BlockElement, activity: CalendarActivity) => React.cloneElement(block, {
                       'data-tooltip-id': 'react-tooltip',
                       'data-tooltip-html': `${activity.count} activities on ${activity.date}`,
                     })
@@ -243,14 +265,14 @@ export const UserPage = (): React.ReactElement => {
                 <Stack.Item gutterAfter={PaddingSize.Narrow}>
                   <Text variant='header3'>Blue Chip Holdings</Text>
                 </Stack.Item>
-                { blueChipOwnedCollections === undefined ? (
+                {blueChipOwnedCollections === undefined ? (
                   <LoadingSpinner />
                 ) : blueChipOwnedCollections === null ? (
                   <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
                 ) : blueChipOwnedCollections.length === 0 ? (
                   <Text alignment={TextAlignment.Center}>No activity</Text>
                 ) : (
-                  <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 4, large: 3 }} shouldAddGutters={true}>
+                  <EqualGrid childSizeResponsive={{ base: 12, small: 6, medium: 4, large: 3 }} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
                     {blueChipOwnedCollections.map((ownedCollection: OwnedCollection): React.ReactElement => (
                       <Box key={ownedCollection.collection.address} variant='card' isFullHeight={true} isFullWidth={true}>
                         <Stack direction={Direction.Vertical} shouldAddGutters={true}>
@@ -271,6 +293,46 @@ export const UserPage = (): React.ReactElement => {
                         </Stack>
                       </Box>
                     ))}
+                  </EqualGrid>
+                )}
+                <Spacing variant={PaddingSize.Wide} />
+                <Stack.Item gutterAfter={PaddingSize.Narrow}>
+                  <Text variant='header3'>Trading Overview</Text>
+                </Stack.Item>
+                {tradingOverview === undefined ? (
+                  <LoadingSpinner />
+                ) : tradingOverview === null ? (
+                  <Text variant='error'>Trading overview failed to load</Text>
+                ) : (
+                  <EqualGrid childSizeResponsive={{ base: 12, small: 6, large: 3 }} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                    {tradingOverview.mostTradedToken != null && (
+                      <TokenOverviewView
+                        title={'Most Traded'}
+                        collectionToken={tradingOverview.mostTradedToken}
+                      />
+                    )}
+                    {tradingOverview.mostRecentlyMintedTokenTransfer != null && (
+                      <TokenOverviewView
+                        title={'Latest Minted'}
+                        collectionToken={tradingOverview.mostRecentlyMintedTokenTransfer.token}
+                        value={tradingOverview.mostRecentlyMintedTokenTransfer.value}
+                      />
+                    )}
+                    {tradingOverview.highestBoughtTokenTransfer != null && (
+                      <TokenOverviewView
+                        title={'Highest Buy'}
+                        collectionToken={tradingOverview.highestBoughtTokenTransfer.token}
+                        value={tradingOverview.highestBoughtTokenTransfer.value}
+
+                      />
+                    )}
+                    {tradingOverview.highestSoldTokenTransfer != null && (
+                      <TokenOverviewView
+                        title={'Highest Sell'}
+                        collectionToken={tradingOverview.highestSoldTokenTransfer.token}
+                        value={tradingOverview.highestSoldTokenTransfer.value}
+                      />
+                    )}
                   </EqualGrid>
                 )}
                 <Stack.Item growthFactor={1} shrinkFactor={1} />

@@ -51,6 +51,7 @@ from notd.model import TokenTransfer
 from notd.model import TokenTransferValue
 from notd.model import TradingHistory
 from notd.model import TrendingCollection
+from notd.model import UserTradingOverview
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
@@ -620,6 +621,46 @@ class NotdManager:
                 tokenMetadatas=collectionTokenMap[registryAddress],
             ) for registryAddress in registryAddresses
         ]
+
+    async def get_user_trading_overview(self, userAddress: str) -> UserTradingOverview:
+        #NOTE(Femi-Ogunkola): Please confirm if using one query is the better option
+        mostTradedQuery = (
+            sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
+            .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc()) # type: ignore[no-untyped-call]
+            .limit(1)
+        )
+        mostTradedResult = await self.retriever.database.execute(query=mostTradedQuery)
+        mostTradedTokens = [Token(registryAddress=row['registryAddress'], tokenId=row['tokenId']) for row in mostTradedResult.mappings()]
+        mostTradedToken = mostTradedTokens[0] if len(mostTradedTokens) > 0 else None
+        highestSoldTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=userAddress)
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+            limit=1
+        )
+        highestSoldTokenTransfer = highestSoldTokenTransfers[0] if len(highestSoldTokenTransfers) else None
+        highestBoughtTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=userAddress)
+            ],
+            orders=[Order(fieldName=TokenTransfersTable.c.value.key, direction=Direction.DESCENDING)],
+            limit=1
+        )
+        highestBoughtTokenTransfer = highestBoughtTokenTransfers[0] if len(highestBoughtTokenTransfers) else None
+        mostRecentlyMintedTokenTransfers = await self.retriever.list_token_transfers(
+            fieldFilters=[
+                StringFieldFilter(fieldName=TokenTransfersTable.c.toAddress.key, eq=userAddress),
+                StringFieldFilter(fieldName=TokenTransfersTable.c.fromAddress.key, eq=chain_util.BURN_ADDRESS),
+            ],
+            orders=[Order(fieldName=BlocksTable.c.blockDate.key, direction=Direction.DESCENDING)],
+            limit=1
+        )
+        mostRecentlyMintedTokenTransfer = mostRecentlyMintedTokenTransfers[0] if len(mostRecentlyMintedTokenTransfers) else None
+        userTradingOverview = UserTradingOverview(mostTradedToken=mostTradedToken, highestSoldTokenTransfer=highestSoldTokenTransfer, highestBoughtTokenTransfer=highestBoughtTokenTransfer, mostRecentlyMintedTokenTransfer=mostRecentlyMintedTokenTransfer)
+        return userTradingOverview
 
     async def update_token_metadata_deferred(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)

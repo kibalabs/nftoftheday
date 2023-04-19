@@ -16,6 +16,7 @@ from notd.api.endpoints_v1 import GetCollectionTokenRecentSalesResponse
 from notd.api.endpoints_v1 import GetCollectionTokenResponse
 from notd.api.endpoints_v1 import GetCollectionTransferValuesResponse
 from notd.api.endpoints_v1 import GetTokenRecentTransfersResponse
+from notd.api.endpoints_v1 import GetUserTradingOverviewResponse
 from notd.api.endpoints_v1 import ListAccountDelegatedTokensResponse
 from notd.api.endpoints_v1 import ListAllListingsForCollectionTokenResponse
 from notd.api.endpoints_v1 import ListCollectionTokensByOwnerResponse
@@ -238,6 +239,11 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         offset = offset if offset is not None else 0
         tradingHistories = await notdManager.list_user_trading_histories(userAddress=userAddress, offset=offset)
         return ListUserTradingHistoryResponse(tradingHistories=(await responseBuilder.trading_histories_from_models(tradingHistories=tradingHistories)))
+
+    @router.get('/accounts/{userAddress}/trading-overview', response_model=GetUserTradingOverviewResponse)
+    async def get_user_trading_overview(userAddress: str) -> GetUserTradingOverviewResponse:
+        tradingOverview = await notdManager.get_user_trading_overview(userAddress=userAddress)
+        return GetUserTradingOverviewResponse(tradingOverview=(await responseBuilder.trading_overview_from_model(tradingOverview=tradingOverview)))
 
     @router.get('/accounts/{userAddress}/blue-chip-owned-collections', response_model=ListUserBlueChipOwnedCollectionsResponse)
     async def list_user_blue_chip_owned_collections(userAddress: str) -> ListUserBlueChipOwnedCollectionsResponse:

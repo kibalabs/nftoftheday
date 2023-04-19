@@ -515,3 +515,21 @@ export class ListUserBlueChipOwnedCollectionsResponse extends ResponseData {
     );
   };
 }
+
+export class RetrieveUserTradingOverviewRequest extends RequestData {
+}
+
+export class RetrieveUserTradingOverviewResponse extends ResponseData {
+  readonly tradingOverview: Resources.TradingOverview;
+
+  public constructor(tradingOverview: Resources.TradingOverview) {
+    super();
+    this.tradingOverview = tradingOverview;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): RetrieveUserTradingOverviewResponse => {
+    return new RetrieveUserTradingOverviewResponse(
+      Resources.TradingOverview.fromObject(obj.tradingOverview as Record<string, unknown>),
+    );
+  };
+}

@@ -303,3 +303,10 @@ class ApiTradingHistory(BaseModel):
     buyCount: int
     sellCount: int
     mintCount: int
+
+
+class ApiUserTradingOverview(BaseModel):
+    mostTradedToken: Optional[ApiCollectionToken]
+    highestSoldTokenTransfer: Optional[ApiTokenTransfer]
+    highestBoughtTokenTransfer: Optional[ApiTokenTransfer]
+    mostRecentlyMintedTokenTransfer: Optional[ApiTokenTransfer]

@@ -12,8 +12,6 @@ export interface TokenCardProps {
   target?: string;
 }
 
-const defaultImage = '/assets/icon.png';
-
 export const TokenCard = (props:TokenCardProps): React.ReactElement => {
   const onClicked = (): void => {
     if (props.onClicked) {
@@ -21,17 +19,14 @@ export const TokenCard = (props:TokenCardProps): React.ReactElement => {
     }
   };
 
-  let imageUrl = props.collectionToken?.imageUrl || defaultImage;
-  if (imageUrl?.startsWith('ipfs://')) {
-    imageUrl = imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/');
-  }
+  const imageUrl = props.collectionToken?.imageUrl || '/assets/icon.png';
 
   return (
     <LinkBase onClicked={onClicked} target={props.target}>
       <Box variant='tokenCard' shouldClipContent={true}>
         <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
           <Box variant='unrounded' height='11rem' width='11rem' shouldClipContent={true}>
-            <Media source={ imageUrl || defaultImage} alternativeText='image' fitType='cover' />
+            <Media source={imageUrl} alternativeText='image' fitType='cover' />
           </Box>
           <Box>
             <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Wide}>

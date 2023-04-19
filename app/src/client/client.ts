@@ -179,4 +179,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.ListUserBlueChipOwnedCollectionsResponse);
     return response.ownedCollections;
   };
+
+  public retrieveUserTradingOverview = async (address: string): Promise<Resources.TradingOverview> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${address}/trading-overview`;
+    const request = new Endpoints.RetrieveUserTradingOverviewRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.RetrieveUserTradingOverviewResponse);
+    return response.tradingOverview;
+  };
 }

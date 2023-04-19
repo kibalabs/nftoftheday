@@ -709,3 +709,11 @@ class TradingHistory:
     buyCount: int
     sellCount: int
     mintCount: int
+
+
+@dataclasses.dataclass
+class UserTradingOverview:
+    mostTradedToken: Optional[Token]
+    highestSoldTokenTransfer: Optional[TokenTransfer]
+    highestBoughtTokenTransfer: Optional[TokenTransfer]
+    mostRecentlyMintedTokenTransfer: Optional[TokenTransfer]
