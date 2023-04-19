@@ -24,13 +24,13 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
               </Box>
             )}
             <Box width='9rem'>
-              <Account accountId={props.tokenTransfer?.fromAddress} />
+              <Account accountId={props.tokenTransfer?.fromAddress} target={`/accounts/${props.tokenTransfer?.fromAddress}`} />
             </Box>
             <Stack.Item baseSize='2rem' alignment={Alignment.Center}>
               <KibaIcon iconId='ion-arrow-forward' />
             </Stack.Item>
             <Box width='9rem'>
-              <Account accountId={props.tokenTransfer?.toAddress} />
+              <Account accountId={props.tokenTransfer?.toAddress} target={`/accounts/${props.tokenTransfer?.toAddress}`} />
             </Box>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Spacing variant={PaddingSize.Wide} />
@@ -55,13 +55,13 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
             )}
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
               <Box width='6rem'>
-                <Account accountId={props.tokenTransfer?.fromAddress} />
+                <Account accountId={props.tokenTransfer?.fromAddress} target={`/accounts/${props.tokenTransfer?.fromAddress}`} />
               </Box>
               <Stack.Item baseSize='5rem'>
                 <KibaIcon iconId='ion-arrow-forward' />
               </Stack.Item>
               <Box width='6rem'>
-                <Account accountId={props.tokenTransfer?.toAddress} />
+                <Account accountId={props.tokenTransfer?.toAddress} target={`/accounts/${props.tokenTransfer?.toAddress}`} />
               </Box>
             </Stack>
             <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} padding={PaddingSize.Narrow}>
@@ -82,3 +82,4 @@ export const TokenSaleRow = (props: ITokenSaleRowProps): React.ReactElement => {
     </Stack>
   );
 };
+TokenSaleRow.displayName = 'TokenSaleRow';
