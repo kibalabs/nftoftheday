@@ -341,6 +341,12 @@ class ListGmAccountRowsRequest(BaseModel):
 class ListGmAccountRowsResponse(BaseModel):
     accountRows: List[ApiGmAccountRow]
 
+class ListGmCollectionAccountRowsRequest(BaseModel):
+    pass
+
+class ListGmCollectionAccountRowsResponse(BaseModel):
+    accountRows: List[ApiGmAccountRow]
+
 class ListGmCollectionRowsRequest(BaseModel):
     pass
 
