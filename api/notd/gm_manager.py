@@ -138,7 +138,7 @@ class GmManager:
             .where(AccountCollectionGmsTable.c.registryAddress == registryAddress)
             .group_by(AccountCollectionGmsTable.c.accountAddress)
         )
-        latestAccountRowQuery: Select[Any] = (  # type: ignore[misc]
+        latestAccountRowQuery = (
             sqlalchemy.select(AccountGmsTable.c.address, sqlalchemyfunc.max(AccountGmsTable.c.date).label('date'))  # type: ignore[no-untyped-call]
             .where(AccountGmsTable.c.date >= date_util.start_of_day(dt=date_util.datetime_from_now(days=-7)))
             .group_by(AccountGmsTable.c.address)

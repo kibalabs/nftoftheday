@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  build-app:
+  app-build:
     runs-on: ubuntu-latest
     env:
       DOCKER_IMAGE: build
@@ -50,7 +50,7 @@ jobs:
           check-name: app-type-check
           fail-on-error: false
           path-prefix: ./app/
-  build-api:
+  api-build:
     runs-on: ubuntu-latest
     env:
       DOCKER_IMAGE: build
