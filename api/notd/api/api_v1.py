@@ -203,23 +203,23 @@ def create_api(notdManager: NotdManager, responseBuilder: ResponseBuilder) -> AP
         collectionActivities = await notdManager.get_collection_daily_activities(address=registryAddress)
         return GetCollectionDailyActivitiesResponse(collectionActivities=(await responseBuilder.collection_activities_from_models(collectionActivities=collectionActivities)))
 
-    @router.get('/accounts/{accountAddress}/tokens', response_model=GetAccountTokensResponse)
-    async def list_account_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> GetAccountTokensResponse:
+    @router.get('/accounts/{userAddress}/tokens', response_model=GetAccountTokensResponse)
+    async def list_account_tokens(userAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> GetAccountTokensResponse:
         limit = limit if limit is not None else 100
         offset = offset if offset is not None else 0
-        tokenKeys = await notdManager.list_account_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
+        tokenKeys = await notdManager.list_account_tokens(accountAddress=userAddress, limit=limit, offset=offset)
         return GetAccountTokensResponse(tokens=(await responseBuilder.collection_tokens_from_token_keys(tokenKeys=tokenKeys)))
 
-    @router.get('/accounts/{accountAddress}/delegated-tokens', response_model=ListAccountDelegatedTokensResponse)
-    async def list_account_delegated_tokens(accountAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> ListAccountDelegatedTokensResponse:
+    @router.get('/accounts/{userAddress}/delegated-tokens', response_model=ListAccountDelegatedTokensResponse)
+    async def list_account_delegated_tokens(userAddress: str, limit: Optional[int] = None, offset: Optional[int] = None) -> ListAccountDelegatedTokensResponse:
         limit = limit if limit is not None else 100
         offset = offset if offset is not None else 0
-        accountTokenKeys = await notdManager.list_account_delegated_tokens(accountAddress=accountAddress, limit=limit, offset=offset)
+        accountTokenKeys = await notdManager.list_account_delegated_tokens(accountAddress=userAddress, limit=limit, offset=offset)
         return ListAccountDelegatedTokensResponse(accountTokens=(await responseBuilder.collection_tokens_from_account_token_keys(accountTokenKeys=accountTokenKeys)))
 
-    @router.post('/accounts/{accountAddress}/refresh-token-ownerships', response_model=RefreshAccountTokenOwnershipsResponse)
-    async def refresh_owner_token_ownerships(accountAddress: str) -> RefreshAccountTokenOwnershipsResponse:
-        await notdManager.reprocess_owner_token_ownerships(accountAddress=accountAddress)
+    @router.post('/accounts/{userAddress}/refresh-token-ownerships', response_model=RefreshAccountTokenOwnershipsResponse)
+    async def refresh_owner_token_ownerships(userAddress: str) -> RefreshAccountTokenOwnershipsResponse:
+        await notdManager.reprocess_owner_token_ownerships(userAddress=userAddress)
         return RefreshAccountTokenOwnershipsResponse()
 
     @router.get('/accounts/{userAddress}/owned-collections')

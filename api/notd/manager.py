@@ -765,8 +765,8 @@ class NotdManager:
         collection = await self.collectionManager.get_collection_by_address(address=address)
         return await self.ownershipManager.list_collection_tokens_by_owner(address=address, ownerAddress=ownerAddress, collection=collection)
 
-    async def reprocess_owner_token_ownerships(self, accountAddress: str) -> None:
-        collectionTokenIds = await self.ownershipManager.reprocess_owner_token_ownerships(ownerAddress=accountAddress)
+    async def reprocess_owner_token_ownerships(self, userAddress: str) -> None:
+        collectionTokenIds = await self.ownershipManager.reprocess_owner_token_ownerships(ownerAddress=userAddress)
         await self.tokenManager.update_token_metadatas_deferred(collectionTokenIds=collectionTokenIds)
 
     async def refresh_views_deferred(self) -> None:

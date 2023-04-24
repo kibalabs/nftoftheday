@@ -7,6 +7,7 @@ from notd.api.endpoints_v1 import CreateGmRequest
 from notd.api.endpoints_v1 import CreateGmResponse
 from notd.api.endpoints_v1 import GetLatestGmForAccountResponse
 from notd.api.endpoints_v1 import ListGmAccountRowsResponse
+from notd.api.endpoints_v1 import ListGmCollectionAccountRowsResponse
 from notd.api.endpoints_v1 import ListGmCollectionRowsResponse
 from notd.api.response_builder import ResponseBuilder
 from notd.gm_manager import GmManager
@@ -29,6 +30,11 @@ def create_api(gmManager: GmManager, responseBuilder: ResponseBuilder) -> APIRou
     async def list_gm_account_rows() -> ListGmAccountRowsResponse:
         gmAccountRows = await gmManager.list_gm_account_rows()
         return ListGmAccountRowsResponse(accountRows=(await responseBuilder.gm_account_rows_from_models(gmAccountRows=gmAccountRows)))
+
+    @router.get('/collections/{registryAddress}/account-rows', response_model=ListGmCollectionAccountRowsResponse)
+    async def list_gm_collection_account_rows(registryAddress: str) -> ListGmCollectionAccountRowsResponse:
+        gmAccountRows = await gmManager.list_gm_collection_account_rows(registryAddress=registryAddress)
+        return ListGmCollectionAccountRowsResponse(accountRows=(await responseBuilder.gm_account_rows_from_models(gmAccountRows=gmAccountRows)))
 
     @router.get('/collection-rows', response_model=ListGmCollectionRowsResponse)
     async def list_gm_collection_rows() -> ListGmCollectionRowsResponse:
