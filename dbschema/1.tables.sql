@@ -514,15 +514,14 @@ CREATE TABLE tbl_subcontract_tokens (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    contract_name TEXT NOT NULL,
-    subcontract_name TEXT NOT NULL,
+    registry_address TEXT NOT NULL,
+    collection_name TEXT NOT NULL,
     token_id TEXT NOT NULL,
 );
 
-CREATE UNIQUE INDEX tbl_subcontract_tokens_regsitry_address_subcontract_name_contract_name_token_id ON tbl_subcontract_tokens (subcontract_name, contract_name, token_id);
+CREATE UNIQUE INDEX tbl_subcontract_tokens_registry_address_token_id ON tbl_subcontract_tokens (registry_address, token_id);
 CREATE INDEX tbl_subcontract_tokens_created_date ON tbl_subcontract_tokens (created_date);
 CREATE INDEX tbl_subcontract_tokens_updated_date ON tbl_subcontract_tokens (updated_date);
-CREATE INDEX tbl_subcontract_tokens_registry_address_token_id ON tbl_subcontract_tokens (subcontract_name, token_id);
-CREATE INDEX tbl_subcontract_tokens_subcontract_name ON tbl_subcontract_tokens (subcontract_name);
-CREATE INDEX tbl_subcontract_tokens_contract_name ON tbl_subcontract_tokens (contract_name);
+CREATE INDEX tbl_subcontract_tokens_collection_name ON tbl_subcontract_tokens (collection_name);
+CREATE INDEX tbl_subcontract_tokens_registry_address ON tbl_subcontract_tokens (registry_address);
 CREATE INDEX tbl_subcontract_tokens_token_id ON tbl_subcontract_tokens (token_id);
