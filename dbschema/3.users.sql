@@ -48,6 +48,8 @@ GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_gallery_badge_assignments TO notd_ap
 GRANT ALL ON SEQUENCE tbl_gallery_badge_assignments_id_seq TO notd_api;
 GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_token_stakings TO notd_api;
 GRANT ALL ON SEQUENCE tbl_token_stakings_id_seq TO notd_api;
+GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_subcontract_tokens TO notd_api;
+GRANT ALL ON SEQUENCE tbl_subcontract_tokens_id_seq TO notd_api;
 GRANT SELECT ON vw_token_ownerships to notd_api;
 GRANT SELECT ON vw_ordered_token_listings to notd_api;
 GRANT SELECT ON vw_gallery_badge_holders to notd_api;
@@ -77,6 +79,7 @@ GRANT SELECT ON tbl_collection_overlaps TO obafemi;
 GRANT SELECT ON tbl_gallery_badge_holders TO obafemi;
 GRANT SELECT ON tbl_gallery_badge_assignments TO obafemi;
 GRANT SELECT ON tbl_token_stakings TO obafemi;
+GRANT SELECT ON tbl_subcontract_tokens TO obafemi;
 GRANT SELECT ON vw_token_ownerships to obafemi;
 GRANT SELECT ON vw_ordered_token_listings to obafemi;
 GRANT SELECT ON vw_gallery_badge_holders to obafemi;
