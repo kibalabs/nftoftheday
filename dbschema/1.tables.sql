@@ -510,7 +510,7 @@ CREATE INDEX tbl_token_stakings_staked_date ON tbl_token_stakings (staked_date);
 CREATE INDEX tbl_token_stakings_token_id ON tbl_token_stakings (token_id);
 CREATE INDEX tbl_token_stakings_transaction_hash ON tbl_token_stakings (transaction_hash);
 
-CREATE TABLE tbl_subcontract_tokens (
+CREATE TABLE tbl_sub_collection_tokens (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -519,9 +519,9 @@ CREATE TABLE tbl_subcontract_tokens (
     token_id TEXT NOT NULL,
 );
 
-CREATE UNIQUE INDEX tbl_subcontract_tokens_registry_address_token_id ON tbl_subcontract_tokens (registry_address, token_id);
-CREATE INDEX tbl_subcontract_tokens_created_date ON tbl_subcontract_tokens (created_date);
-CREATE INDEX tbl_subcontract_tokens_updated_date ON tbl_subcontract_tokens (updated_date);
-CREATE INDEX tbl_subcontract_tokens_collection_name ON tbl_subcontract_tokens (collection_name);
-CREATE INDEX tbl_subcontract_tokens_registry_address ON tbl_subcontract_tokens (registry_address);
-CREATE INDEX tbl_subcontract_tokens_token_id ON tbl_subcontract_tokens (token_id);
+CREATE UNIQUE INDEX tbl_sub_collection_tokens_registry_address_token_id ON tbl_sub_collection_tokens (registry_address, token_id);
+CREATE INDEX tbl_sub_collection_tokens_created_date ON tbl_sub_collection_tokens (created_date);
+CREATE INDEX tbl_sub_collection_tokens_updated_date ON tbl_sub_collection_tokens (updated_date);
+CREATE INDEX tbl_sub_collection_tokens_collection_name ON tbl_sub_collection_tokens (collection_name);
+CREATE INDEX tbl_sub_collection_tokens_registry_address ON tbl_sub_collection_tokens (registry_address);
+CREATE INDEX tbl_sub_collection_tokens_token_id ON tbl_sub_collection_tokens (token_id);

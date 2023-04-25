@@ -24,6 +24,7 @@ from notd.model import GalleryBadgeAssignment
 from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
+from notd.model import SubCollectionToken
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -46,6 +47,7 @@ from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
+from notd.store.schema import SubCollectionTokensTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
@@ -70,6 +72,7 @@ from notd.store.schema_conversions import gallery_badge_assignment_from_row
 from notd.store.schema_conversions import gallery_badge_holder_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import lock_from_row
+from notd.store.schema_conversions import sub_collection_token_from_row
 from notd.store.schema_conversions import token_attribute_from_row
 from notd.store.schema_conversions import token_customization_from_row
 from notd.store.schema_conversions import token_listing_from_row
@@ -579,4 +582,16 @@ class Retriever(CoreRetriever):
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
         tokenStaking = [token_staking_from_row(row) for row in result.mappings()]
+        return tokenStaking
+
+    async def list_sub_collection_tokens(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[SubCollectionToken]:
+        query = SubCollectionTokensTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=SubCollectionTokensTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=SubCollectionTokensTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        tokenStaking = [sub_collection_token_from_row(row) for row in result.mappings()]
         return tokenStaking

@@ -30,6 +30,7 @@ from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenStaking
 from notd.model import RetrievedTokenTransfer
 from notd.model import Signature
+from notd.model import SubCollectionToken
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
@@ -47,6 +48,7 @@ from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
+from notd.store.schema import SubCollectionTokensTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
@@ -1076,3 +1078,25 @@ class Saver(CoreSaver):
             return
         query = TokenStakingsTable.delete().where(TokenStakingsTable.c.tokenStakingId.in_(tokenStakingIds)).returning(TokenStakingsTable.c.tokenStakingId)
         await self._execute(query=query, connection=connection)
+
+    async def create_sub_collection_token(self, registryAddress: str, tokenId: str, collectionName: str, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values: CreateRecordDict = {
+            SubCollectionTokensTable.c.createdDate.key: createdDate,
+            SubCollectionTokensTable.c.updatedDate.key: updatedDate,
+            SubCollectionTokensTable.c.registryAddress.key: registryAddress,
+            SubCollectionTokensTable.c.tokenId.key: tokenId,
+            SubCollectionTokensTable.c.collectionName.key: collectionName,
+        }
+        query = SubCollectionTokensTable.insert().values(values).returning(SubCollectionTokensTable.c.userProfileId)
+        result = await self._execute(query=query, connection=connection)
+        subCollectionTokenId = int(result.scalar_one())
+        return SubCollectionToken(
+            subCollectionTokenId=subCollectionTokenId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            collectionName=collectionName,
+        )

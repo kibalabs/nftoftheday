@@ -717,3 +717,13 @@ class UserTradingOverview:
     highestSoldTokenTransfer: Optional[TokenTransfer]
     highestBoughtTokenTransfer: Optional[TokenTransfer]
     mostRecentlyMintedTokenTransfer: Optional[TokenTransfer]
+
+
+@dataclasses.dataclass
+class SubCollectionToken:
+    subCollectionTokenId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    collectionName: str

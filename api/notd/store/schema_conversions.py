@@ -15,6 +15,7 @@ from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import Signature
+from notd.model import SubCollectionToken
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -36,6 +37,7 @@ from notd.store.schema import GalleryBadgeAssignmentsTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
+from notd.store.schema import SubCollectionTokensTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
@@ -393,4 +395,15 @@ def token_staking_from_row(rowMapping: RowMapping) -> TokenStaking:
         tokenId=rowMapping[TokenStakingsTable.c.tokenId],
         stakedDate=rowMapping[TokenStakingsTable.c.stakedDate],
         transactionHash=rowMapping[TokenStakingsTable.c.transactionHash],
+    )
+
+
+def sub_collection_token_from_row(rowMapping: RowMapping) -> SubCollectionToken:
+    return SubCollectionToken(
+        subCollectionTokenId=rowMapping[SubCollectionTokensTable.c.subCollectionTokenId],
+        createdDate=rowMapping[SubCollectionTokensTable.c.createdDate],
+        updatedDate=rowMapping[SubCollectionTokensTable.c.updatedDate],
+        registryAddress=rowMapping[SubCollectionTokensTable.c.registryAddress],
+        tokenId=rowMapping[SubCollectionTokensTable.c.tokenId],
+        collectionName=rowMapping[SubCollectionTokensTable.c.collectionName],
     )
