@@ -436,7 +436,7 @@ TokenStakingsTable = sqlalchemy.Table(
 SubCollectionTokensTable = sqlalchemy.Table(
     'tbl_sub_collection_tokens',
     metadata,
-    sqlalchemy.Column(key='subCollectionsTokenId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='subCollectionTokenId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
     sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),

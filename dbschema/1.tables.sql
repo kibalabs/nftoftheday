@@ -516,7 +516,7 @@ CREATE TABLE tbl_sub_collection_tokens (
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     registry_address TEXT NOT NULL,
     collection_name TEXT NOT NULL,
-    token_id TEXT NOT NULL,
+    token_id TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX tbl_sub_collection_tokens_registry_address_token_id ON tbl_sub_collection_tokens (registry_address, token_id);
