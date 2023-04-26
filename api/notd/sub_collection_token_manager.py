@@ -15,7 +15,7 @@ class SubCollectionTokenManager:
         try:
             subCollectionToken = await self.retriever.get_sub_collection_token_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
         except NotFoundException:
-        subCollectionToken = None
+            subCollectionToken = None
         if subCollectionToken:
             await self.saver.update_sub_collection_token(subCollectionTokenId=subCollectionToken.subCollectionTokenId, collectionName=collectionName)
         else:
