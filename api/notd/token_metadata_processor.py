@@ -304,7 +304,7 @@ class TokenMetadataProcessor():
             tokenMetadataDict = tokenMetadataDict[0] if len(tokenMetadataDict) > 0 else {}  # type: ignore[assignment]
         if not isinstance(tokenMetadataDict, dict):
             return self.get_default_token_metadata(registryAddress=registryAddress, tokenId=tokenId)
-        if registryAddress == '0x495f947276749Ce646f68AC8c248420045cb7b5e':
+        if registryAddress in {'0x495f947276749Ce646f68AC8c248420045cb7b5e'}:
             await self.subCollectionTokenManager.update_sub_collection_token(registryAddress=registryAddress, tokenId=tokenId)
         retrievedTokenMetadata = self._get_token_metadata_from_data(registryAddress=registryAddress, tokenId=tokenId, metadataUrl=metadataUrl, tokenMetadataDict=tokenMetadataDict)
         if registryAddress in GALLERY_COLLECTIONS and retrievedTokenMetadata.imageUrl:

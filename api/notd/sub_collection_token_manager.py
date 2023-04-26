@@ -10,7 +10,7 @@ class SubCollectionTokenManager:
         self.saver = saver
         self.subCollectionTokenProcessor = subCollectionTokenProcessor
 
-    async def update_sub_collection_token(self,registryAddress: str, tokenId: str):
+    async def update_sub_collection_token(self,registryAddress: str, tokenId: str) -> None:
         collectionName = await self.subCollectionTokenProcessor.retrieve_collection_name(registryAddress=registryAddress, tokenId=tokenId)
         try:
             subCollectionToken = await self.retriever.get_sub_collection_token_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
