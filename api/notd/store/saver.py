@@ -1100,7 +1100,7 @@ class Saver(CoreSaver):
             tokenId=tokenId,
             collectionName=collectionName,
         )
-    async def update_sub_collection_token(self, subCollectionTokenId: int, key: Optional[str] = None, collectionName: Optional[str] = _EMPTY_STRING, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_sub_collection_token(self, subCollectionTokenId: int, collectionName: Optional[str] = _EMPTY_STRING, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
         if collectionName != _EMPTY_STRING:
             values[SubCollectionTokensTable.c.collectionName.key] = collectionName
