@@ -11,18 +11,19 @@ class SubCollectionTokenManager:
         self.saver = saver
         self.subCollectionTokenProcessor = subCollectionTokenProcessor
 
-    def has_sub_collections(self, registryAddress) -> bool:
+    async def has_sub_collections(self, registryAddress) -> bool:
         return (registryAddress in SUB_COLLECTION_PARENT_ADDRESSES)
 
 
     async def update_sub_collection_token(self, registryAddress: str, tokenId: str) -> None:
-        collectionName = await self.subCollectionTokenProcessor.retrieve_collection_name(registryAddress=registryAddress, tokenId=tokenId)
-        if collectionName:
-            try:
-                subCollectionToken = await self.retriever.get_sub_collection_token_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
-            except NotFoundException:
-                subCollectionToken = None
-            if subCollectionToken:
-                await self.saver.update_sub_collection_token(subCollectionTokenId=subCollectionToken.subCollectionTokenId, collectionName=collectionName)
-            else:
-                await self.saver.create_sub_collection_token(registryAddress=registryAddress, tokenId=tokenId, collectionName=collectionName)
+        if (await self.has_sub_collections(registryAddress=registryAddress)):
+            collectionName = await self.subCollectionTokenProcessor.retrieve_sub_collection_name(registryAddress=registryAddress, tokenId=tokenId)
+            if collectionName:
+                try:
+                    subCollectionToken = await self.retriever.get_sub_collection_token_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
+                except NotFoundException:
+                    subCollectionToken = None
+                if subCollectionToken:
+                    await self.saver.update_sub_collection_token(subCollectionTokenId=subCollectionToken.subCollectionTokenId, collectionName=collectionName)
+                else:
+                    await self.saver.create_sub_collection_token(registryAddress=registryAddress, tokenId=tokenId, collectionName=collectionName)
