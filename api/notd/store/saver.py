@@ -1089,7 +1089,7 @@ class Saver(CoreSaver):
             SubCollectionTokensTable.c.tokenId.key: tokenId,
             SubCollectionTokensTable.c.collectionName.key: collectionName,
         }
-        query = SubCollectionTokensTable.insert().values(values).returning(SubCollectionTokensTable.c.userProfileId)
+        query = SubCollectionTokensTable.insert().values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
         result = await self._execute(query=query, connection=connection)
         subCollectionTokenId = int(result.scalar_one())
         return SubCollectionToken(
@@ -1100,3 +1100,12 @@ class Saver(CoreSaver):
             tokenId=tokenId,
             collectionName=collectionName,
         )
+
+    async def update_sub_collection_token(self, subCollectionTokenId: int, collectionName: Optional[str] = _EMPTY_STRING, connection: Optional[DatabaseConnection] = None) -> None:
+        values: UpdateRecordDict = {}
+        if collectionName != _EMPTY_STRING:
+            values[SubCollectionTokensTable.c.collectionName.key] = collectionName
+        if len(values) > 0:
+            values[SubCollectionTokensTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = SubCollectionTokensTable.update().where(SubCollectionTokensTable.c.subCollectionTokenId == subCollectionTokenId).values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
+        await self._execute(query=query, connection=connection)

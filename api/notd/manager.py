@@ -69,6 +69,7 @@ from notd.store.schema_conversions import token_transfer_from_row
 from notd.token_manager import TokenManager
 from notd.token_staking_manager import TokenStakingManager
 from notd.twitter_manager import TwitterManager
+from notd.sub_collection_token_manager import SubCollectionTokenManager
 
 _REGISTRY_BLACKLIST = {
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47',  # Curve SynthSwap
@@ -84,7 +85,7 @@ _REGISTRY_BLACKLIST = {
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, tokenStakingManager: TokenStakingManager, requester: Requester, revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, tokenStakingManager: TokenStakingManager, requester: Requester, subCollectionTokenManager: SubCollectionTokenManager,revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -100,6 +101,7 @@ class NotdManager:
         self.twitterManager = twitterManager
         self.delegationManager = delegationManager
         self.collectionOverlapManager = collectionOverlapManager
+        self.subCollectionTokenManager = subCollectionTokenManager
         self.requester = requester
         self.revueApiKey = revueApiKey
 
@@ -667,6 +669,7 @@ class NotdManager:
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        await self.subCollectionTokenManager.update_sub_collection_token(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.ownershipManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId)

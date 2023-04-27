@@ -593,5 +593,16 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        tokenStaking = [sub_collection_token_from_row(row) for row in result.mappings()]
-        return tokenStaking
+        subCollectionTokens = [sub_collection_token_from_row(row) for row in result.mappings()]
+        return subCollectionTokens
+
+    async def get_sub_collection_token_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
+        query = SubCollectionTokensTable.select() \
+            .where(SubCollectionTokensTable.c.registryAddress == registryAddress) \
+            .where(SubCollectionTokensTable.c.tokenId == tokenId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.mappings().first()
+        if not row:
+            raise NotFoundException(message=f'SubCollectionToken with registry:{registryAddress} tokenId:{tokenId} not found')
+        subCollectionToken = sub_collection_token_from_row(row)
+        return subCollectionToken
