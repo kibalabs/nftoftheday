@@ -11,7 +11,7 @@ class SubCollectionTokenManager:
         self.saver = saver
         self.subCollectionTokenProcessor = subCollectionTokenProcessor
 
-    async def has_sub_collections(self, registryAddress) -> bool:
+    async def has_sub_collections(self, registryAddress: str) -> bool:
         return (registryAddress in SUB_COLLECTION_PARENT_ADDRESSES)
 
 

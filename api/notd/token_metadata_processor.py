@@ -24,7 +24,6 @@ from web3.main import Web3
 from notd.model import GALLERY_COLLECTIONS
 from notd.model import Collection
 from notd.model import RetrievedTokenMetadata
-from notd.sub_collection_token_manager import SubCollectionTokenManager
 
 IPFS_PROVIDER_PREFIXES = [
     'https://gateway.pinata.cloud/ipfs/',
