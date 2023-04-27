@@ -49,10 +49,9 @@ class TokenMetadataUnprocessableException(NotFoundException):
 
 class TokenMetadataProcessor():
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, pabloClient: PabloClient, subCollectionTokenManager: SubCollectionTokenManager):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, pabloClient: PabloClient):
         self.requester = requester
         self.ethClient = ethClient
-        self.subCollectionTokenManager = subCollectionTokenManager
         self.pabloClient = pabloClient
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:

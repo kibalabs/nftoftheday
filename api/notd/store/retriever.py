@@ -593,8 +593,8 @@ class Retriever(CoreRetriever):
         if limit:
             query = query.limit(limit)
         result = await self.database.execute(query=query, connection=connection)
-        subCollectionToken = [sub_collection_token_from_row(row) for row in result.mappings()]
-        return subCollectionToken
+        subCollectionTokens = [sub_collection_token_from_row(row) for row in result.mappings()]
+        return subCollectionTokens
 
     async def get_sub_collection_token_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
         query = SubCollectionTokensTable.select() \

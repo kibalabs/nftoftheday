@@ -668,9 +668,9 @@ class NotdManager:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
-        if registryAddress in {'0x495f947276749Ce646f68AC8c248420045cb7b5e'}:
-            await self.subCollectionTokenManager.update_sub_collection_token(registryAddress=registryAddress, tokenId=tokenId)
         await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        if self.subCollectionTokenManager.has_sub_collections(registryAddress=registryAddress):
+            await self.subCollectionTokenManager.update_sub_collection_token(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
         await self.ownershipManager.update_token_ownership_deferred(registryAddress=registryAddress, tokenId=tokenId)
