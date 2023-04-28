@@ -40,6 +40,8 @@ from notd.manager import NotdManager
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.sub_collection_token_manager import SubCollectionTokenManager
+from notd.sub_collection_token_processor import SubCollectionTokenProcessor
 from notd.token_attributes_processor import TokenAttributeProcessor
 from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
@@ -86,6 +88,8 @@ collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClie
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
 collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
 openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
+subCollectionTokenProcessor = SubCollectionTokenProcessor(openseaRequester=openseaRequester)
+subCollectionTokenManager = SubCollectionTokenManager(retriever=retriever, saver=saver, subCollectionTokenProcessor=subCollectionTokenProcessor)
 lockManager = LockManager(retriever=retriever, saver=saver)
 tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
 collectionOverlapProcessor = CollectionOverlapProcessor(retriever=retriever)
@@ -104,7 +108,7 @@ delegationManager = DelegationManager(ethClient=ethClient)
 tokenStakingProcessor = TokenStakingProcessor(ethClient=ethClient, retriever=retriever)
 tokenStakingManager = TokenStakingManager(retriever=retriever, saver=saver, tokenQueue=tokenQueue, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
 blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager, tokenStakingManager=tokenStakingManager)
-notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, requester=requester, revueApiKey=revueApiKey)
+notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, subCollectionTokenManager=subCollectionTokenManager, requester=requester, revueApiKey=revueApiKey)
 galleryManager = GalleryManager(ethClient=ethClient, retriever=retriever, saver=saver, twitterManager=twitterManager, collectionManager=collectionManager, badgeManager=badgeManager)
 gmManager = GmManager(retriever=retriever, saver=saver, delegationManager=delegationManager)
 responseBuilder = ResponseBuilder(retriever=retriever)

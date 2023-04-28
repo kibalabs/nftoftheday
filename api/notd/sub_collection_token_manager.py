@@ -12,11 +12,11 @@ class SubCollectionTokenManager:
         self.subCollectionTokenProcessor = subCollectionTokenProcessor
 
     async def has_sub_collections(self, registryAddress: str) -> bool:
-        return (registryAddress in SUB_COLLECTION_PARENT_ADDRESSES)
+        return registryAddress in SUB_COLLECTION_PARENT_ADDRESSES
 
 
     async def update_sub_collection_token(self, registryAddress: str, tokenId: str) -> None:
-        if (await self.has_sub_collections(registryAddress=registryAddress)):
+        if await self.has_sub_collections(registryAddress=registryAddress):
             collectionName = await self.subCollectionTokenProcessor.retrieve_sub_collection_name(registryAddress=registryAddress, tokenId=tokenId)
             if collectionName:
                 try:
