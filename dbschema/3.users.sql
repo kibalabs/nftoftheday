@@ -48,7 +48,7 @@ GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_gallery_badge_assignments TO notd_ap
 GRANT ALL ON SEQUENCE tbl_gallery_badge_assignments_id_seq TO notd_api;
 GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_token_stakings TO notd_api;
 GRANT ALL ON SEQUENCE tbl_token_stakings_id_seq TO notd_api;
-GRANT INSERT, SELECT, UPDATE, DELETE ON tbl_sub_collection_tokens TO notd_api;
+GRANT INSERT, SELECT, UPDATE ON tbl_sub_collection_tokens TO notd_api;
 GRANT ALL ON SEQUENCE tbl_sub_collection_tokens_id_seq TO notd_api;
 GRANT SELECT ON vw_token_ownerships to notd_api;
 GRANT SELECT ON vw_ordered_token_listings to notd_api;
