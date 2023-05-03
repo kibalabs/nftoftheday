@@ -66,10 +66,10 @@ from notd.store.schema import TokenOwnershipsView
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
+from notd.sub_collection_token_manager import SubCollectionTokenManager
 from notd.token_manager import TokenManager
 from notd.token_staking_manager import TokenStakingManager
 from notd.twitter_manager import TwitterManager
-from notd.sub_collection_token_manager import SubCollectionTokenManager
 
 _REGISTRY_BLACKLIST = {
     '0x58A3c68e2D3aAf316239c003779F71aCb870Ee47',  # Curve SynthSwap

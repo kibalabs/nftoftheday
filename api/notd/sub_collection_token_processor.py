@@ -1,6 +1,9 @@
 from typing import Optional
+
 from core.requester import Requester
+
 from notd.model import OPENSEA_SHARED_STOREFRONT_ADDRESS
+
 
 class SubCollectionTokenProcessor:
 
