@@ -190,7 +190,7 @@ class TokenListingProcessor:
                 responseJson = response.json()
                 if len(responseJson['data']) == 0:
                     break
-                latestOrderHash = None
+                latestOrderId = None
                 for order in responseJson['data']:
                     startDate = datetime.datetime.utcfromtimestamp(order["startTime"])
                     endDate = datetime.datetime.utcfromtimestamp(order["endTime"])
