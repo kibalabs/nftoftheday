@@ -217,13 +217,13 @@ class TokenListingProcessor:
 
     async def _get_looksrare_listings_for_token(self, registryAddress: str, tokenId: str) -> List[RetrievedTokenListing]:
         queryData: Dict[str, JSON1] = {
-                'quoteType': 1,
-                'collection': registryAddress,
-                'itemId': tokenId,
-                'status': 'VALID',
-                'pagination[first]': 100,
-                'sort': 'PRICE_ASC',
-            }
+            'quoteType': 1,
+            'collection': registryAddress,
+            'itemId': tokenId,
+            'status': 'VALID',
+            'pagination[first]': 100,
+            'sort': 'PRICE_ASC',
+        }
         assetListings: List[RetrievedTokenListing] = []
         index = 0
         while True:
