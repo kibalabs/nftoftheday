@@ -1,2 +1,2 @@
 kiba-pablo-client==0.1.2
-kiba-core[database-psql, requester, queues, api, web3]==0.5.2.dev1
+kiba-core[database-psql, requester, queues, api, web3]==0.5.2.dev3

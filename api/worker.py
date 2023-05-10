@@ -8,6 +8,8 @@ from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
+from core.discord_client import DiscordClient
+from core.notification_client import NotificationClient
 from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
@@ -101,8 +103,9 @@ async def main():
     notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, requester=requester, revueApiKey=revueApiKey)
     processor = NotdMessageProcessor(notdManager=notdManager)
     slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
-    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
+    discordClient = DiscordClient(webhookUrl=os.environ['DISCORD_WEBHOOK_URL'], requester=requester)
+    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, notificationClients=[slackClient, discordClient], requestIdHolder=requestIdHolder)
+    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, notificationClients=[slackClient, discordClient], requestIdHolder=requestIdHolder)
 
     await database.connect()
     await workQueue.connect()
