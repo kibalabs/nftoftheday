@@ -734,6 +734,7 @@ class SubCollectionToken:
     tokenId: str
     collectionName: str
 
+
 @dataclasses.dataclass
 class SubCollection:
     subCollectionId: int
