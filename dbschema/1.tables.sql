@@ -525,3 +525,28 @@ CREATE INDEX tbl_sub_collection_tokens_updated_date ON tbl_sub_collection_tokens
 CREATE INDEX tbl_sub_collection_tokens_collection_name ON tbl_sub_collection_tokens (collection_name);
 CREATE INDEX tbl_sub_collection_tokens_registry_address ON tbl_sub_collection_tokens (registry_address);
 CREATE INDEX tbl_sub_collection_tokens_token_id ON tbl_sub_collection_tokens (token_id);
+
+CREATE TABLE tbl_sub_collections (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_Address TEXT NOT NULL,
+    external_id TEXT NOT NULL,
+    name TEXT,
+    symbol TEXT,
+    description TEXT,
+    image_url TEXT,
+    twitter_username TEXT,
+    instagram_username TEXT,
+    wiki_url TEXT,
+    opensea_slug TEXT,
+    url TEXT,
+    discord_url TEXT,
+    banner_image_url TEXT,
+    does_support_erc721 BOOLEAN NOT NULL,
+    does_support_erc1155 BOOLEAN NOT NULL
+);
+CREATE UNIQUE INDEX tbl_sub_collections_registry_address_external_id ON tbl_sub_collections (registry_Address, external_id);
+CREATE INDEX tbl_sub_collections_address_updated_date ON tbl_sub_collections (address, updated_date);
+CREATE INDEX tbl_sub_collections_updated_date ON tbl_sub_collections (updated_date);
+CREATE INDEX tbl_sub_collections_name ON tbl_sub_collections (name);

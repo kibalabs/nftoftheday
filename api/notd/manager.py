@@ -35,6 +35,7 @@ from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
+from notd.sub_collection_manager import SubCollectionManager
 from notd.messages import RefreshViewsMessageContent
 from notd.model import BLUE_CHIP_COLLECTIONS
 from notd.model import AccountToken
@@ -85,7 +86,7 @@ _REGISTRY_BLACKLIST = {
 
 class NotdManager:
 
-    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, tokenStakingManager: TokenStakingManager, requester: Requester, subCollectionTokenManager: SubCollectionTokenManager,revueApiKey: str):
+    def __init__(self, saver: Saver, retriever: Retriever, workQueue: MessageQueue[Message], blockManager: BlockManager, tokenManager: TokenManager, listingManager: ListingManager, attributeManager: AttributeManager, activityManager: ActivityManager, collectionManager: CollectionManager, ownershipManager: OwnershipManager, collectionOverlapManager: CollectionOverlapManager, twitterManager: TwitterManager, badgeManager: BadgeManager, delegationManager: DelegationManager, tokenStakingManager: TokenStakingManager, requester: Requester, subCollectionTokenManager: SubCollectionTokenManager, subCollectionManager: SubCollectionManager, revueApiKey: str):
         self.saver = saver
         self.retriever = retriever
         self.workQueue = workQueue
@@ -102,6 +103,7 @@ class NotdManager:
         self.delegationManager = delegationManager
         self.collectionOverlapManager = collectionOverlapManager
         self.subCollectionTokenManager = subCollectionTokenManager
+        self.subCollectionManager = subCollectionManager
         self.requester = requester
         self.revueApiKey = revueApiKey
 
@@ -843,3 +845,9 @@ class NotdManager:
 
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
+
+    async def update_sub_collection_deferred(self, collectionName: str) -> None:
+        await self.subCollectionManager.update_sub_collection_deferred(collectionName=collectionName)
+
+    async def update_sub_collection(self, collectionName: str) -> None:
+        await self.subCollectionManager.update_sub_collection(collectionName=collectionName)

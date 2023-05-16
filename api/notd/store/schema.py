@@ -419,6 +419,7 @@ GalleryBadgeHoldersView = sqlalchemy.Table(
     sqlalchemy.Column(key='achievedDate', name='achieved_date', type_=sqlalchemy.DateTime, nullable=False),
 )
 
+
 TokenStakingsTable = sqlalchemy.Table(
     'tbl_token_stakings',
     metadata,
@@ -433,6 +434,7 @@ TokenStakingsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='transactionHash', name='transaction_hash', type_=sqlalchemy.Text, nullable=False),
 )
 
+
 SubCollectionTokensTable = sqlalchemy.Table(
     'tbl_sub_collection_tokens',
     metadata,
@@ -442,4 +444,28 @@ SubCollectionTokensTable = sqlalchemy.Table(
     sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='collectionName', name='collection_name', type_=sqlalchemy.Text, nullable=False),
     sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
+)
+
+
+SubCollectionsTable = sqlalchemy.Table(
+    'tbl_sub_collections',
+    metadata,
+    sqlalchemy.Column(key='subCollectionId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='externalId', name='external_id', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='name', name='name', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='symbol', name='symbol', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='description', name='description', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='imageUrl', name='image_url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='twitterUsername', name='twitter_username', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='instagramUsername', name='instagram_username', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='wikiUrl', name='wiki_url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='openseaSlug', name='opensea_slug', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='url', name='url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='discordUrl', name='discord_url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='bannerImageUrl', name='banner_image_url', type_=sqlalchemy.Text, nullable=True),
+    sqlalchemy.Column(key='doesSupportErc721', name='does_support_erc721', type_=sqlalchemy.Boolean, nullable=False),
+    sqlalchemy.Column(key='doesSupportErc1155', name='does_support_erc1155', type_=sqlalchemy.Boolean, nullable=False),
 )

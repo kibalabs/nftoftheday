@@ -15,6 +15,7 @@ from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import Signature
+from notd.model import SubCollection
 from notd.model import SubCollectionToken
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
@@ -406,4 +407,27 @@ def sub_collection_token_from_row(rowMapping: RowMapping) -> SubCollectionToken:
         registryAddress=rowMapping[SubCollectionTokensTable.c.registryAddress],
         tokenId=rowMapping[SubCollectionTokensTable.c.tokenId],
         collectionName=rowMapping[SubCollectionTokensTable.c.collectionName],
+    )
+
+
+def sub_collection_from_row(rowMapping: RowMapping) -> SubCollection:
+    return SubCollection(
+        subCollectionId=rowMapping[TokenCollectionsTable.c.subCollectionId],
+        createdDate=rowMapping[TokenCollectionsTable.c.createdDate],
+        updatedDate=rowMapping[TokenCollectionsTable.c.updatedDate],
+        registryAddress=rowMapping[TokenCollectionsTable.c.registryAddress],
+        externalId=rowMapping[TokenCollectionsTable.c.externalId],
+        name=rowMapping[TokenCollectionsTable.c.name],
+        symbol=rowMapping[TokenCollectionsTable.c.symbol],
+        description=rowMapping[TokenCollectionsTable.c.description],
+        imageUrl=rowMapping[TokenCollectionsTable.c.imageUrl],
+        twitterUsername=rowMapping[TokenCollectionsTable.c.twitterUsername],
+        instagramUsername=rowMapping[TokenCollectionsTable.c.instagramUsername],
+        wikiUrl=rowMapping[TokenCollectionsTable.c.wikiUrl],
+        openseaSlug=rowMapping[TokenCollectionsTable.c.openseaSlug],
+        url=rowMapping[TokenCollectionsTable.c.url],
+        discordUrl=rowMapping[TokenCollectionsTable.c.discordUrl],
+        bannerImageUrl=rowMapping[TokenCollectionsTable.c.bannerImageUrl],
+        doesSupportErc721=rowMapping[TokenCollectionsTable.c.doesSupportErc721],
+        doesSupportErc1155=rowMapping[TokenCollectionsTable.c.doesSupportErc1155],
     )
