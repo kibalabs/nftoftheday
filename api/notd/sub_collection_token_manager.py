@@ -1,9 +1,6 @@
 from core.exceptions import NotFoundException
-from core.queues.message_queue import MessageQueue
-from core.queues.model import Message
 from core.util import chain_util
 
-# from notd.messages import UpdateSubCollectionMessageContent
 from notd.model import SUB_COLLECTION_PARENT_ADDRESSES
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver

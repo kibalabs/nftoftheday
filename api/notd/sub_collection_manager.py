@@ -9,7 +9,6 @@ from core.store.retriever import StringFieldFilter
 from core.util import date_util
 
 from notd.messages import UpdateSubCollectionMessageContent
-# from notd.model import SubCollection
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.store.schema import SubCollectionsTable

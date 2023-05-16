@@ -1,5 +1,3 @@
-# from typing import Optional
-
 from core.exceptions import KibaException
 from core.exceptions import NotFoundException
 from core.requester import Requester
@@ -7,8 +5,6 @@ from core.requester import Requester
 from notd.collection_manager import CollectionManager
 from notd.model import OPENSEA_SHARED_STOREFRONT_ADDRESS
 from notd.model import RetrievedSubCollection
-
-# from notd.model import SubCollection
 
 
 class SubCollectionDoesNotExist(NotFoundException):

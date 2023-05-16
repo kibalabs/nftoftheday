@@ -1,6 +1,6 @@
 
-from core.requester import Requester
 from core.exceptions import KibaException
+from core.requester import Requester
 
 from notd.model import OPENSEA_SHARED_STOREFRONT_ADDRESS
 from notd.model import SubCollectionKey
