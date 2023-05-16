@@ -1,5 +1,6 @@
 
 from core.requester import Requester
+from core.exceptions import KibaException
 
 from notd.model import OPENSEA_SHARED_STOREFRONT_ADDRESS
 from notd.model import SubCollectionKey
@@ -18,4 +19,4 @@ class SubCollectionTokenProcessor:
             tokenAssetDict = tokenAssetResponse.json()
             collectionName = tokenAssetDict.get('collection', {}).get('slug', None)
             return SubCollectionKey(registryAddress=registryAddress, externalId=collectionName)
-        return
+        raise KibaException(message=f'Unhandled registryAddress {registryAddress}')

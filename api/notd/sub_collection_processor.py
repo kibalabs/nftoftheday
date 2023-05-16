@@ -1,5 +1,6 @@
 # from typing import Optional
 
+from core.exceptions import KibaException
 from core.exceptions import NotFoundException
 from core.requester import Requester
 
@@ -23,7 +24,7 @@ class SubCollectionProcessor:
         if registryAddress == OPENSEA_SHARED_STOREFRONT_ADDRESS:
             collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
             collectionAssetUrl = f'https://api.opensea.io/api/v1/collection/{externalId}'
-            collectionAssetResponse = await self.openseaRequester.get(url=collectionAssetUrl, timeout=10)
+            collectionAssetResponse = await  self.openseaRequester.get(url=collectionAssetUrl, timeout=10)
             collectionAssetDict = collectionAssetResponse.json()
             return RetrievedSubCollection(
                 registryAddress=registryAddress,
@@ -42,4 +43,4 @@ class SubCollectionProcessor:
                 doesSupportErc721=collection.doesSupportErc721,
                 doesSupportErc1155=collection.doesSupportErc1155,
             )
-        return
+        raise KibaException(f"Unhandled registryAddress {registryAddress}")
