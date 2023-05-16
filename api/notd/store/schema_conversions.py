@@ -400,17 +400,6 @@ def token_staking_from_row(rowMapping: RowMapping) -> TokenStaking:
     )
 
 
-def sub_collection_token_from_row(rowMapping: RowMapping) -> SubCollectionToken:
-    return SubCollectionToken(
-        subCollectionTokenId=rowMapping[SubCollectionTokensTable.c.subCollectionTokenId],
-        createdDate=rowMapping[SubCollectionTokensTable.c.createdDate],
-        updatedDate=rowMapping[SubCollectionTokensTable.c.updatedDate],
-        registryAddress=rowMapping[SubCollectionTokensTable.c.registryAddress],
-        tokenId=rowMapping[SubCollectionTokensTable.c.tokenId],
-        subCollectionId=rowMapping[SubCollectionTokensTable.c.subCollectionId],
-    )
-
-
 def sub_collection_from_row(rowMapping: RowMapping) -> SubCollection:
     return SubCollection(
         subCollectionId=rowMapping[SubCollectionsTable.c.subCollectionId],
@@ -431,4 +420,15 @@ def sub_collection_from_row(rowMapping: RowMapping) -> SubCollection:
         bannerImageUrl=rowMapping[SubCollectionsTable.c.bannerImageUrl],
         doesSupportErc721=rowMapping[SubCollectionsTable.c.doesSupportErc721],
         doesSupportErc1155=rowMapping[SubCollectionsTable.c.doesSupportErc1155],
+    )
+
+
+def sub_collection_token_from_row(rowMapping: RowMapping) -> SubCollectionToken:
+    return SubCollectionToken(
+        subCollectionTokenId=rowMapping[SubCollectionTokensTable.c.subCollectionTokenId],
+        createdDate=rowMapping[SubCollectionTokensTable.c.createdDate],
+        updatedDate=rowMapping[SubCollectionTokensTable.c.updatedDate],
+        registryAddress=rowMapping[SubCollectionTokensTable.c.registryAddress],
+        tokenId=rowMapping[SubCollectionTokensTable.c.tokenId],
+        subCollectionId=rowMapping[SubCollectionTokensTable.c.subCollectionId],
     )

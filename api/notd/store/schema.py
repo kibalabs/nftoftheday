@@ -435,18 +435,6 @@ TokenStakingsTable = sqlalchemy.Table(
 )
 
 
-SubCollectionTokensTable = sqlalchemy.Table(
-    'tbl_sub_collection_tokens',
-    metadata,
-    sqlalchemy.Column(key='subCollectionTokenId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
-    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
-    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
-    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
-    sqlalchemy.Column(key='subCollectionId', name='sub_collection_id', type_=sqlalchemy.BIGINT, nullable=False),
-    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
-)
-
-
 SubCollectionsTable = sqlalchemy.Table(
     'tbl_sub_collections',
     metadata,
@@ -468,4 +456,16 @@ SubCollectionsTable = sqlalchemy.Table(
     sqlalchemy.Column(key='bannerImageUrl', name='banner_image_url', type_=sqlalchemy.Text, nullable=True),
     sqlalchemy.Column(key='doesSupportErc721', name='does_support_erc721', type_=sqlalchemy.Boolean, nullable=False),
     sqlalchemy.Column(key='doesSupportErc1155', name='does_support_erc1155', type_=sqlalchemy.Boolean, nullable=False),
+)
+
+
+SubCollectionTokensTable = sqlalchemy.Table(
+    'tbl_sub_collection_tokens',
+    metadata,
+    sqlalchemy.Column(key='subCollectionTokenId', name='id', type_=sqlalchemy.Integer, autoincrement=True, primary_key=True, nullable=False),
+    sqlalchemy.Column(key='createdDate', name='created_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='updatedDate', name='updated_date', type_=sqlalchemy.DateTime, nullable=False),
+    sqlalchemy.Column(key='registryAddress', name='registry_address', type_=sqlalchemy.Text, nullable=False),
+    sqlalchemy.Column(key='subCollectionId', name='sub_collection_id', type_=sqlalchemy.BIGINT, nullable=False),
+    sqlalchemy.Column(key='tokenId', name='token_id', type_=sqlalchemy.Text, nullable=False),
 )

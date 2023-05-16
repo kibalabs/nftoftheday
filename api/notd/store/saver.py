@@ -1081,28 +1081,6 @@ class Saver(CoreSaver):
         query = TokenStakingsTable.delete().where(TokenStakingsTable.c.tokenStakingId.in_(tokenStakingIds)).returning(TokenStakingsTable.c.tokenStakingId)
         await self._execute(query=query, connection=connection)
 
-    async def create_sub_collection_token(self, registryAddress: str, tokenId: str, subCollectionId: int, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
-        createdDate = date_util.datetime_from_now()
-        updatedDate = createdDate
-        values: CreateRecordDict = {
-            SubCollectionTokensTable.c.createdDate.key: createdDate,
-            SubCollectionTokensTable.c.updatedDate.key: updatedDate,
-            SubCollectionTokensTable.c.registryAddress.key: registryAddress,
-            SubCollectionTokensTable.c.tokenId.key: tokenId,
-            SubCollectionTokensTable.c.subCollectionId.key: subCollectionId,
-        }
-        query = SubCollectionTokensTable.insert().values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
-        result = await self._execute(query=query, connection=connection)
-        subCollectionTokenId = int(result.scalar_one())
-        return SubCollectionToken(
-            subCollectionTokenId=subCollectionTokenId,
-            createdDate=createdDate,
-            updatedDate=updatedDate,
-            registryAddress=registryAddress,
-            tokenId=tokenId,
-            subCollectionId=subCollectionId,
-        )
-
     async def update_sub_collection_token(self, subCollectionTokenId: int, subCollectionId: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
         if subCollectionId is not None:
@@ -1191,3 +1169,25 @@ class Saver(CoreSaver):
             values[SubCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = SubCollectionsTable.update().where(SubCollectionsTable.c.subCollectionId == subCollectionId).values(values).returning(SubCollectionsTable.c.subCollectionId)
         await self._execute(query=query, connection=connection)
+
+    async def create_sub_collection_token(self, registryAddress: str, tokenId: str, subCollectionId: int, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values: CreateRecordDict = {
+            SubCollectionTokensTable.c.createdDate.key: createdDate,
+            SubCollectionTokensTable.c.updatedDate.key: updatedDate,
+            SubCollectionTokensTable.c.registryAddress.key: registryAddress,
+            SubCollectionTokensTable.c.tokenId.key: tokenId,
+            SubCollectionTokensTable.c.subCollectionId.key: subCollectionId,
+        }
+        query = SubCollectionTokensTable.insert().values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
+        result = await self._execute(query=query, connection=connection)
+        subCollectionTokenId = int(result.scalar_one())
+        return SubCollectionToken(
+            subCollectionTokenId=subCollectionTokenId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            subCollectionId=subCollectionId,
+        )

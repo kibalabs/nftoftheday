@@ -587,29 +587,6 @@ class Retriever(CoreRetriever):
         tokenStaking = [token_staking_from_row(row) for row in result.mappings()]
         return tokenStaking
 
-    async def list_sub_collection_tokens(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[SubCollectionToken]:
-        query = SubCollectionTokensTable.select()
-        if fieldFilters:
-            query = self._apply_field_filters(query=query, table=SubCollectionTokensTable, fieldFilters=fieldFilters)
-        if orders:
-            query = self._apply_orders(query=query, table=SubCollectionTokensTable, orders=orders)
-        if limit:
-            query = query.limit(limit)
-        result = await self.database.execute(query=query, connection=connection)
-        subCollectionTokens = [sub_collection_token_from_row(row) for row in result.mappings()]
-        return subCollectionTokens
-
-    async def get_sub_collection_token_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
-        query = SubCollectionTokensTable.select() \
-            .where(SubCollectionTokensTable.c.registryAddress == registryAddress) \
-            .where(SubCollectionTokensTable.c.tokenId == tokenId)
-        result = await self.database.execute(query=query, connection=connection)
-        row = result.mappings().first()
-        if not row:
-            raise NotFoundException(message=f'SubCollectionToken with registry:{registryAddress} tokenId:{tokenId} not found')
-        subCollectionToken = sub_collection_token_from_row(row)
-        return subCollectionToken
-
     async def list_sub_collections(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[SubCollection]:
         query = SubCollectionsTable.select()
         if fieldFilters:
@@ -633,3 +610,26 @@ class Retriever(CoreRetriever):
             raise NotFoundException(message=f'Collection with registry:{registryAddress} and externalId: {externalId} not found')
         subCollection = sub_collection_from_row(row)
         return subCollection
+
+    async def list_sub_collection_tokens(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[SubCollectionToken]:
+        query = SubCollectionTokensTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=SubCollectionTokensTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=SubCollectionTokensTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        subCollectionTokens = [sub_collection_token_from_row(row) for row in result.mappings()]
+        return subCollectionTokens
+
+    async def get_sub_collection_token_by_registry_address_token_id(self, registryAddress: str, tokenId: str, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
+        query = SubCollectionTokensTable.select() \
+            .where(SubCollectionTokensTable.c.registryAddress == registryAddress) \
+            .where(SubCollectionTokensTable.c.tokenId == tokenId)
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.mappings().first()
+        if not row:
+            raise NotFoundException(message=f'SubCollectionToken with registry:{registryAddress} tokenId:{tokenId} not found')
+        subCollectionToken = sub_collection_token_from_row(row)
+        return subCollectionToken

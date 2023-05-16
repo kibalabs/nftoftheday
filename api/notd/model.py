@@ -726,16 +726,6 @@ class UserTradingOverview:
 
 
 @dataclasses.dataclass
-class SubCollectionToken:
-    subCollectionTokenId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
-    registryAddress: str
-    tokenId: str
-    subCollectionId: int
-
-
-@dataclasses.dataclass
 class RetrievedSubCollection:
     registryAddress: str
     externalId: str
@@ -765,3 +755,13 @@ class SubCollection(RetrievedSubCollection):
 class SubCollectionKey:
     registryAddress: str
     externalId: str
+
+
+@dataclasses.dataclass
+class SubCollectionToken:
+    subCollectionTokenId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    subCollectionId: int
