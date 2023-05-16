@@ -515,14 +515,14 @@ CREATE TABLE tbl_sub_collection_tokens (
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     registry_address TEXT NOT NULL,
-    collection_name TEXT NOT NULL,
+    sub_collection_id BIGINT NOT NULL,
     token_id TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX tbl_sub_collection_tokens_registry_address_token_id ON tbl_sub_collection_tokens (registry_address, token_id);
 CREATE INDEX tbl_sub_collection_tokens_created_date ON tbl_sub_collection_tokens (created_date);
 CREATE INDEX tbl_sub_collection_tokens_updated_date ON tbl_sub_collection_tokens (updated_date);
-CREATE INDEX tbl_sub_collection_tokens_collection_name ON tbl_sub_collection_tokens (collection_name);
+CREATE INDEX tbl_sub_collection_tokens_sub_collection_id ON tbl_sub_collection_tokens (sub_collection_id);
 CREATE INDEX tbl_sub_collection_tokens_registry_address ON tbl_sub_collection_tokens (registry_address);
 CREATE INDEX tbl_sub_collection_tokens_token_id ON tbl_sub_collection_tokens (token_id);
 
@@ -530,7 +530,7 @@ CREATE TABLE tbl_sub_collections (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    registry_Address TEXT NOT NULL,
+    registry_address TEXT NOT NULL,
     external_id TEXT NOT NULL,
     name TEXT,
     symbol TEXT,
@@ -546,7 +546,7 @@ CREATE TABLE tbl_sub_collections (
     does_support_erc721 BOOLEAN NOT NULL,
     does_support_erc1155 BOOLEAN NOT NULL
 );
-CREATE UNIQUE INDEX tbl_sub_collections_registry_address_external_id ON tbl_sub_collections (registry_Address, external_id);
-CREATE INDEX tbl_sub_collections_address_updated_date ON tbl_sub_collections (address, updated_date);
+CREATE UNIQUE INDEX tbl_sub_collections_registry_address_external_id ON tbl_sub_collections (registry_address, external_id);
+CREATE INDEX tbl_sub_collections_registry_address_updated_date ON tbl_sub_collections (registry_address, updated_date);
 CREATE INDEX tbl_sub_collections_updated_date ON tbl_sub_collections (updated_date);
 CREATE INDEX tbl_sub_collections_name ON tbl_sub_collections (name);

@@ -128,4 +128,5 @@ class RefreshGalleryBadgeHoldersForAllCollectionsMessageContent(MessageContent):
 
 class UpdateSubCollectionMessageContent(MessageContent):
     _COMMAND = 'UPDATE_SUB_COLLECTION'
-    collectionName: str
+    registryAddress: str
+    externalId: str

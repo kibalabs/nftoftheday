@@ -1081,7 +1081,7 @@ class Saver(CoreSaver):
         query = TokenStakingsTable.delete().where(TokenStakingsTable.c.tokenStakingId.in_(tokenStakingIds)).returning(TokenStakingsTable.c.tokenStakingId)
         await self._execute(query=query, connection=connection)
 
-    async def create_sub_collection_token(self, registryAddress: str, tokenId: str, collectionName: str, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
+    async def create_sub_collection_token(self, registryAddress: str, tokenId: str, subCollectionId: int, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
         values: CreateRecordDict = {
@@ -1089,7 +1089,7 @@ class Saver(CoreSaver):
             SubCollectionTokensTable.c.updatedDate.key: updatedDate,
             SubCollectionTokensTable.c.registryAddress.key: registryAddress,
             SubCollectionTokensTable.c.tokenId.key: tokenId,
-            SubCollectionTokensTable.c.collectionName.key: collectionName,
+            SubCollectionTokensTable.c.subCollectionId.key: subCollectionId,
         }
         query = SubCollectionTokensTable.insert().values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
         result = await self._execute(query=query, connection=connection)
@@ -1100,25 +1100,27 @@ class Saver(CoreSaver):
             updatedDate=updatedDate,
             registryAddress=registryAddress,
             tokenId=tokenId,
-            collectionName=collectionName,
+            subCollectionId=subCollectionId,
         )
 
-    async def update_sub_collection_token(self, subCollectionTokenId: int, collectionName: Optional[str] = _EMPTY_STRING, connection: Optional[DatabaseConnection] = None) -> None:
+    async def update_sub_collection_token(self, subCollectionTokenId: int, subCollectionId: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
         values: UpdateRecordDict = {}
-        if collectionName != _EMPTY_STRING:
-            values[SubCollectionTokensTable.c.collectionName.key] = collectionName
+        if subCollectionId is not None:
+            values[SubCollectionTokensTable.c.subCollectionId.key] = subCollectionId
         if len(values) > 0:
             values[SubCollectionTokensTable.c.updatedDate.key] = date_util.datetime_from_now()
         query = SubCollectionTokensTable.update().where(SubCollectionTokensTable.c.subCollectionTokenId == subCollectionTokenId).values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
         await self._execute(query=query, connection=connection)
 
-    async def create_sub_collection(self, registryAddress: str, externalId: str,name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool, connection: Optional[DatabaseConnection] = None) -> SubCollection:
+    async def create_sub_collection(self, registryAddress: str, externalId: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool, connection: Optional[DatabaseConnection] = None) -> SubCollection:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
+        print(externalId)
         values: CreateRecordDict = {
             SubCollectionsTable.c.createdDate.key: createdDate,
             SubCollectionsTable.c.updatedDate.key: updatedDate,
             SubCollectionsTable.c.registryAddress.key: registryAddress,
+            SubCollectionsTable.c.externalId.key: externalId,
             SubCollectionsTable.c.name.key: name,
             SubCollectionsTable.c.symbol.key: symbol,
             SubCollectionsTable.c.description.key: description,

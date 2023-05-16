@@ -38,6 +38,7 @@ class NotdMessageProcessor(MessageProcessor):
     def __init__(self, notdManager: NotdManager):
         self.notdManager = notdManager
 
+    # pylint: disable=too-many-statements
     async def process_message(self, message: Message) -> None:
         if message.command == ProcessBlockMessageContent.get_command():
             processBlockMessageContent = ProcessBlockMessageContent.parse_obj(message.content)
@@ -173,7 +174,7 @@ class NotdMessageProcessor(MessageProcessor):
             if message.postDate is None or message.postDate < date_util.datetime_from_now(seconds=-(60 * 5)):
                 logging.info(f'Skipping {message.command} from more than 5 minutes ago')
                 return
-            updateSubCollectionMessageContent = UpdateSubCollectionMessageContent.parse_obj(message.content)  # pylint: disable=unused-variable
-            await self.notdManager.update_sub_collection(collectionName=updateSubCollectionMessageContent.collectionName)
+            updateSubCollectionMessageContent = UpdateSubCollectionMessageContent.parse_obj(message.content)
+            await self.notdManager.update_sub_collection(registryAddress=updateSubCollectionMessageContent.registryAddress, externalId=updateSubCollectionMessageContent.externalId)
             return
         raise KibaException(message='Message was unhandled')

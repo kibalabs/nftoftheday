@@ -622,7 +622,7 @@ class Retriever(CoreRetriever):
         subCollections = [sub_collection_from_row(row) for row in result.mappings()]
         return subCollections
 
-    async def get_sub_collection_by_registry_address_external_id(self, registryAddress: str, externalId: str,connection: Optional[DatabaseConnection] = None) -> SubCollection:
+    async def get_sub_collection_by_registry_address_external_id(self, registryAddress: str, externalId: str, connection: Optional[DatabaseConnection] = None) -> SubCollection:
         query = (SubCollectionsTable.select()
             .where(SubCollectionsTable.c.registryAddress == registryAddress)
             .where(SubCollectionsTable.c.externalId == externalId)

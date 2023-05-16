@@ -35,7 +35,6 @@ from notd.collection_manager import CollectionManager
 from notd.collection_overlap_manager import CollectionOverlapManager
 from notd.delegation_manager import DelegationManager
 from notd.listing_manager import ListingManager
-from notd.sub_collection_manager import SubCollectionManager
 from notd.messages import RefreshViewsMessageContent
 from notd.model import BLUE_CHIP_COLLECTIONS
 from notd.model import AccountToken
@@ -67,6 +66,7 @@ from notd.store.schema import TokenOwnershipsView
 from notd.store.schema import TokenTransfersTable
 from notd.store.schema_conversions import token_multi_ownership_from_row
 from notd.store.schema_conversions import token_transfer_from_row
+from notd.sub_collection_manager import SubCollectionManager
 from notd.sub_collection_token_manager import SubCollectionTokenManager
 from notd.token_manager import TokenManager
 from notd.token_staking_manager import TokenStakingManager
@@ -670,7 +670,7 @@ class NotdManager:
         await self.tokenManager.update_token_metadata_deferred(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
 
     async def update_token_metadata(self, registryAddress: str, tokenId: str, shouldForce: Optional[bool] = False) -> None:
-        await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
+        # await self.tokenManager.update_token_metadata(registryAddress=registryAddress, tokenId=tokenId, shouldForce=shouldForce)
         await self.subCollectionTokenManager.update_sub_collection_token(registryAddress=registryAddress, tokenId=tokenId)
 
     async def update_token_ownership_deferred(self, registryAddress: str, tokenId: str) -> None:
@@ -846,8 +846,8 @@ class NotdManager:
     async def update_token_staking(self, registryAddress: str, tokenId: str) -> None:
         await self.tokenStakingManager.update_token_staking(registryAddress=registryAddress, tokenId=tokenId)
 
-    async def update_sub_collection_deferred(self, collectionName: str) -> None:
-        await self.subCollectionManager.update_sub_collection_deferred(collectionName=collectionName)
+    async def update_sub_collection_deferred(self, registryAddress: str, externalId: str) -> None:
+        await self.subCollectionManager.update_sub_collection_deferred(registryAddress=registryAddress, externalId=externalId)
 
-    async def update_sub_collection(self, collectionName: str) -> None:
-        await self.subCollectionManager.update_sub_collection(collectionName=collectionName)
+    async def update_sub_collection(self, registryAddress: str, externalId: str) -> None:
+        await self.subCollectionManager.update_sub_collection(registryAddress=registryAddress, externalId=externalId)

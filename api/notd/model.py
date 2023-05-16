@@ -732,14 +732,11 @@ class SubCollectionToken:
     updatedDate: datetime.datetime
     registryAddress: str
     tokenId: str
-    collectionName: str
+    subCollectionId: int
 
 
 @dataclasses.dataclass
-class SubCollection:
-    subCollectionId: int
-    createdDate: datetime.datetime
-    updatedDate: datetime.datetime
+class RetrievedSubCollection:
     registryAddress: str
     externalId: str
     name: Optional[str]
@@ -755,3 +752,16 @@ class SubCollection:
     bannerImageUrl: Optional[str]
     doesSupportErc721: bool
     doesSupportErc1155: bool
+
+
+@dataclasses.dataclass
+class SubCollection(RetrievedSubCollection):
+    subCollectionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class SubCollectionKey:
+    registryAddress: str
+    externalId: str

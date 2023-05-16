@@ -38,6 +38,7 @@ from notd.store.schema import GalleryBadgeAssignmentsTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
+from notd.store.schema import SubCollectionsTable
 from notd.store.schema import SubCollectionTokensTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
@@ -406,28 +407,28 @@ def sub_collection_token_from_row(rowMapping: RowMapping) -> SubCollectionToken:
         updatedDate=rowMapping[SubCollectionTokensTable.c.updatedDate],
         registryAddress=rowMapping[SubCollectionTokensTable.c.registryAddress],
         tokenId=rowMapping[SubCollectionTokensTable.c.tokenId],
-        collectionName=rowMapping[SubCollectionTokensTable.c.collectionName],
+        subCollectionId=rowMapping[SubCollectionTokensTable.c.subCollectionId],
     )
 
 
 def sub_collection_from_row(rowMapping: RowMapping) -> SubCollection:
     return SubCollection(
-        subCollectionId=rowMapping[TokenCollectionsTable.c.subCollectionId],
-        createdDate=rowMapping[TokenCollectionsTable.c.createdDate],
-        updatedDate=rowMapping[TokenCollectionsTable.c.updatedDate],
-        registryAddress=rowMapping[TokenCollectionsTable.c.registryAddress],
-        externalId=rowMapping[TokenCollectionsTable.c.externalId],
-        name=rowMapping[TokenCollectionsTable.c.name],
-        symbol=rowMapping[TokenCollectionsTable.c.symbol],
-        description=rowMapping[TokenCollectionsTable.c.description],
-        imageUrl=rowMapping[TokenCollectionsTable.c.imageUrl],
-        twitterUsername=rowMapping[TokenCollectionsTable.c.twitterUsername],
-        instagramUsername=rowMapping[TokenCollectionsTable.c.instagramUsername],
-        wikiUrl=rowMapping[TokenCollectionsTable.c.wikiUrl],
-        openseaSlug=rowMapping[TokenCollectionsTable.c.openseaSlug],
-        url=rowMapping[TokenCollectionsTable.c.url],
-        discordUrl=rowMapping[TokenCollectionsTable.c.discordUrl],
-        bannerImageUrl=rowMapping[TokenCollectionsTable.c.bannerImageUrl],
-        doesSupportErc721=rowMapping[TokenCollectionsTable.c.doesSupportErc721],
-        doesSupportErc1155=rowMapping[TokenCollectionsTable.c.doesSupportErc1155],
+        subCollectionId=rowMapping[SubCollectionsTable.c.subCollectionId],
+        createdDate=rowMapping[SubCollectionsTable.c.createdDate],
+        updatedDate=rowMapping[SubCollectionsTable.c.updatedDate],
+        registryAddress=rowMapping[SubCollectionsTable.c.registryAddress],
+        externalId=rowMapping[SubCollectionsTable.c.externalId],
+        name=rowMapping[SubCollectionsTable.c.name],
+        symbol=rowMapping[SubCollectionsTable.c.symbol],
+        description=rowMapping[SubCollectionsTable.c.description],
+        imageUrl=rowMapping[SubCollectionsTable.c.imageUrl],
+        twitterUsername=rowMapping[SubCollectionsTable.c.twitterUsername],
+        instagramUsername=rowMapping[SubCollectionsTable.c.instagramUsername],
+        wikiUrl=rowMapping[SubCollectionsTable.c.wikiUrl],
+        openseaSlug=rowMapping[SubCollectionsTable.c.openseaSlug],
+        url=rowMapping[SubCollectionsTable.c.url],
+        discordUrl=rowMapping[SubCollectionsTable.c.discordUrl],
+        bannerImageUrl=rowMapping[SubCollectionsTable.c.bannerImageUrl],
+        doesSupportErc721=rowMapping[SubCollectionsTable.c.doesSupportErc721],
+        doesSupportErc1155=rowMapping[SubCollectionsTable.c.doesSupportErc1155],
     )
