@@ -1093,7 +1093,6 @@ class Saver(CoreSaver):
     async def create_sub_collection(self, registryAddress: str, externalId: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool, connection: Optional[DatabaseConnection] = None) -> SubCollection:
         createdDate = date_util.datetime_from_now()
         updatedDate = createdDate
-        print(externalId)
         values: CreateRecordDict = {
             SubCollectionsTable.c.createdDate.key: createdDate,
             SubCollectionsTable.c.updatedDate.key: updatedDate,

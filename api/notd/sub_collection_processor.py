@@ -21,7 +21,7 @@ class SubCollectionProcessor:
             collection = await self.collectionManager.get_collection_by_address(address=registryAddress)
             collectionAssetUrl = f'https://api.opensea.io/api/v1/collection/{externalId}'
             collectionAssetResponse = await  self.openseaRequester.get(url=collectionAssetUrl, timeout=10)
-            collectionAssetDict = collectionAssetResponse.json()
+            collectionAssetDict = collectionAssetResponse.json().get('collection')
             return RetrievedSubCollection(
                 registryAddress=registryAddress,
                 externalId=collectionAssetDict.get('slug'),

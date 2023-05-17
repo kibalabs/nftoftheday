@@ -17,6 +17,9 @@ from notd.store.schema import TokenMetadatasTable
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
 from notd.model import OPENSEA_SHARED_STOREFRONT_ADDRESS
+from notd.collection_manager import CollectionManager
+from notd.sub_collection_manager import SubCollectionManager
+from notd.sub_collection_processor import SubCollectionProcessor
 from notd.sub_collection_token_manager import SubCollectionTokenManager
 from notd.sub_collection_token_processor import SubCollectionTokenProcessor
 
@@ -30,8 +33,11 @@ async def backfill_sub_collection_tokens():
     saver = Saver(database=database)
     retriever = Retriever(database=database)
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
+    collectionManager = CollectionManager(saver=saver, retriever=retriever, tokenQueue=None, collectionProcessor=None)
+    subCollectionProcessor = SubCollectionProcessor(openseaRequester=openseaRequester, collectionManager=collectionManager)
+    subCollectionManager = SubCollectionManager(retriever=retriever, saver=saver, workQueue=None, subCollectionProcessor=subCollectionProcessor)
     subCollectionTokenProcessor = SubCollectionTokenProcessor(openseaRequester=openseaRequester)
-    subCollectionTokenManager = SubCollectionTokenManager(retriever=retriever, saver=saver, subCollectionTokenProcessor=subCollectionTokenProcessor)
+    subCollectionTokenManager = SubCollectionTokenManager(retriever=retriever, saver=saver, subCollectionTokenProcessor=subCollectionTokenProcessor, subCollectionManager=subCollectionManager)
 
     await database.connect()
     query = (

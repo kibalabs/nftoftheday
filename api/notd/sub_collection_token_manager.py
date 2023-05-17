@@ -27,7 +27,6 @@ class SubCollectionTokenManager:
         subCollectionKey = await self.subCollectionTokenProcessor.retrieve_sub_collection_name(registryAddress=registryAddress, tokenId=tokenId)
         await self.subCollectionManager.update_sub_collection(registryAddress=subCollectionKey.registryAddress, externalId=subCollectionKey.externalId)
         subCollection = await self.retriever.get_sub_collection_by_registry_address_external_id(registryAddress=registryAddress, externalId=subCollectionKey.externalId)
-        print(subCollection)
         if subCollectionKey.externalId:
             try:
                 subCollectionToken = await self.retriever.get_sub_collection_token_by_registry_address_token_id(registryAddress=registryAddress, tokenId=tokenId)
