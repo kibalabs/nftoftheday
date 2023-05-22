@@ -24,6 +24,7 @@ from notd.model import GalleryBadgeAssignment
 from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
+from notd.model import SubCollection
 from notd.model import SubCollectionToken
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
@@ -47,6 +48,7 @@ from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
+from notd.store.schema import SubCollectionsTable
 from notd.store.schema import SubCollectionTokensTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
@@ -72,6 +74,7 @@ from notd.store.schema_conversions import gallery_badge_assignment_from_row
 from notd.store.schema_conversions import gallery_badge_holder_from_row
 from notd.store.schema_conversions import latest_update_from_row
 from notd.store.schema_conversions import lock_from_row
+from notd.store.schema_conversions import sub_collection_from_row
 from notd.store.schema_conversions import sub_collection_token_from_row
 from notd.store.schema_conversions import token_attribute_from_row
 from notd.store.schema_conversions import token_customization_from_row
@@ -583,6 +586,30 @@ class Retriever(CoreRetriever):
         result = await self.database.execute(query=query, connection=connection)
         tokenStaking = [token_staking_from_row(row) for row in result.mappings()]
         return tokenStaking
+
+    async def list_sub_collections(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[SubCollection]:
+        query = SubCollectionsTable.select()
+        if fieldFilters:
+            query = self._apply_field_filters(query=query, table=SubCollectionsTable, fieldFilters=fieldFilters)
+        if orders:
+            query = self._apply_orders(query=query, table=SubCollectionsTable, orders=orders)
+        if limit:
+            query = query.limit(limit)
+        result = await self.database.execute(query=query, connection=connection)
+        subCollections = [sub_collection_from_row(row) for row in result.mappings()]
+        return subCollections
+
+    async def get_sub_collection_by_registry_address_external_id(self, registryAddress: str, externalId: str, connection: Optional[DatabaseConnection] = None) -> SubCollection:
+        query = (SubCollectionsTable.select()
+            .where(SubCollectionsTable.c.registryAddress == registryAddress)
+            .where(SubCollectionsTable.c.externalId == externalId)
+        )
+        result = await self.database.execute(query=query, connection=connection)
+        row = result.mappings().first()
+        if not row:
+            raise NotFoundException(message=f'Collection with registry:{registryAddress} and externalId: {externalId} not found')
+        subCollection = sub_collection_from_row(row)
+        return subCollection
 
     async def list_sub_collection_tokens(self, fieldFilters: Optional[Sequence[FieldFilter]] = None, orders: Optional[Sequence[Order]] = None, limit: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> List[SubCollectionToken]:
         query = SubCollectionTokensTable.select()

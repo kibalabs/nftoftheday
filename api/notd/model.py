@@ -726,10 +726,42 @@ class UserTradingOverview:
 
 
 @dataclasses.dataclass
+class RetrievedSubCollection:
+    registryAddress: str
+    externalId: str
+    name: Optional[str]
+    symbol: Optional[str]
+    description: Optional[str]
+    imageUrl: Optional[str]
+    twitterUsername: Optional[str]
+    instagramUsername: Optional[str]
+    wikiUrl: Optional[str]
+    openseaSlug: Optional[str]
+    url: Optional[str]
+    discordUrl: Optional[str]
+    bannerImageUrl: Optional[str]
+    doesSupportErc721: bool
+    doesSupportErc1155: bool
+
+
+@dataclasses.dataclass
+class SubCollection(RetrievedSubCollection):
+    subCollectionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class SubCollectionKey:
+    registryAddress: str
+    externalId: str
+
+
+@dataclasses.dataclass
 class SubCollectionToken:
     subCollectionTokenId: int
     createdDate: datetime.datetime
     updatedDate: datetime.datetime
     registryAddress: str
     tokenId: str
-    collectionName: str
+    subCollectionId: int

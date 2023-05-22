@@ -498,7 +498,6 @@ CREATE TABLE tbl_token_stakings (
     staked_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     transaction_hash TEXT NOT NULL
 );
-
 CREATE UNIQUE INDEX tbl_token_stakings_regsitry_address_staking_address_owner_address_token_id ON tbl_token_stakings (registry_address, staking_address, owner_address, token_id);
 CREATE INDEX tbl_token_stakings_created_date ON tbl_token_stakings (created_date);
 CREATE INDEX tbl_token_stakings_updated_date ON tbl_token_stakings (updated_date);
@@ -510,18 +509,42 @@ CREATE INDEX tbl_token_stakings_staked_date ON tbl_token_stakings (staked_date);
 CREATE INDEX tbl_token_stakings_token_id ON tbl_token_stakings (token_id);
 CREATE INDEX tbl_token_stakings_transaction_hash ON tbl_token_stakings (transaction_hash);
 
+CREATE TABLE tbl_sub_collections (
+    id BIGSERIAL PRIMARY KEY,
+    created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    registry_address TEXT NOT NULL,
+    external_id TEXT NOT NULL,
+    name TEXT,
+    symbol TEXT,
+    description TEXT,
+    image_url TEXT,
+    twitter_username TEXT,
+    instagram_username TEXT,
+    wiki_url TEXT,
+    opensea_slug TEXT,
+    url TEXT,
+    discord_url TEXT,
+    banner_image_url TEXT,
+    does_support_erc721 BOOLEAN NOT NULL,
+    does_support_erc1155 BOOLEAN NOT NULL
+);
+CREATE UNIQUE INDEX tbl_sub_collections_registry_address_external_id ON tbl_sub_collections (registry_address, external_id);
+CREATE INDEX tbl_sub_collections_registry_address_updated_date ON tbl_sub_collections (registry_address, updated_date);
+CREATE INDEX tbl_sub_collections_updated_date ON tbl_sub_collections (updated_date);
+CREATE INDEX tbl_sub_collections_name ON tbl_sub_collections (name);
+
 CREATE TABLE tbl_sub_collection_tokens (
     id BIGSERIAL PRIMARY KEY,
     created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     registry_address TEXT NOT NULL,
-    collection_name TEXT NOT NULL,
+    sub_collection_id BIGINT NOT NULL,
     token_id TEXT NOT NULL
 );
-
 CREATE UNIQUE INDEX tbl_sub_collection_tokens_registry_address_token_id ON tbl_sub_collection_tokens (registry_address, token_id);
 CREATE INDEX tbl_sub_collection_tokens_created_date ON tbl_sub_collection_tokens (created_date);
 CREATE INDEX tbl_sub_collection_tokens_updated_date ON tbl_sub_collection_tokens (updated_date);
-CREATE INDEX tbl_sub_collection_tokens_collection_name ON tbl_sub_collection_tokens (collection_name);
+CREATE INDEX tbl_sub_collection_tokens_sub_collection_id ON tbl_sub_collection_tokens (sub_collection_id);
 CREATE INDEX tbl_sub_collection_tokens_registry_address ON tbl_sub_collection_tokens (registry_address);
 CREATE INDEX tbl_sub_collection_tokens_token_id ON tbl_sub_collection_tokens (token_id);
