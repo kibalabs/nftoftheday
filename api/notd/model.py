@@ -47,6 +47,12 @@ OPENSEA_WYVERN_2_ADDRESS = '0x7f268357A8c2552623316e2562D90e642bB538E5'
 LOOKSRARE_MARKETPLACE_ADDRESS = '0x59728544B08AB483533076417FbBB2fD0B17CE3a'
 BLUR_2_ADDRESS = '0x39da41747a83aeE658334415666f3EF92DD0D541'
 
+OPENSEA_SHARED_STOREFRONT_ADDRESS = '0x495f947276749Ce646f68AC8c248420045cb7b5e'
+
+SUB_COLLECTION_PARENT_ADDRESSES = {
+    OPENSEA_SHARED_STOREFRONT_ADDRESS,
+}
+
 CREEPZ_STAKING_ADDRESS = '0xC3503192343EAE4B435E4A1211C5d28BF6f6a696'
 
 MARKETPLACE_ADDRESSES = {
@@ -717,3 +723,45 @@ class UserTradingOverview:
     highestSoldTokenTransfer: Optional[TokenTransfer]
     highestBoughtTokenTransfer: Optional[TokenTransfer]
     mostRecentlyMintedTokenTransfer: Optional[TokenTransfer]
+
+
+@dataclasses.dataclass
+class RetrievedSubCollection:
+    registryAddress: str
+    externalId: str
+    name: Optional[str]
+    symbol: Optional[str]
+    description: Optional[str]
+    imageUrl: Optional[str]
+    twitterUsername: Optional[str]
+    instagramUsername: Optional[str]
+    wikiUrl: Optional[str]
+    openseaSlug: Optional[str]
+    url: Optional[str]
+    discordUrl: Optional[str]
+    bannerImageUrl: Optional[str]
+    doesSupportErc721: bool
+    doesSupportErc1155: bool
+
+
+@dataclasses.dataclass
+class SubCollection(RetrievedSubCollection):
+    subCollectionId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+
+
+@dataclasses.dataclass
+class SubCollectionKey:
+    registryAddress: str
+    externalId: str
+
+
+@dataclasses.dataclass
+class SubCollectionToken:
+    subCollectionTokenId: int
+    createdDate: datetime.datetime
+    updatedDate: datetime.datetime
+    registryAddress: str
+    tokenId: str
+    subCollectionId: int

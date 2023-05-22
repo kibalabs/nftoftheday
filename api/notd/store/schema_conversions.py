@@ -15,6 +15,8 @@ from notd.model import GalleryBadgeHolder
 from notd.model import LatestUpdate
 from notd.model import Lock
 from notd.model import Signature
+from notd.model import SubCollection
+from notd.model import SubCollectionToken
 from notd.model import TokenAttribute
 from notd.model import TokenCustomization
 from notd.model import TokenListing
@@ -36,6 +38,8 @@ from notd.store.schema import GalleryBadgeAssignmentsTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
+from notd.store.schema import SubCollectionsTable
+from notd.store.schema import SubCollectionTokensTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
@@ -393,4 +397,38 @@ def token_staking_from_row(rowMapping: RowMapping) -> TokenStaking:
         tokenId=rowMapping[TokenStakingsTable.c.tokenId],
         stakedDate=rowMapping[TokenStakingsTable.c.stakedDate],
         transactionHash=rowMapping[TokenStakingsTable.c.transactionHash],
+    )
+
+
+def sub_collection_from_row(rowMapping: RowMapping) -> SubCollection:
+    return SubCollection(
+        subCollectionId=rowMapping[SubCollectionsTable.c.subCollectionId],
+        createdDate=rowMapping[SubCollectionsTable.c.createdDate],
+        updatedDate=rowMapping[SubCollectionsTable.c.updatedDate],
+        registryAddress=rowMapping[SubCollectionsTable.c.registryAddress],
+        externalId=rowMapping[SubCollectionsTable.c.externalId],
+        name=rowMapping[SubCollectionsTable.c.name],
+        symbol=rowMapping[SubCollectionsTable.c.symbol],
+        description=rowMapping[SubCollectionsTable.c.description],
+        imageUrl=rowMapping[SubCollectionsTable.c.imageUrl],
+        twitterUsername=rowMapping[SubCollectionsTable.c.twitterUsername],
+        instagramUsername=rowMapping[SubCollectionsTable.c.instagramUsername],
+        wikiUrl=rowMapping[SubCollectionsTable.c.wikiUrl],
+        openseaSlug=rowMapping[SubCollectionsTable.c.openseaSlug],
+        url=rowMapping[SubCollectionsTable.c.url],
+        discordUrl=rowMapping[SubCollectionsTable.c.discordUrl],
+        bannerImageUrl=rowMapping[SubCollectionsTable.c.bannerImageUrl],
+        doesSupportErc721=rowMapping[SubCollectionsTable.c.doesSupportErc721],
+        doesSupportErc1155=rowMapping[SubCollectionsTable.c.doesSupportErc1155],
+    )
+
+
+def sub_collection_token_from_row(rowMapping: RowMapping) -> SubCollectionToken:
+    return SubCollectionToken(
+        subCollectionTokenId=rowMapping[SubCollectionTokensTable.c.subCollectionTokenId],
+        createdDate=rowMapping[SubCollectionTokensTable.c.createdDate],
+        updatedDate=rowMapping[SubCollectionTokensTable.c.updatedDate],
+        registryAddress=rowMapping[SubCollectionTokensTable.c.registryAddress],
+        tokenId=rowMapping[SubCollectionTokensTable.c.tokenId],
+        subCollectionId=rowMapping[SubCollectionTokensTable.c.subCollectionId],
     )

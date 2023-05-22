@@ -124,3 +124,9 @@ class RefreshGalleryBadgeHoldersForCollectionMessageContent(MessageContent):
 
 class RefreshGalleryBadgeHoldersForAllCollectionsMessageContent(MessageContent):
     _COMMAND = 'REFRESH_GALLERY_BADGE_HOLDERS_FOR_ALL_COLLECTIONS'
+
+
+class UpdateSubCollectionMessageContent(MessageContent):
+    _COMMAND = 'UPDATE_SUB_COLLECTION'
+    registryAddress: str
+    externalId: str

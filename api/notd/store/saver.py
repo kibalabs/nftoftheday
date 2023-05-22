@@ -30,6 +30,8 @@ from notd.model import RetrievedTokenMultiOwnership
 from notd.model import RetrievedTokenStaking
 from notd.model import RetrievedTokenTransfer
 from notd.model import Signature
+from notd.model import SubCollection
+from notd.model import SubCollectionToken
 from notd.model import TokenCustomization
 from notd.model import TokenMetadata
 from notd.model import TokenOwnership
@@ -47,6 +49,8 @@ from notd.store.schema import GalleryBadgeHoldersTable
 from notd.store.schema import LatestTokenListingsTable
 from notd.store.schema import LatestUpdatesTable
 from notd.store.schema import LocksTable
+from notd.store.schema import SubCollectionsTable
+from notd.store.schema import SubCollectionTokensTable
 from notd.store.schema import TokenAttributesTable
 from notd.store.schema import TokenCollectionOverlapsTable
 from notd.store.schema import TokenCollectionsTable
@@ -1076,3 +1080,113 @@ class Saver(CoreSaver):
             return
         query = TokenStakingsTable.delete().where(TokenStakingsTable.c.tokenStakingId.in_(tokenStakingIds)).returning(TokenStakingsTable.c.tokenStakingId)
         await self._execute(query=query, connection=connection)
+
+    async def update_sub_collection_token(self, subCollectionTokenId: int, subCollectionId: Optional[int] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values: UpdateRecordDict = {}
+        if subCollectionId is not None:
+            values[SubCollectionTokensTable.c.subCollectionId.key] = subCollectionId
+        if len(values) > 0:
+            values[SubCollectionTokensTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = SubCollectionTokensTable.update().where(SubCollectionTokensTable.c.subCollectionTokenId == subCollectionTokenId).values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
+        await self._execute(query=query, connection=connection)
+
+    async def create_sub_collection(self, registryAddress: str, externalId: str, name: Optional[str], symbol: Optional[str], description: Optional[str], imageUrl: Optional[str] , twitterUsername: Optional[str], instagramUsername: Optional[str], wikiUrl: Optional[str], openseaSlug: Optional[str], url: Optional[str], discordUrl: Optional[str], bannerImageUrl: Optional[str], doesSupportErc721: bool, doesSupportErc1155: bool, connection: Optional[DatabaseConnection] = None) -> SubCollection:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values: CreateRecordDict = {
+            SubCollectionsTable.c.createdDate.key: createdDate,
+            SubCollectionsTable.c.updatedDate.key: updatedDate,
+            SubCollectionsTable.c.registryAddress.key: registryAddress,
+            SubCollectionsTable.c.externalId.key: externalId,
+            SubCollectionsTable.c.name.key: name,
+            SubCollectionsTable.c.symbol.key: symbol,
+            SubCollectionsTable.c.description.key: description,
+            SubCollectionsTable.c.imageUrl.key: imageUrl,
+            SubCollectionsTable.c.twitterUsername.key: twitterUsername,
+            SubCollectionsTable.c.instagramUsername.key: instagramUsername,
+            SubCollectionsTable.c.wikiUrl.key: wikiUrl,
+            SubCollectionsTable.c.openseaSlug.key: openseaSlug,
+            SubCollectionsTable.c.url.key: url,
+            SubCollectionsTable.c.discordUrl.key: discordUrl,
+            SubCollectionsTable.c.bannerImageUrl.key: bannerImageUrl,
+            SubCollectionsTable.c.doesSupportErc721.key: doesSupportErc721,
+            SubCollectionsTable.c.doesSupportErc1155.key: doesSupportErc1155,
+        }
+        query = SubCollectionsTable.insert().values(values).returning(SubCollectionsTable.c.subCollectionId)
+        result = await self._execute(query=query, connection=connection)
+        subCollectionId = int(result.scalar_one())
+        return SubCollection(
+            subCollectionId=subCollectionId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            externalId=externalId,
+            name=name,
+            symbol=symbol,
+            description=description,
+            imageUrl=imageUrl,
+            twitterUsername=twitterUsername,
+            instagramUsername=instagramUsername,
+            wikiUrl=wikiUrl,
+            openseaSlug=openseaSlug,
+            url=url,
+            discordUrl=discordUrl,
+            bannerImageUrl=bannerImageUrl,
+            doesSupportErc721=doesSupportErc721,
+            doesSupportErc1155=doesSupportErc1155,
+        )
+
+    async def update_sub_collection(self, subCollectionId: int, name: Optional[str] = _EMPTY_STRING, symbol: Optional[str] = _EMPTY_STRING, description: Optional[str] = _EMPTY_STRING, imageUrl: Optional[str] = _EMPTY_STRING, twitterUsername: Optional[str] = _EMPTY_STRING, instagramUsername: Optional[str] = _EMPTY_STRING, wikiUrl: Optional[str] = _EMPTY_STRING, openseaSlug: Optional[str] = _EMPTY_STRING, url: Optional[str] = _EMPTY_STRING, discordUrl: Optional[str] = _EMPTY_STRING, bannerImageUrl: Optional[str] = _EMPTY_STRING, doesSupportErc721: Optional[bool] = None, doesSupportErc1155: Optional[bool] = None, connection: Optional[DatabaseConnection] = None) -> None:
+        values: UpdateRecordDict = {}
+        if name != _EMPTY_STRING:
+            values[SubCollectionsTable.c.name.key] = name
+        if symbol != _EMPTY_STRING:
+            values[SubCollectionsTable.c.symbol.key] = symbol
+        if description != _EMPTY_STRING:
+            values[SubCollectionsTable.c.description.key] = description
+        if imageUrl != _EMPTY_STRING:
+            values[SubCollectionsTable.c.imageUrl.key] = imageUrl
+        if twitterUsername != _EMPTY_STRING:
+            values[SubCollectionsTable.c.twitterUsername.key] = twitterUsername
+        if instagramUsername != _EMPTY_STRING:
+            values[SubCollectionsTable.c.instagramUsername.key] = instagramUsername
+        if wikiUrl != _EMPTY_STRING:
+            values[SubCollectionsTable.c.wikiUrl.key] = wikiUrl
+        if openseaSlug != _EMPTY_STRING:
+            values[SubCollectionsTable.c.openseaSlug.key] = openseaSlug
+        if url != _EMPTY_STRING:
+            values[SubCollectionsTable.c.url.key] = url
+        if discordUrl != _EMPTY_STRING:
+            values[SubCollectionsTable.c.discordUrl.key] = discordUrl
+        if bannerImageUrl != _EMPTY_STRING:
+            values[SubCollectionsTable.c.bannerImageUrl.key] = bannerImageUrl
+        if doesSupportErc721 is not None:
+            values[SubCollectionsTable.c.doesSupportErc721.key] = doesSupportErc721
+        if doesSupportErc1155 is not None:
+            values[SubCollectionsTable.c.doesSupportErc1155.key] = doesSupportErc1155
+        if len(values) > 0:
+            values[SubCollectionsTable.c.updatedDate.key] = date_util.datetime_from_now()
+        query = SubCollectionsTable.update().where(SubCollectionsTable.c.subCollectionId == subCollectionId).values(values).returning(SubCollectionsTable.c.subCollectionId)
+        await self._execute(query=query, connection=connection)
+
+    async def create_sub_collection_token(self, registryAddress: str, tokenId: str, subCollectionId: int, connection: Optional[DatabaseConnection] = None) -> SubCollectionToken:
+        createdDate = date_util.datetime_from_now()
+        updatedDate = createdDate
+        values: CreateRecordDict = {
+            SubCollectionTokensTable.c.createdDate.key: createdDate,
+            SubCollectionTokensTable.c.updatedDate.key: updatedDate,
+            SubCollectionTokensTable.c.registryAddress.key: registryAddress,
+            SubCollectionTokensTable.c.tokenId.key: tokenId,
+            SubCollectionTokensTable.c.subCollectionId.key: subCollectionId,
+        }
+        query = SubCollectionTokensTable.insert().values(values).returning(SubCollectionTokensTable.c.subCollectionTokenId)
+        result = await self._execute(query=query, connection=connection)
+        subCollectionTokenId = int(result.scalar_one())
+        return SubCollectionToken(
+            subCollectionTokenId=subCollectionTokenId,
+            createdDate=createdDate,
+            updatedDate=updatedDate,
+            registryAddress=registryAddress,
+            tokenId=tokenId,
+            subCollectionId=subCollectionId,
+        )
