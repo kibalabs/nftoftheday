@@ -1,23 +1,23 @@
-import tqdm
 import asyncio
 import logging
 import os
 import sys
+
 # import 
 import asyncclick as click
 import sqlalchemy
-
-from core.store.database import Database
+import tqdm
 from core.requester import Requester
+from core.store.database import Database
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 
-from notd.store.schema import TokenMetadatasTable
+from notd.collection_manager import CollectionManager
+from notd.model import OPENSEA_SHARED_STOREFRONT_ADDRESS
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
-from notd.model import OPENSEA_SHARED_STOREFRONT_ADDRESS
-from notd.collection_manager import CollectionManager
+from notd.store.schema import TokenMetadatasTable
 from notd.sub_collection_manager import SubCollectionManager
 from notd.sub_collection_processor import SubCollectionProcessor
 from notd.sub_collection_token_manager import SubCollectionTokenManager

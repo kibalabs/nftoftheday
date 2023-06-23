@@ -46,12 +46,13 @@ class TokenMetadataUnprocessableException(NotFoundException):
     pass
 
 
-class TokenMetadataProcessor():
+class TokenMetadataProcessor:
 
-    def __init__(self, requester: Requester, ethClient: EthClientInterface, pabloClient: PabloClient):
+    def __init__(self, requester: Requester, ethClient: EthClientInterface, pabloClient: PabloClient, openseaRequester: Requester):
         self.requester = requester
         self.ethClient = ethClient
         self.pabloClient = pabloClient
+        self.openseaRequester = openseaRequester
         self.w3 = Web3()
         with open('./contracts/IERC721Metadata.json') as contractJsonFile:
             erc721MetadataContractJson = json.load(contractJsonFile)
@@ -283,7 +284,8 @@ class TokenMetadataProcessor():
             tokenMetadataDict = self._resolve_data(dataString=tokenMetadataUri, registryAddress=registryAddress, tokenId=tokenId)
         else:
             try:
-                tokenMetadataResponse = await self.requester.get(url=tokenMetadataUri, timeout=10)
+                requester = self.openseaRequester if tokenMetadataUri.startswith('https://api.opensea.io/') else self.requester
+                tokenMetadataResponse = await requester.get(url=tokenMetadataUri, timeout=10)
                 tokenMetadataDict = tokenMetadataResponse.json()
                 if tokenMetadataDict is None:
                     raise InternalServerErrorException('Empty response')
@@ -296,7 +298,7 @@ class TokenMetadataProcessor():
                 logging.info(f'Response error while pulling metadata from {metadataUrl}: {exception.statusCode} {errorMessage}')
                 tokenMetadataDict = {}
             except Exception as exception:  # pylint: disable=broad-except
-                logging.info(f'Failed to process metadata from {metadataUrl}: {type(exception)} {str(exception)}')
+                logging.info(f'Failed to process metadata from {metadataUrl}: {str(exception)}')
                 tokenMetadataDict = {}
         if isinstance(tokenMetadataDict, list):
             tokenMetadataDict = tokenMetadataDict[0] if len(tokenMetadataDict) > 0 else {}  # type: ignore[assignment]

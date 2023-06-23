@@ -3,13 +3,13 @@ import os
 import time
 
 from core import logging
+from core.discord_client import DiscordClient
 from core.http.basic_authentication import BasicAuthentication
+from core.notification_client import NotificationClient
 from core.queues.message_queue_processor import MessageQueueProcessor
 from core.queues.sqs import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
-from core.discord_client import DiscordClient
-from core.notification_client import NotificationClient
 from core.store.database import Database
 from core.util.value_holder import RequestIdHolder
 from core.web3.eth_client import RestEthClient
@@ -81,11 +81,11 @@ async def main():
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient)
+    openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient, openseaRequester=openseaRequester)
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey)
     tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
     collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
-    openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     lockManager = LockManager(retriever=retriever, saver=saver)
     tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
     collectionOverlapProcessor = CollectionOverlapProcessor(retriever=retriever)

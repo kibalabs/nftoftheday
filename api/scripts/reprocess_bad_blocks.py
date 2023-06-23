@@ -5,7 +5,6 @@ import sys
 
 import asyncclick as click
 import sqlalchemy
-from sqlalchemy.sql import functions as sqlalchemyfunc
 from core import logging
 from core.aws_requester import AwsRequester
 from core.queues.sqs import SqsMessageQueue
@@ -14,6 +13,7 @@ from core.slack_client import SlackClient
 from core.store.database import Database
 from core.util import list_util
 from core.web3.eth_client import RestEthClient
+from sqlalchemy.sql import functions as sqlalchemyfunc
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.block_processor import BlockProcessor

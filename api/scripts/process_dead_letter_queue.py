@@ -32,6 +32,10 @@ from notd.notd_message_processor import NotdMessageProcessor
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.sub_collection_manager import SubCollectionManager
+from notd.sub_collection_processor import SubCollectionProcessor
+from notd.sub_collection_token_manager import SubCollectionTokenManager
+from notd.sub_collection_token_processor import SubCollectionTokenProcessor
 from notd.token_attributes_processor import TokenAttributeProcessor
 from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
@@ -67,7 +71,6 @@ async def main():
     database = Database(connectionString=databaseConnectionString)
     saver = Saver(database=database)
     retriever = Retriever(database=database)
-    dlWorkQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue-dl')
     workQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue')
     tokenQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-token-queue')
     ethNodeAuth = BasicAuthentication(username=ethNodeUsername, password=ethNodePassword)
@@ -76,17 +79,21 @@ async def main():
     blockProcessor = BlockProcessor(ethClient=ethClient)
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
-    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient)
+    openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
+    tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient, openseaRequester=openseaRequester)
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey)
     tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
     collectionActivityProcessor = CollectionActivityProcessor(retriever=retriever)
-    openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
     lockManager = LockManager(retriever=retriever, saver=saver)
     tokenAttributeProcessor = TokenAttributeProcessor(retriever=retriever)
     collectionOverlapProcessor = CollectionOverlapProcessor(retriever=retriever)
     activityManager = ActivityManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, collectionActivityProcessor=collectionActivityProcessor)
     attributeManager = AttributeManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenQueue=tokenQueue, tokenAttributeProcessor=tokenAttributeProcessor)
     collectionManager = CollectionManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, collectionProcessor=collectionProcessor)
+    subCollectionProcessor = SubCollectionProcessor(openseaRequester=openseaRequester, collectionManager=collectionManager)
+    subCollectionManager = SubCollectionManager(retriever=retriever, saver=saver, workQueue=workQueue, subCollectionProcessor=subCollectionProcessor)
+    subCollectionTokenProcessor = SubCollectionTokenProcessor(openseaRequester=openseaRequester)
+    subCollectionTokenManager = SubCollectionTokenManager(retriever=retriever, saver=saver, subCollectionTokenProcessor=subCollectionTokenProcessor, subCollectionManager=subCollectionManager)
     tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManager=lockManager, collectionManger=collectionManager)
     ownershipManager = OwnershipManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor, lockManager=lockManager, collectionManager=collectionManager)
     listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenListingProcessor=tokenListingProcessor)
@@ -99,11 +106,11 @@ async def main():
     tokenStakingProcessor = TokenStakingProcessor(ethClient=ethClient, retriever=retriever)
     tokenStakingManager = TokenStakingManager(retriever=retriever, saver=saver, tokenQueue=tokenQueue, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
     blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager, tokenStakingManager=tokenStakingManager)
-    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, requester=requester, revueApiKey=revueApiKey)
+    notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, subCollectionTokenManager=subCollectionTokenManager, subCollectionManager=subCollectionManager, requester=requester, revueApiKey=revueApiKey)
 
+    dlWorkQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue-dl')
     processor = NotdMessageProcessor(notdManager=notdManager)
-    slackClient = None #SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-    workQueueProcessor = MessageQueueProcessor(queue=dlWorkQueue, messageProcessor=processor, slackClient=slackClient, requestIdHolder=requestIdHolder)
+    workQueueProcessor = MessageQueueProcessor(queue=dlWorkQueue, messageProcessor=processor, notificationClients=[], requestIdHolder=requestIdHolder)
 
     await database.connect()
     await dlWorkQueue.connect()
