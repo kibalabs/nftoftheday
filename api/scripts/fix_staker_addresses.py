@@ -1,16 +1,17 @@
+import asyncio
+import logging
 import os
 import sys
-import asyncio
-import tqdm
 
-import logging
+import tqdm
 from core.store.database import Database
 from core.util.chain_util import normalize_address
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from notd.store.schema import TokenStakingsTable
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import TokenStakingsTable
+
 
 async def fix_staker_address():
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])

@@ -137,7 +137,7 @@ class TwitterManager:
         for chunk in chunkedIds:
             ids = ','.join(chunk)
             dataDict = {
-                'ids':  ids,
+                'ids': ids,
                 'expansions': 'pinned_tweet_id',
                 'user.fields': 'created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld',
             }
@@ -158,10 +158,9 @@ class TwitterManager:
                         twitterId=userData['id'],
                     )
                 ]
-            for retrievedTwitterProfile in  retrievedTwitterProfiles:
+            for retrievedTwitterProfile in retrievedTwitterProfiles:
                 twitterProfile = twitterIdProfileMap[retrievedTwitterProfile.twitterId]
                 await self.saver.update_twitter_profile(twitterProfileId=twitterProfile.twitterProfileId, username=retrievedTwitterProfile.username, name=retrievedTwitterProfile.name, description=retrievedTwitterProfile.description, isVerified=retrievedTwitterProfile.isVerified, pinnedTweetId=retrievedTwitterProfile.pinnedTweetId, followerCount=retrievedTwitterProfile.followerCount, followingCount=retrievedTwitterProfile.followingCount, tweetCount=retrievedTwitterProfile.tweetCount)
-
 
     async def update_twitter_profile(self, twitterId: str) -> None:
         twitterCredential = await self.retriever.get_twitter_credential_by_twitter_id(twitterId=twitterId)

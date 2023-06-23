@@ -4,24 +4,17 @@ import os
 import sys
 import time
 
-import sqlalchemy
 import asyncclick as click
-from core import logging
-from core.http.basic_authentication import BasicAuthentication
-from core.requester import Requester
-from core.slack_client import SlackClient
-from core.store.database import Database
-from core.util import list_util
-from core.web3.eth_client import RestEthClient
+import sqlalchemy
 from core import logging
 from core.http.basic_authentication import BasicAuthentication
 from core.queues.sqs import SqsMessageQueue
 from core.requester import Requester
 from core.slack_client import SlackClient
 from core.store.database import Database
+from core.util import list_util
 from core.web3.eth_client import RestEthClient
 from pablo import PabloClient
-from core.util import list_util
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from notd.activity_manager import ActivityManager
@@ -43,6 +36,7 @@ from notd.notd_message_processor import NotdMessageProcessor
 from notd.ownership_manager import OwnershipManager
 from notd.store.retriever import Retriever
 from notd.store.saver import Saver
+from notd.store.schema import BlocksTable
 from notd.token_attributes_processor import TokenAttributeProcessor
 from notd.token_listing_processor import TokenListingProcessor
 from notd.token_manager import TokenManager
@@ -51,7 +45,6 @@ from notd.token_ownership_processor import TokenOwnershipProcessor
 from notd.token_staking_manager import TokenStakingManager
 from notd.token_staking_processor import TokenStakingProcessor
 from notd.twitter_manager import TwitterManager
-from notd.store.schema import BlocksTable
 
 
 async def reprocess_block(notdManager: NotdManager, blockNumber: int):

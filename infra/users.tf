@@ -9,7 +9,7 @@ resource "aws_iam_group" "notd_readers" {
 resource "aws_iam_user" "notd_api" {
   name = "${local.project}-api"
   tags = {
-    app = "notd"
+    app = local.project
   }
 }
 

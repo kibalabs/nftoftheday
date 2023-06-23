@@ -808,7 +808,9 @@ class NotdManager:
         await self.twitterManager.update_all_twitter_users_deferred()
 
     async def update_all_twitter_users(self) -> None:
-        await self.twitterManager.update_all_twitter_users()
+        # NOTE(krishan711): this does not work anymore because of twitter API changes :()
+        # await self.twitterManager.update_all_twitter_users()
+        pass
 
     async def refresh_overlap_for_collection(self, registryAddress: str) -> None:
         await self.collectionOverlapManager.refresh_overlap_for_collection(registryAddress=registryAddress)
