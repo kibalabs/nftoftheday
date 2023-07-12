@@ -65,6 +65,7 @@ else:
     logging.init_json_logging(name=name, version=version, environment=environment, requestIdHolder=requestIdHolder)
 
 openseaApiKey = os.environ['OPENSEA_API_KEY']
+raribleApiKey = os.environ['RARIBLE_API_KEY']
 revueApiKey = os.environ['REVUE_API_KEY']
 accessKeyId = os.environ['AWS_KEY']
 accessKeySecret = os.environ['AWS_SECRET']
@@ -86,6 +87,7 @@ blockProcessor = BlockProcessor(ethClient=ethClient)
 requester = Requester()
 pabloClient = PabloClient(requester=requester)
 openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
+raribleRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": raribleApiKey})
 tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient, openseaRequester=openseaRequester)
 collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey)
 tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
@@ -100,10 +102,10 @@ subCollectionProcessor = SubCollectionProcessor(openseaRequester=openseaRequeste
 subCollectionManager = SubCollectionManager(retriever=retriever, saver=saver, workQueue=workQueue, subCollectionProcessor=subCollectionProcessor)
 subCollectionTokenProcessor = SubCollectionTokenProcessor(openseaRequester=openseaRequester)
 subCollectionTokenManager = SubCollectionTokenManager(retriever=retriever, saver=saver, subCollectionTokenProcessor=subCollectionTokenProcessor, subCollectionManager=subCollectionManager)
-tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManager=lockManager, collectionManger=collectionManager)
+tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, raribleRequester=raribleRequester, lockManager=lockManager, collectionManger=collectionManager)
+collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retriever, workQueue=workQueue, collectionOverlapProcessor=collectionOverlapProcessor)
 ownershipManager = OwnershipManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor, lockManager=lockManager, collectionManager=collectionManager)
 listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenListingProcessor=tokenListingProcessor)
-collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retriever, workQueue=workQueue, collectionOverlapProcessor=collectionOverlapProcessor)
 tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager, ownershipManager=ownershipManager)
 twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
 badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
