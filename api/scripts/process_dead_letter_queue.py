@@ -59,13 +59,14 @@ async def main():
         logging.init_json_logging(name=name, version=version, environment=environment, requestIdHolder=requestIdHolder)
 
     openseaApiKey = os.environ['OPENSEA_API_KEY']
+    raribleApiKey = os.environ['RARIBLE_API_KEY']
     revueApiKey = os.environ['REVUE_API_KEY']
     accessKeyId = os.environ['AWS_KEY']
     accessKeySecret = os.environ['AWS_SECRET']
     twitterBearerToken = os.environ["TWITTER_BEARER_TOKEN"]
-    ethNodeUsername = os.environ["INFURA_NODE_USERNAME"]
-    ethNodePassword = os.environ["INFURA_NODE_PASSWORD"]
-    ethNodeUrl = os.environ["INFURA_NODE_URL"]
+    ethNodeUsername = os.environ["ETH_NODE_USERNAME"]
+    ethNodePassword = os.environ["ETH_NODE_PASSWORD"]
+    ethNodeUrl = os.environ["ETH_NODE_URL"]
 
     databaseConnectionString = Database.create_psql_connection_string(username=os.environ["DB_USERNAME"], password=os.environ["DB_PASSWORD"], host=os.environ["DB_HOST"], port=os.environ["DB_PORT"], name=os.environ["DB_NAME"])
     database = Database(connectionString=databaseConnectionString)
@@ -80,6 +81,7 @@ async def main():
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
+    raribleRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": raribleApiKey})
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient, openseaRequester=openseaRequester)
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey)
     tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
@@ -94,10 +96,10 @@ async def main():
     subCollectionManager = SubCollectionManager(retriever=retriever, saver=saver, workQueue=workQueue, subCollectionProcessor=subCollectionProcessor)
     subCollectionTokenProcessor = SubCollectionTokenProcessor(openseaRequester=openseaRequester)
     subCollectionTokenManager = SubCollectionTokenManager(retriever=retriever, saver=saver, subCollectionTokenProcessor=subCollectionTokenProcessor, subCollectionManager=subCollectionManager)
-    tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManager=lockManager, collectionManger=collectionManager)
+    tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, raribleRequester=raribleRequester, lockManager=lockManager, collectionManger=collectionManager)
+    collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retriever, workQueue=workQueue, collectionOverlapProcessor=collectionOverlapProcessor)
     ownershipManager = OwnershipManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor, lockManager=lockManager, collectionManager=collectionManager)
     listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenListingProcessor=tokenListingProcessor)
-    collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retriever, workQueue=workQueue, collectionOverlapProcessor=collectionOverlapProcessor)
     tokenManager = TokenManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenMetadataProcessor=tokenMetadataProcessor, collectionManager=collectionManager, ownershipManager=ownershipManager)
     twitterManager = TwitterManager(saver=saver, retriever=retriever, requester=requester, workQueue=workQueue, twitterBearerToken=twitterBearerToken)
     badgeProcessor = BadgeProcessor(retriever=retriever, saver=saver)
@@ -107,9 +109,9 @@ async def main():
     tokenStakingManager = TokenStakingManager(retriever=retriever, saver=saver, tokenQueue=tokenQueue, workQueue=workQueue, tokenStakingProcessor=tokenStakingProcessor)
     blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager, tokenStakingManager=tokenStakingManager)
     notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, subCollectionTokenManager=subCollectionTokenManager, subCollectionManager=subCollectionManager, requester=requester, revueApiKey=revueApiKey)
+    processor = NotdMessageProcessor(notdManager=notdManager)
 
     dlWorkQueue = SqsMessageQueue(region='eu-west-1', accessKeyId=accessKeyId, accessKeySecret=accessKeySecret, queueUrl='https://sqs.eu-west-1.amazonaws.com/097520841056/notd-work-queue-dl')
-    processor = NotdMessageProcessor(notdManager=notdManager)
     workQueueProcessor = MessageQueueProcessor(queue=dlWorkQueue, messageProcessor=processor, notificationClients=[], requestIdHolder=requestIdHolder)
 
     await database.connect()

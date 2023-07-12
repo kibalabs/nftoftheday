@@ -18,24 +18,28 @@ from notd.model import RetrievedTokenListing
 
 _OPENSEA_API_LISTING_CHUNK_SIZE = 30
 _LOOKSRARE_API_LISTING_CHUNK_SIZE = 30
-_RARIBLE_API_LISTING_CHUNK_SIZE = 100
+_RARIBLE_API_LISTING_CHUNK_SIZE = 10
 
 SECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 MILLISECONDS_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
+
 def _timestamp_to_datetime(timestamp: int) -> datetime.datetime:
     return datetime.datetime.utcfromtimestamp(timestamp)
+
 
 def _parse_date_string(dateString: str) -> datetime.datetime:
     if '.' in dateString:
         return date_util.datetime_from_string(dateString, dateFormat=MILLISECONDS_DATETIME_FORMAT)
     return date_util.datetime_from_string(dateString, dateFormat=SECONDS_DATETIME_FORMAT)
 
+
 class TokenListingProcessor:
 
-    def __init__(self, requester: Requester, openseaRequester: Requester, lockManager: LockManager, collectionManger: CollectionManager):
+    def __init__(self, requester: Requester, openseaRequester: Requester, raribleRequester: Requester, lockManager: LockManager, collectionManger: CollectionManager):
         self.requester = requester
         self.openseaRequester = openseaRequester
+        self.raribleRequester = raribleRequester
         self.lockManager = lockManager
         self.collectionManger = collectionManger
 
@@ -308,7 +312,7 @@ class TokenListingProcessor:
         pageCount = 0
         while True:
             logging.stat('RETRIEVE_LISTINGS_RARIBLE', registryAddress, float(f'{tokenId}.{index}'))
-            response = await self.requester.get(url='https://api.rarible.org/v0.1/orders/sell/byItem', dataDict=queryData, timeout=30)
+            response = await self.raribleRequester.get(url='https://api.rarible.org/v0.1/orders/sell/byItem', dataDict=queryData, timeout=30)
             responseJson = response.json()
             for order in responseJson['orders']:
                 createdDate = _parse_date_string(dateString=order['createdAt'])
@@ -364,7 +368,7 @@ class TokenListingProcessor:
             page = 0
             while not hasReachedEnd:
                 logging.stat(f'RETRIEVE_CHANGED_LISTINGS_RARIBLE'.upper(), address, page)
-                response = await self.requester.get(url='https://api.rarible.org/v0.1/activities/byCollection', dataDict=queryData, timeout=60)
+                response = await self.raribleRequester.get(url='https://api.rarible.org/v0.1/activities/byCollection', dataDict=queryData, timeout=60)
                 responseJson = response.json()
                 logging.info(f'Got {len(responseJson["activities"])} rarible events')
                 if len(responseJson['activities']) == 0:

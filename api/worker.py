@@ -61,6 +61,7 @@ async def main():
         logging.init_json_logging(name=name, version=version, environment=environment, requestIdHolder=requestIdHolder)
 
     openseaApiKey = os.environ['OPENSEA_API_KEY']
+    raribleApiKey = os.environ['RARIBLE_API_KEY']
     revueApiKey = os.environ['REVUE_API_KEY']
     accessKeyId = os.environ['AWS_KEY']
     accessKeySecret = os.environ['AWS_SECRET']
@@ -82,6 +83,7 @@ async def main():
     requester = Requester()
     pabloClient = PabloClient(requester=requester)
     openseaRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": openseaApiKey})
+    raribleRequester = Requester(headers={"Accept": "application/json", "X-API-KEY": raribleApiKey})
     tokenMetadataProcessor = TokenMetadataProcessor(requester=requester, ethClient=ethClient, pabloClient=pabloClient, openseaRequester=openseaRequester)
     collectionProcessor = CollectionProcessor(requester=requester, ethClient=ethClient, openseaApiKey=openseaApiKey)
     tokenOwnershipProcessor = TokenOwnershipProcessor(retriever=retriever)
@@ -96,7 +98,7 @@ async def main():
     subCollectionManager = SubCollectionManager(retriever=retriever, saver=saver, workQueue=workQueue, subCollectionProcessor=subCollectionProcessor)
     subCollectionTokenProcessor = SubCollectionTokenProcessor(openseaRequester=openseaRequester)
     subCollectionTokenManager = SubCollectionTokenManager(retriever=retriever, saver=saver, subCollectionTokenProcessor=subCollectionTokenProcessor, subCollectionManager=subCollectionManager)
-    tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, lockManager=lockManager, collectionManger=collectionManager)
+    tokenListingProcessor = TokenListingProcessor(requester=requester, openseaRequester=openseaRequester, raribleRequester=raribleRequester, lockManager=lockManager, collectionManger=collectionManager)
     collectionOverlapManager = CollectionOverlapManager(saver=saver, retriever=retriever, workQueue=workQueue, collectionOverlapProcessor=collectionOverlapProcessor)
     ownershipManager = OwnershipManager(saver=saver, retriever=retriever, tokenQueue=tokenQueue, tokenOwnershipProcessor=tokenOwnershipProcessor, lockManager=lockManager, collectionManager=collectionManager)
     listingManager = ListingManager(saver=saver, retriever=retriever, workQueue=workQueue, tokenListingProcessor=tokenListingProcessor)
@@ -110,10 +112,8 @@ async def main():
     blockManager = BlockManager(saver=saver, retriever=retriever, workQueue=workQueue, blockProcessor=blockProcessor, tokenManager=tokenManager, collectionManager=collectionManager, ownershipManager=ownershipManager, tokenStakingManager=tokenStakingManager)
     notdManager = NotdManager(saver=saver, retriever=retriever, workQueue=workQueue, blockManager=blockManager, tokenManager=tokenManager, activityManager=activityManager, attributeManager=attributeManager, collectionManager=collectionManager, ownershipManager=ownershipManager, listingManager=listingManager, twitterManager=twitterManager, collectionOverlapManager=collectionOverlapManager, badgeManager=badgeManager, delegationManager=delegationManager, tokenStakingManager=tokenStakingManager, subCollectionTokenManager=subCollectionTokenManager, subCollectionManager=subCollectionManager, requester=requester, revueApiKey=revueApiKey)
     processor = NotdMessageProcessor(notdManager=notdManager)
-    slackClient = SlackClient(webhookUrl=os.environ['SLACK_WEBHOOK_URL'], requester=requester, defaultSender='worker', defaultChannel='notd-notifications')
-    discordClient = DiscordClient(webhookUrl=os.environ['DISCORD_WEBHOOK_URL'], requester=requester)
-    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, notificationClients=[slackClient, discordClient], requestIdHolder=requestIdHolder)
-    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, notificationClients=[slackClient, discordClient], requestIdHolder=requestIdHolder)
+    workQueueProcessor = MessageQueueProcessor(queue=workQueue, messageProcessor=processor, notificationClients=[], requestIdHolder=requestIdHolder)
+    tokenQueueProcessor = MessageQueueProcessor(queue=tokenQueue, messageProcessor=processor, notificationClients=[], requestIdHolder=requestIdHolder)
 
     await database.connect()
     await workQueue.connect()
