@@ -31,7 +31,7 @@ class CollectionOverlapProcessor:
         registryOwners = [ownerAddress for (ownerAddress, ) in registryOwnersResult if ownerAddress != chain_util.BURN_ADDRESS]
         otherOwnedRegistryCounts: List[Tuple[str, str, int]] = []
         logging.info(f'Calculating overlap for {len(registryOwners)} owners')
-        for registryOwnersChunk in list_util.generate_chunks(lst=registryOwners, chunkSize=50):
+        for registryOwnersChunk in list_util.generate_chunks(lst=registryOwners, chunkSize=25):
             # otherOwnedRegistryCountQuery = (
             #     sqlalchemy.select(TokenOwnershipsView.c.ownerAddress, TokenOwnershipsView.c.registryAddress, sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity))  # type: ignore[no-untyped-call]
             #     .where(TokenOwnershipsView.c.ownerAddress.in_(registryOwnersChunk))
