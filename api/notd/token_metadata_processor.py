@@ -64,6 +64,9 @@ class TokenMetadataProcessor:
         self.cryptoPunksContract = self.w3.eth.contract(address='0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2', abi=contractJson['abi'])  # type: ignore[call-overload]
         self.cryptoPunksAttributesFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkAttributes'][0]
         self.cryptoPunksImageSvgFunctionAbi = [internalAbi for internalAbi in self.cryptoPunksContract.abi if internalAbi.get('name') == 'punkImageSvg'][0]
+        with open('./contracts/Autoglyphs.json') as contractJsonFile:
+            contractJson = json.load(contractJsonFile)
+        self.autoglyphsContract = self.w3.eth.contract(address='0xd4e4078ca3495DE5B1d4dB434BEbc5a986197782', abi=contractJson['abi'])  # type: ignore[call-overload]
         with open('./contracts/IERC1155MetadataURI.json') as contractJsonFile:
             erc1155MetadataContractJson = json.load(contractJsonFile)
         self.erc1155MetadataContractAbi = erc1155MetadataContractJson['abi']
@@ -169,6 +172,9 @@ class TokenMetadataProcessor:
         youtubeUrl: Optional[str] = tokenMetadataDict.get('youtube_url')  # type: ignore[assignment]
         frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
         attributes: JSON = tokenMetadataDict.get('attributes') or []  # type: ignore[assignment]
+        if not attributes or len(attributes) == 0 and registryAddress == '0x99a9B7c1116f9ceEB1652de04d5969CcE509B069':  # type: ignore[arg-type]
+            features = tokenMetadataDict.get('features')
+            attributes = [{'trait_type': name, 'value': value} for name, value in features.items()] if features else []  # tpye: ignore[union-attr]
         if isinstance(attributes, list):
             attributes = self._clean_attributes(attributes)  # type: ignore[assignment, arg-type]
         retrievedTokenMetadata = RetrievedTokenMetadata(
@@ -187,7 +193,7 @@ class TokenMetadataProcessor:
         )
         return retrievedTokenMetadata
 
-    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str, collection: Collection) -> RetrievedTokenMetadata:
+    async def retrieve_token_metadata(self, registryAddress: str, tokenId: str, collection: Collection) -> RetrievedTokenMetadata:  # pylint: disable=too-many-statements
         if registryAddress == '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB':
             # NOTE(krishan711): special case for CryptoPunks
             attributesResponse = await self.ethClient.call_function(toAddress=self.cryptoPunksContract.address, contractAbi=self.cryptoPunksContract.abi, functionAbi=self.cryptoPunksAttributesFunctionAbi, arguments={'index': int(tokenId)})
@@ -227,6 +233,21 @@ class TokenMetadataProcessor:
             raise TokenMetadataUnprocessableException()
         if registryAddress == '0xdF5d68D54433661b1e5e90a547237fFB0AdF6EC2':
             # TODO(krishan711): Implement special case for Arcona Digital Land (it's a really old contract)
+            raise TokenMetadataUnprocessableException()
+        if registryAddress == '0x6112d87127847202151B9Fe48eA0e2704fA428a1':
+            # TODO(krishan711): Implement special case for Astaria Collateral Token (ACT)
+            raise TokenMetadataUnprocessableException()
+        if registryAddress == '0x6D0F425adc5a61F78A43460c5929B84f3e71E67E':
+            # TODO(krishan711): Implement special case for Astaria Lien Token (ALT)
+            raise TokenMetadataUnprocessableException()
+        if registryAddress == '0x2d4B98CeFAA13A79E0C9BE2EE9564df34dEce351':
+            # TODO(krishan711): Implement special case for holog (hhh)
+            raise TokenMetadataUnprocessableException()
+        if registryAddress == '0x843C77ba8422E50C0156265aABB5D0291F354004':
+            # TODO(krishan711): Implement special case for NoteToAStranger (ELIF)
+            raise TokenMetadataUnprocessableException()
+        if registryAddress == '0xef31722Ec41B6e59B842af8feD976d2626A92F87':
+            # TODO(krishan711): Implement special case for Billions Team (BLT)
             raise TokenMetadataUnprocessableException()
         if not collection.doesSupportErc721 and not collection.doesSupportErc1155:
             logging.info(f'Contract does not support ERC721 or ERC1155: {registryAddress}')
@@ -312,4 +333,9 @@ class TokenMetadataProcessor:
             except BadRequestException as exception:
                 # TODO(krishan711): this is ignoring "unsupported image format", find nicer way to ignore only this error
                 logging.info(f'Skipping resizing image due to: {exception}')
+        if registryAddress == self.autoglyphsContract.address:
+            # NOTE(krishan711): Get special attribute for autoglyphs
+            symbolResponse = await self.ethClient.call_contract_function(contract=self.autoglyphsContract, functionName='symbolScheme', arguments={'_id': int(tokenId)})
+            symbolSchemeMap = {1: 'X/\\', 2: '+-|', 3: '/\\', 4: '\\|-/', 5: 'O|-', 6: '\\', 7: '#|-+', 8: 'OO', 9: '#'}
+            retrievedTokenMetadata.attributes += [{'trait_type': 'Symbol Scheme', 'value': symbolSchemeMap.get(symbolResponse[0], '#O')}]  # type: ignore[operator]
         return retrievedTokenMetadata
