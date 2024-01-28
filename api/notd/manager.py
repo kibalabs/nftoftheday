@@ -184,8 +184,8 @@ class NotdManager:
         holderCountQuery = (
             TokenOwnershipsTable.select()
             .with_only_columns(
-                sqlalchemyfunc.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),  # type: ignore[no-untyped-call]
-                sqlalchemyfunc.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.count(sqlalchemy.distinct(TokenOwnershipsTable.c.tokenId)),
+                sqlalchemyfunc.count(sqlalchemy.distinct(TokenOwnershipsTable.c.ownerAddress)),
             )
             .where(TokenOwnershipsTable.c.registryAddress == address)
         )
@@ -197,9 +197,9 @@ class NotdManager:
         allActivityQuery: Select[Any] = (  # type: ignore[misc]
             CollectionHourlyActivitiesTable.select()
             .with_only_columns(
-                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount),  # type: ignore[no-untyped-call]
-                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.transferCount),  # type: ignore[no-untyped-call]
-                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue),  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount),
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.transferCount),
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue),
             )
             .where(CollectionHourlyActivitiesTable.c.address == address)
         )
@@ -211,9 +211,9 @@ class NotdManager:
         dayActivityQuery: Select[Any] = (  # type: ignore[misc]
             CollectionHourlyActivitiesTable.select()
             .with_only_columns(
-                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue),  # type: ignore[no-untyped-call]
-                sqlalchemyfunc.min(CollectionHourlyActivitiesTable.c.minimumValue),  # type: ignore[no-untyped-call]
-                sqlalchemyfunc.max(CollectionHourlyActivitiesTable.c.maximumValue),  # type: ignore[no-untyped-call]
+                sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue),
+                sqlalchemyfunc.min(CollectionHourlyActivitiesTable.c.minimumValue),
+                sqlalchemyfunc.max(CollectionHourlyActivitiesTable.c.maximumValue),
             )
             .where(CollectionHourlyActivitiesTable.c.address == address)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
@@ -387,23 +387,23 @@ class NotdManager:
         else:
             raise BadRequestException('Unknown duration')
         query = (
-            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount')) # type: ignore[no-untyped-call, var-annotated]
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount'))
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .where(CollectionHourlyActivitiesTable.c.date < currentDate)
             .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(CollectionHourlyActivitiesTable.c.address)
         )
         if order is None or order == "TOTAL_VALUE":
-            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
+            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc())
         elif order == "TOTAL_SALES":
-            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).desc()) # type: ignore[no-untyped-call]
+            query = query.order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).desc())
         query = query.limit(limit)
         result = await self.retriever.database.execute(query=query)
         trendingCollectionRows = list(result.mappings())
         currentTrendingCollections = {trendingCollectionRow['address']: (int(trendingCollectionRow['totalSalesCount']), int(trendingCollectionRow['totalTransferCount'])) for trendingCollectionRow in trendingCollectionRows}
         addresses = list(currentTrendingCollections.keys())
         previousPeriodQuery = (
-            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount')) # type: ignore[no-untyped-call, var-annotated]
+            sqlalchemy.select(CollectionHourlyActivitiesTable.c.address, sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.saleCount).label('totalSalesCount'), sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).label('totalTransferCount'))
             .where(CollectionHourlyActivitiesTable.c.date >= previousPeriodStartDate)
             .where(CollectionHourlyActivitiesTable.c.date < startDate)
             .where(CollectionHourlyActivitiesTable.c.address.in_(addresses))
@@ -457,7 +457,7 @@ class NotdManager:
         else:
             raise BadRequestException('Unknown duration')
         query = (
-            sqlalchemy.select(date, sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('mintedTokenCount'), sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('newRegistryCount')) # type: ignore[no-untyped-call]
+            sqlalchemy.select(date, sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('mintedTokenCount'), sqlalchemyfunc.count(CollectionHourlyActivitiesTable.c.address.distinct()).label('newRegistryCount'))
             .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
             .where(CollectionHourlyActivitiesTable.c.date >= startDate)
             .group_by(date)
@@ -484,7 +484,7 @@ class NotdManager:
             .where(CollectionHourlyActivitiesTable.c.date <= currentDate)
             .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
             .group_by(CollectionHourlyActivitiesTable.c.address)
-            .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
+            .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc())
             .limit(int(limit / 2))
         )
         highestValueAddressesResult = await self.retriever.database.execute(query=highestValueAddressesQuery)
@@ -496,7 +496,7 @@ class NotdManager:
             .where(CollectionHourlyActivitiesTable.c.address.not_in(list(_REGISTRY_BLACKLIST)))
             .where(CollectionHourlyActivitiesTable.c.mintCount > 0)
             .group_by(CollectionHourlyActivitiesTable.c.address)
-            .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc()) # type: ignore[no-untyped-call]
+            .order_by(sqlalchemyfunc.sum(CollectionHourlyActivitiesTable.c.totalValue).desc())
             .limit(int(limit / 2))
         )
         newlyMintedAddressResult = await self.retriever.database.execute(query=newlyMintedAddressSubQuery)
@@ -571,7 +571,7 @@ class NotdManager:
             .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
             .where(BlocksTable.c.blockDate <= currentDate)
             .where(BlocksTable.c.blockDate >= date_util.datetime_from_datetime(dt=currentDate, weeks=-52))
-            .group_by(sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label('date'), TokenTransfersTable.c)
+            .group_by(sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label('date'), TokenTransfersTable.c)  # type: ignore[arg-type]
             .order_by(sqlalchemy.cast(BlocksTable.c.blockDate, sqlalchemy.DATE).label('date').desc())
             .offset(offset)
         )
@@ -632,7 +632,7 @@ class NotdManager:
             sqlalchemy.select(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
             .where(sqlalchemy.or_(TokenTransfersTable.c.toAddress == userAddress, TokenTransfersTable.c.fromAddress == userAddress))
             .group_by(TokenTransfersTable.c.registryAddress, TokenTransfersTable.c.tokenId)
-            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc()) # type: ignore[no-untyped-call]
+            .order_by(sqlalchemyfunc.count(TokenTransfersTable.c.tokenId).desc())
             .limit(1)
         )
         mostTradedResult = await self.retriever.database.execute(query=mostTradedQuery)

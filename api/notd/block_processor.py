@@ -8,7 +8,7 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-import eth_abi
+import eth_abi  # type: ignore[import]
 from core import logging
 from core.exceptions import InternalServerErrorException
 from core.util import chain_util

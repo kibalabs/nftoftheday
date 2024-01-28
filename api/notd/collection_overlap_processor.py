@@ -33,7 +33,7 @@ class CollectionOverlapProcessor:
         logging.info(f'Calculating overlap for {len(registryOwners)} owners')
         for registryOwnersChunk in list_util.generate_chunks(lst=registryOwners, chunkSize=25):
             # otherOwnedRegistryCountQuery = (
-            #     sqlalchemy.select(TokenOwnershipsView.c.ownerAddress, TokenOwnershipsView.c.registryAddress, sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity))  # type: ignore[no-untyped-call]
+            #     sqlalchemy.select(TokenOwnershipsView.c.ownerAddress, TokenOwnershipsView.c.registryAddress, sqlalchemyfunc.sum(TokenOwnershipsView.c.quantity))
             #     .where(TokenOwnershipsView.c.ownerAddress.in_(registryOwnersChunk))
             #     .where(TokenOwnershipsView.c.quantity > 0)
             #     .group_by(TokenOwnershipsView.c.ownerAddress, TokenOwnershipsView.c.registryAddress)
@@ -42,14 +42,14 @@ class CollectionOverlapProcessor:
             # otherOwnedRegistryCounts += list(otherOwnedRegistryCountResult)
             # # NOTE(krishan711): for some reason the view takes too long but querying the two tables separately fits in the time
             otherOwnedSingleRegistryCountQuery = (
-                sqlalchemy.select(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress, sqlalchemyfunc.count(TokenOwnershipsTable.c.tokenId))  # type: ignore[no-untyped-call]
+                sqlalchemy.select(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress, sqlalchemyfunc.count(TokenOwnershipsTable.c.tokenId))
                 .where(TokenOwnershipsTable.c.ownerAddress.in_(registryOwnersChunk))
                 .group_by(TokenOwnershipsTable.c.ownerAddress, TokenOwnershipsTable.c.registryAddress)
             )
             otherOwnedSingleRegistryCountResult = await self.retriever.database.execute(query=otherOwnedSingleRegistryCountQuery)
             otherOwnedRegistryCounts += typing.cast(List[Tuple[str, str, int]], list(otherOwnedSingleRegistryCountResult))
             otherOwnedMultiRegistryCountQuery: Select[Any] = (  # type: ignore[misc]
-                sqlalchemy.select(TokenMultiOwnershipsTable.c.ownerAddress, TokenMultiOwnershipsTable.c.registryAddress, sqlalchemyfunc.sum(TokenMultiOwnershipsTable.c.quantity))  # type: ignore[no-untyped-call]
+                sqlalchemy.select(TokenMultiOwnershipsTable.c.ownerAddress, TokenMultiOwnershipsTable.c.registryAddress, sqlalchemyfunc.sum(TokenMultiOwnershipsTable.c.quantity))
                 .where(TokenMultiOwnershipsTable.c.ownerAddress.in_(registryOwnersChunk))
                 .where(TokenMultiOwnershipsTable.c.quantity > 0)
                 .group_by(TokenMultiOwnershipsTable.c.ownerAddress, TokenMultiOwnershipsTable.c.registryAddress)
@@ -57,7 +57,7 @@ class CollectionOverlapProcessor:
             otherOwnedMultiRegistryCountResult = await self.retriever.database.execute(query=otherOwnedMultiRegistryCountQuery)
             otherOwnedRegistryCounts += typing.cast(List[Tuple[str, str, int]], list(otherOwnedMultiRegistryCountResult))
         registryCountQuery: Select[Any] = (  # type: ignore[misc]
-            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity))  # type: ignore[no-untyped-call]
+            sqlalchemy.select(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress, sqlalchemyfunc.sum(UserRegistryOrderedOwnershipsMaterializedView.c.quantity))
             .where(UserRegistryOrderedOwnershipsMaterializedView.c.registryAddress == registryAddress)
             .group_by(UserRegistryOrderedOwnershipsMaterializedView.c.ownerAddress)
         )
