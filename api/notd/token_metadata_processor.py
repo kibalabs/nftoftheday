@@ -175,7 +175,7 @@ class TokenMetadataProcessor:
         if not attributes or len(attributes) == 0 and registryAddress == '0x99a9B7c1116f9ceEB1652de04d5969CcE509B069':  # type: ignore[arg-type]
             # NOTE(krishan711): special case for artblocks
             features = tokenMetadataDict.get('features') or []
-            attributes = [{'trait_type': name, 'value': value} for name, value in features.items()] if features else []  # tpye: ignore[union-attr]
+            attributes = [{'trait_type': name, 'value': value} for name, value in features.items()] if features else []  # type: ignore[union-attr]
         if isinstance(attributes, list):
             attributes = self._clean_attributes(attributes)  # type: ignore[assignment, arg-type]
         retrievedTokenMetadata = RetrievedTokenMetadata(
