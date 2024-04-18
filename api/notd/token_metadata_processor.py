@@ -181,13 +181,13 @@ class TokenMetadataProcessor:
             # NOTE(krishan711): special case for artblocks (different address, dunno why)
             if tokenMetadataDict.get('traits'):
                 traits = tokenMetadataDict['traits']
-                for trait in traits:
-                    name = trait['trait_type']
-                    value = trait['value']
-                    if value.startswith('All ') and value.endswith('s') and name[:5] in value:
+                for trait in traits:  # type: ignore[union-attr]
+                    name = trait['trait_type']  # type: ignore[index,call-overload,assignment]
+                    value = trait['value']  # type: ignore[index,call-overload]
+                    if value.startswith('All ') and value.endswith('s') and name[:5] in value:  # type: ignore[operator,index,union-attr]
                         continue
-                    if ': ' in value:
-                        attributes.append({'trait_type': trait['value'].split(': ')[0], 'value': ': '.join(trait['value'].split(': ')[1:])})  # type: ignore[operator,union-attr]
+                    if ': ' in value:  # type: ignore[operator]
+                        attributes.append({'trait_type': trait['value'].split(': ')[0], 'value': ': '.join(trait['value'].split(': ')[1:])})  # type: ignore[union-attr,index,call-overload]
         if isinstance(attributes, list):
             attributes = self._clean_attributes(attributes)  # type: ignore[assignment, arg-type]
         retrievedTokenMetadata = RetrievedTokenMetadata(
