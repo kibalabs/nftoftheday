@@ -172,10 +172,22 @@ class TokenMetadataProcessor:
         youtubeUrl: Optional[str] = tokenMetadataDict.get('youtube_url')  # type: ignore[assignment]
         frameImageUrl: Optional[str] = tokenMetadataDict.get('frame_image') or tokenMetadataDict.get('frame_image_url') or tokenMetadataDict.get('frameImage')  # type: ignore[assignment]
         attributes: JSON = tokenMetadataDict.get('attributes') or []  # type: ignore[assignment]
-        if not attributes or len(attributes) == 0 and registryAddress == '0x99a9B7c1116f9ceEB1652de04d5969CcE509B069':  # type: ignore[arg-type]
+        if registryAddress == '0x99a9B7c1116f9ceEB1652de04d5969CcE509B069':
             # NOTE(krishan711): special case for artblocks
-            features = tokenMetadataDict.get('features') or []
-            attributes = [{'trait_type': name, 'value': value} for name, value in features.items()] if features else []  # type: ignore[union-attr]
+            if tokenMetadataDict.get('features'):
+                features = tokenMetadataDict['features']
+                attributes += [{'trait_type': name, 'value': value} for name, value in features.items()]  # type: ignore[operator,union-attr]
+        if registryAddress == '0xa7d8d9ef8D8Ce8992Df33D8b8CF4Aebabd5bD270':
+            # NOTE(krishan711): special case for artblocks (different address, dunno why)
+            if tokenMetadataDict.get('traits'):
+                traits = tokenMetadataDict['traits']
+                for trait in traits:  # type: ignore[union-attr]
+                    name = trait['trait_type']  # type: ignore[index,call-overload,assignment]
+                    value = trait['value']  # type: ignore[index,call-overload]
+                    if value.startswith('All ') and value.endswith('s') and name[:5] in value:  # type: ignore[operator,index,union-attr]
+                        continue
+                    if ': ' in value:  # type: ignore[operator]
+                        attributes.append({'trait_type': trait['value'].split(': ')[0], 'value': ': '.join(trait['value'].split(': ')[1:])})  # type: ignore[union-attr,index,call-overload]
         if isinstance(attributes, list):
             attributes = self._clean_attributes(attributes)  # type: ignore[assignment, arg-type]
         retrievedTokenMetadata = RetrievedTokenMetadata(
@@ -260,11 +272,15 @@ class TokenMetadataProcessor:
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc721MetadataContractAbi, functionAbi=self.erc721MetadataUriFunctionAbi, arguments={'tokenId': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
+            except UnicodeDecodeError as exception:
+                badRequestException = BadRequestException(message=str(exception))
         if collection.doesSupportErc1155:
             try:
                 tokenMetadataUriResponse = (await self.ethClient.call_function(toAddress=registryAddress, contractAbi=self.erc1155MetadataContractAbi, functionAbi=self.erc1155MetadataUriFunctionAbi, arguments={'id': int(tokenId)}))[0]
             except BadRequestException as exception:
                 badRequestException = exception
+            except UnicodeDecodeError as exception:
+                badRequestException = BadRequestException(message=str(exception))
         if badRequestException is not None:
             if badRequestException.message:
                 if 'URI query for nonexistent token' in badRequestException.message:
@@ -279,6 +295,8 @@ class TokenMetadataProcessor:
                     raise TokenMetadataUnprocessableException(message='Maybe the method does not exist on this contract')
                 if 'value could not be decoded as valid UTF8' in badRequestException.message:
                     raise TokenMetadataUnprocessableException(message='value could not be decoded as valid UTF8')
+                if 'codec can\'t decode' in badRequestException.message:
+                    raise TokenMetadataUnprocessableException(message='Undecodable content')
             raise badRequestException
         tokenMetadataUri: Optional[str] = None
         if tokenMetadataUriResponse:

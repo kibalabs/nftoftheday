@@ -141,6 +141,7 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_methods=['*'], 
     'https://rudeboys.io',
     'https://gallery.rudeboys.io',
     'https://mint.rudeboys.io',
+    'https://swap.zenacademy.com',
 ], allow_origin_regex='https://.*\.tokenpage\.xyz')
 
 @app.on_event('startup')
