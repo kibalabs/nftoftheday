@@ -9,7 +9,7 @@ from core.exceptions import NotFoundException
 from core.requester import Requester
 from core.requester import ResponseException
 from core.web3.eth_client import EthClientInterface
-from eth_abi.exceptions import InsufficientDataBytes  # type: ignore[import]
+from eth_abi.exceptions import InsufficientDataBytes
 from httpx import ReadTimeout
 
 from notd.model import RetrievedCollection
